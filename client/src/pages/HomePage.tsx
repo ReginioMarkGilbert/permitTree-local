@@ -1,13 +1,16 @@
+import React, { useState } from 'react'; // Import useState from React
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import denrLogo from '../assets/denr-logo.png'; // Ensure the path to the logo is correct
 
 function HomePage() {
+    const [isOpen, setIsOpen] = useState(false);
+
     return (
         <div className="flex h-screen">
-            <Sidebar />
+            <Sidebar isOpen={isOpen} toggleSidebar={() => setIsOpen(!isOpen)} />
             <div className="flex-grow flex flex-col">
-                <Navbar />
+                <Navbar sidebarToggle={isOpen} setSidebarToggle={setIsOpen} />
                 <div className="flex-grow flex justify-center items-center bg-gray-100 text-center">
                     <div className="bg-white p-10 rounded-lg shadow-md" style={{ width: '700px' }}>
                         <img src={denrLogo} alt="DENR Logo" className="w-24 mb-5 mx-auto" />
