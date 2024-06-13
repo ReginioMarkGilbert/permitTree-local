@@ -1,16 +1,9 @@
 import React from 'react';
-import { FaBars } from 'react-icons/fa';
+// import { FaBars } from 'react-icons/fa';
 
-interface NavbarProps {
-    toggleSidebar: () => void;
-}
-
-const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
+const Navbar: React.FC = () => {
     return (
-        <nav className="bg-gray-800 text-white p-4 fixed top-0 left-0 right-0 z-10 flex items-center">
-            <button onClick={toggleSidebar} className="mr-4">
-                <FaBars size={24} />
-            </button>
+        <nav className="bg-gray-800 text-white p-4 fixed top-0 left-64 right-0 z-10 flex items-center">
             <h1 className="text-lg font-semibold">DENR PENRO Permit Issuance</h1>
         </nav>
     );

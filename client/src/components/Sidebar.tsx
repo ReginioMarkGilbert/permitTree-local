@@ -2,13 +2,9 @@ import React from 'react';
 import { FaHome, FaFileAlt, FaBell, FaUser, FaSignInAlt, FaClipboardList } from 'react-icons/fa';
 import permitTreeLogo from '../assets/denr-logo.png';
 
-interface SidebarProps {
-    isOpen: boolean;
-}
-
-const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
+const Sidebar: React.FC = () => {
     return (
-        <div className={`h-screen bg-gray-900 text-white flex flex-col justify-between fixed top-0 left-0 transition-all duration-300 ${isOpen ? 'w-64' : 'w-0 overflow-hidden'}`}>
+        <div className="h-full bg-gray-900 text-white flex flex-col justify-between fixed top-0 left-0 w-64">
             <div>
                 <div className="flex items-center justify-center mt-10">
                     <img src={permitTreeLogo} alt="PermitTree Logo" className="h-12" />

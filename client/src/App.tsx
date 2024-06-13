@@ -1,20 +1,16 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import './App.css';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import HomePage from './pages/HomePage';
 
 const App = () => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-    const toggleSidebar = () => {
-        setIsSidebarOpen(!isSidebarOpen);
-    };
-
+    const [sidebarToggle, setSidebarToggle] = useState(false)
     return (
         <div className="flex">
-            <Sidebar isOpen={isSidebarOpen} />
-            <div className={`flex-1 transition-all duration-300 ${isSidebarOpen ? 'ml-64' : 'ml-0'}`}>
-                <Navbar toggleSidebar={toggleSidebar} />
+            <Sidebar/>
+            <div className={`flex-1 transition-all duration-300`}>
+                <Navbar sidebarToggle={sidebarToggle} setSidebarToggle={setSidebarToggle}/>
                 <div className="p-4">
                     <HomePage />
                 </div>
