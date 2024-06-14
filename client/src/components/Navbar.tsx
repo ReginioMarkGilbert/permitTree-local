@@ -1,5 +1,6 @@
-import React from 'react';
-import { FaBars } from 'react-icons/fa';
+import React, { useState } from 'react';
+import { FaBars, FaTimes } from 'react-icons/fa';
+import '../App.css';
 
 interface NavbarProps {
     sidebarToggle: boolean;
@@ -7,10 +8,17 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ sidebarToggle, setSidebarToggle }) => {
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    const handleToggle = () => {
+        setSidebarToggle(!sidebarToggle);
+        setIsSidebarOpen(!isSidebarOpen);
+    };
+
     return (
         <nav className="bg-gray-800 text-white p-4 fixed top-0 left-0 right-0 z-10 flex items-center">
-            <button className="ml-2" onClick={() => setSidebarToggle(!sidebarToggle)}>
-                <FaBars />
+            <button className="ml-2" onClick={handleToggle}>
+                {isSidebarOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
             </button>
             <h1 className="text-lg font-semibold ml-4">DENR PENRO Permit Issuance</h1>
         </nav>
