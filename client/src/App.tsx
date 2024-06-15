@@ -1,28 +1,27 @@
-import { useState } from 'react';
-import './App.css';
+// import React from 'react';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import HomePage from './pages/HomePage';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PermitsPage from './pages/permitsPage';
+import { Routes, Route } from 'react-router-dom';
+import { useSidebarToggle } from './hooks/useSidebarToggle';
 
 const App = () => {
-    const [sidebarToggle, setSidebarToggle] = useState(false);
+    const { sidebarToggle, toggleSidebar } = useSidebarToggle();
+
     return (
-        <Router>
-            <div className="flex">
-                <Sidebar isOpen={sidebarToggle} />
-                <div className={`flex-1 transition-all duration-300 ${sidebarToggle ? 'ml-64' : 'ml-0'}`}>
-                    <Navbar sidebarToggle={sidebarToggle} setSidebarToggle={setSidebarToggle} />
-                    <div className="p-4">
-                        <Routes>
-                            <Route path="/" element={<HomePage />} />
-                            <Route path="/permits" element={<PermitsPage />} />
-                        </Routes>
-                    </div>
+        <div className="flex">
+            <Sidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
+            <div className={`flex-1 transition-all duration-300 ${sidebarToggle ? 'ml-64' : 'ml-0'}`}>
+                <Navbar sidebarToggle={sidebarToggle} setSidebarToggle={toggleSidebar} />
+                <div className="p-4">
+                    <Routes>
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="/permits" element={<PermitsPage />} />
+                    </Routes>
                 </div>
             </div>
-        </Router>
+        </div>
     );
 };
 

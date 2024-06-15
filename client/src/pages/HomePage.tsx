@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; // Import useState from React
+import { useState } from 'react'; // Import useState from React
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import denrLogo from '../assets/denr-logo.png'; // Ensure the path to the logo is correct
