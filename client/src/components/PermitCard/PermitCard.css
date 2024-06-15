@@ -1,0 +1,11 @@
+/* client/src/components/PermitCard/PermitCard.css */
+.permit-button {
+    background-color: black;
+    color: white;
+    transition: background-color 0.3s;
+}
+
+.permit-button:hover {
+    background-color: white;
+    color: black;
+}
