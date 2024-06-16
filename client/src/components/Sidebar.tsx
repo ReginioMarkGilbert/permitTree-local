@@ -16,7 +16,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
     const handleLogout = async () => {
         try {
             await axios.get('http://localhost:3000/api/logout');
-            navigate('/login');
+            navigate('/auth');
             console.log('Logout successful!');
         } catch (error) {
             console.error('Logout failed:', error);

@@ -31,7 +31,7 @@ const LoginPage = () => {
                 });
                 setTimeout(() => {
                     navigate('/home');
-                }, 1000); // 1-second delay
+                }, 1000);
             } else {
                 const text = await response.text(); // Use text() instead of json() to handle non-JSON responses
                 try {
