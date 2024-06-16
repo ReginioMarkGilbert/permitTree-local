@@ -2,6 +2,8 @@ import React from 'react';
 import { FaHome, FaFileAlt, FaBell, FaUser, FaSignInAlt, FaClipboardList } from 'react-icons/fa';
 import { NavLink } from 'react-router-dom';
 import permitTreeLogo from '../assets/denr-logo.png';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 interface SidebarProps {
     isOpen: boolean;
@@ -9,6 +11,18 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        try {
+            await axios.get('http://localhost:3000/api/logout');
+            navigate('/login');
+            console.log('Logout successful!');
+        } catch (error) {
+            console.error('Logout failed:', error);
+        }
+    };
+
     return (
         <div className={`h-full bg-gray-900 text-white flex flex-col justify-between fixed top-0 left-0 w-56 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
             <div className="mt-6 ml-4">
@@ -45,7 +59,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
                     <span className="mr-3"><FaUser /></span>
                     <span>Profile</span>
                 </NavLink>
-                <NavLink to="/logout" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
+                <NavLink to="#" onClick={handleLogout} className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
                     <span className="mr-3"><FaSignInAlt /></span>
                     <span>Logout</span>
                 </NavLink>

@@ -54,7 +54,7 @@ const LoginPage = () => {
         } catch (error) {
             console.error('Login failed:', error);
             toast.error('Login failed: An error occurred', {
-                position: toast.POSITION.TOP_RIGHT,
+                position: "top-right",
                 autoClose: 5000,
                 hideProgressBar: false,
                 closeOnClick: true,

@@ -14,10 +14,19 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // Use the session secret from the environment variable
-const sessionSecret = process.env.SESSION_SECRET;
+const crypto = require('crypto');
+
+let sessionSecret = process.env.SESSION_SECRET;
 if (!sessionSecret) {
-    throw new Error('SESSION_SECRET is not defined in the environment variables');
+    console.warn('SESSION_SECRET is not defined in the environment variables. Generating a random secret...');
+    sessionSecret = crypto.randomBytes(64).toString('hex');
+    // if (sessionSecret) {
+    //     console.warn('Generated session secret:', sessionSecret);
+    // } else {
+    //     console.error('Failed to generate session secret.');
+    // }
 }
+
 // Session middleware
 app.use(session({ secret: sessionSecret, resave: false, saveUninitialized: true }));
 
