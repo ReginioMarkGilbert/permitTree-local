@@ -1,9 +1,10 @@
-// import React from 'react';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import HomePage from './pages/HomePage';
 import PermitsPage from './pages/permitsPage';
-import { Routes, Route } from 'react-router-dom';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useSidebarToggle } from './hooks/useSidebarToggle';
 
 const App = () => {
@@ -16,7 +17,10 @@ const App = () => {
                 <Navbar sidebarToggle={sidebarToggle} setSidebarToggle={toggleSidebar} />
                 <div className="p-4">
                     <Routes>
-                        <Route path="/" element={<HomePage />} />
+                        <Route path="/" element={<Navigate replace to="/login" />} />
+                        <Route path="/login" element={<LoginPage />} />
+                        <Route path="/signup" element={<SignupPage />} />
+                        <Route path="/home" element={<HomePage />} />
                         <Route path="/permits" element={<PermitsPage />} />
                     </Routes>
                 </div>
