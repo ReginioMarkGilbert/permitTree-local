@@ -13,37 +13,27 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-// Use the session secret from the environment variable
-const crypto = require('crypto');
-
-let sessionSecret = process.env.SESSION_SECRET;
-if (!sessionSecret) {
-    console.warn('SESSION_SECRET is not defined in the environment variables. Generating a random secret...');
-    sessionSecret = crypto.randomBytes(64).toString('hex');
-    // if (sessionSecret) {
-    //     console.warn('Generated session secret:', sessionSecret);
-    // } else {
-    //     console.error('Failed to generate session secret.');
-    // }
-}
-
 // Session middleware
-app.use(session({ secret: sessionSecret, resave: false, saveUninitialized: true }));
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'default_session_secret',
+    resave: false,
+    saveUninitialized: true
+}));
 
 // Passport middleware
 app.use(passport.initialize());
-app.use(passport.session());
 
 // MongoDB connection
-const db = 'mongodb://localhost:27017/chainsawRegistration';
-mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect('mongodb://localhost:27017/chainsawRegistration', { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('MongoDB connected...'))
     .catch(err => console.log(err));
 
 // Routes
 // const applicationRoutes = require('./routes/chainsaw_Routes');
 // const adminRoutes = require('./routes/AdminRoutes/admin_routes');
-const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userProfileRoutes');
+app.use('/api', userRoutes);
+const authRoutes = require('./routes/userAuthRoutes');
 app.use('/api', authRoutes);
 
 // Start the server

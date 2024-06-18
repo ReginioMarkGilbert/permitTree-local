@@ -1,15 +1,16 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { setToken } from '../utils/auth';
 
 const UserAuthPage = () => {
     const [email, setEmail] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [phone, setPhone] = useState('');
-    const [login, setLogin] = useState('');
+    const [loginIdentifier, setLoginIdentifier] = useState('');
     const [isLogin, setIsLogin] = useState(true); // State to toggle between login and signup
     const navigate = useNavigate();
 
@@ -20,12 +21,15 @@ const UserAuthPage = () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username: login, password })
+                body: JSON.stringify({ email: loginIdentifier, username: loginIdentifier, password }) // both accept username and email
             });
+
             if (response.ok) {
+                const data = await response.json();
+                setToken(data.token); // Store the token
                 toast.success('Login successful!', {
                     position: "top-center",
-                    autoClose: 2000,
+                    autoClose: 500,
                     hideProgressBar: true,
                     closeOnClick: true,
                     pauseOnHover: true,
@@ -34,7 +38,8 @@ const UserAuthPage = () => {
                     onClose: () => navigate('/home') // Navigate to home page after autoClose toast
                 });
             } else {
-                toast.error('Login failed: Invalid credentials');
+                const errorData = await response.json();
+                toast.error(`Login failed: ${errorData.message}`);
             }
         } catch (error) {
             toast.error('Login failed: An error occurred');
@@ -46,9 +51,20 @@ const UserAuthPage = () => {
             const response = await axios.post('http://localhost:3000/api/signup', {
                 email, username, password, phone
             });
+
             if (response.status === 201) {
-                toast.success('Signup successful!');
-                navigate('/');
+                const data = response.data;
+                setToken(data.token); // Store the token
+                toast.success('Signup successful!', {
+                    position: "top-center",
+                    autoClose: 500,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    onClose: () => navigate('/') // Navigate to home page after autoClose toast
+                });
             } else {
                 toast.error('Signup failed: An error occurred');
             }
@@ -76,8 +92,20 @@ const UserAuthPage = () => {
                 {isLogin ? (
                     <>
                         <h1 className="text-2xl font-bold mb-6">Login</h1>
-                        <input type="text" placeholder="Username or Phone Number" value={login} onChange={(e) => setLogin(e.target.value)} className="w-full p-2 mb-4 border rounded" />
-                        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full p-2 mb-4 border rounded" />
+                        <input
+                            type="text"
+                            placeholder="Username or Gmail"
+                            value={loginIdentifier}
+                            onChange={(e) => setLoginIdentifier(e.target.value)}
+                            className="w-full p-2 mb-4 border rounded"
+                        />
+                        <input
+                            type="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full p-2 mb-4 border rounded"
+                        />
                         <button onClick={() => { handleLogin(); setIsLogin(true); }} className="w-full bg-blue-500 text-white p-2 rounded">Login</button>
                         <button onClick={handleGoogleLogin} className="w-full bg-red-500 text-white p-2 rounded mt-4">Login with Google</button>
                         <p className="mt-4 text-center">Don't have an account? <span onClick={() => setIsLogin(false)} className="text-blue-500 hover:text-blue-700 cursor-pointer">Sign Up</span></p>
@@ -125,3 +153,4 @@ const UserAuthPage = () => {
 };
 
 export default UserAuthPage;
+

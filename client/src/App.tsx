@@ -2,7 +2,8 @@ import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import HomePage from './pages/HomePage';
 import PermitsPage from './pages/permitsPage';
-import UserAuthPage from './pages/UserAuthPage'; // Updated import
+import UserAuthPage from './pages/UserAuthPage';
+import UserProfilePage from './pages/UserProfilePage';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useSidebarToggle } from './hooks/useSidebarToggle';
 
@@ -20,6 +21,7 @@ const App = () => {
                         <Route path="/auth" element={<UserAuthPage />} /> {/* Combined login and signup page */}
                         <Route path="/home" element={<HomePage />} />
                         <Route path="/permits" element={<PermitsPage />} />
+                        <Route path="/profile" element={<UserProfilePage />} />
                     </Routes>
                 </div>
             </div>

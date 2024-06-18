@@ -4,9 +4,9 @@ const bcrypt = require('bcrypt');
 const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     username: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String, required: true},
     // googleId: { type: String },
-    phone: { type: String, required: true, unique: true }
+    phone: { type: String, required: true, unique: true, match: [/^\d{10}$/, 'Please fill a valid phone number'] }
 });
 
 userSchema.pre('save', async function (next) {
@@ -16,9 +16,11 @@ userSchema.pre('save', async function (next) {
     next();
 });
 
-// userSchema.methods.matchPassword = async function (enteredPassword) {
-//     return await bcrypt.compare(enteredPassword, this.password);
-// };
+userSchema.methods.matchPassword = async function (enteredPassword) {
+    console.log('Entered password:', enteredPassword);
+    console.log('User password:', this.password);
+    return await bcrypt.compare(enteredPassword, this.password);
+};
 
 const User = mongoose.model('User', userSchema);
 
