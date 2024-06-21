@@ -24,7 +24,7 @@ app.use(session({
 app.use(passport.initialize());
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/chainsawRegistration', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect('mongodb://localhost:27017/PermiTree-db')
     .then(() => console.log('MongoDB connected...'))
     .catch(err => console.log(err));
 
