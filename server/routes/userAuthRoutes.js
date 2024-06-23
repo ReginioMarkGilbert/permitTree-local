@@ -13,3 +13,4 @@ router.get('/protected', passport.authenticate('jwt', { session: false }), (req,
 });
 
 module.exports = router;
+

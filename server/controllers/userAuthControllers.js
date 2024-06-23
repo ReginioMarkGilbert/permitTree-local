@@ -5,13 +5,13 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const signup = async (req, res) => {
-    const { username, password, phone, email } = req.body;
+    const { username, password, phone, email, firstName, lastName } = req.body;
     try {
         const user = await User.findOne({ username });
         if (user) {
             return res.status(400).json({ message: 'User already exists' });
         }
-        const newUser = new User({ username, password, phone, email });
+        const newUser = new User({ username, password, phone, email, firstName, lastName });
         await newUser.save();
         return res.status(201).json({ message: 'User created successfully' });
     } catch (err) {
@@ -20,9 +20,9 @@ const signup = async (req, res) => {
 };
 
 const login = async (req, res) => {
-    const { username, email, password } = req.body;
+    const { loginIdentifier, password } = req.body; // Use loginIdentifier instead of separate username and email
     try {
-        const user = await User.findOne({ $or: [{ username }, { email }] });
+        const user = await User.findOne({ $or: [{ username: loginIdentifier }, { email: loginIdentifier }] }); // Check both username and email
         if (!user) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
@@ -40,7 +40,9 @@ const login = async (req, res) => {
 
         const payload = {
             id: user.id,
-            username: user.username
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName
         };
 
         const token = jwt.sign(payload, process.env.JWT_SECRET || 'default_secret', { expiresIn: '1h' });
