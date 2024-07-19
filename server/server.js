@@ -2,28 +2,39 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const session = require('express-session');
+const passport = require('passport');
+require('dotenv').config();
+require('./config/passport');
 
-// Initialize the app
 const app = express();
 
 // Middleware
 app.use(bodyParser.json());
 app.use(cors());
 
-// MongoDB connection
-const db = 'mongodb://localhost:27017/chainsawRegistration';
-// const db = 'mongodb+srv://markgilbert:6jSZ1vskFMjO6VH5@permittreeprototypedb.v3cxfds.mongodb.net/?retryWrites=true&w=majority&appName=PermittreePrototypeDB'
+// Session middleware
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'default_session_secret',
+    resave: false,
+    saveUninitialized: true
+}));
 
-mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
+// Passport middleware
+app.use(passport.initialize());
+
+// MongoDB connection
+mongoose.connect('mongodb://localhost:27017/PermiTree-db')
     .then(() => console.log('MongoDB connected...'))
     .catch(err => console.log(err));
 
 // Routes
-const applicationRoutes = require('./routes/chainsaw_Routes');
-const adminRoutes = require('./routes/AdminRoutes/admin_routes');
-
-app.use('/api', applicationRoutes);
-app.use('/api/admin', adminRoutes);
+// const applicationRoutes = require('./routes/chainsaw_Routes');
+// const adminRoutes = require('./routes/AdminRoutes/admin_routes');
+const userRoutes = require('./routes/userProfileRoutes');
+app.use('/api', userRoutes);
+const authRoutes = require('./routes/userAuthRoutes');
+app.use('/api', authRoutes);
 
 // Start the server
 const port = process.env.PORT || 3000;

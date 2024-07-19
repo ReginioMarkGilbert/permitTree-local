@@ -1,35 +1,47 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import Navbar from './components/Navbar';
+import Sidebar from './components/Sidebar';
+import HomePage from './pages/HomePage';
+import PermitsPage from './pages/permitsPage';
+import UserAuthPage from './pages/UserAuthPage';
+import UserProfilePage from './pages/UserProfilePage';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useSidebarToggle } from './hooks/useSidebarToggle';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { isAuthenticated } from './utils/auth';
+import ProtectedRoute from './components/ProtectedRoute';
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+    const { sidebarToggle, toggleSidebar } = useSidebarToggle();
+    const navigate = useNavigate();
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    useEffect(() => {
+        if (!isAuthenticated()) {
+            navigate('/auth');
+        }
+    }, [navigate]);
 
-export default App
+    return (
+        <div className="flex">
+            {isAuthenticated() && (
+                <>
+                    <Sidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
+                    <Navbar sidebarToggle={sidebarToggle} setSidebarToggle={toggleSidebar} />
+                </>
+            )}
+            <div className={`flex-1 transition-all duration-300 ${sidebarToggle ? 'ml-64' : 'ml-0'}`}>
+                <div className="p-4">
+                    <Routes>
+                        <Route path="/" element={<Navigate replace to="/auth" />} />
+                        <Route path="/auth" element={<UserAuthPage />} />
+                        <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+                        <Route path="/permits" element={<ProtectedRoute><PermitsPage /></ProtectedRoute>} />
+                        <Route path="/profile" element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
+                    </Routes>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default App;

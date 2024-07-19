@@ -1,0 +1,66 @@
+.container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.profile-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid green;
+    margin-right: 1.5rem;
+}
+
+.profile-info h2, .profile-info p {
+    margin: 0;
+    color: #333;
+}
+
+.icon-button, .save-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.7rem;
+    transition: color 0.3s;
+}
+
+.icon-button:hover, .save-button:hover {
+    color: green;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.info-card {
+    background-color: #f9fafb;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.info-card label, .info-card p {
+    display: block;
+    margin: 0;
+    color: #333;
+}
+
+.profile-info-input, .info-input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
