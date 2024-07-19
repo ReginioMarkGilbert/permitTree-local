@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import './styles/UserProfilePage.css';
 
 const UserProfilePage: React.FC = () => {
     const [user, setUser] = useState({
@@ -13,6 +14,7 @@ const UserProfilePage: React.FC = () => {
         birthDate: '',
         accountCreated: ''
     });
+    const [editMode, setEditMode] = useState(false);
 
     useEffect(() => {
         const fetchUserDetails = async () => {
@@ -26,56 +28,60 @@ const UserProfilePage: React.FC = () => {
         fetchUserDetails();
     }, []);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setUser(prevState => ({ ...prevState, [name]: value }));
+    const handleEdit = () => {
+        setEditMode(true);
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSave = async () => {
         try {
             await axios.put('http://localhost:3000/api/user', user);
             toast.success('Profile updated successfully');
+            setEditMode(false);
         } catch (error) {
             toast.error('Failed to update profile');
         }
     };
 
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setUser(prevState => ({ ...prevState, [name]: value }));
+    };
+
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
-            <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md">
-                <h1 className="text-2xl font-bold mb-6">User Profile</h1>
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Profile Photo</label>
-                        <input type="file" className="form-input" name="profilePhoto" value={user.profilePhoto} onChange={handleChange} />
+        <div className="flex h-screen justify-center items-center mt-[-30px]">
+            <div className="container px-4">
+                <div className="profile-header">
+                    <img src={user.profilePhoto || 'default-profile.png'} alt="Profile" className="profile-img" />
+                    <div className="profile-info">
+                        {editMode ? (
+                            <input type="text" value={user.username} onChange={handleChange} name="username" className="profile-info-input" />
+                        ) : (
+                            <h2>{user.username}</h2>
+                        )}
+                        <p>{user.email}</p>
                     </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Username</label>
-                        <input type="text" className="form-input" name="username" value={user.username} onChange={handleChange} />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Email</label>
-                        <input type="email" className="form-input" name="email" value={user.email} onChange={handleChange} />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Phone</label>
-                        <input type="tel" className="form-input" name="phone" value={user.phone} onChange={handleChange} />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Address</label>
-                        <textarea className="form-textarea" name="address" value={user.address} onChange={handleChange} />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Birth Date</label>
-                        <input type="date" className="form-input" name="birthDate" value={user.birthDate} onChange={handleChange} />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Account Created</label>
-                        <input type="text" className="form-input" name="accountCreated" value={user.accountCreated} onChange={handleChange} disabled />
-                    </div>
-                    <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Update Profile</button>
-                </form>
+                </div>
+                <div className="profile-actions">
+                    {editMode ? (
+                        <button onClick={handleSave} className="save-button">Save</button>
+                    ) : (
+                        <button onClick={handleEdit} className="icon-button"><i className="fa fa-pencil"></i></button>
+                    )}
+                </div>
+                <div className="info-grid">
+                    {Object.entries(user).map(([key, value]) => (
+                        key !== 'profilePhoto' && key !== 'accountCreated' && (
+                            <div className="info-card" key={key}>
+                                <label>{key}</label>
+                                {editMode ? (
+                                    <input type="text" value={value} onChange={handleChange} name={key} className="info-input" />
+                                ) : (
+                                    <p>{value}</p>
+                                )}
+                            </div>
+                        )
+                    ))}
+                </div>
                 <ToastContainer />
             </div>
         </div>

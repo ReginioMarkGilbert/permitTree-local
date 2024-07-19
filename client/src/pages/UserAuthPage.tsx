@@ -27,8 +27,8 @@ const UserAuthPage = () => {
                 body: JSON.stringify({ loginIdentifier, password }) // Use loginIdentifier instead of separate username and email
             });
 
-            if (response.ok) {
-                const data = await response.json();
+            if (response.status === 200) {
+                const data = response.data;
                 setToken(data.token); // Store the token
                 toast.success('Login successful!', {
                     position: "top-center",
@@ -41,8 +41,7 @@ const UserAuthPage = () => {
                     onClose: () => navigate('/home') // Navigate to home page after autoClose toast
                 });
             } else {
-                const errorData = await response.json();
-                toast.error(`Login failed: ${errorData.message}`);
+                toast.error(`Login failed: ${response.data.message}`);
             }
         } catch (error) {
             toast.error('Login failed: An error occurred');
@@ -66,7 +65,7 @@ const UserAuthPage = () => {
                     pauseOnHover: true,
                     draggable: true,
                     progress: undefined,
-                    onClose: () => navigate('/') // Navigate to home page after autoClose toast
+                    onClose: () => navigate('/home') // Navigate to home page after autoClose toast
                 });
             } else {
                 toast.error('Signup failed: An error occurred');

@@ -1,17 +1,26 @@
-import { useState } from 'react'; // Import useState from React
+import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
-import denrLogo from '../assets/denr-logo.png'; // Ensure the path to the logo is correct
+import denrLogo from '../assets/denr-logo.png';
 import { useNavigate } from 'react-router-dom';
+import { isAuthenticated } from '../utils/auth';
 
 function HomePage() {
     const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
 
+    useEffect(() => {
+        if (isAuthenticated()) {
+            navigate('/home');
+        } else {
+            navigate('/auth');
+        }
+    }, [navigate]);
+
     return (
         <div className="flex h-screen">
             <Sidebar isOpen={isOpen} toggleSidebar={() => setIsOpen(!isOpen)} />
-            <div className="flex-grow flex flex-col">
+            <div className={`flex-grow flex flex-col ${isOpen ? 'ml-64' : 'ml-0'} transition-all duration-300`}>
                 <Navbar sidebarToggle={isOpen} setSidebarToggle={setIsOpen} />
                 <div className="flex-grow flex justify-center items-center bg-gray-100 text-center">
                     <div className="bg-white p-10 rounded-lg shadow-md" style={{ width: '700px' }}>
