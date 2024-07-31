@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: true},
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
-    phone: { type: String, required: true, unique: true, match: [/^\d{10}$/, 'Please fill a valid phone number'] }
+    phone: { type: String, required: true, unique: true, match: [/^\d{11}$/, 'Please fill a valid phone number'] }
 });
 
 userSchema.pre('save', async function (next) {

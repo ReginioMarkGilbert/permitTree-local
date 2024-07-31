@@ -28,7 +28,8 @@ const UserAuthPage = () => {
             });
 
             if (response.status === 200) {
-                const data = response.data;
+                const data = await response.json(); // Parse the response as JSON
+                console.log('Login response data:', data); // Log the response data
                 setToken(data.token); // Store the token
                 toast.success('Login successful!', {
                     position: "top-center",
@@ -41,17 +42,76 @@ const UserAuthPage = () => {
                     onClose: () => navigate('/home') // Navigate to home page after autoClose toast
                 });
             } else {
-                toast.error(`Login failed: ${response.data.message}`);
+                const errorData = await response.json(); // Parse the error response as JSON
+                console.error('Login failed:', errorData); // Log the error response
+                toast.error(`Login failed: ${errorData.message}`);
             }
         } catch (error) {
+            console.error('Login error:', error); // Log the error
             toast.error('Login failed: An error occurred');
         }
     };
 
     const handleSignup = async () => {
+        // Client-side validation for required fields
+        if (!firstName) {
+            toast.error('First Name is required.');
+            return;
+        }
+        if (!lastName) {
+            toast.error('Last Name is required.');
+            return;
+        }
+        if (!username) {
+            toast.error('Username is required.');
+            return;
+        }
+        // Check if username already exists
         try {
+            const checkResponse = await axios.get(`http://localhost:3000/api/check-username/${username}`);
+            if (checkResponse.data.exists) {
+                toast.error('Username already exists. Please choose another one.');
+                return;
+            }
+        } catch (error) {
+            console.error('Error checking username:', error);
+            toast.error('An error occurred while checking username availability.');
+            return;
+        }
+        if (!email) {
+            toast.error('Email is required.');
+            return;
+        }
+        const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+        if (!gmailRegex.test(email)) {
+            if (email.includes('@gmial.com') || email.includes('@gmail.cim')) {
+               toast.error('Email address is misspelled. Did you mean @gmail.com?');
+            } else if (/@gmail\.com[^$]/.test(email) || email.includes('@gmail.com.')) {
+                toast.error('Invalid email format. Please remove any extra characters after @gmail.com');
+            } else if (!email.includes('@gmail.com')) {
+                toast.error('Email must be a Gmail account.');
+            } else {
+                toast.error('Invalid email format. Please enter a valid Gmail address.');
+            }
+            return;
+        } 
+        if (!password) {
+            toast.error('Password is required.');
+            return;
+        }
+        if (!phone) {
+            toast.error('Phone number is required.');
+            return;
+        }
+        if (!/^\d{11}$/.test(phone)) {
+            toast.error('Phone number must be 11 digits long.');
+            return;
+        }
+
+        try {
+            console.log({ firstName, lastName, username, email, password, phone }); // Log the data being sent
             const response = await axios.post('http://localhost:3000/api/signup', {
-                email, username, password, phone, firstName, lastName
+                firstName, lastName, username, email, password, phone, 
             });
 
             if (response.status === 201) {
