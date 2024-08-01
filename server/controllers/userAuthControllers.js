@@ -7,6 +7,12 @@ require('dotenv').config();
 const signup = async (req, res) => {
     console.log(req.body); // Log the received data
     const { username, password, phone, email, firstName, lastName } = req.body;
+
+    // Server-side validation for phone number
+    if (!/^\d{11}$/.test(phone)) {
+        return res.status(400).json({ message: 'Phone number must be 11 digits long.' });
+    }
+
     try {
         const user = await User.findOne({ username });
         if (user) {

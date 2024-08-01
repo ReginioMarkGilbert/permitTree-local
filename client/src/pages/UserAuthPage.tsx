@@ -74,9 +74,14 @@ const UserAuthPage = () => {
                 return;
             }
         } catch (error) {
-            console.error('Error checking username:', error);
-            toast.error('An error occurred while checking username availability.');
-            return;
+            if (axios.isAxiosError(error) && error.response && error.response.status === 404) {
+                // If the error is a 404, it means no users exist in the database
+                console.log('No users found in the database. Proceeding with signup.');
+            } else {
+                console.error('Error checking username:', error);
+                toast.error('An error occurred while checking username availability.');
+                return;
+            }
         }
         if (!email) {
             toast.error('Email is required.');
@@ -207,6 +212,7 @@ const UserAuthPage = () => {
                             <input
                                 type="text"
                                 id="username"
+                                name="username"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 className="w-full p-2 mb-2 border rounded input-field"
