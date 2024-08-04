@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './styles/UserProfilePage.css';
+import axios from 'axios';
 
 const UserProfilePage: React.FC = () => {
     const [user, setUser] = useState({
@@ -19,12 +19,22 @@ const UserProfilePage: React.FC = () => {
     useEffect(() => {
         const fetchUserDetails = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/api/user');
+                const token = localStorage.getItem('token'); // Ensure the token is stored correctly
+                if (!token) {
+                    throw new Error('No token found');
+                }
+                const response = await axios.get('http://localhost:3000/api/user', {
+                    headers: {
+                        Authorization: token
+                    }
+                });
                 setUser(response.data);
             } catch (error) {
                 toast.error('Failed to fetch user details');
+                console.error(error);
             }
         };
+
         fetchUserDetails();
     }, []);
 
@@ -34,11 +44,18 @@ const UserProfilePage: React.FC = () => {
 
     const handleSave = async () => {
         try {
-            await axios.put('http://localhost:3000/api/user', user);
+            const token = localStorage.getItem('token'); // Ensure the token is stored correctly
+            await axios.put('http://localhost:3000/api/user', user, {
+                headers: {
+                    Authorization: token
+                }
+            });
             toast.success('Profile updated successfully');
             setEditMode(false);
+            localStorage.setItem('user', JSON.stringify(user));
         } catch (error) {
             toast.error('Failed to update profile');
+            console.error(error);
         }
     };
 

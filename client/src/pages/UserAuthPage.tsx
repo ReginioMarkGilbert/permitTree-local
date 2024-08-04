@@ -90,7 +90,7 @@ const UserAuthPage = () => {
         const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
         if (!gmailRegex.test(email)) {
             if (email.includes('@gmial.com') || email.includes('@gmail.cim')) {
-               toast.error('Email address is misspelled. Did you mean @gmail.com?');
+                toast.error('Email address is misspelled. Did you mean @gmail.com?');
             } else if (/@gmail\.com[^$]/.test(email) || email.includes('@gmail.com.')) {
                 toast.error('Invalid email format. Please remove any extra characters after @gmail.com');
             } else if (!email.includes('@gmail.com')) {
@@ -99,7 +99,7 @@ const UserAuthPage = () => {
                 toast.error('Invalid email format. Please enter a valid Gmail address.');
             }
             return;
-        } 
+        }
         if (!password) {
             toast.error('Password is required.');
             return;
@@ -116,7 +116,7 @@ const UserAuthPage = () => {
         try {
             console.log({ firstName, lastName, username, email, password, phone }); // Log the data being sent
             const response = await axios.post('http://localhost:3000/api/signup', {
-                firstName, lastName, username, email, password, phone, 
+                firstName, lastName, username, email, password, phone,
             });
 
             if (response.status === 201) {
