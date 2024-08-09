@@ -1,4 +1,3 @@
-
 const PermitsPage = () => {
     const handleApplyClick = () => {
         // Handle apply click
@@ -46,4 +45,3 @@ const PermitsPage = () => {
 };
 
 export default PermitsPage;
-
