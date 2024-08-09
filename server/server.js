@@ -31,8 +31,8 @@ mongoose.connect('mongodb://localhost:27017/PermiTree-db')
 // Routes
 // const applicationRoutes = require('./routes/chainsaw_Routes');
 // const adminRoutes = require('./routes/AdminRoutes/admin_routes');
-const userRoutes = require('./routes/userProfileRoutes');
-app.use('/api', userRoutes);
+const userProfileRoutes = require('./routes/userProfileRoutes');
+app.use('/api', userProfileRoutes);
 const authRoutes = require('./routes/userAuthRoutes');
 app.use('/api', authRoutes);
 

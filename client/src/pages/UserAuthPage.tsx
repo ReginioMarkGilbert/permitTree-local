@@ -122,6 +122,7 @@ const UserAuthPage = () => {
             if (response.status === 201) {
                 const data = response.data;
                 setToken(data.token); // Store the token
+                localStorage.setItem('user', JSON.stringify(data.user)); // Store user details
                 toast.success('Signup successful!', {
                     position: "top-center",
                     autoClose: 500,
@@ -130,7 +131,7 @@ const UserAuthPage = () => {
                     pauseOnHover: true,
                     draggable: true,
                     progress: undefined,
-                    onClose: () => navigate('/home') // Navigate to home page after autoClose toast
+                    onClose: () => navigate('/profile') // Navigate to profile page after autoClose toast
                 });
             } else {
                 toast.error('Signup failed: An error occurred');

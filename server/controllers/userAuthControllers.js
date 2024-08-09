@@ -20,7 +20,9 @@ const signup = async (req, res) => {
         }
         const newUser = new User({ firstName, lastName, username, email, password, phone });
         await newUser.save();
-        return res.status(201).json({ message: 'User created successfully' });
+
+        // Store user details in local storage (or return them in the response)
+        res.status(201).json({ message: 'User created successfully', user: newUser });
     } catch (err) {
         console.error('Signup error:', err); // Log the error
         res.status(400).json({ error: err.message });
@@ -54,7 +56,7 @@ const login = async (req, res) => {
         };
 
         const token = jwt.sign(payload, process.env.JWT_SECRET || 'default_secret', { expiresIn: '1h' });
-        console.log('Generated token:', token); // Log the generated token
+        // console.log('Generated token:', token); // Log the generated token
         res.status(200).json({ message: 'Login successful', token: `Bearer ${token}` });
     } catch (err) {
         console.error('Login error:', err); // Log the error
