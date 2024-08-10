@@ -4,7 +4,7 @@ import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { setToken } from '../utils/auth';
-import '../styles/UserAuthPage.css'; // Import the CSS file
+import '../styles/UserAuthPage.css';
 
 const UserAuthPage = () => {
     const [email, setEmail] = useState('');
@@ -14,7 +14,7 @@ const UserAuthPage = () => {
     const [password, setPassword] = useState('');
     const [phone, setPhone] = useState('');
     const [loginIdentifier, setLoginIdentifier] = useState('');
-    const [isLogin, setIsLogin] = useState(true); // State to toggle between login and signup
+    const [isLogin, setIsLogin] = useState(true);
     const navigate = useNavigate();
 
     const handleLogin = async () => {
@@ -24,13 +24,12 @@ const UserAuthPage = () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ loginIdentifier, password }) // Use loginIdentifier instead of separate username and email
+                body: JSON.stringify({ loginIdentifier, password })
             });
 
             if (response.status === 200) {
-                const data = await response.json(); // Parse the response as JSON
-                console.log('Login response data:', data); // Log the response data
-                setToken(data.token); // Store the token
+                const data = await response.json();
+                setToken(data.token);
                 toast.success('Login successful!', {
                     position: "top-center",
                     autoClose: 500,
@@ -39,15 +38,13 @@ const UserAuthPage = () => {
                     pauseOnHover: true,
                     draggable: true,
                     progress: undefined,
-                    onClose: () => navigate('/home') // Navigate to home page after autoClose toast
+                    onClose: () => navigate('/home')
                 });
             } else {
-                const errorData = await response.json(); // Parse the error response as JSON
-                console.error('Login failed:', errorData); // Log the error response
+                const errorData = await response.json();
                 toast.error(`Login failed: ${errorData.message}`);
             }
         } catch (error) {
-            console.error('Login error:', error); // Log the error
             toast.error('Login failed: An error occurred');
         }
     };
@@ -75,10 +72,8 @@ const UserAuthPage = () => {
             }
         } catch (error) {
             if (axios.isAxiosError(error) && error.response && error.response.status === 404) {
-                // If the error is a 404, it means no users exist in the database
                 console.log('No users found in the database. Proceeding with signup.');
             } else {
-                console.error('Error checking username:', error);
                 toast.error('An error occurred while checking username availability.');
                 return;
             }
@@ -89,15 +84,7 @@ const UserAuthPage = () => {
         }
         const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
         if (!gmailRegex.test(email)) {
-            if (email.includes('@gmial.com') || email.includes('@gmail.cim')) {
-                toast.error('Email address is misspelled. Did you mean @gmail.com?');
-            } else if (/@gmail\.com[^$]/.test(email) || email.includes('@gmail.com.')) {
-                toast.error('Invalid email format. Please remove any extra characters after @gmail.com');
-            } else if (!email.includes('@gmail.com')) {
-                toast.error('Email must be a Gmail account.');
-            } else {
-                toast.error('Invalid email format. Please enter a valid Gmail address.');
-            }
+            toast.error('Email must be a Gmail account.');
             return;
         }
         if (!password) {
@@ -112,17 +99,15 @@ const UserAuthPage = () => {
             toast.error('Phone number must be 11 digits long.');
             return;
         }
-
         try {
-            console.log({ firstName, lastName, username, email, password, phone }); // Log the data being sent
             const response = await axios.post('http://localhost:3000/api/signup', {
                 firstName, lastName, username, email, password, phone,
             });
 
             if (response.status === 201) {
                 const data = response.data;
-                setToken(data.token); // Store the token
-                localStorage.setItem('user', JSON.stringify(data.user)); // Store user details
+                setToken(data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
                 toast.success('Signup successful!', {
                     position: "top-center",
                     autoClose: 500,
@@ -131,7 +116,7 @@ const UserAuthPage = () => {
                     pauseOnHover: true,
                     draggable: true,
                     progress: undefined,
-                    onClose: () => navigate('/profile') // Navigate to profile page after autoClose toast
+                    onClose: () => navigate('/profile')
                 });
             } else {
                 toast.error('Signup failed: An error occurred');
@@ -156,7 +141,6 @@ const UserAuthPage = () => {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
             <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md">
-
                 {isLogin ? (
                     <>
                         <h1 className="text-2xl font-bold mb-6">Login</h1>
@@ -180,7 +164,7 @@ const UserAuthPage = () => {
                             />
                             <label htmlFor="password" className="input-label">Password</label>
                         </div>
-                        <button onClick={() => { handleLogin(); setIsLogin(true); }} className="w-full bg-blue-500 text-white p-2 rounded">Login</button>
+                        <button onClick={handleLogin} className="w-full bg-blue-500 text-white p-2 rounded">Login</button>
                         <button onClick={handleGoogleLogin} className="w-full bg-red-500 text-white p-2 rounded mt-4">Login with Google</button>
                         <p className="mt-4 text-center">Don't have an account? <span onClick={() => setIsLogin(false)} className="text-blue-500 hover:text-blue-700 cursor-pointer">Sign Up</span></p>
                     </>
@@ -256,8 +240,8 @@ const UserAuthPage = () => {
                         <p className="mt-4 text-center">Already have an account? <span onClick={() => setIsLogin(true)} className="text-blue-500 hover:text-blue-700 cursor-pointer">Login</span></p>
                     </>
                 )}
+                <ToastContainer />
             </div>
-            <ToastContainer />
         </div>
     );
 };

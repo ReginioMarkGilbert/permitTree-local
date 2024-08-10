@@ -4,7 +4,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import './styles/UserProfilePage.css';
 import axios from 'axios';
 
-const UserProfilePage: React.FC = () => {
+const UserProfilePage = () => {
     const [user, setUser] = useState({
         username: '',
         email: '',
@@ -19,7 +19,7 @@ const UserProfilePage: React.FC = () => {
     useEffect(() => {
         const fetchUserDetails = async () => {
             try {
-                const token = localStorage.getItem('token'); // Ensure the token is stored correctly
+                const token = localStorage.getItem('token');
                 if (!token) {
                     throw new Error('No token found');
                 }
@@ -44,7 +44,7 @@ const UserProfilePage: React.FC = () => {
 
     const handleSave = async () => {
         try {
-            const token = localStorage.getItem('token'); // Ensure the token is stored correctly
+            const token = localStorage.getItem('token');
             await axios.put('http://localhost:3000/api/user', user, {
                 headers: {
                     Authorization: token
@@ -59,7 +59,7 @@ const UserProfilePage: React.FC = () => {
         }
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e) => {
         const { name, value } = e.target;
         setUser(prevState => ({ ...prevState, [name]: value }));
     };
