@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage';
 import PermitsPage from './pages/permitsPage';
 import UserAuthPage from './pages/UserAuthPage';
 import UserProfilePage from './pages/UserProfilePage';
+import AdminPage from './pages/AdminPage';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useSidebarToggle } from './hooks/useSidebarToggle';
 import { useEffect } from 'react';
@@ -37,6 +38,9 @@ const App = () => {
                         <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
                         <Route path="/permits" element={<ProtectedRoute><PermitsPage /></ProtectedRoute>} />
                         <Route path="/profile" element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
+
+                        {/* admin routes */}
+                        <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
                     </Routes>
                 </div>
             </div>
