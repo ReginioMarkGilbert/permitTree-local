@@ -2,12 +2,7 @@ import React from 'react';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import '../App.css';
 
-interface NavbarProps {
-    sidebarToggle: boolean;
-    setSidebarToggle: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-const Navbar: React.FC<NavbarProps> = ({ sidebarToggle, setSidebarToggle }) => {
+const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
     const handleToggle = () => {
         setSidebarToggle(!sidebarToggle);
     };
@@ -20,6 +15,6 @@ const Navbar: React.FC<NavbarProps> = ({ sidebarToggle, setSidebarToggle }) => {
             <h1 className="text-lg font-semibold ml-4">DENR PENRO Permit Issuance</h1>
         </nav>
     );
-}
+};
 
 export default Navbar;

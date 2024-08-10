@@ -6,18 +6,13 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { isAuthenticated, removeToken } from '../utils/auth';
 
-interface SidebarProps {
-    isOpen: boolean;
-    toggleSidebar: () => void;
-}
-
-const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
+const Sidebar = ({ isOpen, toggleSidebar }) => {
     const navigate = useNavigate();
 
     const handleLogout = async () => {
         try {
             await axios.get('http://localhost:3000/api/logout');
-            removeToken(); // Ensure token is removed after successful logout
+            removeToken();
             navigate('/auth');
             console.log('Logout successful!');
         } catch (error) {
@@ -29,13 +24,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
         const authStatus = isAuthenticated();
         console.log('Authentication status:', authStatus);
         if (!authStatus) {
-            navigate('/auth'); // Redirect to login if not authenticated
+            navigate('/auth');
         }
     }, []);
 
     if (!isAuthenticated()) {
         console.log('Rendering null due to failed authentication');
-        return null; // Do not render the sidebar if not authenticated
+        return null;
     }
 
     return (
