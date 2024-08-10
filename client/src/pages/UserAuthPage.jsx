@@ -4,7 +4,7 @@ import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { setToken } from '../utils/auth';
-import '../styles/UserAuthPage.css'; // Import the CSS file
+import '../styles/UserAuthPage.css';
 
 const UserAuthPage = () => {
     const [email, setEmail] = useState('');
@@ -14,7 +14,7 @@ const UserAuthPage = () => {
     const [password, setPassword] = useState('');
     const [phone, setPhone] = useState('');
     const [loginIdentifier, setLoginIdentifier] = useState('');
-    const [isLogin, setIsLogin] = useState(true); // State to toggle between login and signup
+    const [isLogin, setIsLogin] = useState(true);
     const navigate = useNavigate();
 
     const handleLogin = async () => {
@@ -24,12 +24,12 @@ const UserAuthPage = () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ loginIdentifier, password }) // Use loginIdentifier instead of separate username and email
+                body: JSON.stringify({ loginIdentifier, password })
             });
 
             if (response.status === 200) {
-                const data = response.data;
-                setToken(data.token); // Store the token
+                const data = await response.json();
+                setToken(data.token);
                 toast.success('Login successful!', {
                     position: "top-center",
                     autoClose: 500,
@@ -38,10 +38,11 @@ const UserAuthPage = () => {
                     pauseOnHover: true,
                     draggable: true,
                     progress: undefined,
-                    onClose: () => navigate('/home') // Navigate to home page after autoClose toast
+                    onClose: () => navigate('/home')
                 });
             } else {
-                toast.error(`Login failed: ${response.data.message}`);
+                const errorData = await response.json();
+                toast.error(`Login failed: ${errorData.message}`);
             }
         } catch (error) {
             toast.error('Login failed: An error occurred');
@@ -49,14 +50,64 @@ const UserAuthPage = () => {
     };
 
     const handleSignup = async () => {
+        // Client-side validation for required fields
+        if (!firstName) {
+            toast.error('First Name is required.');
+            return;
+        }
+        if (!lastName) {
+            toast.error('Last Name is required.');
+            return;
+        }
+        if (!username) {
+            toast.error('Username is required.');
+            return;
+        }
+        // Check if username already exists
+        try {
+            const checkResponse = await axios.get(`http://localhost:3000/api/check-username/${username}`);
+            if (checkResponse.data.exists) {
+                toast.error('Username already exists. Please choose another one.');
+                return;
+            }
+        } catch (error) {
+            if (axios.isAxiosError(error) && error.response && error.response.status === 404) {
+                console.log('No users found in the database. Proceeding with signup.');
+            } else {
+                toast.error('An error occurred while checking username availability.');
+                return;
+            }
+        }
+        if (!email) {
+            toast.error('Email is required.');
+            return;
+        }
+        const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+        if (!gmailRegex.test(email)) {
+            toast.error('Email must be a Gmail account.');
+            return;
+        }
+        if (!password) {
+            toast.error('Password is required.');
+            return;
+        }
+        if (!phone) {
+            toast.error('Phone number is required.');
+            return;
+        }
+        if (!/^\d{11}$/.test(phone)) {
+            toast.error('Phone number must be 11 digits long.');
+            return;
+        }
         try {
             const response = await axios.post('http://localhost:3000/api/signup', {
-                email, username, password, phone, firstName, lastName
+                firstName, lastName, username, email, password, phone,
             });
 
             if (response.status === 201) {
                 const data = response.data;
-                setToken(data.token); // Store the token
+                setToken(data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
                 toast.success('Signup successful!', {
                     position: "top-center",
                     autoClose: 500,
@@ -65,7 +116,7 @@ const UserAuthPage = () => {
                     pauseOnHover: true,
                     draggable: true,
                     progress: undefined,
-                    onClose: () => navigate('/home') // Navigate to home page after autoClose toast
+                    onClose: () => navigate('/profile')
                 });
             } else {
                 toast.error('Signup failed: An error occurred');
@@ -90,7 +141,6 @@ const UserAuthPage = () => {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
             <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md">
-
                 {isLogin ? (
                     <>
                         <h1 className="text-2xl font-bold mb-6">Login</h1>
@@ -114,7 +164,7 @@ const UserAuthPage = () => {
                             />
                             <label htmlFor="password" className="input-label">Password</label>
                         </div>
-                        <button onClick={() => { handleLogin(); setIsLogin(true); }} className="w-full bg-blue-500 text-white p-2 rounded">Login</button>
+                        <button onClick={handleLogin} className="w-full bg-blue-500 text-white p-2 rounded">Login</button>
                         <button onClick={handleGoogleLogin} className="w-full bg-red-500 text-white p-2 rounded mt-4">Login with Google</button>
                         <p className="mt-4 text-center">Don't have an account? <span onClick={() => setIsLogin(false)} className="text-blue-500 hover:text-blue-700 cursor-pointer">Sign Up</span></p>
                     </>
@@ -147,6 +197,7 @@ const UserAuthPage = () => {
                             <input
                                 type="text"
                                 id="username"
+                                name="username"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 className="w-full p-2 mb-2 border rounded input-field"
@@ -189,8 +240,8 @@ const UserAuthPage = () => {
                         <p className="mt-4 text-center">Already have an account? <span onClick={() => setIsLogin(true)} className="text-blue-500 hover:text-blue-700 cursor-pointer">Login</span></p>
                     </>
                 )}
+                <ToastContainer />
             </div>
-            <ToastContainer />
         </div>
     );
 };
