@@ -30,6 +30,11 @@ const UserAuthPage = () => {
             if (response.status === 200) {
                 const data = await response.json();
                 setToken(data.token);
+                // if (data.user.role === 'admin') {
+                //     navigate('/admin'); // Redirect to admin page
+                // } else {
+                //     navigate('/home'); // Redirect to user home
+                // }
                 toast.success('Login successful!', {
                     position: "top-center",
                     autoClose: 500,

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 const { signup, login, logout } = require('../controllers/userAuthControllers');
+const roleMiddleware = require('../middleware/roleMiddleware');
 
 router.post('/signup', signup);
 router.post('/login', login);
@@ -12,5 +13,8 @@ router.get('/protected', passport.authenticate('jwt', { session: false }), (req,
     res.status(200).json({ message: 'This is a protected route', user: req.user });
 });
 
-module.exports = router;
+router.get('/admin', passport.authenticate('jwt', { session: false }), roleMiddleware(['admin']), (req, res) => {
+    res.status(200).json({ message: 'Welcome Admin' });
+});
 
+module.exports = router;

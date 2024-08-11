@@ -6,7 +6,7 @@ require('dotenv').config();
 
 const signup = async (req, res) => {
     console.log(req.body); // Log the received data
-    const { username, password, phone, email, firstName, lastName } = req.body;
+    const { username, password, phone, email, firstName, lastName, role } = req.body;
 
     // Server-side validation for phone number
     if (!/^\d{11}$/.test(phone)) {
@@ -18,7 +18,7 @@ const signup = async (req, res) => {
         if (user) {
             return res.status(400).json({ message: 'User already exists' });
         }
-        const newUser = new User({ firstName, lastName, username, email, password, phone });
+        const newUser = new User({ firstName, lastName, username, email, password, phone, role: role || 'user' });
         await newUser.save();
 
         // Store user details in local storage (or return them in the response)
@@ -52,7 +52,8 @@ const login = async (req, res) => {
             id: user.id,
             username: user.username,
             firstName: user.firstName,
-            lastName: user.lastName
+            lastName: user.lastName,
+            role: user.role // Add role to payload
         };
 
         const token = jwt.sign(payload, process.env.JWT_SECRET || 'default_secret', { expiresIn: '1h' });

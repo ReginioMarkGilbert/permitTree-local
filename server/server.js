@@ -35,6 +35,8 @@ const userProfileRoutes = require('./routes/userProfileRoutes');
 app.use('/api', userProfileRoutes);
 const authRoutes = require('./routes/userAuthRoutes');
 app.use('/api', authRoutes);
+// const adminRoutes = require('./routes/AdminRoutes/admin_routes');
+// app.use('/api/admin', adminRoutes);
 
 // Start the server
 const port = process.env.PORT || 3000;
