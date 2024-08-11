@@ -1,4 +1,5 @@
 html, body, #root , .min-h-screen {
+    font-family: Arial, sans-serif;
     background-color: whitesmoke;
     height: 100%;
     margin: 0;

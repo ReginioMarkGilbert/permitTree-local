@@ -225,6 +225,7 @@ const ApplicationForm = ({ selectedStore }) => {
                     ))}
                 </div>
 
+                {/* <button className="bg-black text-white rounded p-4 mt-4 hover:bg-gray-900 w-[400px] h-[40px]" type="submit">Submit</button> */}
                 <button className="submit-button" type="submit">Submit</button>
             </form>
         </div>
