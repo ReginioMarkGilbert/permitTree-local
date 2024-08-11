@@ -1,6 +1,11 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+
 const PermitsPage = () => {
+    const navigate = useNavigate();
+
     const handleApplyClick = () => {
-        // Handle apply click
+        navigate('/apply'); // Navigate to the StoreSelectionPage
     };
 
     return (
