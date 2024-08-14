@@ -5,6 +5,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { setToken } from '../utils/auth';
 import '../styles/UserAuthPage.css';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const UserAuthPage = () => {
     const [email, setEmail] = useState('');
@@ -15,11 +16,16 @@ const UserAuthPage = () => {
     const [phone, setPhone] = useState('');
     const [loginIdentifier, setLoginIdentifier] = useState('');
     const [isLogin, setIsLogin] = useState(true);
+    const [showPassword, setShowPassword] = useState(false); // New state for password visibility
     const navigate = useNavigate();
 
     const handleLogin = async () => {
         try {
-            const response = await fetch('http://localhost:3000/api/login', {
+            // const response = await fetch('http://localhost:3000/api/login' , {
+            const apiUrl = window.location.hostname === 'localhost'
+            ? 'http://localhost:3000/api/login'
+            : 'http://192.168.137.1:3000/api/login'; // for mobile
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -70,7 +76,11 @@ const UserAuthPage = () => {
         }
         // Check if username already exists
         try {
-            const checkResponse = await axios.get(`http://localhost:3000/api/check-username/${username}`);
+            // const checkResponse = await axios.get(`http://localhost:3000/api/check-username/${username}`);
+            const apiUrl = window.location.hostname === 'localhost'
+            ? 'http://localhost:3000/api/check-username'
+            : 'http://192.168.137.1:3000/api/check-username'; // for mobile
+            const checkResponse = await axios.get(`${apiUrl}/${username}`);
             if (checkResponse.data.exists) {
                 toast.error('Username already exists. Please choose another one.');
                 return;
@@ -105,7 +115,11 @@ const UserAuthPage = () => {
             return;
         }
         try {
-            const response = await axios.post('http://localhost:3000/api/signup', {
+            // const response = await axios.post('http://localhost:3000/api/signup', {
+            const apiUrl = window.location.hostname === 'localhost'
+            ? 'http://localhost:3000/api/signup'
+            : 'http://192.168.137.1:3000/api/signup'; // for mobile
+            const response = await axios.post(apiUrl, {
                 firstName, lastName, username, email, password, phone,
             });
 
@@ -159,15 +173,21 @@ const UserAuthPage = () => {
                             />
                             <label htmlFor="loginIdentifier" className="input-label">Username or Gmail</label>
                         </div>
-                        <div className="input-container">
+                        <div className="input-container relative"> {/* Added relative for positioning */}
                             <input
-                                type="password"
+                                type={showPassword ? 'text' : 'password'} // Toggle password visibility
                                 id="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="w-full p-2 mb-4 border rounded input-field"
                             />
                             <label htmlFor="password" className="input-label">Password</label>
+                            <span
+                                onClick={() => setShowPassword(!showPassword)} // Toggle function
+                                className="absolute right-2 top-1/4 transform -translate-y-1/4 cursor-pointer text-xl pr-1 pt-1 text-gray-600"
+                            >
+                                {showPassword ? <FaEyeSlash /> : <FaEye />} {/* Eye icon */}
+                            </span>
                         </div>
                         <button onClick={handleLogin} className="w-full bg-blue-500 text-white p-2 rounded">Login</button>
                         <button onClick={handleGoogleLogin} className="w-full bg-red-500 text-white p-2 rounded mt-4">Login with Google</button>

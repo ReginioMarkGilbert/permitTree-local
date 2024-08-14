@@ -11,7 +11,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
     const handleLogout = async () => {
         try {
-            await axios.get('http://localhost:3000/api/logout');
+            // await axios.get('http://localhost:3000/api/logout');
+            const apiUrl = window.location.hostname === 'localhost'
+            ? 'http://localhost:3000/api/logout'
+            : 'http://192.168.137.1:3000/api/logout'; // for mobile
+            await axios.get(apiUrl);
             removeToken();
             navigate('/auth');
             console.log('Logout successful!');
@@ -34,7 +38,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     }
 
     return (
-        <div className={`h-full bg-gray-900 text-white flex flex-col justify-between fixed top-0 left-0 w-56 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className={`h-full bg-gray-900 text-white flex flex-col justify-between fixed top-0 left-0 w-56 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:w-64`}>
             <div className="mt-6 ml-4">
                 <div className="mt-16">
                     <div className="flex items-center justify-center mt-10 mr-5">
