@@ -5,27 +5,26 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const signup = async (req, res) => {
-    console.log(req.body); // Log the received data
-    const { username, password, phone, email, firstName, lastName, role } = req.body;
+    const { firstName, lastName, username, password } = req.body; // Include username in the destructuring
 
-    // Server-side validation for phone number
-    if (!/^\d{11}$/.test(phone)) {
-        return res.status(400).json({ message: 'Phone number must be 11 digits long.' });
+    const validatePassword = (password) => {
+        if (!/[A-Z]/.test(password) || !/[0-9]/.test(password) || password.length < 8) {
+            return false;
+        }
+        return true;
+    };
+
+    if (!validatePassword(password)) {
+        return res.status(400).json({ message: 'Password does not meet requirements.' });
     }
 
     try {
-        const user = await User.findOne({ username });
-        if (user) {
-            return res.status(400).json({ message: 'User already exists' });
-        }
-        const newUser = new User({ firstName, lastName, username, email, password, phone, role: role || 'user' });
+        const newUser = new User({ firstName, lastName, username, password }); // Include username when creating the user
         await newUser.save();
-
-        // Store user details in local storage (or return them in the response)
         res.status(201).json({ message: 'User created successfully', user: newUser });
     } catch (err) {
-        console.error('Signup error:', err); // Log the error
-        res.status(400).json({ error: err.message });
+        console.error('Signup error:', err);
+        res.status(500).json({ error: err.message });
     }
 };
 

@@ -11,7 +11,7 @@ import StatusPage from './pages/StatusPage';
 import HomePage from './pages/HomePage';
 
 import UserAuthPage from './pages/UserAuthPage';
-import UserProfilePage from './pages/UserProfilePage';
+// import UserProfilePage from './pages/UserProfilePage';
 import AdminPage from './pages/AdminPage';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useSidebarToggle } from './hooks/useSidebarToggle';
@@ -83,7 +83,7 @@ const App = () => {
                         <Route path="/message" element={<ProtectedRoute><MessageBox onViewStatus={handleViewStatus} /></ProtectedRoute>} />
                         <Route path="/status" element={<ProtectedRoute><StatusPage /></ProtectedRoute>} />
 
-                        <Route path="/profile" element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
+                        {/* <Route path="/profile" element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} /> */}
 
                         {/* admin routes */}
                         <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
