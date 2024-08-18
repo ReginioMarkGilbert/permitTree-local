@@ -191,7 +191,7 @@ const UserAuthPage = () => {
                                 type="text"
                                 id="username"
                                 value={username}
-                                readOnly
+                                // readOnly
                                 className="w-full p-2 mb-4 border rounded input-field"
                             />
                             <label htmlFor="username" className="input-label">Generated Username</label>
@@ -210,7 +210,7 @@ const UserAuthPage = () => {
                         <div className="input-container">
                             <label htmlFor="confirmPassword" className="input-label">Confirm Password</label>
                             <input
-                                type="password"
+                                type={showPassword ? 'text' : 'password'}
                                 id="confirmPassword"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
