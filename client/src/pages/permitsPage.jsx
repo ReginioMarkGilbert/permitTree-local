@@ -1,13 +1,18 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import './styles/PermitsPage.css'; // Import the CSS file for custom scrollbar styles
 
 const PermitsPage = () => {
+    const navigate = useNavigate();
+
     const handleApplyClick = () => {
-        // Handle apply click
+        navigate('/apply'); // Navigate to the StoreSelectionPage
     };
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
-            <div className="max-w-7xl mx-auto">
-                <h1 className="text-3xl font-bold text-center mb-[70px]">Permit Applications</h1>
+            <div className="max-w-7xl mx-auto custom-scrollbar" style={{ maxHeight: 'calc(100vh - 48px)', overflowY: 'auto' }}>
+                <h1 className="text-3xl font-bold text-center mb-[70px]" style={{ marginTop: '70px' }}>Permit Applications</h1>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div className="h-[200px] bg-gray-200 p-6 rounded-lg shadow-md flex flex-col items-center">
                         <h3 className="text-xl font-bold mb-2 text-center">Chainsaw registration</h3>
@@ -46,4 +51,3 @@ const PermitsPage = () => {
 };
 
 export default PermitsPage;
-

@@ -61,9 +61,15 @@ const createTreeData = async (req, res) => {
     }
 };
 
+const getAdminData = (req, res) => {
+    // Example admin function logic
+    res.json({ message: 'Admin data accessed' });
+};
+
 module.exports = {
     resetCounter,
     getTreeData,
     updateTreeData,
-    createTreeData
+    createTreeData,
+    getAdminData
 };
