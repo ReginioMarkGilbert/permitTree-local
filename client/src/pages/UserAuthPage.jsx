@@ -5,7 +5,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { setToken } from '../utils/auth';
 import '../styles/UserAuthPage.css';
-import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Import eye icons for password visibility toggle
+
 
 const UserAuthPage = () => {
     const [firstName, setFirstName] = useState('');
@@ -56,7 +56,7 @@ const UserAuthPage = () => {
             ? 'http://localhost:3000/api/signup'
             : 'http://192.168.137.1:3000/api/signup'; // for mobile
             const response = await axios.post(apiUrl, {
-                firstName, lastName, username, password, // Include username here
+                firstName, lastName, username, password,
             });
 
             if (response.status === 201) {
@@ -120,6 +120,17 @@ const UserAuthPage = () => {
         }
     };
 
+    const handleSwitchToSignup = () => {
+        setIsLogin(false);
+        setPassword('');
+        setConfirmPassword('');
+    };
+
+    const handleSwitchToLogin = () => {
+        setIsLogin(true);
+        setPassword('');
+    };
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
             <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md">
@@ -158,13 +169,14 @@ const UserAuthPage = () => {
 
                         </div>
                         <button onClick={handleLogin} className="w-full bg-blue-500 text-white p-2 rounded">Login</button>
-                        <p className="mt-4 text-center">Don't have an account? <span onClick={() => setIsLogin(false)} className="text-blue-500 hover:text-blue-700 cursor-pointer">Sign Up</span></p>
+                        <p className="mt-4 text-center">Don't have an account? <span onClick={handleSwitchToSignup} className="text-blue-500 hover:text-blue-700 cursor-pointer">Sign Up</span></p>
                     </>
                 ) : (
                     <>
                         <h1 className="text-2xl font-bold mb-6">Sign Up</h1>
                         <div className="flex justify-between space-x-4">
                             <div className="input-container w-1/2">
+                                <label htmlFor="firstName" className="input-label">First Name</label>
                                 <input
                                     type="text"
                                     id="firstName"
@@ -172,9 +184,10 @@ const UserAuthPage = () => {
                                     onChange={(e) => setFirstName(e.target.value)}
                                     className="w-full p-2 mb-4 border rounded input-field"
                                 />
-                                <label htmlFor="firstName" className="input-label">First Name</label>
                             </div>
+
                             <div className="input-container w-1/2">
+                                <label htmlFor="lastName" className="input-label">Last Name</label>
                                 <input
                                     type="text"
                                     id="lastName"
@@ -182,11 +195,11 @@ const UserAuthPage = () => {
                                     onChange={(e) => setLastName(e.target.value)}
                                     className="w-full p-2 mb-4 border rounded input-field"
                                 />
-                                <label htmlFor="lastName" className="input-label">Last Name</label>
                             </div>
                         </div>
+
                         <div className="input-container">
-                        <label htmlFor="passwordSignup" className="input-label">Password</label>
+                            <label htmlFor="username" className="input-label">Generated Username</label>
                             <input
                                 type="text"
                                 id="username"
@@ -194,10 +207,12 @@ const UserAuthPage = () => {
                                 // readOnly
                                 className="w-full p-2 mb-4 border rounded input-field"
                             />
-                            <label htmlFor="username" className="input-label">Generated Username</label>
                         </div>
+
                         {passwordError && <div className="text-red-500 text-sm mb-4">{passwordError}</div>}
+
                         <div className="input-container">
+                            <label htmlFor="passwordSignup" className="input-label">Password</label>
                             <input
                                 type={showPassword ? 'text' : 'password'}
                                 id="passwordSignup"
@@ -226,10 +241,10 @@ const UserAuthPage = () => {
                                 />
                                 <label htmlFor="showPassword" className="text-sm text-gray-600">Show password</label>
                             </div>
-
                         </div>
+
                         <button onClick={handleSignup} className="w-full bg-blue-500 text-white p-2 rounded">Sign Up</button>
-                        <p className="mt-4 text-center">Already have an account? <span onClick={() => setIsLogin(true)} className="text-blue-500 hover:text-blue-700 cursor-pointer">Login</span></p>
+                        <p className="mt-4 text-center">Already have an account? <span onClick={handleSwitchToLogin} className="text-blue-500 hover:text-blue-700 cursor-pointer">Login</span></p>
                     </>
                 )}
                 <ToastContainer />
