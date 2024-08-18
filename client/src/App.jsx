@@ -16,13 +16,14 @@ import AdminPage from './pages/AdminPage';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useSidebarToggle } from './hooks/useSidebarToggle';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { isAuthenticated } from './utils/auth';
 import ProtectedRoute from './components/ProtectedRoute';
 
 const App = () => {
     const { sidebarToggle, toggleSidebar } = useSidebarToggle();
     const navigate = useNavigate();
+    const location = useLocation();
     const [selectedStore, setSelectedStore] = useState(null);
 
     useEffect(() => {
@@ -64,7 +65,7 @@ const App = () => {
 
     return (
         <div className="flex">
-            {isAuthenticated() && (
+            {isAuthenticated() && location.pathname !== '/auth' && (
                 <>
                     <Sidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
                     <Navbar sidebarToggle={sidebarToggle} setSidebarToggle={toggleSidebar} />
