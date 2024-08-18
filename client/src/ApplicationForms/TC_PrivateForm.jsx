@@ -1,25 +1,24 @@
-// CERTIFICATE OF VERIFICATION (COV) FOR THE TRANSPORT OF PLANTED TREES WITHIN PRIVATE LAND, NON-TIMBER FOREST PRODUCTS EXCEPT RATTAN AND BAMBOO
-// COV is a document to be presented when transporting planted trees within private lands not registered under the Private Tree Plantation Registration and/or non-premium trees, non-timber forest products (except rattan and bamboo)
+//  ISSUANCE OF PRIVATE LAND TIMBER PERMIT (PLTP) FOR NON-PREMIUIM SPECIES, OR SPECIAL PLTP (SPLTP) FOR PREMIUM/ NATURALLY-GROWN TREES WITHIN PRIVATE/ TITLED LANDS
 
 import React, { useState } from 'react';
 
-const COVForm = () => {
+const TC_PrivateForm = () => {
     const [name, setName] = useState('');
     const [address, setAddress] = useState('');
     const [phone, setPhone] = useState('');
-    const [treeType, setTreeType] = useState('');
-    const [quantity, setQuantity] = useState('');
+    const [landTitle, setLandTitle] = useState('');
+    const [treeCount, setTreeCount] = useState('');
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        const formData = { name, address, phone, treeType, quantity };
+        const formData = { name, address, phone, landTitle, treeCount };
         console.log('Form Data:', formData);
     };
 
     return (
         <div className="form-container">
-            <h3>Apply for Certificate of Verification</h3>
-            <form id="covForm" onSubmit={handleSubmit}>
+            <h3>Apply for Private Land Timber Permit</h3>
+            <form id="tcPrivateForm" onSubmit={handleSubmit}>
                 <div className="form-section">
                     <h4 className='form-title'>Applicant Details</h4>
                     <label htmlFor="name">Name</label>
@@ -54,25 +53,25 @@ const COVForm = () => {
                     />
                 </div>
                 <div className="form-section">
-                    <h4 className='form-title'>Tree Details</h4>
-                    <label htmlFor="treeType">Tree Type</label>
+                    <h4 className='form-title'>Land Details</h4>
+                    <label htmlFor="landTitle">Land Title</label>
                     <input
                         type="text"
-                        id="treeType"
-                        name="treeType"
-                        placeholder="Enter Tree Type"
-                        value={treeType}
-                        onChange={(e) => setTreeType(e.target.value)}
+                        id="landTitle"
+                        name="landTitle"
+                        placeholder="Enter Land Title"
+                        value={landTitle}
+                        onChange={(e) => setLandTitle(e.target.value)}
                         required
                     />
-                    <label htmlFor="quantity">Quantity</label>
+                    <label htmlFor="treeCount">Number of Trees</label>
                     <input
                         type="number"
-                        id="quantity"
-                        name="quantity"
-                        placeholder="Enter Quantity"
-                        value={quantity}
-                        onChange={(e) => setQuantity(e.target.value)}
+                        id="treeCount"
+                        name="treeCount"
+                        placeholder="Enter Number of Trees"
+                        value={treeCount}
+                        onChange={(e) => setTreeCount(e.target.value)}
                         required
                     />
                 </div>
@@ -82,4 +81,4 @@ const COVForm = () => {
     );
 };
 
-export default COVForm;
+export default TC_PrivateForm;

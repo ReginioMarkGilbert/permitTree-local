@@ -1,25 +1,25 @@
-// CERTIFICATE OF VERIFICATION (COV) FOR THE TRANSPORT OF PLANTED TREES WITHIN PRIVATE LAND, NON-TIMBER FOREST PRODUCTS EXCEPT RATTAN AND BAMBOO
-// COV is a document to be presented when transporting planted trees within private lands not registered under the Private Tree Plantation Registration and/or non-premium trees, non-timber forest products (except rattan and bamboo)
+// ISSUANCE OF TREE CUTTING AND/OR EARTH BALLING PERMIT FOR TREES AFFECTED BY PROJECTS OF NATIONAL GOVERNMENT AGENCIES (DPWH, DOTR, DepEd, DA, DOH, CHED, DOE, and NIA)
+// This Permit serves as proof of authorization for the removal/cutting and/or relocation of trees affected by projects of the National Government Agencies (DPWH, DOTR, DepEd, DA, DOH, CHED, DOE and NIA)
 
 import React, { useState } from 'react';
 
-const COVForm = () => {
+const TC_NGAForm = () => {
     const [name, setName] = useState('');
     const [address, setAddress] = useState('');
     const [phone, setPhone] = useState('');
-    const [treeType, setTreeType] = useState('');
-    const [quantity, setQuantity] = useState('');
+    const [projectName, setProjectName] = useState('');
+    const [projectLocation, setProjectLocation] = useState('');
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        const formData = { name, address, phone, treeType, quantity };
+        const formData = { name, address, phone, projectName, projectLocation };
         console.log('Form Data:', formData);
     };
 
     return (
         <div className="form-container">
-            <h3>Apply for Certificate of Verification</h3>
-            <form id="covForm" onSubmit={handleSubmit}>
+            <h3>Apply for Tree Cutting and/or Earth Balling Permit (NGA)</h3>
+            <form id="tcNGAForm" onSubmit={handleSubmit}>
                 <div className="form-section">
                     <h4 className='form-title'>Applicant Details</h4>
                     <label htmlFor="name">Name</label>
@@ -54,25 +54,25 @@ const COVForm = () => {
                     />
                 </div>
                 <div className="form-section">
-                    <h4 className='form-title'>Tree Details</h4>
-                    <label htmlFor="treeType">Tree Type</label>
+                    <h4 className='form-title'>Project Details</h4>
+                    <label htmlFor="projectName">Project Name</label>
                     <input
                         type="text"
-                        id="treeType"
-                        name="treeType"
-                        placeholder="Enter Tree Type"
-                        value={treeType}
-                        onChange={(e) => setTreeType(e.target.value)}
+                        id="projectName"
+                        name="projectName"
+                        placeholder="Enter Project Name"
+                        value={projectName}
+                        onChange={(e) => setProjectName(e.target.value)}
                         required
                     />
-                    <label htmlFor="quantity">Quantity</label>
+                    <label htmlFor="projectLocation">Project Location</label>
                     <input
-                        type="number"
-                        id="quantity"
-                        name="quantity"
-                        placeholder="Enter Quantity"
-                        value={quantity}
-                        onChange={(e) => setQuantity(e.target.value)}
+                        type="text"
+                        id="projectLocation"
+                        name="projectLocation"
+                        placeholder="Enter Project Location"
+                        value={projectLocation}
+                        onChange={(e) => setProjectLocation(e.target.value)}
                         required
                     />
                 </div>
@@ -82,4 +82,4 @@ const COVForm = () => {
     );
 };
 
-export default COVForm;
+export default TC_NGAForm;

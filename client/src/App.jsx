@@ -80,7 +80,7 @@ const App = () => {
                         <Route path="/permits" element={<ProtectedRoute><PermitsPage /></ProtectedRoute>} />
 
                         <Route path="/apply" element={<ProtectedRoute><StoreSelectionPage onContinue={handleStoreSelection} /></ProtectedRoute>} />
-                        <Route path="/apply/:store" element={<ProtectedRoute><ApplicationForm onSubmit={handleSubmitApplication} selectedStore={selectedStore} /></ProtectedRoute>} />
+                        <Route path="/apply/:formType" element={<ProtectedRoute><ApplicationForm onSubmit={handleSubmitApplication} selectedStore={selectedStore} /></ProtectedRoute>} />
                         <Route path="/message" element={<ProtectedRoute><MessageBox onViewStatus={handleViewStatus} /></ProtectedRoute>} />
                         <Route path="/status" element={<ProtectedRoute><StatusPage /></ProtectedRoute>} />
 
