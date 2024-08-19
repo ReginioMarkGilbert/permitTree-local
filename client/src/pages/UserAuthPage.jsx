@@ -54,6 +54,8 @@ const UserAuthPage = () => {
         try {
             const apiUrl = window.location.hostname === 'localhost'
             ? 'http://localhost:3000/api/signup'
+            : window.location.hostname === '192.168.1.12'
+            ? 'http://192.168.1.12:3000/api/signup' // for other laptop
             : 'http://192.168.137.1:3000/api/signup'; // for mobile
             const response = await axios.post(apiUrl, {
                 firstName, lastName, username, password,
@@ -89,6 +91,8 @@ const UserAuthPage = () => {
         try {
             const apiUrl = window.location.hostname === 'localhost'
             ? 'http://localhost:3000/api/login'
+            : window.location.hostname === '192.168.1.12'
+            ? 'http://192.168.1.12:3000/api/login' // for other laptop
             : 'http://192.168.137.1:3000/api/login'; // for mobile
             const response = await fetch(apiUrl, {
                 method: 'POST',
