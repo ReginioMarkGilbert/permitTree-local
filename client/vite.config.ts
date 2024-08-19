@@ -4,8 +4,11 @@ import { qrcode } from 'vite-plugin-qrcode';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    react(),
-    qrcode()
-  ],
+    plugins: [
+        react(),
+        qrcode()
+    ],
+    server: {
+        port: 5173 // Set the port to 5173
+    }
 })
