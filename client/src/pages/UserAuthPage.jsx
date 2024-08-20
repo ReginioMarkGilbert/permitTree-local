@@ -113,6 +113,13 @@ const UserAuthPage = () => {
                     pauseOnHover: true,
                     draggable: true,
                     progress: undefined,
+                    closeButton: false,
+                    style: {
+                        width: '200px', // resized width
+                        fontSize: '16px', // resized font size
+                        marginLeft: 'auto', // center the toast
+                        marginRight: 'auto', // center the toast
+                    },
                     onClose: () => navigate('/home')
                 });
             } else {
