@@ -8,7 +8,7 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
     };
 
     return (
-        <nav className="bg-gray-800 text-white p-4 fixed top-0 left-0 right-0 z-10 flex items-center">
+        <nav className="bg-gray-800 text-white p-4 fixed top-0 left-0 right-0 z-10 flex items-center" style={{ background: 'linear-gradient(90deg, #4a6b4a, #334b17)'}}>
             <button className="ml-2 p-2" onClick={handleToggle}>
                 {sidebarToggle ? <FaTimes size={20} /> : <FaBars size={20} />}
             </button>
