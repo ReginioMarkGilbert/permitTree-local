@@ -17,32 +17,32 @@ const PermitsPage = () => {
                     <div className="h-[200px] bg-gray-200 p-6 rounded-lg shadow-md flex flex-col items-center">
                         <h3 className="text-xl font-bold mb-2 text-center">Chainsaw registration</h3>
                         <p className="mt-4 text-center">Application for Chainsaw registration</p>
-                        <button className="mt-7 bg-black text-white py-2 px-4 rounded w-[250px] hover:bg-gray-800" onClick={() => handleApplyClick('chainsaw')}>APPLY</button>
+                        <button className="mt-7 bg-custom-green text-white py-2 px-4 rounded w-[250px] hover:bg-dark-green" onClick={() => handleApplyClick('chainsaw')}>APPLY</button>
                     </div>
                     <div className="h-[200px] bg-gray-200 p-6 rounded-lg shadow-md flex flex-col items-center">
                         <h3 className="text-xl font-bold mb-2 text-center">Certificate of Verification</h3>
                         <p className="mt-4 text-center">Application for Certificate of Verification</p>
-                        <button className="mt-7 bg-black text-white py-2 px-4 rounded w-[250px] hover:bg-gray-800" onClick={() => handleApplyClick('cov')}>APPLY</button>
+                        <button className="mt-7 bg-custom-green text-white py-2 px-4 rounded w-[250px] hover:bg-dark-green" onClick={() => handleApplyClick('cov')}>APPLY</button>
                     </div>
                     <div className="h-[200px] bg-gray-200 p-6 rounded-lg shadow-md flex flex-col items-center">
                         <h3 className="text-xl font-bold mb-2 text-center">Private Tree Plantation Registration</h3>
                         <p className="mt-4 text-center">Application for Private Tree Plantation Registration</p>
-                        <button className="mt-7 bg-black text-white py-2 px-4 rounded w-[250px] hover:bg-gray-800" onClick={() => handleApplyClick('ptpr')}>APPLY</button>
+                        <button className="mt-7 bg-custom-green text-white py-2 px-4 rounded w-[250px] hover:bg-dark-green" onClick={() => handleApplyClick('ptpr')}>APPLY</button>
                     </div>
                     <div className="h-[220px] bg-gray-200 p-6 rounded-lg shadow-md flex flex-col items-center">
                         <h3 className="text-xl font-bold mb-2 text-center">Public Land Timber Permit</h3>
                         <p className="mt-4 text-center">Application for Public Land Timber Permit</p>
-                        <button className="mt-7 bg-black text-white py-2 px-4 rounded w-[250px] hover:bg-gray-800" onClick={() => handleApplyClick('tc_public')}>APPLY</button>
+                        <button className="mt-7 bg-custom-green text-white py-2 px-4 rounded w-[250px] hover:bg-dark-green" onClick={() => handleApplyClick('tc_public')}>APPLY</button>
                     </div>
                     <div className="h-[220px] bg-gray-200 p-6 rounded-lg shadow-md flex flex-col items-center">
                         <h3 className="text-xl font-semibold mb-2 text-center">Special/Private Land Timber Permit</h3>
                         <p className="mb-4 text-center">Application for Special Private Land Timber Permit</p>
-                        <button className="mt-7 bg-black text-white py-2 px-4 rounded w-[250px] hover:bg-gray-800" onClick={() => handleApplyClick('tc_private')}>APPLY</button>
+                        <button className="mt-7 bg-custom-green text-white py-2 px-4 rounded w-[250px] hover:bg-dark-green" onClick={() => handleApplyClick('tc_private')}>APPLY</button>
                     </div>
                     <div className="h-[220px] bg-gray-200 p-6 rounded-lg shadow-md flex flex-col items-center">
                         <h3 className="text-xl font-semibold mb-2 text-center">National Government Agency Tree Cutting Permit</h3>
                         <p className="mb-4 text-center">Application for Public Tree cutting permit</p>
-                        <button className="mt-7 bg-black text-white py-2 px-4 rounded w-[250px] hover:bg-gray-800" onClick={() => handleApplyClick('tc_nga')}>APPLY</button>
+                        <button className="mt-7 bg-custom-green text-white py-2 px-4 rounded w-[250px] hover:bg-dark-green" onClick={() => handleApplyClick('tc_nga')}>APPLY</button>
                     </div>
                 </div>
             </div>
