@@ -1,16 +1,53 @@
+/* Sidebar styles */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 100%;
+    background-color: #333;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+    transform: translateX(-100%);
+}
+
+.sidebar.open {
+    transform: translateX(0);
+}
+
+/* Main content styles */
+.main-content {
+    transition: filter 0.3s ease;
+}
+
+.main-content.dimmed {
+    filter: brightness(0.5); /* Dim the main content when sidebar is open */
+}
 
 /* Hide scrollbar for WebKit browsers (Chrome, Safari) */
 .custom-scrollbar::-webkit-scrollbar {
-    width: 0; /* Hide scrollbar */
-    background: transparent; /* Optional: make the background transparent */
+    width: 0;
+    background: transparent;
 }
 
 /* Hide scrollbar for Firefox */
-.custom-scrollbar {
+/* .custom-scrollbar {
     scrollbar-width: none;
-}
+} */
 
 /* Hide scrollbar for Internet Explorer and Edge */
-.custom-scrollbar {
+/* .custom-scrollbar {
     -ms-overflow-style: none;
+} */
+
+/* Adjust sidebar behavior for mobile */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+    }
+
+    .main-content.dimmed {
+        filter: brightness(0.5); /* Dim content on mobile when sidebar is open */
+    }
 }
