@@ -15,6 +15,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             ? 'http://localhost:3000/api/logout'
             : window.location.hostname === '192.168.1.12'
             ? 'http://192.168.1.12:3000/api/logout' // for other laptop
+            : window.location.hostname === '192.168.1.15'
+            ? 'http://192.168.1.15:3000/api/logout' // for new url
             : 'http://192.168.137.1:3000/api/logout'; // for mobile
             await axios.get(apiUrl);
             removeToken();
