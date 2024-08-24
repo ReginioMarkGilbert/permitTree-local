@@ -4,7 +4,7 @@ import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { setToken } from '../utils/auth';
-import '../styles/UserAuthPage.css';
+import './styles/UserAuthPage.css';
 
 
 const UserAuthPage = () => {
