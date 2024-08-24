@@ -4,7 +4,7 @@ import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { setToken } from '../utils/auth';
-import '../styles/UserAuthPage.css';
+import './styles/UserAuthPage.css';
 
 
 const UserAuthPage = () => {
@@ -56,6 +56,8 @@ const UserAuthPage = () => {
             ? 'http://localhost:3000/api/signup'
             : window.location.hostname === '192.168.1.12'
             ? 'http://192.168.1.12:3000/api/signup' // for other laptop
+            : window.location.hostname === '192.168.1.15'
+            ? 'http://192.168.1.15:3000/api/signup' // for new url
             : 'http://192.168.137.1:3000/api/signup'; // for mobile
             const response = await axios.post(apiUrl, {
                 firstName, lastName, username, password,
@@ -93,6 +95,8 @@ const UserAuthPage = () => {
             ? 'http://localhost:3000/api/login'
             : window.location.hostname === '192.168.1.12'
             ? 'http://192.168.1.12:3000/api/login' // for other laptop
+            : window.location.hostname === '192.168.1.15'
+            ? 'http://192.168.1.15:3000/api/login'
             : 'http://192.168.137.1:3000/api/login'; // for mobile
             const response = await fetch(apiUrl, {
                 method: 'POST',

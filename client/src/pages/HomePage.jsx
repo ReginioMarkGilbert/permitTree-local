@@ -20,7 +20,7 @@ function HomePage() {
     return (
         <div className="flex h-screen">
             <Sidebar isOpen={isOpen} toggleSidebar={() => setIsOpen(!isOpen)} />
-            <div className={`flex-grow flex flex-col transition-all duration-300 ${isOpen ? 'ml-64' : 'ml-0'} md:ml-0`}>
+            <div className={`flex-grow flex flex-col transition-all duration-300 ml-0`}>
                 <Navbar sidebarToggle={isOpen} setSidebarToggle={setIsOpen} />
                 <div className="flex-grow flex justify-center items-center bg-gray-100 text-center p-4 md:p-0">
                     <div className="bg-white p-10 rounded-lg shadow-md" style={{ width: '100%', maxWidth: '700px' }}>
