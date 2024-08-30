@@ -17,7 +17,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useSidebarToggle } from './hooks/useSidebarToggle';
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { isAuthenticated } from './utils/auth';
+import { isAuthenticated, getUserRole } from './utils/auth';
 import ProtectedRoute from './components/ProtectedRoute';
 
 const App = () => {
@@ -76,18 +76,14 @@ const App = () => {
                     <Routes>
                         <Route path="/" element={<Navigate replace to="/auth" />} />
                         <Route path="/auth" element={<UserAuthPage />} />
-                        <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-                        <Route path="/permits" element={<ProtectedRoute><PermitsPage /></ProtectedRoute>} />
-
-                        <Route path="/apply" element={<ProtectedRoute><StoreSelectionPage onContinue={handleStoreSelection} /></ProtectedRoute>} />
-                        <Route path="/apply/:formType" element={<ProtectedRoute><ApplicationForm onSubmit={handleSubmitApplication} selectedStore={selectedStore} /></ProtectedRoute>} />
-                        <Route path="/message" element={<ProtectedRoute><MessageBox onViewStatus={handleViewStatus} /></ProtectedRoute>} />
-                        <Route path="/status" element={<ProtectedRoute><StatusPage /></ProtectedRoute>} />
-
-                        {/* <Route path="/profile" element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} /> */}
-
-                        {/* admin routes */}
-                        <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
+                        <Route path="/home" element={<ProtectedRoute roles={['user', 'admin']}><HomePage /></ProtectedRoute>} />
+                        <Route path="/permits" element={<ProtectedRoute roles={['user', 'admin']}><PermitsPage /></ProtectedRoute>} />
+                        <Route path="/apply" element={<ProtectedRoute roles={['user', 'admin']}><StoreSelectionPage onContinue={handleStoreSelection} /></ProtectedRoute>} />
+                        <Route path="/apply/:formType" element={<ProtectedRoute roles={['user', 'admin']}><ApplicationForm onSubmit={handleSubmitApplication} selectedStore={selectedStore} /></ProtectedRoute>} />
+                        <Route path="/message" element={<ProtectedRoute roles={['user', 'admin']}><MessageBox onViewStatus={handleViewStatus} /></ProtectedRoute>} />
+                        <Route path="/status" element={<ProtectedRoute roles={['user', 'admin']}><StatusPage /></ProtectedRoute>} />
+                        <Route path="/admin" element={<ProtectedRoute roles={['admin']}><AdminPage /></ProtectedRoute>} />
+                        <Route path="/unauthorized" element={<div>Unauthorized Access</div>} /> {/* Add this line */}
                     </Routes>
                 </div>
             </div>
