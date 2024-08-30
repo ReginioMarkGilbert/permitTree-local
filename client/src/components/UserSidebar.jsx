@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { isAuthenticated, removeToken } from '../utils/auth';
 
-const Sidebar = ({ isOpen, toggleSidebar }) => {
+const Sidebar = ({ isOpen }) => {
     const navigate = useNavigate();
 
     const handleLogout = async () => {

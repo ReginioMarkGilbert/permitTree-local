@@ -1,5 +1,10 @@
+import React, { useEffect, useState } from 'react'; // Added useState import
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
-import Sidebar from './components/Sidebar';
+import UserSidebar from './components/UserSidebar';
+import AdminSidebar from './components/AdminSidebar';
+import HomePage from './pages/HomePage';
+import AdminPage from './pages/AdminPage';
 
 import PermitsPage from './pages/permitsPage';
 
@@ -8,23 +13,19 @@ import ApplicationForm from './pages/ApplicationForm';
 import MessageBox from './pages/MessageBox';
 import StatusPage from './pages/StatusPage';
 
-import HomePage from './pages/HomePage';
-
 import UserAuthPage from './pages/UserAuthPage';
-// import UserProfilePage from './pages/UserProfilePage';
-import AdminPage from './pages/AdminPage';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { useSidebarToggle } from './hooks/useSidebarToggle';
-import { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { isAuthenticated, getUserRole } from './utils/auth';
 import ProtectedRoute from './components/ProtectedRoute';
+import { isAuthenticated, getUserRole } from './utils/auth';
+import useSidebarToggle from './hooks/useSidebarToggle';
+import useApplicationHandlers from './hooks/useApplicationHandlers'; // Import the custom hook
 
 const App = () => {
     const { sidebarToggle, toggleSidebar } = useSidebarToggle();
     const navigate = useNavigate();
     const location = useLocation();
     const [selectedStore, setSelectedStore] = useState(null);
+    const userRole = getUserRole();
+    const { handleSubmitApplication, handleViewStatus } = useApplicationHandlers(); // Use the custom hook
 
     useEffect(() => {
         if (!isAuthenticated()) {
@@ -37,37 +38,15 @@ const App = () => {
         navigate(`/apply/${store}`);
     };
 
-    const handleSubmitApplication = async (formData) => {
-        try {
-            const response = await fetch('http://localhost:5000/api/createApplication', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                console.log('Application submitted:', data);
-                navigate('/message'); // Navigate to the MessageBox component
-            } else {
-                console.error('Failed to submit application');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    };
-
-    const handleViewStatus = () => {
-        navigate('/status');
-    };
-
     return (
         <div className="flex">
             {isAuthenticated() && location.pathname !== '/auth' && (
                 <>
-                    <Sidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
+                    {userRole === 'admin' ? (
+                        <AdminSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
+                    ) : (
+                        <UserSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
+                    )}
                     <Navbar sidebarToggle={sidebarToggle} setSidebarToggle={toggleSidebar} />
                 </>
             )}
@@ -76,14 +55,15 @@ const App = () => {
                     <Routes>
                         <Route path="/" element={<Navigate replace to="/auth" />} />
                         <Route path="/auth" element={<UserAuthPage />} />
-                        <Route path="/home" element={<ProtectedRoute roles={['user', 'admin']}><HomePage /></ProtectedRoute>} />
-                        <Route path="/permits" element={<ProtectedRoute roles={['user', 'admin']}><PermitsPage /></ProtectedRoute>} />
-                        <Route path="/apply" element={<ProtectedRoute roles={['user', 'admin']}><StoreSelectionPage onContinue={handleStoreSelection} /></ProtectedRoute>} />
-                        <Route path="/apply/:formType" element={<ProtectedRoute roles={['user', 'admin']}><ApplicationForm onSubmit={handleSubmitApplication} selectedStore={selectedStore} /></ProtectedRoute>} />
-                        <Route path="/message" element={<ProtectedRoute roles={['user', 'admin']}><MessageBox onViewStatus={handleViewStatus} /></ProtectedRoute>} />
-                        <Route path="/status" element={<ProtectedRoute roles={['user', 'admin']}><StatusPage /></ProtectedRoute>} />
+                        <Route path="/home" element={<ProtectedRoute roles={['user']}><HomePage /></ProtectedRoute>} />
+                        <Route path="/permits" element={<ProtectedRoute roles={['user']}><PermitsPage /></ProtectedRoute>} />
+                        <Route path="/apply" element={<ProtectedRoute roles={['user']}><StoreSelectionPage onContinue={handleStoreSelection} /></ProtectedRoute>} />
+                        <Route path="/apply/:formType" element={<ProtectedRoute roles={['user']}><ApplicationForm /></ProtectedRoute>} />
+                        <Route path="/message" element={<ProtectedRoute roles={['user']}><MessageBox /></ProtectedRoute>} />
+                        <Route path="/status" element={<ProtectedRoute roles={['user']}><StatusPage /></ProtectedRoute>} />
                         <Route path="/admin" element={<ProtectedRoute roles={['admin']}><AdminPage /></ProtectedRoute>} />
-                        <Route path="/unauthorized" element={<div>Unauthorized Access</div>} /> {/* Add this line */}
+                        {/* Add other routes as needed */}
+                        <Route path="/unauthorized" element={<div>Unauthorized Access</div>} />
                     </Routes>
                 </div>
             </div>
