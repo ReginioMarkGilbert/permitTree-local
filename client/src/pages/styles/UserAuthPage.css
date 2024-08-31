@@ -18,6 +18,8 @@
     left: 0.75rem;
     padding: 0 0.25rem;
     background: white;
+    font-weight: normal;
+    color: #666;
     /* color: #aaa; */
     font-size: 0.75rem;
     transition: all 0.2s ease;
