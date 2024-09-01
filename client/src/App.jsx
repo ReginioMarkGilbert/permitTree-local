@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'; // Added useState import
+import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import UserSidebar from './components/UserSidebar';
@@ -17,7 +17,7 @@ import UserAuthPage from './pages/UserAuthPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { isAuthenticated, getUserRole } from './utils/auth';
 import useSidebarToggle from './hooks/useSidebarToggle';
-import useApplicationHandlers from './hooks/useApplicationHandlers'; // Import the custom hook
+import useApplicationHandlers from './hooks/useApplicationHandlers';
 
 const App = () => {
     const { sidebarToggle, toggleSidebar } = useSidebarToggle();
@@ -25,8 +25,8 @@ const App = () => {
     const location = useLocation();
     const [selectedStore, setSelectedStore] = useState(null);
     const userRole = getUserRole();
-    const { handleSubmitApplication, handleViewStatus } = useApplicationHandlers(); // Use the custom hook
-
+    // const { handleSubmitApplication, handleViewStatus } = useApplicationHandlers();
+    
     useEffect(() => {
         if (!isAuthenticated()) {
             navigate('/auth');

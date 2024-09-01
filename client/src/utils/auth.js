@@ -1,11 +1,11 @@
 export const getToken = () => {
     const token = localStorage.getItem('token');
-    console.log('Retrieved Token:', token); // Debugging line
+    // console.log('Retrieved Token:', token);
     return token;
 };
 
 export const setToken = (token) => {
-    console.log('Setting Token:', token); // Debugging line
+    // console.log('Setting Token:', token);
     localStorage.setItem('token', token);
 };
 
@@ -21,10 +21,12 @@ export const getUserRole = () => {
     const token = getToken();
     if (!token) return null;
     try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        console.log('Token Payload:', payload); // Debugging line
-        return payload.role; // Ensure this matches the key used in the JWT payload
-    } catch (error) {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const payload = JSON.parse(window.atob(base64));
+        // console.log('Token Payload:', payload);
+        return payload.role;
+    } catch (error) {   3
         console.error('Failed to decode token:', error);
         return null;
     }

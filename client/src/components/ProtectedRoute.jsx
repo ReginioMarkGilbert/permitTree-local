@@ -8,6 +8,7 @@ const ProtectedRoute = ({ children, roles }) => {
     }
 
     const userRole = getUserRole();
+    // console.log('ProtectedRoute - User role:', userRole);
     if (roles && !roles.includes(userRole)) {
         return <Navigate to="/unauthorized" />;
     }

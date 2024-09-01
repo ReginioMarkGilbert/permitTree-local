@@ -37,7 +37,14 @@ const signup = async (req, res) => {
         });
 
         await newUser.save();
-        res.status(201).json({ message: 'User created successfully', user: newUser });
+        // Generate JWT token here
+        const token = jwt.sign(
+            { id: newUser.id, username: newUser.username, role: newUser.role },
+            process.env.JWT_SECRET || 'default_secret',
+            { expiresIn: '1h' }
+        );
+
+        res.status(201).json({ message: 'User created successfully', user: newUser, token: `Bearer ${token}`, user: newUser });
     } catch (err) {
         console.error('Signup error:', err);
         res.status(500).json({ error: err.message });

@@ -1,4 +1,3 @@
-// client/src/components/AdminSidebar.jsx
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { FaTachometerAlt, FaUsers, FaChartLine, FaCog, FaSignInAlt } from 'react-icons/fa';

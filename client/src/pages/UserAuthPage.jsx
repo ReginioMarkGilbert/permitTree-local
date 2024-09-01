@@ -55,12 +55,12 @@ const UserAuthPage = () => {
         }
         try {
             const apiUrl = window.location.hostname === 'localhost'
-            ? 'http://localhost:3000/api/signup'
-            : window.location.hostname === '192.168.1.12'
-            ? 'http://192.168.1.12:3000/api/signup' // for other laptop
-            : window.location.hostname === '192.168.1.15'
-            ? 'http://192.168.1.15:3000/api/signup' // for new url
-            : 'http://192.168.137.1:3000/api/signup'; // for mobile
+                ? 'http://localhost:3000/api/signup'
+                : window.location.hostname === '192.168.1.12'
+                    ? 'http://192.168.1.12:3000/api/signup' // for other laptop
+                    : window.location.hostname === '192.168.1.15'
+                        ? 'http://192.168.1.15:3000/api/signup' // for new url
+                        : 'http://192.168.137.1:3000/api/signup'; // for mobile
             const response = await axios.post(apiUrl, {
                 firstName, lastName, username, password,
             });
@@ -68,6 +68,7 @@ const UserAuthPage = () => {
             if (response.status === 201) {
                 const data = response.data;
                 setToken(data.token);
+                // console.log('Token immediately after setting:', localStorage.getItem('token')); // Debugging line
                 localStorage.setItem('user', JSON.stringify(data.user));
                 toast.success(`Signup successful!`, {
                     position: "top-center",
@@ -96,10 +97,10 @@ const UserAuthPage = () => {
             const apiUrl = window.location.hostname === 'localhost'
                 ? 'http://localhost:3000/api/login'
                 : window.location.hostname === '192.168.1.12'
-                ? 'http://192.168.1.12:3000/api/login'
-                : window.location.hostname === '192.168.1.15'
-                ? 'http://192.168.1.15:3000/api/login'
-                : 'http://192.168.137.1:3000/api/login';
+                    ? 'http://192.168.1.12:3000/api/login'
+                    : window.location.hostname === '192.168.1.15'
+                        ? 'http://192.168.1.15:3000/api/login'
+                        : 'http://192.168.137.1:3000/api/login';
 
             const response = await fetch(apiUrl, {
                 method: 'POST',
@@ -129,12 +130,9 @@ const UserAuthPage = () => {
                         marginLeft: 'auto',
                         marginRight: 'auto',
                     },
+                    // onClose: () => navigate('/home')
                     onClose: () => {
-                        if (userRole === 'admin') {
-                            navigate('/admin');
-                        } else {
-                            navigate('/home');
-                        }
+                        navigate(userRole === 'admin' ? '/admin' : '/home'); // if admin, navigate to admin page, else (if user) navigate to home page
                     }
                 });
             } else {
