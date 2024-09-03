@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
-import Sidebar from '../components/UserSidebar';
+import Sidebar from '../components/Sidebar';
 import denrLogo from '../assets/denr-logo.png';
 import { useNavigate } from 'react-router-dom';
 import { isAuthenticated } from '../utils/auth';

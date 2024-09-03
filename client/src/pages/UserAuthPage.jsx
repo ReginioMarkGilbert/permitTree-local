@@ -3,12 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { setToken, getUserRole } from '../utils/auth';
+import { setToken } from '../utils/auth';
 import './styles/UserAuthPage.css';
 
 
 const UserAuthPage = () => {
-    // Signup
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [username, setUsername] = useState('');
@@ -17,7 +16,6 @@ const UserAuthPage = () => {
     const [passwordError, setPasswordError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
-    // Login
     const [loginUsername, setLoginUsername] = useState('');
     const [isLogin, setIsLogin] = useState(true);
     const navigate = useNavigate();
@@ -55,12 +53,12 @@ const UserAuthPage = () => {
         }
         try {
             const apiUrl = window.location.hostname === 'localhost'
-                ? 'http://localhost:3000/api/signup'
-                : window.location.hostname === '192.168.1.12'
-                    ? 'http://192.168.1.12:3000/api/signup' // for other laptop
-                    : window.location.hostname === '192.168.1.15'
-                        ? 'http://192.168.1.15:3000/api/signup' // for new url
-                        : 'http://192.168.137.1:3000/api/signup'; // for mobile
+            ? 'http://localhost:3000/api/signup'
+            : window.location.hostname === '192.168.1.12'
+            ? 'http://192.168.1.12:3000/api/signup' // for other laptop
+            : window.location.hostname === '192.168.1.15'
+            ? 'http://192.168.1.15:3000/api/signup' // for new url
+            : 'http://192.168.137.1:3000/api/signup'; // for mobile
             const response = await axios.post(apiUrl, {
                 firstName, lastName, username, password,
             });
@@ -68,7 +66,6 @@ const UserAuthPage = () => {
             if (response.status === 201) {
                 const data = response.data;
                 setToken(data.token);
-                // console.log('Token immediately after setting:', localStorage.getItem('token')); // Debugging line
                 localStorage.setItem('user', JSON.stringify(data.user));
                 toast.success(`Signup successful!`, {
                     position: "top-center",
@@ -95,17 +92,16 @@ const UserAuthPage = () => {
     const handleLogin = async () => {
         try {
             const apiUrl = window.location.hostname === 'localhost'
-                ? 'http://localhost:3000/api/login'
-                : window.location.hostname === '192.168.1.12'
-                    ? 'http://192.168.1.12:3000/api/login'
-                    : window.location.hostname === '192.168.1.15'
-                        ? 'http://192.168.1.15:3000/api/login'
-                        : 'http://192.168.137.1:3000/api/login';
-
+            ? 'http://localhost:3000/api/login'
+            : window.location.hostname === '192.168.1.12'
+            ? 'http://192.168.1.12:3000/api/login' // for other laptop
+            : window.location.hostname === '192.168.1.15'
+            ? 'http://192.168.1.15:3000/api/login'
+            : 'http://192.168.137.1:3000/api/login'; // for mobile
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ username: loginUsername, password })
             });
@@ -113,8 +109,6 @@ const UserAuthPage = () => {
             if (response.status === 200) {
                 const data = await response.json();
                 setToken(data.token);
-
-                const userRole = getUserRole(); // Fetch the role from the token
                 toast.success('Login successful!', {
                     position: "top-center",
                     autoClose: 500,
@@ -125,26 +119,21 @@ const UserAuthPage = () => {
                     progress: undefined,
                     closeButton: false,
                     style: {
-                        width: '200px',
-                        fontSize: '16px',
-                        marginLeft: 'auto',
-                        marginRight: 'auto',
+                        width: '200px', // resized width
+                        fontSize: '16px', // resized font size
+                        marginLeft: 'auto', // center the toast
+                        marginRight: 'auto', // center the toast
                     },
-                    // onClose: () => navigate('/home')
-                    onClose: () => {
-                        navigate(userRole === 'admin' ? '/admin' : '/home'); // if admin, navigate to admin page, else (if user) navigate to home page
-                    }
+                    onClose: () => navigate('/home')
                 });
             } else {
                 const errorData = await response.json();
                 toast.error(`Login failed: ${errorData.message}`);
             }
         } catch (error) {
-            console.log("Login Error: ", error);
             toast.error('Login failed: An error occurred');
         }
     };
-
 
     const handleSwitchToSignup = () => {
         setIsLogin(false);

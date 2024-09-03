@@ -1,6 +1,6 @@
 import {React, useState} from 'react';
 import Navbar from '../components/Navbar';
-import UserSidebar from '../components/UserSidebar';
+import Sidebar from '../components/Sidebar';
 import { useNavigate } from 'react-router-dom';
 import './styles/PermitsPage.css';
 
@@ -14,7 +14,7 @@ const PermitsPage = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6 ">
-            <UserSidebar isOpen={isOpen} toggleSidebar={() => setIsOpen(!isOpen)} />
+            <Sidebar isOpen={isOpen} toggleSidebar={() => setIsOpen(!isOpen)} />
             <div className="max-w-7xl mx-auto custom-scrollbar mb-18 overflow-y-auto max-h-[calc(100vh-4rem)] md:max-h-full pb-6" > {/* container for the permit applications */}
                 <Navbar sidebarToggle={isOpen} setSidebarToggle={setIsOpen} />
                 <h1 className="text-3xl font-bold text-center mb-[70px] sm:mt-12 mt-14">Permit Applications</h1>

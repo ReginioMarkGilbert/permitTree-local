@@ -1,7 +1,7 @@
 import {React, useState} from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import UserSidebar from '../components/UserSidebar';
+import Sidebar from '../components/Sidebar';
 import CSAWForm from '../ApplicationForms/CSAWForm';
 import COVForm from '../ApplicationForms/COVForm';
 import PTPRForm from '../ApplicationForms/PTPRForm';
@@ -28,7 +28,7 @@ const ApplicationForm = () => {
 
     return (
         <div className="flex h-screen">
-            <UserSidebar isOpen={isOpen} toggleSidebar={() => setIsOpen(!isOpen)} />
+            <Sidebar isOpen={isOpen} toggleSidebar={() => setIsOpen(!isOpen)} />
             <div className="flex-grow flex flex-col transition-all duration-300 ml-0">
                 <Navbar sidebarToggle={isOpen} setSidebarToggle={setIsOpen} />
                 {FormComponent ? <FormComponent /> : <p>Form not found</p>}

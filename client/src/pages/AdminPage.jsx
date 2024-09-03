@@ -2,10 +2,9 @@ import React from 'react';
 
 const AdminPage = () => {
     return (
-        <div className="bg-gray-100 min-h-screen flex items-center justify-center">
-            <div className="text-center p-4 shadow-md rounded bg-white">
-                <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-                <p>Welcome to the admin panel!</p>
+        <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
+            <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md">
+                <h1 className="text-2xl font-bold mb-6">You are in the Admin Page</h1>
             </div>
         </div>
     );

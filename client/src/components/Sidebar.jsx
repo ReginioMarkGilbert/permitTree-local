@@ -6,18 +6,18 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { isAuthenticated, removeToken } from '../utils/auth';
 
-const Sidebar = ({ isOpen }) => {
+const Sidebar = ({ isOpen, toggleSidebar }) => {
     const navigate = useNavigate();
 
     const handleLogout = async () => {
         try {
             const apiUrl = window.location.hostname === 'localhost'
-                ? 'http://localhost:3000/api/logout'
-                : window.location.hostname === '192.168.1.12'
-                    ? 'http://192.168.1.12:3000/api/logout' // for other laptop
-                    : window.location.hostname === '192.168.1.15'
-                        ? 'http://192.168.1.15:3000/api/logout' // for new url
-                        : 'http://192.168.137.1:3000/api/logout'; // for mobile
+            ? 'http://localhost:3000/api/logout'
+            : window.location.hostname === '192.168.1.12'
+            ? 'http://192.168.1.12:3000/api/logout' // for other laptop
+            : window.location.hostname === '192.168.1.15'
+            ? 'http://192.168.1.15:3000/api/logout' // for new url
+            : 'http://192.168.137.1:3000/api/logout'; // for mobile
             await axios.get(apiUrl);
             removeToken();
             navigate('/auth');
