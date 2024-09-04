@@ -14,7 +14,7 @@ import UserAuthPage from './pages/UserAuthPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { isAuthenticated, getUserRole } from './utils/auth';
 import useSidebarToggle from './hooks/useSidebarToggle';
-import useApplicationHandlers from './hooks/useApplicationHandlers';
+import LandingPage from './pages/LandingPage';
 
 const App = () => {
     const { sidebarToggle, toggleSidebar } = useSidebarToggle();
@@ -22,13 +22,12 @@ const App = () => {
     const location = useLocation();
     const [selectedStore, setSelectedStore] = useState(null);
     const userRole = getUserRole();
-    // const { handleSubmitApplication, handleViewStatus } = useApplicationHandlers();
 
     useEffect(() => {
-        if (!isAuthenticated()) {
+        if (!isAuthenticated() && location.pathname !== '/') {
             navigate('/auth');
         }
-    }, [navigate]);
+    }, [navigate, location.pathname]);
 
     const handleStoreSelection = (store) => {
         setSelectedStore(store);
@@ -50,7 +49,7 @@ const App = () => {
             <div className={`flex-1 transition-all duration-300 ${sidebarToggle ? 'ml-64' : 'ml-0'}`}>
                 <div className="p-0">
                     <Routes>
-                        <Route path="/" element={<Navigate replace to="/auth" />} />
+                        <Route path="/" element={<LandingPage />} />
                         <Route path="/auth" element={<UserAuthPage />} />
                         <Route path="/home" element={<ProtectedRoute roles={['user']}><HomePage /></ProtectedRoute>} />
                         <Route path="/permits" element={<ProtectedRoute roles={['user']}><PermitsPage /></ProtectedRoute>} />
@@ -58,9 +57,7 @@ const App = () => {
                         <Route path="/apply/:formType" element={<ProtectedRoute roles={['user']}><ApplicationForm /></ProtectedRoute>} />
                         <Route path="/message" element={<ProtectedRoute roles={['user']}><MessageBox /></ProtectedRoute>} />
                         <Route path="/status" element={<ProtectedRoute roles={['user']}><StatusPage /></ProtectedRoute>} />
-
                         <Route path="/admin" element={<ProtectedRoute roles={['admin']}><AdminPage /></ProtectedRoute>} />
-
                         <Route path="/unauthorized" element={<div>Unauthorized Access</div>} />
                     </Routes>
                 </div>
