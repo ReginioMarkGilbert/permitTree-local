@@ -6,7 +6,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import { setToken, getUserRole } from '../utils/auth';
 import '../styles/UserAuthPage.css';
 
-
 const UserAuthPage = () => {
     // Signup
     const [firstName, setFirstName] = useState('');
@@ -78,7 +77,10 @@ const UserAuthPage = () => {
                     pauseOnHover: true,
                     draggable: true,
                     progress: undefined,
-                    onClose: () => navigate('/home')
+                    onClose: () => {
+                        const userRole = getUserRole();
+                        navigate(userRole === 'admin' ? '/admin' : '/home', { replace: true });
+                    }
                 });
             } else {
                 toast.error('Signup failed: An error occurred');
@@ -113,9 +115,8 @@ const UserAuthPage = () => {
             if (response.status === 200) {
                 const data = await response.json();
                 setToken(data.token);
-
-                const userRole = getUserRole(); // Fetch the role from the token
-                toast.success('Login successful!', {
+                localStorage.setItem('user', JSON.stringify(data.user));
+                toast.success(`Login successful!`, {
                     position: "top-center",
                     autoClose: 500,
                     hideProgressBar: true,
@@ -123,28 +124,22 @@ const UserAuthPage = () => {
                     pauseOnHover: true,
                     draggable: true,
                     progress: undefined,
-                    closeButton: false,
-                    style: {
-                        width: '200px',
-                        fontSize: '16px',
-                        marginLeft: 'auto',
-                        marginRight: 'auto',
-                    },
-                    // onClose: () => navigate('/home')
                     onClose: () => {
-                        navigate(userRole === 'admin' ? '/admin' : '/home'); // if admin, navigate to admin page, else (if user) navigate to home page
+                        const userRole = getUserRole();
+                        navigate(userRole === 'admin' ? '/admin' : '/home', { replace: true });
                     }
                 });
             } else {
-                const errorData = await response.json();
-                toast.error(`Login failed: ${errorData.message}`);
+                toast.error('Login failed: Invalid username or password');
             }
         } catch (error) {
-            console.log("Login Error: ", error);
-            toast.error('Login failed: An error occurred');
+            if (axios.isAxiosError(error) && error.response) {
+                toast.error(`Login failed: ${error.response.data.message}`);
+            } else {
+                toast.error('Login failed: An error occurred');
+            }
         }
     };
-
 
     const handleSwitchToSignup = () => {
         setIsLogin(false);
@@ -158,12 +153,12 @@ const UserAuthPage = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
-            <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md">
+        <div className="flex items-center justify-center min-h-screen bg-gray-100">
+            <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
                 {isLogin ? (
                     <>
                         <h1 className="text-2xl font-bold mb-6">Login</h1>
-                        <div className="input-container">
+                        <div className="input-container relative">
                             <input
                                 type="text"
                                 id="loginUsername"
