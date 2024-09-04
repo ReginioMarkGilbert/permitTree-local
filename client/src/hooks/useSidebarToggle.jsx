@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-export const useSidebarToggle = () => {
+const useSidebarToggle = () => {
     const [sidebarToggle, setSidebarToggle] = useState(false);
     const location = useLocation();
 
@@ -13,3 +13,5 @@ export const useSidebarToggle = () => {
 
     return { sidebarToggle, toggleSidebar };
 };
+
+export default useSidebarToggle;

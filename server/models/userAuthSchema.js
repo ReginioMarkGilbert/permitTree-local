@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     // phone: { type: String, required: true, match: [/^\d{11}$/, 'Please fill a valid phone number'] }
-    // role: { type: String, enum: ['admin', 'user'], default: 'user' }
+    role: { type: String, enum: ['admin', 'user'], default: 'user' }
 });
 
 userSchema.pre('save', async function (next) {
