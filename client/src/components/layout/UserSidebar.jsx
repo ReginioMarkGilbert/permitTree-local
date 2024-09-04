@@ -1,10 +1,10 @@
 import React from 'react';
 import { FaHome, FaFileAlt, FaBell, FaUser, FaSignInAlt, FaClipboardList } from 'react-icons/fa';
 import { NavLink } from 'react-router-dom';
-import permitTreeLogo from '../assets/denr-logo.png';
+import permitTreeLogo from '../../assets/denr-logo.png';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { isAuthenticated, removeToken } from '../utils/auth';
+import { isAuthenticated, removeToken } from '../../utils/auth';
 
 const Sidebar = ({ isOpen }) => {
     const navigate = useNavigate();

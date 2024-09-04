@@ -1,6 +1,6 @@
-const Application = require('../models/ChainsawApplication');
-const Notification = require('../models/Notification');
-const Counter = require('../models/admin/counter');
+const Application = require('../../models/PermitApplications/ChainsawApplication');
+const Notification = require('../../models/User/Notification');
+const Counter = require('../../models/admin/counter');
 
 const csaw_createApplication = async (req, res) => {
     try {

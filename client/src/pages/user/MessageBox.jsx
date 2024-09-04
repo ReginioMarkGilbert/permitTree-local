@@ -1,5 +1,5 @@
 import React from 'react';
-import './styles/MessageBox.css';
+import '../../styles/MessageBox.css';
 
 const MessageBox = ({ onViewStatus }) => {
     return (

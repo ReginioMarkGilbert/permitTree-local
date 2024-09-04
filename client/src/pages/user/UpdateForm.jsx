@@ -1,7 +1,7 @@
 import React from 'react';
-import './styles/UpdateForm.css';
-import uploadIcon from '../assets/upload_icn.svg';
-import closeIcon from '../assets/close_icn.svg';
+import '../../styles/UpdateForm.css';
+import uploadIcon from '../../assets/upload_icn.svg';
+import closeIcon from '../../assets/close_icn.svg';
 
 const UpdateForm = ({
     newName, setNewName,
