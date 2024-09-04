@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './styles/StoreSelectionPage.css';
+import '../../styles/StoreSelectionPage.css';
 
 const StoreSelectionPage = ({ onContinue }) => {
     const [store, setStore] = useState('');

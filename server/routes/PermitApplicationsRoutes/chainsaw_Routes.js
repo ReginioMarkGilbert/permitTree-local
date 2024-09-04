@@ -3,7 +3,7 @@ const router = express.Router();
 const { csaw_createApplication,
     csaw_getApplications,
     csaw_updateApplication,
-    csaw_deleteApplication } = require('../controllers/ChainsawApplicationController');
+    csaw_deleteApplication } = require('../../controllers/permitApplicationControllers/ChainsawApplicationController');
 
 router.post('/csaw_createApplication', csaw_createApplication);
 router.get('/csaw_getApplications', csaw_getApplications);

@@ -1,18 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import UserSidebar from './components/UserSidebar';
-import AdminSidebar from './components/AdminSidebar';
-import HomePage from './pages/HomePage';
-import AdminPage from './pages/AdminPage';
-
-import PermitsPage from './pages/permitsPage';
-
-import StoreSelectionPage from './pages/StoreSelectionPage';
-import ApplicationForm from './pages/ApplicationForm';
-import MessageBox from './pages/MessageBox';
-import StatusPage from './pages/StatusPage';
-
+import Navbar from './components/layout/Navbar';
+import UserSidebar from './components/layout/UserSidebar';
+import AdminSidebar from './components/layout/AdminSidebar';
+import HomePage from './pages/user/HomePage';
+import AdminPage from './pages/admin/AdminPage';
+import PermitsPage from './pages/user/PermitsPage';
+import StoreSelectionPage from './pages/user/StoreSelectionPage';
+import ApplicationForm from './pages/user/ApplicationForm';
+import MessageBox from './pages/user/MessageBox';
+import StatusPage from './pages/user/StatusPage';
 import UserAuthPage from './pages/UserAuthPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { isAuthenticated, getUserRole } from './utils/auth';
@@ -26,7 +23,7 @@ const App = () => {
     const [selectedStore, setSelectedStore] = useState(null);
     const userRole = getUserRole();
     // const { handleSubmitApplication, handleViewStatus } = useApplicationHandlers();
-    
+
     useEffect(() => {
         if (!isAuthenticated()) {
             navigate('/auth');
@@ -51,7 +48,7 @@ const App = () => {
                 </>
             )}
             <div className={`flex-1 transition-all duration-300 ${sidebarToggle ? 'ml-64' : 'ml-0'}`}>
-                <div className="p-4">
+                <div className="p-0">
                     <Routes>
                         <Route path="/" element={<Navigate replace to="/auth" />} />
                         <Route path="/auth" element={<UserAuthPage />} />
@@ -61,8 +58,9 @@ const App = () => {
                         <Route path="/apply/:formType" element={<ProtectedRoute roles={['user']}><ApplicationForm /></ProtectedRoute>} />
                         <Route path="/message" element={<ProtectedRoute roles={['user']}><MessageBox /></ProtectedRoute>} />
                         <Route path="/status" element={<ProtectedRoute roles={['user']}><StatusPage /></ProtectedRoute>} />
+
                         <Route path="/admin" element={<ProtectedRoute roles={['admin']}><AdminPage /></ProtectedRoute>} />
-                        {/* Add other routes as needed */}
+
                         <Route path="/unauthorized" element={<div>Unauthorized Access</div>} />
                     </Routes>
                 </div>
