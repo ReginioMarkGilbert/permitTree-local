@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
-import Sidebar from '../components/UserSidebar';
-import denrLogo from '../assets/denr-logo.png';
+import Navbar from '../../components/layout/Navbar';
+import UserSidebar from '../../components/layout/UserSidebar';
+
+import denrLogo from '../../assets/denr-logo.png';
 import { useNavigate } from 'react-router-dom';
-import { isAuthenticated } from '../utils/auth';
+import { isAuthenticated } from '../../utils/auth';
 
 function HomePage() {
     const [isOpen, setIsOpen] = useState(false);
@@ -19,7 +20,7 @@ function HomePage() {
 
     return (
         <div className="flex h-screen">
-            <Sidebar isOpen={isOpen} toggleSidebar={() => setIsOpen(!isOpen)} />
+            <UserSidebar isOpen={isOpen} toggleSidebar={() => setIsOpen(!isOpen)} />
             <div className={`flex-grow flex flex-col transition-all duration-300 ml-0`}>
                 <Navbar sidebarToggle={isOpen} setSidebarToggle={setIsOpen} />
                 <div className="flex-grow flex justify-center items-center bg-gray-100 text-center p-4 md:p-0">

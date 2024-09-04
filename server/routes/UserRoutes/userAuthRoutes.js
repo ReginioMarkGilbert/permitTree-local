@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
-const { signup, login, logout } = require('../controllers/userAuthControllers');
-const roleMiddleware = require('../middleware/roleMiddleware');
+const { signup, login, logout } = require('../../controllers/userControllers/userAuthControllers');
+const roleMiddleware = require('../../middleware/roleMiddleware');
 
 router.post('/signup', signup);
 router.post('/login', login);

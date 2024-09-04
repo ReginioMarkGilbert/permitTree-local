@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './styles/StatusPage.css';
 import UpdateForm from './UpdateForm';
-import backHome from '../assets/back_home.svg';
-import refreshIcon from '../assets/refresh_page_icn.svg';
+import backHome from '../../assets/back_home.svg';
+import refreshIcon from '../../assets/refresh_page_icn.svg';
+import '../../styles/StatusPage.css';
 
 // const StatusPage = ({ applicationId }) => {
 const StatusPage = () => {
@@ -146,7 +146,7 @@ const StatusPage = () => {
                             <td>{application.customId}</td>
                             <td>
                                 {new Date(application.dateOfSubmission).toLocaleDateString()} | {
-                                new Date(application.dateOfSubmission).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
+                                    new Date(application.dateOfSubmission).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
                             </td>
                             <td className="status-cell">
                                 <span className={`status ${application.status.toLowerCase().replace(' ', '-')}`}>{application.status}</span>
