@@ -58,8 +58,9 @@ const App = () => {
                         <Route path="/apply/:formType" element={<ProtectedRoute roles={['user']}><ApplicationForm /></ProtectedRoute>} />
                         <Route path="/message" element={<ProtectedRoute roles={['user']}><MessageBox /></ProtectedRoute>} />
                         <Route path="/status" element={<ProtectedRoute roles={['user']}><StatusPage /></ProtectedRoute>} />
+
                         <Route path="/admin" element={<ProtectedRoute roles={['admin']}><AdminPage /></ProtectedRoute>} />
-                        {/* Add other routes as needed */}
+
                         <Route path="/unauthorized" element={<div>Unauthorized Access</div>} />
                     </Routes>
                 </div>
