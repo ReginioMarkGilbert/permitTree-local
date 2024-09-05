@@ -5,11 +5,13 @@
 
 .input-field {
     width: 100%;
-    padding: 1rem 0.75rem 0.25rem 0.75rem; /* Adjust padding to make space for the label */
+    padding: 1rem 0.75rem 0.25rem 0.75rem;
+    /* Adjust padding to make space for the label */
     border: 1px solid #ccc;
     border-radius: 0.25rem;
     outline: none;
-    box-sizing: border-box; /* Ensure padding is included in the width */
+    box-sizing: border-box;
+    /* Ensure padding is included in the width */
 }
 
 .input-label {
@@ -26,10 +28,11 @@
     pointer-events: none;
 }
 
-.input-field:focus + .input-label,
-.input-field:not(:placeholder-shown) + .input-label {
+.input-field:focus+.input-label,
+.input-field:not(:placeholder-shown)+.input-label {
     top: -0.75rem;
     left: 0.5rem;
     color: #666;
     font-size: 0.75rem;
 }
+
