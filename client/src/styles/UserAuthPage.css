@@ -36,3 +36,10 @@
     font-size: 0.75rem;
 }
 
+button {
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #e6e6e6;
+}

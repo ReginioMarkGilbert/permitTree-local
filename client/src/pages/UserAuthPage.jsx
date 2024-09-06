@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
@@ -12,32 +12,38 @@ import { FaLeaf } from 'react-icons/fa';
 import '../styles/UserAuthPage.css';
 
 const UserAuthPage = () => {
-    const [isSignUp, setIsSignUp] = useState(true);
-
+    const [activeTab, setActiveTab] = useState('signup');
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    // Sign In
-    const [loginEmail, setLoginEmail] = useState('');
+    const [loginUsername, setLoginUsername] = useState('');
     const [loginPassword, setLoginPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [passwordError, setPasswordError] = useState('');
     const navigate = useNavigate();
 
-    const [loginUsername, setLoginUsername] = useState('');
-    const [isLogin, setIsLogin] = useState(true);
+    useEffect(() => {
+        if (firstName && lastName) {
+            setUsername(`${firstName.toLowerCase()}_${lastName.toLowerCase()}`);
+        } else {
+            setUsername('');
+        }
+    }, [firstName, lastName]);
 
-    const handleSwitchToSignup = () => {
-        setIsSignUp(true);
-        setPassword('');
-        setConfirmPassword('');
+    const validatePassword = (password) => {
+        let errors = [];
+        if (!/[A-Z]/.test(password)) errors.push("Password must include at least one uppercase letter.");
+        if (!/[0-9]/.test(password)) errors.push("Password must include at least one number.");
+        if (password.length < 8) errors.push("Password must be at least 8 characters long.");
+        setPasswordError(errors.join(' '));
     };
 
-    const handleSwitchToSignIn = () => {
-        setIsSignUp(false);
-        setLoginEmail('');
-        setLoginPassword('');
+    const handlePasswordChange = (e) => {
+        const newPassword = e.target.value;
+        setPassword(newPassword);
+        validatePassword(newPassword);
     };
 
     const handleSignup = async (e) => {
@@ -46,11 +52,15 @@ const UserAuthPage = () => {
             toast.error('Passwords do not match.');
             return;
         }
+        if (passwordError) {
+            toast.error('Please correct the password as per requirements.');
+            return;
+        }
         try {
             const response = await axios.post('http://localhost:3000/api/signup', {
                 firstName,
                 lastName,
-                email,
+                username,
                 password,
             });
             if (response.status === 201) {
@@ -78,7 +88,7 @@ const UserAuthPage = () => {
         e.preventDefault();
         try {
             const response = await axios.post('http://localhost:3000/api/login', {
-                email: loginEmail,
+                username: loginUsername,
                 password: loginPassword,
             });
             if (response.status === 200) {
@@ -95,7 +105,7 @@ const UserAuthPage = () => {
                     },
                 });
             } else {
-                toast.error('Login failed: Invalid email or password');
+                toast.error('Login failed: Invalid username or password');
             }
         } catch (error) {
             toast.error('Login failed: An error occurred');
@@ -116,13 +126,13 @@ const UserAuthPage = () => {
             </header>
             <main className="flex-1 flex items-center justify-center">
                 <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
-                    <Tabs defaultValue={isSignUp ? 'signup' : 'signin'} className="w-full">
+                    <Tabs defaultValue={activeTab} className="w-full">
                         <TabsList className="grid w-full grid-cols-2 mb-8">
-                            <TabsTrigger value="signup" onClick={() => setIsSignUp(true)} className={`py-2 px-4 text-center cursor-pointer rounded-tl-lg ${isSignUp ? 'bg-white border-b-2 border-green-600' : 'bg-gray-100'}`}>Sign Up</TabsTrigger>
-                            <TabsTrigger value="signin" onClick={() => setIsSignUp(false)} className={`py-2 px-4 text-center cursor-pointer rounded-tr-lg ${!isSignUp ? 'bg-white border-b-2 border-green-600' : 'bg-gray-100'}`}>Sign In</TabsTrigger>
+                            <TabsTrigger value="signup" onClick={() => setActiveTab('signup')}>Sign Up</TabsTrigger>
+                            <TabsTrigger value="signin" onClick={() => setActiveTab('signin')}>Sign In</TabsTrigger>
                         </TabsList>
-                        <TabsContent value="signup" activeTab={isSignUp ? 'signup' : 'signin'}>
-                            <form className="space-y-4" onSubmit={handleSignup}>
+                        <TabsContent value="signup">
+                            <form className="space-y-4 pt-2" onSubmit={handleSignup}>
                                 <div className="space-y-2">
                                     <Label htmlFor="first-name">First name</Label>
                                     <Input id="first-name" placeholder="John" required value={firstName} onChange={(e) => setFirstName(e.target.value)} />
@@ -132,14 +142,15 @@ const UserAuthPage = () => {
                                     <Input id="last-name" placeholder="Doe" required value={lastName} onChange={(e) => setLastName(e.target.value)} />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="email">Email</Label>
-                                    <Input id="email" placeholder="john@example.com" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                                    <Label htmlFor="username">Generated Username</Label>
+                                    <Input id="username" placeholder="john_doe" required value={username} readOnly />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="password">Password</Label>
                                     <div className="input-container relative">
-                                        <Input id="password" required type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} />
+                                        <Input id="password" required type={showPassword ? 'text' : 'password'} value={password} onChange={handlePasswordChange} />
                                     </div>
+                                    {passwordError && <div className="text-red-500 text-sm">{passwordError}</div>}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="confirm-password">Confirm Password</Label>
@@ -149,41 +160,28 @@ const UserAuthPage = () => {
                                         <label htmlFor="showPassword" className="text-sm text-gray-600">Show password</label>
                                     </div>
                                 </div>
-                                <AuthButton className="w-full bg-green-600 hover:bg-green-700">Sign Up</AuthButton>
-                                <p className="mt-4 text-center">Already have an account? <span onClick={handleSwitchToSignIn} className="text-blue-500 hover:text-blue-700 cursor-pointer">Sign In</span></p>
+                                <AuthButton className="w-full text-white bg-green-600 hover:bg-green-700">Sign Up</AuthButton>
+                                <p className="mt-4 text-center">Already have an account? <span onClick={() => setActiveTab('signin')} className="text-blue-500 hover:text-blue-700 cursor-pointer">Sign In</span></p>
                             </form>
                         </TabsContent>
-                        <TabsContent value="signin" activeTab={isSignUp ? 'signup' : 'signin'}>
+                        <TabsContent value="signin">
                             <form className="space-y-4" onSubmit={handleLogin}>
-                                <div className="input-container">
-                                    <input
-                                        type="text"
-                                        id="loginUsername"
-                                        value={loginUsername}
-                                        onChange={(e) => setLoginUsername(e.target.value)}
-                                        className="w-full p-2 mb-4 border rounded input-field"
-                                    />
-                                    <label htmlFor="loginUsername" className="input-label">Username</label>
+                                <div className="space-y-2">
+                                    <Label htmlFor="login-username">Username</Label>
+                                    <Input id="login-username" placeholder="john_doe" required value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} />
                                 </div>
                                 <div className="space-y-2">
-                                    <label htmlFor="password" className="input-label">Password</label>
-                                    <input
-                                        type={showPassword ? 'text' : 'password'}
-                                        id="password"
-                                        value={loginPassword}
-                                        onChange={(e) => setLoginPassword(e.target.value)}
-                                        className="w-full p-2 mb-4 border rounded input-field"
-                                    />
+                                    <Label htmlFor="password">Password</Label>
                                     <div className="input-container relative">
                                         <Input id="password-signin" required type={showPassword ? 'text' : 'password'} value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} />
-                                        <div className="flex items-center">
+                                        <div className="flex items-center pt-2">
                                             <input type="checkbox" id="showPassword" checked={showPassword} onChange={() => setShowPassword(!showPassword)} className="mr-2" />
                                             <label htmlFor="showPassword" className="text-sm text-gray-600">Show password</label>
                                         </div>
                                     </div>
                                 </div>
-                                <AuthButton className="w-full bg-green-600 hover:bg-green-700">Sign In</AuthButton>
-                                <p className="mt-4 text-center">Don't have an account? <span onClick={() => setIsSignUp(true)} className="text-blue-500 hover:text-blue-700 cursor-pointer">Sign Up</span></p>
+                                <AuthButton className="w-full rounded-md text-white bg-green-600 hover:bg-green-700">Sign In</AuthButton>
+                                <p className="mt-4 text-center">Don't have an account? <span onClick={() => setActiveTab('signup')} className="text-blue-500 hover:text-blue-700 cursor-pointer">Sign Up</span></p>
                             </form>
                         </TabsContent>
                     </Tabs>
