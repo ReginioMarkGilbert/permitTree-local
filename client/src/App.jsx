@@ -16,6 +16,7 @@ import { isAuthenticated, getUserRole } from './utils/auth';
 import useSidebarToggle from './hooks/useSidebarToggle';
 import LandingPage from './pages/LandingPage';
 import AboutPage from './pages/AboutPage'; // Import the AboutPage
+import ServicesPage from './pages/ServicesPage'; // Import the ServicesPage
 
 const App = () => {
     const { sidebarToggle, toggleSidebar } = useSidebarToggle();
@@ -25,7 +26,7 @@ const App = () => {
     const userRole = getUserRole();
 
     useEffect(() => {
-        if (!isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/about') {
+        if (!isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/about' && location.pathname !== '/services') {
             navigate('/auth');
         }
     }, [navigate, location.pathname]);
@@ -60,7 +61,8 @@ const App = () => {
                         <Route path="/status" element={<ProtectedRoute roles={['user']}><StatusPage /></ProtectedRoute>} />
                         <Route path="/admin" element={<ProtectedRoute roles={['admin']}><AdminPage /></ProtectedRoute>} />
                         <Route path="/unauthorized" element={<div>Unauthorized Access</div>} />
-                        <Route path="/about" element={<AboutPage />} /> {/* Add the route for AboutPage */}
+                        <Route path="/about" element={<AboutPage />} />
+                        <Route path="/services" element={<ServicesPage />} /> {/* Add the route for ServicesPage */}
                     </Routes>
                 </div>
             </div>
