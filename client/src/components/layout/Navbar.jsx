@@ -1,6 +1,5 @@
 import React from 'react';
 import { FaBars, FaTimes } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
 
 const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
     const handleToggle = () => {
@@ -13,11 +12,6 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
                 {sidebarToggle ? <FaTimes size={20} /> : <FaBars size={20} />}
             </div>
             <h1 className="text-lg font-semibold ml-4">DENR PENRO Permit Issuance</h1>
-            <ul className="ml-auto flex space-x-4">
-                <li><Link to="/">Home</Link></li>
-                <li><Link to="/about">About</Link></li>
-                {/* Add other links here */}
-            </ul>
         </nav>
     );
 };
