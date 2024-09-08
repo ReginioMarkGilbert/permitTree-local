@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import './styles/CSAWForm.css';
 import FileUpload from './FileUpload';
+
 
 const CSAWForm = ({ selectedStore }) => {
     const [name, setName] = useState('');
@@ -45,7 +47,7 @@ const CSAWForm = ({ selectedStore }) => {
             countryOfOrigin,
             purchasePrice,
             fileNames,
-            store: selectedStore // Ensure store is included in the form data
+            store: selectedStor
         };
 
         console.log('Form Data:', formData); // Log the form data
@@ -73,13 +75,13 @@ const CSAWForm = ({ selectedStore }) => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto mt-28 p-8 bg-white rounded-lg shadow-md">
-            <h1 className="text-2xl font-bold text-center mb-6">Apply for Chainsaw Registration</h1>
+        <div className="form-container">
+            <h1>Apply for Chainsaw Registration</h1>
             <form id="registrationForm" onSubmit={handleSubmit}>
-                <div className="form-section mb-6">
-                    <h4 className="text-lg font-medium mb-4">Owner Details</h4>
-                    <div className="form-group mb-4">
-                        <label htmlFor="name" className="block text-gray-700 mb-2">Name</label>
+                <div className="form-section">
+                    <h4 className='form-title'>Owner Details</h4>
+                    <div className="form-group">
+                        <label htmlFor="name">Name</label>
                         <input
                             type="text"
                             id="name"
@@ -88,11 +90,10 @@ const CSAWForm = ({ selectedStore }) => {
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             required
-                            className="w-full p-2 border border-gray-300 rounded"
                         />
                     </div>
-                    <div className="form-group mb-4">
-                        <label htmlFor="address" className="block text-gray-700 mb-2">Address</label>
+                    <div className="form-group">
+                        <label htmlFor="address">Address</label>
                         <input
                             type="text"
                             id="address"
@@ -101,11 +102,10 @@ const CSAWForm = ({ selectedStore }) => {
                             value={address}
                             onChange={(e) => setAddress(e.target.value)}
                             required
-                            className="w-full p-2 border border-gray-300 rounded"
                         />
                     </div>
-                    <div className="form-group mb-4">
-                        <label htmlFor="phone" className="block text-gray-700 mb-2">Phone Number</label>
+                    <div className="form-group">
+                        <label htmlFor="phone">Phone Number</label>
                         <input
                             type="tel"
                             id="phone"
@@ -114,15 +114,14 @@ const CSAWForm = ({ selectedStore }) => {
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
                             required
-                            className="w-full p-2 border border-gray-300 rounded"
                         />
                     </div>
                 </div>
 
-                <div id="chainsaw-details" className="form-section mb-6">
-                    <h4 className="text-lg font-medium mb-4">Chainsaw Details</h4>
-                    <div className="form-group mb-4">
-                        <label htmlFor="brand" className="block text-gray-700 mb-2">Brand</label>
+                <div id="chainsaw-details" className="form-section">
+                    <h4 className='form-title'>Chainsaw Details</h4>
+                    <div className="form-group">
+                        <label htmlFor="brand">Brand</label>
                         <input
                             type="text"
                             id="brand"
@@ -132,11 +131,10 @@ const CSAWForm = ({ selectedStore }) => {
                             onChange={(e) => setBrand(e.target.value)}
                             title="Brand can include letters and numbers"
                             required
-                            className="w-full p-2 border border-gray-300 rounded"
                         />
                     </div>
-                    <div className="form-group mb-4">
-                        <label htmlFor="model" className="block text-gray-700 mb-2">Model</label>
+                    <div className="form-group">
+                        <label htmlFor="model">Model</label>
                         <input
                             type="text"
                             id="model"
@@ -146,11 +144,10 @@ const CSAWForm = ({ selectedStore }) => {
                             onChange={(e) => setModel(e.target.value)}
                             title="Model can include letters and numbers"
                             required
-                            className="w-full p-2 border border-gray-300 rounded"
                         />
                     </div>
-                    <div className="form-group mb-4">
-                        <label htmlFor="serialNumber" className="block text-gray-700 mb-2">Serial No.</label>
+                    <div className="form-group">
+                        <label htmlFor="serialNumber">Serial No.</label>
                         <input
                             type="text"
                             id="serialNumber"
@@ -160,11 +157,10 @@ const CSAWForm = ({ selectedStore }) => {
                             onChange={(e) => setSerialNumber(e.target.value)}
                             title="Serial Number can include letters and numbers"
                             required
-                            className="w-full p-2 border border-gray-300 rounded"
                         />
                     </div>
-                    <div className="form-group mb-4">
-                        <label htmlFor="dateOfAcquisition" className="block text-gray-700 mb-2">Date of Acquisition</label>
+                    <div className="form-group">
+                        <label htmlFor="dateOfAcquisition">Date of Acquisition</label>
                         <input
                             type="date"
                             id="dateOfAcquisition"
@@ -172,11 +168,10 @@ const CSAWForm = ({ selectedStore }) => {
                             value={dateOfAcquisition}
                             onChange={(e) => setDateOfAcquisition(e.target.value)}
                             required
-                            className="w-full p-2 border border-gray-300 rounded"
                         />
                     </div>
-                    <div className="form-group mb-4">
-                        <label htmlFor="powerOutput" className="block text-gray-700 mb-2">Power Output (kW/bhp)</label>
+                    <div className="form-group">
+                        <label htmlFor="powerOutput">Power Output (kW/bhp)</label>
                         <input
                             type="text"
                             id="powerOutput"
@@ -186,11 +181,10 @@ const CSAWForm = ({ selectedStore }) => {
                             value={powerOutput}
                             onChange={(e) => setPowerOutput(e.target.value)}
                             required
-                            className="w-full p-2 border border-gray-300 rounded"
                         />
                     </div>
-                    <div className="form-group mb-4">
-                        <label htmlFor="maxLengthGuidebar" className="block text-gray-700 mb-2">Maximum Length of Guidebar</label>
+                    <div className="form-group">
+                        <label htmlFor="maxLengthGuidebar">Maximum Length of Guidebar</label>
                         <input
                             type="text"
                             id="maxLengthGuidebar"
@@ -200,11 +194,10 @@ const CSAWForm = ({ selectedStore }) => {
                             onChange={(e) => setMaxLengthGuidebar(e.target.value)}
                             title="Enter the maximum length of the guidebar"
                             required
-                            className="w-full p-2 border border-gray-300 rounded"
                         />
                     </div>
-                    <div className="form-group mb-4">
-                        <label htmlFor="countryOfOrigin" className="block text-gray-700 mb-2">Country of Origin</label>
+                    <div className="form-group">
+                        <label htmlFor="countryOfOrigin">Country of Origin</label>
                         <input
                             type="text"
                             id="countryOfOrigin"
@@ -213,11 +206,10 @@ const CSAWForm = ({ selectedStore }) => {
                             value={countryOfOrigin}
                             onChange={(e) => setCountryOfOrigin(e.target.value)}
                             required
-                            className="w-full p-2 border border-gray-300 rounded"
                         />
                     </div>
-                    <div className="form-group mb-4">
-                        <label htmlFor="purchasePrice" className="block text-gray-700 mb-2">Purchase Price</label>
+                    <div className="form-group">
+                        <label htmlFor="purchasePrice">Purchase Price</label>
                         <input
                             type="number"
                             id="purchasePrice"
@@ -227,14 +219,13 @@ const CSAWForm = ({ selectedStore }) => {
                             onChange={(e) => setPurchasePrice(e.target.value)}
                             title="Enter the purchase price in local currency"
                             required
-                            className="w-full p-2 border border-gray-300 rounded"
                         />
                     </div>
                 </div>
 
-                <div className="form-actions flex items-center">
+                <div className="form-actions">
                     <FileUpload fileNames={fileNames} setFileNames={setFileNames} />
-                    <button className="submit-button bg-green-500 text-white py-2 px-4 rounded ml-4 hover:bg-green-600" type="submit">Submit</button>
+                    <button className="submit-button" type="submit">Submit</button>
                 </div>
             </form>
         </div>
