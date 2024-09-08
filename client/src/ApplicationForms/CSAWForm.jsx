@@ -2,9 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './styles/CSAWForm.css';
-import uploadIcon from '../assets/upload_icn.svg';
-import closeIcon from '../assets/close_icn.svg';
+import FileUpload from './FileUpload';
 
 const CSAWForm = ({ selectedStore }) => {
     const [name, setName] = useState('');
@@ -20,6 +18,9 @@ const CSAWForm = ({ selectedStore }) => {
     const [serialNumber, setSerialNumber] = useState('');
     const [dateOfAcquisition, setDateOfAcquisition] = useState('');
     const [powerOutput, setPowerOutput] = useState('');
+    const [maxLengthGuidebar, setMaxLengthGuidebar] = useState('');
+    const [countryOfOrigin, setCountryOfOrigin] = useState('');
+    const [purchasePrice, setPurchasePrice] = useState('');
 
     useEffect(() => {
         // Save file names to sessionStorage whenever they change
@@ -27,29 +28,6 @@ const CSAWForm = ({ selectedStore }) => {
     }, [fileNames]);
 
     const navigate = useNavigate(); // Initialize navigate
-
-    const handleFileChange = (event) => {
-        const newFiles = event.target.files;
-        const newFileNamesArray = Array.from(newFiles).map(file => file.name);
-
-        // Check for duplicate file names
-        const duplicateFiles = newFileNamesArray.filter(fileName => fileNames.includes(fileName));
-        if (duplicateFiles.length > 0) {
-            alert(`The following files are duplicates and will not be uploaded: ${duplicateFiles.join(', ')}`);
-            return;
-        }
-
-        if (fileNames.length + newFileNamesArray.length > 5) {
-            alert("You can only upload a maximum of 5 files.");
-            return;
-        }
-
-        setFileNames(prevFileNames => [...prevFileNames, ...newFileNamesArray]);
-    };
-
-    const handleRemoveFile = (fileNameToRemove) => {
-        setFileNames(prevFileNames => prevFileNames.filter(fileName => fileName !== fileNameToRemove));
-    };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -63,6 +41,9 @@ const CSAWForm = ({ selectedStore }) => {
             serialNumber,
             dateOfAcquisition,
             powerOutput,
+            maxLengthGuidebar,
+            countryOfOrigin,
+            purchasePrice,
             fileNames,
             store: selectedStore // Ensure store is included in the form data
         };
@@ -92,142 +73,169 @@ const CSAWForm = ({ selectedStore }) => {
     };
 
     return (
-        <div className="form-container">
-            <h3>Apply for Chainsaw Registration</h3>
+        <div className="max-w-4xl mx-auto mt-28 p-8 bg-white rounded-lg shadow-md">
+            <h1 className="text-2xl font-bold text-center mb-6">Apply for Chainsaw Registration</h1>
             <form id="registrationForm" onSubmit={handleSubmit}>
-                <div className="form-section">
-                    <h4 className='form-title'>Owner Details</h4>
-                    <label htmlFor="name">Name</label>
-                    <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        placeholder="Full Name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                    />
-
-                    <label htmlFor="address">Address</label>
-                    <input
-                        type="text"
-                        id="address"
-                        name="address"
-                        placeholder="Barangay, Bayan, Probinsya"
-                        value={address}
-                        onChange={(e) => setAddress(e.target.value)}
-                        required
-                    />
-
-                    <label htmlFor="phone">Phone Number</label>
-                    <input
-                        type="tel"
-                        id="phone"
-                        name="phone"
-                        placeholder="e.g. 09123456789"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        required
-                    />
+                <div className="form-section mb-6">
+                    <h4 className="text-lg font-medium mb-4">Owner Details</h4>
+                    <div className="form-group mb-4">
+                        <label htmlFor="name" className="block text-gray-700 mb-2">Name</label>
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            placeholder="Full Name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            required
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                    </div>
+                    <div className="form-group mb-4">
+                        <label htmlFor="address" className="block text-gray-700 mb-2">Address</label>
+                        <input
+                            type="text"
+                            id="address"
+                            name="address"
+                            placeholder="Barangay, Bayan, Probinsya"
+                            value={address}
+                            onChange={(e) => setAddress(e.target.value)}
+                            required
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                    </div>
+                    <div className="form-group mb-4">
+                        <label htmlFor="phone" className="block text-gray-700 mb-2">Phone Number</label>
+                        <input
+                            type="tel"
+                            id="phone"
+                            name="phone"
+                            placeholder="e.g. 09123456789"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            required
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                    </div>
                 </div>
 
-                <div id="chainsaw-details" className="form-section">
-                    <h4 className='form-title'>Chainsaw Details</h4>
-                    <label htmlFor="brand">Brand</label>
-                    <input
-                        type="text"
-                        id="brand"
-                        name="brand"
-                        placeholder="Enter Brand"
-                        value={brand}
-                        onChange={(e) => setBrand(e.target.value)}
-                        title="Brand can include letters and numbers"
-                        required
-                    />
-
-                    <label htmlFor="model">Model</label>
-                    <input
-                        type="text"
-                        id="model"
-                        name="model"
-                        placeholder="Enter Model"
-                        value={model}
-                        onChange={(e) => setModel(e.target.value)}
-                        title="Model can include letters and numbers"
-                        required
-                    />
-
-                    <label htmlFor="serialNumber">Serial No.</label>
-                    <input
-                        type="text"
-                        id="serialNumber"
-                        name="serialNumber"
-                        placeholder="Enter Serial Number"
-                        value={serialNumber}
-                        onChange={(e) => setSerialNumber(e.target.value)}
-                        title="Serial Number can include letters and numbers"
-                        required
-                    />
-
-                    <label htmlFor="dateOfAcquisition">Date of Acquisition</label>
-                    <input
-                        type="date"
-                        id="dateOfAcquisition"
-                        name="dateOfAcquisition"
-                        value={dateOfAcquisition}
-                        onChange={(e) => setDateOfAcquisition(e.target.value)}
-                        required
-                    />
-
-                    <label htmlFor="powerOutput">Power Output (kW/bhp)</label>
-                    <input
-                        type="text"
-                        id="powerOutput"
-                        name="powerOutput"
-                        placeholder="e.g. 5 kW or 6.7 bhp"
-                        title="Enter power output in kW or bhp"
-                        value={powerOutput}
-                        onChange={(e) => setPowerOutput(e.target.value)}
-                        required
-                    />
+                <div id="chainsaw-details" className="form-section mb-6">
+                    <h4 className="text-lg font-medium mb-4">Chainsaw Details</h4>
+                    <div className="form-group mb-4">
+                        <label htmlFor="brand" className="block text-gray-700 mb-2">Brand</label>
+                        <input
+                            type="text"
+                            id="brand"
+                            name="brand"
+                            placeholder="Enter Brand"
+                            value={brand}
+                            onChange={(e) => setBrand(e.target.value)}
+                            title="Brand can include letters and numbers"
+                            required
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                    </div>
+                    <div className="form-group mb-4">
+                        <label htmlFor="model" className="block text-gray-700 mb-2">Model</label>
+                        <input
+                            type="text"
+                            id="model"
+                            name="model"
+                            placeholder="Enter Model"
+                            value={model}
+                            onChange={(e) => setModel(e.target.value)}
+                            title="Model can include letters and numbers"
+                            required
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                    </div>
+                    <div className="form-group mb-4">
+                        <label htmlFor="serialNumber" className="block text-gray-700 mb-2">Serial No.</label>
+                        <input
+                            type="text"
+                            id="serialNumber"
+                            name="serialNumber"
+                            placeholder="Enter Serial Number"
+                            value={serialNumber}
+                            onChange={(e) => setSerialNumber(e.target.value)}
+                            title="Serial Number can include letters and numbers"
+                            required
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                    </div>
+                    <div className="form-group mb-4">
+                        <label htmlFor="dateOfAcquisition" className="block text-gray-700 mb-2">Date of Acquisition</label>
+                        <input
+                            type="date"
+                            id="dateOfAcquisition"
+                            name="dateOfAcquisition"
+                            value={dateOfAcquisition}
+                            onChange={(e) => setDateOfAcquisition(e.target.value)}
+                            required
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                    </div>
+                    <div className="form-group mb-4">
+                        <label htmlFor="powerOutput" className="block text-gray-700 mb-2">Power Output (kW/bhp)</label>
+                        <input
+                            type="text"
+                            id="powerOutput"
+                            name="powerOutput"
+                            placeholder="e.g. 5 kW or 6.7 bhp"
+                            title="Enter power output in kW or bhp"
+                            value={powerOutput}
+                            onChange={(e) => setPowerOutput(e.target.value)}
+                            required
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                    </div>
+                    <div className="form-group mb-4">
+                        <label htmlFor="maxLengthGuidebar" className="block text-gray-700 mb-2">Maximum Length of Guidebar</label>
+                        <input
+                            type="text"
+                            id="maxLengthGuidebar"
+                            name="maxLengthGuidebar"
+                            placeholder="e.g. 20 inches"
+                            value={maxLengthGuidebar}
+                            onChange={(e) => setMaxLengthGuidebar(e.target.value)}
+                            title="Enter the maximum length of the guidebar"
+                            required
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                    </div>
+                    <div className="form-group mb-4">
+                        <label htmlFor="countryOfOrigin" className="block text-gray-700 mb-2">Country of Origin</label>
+                        <input
+                            type="text"
+                            id="countryOfOrigin"
+                            name="countryOfOrigin"
+                            placeholder="Enter Country of Origin"
+                            value={countryOfOrigin}
+                            onChange={(e) => setCountryOfOrigin(e.target.value)}
+                            required
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                    </div>
+                    <div className="form-group mb-4">
+                        <label htmlFor="purchasePrice" className="block text-gray-700 mb-2">Purchase Price</label>
+                        <input
+                            type="number"
+                            id="purchasePrice"
+                            name="purchasePrice"
+                            placeholder="Enter Purchase Price"
+                            value={purchasePrice}
+                            onChange={(e) => setPurchasePrice(e.target.value)}
+                            title="Enter the purchase price in local currency"
+                            required
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                    </div>
                 </div>
 
-                <div className="file-upload-container">
-                    <label className='label-file'>Upload image/s of requirements</label>
-                    <input
-                        type="file"
-                        id="fileUpload"
-                        name="fileUpload"
-                        accept="image/*,.pdf,.docx,.svg"
-                        multiple
-                        onChange={handleFileChange}
-                        max="5" // Maximum number of files
-                    />
-                    <button
-                        className="file-upload-label"
-                        type="button"
-                        onClick={() => document.getElementById('fileUpload').click()}
-                    >
-                        <img src={uploadIcon} alt="Upload Icon"/>
-                        Add file
-                    </button>
+                <div className="form-actions flex items-center">
+                    <FileUpload fileNames={fileNames} setFileNames={setFileNames} />
+                    <button className="submit-button bg-green-500 text-white py-2 px-4 rounded ml-4 hover:bg-green-600" type="submit">Submit</button>
                 </div>
-                <div id="form_fileNames" className="form_file-names">
-                    {fileNames.map((fileName, index) => (
-                        <div key={index} className="form_file-name">
-                            {fileName}
-                            <button
-                                type="button"
-                                className="formRemove-file-button"
-                                onClick={() => handleRemoveFile(fileName)}
-                            >
-                                <img className='remove-file-icon' src={closeIcon} alt="Close Icon" />
-                            </button>
-                        </div>
-                    ))}
-                </div>
-
-                <button className="submit-button" type="submit">Submit</button>
             </form>
         </div>
     );

@@ -36,7 +36,7 @@ const App = () => {
 
     return (
         <div className="flex">
-            {isAuthenticated() && location.pathname !== '/auth' && (
+            {isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && (
                 <>
                     {userRole === 'admin' ? (
                         <AdminSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
