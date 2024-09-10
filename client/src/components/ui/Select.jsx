@@ -1,15 +1,25 @@
 import React from 'react';
 
-const Select = ({ options, onChange, value }) => {
+export const Select = ({ children, value, onValueChange }) => {
     return (
-        <select onChange={onChange} value={value} className="border rounded p-2">
-            {options.map((option) => (
-                <option key={option.value} value={option.value}>
-                    {option.label}
-                </option>
-            ))}
+        <select value={value} onChange={(e) => onValueChange(e.target.value)}>
+            {children}
         </select>
     );
 };
 
-export default Select;
+export const SelectTrigger = ({ children }) => {
+    return <div>{children}</div>;
+};
+
+export const SelectValue = ({ placeholder }) => {
+    return <option value="">{placeholder}</option>;
+};
+
+export const SelectContent = ({ children }) => {
+    return <>{children}</>;
+};
+
+export const SelectItem = ({ value, children }) => {
+    return <option value={value}>{children}</option>;
+};

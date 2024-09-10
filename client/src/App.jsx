@@ -56,7 +56,7 @@ const App = () => {
                         <Route path="/auth" element={<UserAuthPage />} />
                         <Route path="/home" element={<ProtectedRoute roles={['user']}><HomePage /></ProtectedRoute>} />
                         <Route path="/permits" element={<ProtectedRoute roles={['user']}><PermitsPage /></ProtectedRoute>} />
-                        <Route path="/apply" element={<ProtectedRoute roles={['user']}><StoreSelectionPage onContinue={handleStoreSelection} /></ProtectedRoute>} />
+                        {/* <Route path="/apply" element={<ProtectedRoute roles={['user']}><StoreSelectionPage onContinue={handleStoreSelection} /></ProtectedRoute>} /> */}
                         <Route path="/apply/:formType" element={<ProtectedRoute roles={['user']}><ApplicationForm /></ProtectedRoute>} />
                         <Route path="/message" element={<ProtectedRoute roles={['user']}><MessageBox /></ProtectedRoute>} />
                         <Route path="/status" element={<ProtectedRoute roles={['user']}><StatusPage /></ProtectedRoute>} />
