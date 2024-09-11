@@ -39,7 +39,7 @@ const ChainsawRegistrationForm = () => {
             toast({
                 title: "Please select an application type",
                 description: "Choose either New or Renewal to proceed.",
-                variant: "destructive",
+                variant: "error",
             });
             return;
         }
@@ -47,9 +47,34 @@ const ChainsawRegistrationForm = () => {
             toast({
                 title: "Please select a chainsaw store",
                 description: "Choose an accredited chainsaw store to proceed.",
-                variant: "destructive",
+                variant: "error",
             });
             return;
+        }
+        if (currentStep === 2) {
+            const requiredFields = [
+                'ownerName',
+                'address',
+                'phone',
+                'brand',
+                'model',
+                'serialNumber',
+                'dateOfAcquisition',
+                'powerOutput',
+                'maxLengthGuidebar',
+                'countryOfOrigin',
+                'purchasePrice'
+            ];
+            for (const field of requiredFields) {
+                if (!formData[field]) {
+                    toast({
+                        title: "Incomplete Form",
+                        description: "Please fill out all required fields to proceed.",
+                        variant: "error",
+                    });
+                    return;
+                }
+            }
         }
         setCurrentStep(prev => prev + 1);
     };
@@ -72,6 +97,7 @@ const ChainsawRegistrationForm = () => {
         toast({
             title: "Application Saved as Draft",
             description: "Your application has been saved to the Draft List/Page.",
+            variant: "default",
         });
     };
 
@@ -86,7 +112,7 @@ const ChainsawRegistrationForm = () => {
         <div className="min-h-screen bg-green-50 flex items-start justify-center pt-20">
             <div className="container mx-auto px-4">
                 <h1 className="text-3xl font-[700] text-green-800 mb-6 text-center">Chainsaw Registration Application</h1>
-                <Card className="max-w-2xl mx-auto"> {/* Changed max-w-lg to max-w-2xl */}
+                <Card className="max-w-2xl mx-auto">
                     <CardHeader>
                         <CardTitle>{steps[currentStep].title}</CardTitle>
                     </CardHeader>
@@ -98,21 +124,21 @@ const ChainsawRegistrationForm = () => {
                                         onValueChange={(value) => handleSelectChange('applicationType', value)}
                                         value={formData.applicationType}
                                     >
-                                        <div className="flex items-center space-x-4">
-                                            <RadioGroupItem value="new" id="new" className="w-6 h-6" /> {/* Increased size */}
-                                            <Label htmlFor="new" className="text-lg">New Registration</Label> {/* Increased font size */}
+                                        <div className="flex items-center space-x-2 pt-8">
+                                            <RadioGroupItem value="New" id="new" className="w-12 h-12" />
+                                            <Label htmlFor="New" className="text-lg font-semibold">New Registration</Label>
                                         </div>
-                                        <div className="flex items-center space-x-4"> {/* Increased spacing */}
-                                            <RadioGroupItem value="renewal" id="renewal" className="w-6 h-6" /> {/* Increased size */}
-                                            <Label htmlFor="renewal" className="text-lg">Renewal</Label> {/* Increased font size */}
+                                        <div className="flex items-center space-x-2 pt-1">
+                                            <RadioGroupItem value="renewal" id="renewal" className="w-12 h-12" />
+                                            <Label htmlFor="renewal" className="text-lg font-semibold">Renewal</Label>
                                         </div>
                                     </RadioGroup>
                                 </div>
                             )}
 
                             {currentStep === 1 && (
-                                <div className="space-y-4">
-                                    <Label htmlFor="chainsawStore">Accredited Chainsaw Store</Label>
+                                <div className="space-y-4 pt-8 h-36">
+                                    <Label htmlFor="chainsawStore" className="text-lg font-semibold">Accredited Chainsaw Store</Label>
                                     <select
                                         id="chainsawStore"
                                         name="chainsawStore"
@@ -122,7 +148,7 @@ const ChainsawRegistrationForm = () => {
                                     >
                                         <option value="" disabled>Select a store</option>
                                         <option value="store1">Green Chainsaw Co.</option>
-                                        <option value="store2">Forest Tools Inc.</option>
+                                        <option value="store 2">Forest Tools Inc.</option>
                                         <option value="store3">EcoSaw Supplies</option>
                                         <option value="store4">Timber Tech Equipment</option>
                                         <option value="store5">Woodland Machinery</option>
@@ -131,11 +157,11 @@ const ChainsawRegistrationForm = () => {
                             )}
 
                             {currentStep === 2 && (
-                                <div className="space-y-6">
+                                <div className="space-y-5 h-[630px]">
                                     <div>
-                                        <h3 className="text-lg font-semibold mb-2 text-green-700">Owner Details</h3>
-                                        <div className="space-y-4">
-                                            <div>
+                                        <h3 className="text-lg font-semibold mb-1 text-green-700">Owner Details</h3>
+                                        <div className="space-y-2">
+                                            <div className="space-y-2">
                                                 <Label htmlFor="ownerName">Name</Label>
                                                 <Input
                                                     id="ownerName"
@@ -146,18 +172,19 @@ const ChainsawRegistrationForm = () => {
                                                     required
                                                 />
                                             </div>
-                                            <div>
+                                            <div className="space-y-2">
                                                 <Label htmlFor="address">Address</Label>
-                                                <Textarea
+                                                <Input
                                                     id="address"
                                                     name="address"
                                                     value={formData.address}
                                                     onChange={handleInputChange}
                                                     placeholder="Barangay, Bayan, Probinsya"
                                                     required
+                                                    className="w-48 h-16 resize-none"
                                                 />
                                             </div>
-                                            <div>
+                                            <div className="space-y-2">
                                                 <Label htmlFor="phone">Phone Number</Label>
                                                 <Input
                                                     id="phone"
@@ -290,7 +317,7 @@ const ChainsawRegistrationForm = () => {
                             )}
                         </form>
                     </CardContent>
-                    <CardFooter>
+                    <CardFooter className="mt-4">
                         {currentStep > 0 && (
                             <Button type="button" variant="outline" onClick={handlePrevStep}>
                                 Previous

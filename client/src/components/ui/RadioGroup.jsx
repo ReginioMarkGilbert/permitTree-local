@@ -10,8 +10,15 @@ export const RadioGroup = ({ children, onValueChange, value }) => {
     );
 };
 
-export const RadioGroupItem = ({ value, id, checked }) => {
+export const RadioGroupItem = ({ value, id, checked, className }) => {
     return (
-        <input type="radio" id={id} name="radio-group" value={value} checked={checked} />
+        <input
+            type="radio"
+            id={id}
+            name="radio-group"
+            value={value}
+            checked={checked}
+            className={`w-4 h-4 border-2 border-black ${className}`}
+        />
     );
 };

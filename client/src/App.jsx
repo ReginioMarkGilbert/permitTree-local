@@ -18,6 +18,8 @@ import LandingPage from './pages/LandingPage';
 import AboutPage from './pages/AboutPage'; // Import the AboutPage
 import ServicesPage from './pages/ServicesPage'; // Import the ServicesPage
 import ContactPage from './pages/ContactPage'; // Import the ContactPage
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
     const { sidebarToggle, toggleSidebar } = useSidebarToggle();
@@ -64,10 +66,11 @@ const App = () => {
                         <Route path="/unauthorized" element={<div>Unauthorized Access</div>} />
                         <Route path="/about" element={<AboutPage />} />
                         <Route path="/services" element={<ServicesPage />} />
-                        <Route path="/contact" element={<ContactPage />} /> Add the route for ContactPage
+                        <Route path="/contact" element={<ContactPage />} /> {/* Add the route for ContactPage */}
                     </Routes>
                 </div>
             </div>
+            <ToastContainer />
         </div>
     );
 };
