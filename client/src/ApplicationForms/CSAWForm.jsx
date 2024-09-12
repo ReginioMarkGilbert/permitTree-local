@@ -4,7 +4,6 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../compone
 import Input from '../components/ui/Input';
 import Label from '../components/ui/Label';
 import { RadioGroup, RadioGroupItem } from '../components/ui/RadioGroup';
-import Textarea from '../components/ui/Textarea';
 import { toast } from '../components/ui/useToast';
 
 const ChainsawRegistrationForm = () => {
