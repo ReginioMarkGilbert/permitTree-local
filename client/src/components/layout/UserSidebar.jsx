@@ -58,7 +58,7 @@ const Sidebar = ({ isOpen }) => {
                             <span className="mr-3"><FaFileAlt /></span>
                             <span>Apply</span>
                         </NavLink>
-                        <NavLink to="/status" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
+                        <NavLink to="/applicationsStatus" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
                             <span className="mr-3"><FaClipboardList /></span>
                             <span>Application Status</span>
                         </NavLink>
