@@ -45,7 +45,7 @@ export default function Component() {
 
     const handleSubmit = (e) => {
         e.preventDefault()
-        // Here you would typically send the updated userInfo and profilePicture to your backend
+        // Here would typically send the updated userInfo and profilePicture to the backend
         console.log('Updated user info:', userInfo)
         console.log('Updated profile picture:', profilePicture)
         // Show a success message to the user
@@ -54,8 +54,6 @@ export default function Component() {
 
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
-            
-
             {/* Main Content */}
             <div className="flex-grow flex items-center justify-center p-6">
                 <div className="bg-white rounded-lg shadow-lg max-w-3xl w-full overflow-hidden">
