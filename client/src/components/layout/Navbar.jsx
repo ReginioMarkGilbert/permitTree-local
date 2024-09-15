@@ -1,5 +1,6 @@
 import React from 'react';
-import { FaBars, FaTimes, FaLeaf } from 'react-icons/fa';
+import { FaBars, FaTimes } from 'react-icons/fa';
+import { Leaf } from 'lucide-react';
 
 const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
     const handleToggle = () => {
@@ -15,7 +16,7 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
                 >
                     {sidebarToggle ? <FaTimes size={20} /> : <FaBars size={20} />}
                 </div>
-                <FaLeaf className="h-8 w-8 text-green-600" />
+                <Leaf className="h-8 w-8 text-green-600" />
                 <span className="text-2xl font-bold text-green-800">PermitTree</span>
             </div>
         </nav>

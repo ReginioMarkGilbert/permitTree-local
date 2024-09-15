@@ -1,35 +1,78 @@
+const multer = require('multer');
+const path = require('path');
 const Application = require('../../models/PermitApplications/ChainsawApplication');
 const Notification = require('../../models/User/Notification');
 const Counter = require('../../models/admin/counter');
 
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${Date.now()}-${file.originalname}`);
+    }
+});
+
+const upload = multer({ storage });
+
 const csaw_createApplication = async (req, res) => {
+    upload.single('file')(req, res, async (err) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+
+        try {
+            console.log('Request body:', req.body); // Log the request body
+
+            const { applicationType, chainsawStore, ownerName, address, phone, brand, model, serialNumber, dateOfAcquisition, powerOutput, maxLengthGuidebar, countryOfOrigin, purchasePrice, dateOfSubmission } = req.body;
+
+            // Ensure dateOfSubmission is a valid date
+            const parsedDateOfSubmission = Array.isArray(dateOfSubmission) ? new Date(dateOfSubmission[0]) : new Date(dateOfSubmission);
+
+            if (isNaN(parsedDateOfSubmission)) {
+                throw new Error('Invalid dateOfSubmission');
+            }
+
+            // Create a new application
+            const newApplication = new Application({
+                applicationType,
+                chainsawStore,
+                ownerName,
+                address,
+                phone,
+                brand,
+                model,
+                serialNumber,
+                dateOfAcquisition,
+                powerOutput,
+                maxLengthGuidebar,
+                countryOfOrigin,
+                purchasePrice,
+                dateOfSubmission: parsedDateOfSubmission // Use the parsed date
+            });
+
+            // Save the application to the database
+            await newApplication.save();
+
+            res.status(201).json({ message: 'Application created successfully', application: newApplication });
+        } catch (error) {
+            console.error('Error creating application:', error); // Log the error message
+            res.status(500).json({ error: error.message });
+        }
+    });
+};
+
+const csaw_saveDraft = async (req, res) => {
     try {
-        console.log('Request Body:', req.body); // Log the request body
-        const { name, address, phone, brand, model, serialNumber, dateOfAcquisition, powerOutput, fileNames, store } = req.body;
+        const { name, address, phone, brand, model, serialNumber, dateOfAcquisition, powerOutput, fileNames, dateOfSubmission } = req.body;
 
-        // Generate custom ID
-        const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
-        const counter = await Counter.findOneAndUpdate(
-            { name: 'applicationId' },
-            { $inc: { seq: 1 } },
-            { new: true, upsert: true }
-        );
-        const year = new Date().getFullYear();
-        const customId = `PMDQ-CSAW-${year}-${String(counter.seq).padStart(6, '0')}`;
-
-        const dateOfSubmission = new Date();
-        const newApplication = new Application({
-            customId, name, address, phone, brand, model, serialNumber, dateOfAcquisition, powerOutput, fileNames, store, dateOfSubmission
+        const newDraft = new Application({
+            name, address, phone, brand, model, serialNumber, dateOfAcquisition, powerOutput, fileNames, dateOfSubmission, status: 'Draft'
         });
-        const savedApplication = await newApplication.save();
+        const savedDraft = await newDraft.save();
 
-        const notification = new Notification({
-            message: 'Your application was successfully submitted.'
-        });
-        await notification.save();
-        console.log('Notification created:', notification); // Log the notification
-
-        res.status(201).json(savedApplication);
+        res.status(201).json(savedDraft);
     } catch (err) {
         console.error('Error:', err);
         res.status(400).json({ error: err.message });
@@ -57,8 +100,8 @@ const csaw_getApplications = async (req, res) => {
 const csaw_updateApplication = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, address, phone, brand, model, serialNumber, dateOfAcquisition, powerOutput, status, fileNames, store } = req.body;
-        const updatedApplication = await Application.findByIdAndUpdate(id, { name, address, phone, brand, model, serialNumber, dateOfAcquisition, powerOutput, status, fileNames, store }, { new: true });
+        const { name, address, phone, chainsawStore, brand, model, serialNumber, dateOfAcquisition, powerOutput, status, dateOfSubmission } = req.body;
+        const updatedApplication = await Application.findByIdAndUpdate(id, { name, address, phone, chainsawStore, brand, model, serialNumber, dateOfAcquisition, powerOutput, status, dateOfSubmission }, { new: true });
         if (!updatedApplication) {
             return res.status(404).json({ error: 'Application not found' });
         }
@@ -92,5 +135,6 @@ module.exports = {
     csaw_createApplication,
     csaw_getApplications,
     csaw_updateApplication,
-    csaw_deleteApplication
+    csaw_deleteApplication,
+    csaw_saveDraft
 };

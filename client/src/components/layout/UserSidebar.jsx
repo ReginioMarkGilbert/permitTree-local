@@ -29,7 +29,7 @@ const Sidebar = ({ isOpen }) => {
 
     React.useEffect(() => {
         const authStatus = isAuthenticated();
-        console.log('Authentication status:', authStatus);
+        // console.log('Authentication status:', authStatus);
         if (!authStatus) {
             navigate('/auth');
         }

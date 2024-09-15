@@ -20,6 +20,7 @@ import ServicesPage from './pages/ServicesPage'; // Import the ServicesPage
 import ContactPage from './pages/ContactPage'; // Import the ContactPage
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import UserApplicationsPage from './pages/user/MyApplicationsPage';
 
 const App = () => {
     const { sidebarToggle, toggleSidebar } = useSidebarToggle();
@@ -58,6 +59,7 @@ const App = () => {
                         <Route path="/auth" element={<UserAuthPage />} />
                         <Route path="/home" element={<ProtectedRoute roles={['user']}><HomePage /></ProtectedRoute>} />
                         <Route path="/permits" element={<ProtectedRoute roles={['user']}><PermitsPage /></ProtectedRoute>} />
+                        <Route path="/my-applications" element={<ProtectedRoute roles={['user']}><UserApplicationsPage /></ProtectedRoute>} />
                         {/* <Route path="/apply" element={<ProtectedRoute roles={['user']}><StoreSelectionPage onContinue={handleStoreSelection} /></ProtectedRoute>} /> */}
                         <Route path="/apply/:formType" element={<ProtectedRoute roles={['user']}><ApplicationForm /></ProtectedRoute>} />
                         <Route path="/message" element={<ProtectedRoute roles={['user']}><MessageBox /></ProtectedRoute>} />
