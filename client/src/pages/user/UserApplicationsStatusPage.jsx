@@ -17,14 +17,17 @@ const MyApplicationsPage = () => {
     const [dateFilter, setDateFilter] = useState('');
     const [requirementsFilter, setRequirementsFilter] = useState([]);
     const [typeFilter, setTypeFilter] = useState([]);
-    const [filteredApplications, setFilteredApplications] = useState({});
+    const [applications, setApplications] = useState([]);
+    const [filteredApplications, setFilteredApplications] = useState([]);
     const [showFilters, setShowFilters] = useState(true);
 
     useEffect(() => {
         const fetchApplications = async () => {
             try {
-                const response = await axios.get('/api/csaw_getApplications');
-                setFilteredApplications(response.data);
+                const response = await axios.get('http://localhost:3000/api/csaw_getApplications');
+                console.log('Fetched applications:', response.data); // Log the fetched applications
+                setApplications(Array.isArray(response.data) ? response.data : []);
+                setFilteredApplications(Array.isArray(response.data) ? response.data : []);
             } catch (error) {
                 console.error('Error fetching applications:', error);
             }
@@ -33,21 +36,20 @@ const MyApplicationsPage = () => {
     }, []);
 
     useEffect(() => {
-        const filtered = Object.keys(filteredApplications).reduce((acc, key) => {
-            acc[key] = filteredApplications[key].filter(app => {
-                const matchesSearch = app.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    app.permitNumber?.toLowerCase().includes(searchTerm.toLowerCase());
-                const matchesDate = !dateFilter || (app.dateEncoded && app.dateEncoded.includes(dateFilter));
-                const matchesRequirements = requirementsFilter.length === 0 ||
-                    (requirementsFilter.includes('uploaded') && app.uploadedRequirements) ||
-                    (requirementsFilter.includes('notUploaded') && !app.uploadedRequirements);
-                const matchesType = typeFilter.length === 0 || typeFilter.includes(app.type);
-                return matchesSearch && matchesDate && matchesRequirements && matchesType;
-            });
-            return acc;
-        }, {});
+        if (!Array.isArray(applications)) return;
+        const filtered = applications.filter(app => {
+            const matchesSearch = app.customId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                app.permitNumber?.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesDate = !dateFilter || (app.dateOfSubmission && app.dateOfSubmission.includes(dateFilter));
+            const matchesRequirements = requirementsFilter.length === 0 ||
+                (requirementsFilter.includes('uploaded') && app.uploadedRequirements) ||
+                (requirementsFilter.includes('notUploaded') && !app.uploadedRequirements);
+            const matchesType = typeFilter.length === 0 || typeFilter.includes(app.applicationType);
+            return matchesSearch && matchesDate && matchesRequirements && matchesType;
+        });
+        console.log('Filtered applications:', filtered); // Add this line to debug filtered applications
         setFilteredApplications(filtered);
-    }, [searchTerm, dateFilter, requirementsFilter, typeFilter]);
+    }, [searchTerm, dateFilter, requirementsFilter, typeFilter, applications]);
 
     const handleAction = (action, app) => {
         console.log(`${action} application:`, app);
@@ -55,16 +57,21 @@ const MyApplicationsPage = () => {
     };
 
     const renderTable = () => {
-        const applications = filteredApplications[activeTab];
-        if (!applications || applications.length === 0) {
+        if (!Array.isArray(filteredApplications)) {
+            return <p className="text-center text-gray-500 my-4">No applications found.</p>;
+        }
+
+        const applicationsToShow = filteredApplications.filter(app => app.status === activeTab);
+        console.log('Applications to show:', applicationsToShow); // Add this line to debug applications to show
+        if (!applicationsToShow || applicationsToShow.length === 0) {
             return <p className="text-center text-gray-500 my-4">No applications found.</p>;
         }
 
         const columns = {
-            draft: ['Application Number', 'Application Type', 'Date & Time Encoded', 'Date & Time Updated', 'Uploaded Requirements', 'Action'],
-            submitted: ['Application Number', 'Application Type', 'Date & Time Encoded', 'Received By', 'Date & Time Updated', 'Date & Time Submitted', 'Uploaded Requirements', 'Action'],
-            returned: ['Application Number', 'Application Type', 'Date & Time Encoded', 'Returned By', 'Date & Time Updated', 'Date & Time Returned', 'Uploaded Requirements', 'Action'],
-            accepted: ['Application Number', 'Application Type', 'Date & Time Encoded', 'Accepted By', 'Date & Time Updated', 'Date & Time Accepted', 'Uploaded Requirements', 'Action'],
+            draft: ['Application Number', 'Application Type', 'Date & Time Updated', 'Uploaded Requirements', 'Action'],
+            submitted: ['Application Number', 'Application Type', 'Received By', 'Date & Time Updated', 'Date & Time Submitted', 'Uploaded Requirements', 'Action'],
+            returned: ['Application Number', 'Application Type', 'Returned By', 'Date & Time Updated', 'Date & Time Returned', 'Uploaded Requirements', 'Action'],
+            accepted: ['Application Number', 'Application Type', 'Accepted By', 'Date & Time Updated', 'Date & Time Accepted', 'Uploaded Requirements', 'Action'],
             released: ['Permit Number', 'Application Type', 'Date & Time Issued', 'Issued By', 'Date & Time Released', 'Released By', 'Validity Date', 'Date & Time Accepted', 'Accepted By', 'Certificate Copy', 'Action'],
             expired: ['Permit Number', 'Application Type', 'Date & Time Released', 'Released By', 'Validity Date', 'Certificate Copy', 'Action'],
         };
@@ -82,14 +89,14 @@ const MyApplicationsPage = () => {
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {applications.map((app, index) => (
+                        {applicationsToShow.map((app, index) => (
                             <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                {Object.keys(app).map((key, i) => (
+                                {columns[activeTab].map((column, i) => (
                                     <td key={i} className="px-3 py-4 text-sm text-gray-500">
                                         <div className="break-words">
-                                            {key === 'uploadedRequirements' || key === 'hasCertificateCopy'
-                                                ? (app[key] ? <FaCheck className="text-green-500" /> : <FaTimes className="text-red-500" />)
-                                                : app[key]}
+                                            {column === 'Uploaded Requirements'
+                                                ? (app.uploadedRequirements ? <FaCheck className="text-green-500" /> : <FaTimes className="text-red-500" />)
+                                                : app[column.replace(/ /g, '')] || 'N/A'}
                                         </div>
                                     </td>
                                 ))}

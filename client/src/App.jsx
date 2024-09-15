@@ -6,7 +6,6 @@ import AdminSidebar from './components/layout/AdminSidebar';
 import HomePage from './pages/user/HomePage';
 import AdminPage from './pages/admin/AdminPage';
 import PermitsPage from './pages/user/PermitsPage';
-import StoreSelectionPage from './pages/user/StoreSelectionPage';
 import ApplicationForm from './pages/user/ApplicationForm';
 import MessageBox from './pages/user/MessageBox';
 import StatusPage from './pages/user/StatusPage';
@@ -15,12 +14,12 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { isAuthenticated, getUserRole } from './utils/auth';
 import useSidebarToggle from './hooks/useSidebarToggle';
 import LandingPage from './pages/LandingPage';
-import AboutPage from './pages/AboutPage'; // Import the AboutPage
-import ServicesPage from './pages/ServicesPage'; // Import the ServicesPage
-import ContactPage from './pages/ContactPage'; // Import the ContactPage
+import AboutPage from './pages/AboutPage';
+import ServicesPage from './pages/ServicesPage';
+import ContactPage from './pages/ContactPage';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import UserApplicationsPage from './pages/user/MyApplicationsPage';
+import UserApplicationsPage from './pages/user/UserApplicationsStatusPage';
 
 const App = () => {
     const { sidebarToggle, toggleSidebar } = useSidebarToggle();
@@ -34,11 +33,6 @@ const App = () => {
             navigate('/auth');
         }
     }, [navigate, location.pathname]);
-
-    const handleStoreSelection = (store) => {
-        setSelectedStore(store);
-        navigate(`/apply/${store}`);
-    };
 
     return (
         <div className="flex">
@@ -60,7 +54,6 @@ const App = () => {
                         <Route path="/home" element={<ProtectedRoute roles={['user']}><HomePage /></ProtectedRoute>} />
                         <Route path="/permits" element={<ProtectedRoute roles={['user']}><PermitsPage /></ProtectedRoute>} />
                         <Route path="/my-applications" element={<ProtectedRoute roles={['user']}><UserApplicationsPage /></ProtectedRoute>} />
-                        {/* <Route path="/apply" element={<ProtectedRoute roles={['user']}><StoreSelectionPage onContinue={handleStoreSelection} /></ProtectedRoute>} /> */}
                         <Route path="/apply/:formType" element={<ProtectedRoute roles={['user']}><ApplicationForm /></ProtectedRoute>} />
                         <Route path="/message" element={<ProtectedRoute roles={['user']}><MessageBox /></ProtectedRoute>} />
                         <Route path="/status" element={<ProtectedRoute roles={['user']}><StatusPage /></ProtectedRoute>} />

@@ -4,14 +4,19 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../compone
 import Input from '../components/ui/Input';
 import Label from '../components/ui/Label';
 import { RadioGroup, RadioGroupItem } from '../components/ui/RadioGroup';
-import { toast } from '../components/ui/useToast';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { Download, X } from "lucide-react";
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import Modal from '../components/ui/Modal';
 
 const ChainsawRegistrationForm = () => {
+    const navigate = useNavigate();
     const [currentStep, setCurrentStep] = useState(0);
     const [formData, setFormData] = useState({
-        applicationType: '',
+        applicationType: 'Chainsaw Registration', // Set default application type
+        registrationType: '', // New field for registration type
         chainsawStore: '',
         ownerName: '',
         address: '',
@@ -25,8 +30,11 @@ const ChainsawRegistrationForm = () => {
         countryOfOrigin: '',
         purchasePrice: '',
         files: [],
-        dateOfSubmission: '' // Added this line
+        dateOfSubmission: '',
+        status: ''
     });
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalContent, setModalContent] = useState({ title: '', message: '' });
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -49,30 +57,14 @@ const ChainsawRegistrationForm = () => {
     };
 
     const handleNextStep = () => {
-        if (currentStep === 0 && !formData.applicationType) {
-            toast({
-                title: "Please select an application type",
-                description: "Choose either New or Renewal to proceed.",
-                variant: "error",
-            });
+        if (currentStep === 0 && !formData.registrationType) {
+            toast.error("Please select a registration type");
             return;
         }
         if (currentStep === 1 && !formData.chainsawStore) {
-            toast({
-                title: "Please select a chainsaw store",
-                description: "Choose an accredited chainsaw store to proceed.",
-                variant: "error",
-            });
+            toast.error("Please select a chainsaw store");
             return;
         }
-        // if (currentStep === 2 && formData.files.length === 0) {
-        //     toast({
-        //         title: "Please upload files",
-        //         description: "Upload necessary documents to proceed.",
-        //         variant: "error",
-        //     });
-        //     return;
-        // }
         if (currentStep === 3) {
             const requiredFields = [
                 'ownerName',
@@ -89,11 +81,7 @@ const ChainsawRegistrationForm = () => {
             ];
             for (const field of requiredFields) {
                 if (!formData[field]) {
-                    toast({
-                        title: "Incomplete Form",
-                        description: "Please fill out all required fields to proceed.",
-                        variant: "error",
-                    });
+                    toast.error("Please fill out all required fields to proceed.");
                     return;
                 }
             }
@@ -105,12 +93,17 @@ const ChainsawRegistrationForm = () => {
         setCurrentStep(prev => prev - 1);
     };
 
-    const handleSaveAsDraft = () => {
-        toast({
-            title: "Draft Saved",
-            description: "Your application draft has been saved.",
-            variant: "success",
-        });
+    const handleSaveAsDraft = async () => {
+        try {
+            const response = await axios.post('http://localhost:3000/api/csaw_saveDraft', { ...formData, status: 'Draft' });
+            setModalContent({
+                title: 'Draft saved successfully!',
+                message: 'Do you want to view your application?'
+            });
+            setModalOpen(true);
+        } catch (error) {
+            toast.error("Error saving draft");
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -123,16 +116,12 @@ const ChainsawRegistrationForm = () => {
                     formData[key].forEach(file => {
                         formDataToSend.append('files', file);
                     });
-                } else {
+                } else if (key !== 'status' && key !== 'dateOfSubmission') { // Exclude status and dateOfSubmission
                     formDataToSend.append(key, formData[key]);
                 }
             });
-            formDataToSend.append('dateOfSubmission', currentDate.toISOString()); // Append the dateOfSubmission as ISO string
-
-            // Log the FormData contents
-            for (let pair of formDataToSend.entries()) {
-                console.log(pair[0] + ': ' + pair[1]);
-            }
+            formDataToSend.append('dateOfSubmission', currentDate.toISOString());
+            formDataToSend.append('status', 'Submitted'); // Append status once
 
             const response = await axios.post('http://localhost:3000/api/csaw_createApplication', formDataToSend, {
                 headers: {
@@ -140,19 +129,13 @@ const ChainsawRegistrationForm = () => {
                 }
             });
 
-            toast({
-                title: "Application Submitted",
-                description: "Your application has been submitted successfully.",
-                variant: "success",
+            setModalContent({
+                title: 'Application submitted successfully!',
+                message: 'Do you want to view your application?'
             });
-            console.log(response.data);
+            setModalOpen(true);
         } catch (error) {
-            toast({
-                title: "Submission Failed",
-                description: "There was an error submitting your application.",
-                variant: "error",
-            });
-            console.error(error);
+            toast.error("Error submitting application");
         }
     };
 
@@ -163,6 +146,13 @@ const ChainsawRegistrationForm = () => {
         { title: "Application Details", description: "Fill in application details" },
         { title: "Review", description: "Review your application" },
     ];
+
+    // Add a helper function to format the labels
+    const formatLabel = (key) => {
+        return key
+            .replace(/([A-Z])/g, ' $1') // Insert space before capital letters
+            .replace(/^./, str => str.toUpperCase()); // Capitalize the first letter
+    };
 
     return (
         <div className="min-h-screen bg-green-50 flex items-start justify-center pt-20">
@@ -177,15 +167,15 @@ const ChainsawRegistrationForm = () => {
                             {currentStep === 0 && (
                                 <div className="space-y-6 pb-4">
                                     <RadioGroup
-                                        onValueChange={(value) => handleSelectChange('applicationType', value)}
-                                        value={formData.applicationType}
+                                        onValueChange={(value) => handleSelectChange('registrationType', value)}
+                                        value={formData.registrationType}
                                     >
                                         <div className="flex items-center space-x-2 pt-8">
                                             <RadioGroupItem value="New" id="new" className="w-12 h-12" />
-                                            <Label htmlFor="New" className="text-lg font-semibold">New Registration</Label>
+                                            <Label htmlFor="new" className="text-lg font-semibold">New Registration</Label>
                                         </div>
                                         <div className="flex items-center space-x-2 pt-1">
-                                            <RadioGroupItem value="renewal" id="renewal" className="w-12 h-12" />
+                                            <RadioGroupItem value="Renewal" id="renewal" className="w-12 h-12" />
                                             <Label htmlFor="renewal" className="text-lg font-semibold">Renewal</Label>
                                         </div>
                                     </RadioGroup>
@@ -405,22 +395,28 @@ const ChainsawRegistrationForm = () => {
                                 <div className="space-y-4">
                                     <h3 className="text-lg font-semibold mb-2 text-green-700">Review Your Application</h3>
                                     <div className="grid grid-cols-2 gap-4">
-                                        {Object.entries(formData).map(([key, value]) => (
-                                            <div key={key} className="space-y-1">
-                                                <Label className="font-semibold">{key.charAt(0).toUpperCase() + key.slice(1)}</Label>
-                                                <p className="text-gray-700">
-                                                    {Array.isArray(value) ? value.map(file => file.name).join(', ') : (value instanceof Date ? value.toLocaleString('en-US', {
-                                                        month: '2-digit',
-                                                        day: '2-digit',
-                                                        year: 'numeric',
-                                                        hour: '2-digit',
-                                                        minute: '2-digit',
-                                                        second: '2-digit',
-                                                        hour12: true
-                                                    }) : value)}
-                                                </p>
-                                            </div>
-                                        ))}
+                                        {Object.entries(formData)
+                                            .filter(([key]) => key !== 'status' && key !== 'dateOfSubmission') // Exclude 'status' and 'dateOfSubmission' from review
+                                            .map(([key, value]) => (
+                                                <div key={key} className="space-y-1">
+                                                    <Label className="font-semibold">{formatLabel(key)}</Label> {/* Use formatted label */}
+                                                    <p className="text-gray-700">
+                                                        {Array.isArray(value)
+                                                            ? value.map(file => file.name).join(', ')
+                                                            : value instanceof Date
+                                                            ? value.toLocaleString('en-US', {
+                                                                  month: '2-digit',
+                                                                  day: '2-digit',
+                                                                  year: 'numeric',
+                                                                  hour: '2-digit',
+                                                                  minute: '2-digit',
+                                                                  second: '2-digit',
+                                                                  hour12: true
+                                                              })
+                                                            : value}
+                                                    </p>
+                                                </div>
+                                            ))}
                                     </div>
                                 </div>
                             )}
@@ -449,9 +445,18 @@ const ChainsawRegistrationForm = () => {
                     </CardFooter>
                 </Card>
             </div>
+            <ToastContainer />
+            <Modal
+                isOpen={modalOpen}
+                title={modalContent.title}
+                message={modalContent.message}
+                onClose={() => setModalOpen(false)}
+                onHome={() => navigate('/')}
+                onApplications={() => navigate('/my-applications')}
+            />
         </div>
     );
 };
 
-export default ChainsawRegistrationForm;
 
+export default ChainsawRegistrationForm;
