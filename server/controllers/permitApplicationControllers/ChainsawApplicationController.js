@@ -16,20 +16,27 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-const generateCustomId = async () => {
-    const counter = await Counter.findOneAndUpdate(
-        { _id: 'applicationId' },
-        { $inc: { seq: 1 } },
-        { new: true, upsert: true }
-    );
+const CSAW_CustomId = async () => {
+    try {
+        const counter = await Counter.findOneAndUpdate(
+            { _id: 'applicationId' },
+            { $inc: { seq: 1 } },
+            { new: true, upsert: true }
+        );
 
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const id = String(counter.seq).padStart(6, '0');
+        const date = new Date();
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const id = String(counter.seq).padStart(6, '0');
 
-    return `PMDQ-CSAW-${year}-${month}${day}-${id}`;
+        const customId = `PMDQ-CSAW-${year}-${month}${day}-${id}`;
+        console.log('Generated customId:', customId);
+        return customId;
+    } catch (error) {
+        console.error('Error generating customId:', error);
+        throw error;
+    }
 };
 
 const csaw_createApplication = async (req, res) => {
@@ -51,11 +58,11 @@ const csaw_createApplication = async (req, res) => {
             }
 
             // Generate customId
-            const customId = await generateCustomId();
+            const customId = await CSAW_CustomId();
 
             // Create a new application
             const newApplication = new Application({
-                customId,
+                customId, // Add the customId to the application object
                 applicationType,
                 registrationType, // Include registrationType
                 chainsawStore,
@@ -96,7 +103,7 @@ const csaw_saveDraft = async (req, res) => {
         const newDraft = new Application({
             customId,
             applicationType,
-            registrationType, // Include registrationType
+            registrationType,
             chainsawStore,
             ownerName,
             address,
@@ -185,10 +192,26 @@ const csaw_deleteApplication = async (req, res) => {
     }
 };
 
+const resetCounter = async (req, res) => {
+    try {
+        await Counter.findOneAndUpdate(
+            { _id: 'applicationId' },
+            { seq: 0 },
+            { new: true, upsert: true }
+        );
+
+        res.status(200).json({ message: 'Counter reset successfully' });
+    } catch (error) {
+        console.error('Error resetting counter:', error);
+        res.status(500).json({ error: 'Failed to reset counter' });
+    }
+};
+
 module.exports = {
     csaw_createApplication,
     csaw_getApplications,
     csaw_updateApplication,
     csaw_deleteApplication,
-    csaw_saveDraft
+    csaw_saveDraft,
+    resetCounter
 };
