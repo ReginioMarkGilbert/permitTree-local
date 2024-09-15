@@ -1,29 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaCheck, FaTimes, FaEdit, FaEye, FaPrint, FaArchive } from 'react-icons/fa';
+import { Eye, Edit, Printer, Archive, ChevronUp, ChevronDown, Leaf } from 'lucide-react';
 
 const UserApplicationsStatusPage = () => {
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [activeTab, setActiveTab] = useState('submitted');
+    const [activeTab, setActiveTab] = useState('Submitted');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterType, setFilterType] = useState('');
+    const [dateRange, setDateRange] = useState('');
+    const [sortConfig, setSortConfig] = useState(null);
 
     useEffect(() => {
         fetchApplications();
-    }, [activeTab]);
+    }, [activeTab, searchTerm, filterType, dateRange, sortConfig]);
 
     const fetchApplications = async () => {
         try {
-            const params = { status: activeTab };
+            const params = { status: activeTab.toLowerCase() };
             const response = await axios.get('http://localhost:3000/api/csaw_getApplications', { params });
 
-            if (Array.isArray(response.data)) {
-                setApplications(response.data);
-            } else {
-                console.error('Response data is not an array:', response.data);
-                setApplications([]);
+            let filteredApps = response.data.filter(app =>
+                (searchTerm === '' || app.customId.toLowerCase().includes(searchTerm.toLowerCase()) || app.applicationType.toLowerCase().includes(searchTerm.toLowerCase())) &&
+                (filterType === '' || app.applicationType === filterType) &&
+                (dateRange === '' || new Date(app.dateOfSubmission).toLocaleDateString() === new Date(dateRange).toLocaleDateString())
+            );
+
+            if (sortConfig !== null) {
+                filteredApps.sort((a, b) => {
+                    if (a[sortConfig.key] < b[sortConfig.key]) return sortConfig.direction === 'asc' ? -1 : 1;
+                    if (a[sortConfig.key] > b[sortConfig.key]) return sortConfig.direction === 'asc' ? 1 : -1;
+                    return 0;
+                });
             }
 
+            setApplications(filteredApps);
             setLoading(false);
         } catch (err) {
             console.error('Error fetching applications:', err);
@@ -32,20 +44,23 @@ const UserApplicationsStatusPage = () => {
         }
     };
 
-    const handleAction = (action, application) => {
-        // Implement your action handlers here (e.g., view, edit, print)
-        console.log(`Action: ${action}`, application);
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
     };
 
-    const renderStatusIcon = (status) => {
-        switch (status) {
-            case 'Accepted':
-                return <FaCheck className="text-green-500" />;
-            case 'Rejected':
-                return <FaTimes className="text-red-500" />;
-            default:
-                return null;
+    const renderSortIcon = (key) => {
+        if (sortConfig?.key === key) {
+            return sortConfig.direction === 'asc' ? <ChevronUp className="inline w-4 h-4" /> : <ChevronDown className="inline w-4 h-4" />;
         }
+        return null;
+    };
+
+    const handleAction = (action, application) => {
+        console.log(`Action: ${action}`, application);
     };
 
     const renderTable = () => {
@@ -62,18 +77,18 @@ const UserApplicationsStatusPage = () => {
         }
 
         return (
-            <div className="overflow-x-auto">
-                <table className="w-full divide-y divide-gray-200">
+            <div className="bg-white rounded-lg shadow overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Application Number
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSort('customId')}>
+                                Application Number {renderSortIcon('customId')}
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Application Type
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Date Submitted
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSort('dateOfSubmission')}>
+                                Date Submitted {renderSortIcon('dateOfSubmission')}
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Status
@@ -97,37 +112,22 @@ const UserApplicationsStatusPage = () => {
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     <div className="flex items-center">
-                                        {renderStatusIcon(app.status)}
                                         <span className="ml-2">{app.status}</span>
                                     </div>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <div className="flex space-x-2">
-                                        <button
-                                            onClick={() => handleAction('view', app)}
-                                            className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded"
-                                        >
-                                            <FaEye className="inline mr-1" /> View
-                                        </button>
-                                        <button
-                                            onClick={() => handleAction('edit', app)}
-                                            className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded"
-                                        >
-                                            <FaEdit className="inline mr-1" /> Edit
-                                        </button>
-                                        <button
-                                            onClick={() => handleAction('print', app)}
-                                            className="bg-purple-500 hover:bg-purple-600 text-white px-2 py-1 rounded"
-                                        >
-                                            <FaPrint className="inline mr-1" /> Print
-                                        </button>
-                                        <button
-                                            onClick={() => handleAction('archive', app)}
-                                            className="bg-gray-500 hover:bg-gray-600 text-white px-2 py-1 rounded"
-                                        >
-                                            <FaArchive className="inline mr-1" /> Archive
-                                        </button>
-                                    </div>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button className="text-green-600 hover:text-green-900 mr-2" onClick={() => handleAction('view', app)}>
+                                        <Eye className="inline w-4 h-4 mr-1" /> View
+                                    </button>
+                                    <button className="text-blue-600 hover:text-blue-900 mr-2" onClick={() => handleAction('edit', app)}>
+                                        <Edit className="inline w-4 h-4 mr-1" /> Edit
+                                    </button>
+                                    <button className="text-purple-600 hover:text-purple-900 mr-2" onClick={() => handleAction('print', app)}>
+                                        <Printer className="inline w-4 h-4 mr-1" /> Print
+                                    </button>
+                                    <button className="text-gray-600 hover:text-gray-900" onClick={() => handleAction('archive', app)}>
+                                        <Archive className="inline w-4 h-4 mr-1" /> Archive
+                                    </button>
                                 </td>
                             </tr>
                         ))}
@@ -138,28 +138,55 @@ const UserApplicationsStatusPage = () => {
     };
 
     return (
-        <div className="container mx-auto p-4">
-            <h1 className="text-3xl font-bold mb-4 text-green-800">My Applications</h1>
-            <div className="mb-4">
-                <div className="inline-flex rounded-md bg-green-100 p-1">
-                    {['submitted', 'accepted', 'rejected'].map((tab) => (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`px-4 py-2 text-sm font-medium rounded-md focus:outline-none ${activeTab === tab
-                                    ? 'bg-white text-green-800 shadow-sm'
-                                    : 'text-gray-700 hover:text-gray-900 hover:bg-green-200'
-                                }`}
-                        >
-                            {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                        </button>
-                    ))}
+        <div className="min-h-screen bg-green-50">
+            <nav className="bg-white shadow-md z-10 flex justify-between items-center p-4">
+                <div className="flex items-center space-x-2">
+                    <Leaf className="h-8 w-8 text-green-600" />
+                    <span className="text-2xl font-bold text-green-800">PermitTree</span>
                 </div>
-            </div>
-            <div className="bg-white rounded-lg shadow-md">
-                <div className="p-6">
-                    {renderTable()}
+            </nav>
+
+            <div className="container mx-auto px-6 py-8">
+                <h1 className="text-3xl font-bold mb-6 text-green-800">My Applications</h1>
+                <div className="mb-6 overflow-x-auto">
+                    <div className="flex bg-gray-100 p-1 rounded-md inline-flex">
+                        {['Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected'].map((tab) => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                className={`px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap ${activeTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
+                            >
+                                {tab}
+                            </button>
+                        ))}
+                    </div>
                 </div>
+                <div className="mb-6 flex flex-wrap gap-4">
+                    <input
+                        type="text"
+                        placeholder="Search applications..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="border rounded-md p-2 flex-grow"
+                    />
+                    <select
+                        value={filterType}
+                        onChange={(e) => setFilterType(e.target.value)}
+                        className="border rounded-md p-2"
+                    >
+                        <option value="">All Types</option>
+                        {['Chainsaw Registration', 'Certificate of Verification', 'Private Tree Plantation Registration (PTPR)', 'Government Project Timber Permit', 'Private Land Timber Permit', 'Public Land Timber Permit'].map(type => (
+                            <option key={type} value={type}>{type}</option>
+                        ))}
+                    </select>
+                    <input
+                        type="date"
+                        value={dateRange}
+                        onChange={(e) => setDateRange(e.target.value)}
+                        className="border rounded-md p-2"
+                    />
+                </div>
+                {renderTable()}
             </div>
         </div>
     );
