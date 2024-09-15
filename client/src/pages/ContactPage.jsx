@@ -4,6 +4,8 @@ import Input from '../components/ui/Input';
 import Textarea from '../components/ui/Textarea';
 import { MapPin, Phone, Mail } from 'lucide-react';
 import Header from '../components/Header';
+import { FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 const ContactPage = () => {
     return (
@@ -61,6 +63,51 @@ const ContactPage = () => {
                     </div>
                 </div>
             </main>
+            <footer className="bg-green-800 text-white py-12">
+                <div className="container mx-auto px-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div>
+                            <h3 className="text-lg font-semibold mb-4">About PermitTree</h3>
+                            <p className="text-sm">
+                                PermitTree is the official online platform of DENR-PENRO for processing tree-related permits
+                                and registrations, committed to the conservation and proper management of the country's natural resources.
+                            </p>
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+                            <ul className="space-y-2">
+                                <li><Link to="/" className="text-sm hover:underline">Home</Link></li>
+                                <li><Link to="/about" className="text-sm hover:underline">About</Link></li>
+                                <li><Link to="/services" className="text-sm hover:underline">Services</Link></li>
+                                <li><Link to="/contact" className="text-sm hover:underline">Contact</Link></li>
+                                <li><Link to="#" className="text-sm hover:underline">Privacy Policy</Link></li>
+                                <li><Link to="#" className="text-sm hover:underline">Terms of Service</Link></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-semibold mb-4">Connect With Us</h3>
+                            <div className="flex space-x-4 mb-4">
+                                <Link to="#" className="hover:text-green-300">
+                                    <FaFacebook className="h-6 w-6" />
+                                </Link>
+                                <Link to="#" className="hover:text-green-300">
+                                    <FaTwitter className="h-6 w-6" />
+                                </Link>
+                                <Link to="#" className="hover:text-green-300">
+                                    <FaInstagram className="h-6 w-6" />
+                                </Link>
+                            </div>
+                            <p className="text-sm">
+                                Email: info@permittree.gov.ph<br />
+                                Phone: (123) 456-7890
+                            </p>
+                        </div>
+                    </div>
+                    <div className="mt-8 pt-8 border-t border-green-700 text-center">
+                        <p className="text-sm">&copy; 2023 PermitTree - DENR-PENRO. All rights reserved.</p>
+                    </div>
+                </div>
+            </footer>
         </div>
     );
 };

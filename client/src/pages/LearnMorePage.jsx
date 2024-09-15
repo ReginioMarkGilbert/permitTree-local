@@ -113,31 +113,31 @@ const LearnMorePage = () => {
                         <div>
                             <h3 className="text-lg font-semibold mb-4">About PermitTree</h3>
                             <p className="text-sm">
-                                PermitTree is the official online platform of DENR-PENRO for processing tree-related permits
-                                and registrations, committed to the conservation and proper management of the country's natural resources.
+                                PermitTree is the official online platform of DENR-PENRO (Department of Environment and Natural Resources - Provincial Environment and Natural Resources Office)
+                                for processing tree-related permits and registrations, committed to the conservation and proper management of the country's natural resources.
                             </p>
                         </div>
                         <div>
                             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
                             <ul className="space-y-2">
-                                <li><Link href="/" className="text-sm hover:underline">Home</Link></li>
-                                <li><Link href="/about" className="text-sm hover:underline">About</Link></li>
-                                <li><Link href="/services" className="text-sm hover:underline">Services</Link></li>
-                                <li><Link href="/contact" className="text-sm hover:underline">Contact</Link></li>
-                                <li><Link href="#" className="text-sm hover:underline">Privacy Policy</Link></li>
-                                <li><Link href="#" className="text-sm hover:underline">Terms of Service</Link></li>
+                                <li><Link to="/" className="text-sm hover:underline">Home</Link></li>
+                                <li><Link to="/about" className="text-sm hover:underline">About</Link></li>
+                                <li><Link to="/services" className="text-sm hover:underline">Services</Link></li>
+                                <li><Link to="/contact" className="text-sm hover:underline">Contact</Link></li>
+                                <li><Link to="#" className="text-sm hover:underline">Privacy Policy</Link></li>
+                                <li><Link to="#" className="text-sm hover:underline">Terms of Service</Link></li>
                             </ul>
                         </div>
                         <div>
                             <h3 className="text-lg font-semibold mb-4">Connect With Us</h3>
                             <div className="flex space-x-4 mb-4">
-                                <Link href="#" className="hover:text-green-300">
+                                <Link to="#" className="hover:text-green-300">
                                     <FaFacebook className="h-6 w-6" />
                                 </Link>
-                                <Link href="#" className="hover:text-green-300">
+                                <Link to="#" className="hover:text-green-300">
                                     <FaTwitter className="h-6 w-6" />
                                 </Link>
-                                <Link href="#" className="hover:text-green-300">
+                                <Link to="#" className="hover:text-green-300">
                                     <FaInstagram className="h-6 w-6" />
                                 </Link>
                             </div>
