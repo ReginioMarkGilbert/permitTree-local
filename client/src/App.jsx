@@ -17,7 +17,8 @@ import LandingPage from './pages/LandingPage';
 import AboutPage from './pages/AboutPage';
 import ServicesPage from './pages/ServicesPage';
 import ContactPage from './pages/ContactPage';
-import LearnMorePage from './pages/LearnMorePage'; // Import LearnMorePage
+import LearnMorePage from './pages/LearnMorePage';
+import UserProfilePage from './pages/user/UserProfilePage';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import UserApplicationsPage from './pages/user/UserApplicationsStatusPage';
@@ -63,7 +64,8 @@ const App = () => {
                         <Route path="/about" element={<AboutPage />} />
                         <Route path="/services" element={<ServicesPage />} />
                         <Route path="/contact" element={<ContactPage />} />
-                        <Route path="/learnMore" element={<LearnMorePage />} /> {/* Add the route for LearnMorePage */}
+                        <Route path="/learnMore" element={<LearnMorePage />} />
+                        <Route path="/profile" element={<UserProfilePage />} />
                     </Routes>
                 </div>
             </div>
