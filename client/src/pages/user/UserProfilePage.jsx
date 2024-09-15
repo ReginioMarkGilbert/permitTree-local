@@ -54,21 +54,7 @@ export default function Component() {
 
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
-            {/* Navbar */}
-            <nav className="bg-white shadow-md z-10 flex justify-between items-center p-4">
-                <div className="flex items-center space-x-2">
-                    <button
-                        onClick={() => setSidebarToggle(!sidebarToggle)}
-                        className="text-green-800 p-2 rounded-md hover:bg-gray-100"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                    </button>
-                    <Leaf className="h-8 w-8 text-green-600" />
-                    <span className="text-2xl font-bold text-green-800">PermitTree</span>
-                </div>
-            </nav>
+            
 
             {/* Main Content */}
             <div className="flex-grow flex items-center justify-center p-6">
