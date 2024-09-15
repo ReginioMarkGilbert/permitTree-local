@@ -124,15 +124,26 @@ const csaw_saveDraft = async (req, res) => {
 const csaw_getApplications = async (req, res) => {
     try {
         const { sort, status } = req.query;
+        let filter = {};
+
+        if (status) {
+            // Case-insensitive regex match for status
+            filter.status = { $regex: new RegExp(`^${status}$`, 'i') };
+        }
+
         let sortOption = {};
 
         if (sort === 'date-asc') {
-            sortOption = { dateOfSubmission: 1 };
+            sortOption.dateOfSubmission = 1;
         } else if (sort === 'date-desc') {
-            sortOption = { dateOfSubmission: -1 };
+            sortOption.dateOfSubmission = -1;
         }
 
-        const applications = await Application.find({ status }).sort(sortOption);
+        console.log('Filter:', filter); // Debug
+        console.log('Sort Option:', sortOption); // Debug
+
+        const applications = await Application.find(filter).sort(sortOption);
+        console.log('Applications Fetched:', applications); // Debug
         res.status(200).json(applications);
     } catch (err) {
         console.error('Error fetching applications:', err);

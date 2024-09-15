@@ -13,7 +13,7 @@ export default function HomePage() {
 
     const quickActions = [
         { title: "New Application", icon: <FaClipboardList className="h-6 w-6" />, link: "/permits" },
-        { title: "My Applications", icon: <FaClipboardList className="h-6 w-6" />, link: "/my-applications" },
+        { title: "My Applications", icon: <FaClipboardList className="h-6 w-6" />, link: "/applicationsStatus" },
         { title: "Notifications", icon: <FaBell className="h-6 w-6" />, link: "/notifications" },
         { title: "Profile", icon: <FaUser className="h-6 w-6" />, link: "/profile" },
     ];
@@ -74,8 +74,8 @@ export default function HomePage() {
                                             <p className="text-sm text-gray-500">Submitted: {app.date}</p>
                                         </div>
                                         <span className={`px-2 py-1 rounded-full text-xs ${app.status === "Approved" ? "bg-green-200 text-green-800" :
-                                                app.status === "Pending" ? "bg-yellow-200 text-yellow-800" :
-                                                    "bg-blue-200 text-blue-800"
+                                            app.status === "Pending" ? "bg-yellow-200 text-yellow-800" :
+                                                "bg-blue-200 text-blue-800"
                                             }`}>
                                             {app.status}
                                         </span>

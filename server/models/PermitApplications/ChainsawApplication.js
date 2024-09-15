@@ -1,9 +1,8 @@
 const mongoose = require('mongoose');
 
 const ChainsawApplicationSchema = new mongoose.Schema({
-    customId: { type: String, unique: true, required: true },
-    applicationType: { type: String, required: true, default: 'Chainsaw Registration' }, // Set default application type
-    registrationType: { type: String, required: true }, // New field for registration type
+    applicationType: { type: String, default: 'Chainsaw Registration', required: true },
+    registrationType: { type: String, required: true },
     chainsawStore: { type: String, required: true },
     ownerName: { type: String, required: true },
     address: { type: String, required: true },
@@ -16,8 +15,10 @@ const ChainsawApplicationSchema = new mongoose.Schema({
     maxLengthGuidebar: { type: String, required: true },
     countryOfOrigin: { type: String, required: true },
     purchasePrice: { type: Number, required: true },
-    dateOfSubmission: { type: Date, default: Date.now },
-    status: { type: String, required: true } // Add status field
-});
+    files: [{ type: String }],
+    dateOfSubmission: { type: Date, required: true },
+    status: { type: String, required: true },
+    uploadedRequirements: { type: String, default: 'No' }
+}, { timestamps: true });
 
 module.exports = mongoose.model('ChainsawApplication', ChainsawApplicationSchema);
