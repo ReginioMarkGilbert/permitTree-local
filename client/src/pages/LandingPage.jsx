@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom'; // Ensure this import is correct
 import { FaTree, FaShieldAlt, FaFileAlt, FaMapMarkerAlt, FaTruck, FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
 import { Button } from '../components/ui/Button';
 import Header from '../components/Header';
@@ -18,10 +18,14 @@ const LandingPage = () => {
                                 Streamlined permitting for tree-related activities. Protecting our environment, one permit at a time.
                             </p>
                             <div className="space-x-4">
-                                <Button className="bg-green-600 hover:bg-green-700 text-white">Get Started</Button>
-                                <Button variant="outline" className="border-green-600 text-green-600 hover:bg-green-100">
-                                    Learn More
-                                </Button>
+                                <Link to="/auth">
+                                    <Button className="bg-green-600 hover:bg-green-700 text-white">Get Started</Button>
+                                </Link>
+                                <Link to="/learnMore">
+                                    <Button variant="outline" className="border-green-600 text-green-600 hover:bg-green-100">
+                                        Learn More
+                                    </Button>
+                                </Link>
                             </div>
                         </div>
                     </div>

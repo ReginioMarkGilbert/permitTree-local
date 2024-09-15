@@ -17,6 +17,7 @@ import LandingPage from './pages/LandingPage';
 import AboutPage from './pages/AboutPage';
 import ServicesPage from './pages/ServicesPage';
 import ContactPage from './pages/ContactPage';
+import LearnMorePage from './pages/LearnMorePage'; // Import LearnMorePage
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import UserApplicationsPage from './pages/user/UserApplicationsStatusPage';
@@ -29,7 +30,7 @@ const App = () => {
     const userRole = getUserRole();
 
     useEffect(() => {
-        if (!isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/about' && location.pathname !== '/services' && location.pathname !== '/contact') {
+        if (!isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/about' && location.pathname !== '/services' && location.pathname !== '/contact' && location.pathname !== '/learnMore') {
             navigate('/auth');
         }
     }, [navigate, location.pathname]);
@@ -61,7 +62,8 @@ const App = () => {
                         <Route path="/unauthorized" element={<div>Unauthorized Access</div>} />
                         <Route path="/about" element={<AboutPage />} />
                         <Route path="/services" element={<ServicesPage />} />
-                        <Route path="/contact" element={<ContactPage />} /> {/* Add the route for ContactPage */}
+                        <Route path="/contact" element={<ContactPage />} />
+                        <Route path="/learnMore" element={<LearnMorePage />} /> {/* Add the route for LearnMorePage */}
                     </Routes>
                 </div>
             </div>
