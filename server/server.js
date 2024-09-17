@@ -41,6 +41,9 @@ app.use('/api', authRoutes);
 const adminRoutes = require('./routes/AdminRoutes/adminRoutes');
 app.use('/api/admin', adminRoutes);
 
+const contactRoutes = require('./routes/UserRoutes/contactRoutes');
+app.use('/api', contactRoutes);
+
 // Start the server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

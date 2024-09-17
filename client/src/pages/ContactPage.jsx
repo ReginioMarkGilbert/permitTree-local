@@ -1,13 +1,53 @@
-import React from 'react';
-// import Button from '../components/ui/Button';
+import React, { useState } from 'react';
 import Input from '../components/ui/Input';
-import Textarea from '../components/ui/Textarea';
 import { MapPin, Phone, Mail } from 'lucide-react';
 import Header from '../components/Header';
 import { FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
+
+const Textarea = ({ id, name, placeholder, rows, required, value, onChange }) => (
+    <textarea
+        id={id}
+        name={name}
+        placeholder={placeholder}
+        rows={rows}
+        required={required}
+        value={value}
+        onChange={onChange}
+        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+    />
+);
 
 const ContactPage = () => {
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
+    });
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        // console.log(`Changing ${name} to ${value}`);
+        setFormData({
+            ...formData,
+            [name]: value
+        });
+        // console.log('Updated formData:', formData);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        // console.log('Form Data:', formData);
+        try {
+            const response = await axios.post('http://localhost:3000/api/contact', formData);
+            alert(response.data.message);
+        } catch (error) {
+            alert('Failed to send message');
+        }
+    };
+
     return (
         <div className="flex flex-col min-h-screen bg-green-50">
             <Header />
@@ -40,22 +80,22 @@ const ContactPage = () => {
                             </div>
                         </div>
                         <div>
-                            <form className="space-y-4">
+                            <form className="space-y-4" onSubmit={handleSubmit}>
                                 <div>
                                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                                    <Input id="name" placeholder="Your Name" required />
+                                    <Input id="name" name="name" placeholder="Your Name" required value={formData.name} onChange={handleChange} />
                                 </div>
                                 <div>
                                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                    <Input id="email" type="email" placeholder="your@email.com" required />
+                                    <Input id="email" name="email" type="email" placeholder="your@email.com" required value={formData.email} onChange={handleChange} />
                                 </div>
                                 <div>
                                     <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
-                                    <Input id="subject" placeholder="Subject of your message" required />
+                                    <Input id="subject" name="subject" placeholder="Subject of your message" required value={formData.subject} onChange={handleChange} />
                                 </div>
                                 <div>
                                     <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">Message</label>
-                                    <Textarea id="message" placeholder="Your message here" rows={5} required />
+                                    <Textarea id="message" name="message" placeholder="Your message here" rows={5} required value={formData.message} onChange={handleChange} />
                                 </div>
                                 <button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded">Send Message</button>
                             </form>
