@@ -1,32 +1,34 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { setToken, getUserRole } from '../utils/auth';
+import AuthButton from '../components/ui/AuthButton';
+import Input from '../components/ui/Input';
+import Label from '../components/ui/Label';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs';
+import { FaLeaf } from 'react-icons/fa';
 import '../styles/UserAuthPage.css';
 
-
 const UserAuthPage = () => {
-    // Signup
+    const [activeTab, setActiveTab] = useState('signup');
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [passwordError, setPasswordError] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
-
-    // Login
     const [loginUsername, setLoginUsername] = useState('');
-    const [isLogin, setIsLogin] = useState(true);
+    const [loginPassword, setLoginPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [passwordError, setPasswordError] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
         if (firstName && lastName) {
             setUsername(`${firstName.toLowerCase()}_${lastName.toLowerCase()}`);
         } else {
-            setUsername(''); // This will clear the username if firstName or lastName is empty
+            setUsername('');
         }
     }, [firstName, lastName]);
 
@@ -44,7 +46,8 @@ const UserAuthPage = () => {
         validatePassword(newPassword);
     };
 
-    const handleSignup = async () => {
+    const handleSignup = async (e) => {
+        e.preventDefault();
         if (password !== confirmPassword) {
             toast.error('Passwords do not match.');
             return;
@@ -54,227 +57,140 @@ const UserAuthPage = () => {
             return;
         }
         try {
-            const apiUrl = window.location.hostname === 'localhost'
-                ? 'http://localhost:3000/api/signup'
-                : window.location.hostname === '192.168.1.12'
-                    ? 'http://192.168.1.12:3000/api/signup' // for other laptop
-                    : window.location.hostname === '192.168.1.15'
-                        ? 'http://192.168.1.15:3000/api/signup' // for new url
-                        : 'http://192.168.137.1:3000/api/signup'; // for mobile
-            const response = await axios.post(apiUrl, {
-                firstName, lastName, username, password,
+            const response = await axios.post('http://localhost:3000/api/signup', {
+                firstName,
+                lastName,
+                username,
+                password,
             });
-
             if (response.status === 201) {
                 const data = response.data;
                 setToken(data.token);
-                // console.log('Token immediately after setting:', localStorage.getItem('token')); // Debugging line
                 localStorage.setItem('user', JSON.stringify(data.user));
-                toast.success(`Signup successful!`, {
-                    position: "top-center",
+                toast.success('Signup successful!', {
+                    position: 'top-center',
                     autoClose: 500,
                     hideProgressBar: true,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    onClose: () => navigate('/home')
+                    onClose: () => {
+                        const userRole = getUserRole();
+                        navigate(userRole === 'admin' ? '/admin' : '/home', { replace: true });
+                    },
                 });
             } else {
                 toast.error('Signup failed: An error occurred');
             }
         } catch (error) {
-            if (axios.isAxiosError(error) && error.response) {
-                toast.error(`Signup failed: ${error.response.data.message}`);
-            } else {
-                toast.error('Signup failed: An error occurred');
-            }
+            toast.error('Signup failed: An error occurred');
         }
     };
 
-    const handleLogin = async () => {
+    const handleLogin = async (e) => {
+        e.preventDefault();
         try {
-            const apiUrl = window.location.hostname === 'localhost'
-                ? 'http://localhost:3000/api/login'
-                : window.location.hostname === '192.168.1.12'
-                    ? 'http://192.168.1.12:3000/api/login'
-                    : window.location.hostname === '192.168.1.15'
-                        ? 'http://192.168.1.15:3000/api/login'
-                        : 'http://192.168.137.1:3000/api/login';
-
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username: loginUsername, password })
+            const response = await axios.post('http://localhost:3000/api/login', {
+                username: loginUsername,
+                password: loginPassword,
             });
-
             if (response.status === 200) {
-                const data = await response.json();
+                const data = response.data;
                 setToken(data.token);
-
-                const userRole = getUserRole(); // Fetch the role from the token
+                localStorage.setItem('user', JSON.stringify(data.user));
                 toast.success('Login successful!', {
-                    position: "top-center",
+                    position: 'top-center',
                     autoClose: 500,
                     hideProgressBar: true,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    closeButton: false,
-                    style: {
-                        width: '200px',
-                        fontSize: '16px',
-                        marginLeft: 'auto',
-                        marginRight: 'auto',
-                    },
-                    // onClose: () => navigate('/home')
                     onClose: () => {
-                        navigate(userRole === 'admin' ? '/admin' : '/home'); // if admin, navigate to admin page, else (if user) navigate to home page
-                    }
+                        const userRole = getUserRole();
+                        navigate(userRole === 'admin' ? '/admin' : '/home', { replace: true });
+                    },
                 });
             } else {
-                const errorData = await response.json();
-                toast.error(`Login failed: ${errorData.message}`);
+                toast.error('Login failed: Invalid username or password');
             }
         } catch (error) {
-            console.log("Login Error: ", error);
             toast.error('Login failed: An error occurred');
         }
     };
 
-
-    const handleSwitchToSignup = () => {
-        setIsLogin(false);
-        setPassword('');
-        setConfirmPassword('');
-    };
-
-    const handleSwitchToLogin = () => {
-        setIsLogin(true);
-        setPassword('');
-    };
-
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
-            <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md">
-                {isLogin ? (
-                    <>
-                        <h1 className="text-2xl font-bold mb-6">Login</h1>
-                        <div className="input-container">
-                            <input
-                                type="text"
-                                id="loginUsername"
-                                value={loginUsername}
-                                onChange={(e) => setLoginUsername(e.target.value)}
-                                className="w-full p-2 mb-4 border rounded input-field"
-                            />
-                            <label htmlFor="loginUsername" className="input-label">Username</label>
-                        </div>
-                        <div className="input-container relative">
-                            <label htmlFor="password" className="input-label">Password</label>
-                            <input
-                                type={showPassword ? 'text' : 'password'}
-                                id="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full p-2 mb-4 border rounded input-field"
-                            />
-                            <div className="flex items-center">
-                                <input
-                                    type="checkbox"
-                                    id="showPassword"
-                                    checked={showPassword}
-                                    onChange={() => setShowPassword(!showPassword)}
-                                    className="mr-2"
-                                />
-                                <label htmlFor="showPassword" className="text-sm text-gray-600">Show password</label>
-                            </div>
-
-                        </div>
-                        <button onClick={handleLogin} className="w-full bg-blue-500 text-white p-2 rounded">Login</button>
-                        <p className="mt-4 text-center">Don't have an account? <span onClick={handleSwitchToSignup} className="text-blue-500 hover:text-blue-700 cursor-pointer">Sign Up</span></p>
-                    </>
-                ) : (
-                    <>
-                        <h1 className="text-2xl font-bold mb-6">Sign Up</h1>
-                        <div className="flex justify-between space-x-4">
-                            <div className="input-container w-1/2">
-                                <label htmlFor="firstName" className="input-label">First Name</label>
-                                <input
-                                    type="text"
-                                    id="firstName"
-                                    value={firstName}
-                                    onChange={(e) => setFirstName(e.target.value)}
-                                    className="w-full p-2 mb-4 border rounded input-field"
-                                />
-                            </div>
-
-                            <div className="input-container w-1/2">
-                                <label htmlFor="lastName" className="input-label">Last Name</label>
-                                <input
-                                    type="text"
-                                    id="lastName"
-                                    value={lastName}
-                                    onChange={(e) => setLastName(e.target.value)}
-                                    className="w-full p-2 mb-4 border rounded input-field"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="input-container">
-                            <label htmlFor="username" className="input-label">Generated Username</label>
-                            <input
-                                type="text"
-                                id="username"
-                                value={username}
-                                // readOnly
-                                className="w-full p-2 mb-4 border rounded input-field"
-                            />
-                        </div>
-
-                        {passwordError && <div className="text-red-500 text-sm mb-4">{passwordError}</div>}
-
-                        <div className="input-container">
-                            <label htmlFor="passwordSignup" className="input-label">Password</label>
-                            <input
-                                type={showPassword ? 'text' : 'password'}
-                                id="passwordSignup"
-                                value={password}
-                                onChange={handlePasswordChange}
-                                className="w-full p-2 mb-4 border rounded input-field"
-                            />
-                        </div>
-
-                        <div className="input-container">
-                            <label htmlFor="confirmPassword" className="input-label">Confirm Password</label>
-                            <input
-                                type={showPassword ? 'text' : 'password'}
-                                id="confirmPassword"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="w-full p-2 mb-4 border rounded input-field"
-                            />
-                            <div className="flex items-center">
-                                <input
-                                    type="checkbox"
-                                    id="showPassword"
-                                    checked={showPassword}
-                                    onChange={() => setShowPassword(!showPassword)}
-                                    className="mr-2"
-                                />
-                                <label htmlFor="showPassword" className="text-sm text-gray-600">Show password</label>
-                            </div>
-                        </div>
-
-                        <button onClick={handleSignup} className="w-full bg-blue-500 text-white p-2 rounded">Sign Up</button>
-                        <p className="mt-4 text-center">Already have an account? <span onClick={handleSwitchToLogin} className="text-blue-500 hover:text-blue-700 cursor-pointer">Login</span></p>
-                    </>
-                )}
-                <ToastContainer />
-            </div>
+        <div className="flex flex-col min-h-screen bg-green-50">
+            <header className="bg-white shadow-sm w-full">
+                <div className="container mx-auto px-4">
+                    <div className="flex items-center justify-between h-16">
+                        <Link className="flex items-center justify-center" to="/">
+                            <FaLeaf className="h-6 w-6 text-green-600" />
+                            <span className="ml-2 text-xl font-bold text-green-800">PermitTree</span>
+                        </Link>
+                    </div>
+                </div>
+            </header>
+            <main className="flex-1 flex items-center justify-center">
+                <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
+                    <Tabs defaultValue={activeTab} className="w-full">
+                        <TabsList className="grid w-full grid-cols-2 mb-8">
+                            <TabsTrigger value="signup" onClick={() => setActiveTab('signup')}>Sign Up</TabsTrigger>
+                            <TabsTrigger value="signin" onClick={() => setActiveTab('signin')}>Sign In</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="signup">
+                            <form className="space-y-4 pt-2" onSubmit={handleSignup}>
+                                <div className="space-y-2">
+                                    <Label htmlFor="first-name">First name</Label>
+                                    <Input id="first-name" placeholder="John" required value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="last-name">Last name</Label>
+                                    <Input id="last-name" placeholder="Doe" required value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="username">Generated Username</Label>
+                                    <Input id="username" placeholder="john_doe" required value={username} readOnly />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="password">Password</Label>
+                                    <div className="input-container relative">
+                                        <Input id="password" required type={showPassword ? 'text' : 'password'} value={password} onChange={handlePasswordChange} />
+                                    </div>
+                                    {passwordError && <div className="text-red-500 text-sm">{passwordError}</div>}
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="confirm-password">Confirm Password</Label>
+                                    <Input id="confirm-password" required type={showPassword ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                                    <div className="flex items-center">
+                                        <input type="checkbox" id="showPassword" checked={showPassword} onChange={() => setShowPassword(!showPassword)} className="mr-2" />
+                                        <label htmlFor="showPassword" className="text-sm text-gray-600">Show password</label>
+                                    </div>
+                                </div>
+                                <AuthButton className="w-full text-white bg-green-600 hover:bg-green-700">Sign Up</AuthButton>
+                                <p className="mt-4 text-center">Already have an account? <span onClick={() => setActiveTab('signin')} className="text-blue-500 hover:text-blue-700 cursor-pointer">Sign In</span></p>
+                            </form>
+                        </TabsContent>
+                        <TabsContent value="signin">
+                            <form className="space-y-4" onSubmit={handleLogin}>
+                                <div className="space-y-2">
+                                    <Label htmlFor="login-username">Username</Label>
+                                    <Input id="login-username" placeholder="john_doe" required value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="password">Password</Label>
+                                    <div className="input-container relative">
+                                        <Input id="password-signin" required type={showPassword ? 'text' : 'password'} value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} />
+                                        <div className="flex items-center pt-2">
+                                            <input type="checkbox" id="showPassword" checked={showPassword} onChange={() => setShowPassword(!showPassword)} className="mr-2" />
+                                            <label htmlFor="showPassword" className="text-sm text-gray-600">Show password</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <AuthButton className="w-full rounded-md text-white bg-green-600 hover:bg-green-700">Sign In</AuthButton>
+                                <p className="mt-4 text-center">Don't have an account? <span onClick={() => setActiveTab('signup')} className="text-blue-500 hover:text-blue-700 cursor-pointer">Sign Up</span></p>
+                            </form>
+                        </TabsContent>
+                    </Tabs>
+                </div>
+            </main>
+            <footer className="py-6 text-center bg-green-800 text-white">
+                <p className="text-sm">&copy; 2023 DENR-PENRO. All rights reserved.</p>
+            </footer>
+            <ToastContainer />
         </div>
     );
 };

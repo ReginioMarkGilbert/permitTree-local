@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaBars, FaTimes } from 'react-icons/fa';
-// import '../../styles/Navbar.css';
+import { Leaf } from 'lucide-react';
 
 const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
     const handleToggle = () => {
@@ -8,11 +8,17 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
     };
 
     return (
-        <nav className="bg-gray-800 text-white p-4 fixed top-0 left-0 right-0 z-10 flex items-center" style={{ background: 'linear-gradient(90deg, #4a6b4a, #334b17)', zIndex: 1000 }}>
-            <button className="ml-2 p-2" onClick={handleToggle}>
-                {sidebarToggle ? <FaTimes size={20} /> : <FaBars size={20} />}
-            </button>
-            <h1 className="text-lg font-semibold ml-4">DENR PENRO Permit Issuance</h1>
+        <nav className="bg-white text-green-800 shadow-md z-10 fixed top-0 left-0 right-0 flex justify-between items-center p-4">
+            <div className="flex items-center space-x-2">
+                <div
+                    onClick={handleToggle}
+                    className="text-green-800 py-2 px-4 rounded cursor-pointer"
+                >
+                    {sidebarToggle ? <FaTimes size={20} /> : <FaBars size={20} />}
+                </div>
+                <Leaf className="h-8 w-8 text-green-600" />
+                <span className="text-2xl font-bold text-green-800">PermitTree</span>
+            </div>
         </nav>
     );
 };

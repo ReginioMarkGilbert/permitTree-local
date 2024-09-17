@@ -1,23 +1,25 @@
 const mongoose = require('mongoose');
 
 const ChainsawApplicationSchema = new mongoose.Schema({
-    customId: { type: String, unique: true },
-    store: { type: mongoose.Schema.Types.Mixed, required: true },
-    // Owner details
-    name: { type: String, required: true },
+    customId: { type: String, unique: true }, // Add this line
+    applicationType: { type: String, default: 'Chainsaw Registration', required: true },
+    registrationType: { type: String, required: true },
+    chainsawStore: { type: String, required: true },
+    ownerName: { type: String, required: true },
     address: { type: String, required: true },
     phone: { type: String, required: true },
-    fileNames: { type: [String], default: [] },
-    // chainsaw details
-    brand: { type: mongoose.Schema.Types.Mixed, required: true },
-    model: { type: mongoose.Schema.Types.Mixed, required: true },
-    serialNumber: { type: mongoose.Schema.Types.Mixed, required: true },
+    brand: { type: String, required: true },
+    model: { type: String, required: true },
+    serialNumber: { type: String, required: true },
     dateOfAcquisition: { type: Date, required: true },
-    powerOutput: { type: mongoose.Schema.Types.Mixed, required: true },
-    dateOfSubmission: { type: Date, default: Date.now },
-    status: { type: String, default: 'For Review' }
-});
+    powerOutput: { type: String, required: true },
+    maxLengthGuidebar: { type: String, required: true },
+    countryOfOrigin: { type: String, required: true },
+    purchasePrice: { type: Number, required: true },
+    files: [{ type: String }],
+    dateOfSubmission: { type: Date, required: true },
+    status: { type: String, required: true },
+    uploadedRequirements: { type: String, default: 'No' }
+}, { timestamps: true });
 
-const ChainsawApplication = mongoose.model('ChainsawApplication', ChainsawApplicationSchema);
-
-module.exports = ChainsawApplication;
+module.exports = mongoose.model('ChainsawApplication', ChainsawApplicationSchema);

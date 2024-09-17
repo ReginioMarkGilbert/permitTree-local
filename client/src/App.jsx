@@ -6,7 +6,6 @@ import AdminSidebar from './components/layout/AdminSidebar';
 import HomePage from './pages/user/HomePage';
 import AdminPage from './pages/admin/AdminPage';
 import PermitsPage from './pages/user/PermitsPage';
-import StoreSelectionPage from './pages/user/StoreSelectionPage';
 import ApplicationForm from './pages/user/ApplicationForm';
 import MessageBox from './pages/user/MessageBox';
 import StatusPage from './pages/user/StatusPage';
@@ -14,7 +13,15 @@ import UserAuthPage from './pages/UserAuthPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { isAuthenticated, getUserRole } from './utils/auth';
 import useSidebarToggle from './hooks/useSidebarToggle';
-import useApplicationHandlers from './hooks/useApplicationHandlers';
+import LandingPage from './pages/LandingPage';
+import AboutPage from './pages/AboutPage';
+import ServicesPage from './pages/ServicesPage';
+import ContactPage from './pages/ContactPage';
+import LearnMorePage from './pages/LearnMorePage';
+import UserProfilePage from './pages/user/UserProfilePage';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import UserApplicationsPage from './pages/user/UserApplicationsStatusPage';
 
 const App = () => {
     const { sidebarToggle, toggleSidebar } = useSidebarToggle();
@@ -22,22 +29,16 @@ const App = () => {
     const location = useLocation();
     const [selectedStore, setSelectedStore] = useState(null);
     const userRole = getUserRole();
-    // const { handleSubmitApplication, handleViewStatus } = useApplicationHandlers();
 
     useEffect(() => {
-        if (!isAuthenticated()) {
+        if (!isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/about' && location.pathname !== '/services' && location.pathname !== '/contact' && location.pathname !== '/learnMore') {
             navigate('/auth');
         }
-    }, [navigate]);
-
-    const handleStoreSelection = (store) => {
-        setSelectedStore(store);
-        navigate(`/apply/${store}`);
-    };
+    }, [navigate, location.pathname]);
 
     return (
         <div className="flex">
-            {isAuthenticated() && location.pathname !== '/auth' && (
+            {isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && (
                 <>
                     {userRole === 'admin' ? (
                         <AdminSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
@@ -50,21 +51,25 @@ const App = () => {
             <div className={`flex-1 transition-all duration-300 ${sidebarToggle ? 'ml-64' : 'ml-0'}`}>
                 <div className="p-0">
                     <Routes>
-                        <Route path="/" element={<Navigate replace to="/auth" />} />
+                        <Route path="/" element={<LandingPage />} />
                         <Route path="/auth" element={<UserAuthPage />} />
                         <Route path="/home" element={<ProtectedRoute roles={['user']}><HomePage /></ProtectedRoute>} />
                         <Route path="/permits" element={<ProtectedRoute roles={['user']}><PermitsPage /></ProtectedRoute>} />
-                        <Route path="/apply" element={<ProtectedRoute roles={['user']}><StoreSelectionPage onContinue={handleStoreSelection} /></ProtectedRoute>} />
+                        <Route path="/applicationsStatus" element={<ProtectedRoute roles={['user']}><UserApplicationsPage /></ProtectedRoute>} />
                         <Route path="/apply/:formType" element={<ProtectedRoute roles={['user']}><ApplicationForm /></ProtectedRoute>} />
                         <Route path="/message" element={<ProtectedRoute roles={['user']}><MessageBox /></ProtectedRoute>} />
                         <Route path="/status" element={<ProtectedRoute roles={['user']}><StatusPage /></ProtectedRoute>} />
-
                         <Route path="/admin" element={<ProtectedRoute roles={['admin']}><AdminPage /></ProtectedRoute>} />
-
                         <Route path="/unauthorized" element={<div>Unauthorized Access</div>} />
+                        <Route path="/about" element={<AboutPage />} />
+                        <Route path="/services" element={<ServicesPage />} />
+                        <Route path="/contact" element={<ContactPage />} />
+                        <Route path="/learnMore" element={<LearnMorePage />} />
+                        <Route path="/profile" element={<UserProfilePage />} />
                     </Routes>
                 </div>
             </div>
+            <ToastContainer />
         </div>
     );
 };

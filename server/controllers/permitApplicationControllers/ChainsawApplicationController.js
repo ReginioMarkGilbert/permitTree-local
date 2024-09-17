@@ -1,35 +1,127 @@
+const multer = require('multer');
+const path = require('path');
 const Application = require('../../models/PermitApplications/ChainsawApplication');
 const Notification = require('../../models/User/Notification');
 const Counter = require('../../models/admin/counter');
 
-const csaw_createApplication = async (req, res) => {
-    try {
-        console.log('Request Body:', req.body); // Log the request body
-        const { name, address, phone, brand, model, serialNumber, dateOfAcquisition, powerOutput, fileNames, store } = req.body;
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${Date.now()}-${file.originalname}`);
+    }
+});
 
-        // Generate custom ID
-        const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
+const upload = multer({ storage });
+
+const CSAW_CustomId = async () => {
+    try {
         const counter = await Counter.findOneAndUpdate(
-            { name: 'applicationId' },
+            { _id: 'applicationId' },
             { $inc: { seq: 1 } },
             { new: true, upsert: true }
         );
-        const year = new Date().getFullYear();
-        const customId = `PMDQ-CSAW-${year}-${String(counter.seq).padStart(6, '0')}`;
 
-        const dateOfSubmission = new Date();
-        const newApplication = new Application({
-            customId, name, address, phone, brand, model, serialNumber, dateOfAcquisition, powerOutput, fileNames, store, dateOfSubmission
+        const date = new Date();
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const id = String(counter.seq).padStart(6, '0');
+
+        const customId = `PMDQ-CSAW-${year}-${month}${day}-${id}`;
+        console.log('Generated customId:', customId);
+        return customId;
+    } catch (error) {
+        console.error('Error generating customId:', error);
+        throw error;
+    }
+};
+
+const csaw_createApplication = async (req, res) => {
+    upload.single('file')(req, res, async (err) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+
+        try {
+            console.log('Request body:', req.body); // Log the request body
+
+            const { applicationType = 'Chainsaw Registration', registrationType, chainsawStore, ownerName, address, phone, brand, model, serialNumber, dateOfAcquisition, powerOutput, maxLengthGuidebar, countryOfOrigin, purchasePrice, dateOfSubmission, status } = req.body;
+
+            // Ensure dateOfSubmission is a valid date
+            const parsedDateOfSubmission = Array.isArray(dateOfSubmission) ? new Date(dateOfSubmission[1]) : new Date(dateOfSubmission);
+
+            if (isNaN(parsedDateOfSubmission)) {
+                throw new Error('Invalid dateOfSubmission');
+            }
+
+            // Generate customId
+            const customId = await CSAW_CustomId();
+
+            // Create a new application
+            const newApplication = new Application({
+                customId, // Add the customId to the application object
+                applicationType,
+                registrationType, // Include registrationType
+                chainsawStore,
+                ownerName,
+                address,
+                phone,
+                brand,
+                model,
+                serialNumber,
+                dateOfAcquisition,
+                powerOutput,
+                maxLengthGuidebar,
+                countryOfOrigin,
+                purchasePrice,
+                dateOfSubmission: parsedDateOfSubmission, // Use the parsed date
+                status // Set the status field
+            });
+
+            // Save the application to the database
+            await newApplication.save();
+            console.log('Application saved:', newApplication); // Log the saved application
+
+            res.status(201).json({ message: 'Application created successfully', application: newApplication });
+        } catch (error) {
+            console.error('Error creating application:', error); // Log the error message
+            res.status(500).json({ error: error.message });
+        }
+    });
+};
+
+const csaw_saveDraft = async (req, res) => {
+    try {
+        const { applicationType = 'Chainsaw Registration', registrationType, chainsawStore, ownerName, address, phone, brand, model, serialNumber, dateOfAcquisition, powerOutput, maxLengthGuidebar, countryOfOrigin, purchasePrice, dateOfSubmission, status } = req.body;
+
+        // Generate customId
+        const customId = await generateCustomId();
+
+        const newDraft = new Application({
+            customId,
+            applicationType,
+            registrationType,
+            chainsawStore,
+            ownerName,
+            address,
+            phone,
+            brand,
+            model,
+            serialNumber,
+            dateOfAcquisition,
+            powerOutput,
+            maxLengthGuidebar,
+            countryOfOrigin,
+            purchasePrice,
+            dateOfSubmission,
+            status
         });
-        const savedApplication = await newApplication.save();
+        const savedDraft = await newDraft.save();
 
-        const notification = new Notification({
-            message: 'Your application was successfully submitted.'
-        });
-        await notification.save();
-        console.log('Notification created:', notification); // Log the notification
-
-        res.status(201).json(savedApplication);
+        res.status(201).json(savedDraft);
     } catch (err) {
         console.error('Error:', err);
         res.status(400).json({ error: err.message });
@@ -38,18 +130,30 @@ const csaw_createApplication = async (req, res) => {
 
 const csaw_getApplications = async (req, res) => {
     try {
-        const { sort } = req.query;
+        const { sort, status } = req.query;
+        let filter = {};
+
+        if (status) {
+            // Case-insensitive regex match for status
+            filter.status = { $regex: new RegExp(`^${status}$`, 'i') };
+        }
+
         let sortOption = {};
 
         if (sort === 'date-asc') {
-            sortOption = { dateOfSubmission: 1 };
+            sortOption.dateOfSubmission = 1;
         } else if (sort === 'date-desc') {
-            sortOption = { dateOfSubmission: -1 };
+            sortOption.dateOfSubmission = -1;
         }
 
-        const applications = await Application.find().sort(sortOption);
+        console.log('Filter:', filter); // Debug
+        console.log('Sort Option:', sortOption); // Debug
+
+        const applications = await Application.find(filter).sort(sortOption);
+        console.log('Applications Fetched:', applications); // Debug
         res.status(200).json(applications);
     } catch (err) {
+        console.error('Error fetching applications:', err);
         res.status(400).json({ error: err.message });
     }
 };
@@ -57,8 +161,8 @@ const csaw_getApplications = async (req, res) => {
 const csaw_updateApplication = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, address, phone, brand, model, serialNumber, dateOfAcquisition, powerOutput, status, fileNames, store } = req.body;
-        const updatedApplication = await Application.findByIdAndUpdate(id, { name, address, phone, brand, model, serialNumber, dateOfAcquisition, powerOutput, status, fileNames, store }, { new: true });
+        const { registrationType, chainsawStore, ownerName, address, phone, brand, model, serialNumber, dateOfAcquisition, powerOutput, maxLengthGuidebar, countryOfOrigin, purchasePrice, status, dateOfSubmission } = req.body;
+        const updatedApplication = await Application.findByIdAndUpdate(id, { registrationType, chainsawStore, ownerName, address, phone, brand, model, serialNumber, dateOfAcquisition, powerOutput, maxLengthGuidebar, countryOfOrigin, purchasePrice, status, dateOfSubmission }, { new: true });
         if (!updatedApplication) {
             return res.status(404).json({ error: 'Application not found' });
         }
@@ -88,9 +192,26 @@ const csaw_deleteApplication = async (req, res) => {
     }
 };
 
+const resetCounter = async (req, res) => {
+    try {
+        await Counter.findOneAndUpdate(
+            { _id: 'applicationId' },
+            { seq: 0 },
+            { new: true, upsert: true }
+        );
+
+        res.status(200).json({ message: 'Counter reset successfully' });
+    } catch (error) {
+        console.error('Error resetting counter:', error);
+        res.status(500).json({ error: 'Failed to reset counter' });
+    }
+};
+
 module.exports = {
     csaw_createApplication,
     csaw_getApplications,
     csaw_updateApplication,
-    csaw_deleteApplication
+    csaw_deleteApplication,
+    csaw_saveDraft,
+    resetCounter
 };

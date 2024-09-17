@@ -24,22 +24,25 @@ app.use(session({
 app.use(passport.initialize());
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/PermiTree-db')
+mongoose.connect('mongodb://localhost:27017/PermiTree-db', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
     .then(() => console.log('MongoDB connected...'))
     .catch(err => console.log(err));
 
 // Routes
-const chainsawRoutes = require('./routes/PermitApplicationsRoutes/chainsaw_Routes');
+const chainsawRoutes = require('./routes/PermitApplicationsRoutes/chainsawApplicationRoutes');
 app.use('/api', chainsawRoutes);
-// const userProfileRoutes = require('./routes/userProfileRoutes');
-// app.use('/api', userProfileRoutes);
+
 const authRoutes = require('./routes/UserRoutes/userAuthRoutes');
 app.use('/api', authRoutes);
-// const notificationRoutes = require('./routes/notificationRoutes');
-// app.use('/api', notificationRoutes);
 
 const adminRoutes = require('./routes/AdminRoutes/adminRoutes');
 app.use('/api/admin', adminRoutes);
+
+const contactRoutes = require('./routes/UserRoutes/contactRoutes');
+app.use('/api', contactRoutes);
 
 // Start the server
 const port = process.env.PORT || 3000;
