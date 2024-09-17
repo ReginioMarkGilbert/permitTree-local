@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';  // Import useLocation for reading query params
 import axios from 'axios';
 import { Button } from '../../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
@@ -10,11 +11,11 @@ export default function HomePage() {
     const [recentApplications, setRecentApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [user, setUser] = useState({ firstName: '', lastName: '' });
 
-    const user = {
-        name: "Juan Dela Cruz",
-        avatar: "/placeholder.svg?height=40&width=40",
-    };
+    const location = useLocation();  // Use location to get the query parameter
+    const queryParams = new URLSearchParams(location.search);
+    const isNewUser = queryParams.get('newUser') === 'true';  // Check if the user is new
 
     const quickActions = [
         { title: "New Application", icon: <FaClipboardList className="h-6 w-6" />, link: "/permits" },
@@ -36,6 +37,7 @@ export default function HomePage() {
 
     useEffect(() => {
         fetchRecentApplications();
+        fetchUserDetails();
     }, []);
 
     const fetchRecentApplications = async () => {
@@ -47,12 +49,24 @@ export default function HomePage() {
             });
             setRecentApplications(response.data);
             setLoading(false);
-            // toast.success('Recent applications fetched successfully.');
         } catch (err) {
-            // console.error('Error fetching recent applications:', err);
             toast.error('Failed to fetch recent applications.');
             setError('Failed to fetch recent applications.');
             setLoading(false);
+        }
+    };
+
+    const fetchUserDetails = async () => {
+        try {
+            const response = await axios.get('http://localhost:3000/api/user-details', {
+                headers: {
+                    Authorization: localStorage.getItem('token')
+                }
+            });
+            setUser(response.data.user);
+        } catch (err) {
+            console.error('Error fetching user details:', err);
+            toast.error('Failed to fetch user details.');
         }
     };
 
@@ -60,7 +74,9 @@ export default function HomePage() {
         <div className="min-h-screen bg-green-50 flex flex-col pt-16">
             <ToastContainer />
             <main className="flex-grow p-8">
-                <h1 className="text-3xl font-bold text-green-800 mb-6">Welcome back, {user.name}!</h1>
+                <h1 className="text-3xl font-bold text-green-800 mb-6">
+                    {isNewUser ? "Welcome" : "Welcome back"}, {user.firstName} {user.lastName}!
+                </h1>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     {quickActions.map((action, index) => (
@@ -109,37 +125,22 @@ export default function HomePage() {
                                     ))}
                                 </div>
                             )}
-                            <Button className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white">
-                                View All Applications
-                            </Button>
+                            <Button className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white">View All Applications</Button>
                         </CardContent>
                     </Card>
-
                     <Card className="bg-white">
                         <CardHeader>
-                            <CardTitle className="text-green-800">Important Announcements</CardTitle>
+                            <CardTitle className="text-green-800">Notifications</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="space-y-4">
-                                <div className="bg-green-100 border-l-4 border-green-500 p-4">
-                                    <p className="font-semibold text-green-800">System Maintenance</p>
-                                    <p className="text-sm text-green-700">PermitTree will be undergoing maintenance on June 1, 2023, from 10 PM to 2 AM.</p>
-                                </div>
-                                <div className="bg-green-100 border-l-4 border-green-500 p-4">
-                                    <p className="font-semibold text-green-800">New Regulation Update</p>
-                                    <p className="text-sm text-green-700">Updated guidelines for Chainsaw Registration will be effective starting July 1, 2023.</p>
-                                </div>
+                            <div className="bg-green-100 border-l-4 border-green-500 p-4">
+                                <p className="font-semibold text-green-800">New Features Released</p>
+                                <p className="text-sm text-green-700">We have added new features to improve your experience!</p>
                             </div>
                         </CardContent>
                     </Card>
                 </div>
             </main>
-
-            <footer className="bg-green-800 text-white py-4">
-                <div className="container mx-auto px-4 text-center text-sm">
-                    <p>&copy; 2023 PermitTree - DENR-PENRO. All rights reserved.</p>
-                </div>
-            </footer>
         </div>
     );
 }

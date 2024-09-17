@@ -73,7 +73,8 @@ const UserAuthPage = () => {
                     hideProgressBar: true,
                     onClose: () => {
                         const userRole = getUserRole();
-                        navigate(userRole === 'admin' ? '/admin' : '/home', { replace: true });
+                        // Add a flag for new users
+                        navigate(userRole === 'admin' ? '/admin' : '/home?newUser=true', { replace: true });
                     },
                 });
             } else {
@@ -101,7 +102,8 @@ const UserAuthPage = () => {
                     hideProgressBar: true,
                     onClose: () => {
                         const userRole = getUserRole();
-                        navigate(userRole === 'admin' ? '/admin' : '/home', { replace: true });
+                        // Add a flag for returning users
+                        navigate(userRole === 'admin' ? '/admin' : '/home?newUser=false', { replace: true });
                     },
                 });
             } else {
@@ -111,6 +113,7 @@ const UserAuthPage = () => {
             toast.error('Login failed: An error occurred');
         }
     };
+
 
     return (
         <div className="flex flex-col min-h-screen bg-green-50">

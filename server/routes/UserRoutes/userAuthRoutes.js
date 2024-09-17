@@ -1,6 +1,6 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
-const { signup, login, logout } = require('../../controllers/userControllers/userAuthControllers');
+const { signup, login, logout, getUserDetails } = require('../../controllers/userControllers/userAuthControllers');
 const roleMiddleware = require('../../middleware/roleMiddleware');
 const passport = require('passport');
 const router = express.Router();
@@ -24,6 +24,8 @@ const validateSignup = [
 router.post('/signup', validateSignup, signup);
 router.post('/login', login);
 router.get('/logout', logout);
+// Add a new route to get user details, protected by JWT
+router.get('/user-details', passport.authenticate('jwt', { session: false }), getUserDetails);
 
 // Protect routes with JWT
 router.get('/protected', passport.authenticate('jwt', { session: false }), (req, res) => {

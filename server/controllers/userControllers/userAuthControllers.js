@@ -122,9 +122,25 @@ const createAdmin = async (req, res) => {
     }
 };
 
+const getUserDetails = async (req, res) => {
+    try {
+        // Assuming the user ID is in the JWT token payload
+        const userId = req.user.id;
+        const user = await User.findById(userId).select('firstName lastName');
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.status(200).json({ user });
+    } catch (err) {
+        console.error('Error fetching user details:', err);
+        res.status(500).json({ message: 'Error fetching user details' });
+    }
+};
+
 module.exports = {
     signup,
     login,
     logout,
-    createAdmin // Add this line to export the createAdmin function
+    createAdmin,
+    getUserDetails
 };
