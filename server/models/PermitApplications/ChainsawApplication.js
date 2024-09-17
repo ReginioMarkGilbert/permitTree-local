@@ -19,7 +19,8 @@ const ChainsawApplicationSchema = new mongoose.Schema({
     files: [{ type: String }],
     dateOfSubmission: { type: Date, required: true },
     status: { type: String, required: true },
-    uploadedRequirements: { type: String, default: 'No' }
+    uploadedRequirements: { type: String, default: 'No' },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
 }, { timestamps: true });
 
 module.exports = mongoose.model('ChainsawApplication', ChainsawApplicationSchema);

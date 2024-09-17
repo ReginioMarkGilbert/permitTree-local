@@ -18,8 +18,14 @@ const UserApplicationsStatusPage = () => {
 
     const fetchApplications = async () => {
         try {
+            const token = localStorage.getItem('token');
             const params = { status: activeTab.toLowerCase() };
-            const response = await axios.get('http://localhost:3000/api/csaw_getApplications', { params });
+            const response = await axios.get('http://localhost:3000/api/csaw_getApplications', {
+                params,
+                headers: {
+                    'Authorization': token
+                }
+            });
 
             let filteredApps = response.data.filter(app =>
                 (searchTerm === '' || app.customId.toLowerCase().includes(searchTerm.toLowerCase()) || app.applicationType.toLowerCase().includes(searchTerm.toLowerCase())) &&

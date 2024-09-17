@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';  // Import useLocation for reading query params
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from '../../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
@@ -42,25 +42,29 @@ export default function HomePage() {
 
     const fetchRecentApplications = async () => {
         try {
+            const token = localStorage.getItem('token');
             const response = await axios.get('http://localhost:3000/api/csaw_getApplications', {
                 params: {
                     status: ['Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected']
+                },
+                headers: {
+                    'Authorization': token
                 }
             });
             setRecentApplications(response.data);
             setLoading(false);
         } catch (err) {
-            toast.error('Failed to fetch recent applications.');
-            setError('Failed to fetch recent applications.');
+            console.log('Error fetching recent applications:', err);
             setLoading(false);
         }
     };
 
     const fetchUserDetails = async () => {
         try {
+            const token = localStorage.getItem('token'); // Get the token from local storage
             const response = await axios.get('http://localhost:3000/api/user-details', {
                 headers: {
-                    Authorization: localStorage.getItem('token')
+                    Authorization: token // Include the token in the headers
                 }
             });
             setUser(response.data.user);
@@ -133,14 +137,25 @@ export default function HomePage() {
                             <CardTitle className="text-green-800">Notifications</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="bg-green-100 border-l-4 border-green-500 p-4">
-                                <p className="font-semibold text-green-800">New Features Released</p>
-                                <p className="text-sm text-green-700">We have added new features to improve your experience!</p>
+                            <div className="space-y-4">
+                                <div className="bg-green-100 border-l-4 border-green-500 p-4">
+                                    <p className="font-semibold text-green-800">System Maintenance</p>
+                                    <p className="text-sm text-green-700">PermitTree will be undergoing maintenance on June 1, 2023, from 10 PM to 2 AM.</p>
+                                </div>
+                                <div className="bg-green-100 border-l-4 border-green-500 p-4">
+                                    <p className="font-semibold text-green-800">New Regulation Update</p>
+                                    <p className="text-sm text-green-700">Updated guidelines for Chainsaw Registration will be effective starting July 1, 2023.</p>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
                 </div>
             </main>
+            <footer className="bg-green-800 text-white py-4">
+                <div className="container mx-auto px-4 text-center text-sm">
+                    <p>&copy; 2023 PermitTree - DENR-PENRO. All rights reserved.</p>
+                </div>
+            </footer>
         </div>
     );
 }

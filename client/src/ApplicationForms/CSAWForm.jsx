@@ -95,13 +95,19 @@ const ChainsawRegistrationForm = () => {
 
     const handleSaveAsDraft = async () => {
         try {
-            const response = await axios.post('http://localhost:3000/api/csaw_saveDraft', { ...formData, status: 'Draft' });
+            const token = localStorage.getItem('token'); // Get the token from local storage
+            const response = await axios.post('http://localhost:3000/api/csaw_saveDraft', { ...formData, status: 'Draft' }, {
+                headers: {
+                    'Authorization': token // Include the token in the headers
+                }
+            });
             setModalContent({
                 title: 'Draft saved successfully!',
                 message: 'Do you want to view your application?'
             });
             setModalOpen(true);
         } catch (error) {
+            console.error('Error saving draft:', error); // Log the error
             toast.error("Error saving draft");
         }
     };
@@ -109,6 +115,7 @@ const ChainsawRegistrationForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            const token = localStorage.getItem('token'); // Get the token from local storage
             const currentDate = new Date();
             const formDataToSend = new FormData();
             Object.keys(formData).forEach(key => {
@@ -125,7 +132,8 @@ const ChainsawRegistrationForm = () => {
 
             const response = await axios.post('http://localhost:3000/api/csaw_createApplication', formDataToSend, {
                 headers: {
-                    'Content-Type': 'multipart/form-data'
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': token // Include the token in the headers
                 }
             });
 
@@ -135,6 +143,7 @@ const ChainsawRegistrationForm = () => {
             });
             setModalOpen(true);
         } catch (error) {
+            console.error('Error submitting application:', error); // Log the error
             toast.error("Error submitting application");
         }
     };

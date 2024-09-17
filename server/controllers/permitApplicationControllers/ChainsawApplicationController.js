@@ -78,7 +78,8 @@ const csaw_createApplication = async (req, res) => {
                 countryOfOrigin,
                 purchasePrice,
                 dateOfSubmission: parsedDateOfSubmission, // Use the parsed date
-                status // Set the status field
+                status, // Set the status field
+                userId: req.user.id // Associate with the logged-in user's ID
             });
 
             // Save the application to the database
@@ -117,7 +118,8 @@ const csaw_saveDraft = async (req, res) => {
             countryOfOrigin,
             purchasePrice,
             dateOfSubmission,
-            status
+            status,
+            userId: req.user.id // Associate with the logged-in user's ID
         });
         const savedDraft = await newDraft.save();
 
@@ -131,7 +133,7 @@ const csaw_saveDraft = async (req, res) => {
 const csaw_getApplications = async (req, res) => {
     try {
         const { sort, status } = req.query;
-        let filter = {};
+        let filter = { userId: req.user.id }; // Filter by the logged-in user's ID
 
         if (status) {
             // Check if status is an array and handle accordingly
@@ -150,11 +152,11 @@ const csaw_getApplications = async (req, res) => {
             sortOption.dateOfSubmission = -1;
         }
 
-        console.log('Filter:', filter); // Debug
-        console.log('Sort Option:', sortOption); // Debug
+        // console.log('Filter:', filter);
+        // console.log('Sort Option:', sortOption);
 
         const applications = await Application.find(filter).sort(sortOption);
-        console.log('Applications Fetched:', applications); // Debug
+        console.log('Applications Fetched:', applications);
         res.status(200).json(applications);
     } catch (err) {
         console.error('Error fetching applications:', err);
