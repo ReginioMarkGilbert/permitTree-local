@@ -134,8 +134,12 @@ const csaw_getApplications = async (req, res) => {
         let filter = {};
 
         if (status) {
-            // Case-insensitive regex match for status
-            filter.status = { $regex: new RegExp(`^${status}$`, 'i') };
+            // Check if status is an array and handle accordingly
+            if (Array.isArray(status)) {
+                filter.status = { $in: status.map(s => new RegExp(`^${s}$`, 'i')) };
+            } else {
+                filter.status = { $regex: new RegExp(`^${status}$`, 'i') };
+            }
         }
 
         let sortOption = {};

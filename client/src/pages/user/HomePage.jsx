@@ -1,10 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Button } from '../../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { FaLeaf, FaBars, FaTimes, FaHome, FaClipboardList, FaBell, FaUser } from 'react-icons/fa';
+import { toast, ToastContainer } from 'react-toastify';
 
 export default function HomePage() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [recentApplications, setRecentApplications] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     const user = {
         name: "Juan Dela Cruz",
@@ -18,12 +23,6 @@ export default function HomePage() {
         { title: "Profile", icon: <FaUser className="h-6 w-6" />, link: "/profile" },
     ];
 
-    const recentApplications = [
-        { id: "APP-001", type: "Chainsaw Registration", status: "Pending", date: "2023-05-15" },
-        { id: "APP-002", type: "Tree Cutting Permit", status: "Approved", date: "2023-05-10" },
-        { id: "APP-003", type: "Private Tree Plantation Registration", status: "Under Review", date: "2023-05-05" },
-    ];
-
     const sidebarLinks = [
         { title: "Dashboard", icon: <FaHome className="h-5 w-5" />, link: "/" },
         { title: "My Applications", icon: <FaClipboardList className="h-5 w-5" />, link: "/applications" },
@@ -35,9 +34,31 @@ export default function HomePage() {
         setSidebarOpen(!sidebarOpen);
     };
 
+    useEffect(() => {
+        fetchRecentApplications();
+    }, []);
+
+    const fetchRecentApplications = async () => {
+        try {
+            const response = await axios.get('http://localhost:3000/api/csaw_getApplications', {
+                params: {
+                    status: ['Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected']
+                }
+            });
+            setRecentApplications(response.data);
+            setLoading(false);
+            // toast.success('Recent applications fetched successfully.');
+        } catch (err) {
+            // console.error('Error fetching recent applications:', err);
+            toast.error('Failed to fetch recent applications.');
+            setError('Failed to fetch recent applications.');
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-green-50 flex flex-col pt-16">
-
+            <ToastContainer />
             <main className="flex-grow p-8">
                 <h1 className="text-3xl font-bold text-green-800 mb-6">Welcome back, {user.name}!</h1>
 
@@ -65,23 +86,29 @@ export default function HomePage() {
                             <CardTitle className="text-green-800">Recent Applications</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="space-y-4">
-                                {recentApplications.map((app, index) => (
-                                    <div key={index} className="flex items-center justify-between border-b border-gray-200 pb-2 last:border-b-0 last:pb-0">
-                                        <div>
-                                            <p className="font-semibold text-green-800">{app.type}</p>
-                                            <p className="text-sm text-gray-500">Application ID: {app.id}</p>
-                                            <p className="text-sm text-gray-500">Submitted: {app.date}</p>
+                            {loading ? (
+                                <p className="text-center text-gray-500">Loading applications...</p>
+                            ) : error ? (
+                                <p className="text-center text-red-500">{error}</p>
+                            ) : (
+                                <div className="space-y-4">
+                                    {recentApplications.map((app, index) => (
+                                        <div key={index} className="flex items-center justify-between border-b border-gray-200 pb-2 last:border-b-0 last:pb-0">
+                                            <div>
+                                                <p className="font-semibold text-green-800">{app.applicationType}</p>
+                                                <p className="text-sm text-gray-500">Application ID: {app.customId}</p>
+                                                <p className="text-sm text-gray-500">Submitted: {new Date(app.dateOfSubmission).toLocaleDateString()}</p>
+                                            </div>
+                                            <span className={`px-2 py-1 rounded-full text-xs ${app.status === "Approved" ? "bg-green-200 text-green-800" :
+                                                app.status === "Pending" ? "bg-yellow-200 text-yellow-800" :
+                                                    "bg-blue-200 text-blue-800"
+                                                }`}>
+                                                {app.status}
+                                            </span>
                                         </div>
-                                        <span className={`px-2 py-1 rounded-full text-xs ${app.status === "Approved" ? "bg-green-200 text-green-800" :
-                                            app.status === "Pending" ? "bg-yellow-200 text-yellow-800" :
-                                                "bg-blue-200 text-blue-800"
-                                            }`}>
-                                            {app.status}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
+                            )}
                             <Button className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white">
                                 View All Applications
                             </Button>
