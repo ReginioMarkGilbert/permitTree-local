@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Eye, Edit, Printer, Archive, ChevronUp, ChevronDown, Leaf } from 'lucide-react';
-import Modal from '../../components/ui/Modal';
 import ApplicationDetailsModal from '../../components/ui/ApplicationDetailsModal';
 
 const UserApplicationsStatusPage = () => {
