@@ -1,10 +1,12 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Leaf } from 'lucide-react'
+import axios from 'axios'; // Import axios for making HTTP requests
+import { toast, ToastContainer } from 'react-toastify'; // Import toast for notifications
 
 export default function Component() {
     const [sidebarToggle, setSidebarToggle] = useState(false)
     const [userInfo, setUserInfo] = useState({
-        fullName: 'John Doe',
+        fullName: '',
         email: 'johndoe@example.com',
         phone: '+63 912 345 6789',
         address: '123 Main St, City, State, ZIP',
@@ -13,6 +15,29 @@ export default function Component() {
     const [profilePicture, setProfilePicture] = useState(null)
     const [showPhotoOptions, setShowPhotoOptions] = useState(false)
     const fileInputRef = useRef(null)
+    const [user, setUser] = useState({ firstName: '', lastName: '' }); // State for user details
+
+    // Fetch user details on component mount
+    useEffect(() => {
+        fetchUserDetails(); // Call the function to fetch user details
+    }, []);
+
+    const fetchUserDetails = async () => {
+        try {
+            const token = localStorage.getItem('token'); // Get the token from local storage
+            const response = await axios.get('http://localhost:3000/api/user-details', {
+                headers: {
+                    Authorization: token // Include the token in the headers
+                }
+            });
+            const { firstName, lastName } = response.data.user; // Destructure firstName and lastName
+            setUser({ firstName, lastName }); // Set user state
+            setUserInfo(prev => ({ ...prev, fullName: `${firstName} ${lastName}` })); // Update userInfo
+        } catch (err) {
+            console.error('Error fetching user details:', err);
+            toast.error('Failed to fetch user details.'); // Show error notification
+        }
+    };
 
     const handleInputChange = (e) => {
         setUserInfo({ ...userInfo, [e.target.id]: e.target.value })
@@ -54,6 +79,7 @@ export default function Component() {
 
     return (
         <div className="min-h-screen bg-green-50 flex flex-col">
+            <ToastContainer />
             {/* Main Content */}
             <div className="flex-grow flex items-center justify-center p-6">
                 <div className="bg-white rounded-lg shadow-lg max-w-3xl w-full overflow-hidden">
@@ -95,7 +121,7 @@ export default function Component() {
                             />
                         </div>
                         <div className="text-center">
-                            <h2 className="text-2xl font-bold text-green-800">{userInfo.fullName}</h2>
+                            <h2 className="text-2xl font-bold text-green-800">{user.firstName} {user.lastName}</h2>
                             <p className="text-green-600">Permit Applicant</p>
                         </div>
                     </div>
@@ -143,7 +169,7 @@ export default function Component() {
                                 <div className="relative">
                                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-green-500">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                                            <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-3a1 1 0 01-1-1V5zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" />
                                         </svg>
                                     </span>
                                     <input
