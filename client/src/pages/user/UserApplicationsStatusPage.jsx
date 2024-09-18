@@ -18,14 +18,16 @@ const UserApplicationsStatusPage = () => {
 
     useEffect(() => {
         fetchApplications();
-    }, [activeTab, searchTerm, filterType, dateRange, sortConfig]);
+    }, [activeTab]);
 
     const fetchApplications = async () => {
         try {
+            setLoading(true);
             const token = localStorage.getItem('token');
             const response = await axios.get('http://localhost:3000/api/csaw_getApplications', {
                 params: {
-                    status: ['Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected']
+                    // status: ['Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected']
+                    status: activeTab // Send only the active tab status
                 },
                 headers: {
                     Authorization: token
@@ -153,6 +155,11 @@ const UserApplicationsStatusPage = () => {
         );
     };
 
+    const handleTabChange = (tab) => {
+        setActiveTab(tab);
+        // fetchApplications will be called automatically due to the useEffect dependency
+    };
+
     return (
         <div className="min-h-screen bg-green-50">
             <nav className="bg-white shadow-md z-10 flex justify-between items-center p-4">
@@ -169,7 +176,7 @@ const UserApplicationsStatusPage = () => {
                         {['Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected'].map((tab) => (
                             <button
                                 key={tab}
-                                onClick={() => setActiveTab(tab)}
+                                onClick={() => handleTabChange(tab)}
                                 className={`px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap ${activeTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
                             >
                                 {tab}
