@@ -40,58 +40,81 @@ const CSAW_CustomId = async () => {
 };
 
 const csaw_createApplication = async (req, res) => {
-    upload.single('file')(req, res, async (err) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
+    try {
+        console.log('Request body:', req.body);
+        console.log('Request files:', req.files);
+
+        const {
+            applicationType = 'Chainsaw Registration',
+            registrationType,
+            chainsawStore,
+            ownerName,
+            address,
+            phone,
+            brand,
+            model,
+            serialNumber,
+            dateOfAcquisition,
+            powerOutput,
+            maxLengthGuidebar,
+            countryOfOrigin,
+            purchasePrice,
+            dateOfSubmission,
+            status
+        } = req.body;
+
+        // Ensure dateOfSubmission is a valid date
+        const parsedDateOfSubmission = new Date(dateOfSubmission);
+        if (isNaN(parsedDateOfSubmission)) {
+            throw new Error('Invalid dateOfSubmission');
         }
 
-        try {
-            console.log('Request body:', req.body); // Log the request body
+        // Generate customId
+        const customId = await CSAW_CustomId();
 
-            const { applicationType = 'Chainsaw Registration', registrationType, chainsawStore, ownerName, address, phone, brand, model, serialNumber, dateOfAcquisition, powerOutput, maxLengthGuidebar, countryOfOrigin, purchasePrice, dateOfSubmission, status } = req.body;
-
-            // Ensure dateOfSubmission is a valid date
-            const parsedDateOfSubmission = Array.isArray(dateOfSubmission) ? new Date(dateOfSubmission[1]) : new Date(dateOfSubmission);
-
-            if (isNaN(parsedDateOfSubmission)) {
-                throw new Error('Invalid dateOfSubmission');
-            }
-
-            // Generate customId
-            const customId = await CSAW_CustomId();
-
-            // Create a new application
-            const newApplication = new Application({
-                customId, // Add the customId to the application object
-                applicationType,
-                registrationType, // Include registrationType
-                chainsawStore,
-                ownerName,
-                address,
-                phone,
-                brand,
-                model,
-                serialNumber,
-                dateOfAcquisition,
-                powerOutput,
-                maxLengthGuidebar,
-                countryOfOrigin,
-                purchasePrice,
-                dateOfSubmission: parsedDateOfSubmission, // Use the parsed date
-                status, // Set the status field
-                userId: req.user.id // Associate with the logged-in user's ID
-            });
-
-            // Save the application to the database
-            await newApplication.save();
-            console.log('Application saved:', newApplication); // Log the saved application
-
-            res.status(201).json({ message: 'Application created successfully', application: newApplication });
-        } catch (error) {
-            console.error('Error creating application:', error); // Log the error message
-            res.status(500).json({ error: error.message });
+        // Process uploaded files
+        let files = [];
+        if (req.files && req.files.files) {
+            const uploadedFiles = Array.isArray(req.files.files) ? req.files.files : [req.files.files];
+            files = uploadedFiles.map(file => ({
+                filename: file.name,
+                contentType: file.mimetype,
+                data: file.data
+            }));
         }
-    });
+
+        // Create a new application
+        const newApplication = new Application({
+            customId,
+            applicationType,
+            registrationType,
+            chainsawStore,
+            ownerName,
+            address,
+            phone,
+            brand,
+            model,
+            serialNumber,
+            dateOfAcquisition,
+            powerOutput,
+            maxLengthGuidebar,
+            countryOfOrigin,
+            purchasePrice,
+            dateOfSubmission: parsedDateOfSubmission,
+            status,
+            files,
+            userId: req.user.id
+        });
+
+        // Save the application to the database
+        await newApplication.save();
+        console.log('Application saved:', newApplication);
+
+        res.status(201).json({ message: 'Application created successfully', application: newApplication });
+    } catch (error) {
+        console.error('Error creating application:', error);
+        res.status(500).json({ error: error.message });
+    }
 };
 
 const csaw_saveDraft = async (req, res) => {

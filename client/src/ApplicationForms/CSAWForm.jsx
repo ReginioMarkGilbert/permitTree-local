@@ -119,6 +119,8 @@ const ChainsawRegistrationForm = () => {
             const token = localStorage.getItem('token'); // Get the token from local storage
             const currentDate = new Date();
             const formDataToSend = new FormData();
+
+            // Append all form fields
             Object.keys(formData).forEach(key => {
                 if (key === 'files') {
                     formData[key].forEach(file => {
@@ -138,13 +140,15 @@ const ChainsawRegistrationForm = () => {
                 }
             });
 
+            // Handle successful submission
+            console.log('Application submitted:', response.data);
             setModalContent({
                 title: 'Application submitted successfully!',
                 message: 'Do you want to view your application?'
             });
             setModalOpen(true);
         } catch (error) {
-            console.error('Error submitting application:', error); // Log the error
+            console.error('Error submitting application:', error);
             toast.error("Error submitting application");
         }
     };
