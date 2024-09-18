@@ -7,9 +7,23 @@ import './styles/customScrollBar.css';
 const EditApplicationModal = ({ isOpen, onClose, application, onUpdate }) => {
     const [formData, setFormData] = useState({});
 
+    const chainsawStores = [
+        { value: "Green Chainsaw Co.", label: "Green Chainsaw Co." },
+        { value: "Forest Tools Inc.", label: "Forest Tools Inc." },
+        { value: "EcoSaw Supplies", label: "EcoSaw Supplies" },
+        { value: "Timber Tech Equipment", label: "Timber Tech Equipment" },
+        { value: "Woodland Machinery", label: "Woodland Machinery" }
+    ];
+
+    const registrationTypes = [
+        { value: "New", label: "New Registration" },
+        { value: "Renewal", label: "Renewal" }
+    ];
+
     useEffect(() => {
         if (application) {
             setFormData({
+                customId: application.customId,
                 registrationType: application.registrationType,
                 chainsawStore: application.chainsawStore,
                 ownerName: application.ownerName,
@@ -61,8 +75,39 @@ const EditApplicationModal = ({ isOpen, onClose, application, onUpdate }) => {
                 </div>
                 <form onSubmit={handleSubmit} className="flex-grow overflow-y-auto p-6 space-y-6 custom-scrollbar">
                     <Section title="Application Information">
-                        <Field label="Registration Type" name="registrationType" value={formData.registrationType} onChange={handleInputChange} />
-                        <Field label="Chainsaw Store" name="chainsawStore" value={formData.chainsawStore} onChange={handleInputChange} />
+                        <Field label="Application ID" value={application.customId} />
+                        <div className="bg-white p-3 rounded-lg shadow-sm">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Registration Type</label>
+                            <select
+                                name="registrationType"
+                                value={formData.registrationType}
+                                onChange={handleInputChange}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50"
+                            >
+                                <option value="" disabled>Select registration type</option>
+                                {registrationTypes.map((type) => (
+                                    <option key={type.value} value={type.value}>
+                                        {type.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="bg-white p-3 rounded-lg shadow-sm">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Chainsaw Store</label>
+                            <select
+                                name="chainsawStore"
+                                value={formData.chainsawStore}
+                                onChange={handleInputChange}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50"
+                            >
+                                <option value="" disabled>Select a store</option>
+                                {chainsawStores.map((store) => (
+                                    <option key={store.value} value={store.value}>
+                                        {store.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </Section>
 
                     <Section title="Owner Information">

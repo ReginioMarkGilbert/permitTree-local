@@ -36,11 +36,12 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
                     </Section>
 
                     <Section title="Chainsaw Details">
+                        <Field label="Chainsaw Store" value={application.chainsawStore} />
                         <Field label="Brand" value={application.brand} />
                         <Field label="Model" value={application.model} />
                         <Field label="Serial Number" value={application.serialNumber} />
-                        <Field label="Power Output" value={`${application.powerOutput} HP`} />
-                        <Field label="Max Length Guidebar" value={`${application.maxLengthGuidebar} inches`} />
+                        <Field label="Power Output" value={application.powerOutput} />
+                        <Field label="Max Length Guidebar" value={application.maxLengthGuidebar} />
                         <Field label="Country of Origin" value={application.countryOfOrigin} />
                         <Field label="Purchase Price" value={`₱${application.purchasePrice.toFixed(2)}`} />
                     </Section>

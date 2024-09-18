@@ -37,6 +37,14 @@ const ChainsawRegistrationForm = () => {
     const [modalOpen, setModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState({ title: '', message: '' });
 
+    const chainsawStores = [
+        { value: "Green Chainsaw Co.", label: "Green Chainsaw Co." },
+        { value: "Forest Tools Inc.", label: "Forest Tools Inc." },
+        { value: "EcoSaw Supplies", label: "EcoSaw Supplies" },
+        { value: "Timber Tech Equipment", label: "Timber Tech Equipment" },
+        { value: "Woodland Machinery", label: "Woodland Machinery" }
+    ];
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
@@ -225,11 +233,11 @@ const ChainsawRegistrationForm = () => {
                                         className="w-full p-2 border border-gray-300 rounded-md"
                                     >
                                         <option value="" disabled>Select a store</option>
-                                        <option value="store1">Green Chainsaw Co.</option>
-                                        <option value="store2">Forest Tools Inc.</option>
-                                        <option value="store3">EcoSaw Supplies</option>
-                                        <option value="store4">Timber Tech Equipment</option>
-                                        <option value="store5">Woodland Machinery</option>
+                                        {chainsawStores.map((store) => (
+                                            <option key={store.value} value={store.value}>
+                                                {store.label}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
                             )}
