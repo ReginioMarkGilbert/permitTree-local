@@ -15,9 +15,8 @@ const userSchema = new mongoose.Schema({
     company: { type: String, required: false },
     address: { type: String, required: false },
     profilePicture: {
-        type: String,
-        required: false,
-        match: [/^.*\.(png|jpg)$/, 'Please upload a valid image (PNG or JPG)'] // Regex to validate file extension
+        data: Buffer,
+        contentType: String
     },
 });
 

@@ -16,6 +16,7 @@ export default function UserProfilePage() {
     const [showPhotoOptions, setShowPhotoOptions] = useState(false);
     const fileInputRef = useRef(null);
     const [user, setUser] = useState({ firstName: '', lastName: '' });
+    const [removeProfilePicture, setRemoveProfilePicture] = useState(false);
 
     const [isEditing, setIsEditing] = useState(false);
     const location = useLocation();
@@ -40,7 +41,9 @@ export default function UserProfilePage() {
                 phone: phone || '',
                 address: address || '',
                 company: company || '',
-                profilePicture: profilePicture ? `http://localhost:3000${profilePicture}` : ''
+                profilePicture: profilePicture
+                    ? `data:${profilePicture.contentType};base64,${profilePicture.data}`
+                    : ''
             };
             setUserInfo(fetchedData);
             setInitialUserInfo(fetchedData); // Store initial data for canceling
@@ -76,6 +79,7 @@ export default function UserProfilePage() {
                 formData.append('phone', userInfo.phone);
                 formData.append('company', userInfo.company);
                 formData.append('address', userInfo.address);
+                formData.append('removeProfilePicture', removeProfilePicture);
 
                 if (profilePicture) {
                     formData.append('profilePicture', profilePicture);
@@ -92,7 +96,8 @@ export default function UserProfilePage() {
 
                 console.log('Server response:', response.data);
                 toast.success('Profile updated successfully!');
-                fetchUserDetails();
+                setRemoveProfilePicture(false);
+                await fetchUserDetails();
             } catch (err) {
                 console.error('Error updating profile:', err);
                 toast.error('Failed to update profile.');
@@ -125,6 +130,13 @@ export default function UserProfilePage() {
         }
     };
 
+    const handleRemovePhoto = () => {
+        setProfilePicture(null);
+        setUserInfo(prev => ({ ...prev, profilePicture: null }));
+        setShowPhotoOptions(false);
+        setRemoveProfilePicture(true);
+    };
+
     const inputClasses = `w-full rounded-md focus:ring-green-500 focus:border-green-500 h-12 pl-3 ${isEditing ? 'bg-gray-100 border-gray-300' : 'bg-white border-transparent'
         }`;
 
@@ -140,7 +152,7 @@ export default function UserProfilePage() {
                             {userInfo.profilePicture ? (
                                 <img src={userInfo.profilePicture} alt="Profile" className="w-full h-full object-cover" />
                             ) : (
-                                userInfo.fullName.split(' ').map(n => n[0]).join('')
+                                <span>{userInfo.fullName.split(' ').map(n => n[0]).join('')}</span>
                             )}
                         </div>
                         {isEditing && showPhotoOptions && (
@@ -153,11 +165,7 @@ export default function UserProfilePage() {
                                 </button>
                                 <button
                                     className="block w-full text-left px-4 py-2 hover:bg-gray-100 rounded"
-                                    onClick={() => {
-                                        setProfilePicture(null);
-                                        setUserInfo(prev => ({ ...prev, profilePicture: null }));
-                                        setShowPhotoOptions(false);
-                                    }}
+                                    onClick={handleRemovePhoto}
                                 >
                                     Remove photo
                                 </button>

@@ -127,11 +127,27 @@ const createAdmin = async (req, res) => {
 const getUserDetails = async (req, res) => {
     try {
         const userId = req.user.id;
-        const user = await User.findById(userId).select('firstName lastName email phone address company profilePicture');
+        const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        res.status(200).json({ user });
+
+        const userDetails = {
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            phone: user.phone,
+            address: user.address,
+            company: user.company,
+            profilePicture: user.profilePicture && user.profilePicture.data
+                ? {
+                    data: user.profilePicture.data.toString('base64'),
+                    contentType: user.profilePicture.contentType
+                  }
+                : null
+        };
+
+        res.status(200).json({ user: userDetails });
     } catch (err) {
         console.error('Error fetching user details:', err);
         res.status(500).json({ message: 'Error fetching user details' });
@@ -140,48 +156,38 @@ const getUserDetails = async (req, res) => {
 
 const updateUserProfile = async (req, res) => {
     try {
-        console.log('Updating user profile...');
-        console.log('Request body:', req.body);
-        console.log('Request files:', req.files);
-
         const userId = req.user.id;
-        const { firstName, lastName, email, phone, company, address } = req.body;
+        const { firstName, lastName, email, phone, company, address, removeProfilePicture } = req.body;
 
-        let profilePicturePath = req.user.profilePicture;
+        let updateData = {
+            firstName,
+            lastName,
+            email,
+            phone,
+            company,
+            address
+        };
 
-        if (req.files && req.files.profilePicture) {
-            console.log('Processing profile picture...');
-            const profilePicture = req.files.profilePicture;
-            const fileName = `${Date.now()}_${profilePicture.name}`;
-            const uploadPath = path.join(__dirname, '../../uploads/', fileName);
-
-            console.log('Saving file to:', uploadPath);
-            await profilePicture.mv(uploadPath);
-            profilePicturePath = `/uploads/${fileName}`;
-            console.log('New profile picture path:', profilePicturePath);
+        if (removeProfilePicture === 'true') {
+            updateData.profilePicture = null;
+        } else if (req.files && req.files.profilePicture) {
+            const file = req.files.profilePicture;
+            updateData.profilePicture = {
+                data: file.data,
+                contentType: file.mimetype
+            };
         }
 
-        console.log('Updating user in database...');
         const user = await User.findByIdAndUpdate(
             userId,
-            {
-                firstName,
-                lastName,
-                email,
-                phone,
-                company,
-                address,
-                profilePicture: profilePicturePath
-            },
+            updateData,
             { new: true }
         );
 
         if (!user) {
-            console.log('User not found');
             return res.status(404).json({ message: 'User not found' });
         }
 
-        console.log('User updated successfully');
         res.status(200).json({ message: 'Profile updated successfully', user });
     } catch (err) {
         console.error('Error updating user profile:', err);
