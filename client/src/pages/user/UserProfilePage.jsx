@@ -53,7 +53,7 @@ export default function Component() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col">
+        <div className="min-h-screen bg-green-50 flex flex-col">
             {/* Main Content */}
             <div className="flex-grow flex items-center justify-center p-6">
                 <div className="bg-white rounded-lg shadow-lg max-w-3xl w-full overflow-hidden">

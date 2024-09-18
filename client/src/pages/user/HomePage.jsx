@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { FaLeaf, FaBars, FaTimes, FaHome, FaClipboardList, FaBell, FaUser } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
+import HomeFooter from '../../components/ui/HomeFooter';
 
 export default function HomePage() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -151,11 +152,7 @@ export default function HomePage() {
                     </Card>
                 </div>
             </main>
-            <footer className="bg-green-800 text-white py-4">
-                <div className="container mx-auto px-4 text-center text-sm">
-                    <p>&copy; 2023 PermitTree - DENR-PENRO. All rights reserved.</p>
-                </div>
-            </footer>
+            <HomeFooter />
         </div>
     );
 }

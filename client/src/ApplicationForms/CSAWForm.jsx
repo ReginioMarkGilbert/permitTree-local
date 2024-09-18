@@ -10,6 +10,7 @@ import { Download, X } from "lucide-react";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../components/ui/Modal';
+// import HomeFooter from '../components/ui/HomeFooter';
 
 const ChainsawRegistrationForm = () => {
     const navigate = useNavigate();
@@ -164,8 +165,8 @@ const ChainsawRegistrationForm = () => {
     };
 
     return (
-        <div className="min-h-screen bg-green-50 flex items-start justify-center pt-20">
-            <div className="container mx-auto px-4">
+        <div className="min-h-screen bg-green-50 flex flex-col justify-between pt-24">
+            <div className="container mx-auto px-4 flex-grow">
                 <h1 className="text-3xl font-[700] text-green-800 mb-6 text-center">Chainsaw Registration Application</h1>
                 <Card className="max-w-2xl mx-auto shadow-lg">
                     <CardHeader>
@@ -463,9 +464,9 @@ const ChainsawRegistrationForm = () => {
                 onHome={() => navigate('/')}
                 onApplications={() => navigate('/applicationsStatus')}
             />
+            {/* <HomeFooter /> */}
         </div>
     );
 };
-
 
 export default ChainsawRegistrationForm;
