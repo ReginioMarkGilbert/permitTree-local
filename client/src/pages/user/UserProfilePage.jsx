@@ -33,13 +33,14 @@ export default function UserProfilePage() {
                 }
             });
             console.log('User details response:', response.data);
-            const { firstName, lastName, email, phone, address, company } = response.data.user;
+            const { firstName, lastName, email, phone, address, company, profilePicture } = response.data.user;
             const fetchedData = {
                 fullName: `${firstName} ${lastName}`,
                 email: email || '',
                 phone: phone || '',
                 address: address || '',
                 company: company || '',
+                profilePicture: profilePicture ? `http://localhost:3000${profilePicture}` : ''
             };
             setUserInfo(fetchedData);
             setInitialUserInfo(fetchedData); // Store initial data for canceling
@@ -67,20 +68,29 @@ export default function UserProfilePage() {
             try {
                 const token = localStorage.getItem('token');
                 const [firstName, lastName] = userInfo.fullName.split(' ');
-                const response = await axios.put('http://localhost:3000/api/user-profile', {
-                    firstName,
-                    lastName,
-                    email: userInfo.email,
-                    phone: userInfo.phone,
-                    company: userInfo.company,
-                    address: userInfo.address,
-                    profilePicture
-                }, {
+
+                const formData = new FormData();
+                formData.append('firstName', firstName);
+                formData.append('lastName', lastName);
+                formData.append('email', userInfo.email);
+                formData.append('phone', userInfo.phone);
+                formData.append('company', userInfo.company);
+                formData.append('address', userInfo.address);
+
+                if (profilePicture) {
+                    formData.append('profilePicture', profilePicture);
+                }
+
+                console.log('Sending form data:', formData);
+
+                const response = await axios.put('http://localhost:3000/api/user-profile', formData, {
                     headers: {
-                        Authorization: token
+                        Authorization: token,
+                        'Content-Type': 'multipart/form-data'
                     }
                 });
 
+                console.log('Server response:', response.data);
                 toast.success('Profile updated successfully!');
                 fetchUserDetails();
             } catch (err) {
@@ -97,6 +107,24 @@ export default function UserProfilePage() {
         setIsEditing(false);
     };
 
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setProfilePicture(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setUserInfo(prev => ({ ...prev, profilePicture: reader.result }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleProfilePictureClick = () => {
+        if (isEditing) {
+            setShowPhotoOptions(true);
+        }
+    };
+
     const inputClasses = `w-full rounded-md focus:ring-green-500 focus:border-green-500 h-12 pl-3 ${isEditing ? 'bg-gray-100 border-gray-300' : 'bg-white border-transparent'
         }`;
 
@@ -106,16 +134,16 @@ export default function UserProfilePage() {
                 <div className="bg-green-100 p-6 flex flex-col items-center space-y-4">
                     <div className="relative">
                         <div
-                            className="bg-gray-300 rounded-full w-32 h-32 flex items-center justify-center text-5xl text-gray-600 overflow-hidden cursor-pointer"
-                            onClick={() => setShowPhotoOptions(true)}
+                            className={`bg-gray-300 rounded-full w-32 h-32 flex items-center justify-center text-5xl text-gray-600 overflow-hidden ${isEditing ? 'cursor-pointer' : ''}`}
+                            onClick={handleProfilePictureClick}
                         >
-                            {profilePicture ? (
-                                <img src={profilePicture} alt="Profile" className="w-full h-full object-cover" />
+                            {userInfo.profilePicture ? (
+                                <img src={userInfo.profilePicture} alt="Profile" className="w-full h-full object-cover" />
                             ) : (
                                 userInfo.fullName.split(' ').map(n => n[0]).join('')
                             )}
                         </div>
-                        {showPhotoOptions && (
+                        {isEditing && showPhotoOptions && (
                             <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white rounded-lg shadow-lg p-2 z-10">
                                 <button
                                     className="block w-full text-left px-4 py-2 hover:bg-gray-100 rounded"
@@ -127,6 +155,7 @@ export default function UserProfilePage() {
                                     className="block w-full text-left px-4 py-2 hover:bg-gray-100 rounded"
                                     onClick={() => {
                                         setProfilePicture(null);
+                                        setUserInfo(prev => ({ ...prev, profilePicture: null }));
                                         setShowPhotoOptions(false);
                                     }}
                                 >
@@ -139,16 +168,8 @@ export default function UserProfilePage() {
                             ref={fileInputRef}
                             className="hidden"
                             accept="image/*"
-                            onChange={(e) => {
-                                const file = e.target.files[0];
-                                if (file) {
-                                    const reader = new FileReader();
-                                    reader.onloadend = () => {
-                                        setProfilePicture(reader.result);
-                                    };
-                                    reader.readAsDataURL(file);
-                                }
-                            }}
+                            onChange={handleFileChange}
+                            disabled={!isEditing}
                         />
                     </div>
                     <div className="text-center">

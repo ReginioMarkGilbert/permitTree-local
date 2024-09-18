@@ -5,6 +5,8 @@ const passport = require('passport');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
 
 const signup = async (req, res) => {
     const { firstName, lastName, password } = req.body;
@@ -44,7 +46,7 @@ const signup = async (req, res) => {
             { expiresIn: '1h' }
         );
 
-        res.status(201).json({ message: 'User created successfully', user: newUser, token: `Bearer ${token}`, user: newUser });
+        res.status(201).json({ message: 'User created successfully', user: newUser, token: `Bearer ${token}` });
     } catch (err) {
         console.error('Signup error:', err);
         res.status(500).json({ error: err.message });
@@ -124,10 +126,8 @@ const createAdmin = async (req, res) => {
 
 const getUserDetails = async (req, res) => {
     try {
-        // Assuming the user ID is in the JWT token payload
         const userId = req.user.id;
-        // Fetch the user with all required fields
-        const user = await User.findById(userId).select('firstName lastName email phone address company profilePicture'); // Include all fields you want to return
+        const user = await User.findById(userId).select('firstName lastName email phone address company profilePicture');
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -140,28 +140,52 @@ const getUserDetails = async (req, res) => {
 
 const updateUserProfile = async (req, res) => {
     try {
-        const userId = req.user.id; // Get the user ID from the JWT token
-        const { firstName, lastName, email, phone, company, address, profilePicture } = req.body; // Destructure the request body
+        console.log('Updating user profile...');
+        console.log('Request body:', req.body);
+        console.log('Request files:', req.files);
 
-        // Update user details
-        const updatedUser = await User.findByIdAndUpdate(userId, {
-            firstName, // Update firstName
-            lastName, // Update lastName
-            email,
-            phone,
-            company,
-            address,
-            profilePicture
-        }, { new: true }); // Return the updated user
+        const userId = req.user.id;
+        const { firstName, lastName, email, phone, company, address } = req.body;
 
-        if (!updatedUser) {
+        let profilePicturePath = req.user.profilePicture;
+
+        if (req.files && req.files.profilePicture) {
+            console.log('Processing profile picture...');
+            const profilePicture = req.files.profilePicture;
+            const fileName = `${Date.now()}_${profilePicture.name}`;
+            const uploadPath = path.join(__dirname, '../../uploads/', fileName);
+
+            console.log('Saving file to:', uploadPath);
+            await profilePicture.mv(uploadPath);
+            profilePicturePath = `/uploads/${fileName}`;
+            console.log('New profile picture path:', profilePicturePath);
+        }
+
+        console.log('Updating user in database...');
+        const user = await User.findByIdAndUpdate(
+            userId,
+            {
+                firstName,
+                lastName,
+                email,
+                phone,
+                company,
+                address,
+                profilePicture: profilePicturePath
+            },
+            { new: true }
+        );
+
+        if (!user) {
+            console.log('User not found');
             return res.status(404).json({ message: 'User not found' });
         }
 
-        res.status(200).json({ message: 'Profile updated successfully', user: updatedUser });
+        console.log('User updated successfully');
+        res.status(200).json({ message: 'Profile updated successfully', user });
     } catch (err) {
         console.error('Error updating user profile:', err);
-        res.status(500).json({ message: 'Error updating profile' });
+        res.status(500).json({ message: 'Error updating user profile', error: err.message });
     }
 };
 
@@ -169,6 +193,7 @@ module.exports = {
     signup,
     login,
     logout,
+    createAdmin,
     getUserDetails,
     updateUserProfile
 };

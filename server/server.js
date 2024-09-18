@@ -6,12 +6,34 @@ const session = require('express-session');
 const passport = require('passport');
 require('dotenv').config();
 require('./config/passport');
+const fileUpload = require('express-fileupload');
+const path = require('path');
 
 const app = express();
 
 // Middleware
-app.use(bodyParser.json());
-app.use(cors());
+
+// CORS Configuration
+const corsOptions = {
+    origin: 'http://localhost:5173', // Allow requests from your frontend
+    optionsSuccessStatus: 200,
+    credentials: true // Allow credentials if you are using cookies/sessions
+};
+
+app.use(cors(corsOptions));
+// Enable file upload
+app.use(fileUpload({
+    createParentPath: true,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5 MB max file size
+    },
+}));
+// Serve static files from the 'uploads' folder
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Increase the size limit for file uploads (to fix PayloadTooLargeError)
+app.use(bodyParser.json({ limit: '10mb' })); // Adjust size as needed
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
 // Session middleware
 app.use(session({
