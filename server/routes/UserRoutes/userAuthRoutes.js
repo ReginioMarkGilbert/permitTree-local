@@ -1,6 +1,6 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
-const { signup, login, logout, getUserDetails } = require('../../controllers/userControllers/userAuthControllers');
+const { signup, login, logout, getUserDetails, updateUserProfile } = require('../../controllers/userControllers/userAuthControllers');
 const roleMiddleware = require('../../middleware/roleMiddleware');
 const passport = require('passport');
 const router = express.Router();
@@ -35,5 +35,8 @@ router.get('/protected', passport.authenticate('jwt', { session: false }), (req,
 router.get('/admin', passport.authenticate('jwt', { session: false }), roleMiddleware(['admin']), (req, res) => {
     res.status(200).json({ message: 'Welcome Admin' });
 });
+
+// Add a new route to update user profile
+router.put('/user-profile', passport.authenticate('jwt', { session: false }), updateUserProfile);
 
 module.exports = router;

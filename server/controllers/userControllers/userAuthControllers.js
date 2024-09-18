@@ -126,7 +126,8 @@ const getUserDetails = async (req, res) => {
     try {
         // Assuming the user ID is in the JWT token payload
         const userId = req.user.id;
-        const user = await User.findById(userId).select('firstName lastName');
+        // Fetch the user with all required fields
+        const user = await User.findById(userId).select('firstName lastName email phone address company profilePicture'); // Include all fields you want to return
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -137,10 +138,37 @@ const getUserDetails = async (req, res) => {
     }
 };
 
+const updateUserProfile = async (req, res) => {
+    try {
+        const userId = req.user.id; // Get the user ID from the JWT token
+        const { firstName, lastName, email, phone, company, address, profilePicture } = req.body; // Destructure the request body
+
+        // Update user details
+        const updatedUser = await User.findByIdAndUpdate(userId, {
+            firstName, // Update firstName
+            lastName, // Update lastName
+            email,
+            phone,
+            company,
+            address,
+            profilePicture
+        }, { new: true }); // Return the updated user
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json({ message: 'Profile updated successfully', user: updatedUser });
+    } catch (err) {
+        console.error('Error updating user profile:', err);
+        res.status(500).json({ message: 'Error updating profile' });
+    }
+};
+
 module.exports = {
     signup,
     login,
     logout,
-    createAdmin,
-    getUserDetails
+    getUserDetails,
+    updateUserProfile
 };

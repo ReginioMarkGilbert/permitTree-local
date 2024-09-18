@@ -156,7 +156,7 @@ const csaw_getApplications = async (req, res) => {
         // console.log('Sort Option:', sortOption);
 
         const applications = await Application.find(filter).sort(sortOption);
-        console.log('Applications Fetched:', applications);
+        // console.log('Applications Fetched:', applications);
         res.status(200).json(applications);
     } catch (err) {
         console.error('Error fetching applications:', err);

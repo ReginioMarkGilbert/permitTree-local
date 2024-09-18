@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Leaf } from 'lucide-react'
+import { useLocation } from 'react-router-dom'; // Import useLocation
 import axios from 'axios'; // Import axios for making HTTP requests
 import { toast, ToastContainer } from 'react-toastify'; // Import toast for notifications
 
@@ -7,20 +7,22 @@ export default function Component() {
     const [sidebarToggle, setSidebarToggle] = useState(false)
     const [userInfo, setUserInfo] = useState({
         fullName: '',
-        email: 'johndoe@example.com',
-        phone: '+63 912 345 6789',
-        address: '123 Main St, City, State, ZIP',
-        company: 'Company Name',
-    })
+        email: '',
+        phone: '',
+        address: '',
+        company: ''
+    });
     const [profilePicture, setProfilePicture] = useState(null)
     const [showPhotoOptions, setShowPhotoOptions] = useState(false)
     const fileInputRef = useRef(null)
     const [user, setUser] = useState({ firstName: '', lastName: '' }); // State for user details
 
-    // Fetch user details on component mount
+    const location = useLocation(); // Get the current location
+
+    // Fetch user details on component mount or when location changes
     useEffect(() => {
         fetchUserDetails(); // Call the function to fetch user details
-    }, []);
+    }, [location]); // Add location as a dependency
 
     const fetchUserDetails = async () => {
         try {
@@ -30,9 +32,17 @@ export default function Component() {
                     Authorization: token // Include the token in the headers
                 }
             });
-            const { firstName, lastName } = response.data.user; // Destructure firstName and lastName
+            console.log('User details response:', response.data); // Log the response
+            const { firstName, lastName, email, phone, address, company } = response.data.user; // Destructure user details
             setUser({ firstName, lastName }); // Set user state
-            setUserInfo(prev => ({ ...prev, fullName: `${firstName} ${lastName}` })); // Update userInfo
+            setUserInfo({
+                fullName: `${firstName} ${lastName}`, // Update fullName
+                email: email || '', // Ensure email is set correctly
+                phone: phone || '', // Ensure phone is set correctly
+                address: address || '', // Ensure address is set correctly
+                company: company || '' // Ensure company is set correctly
+            });
+            console.log('Updated userInfo:', userInfo); // Verify the state after fetching
         } catch (err) {
             console.error('Error fetching user details:', err);
             toast.error('Failed to fetch user details.'); // Show error notification
@@ -40,7 +50,8 @@ export default function Component() {
     };
 
     const handleInputChange = (e) => {
-        setUserInfo({ ...userInfo, [e.target.id]: e.target.value })
+        const { id, value } = e.target;
+        setUserInfo(prev => ({ ...prev, [id]: value }));
     }
 
     const handleProfilePictureClick = () => {
@@ -68,13 +79,33 @@ export default function Component() {
         }
     }
 
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        // Here would typically send the updated userInfo and profilePicture to the backend
-        console.log('Updated user info:', userInfo)
-        console.log('Updated profile picture:', profilePicture)
-        // Show a success message to the user
-        alert('Changes saved successfully!')
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const token = localStorage.getItem('token'); // Get the token from local storage
+            const [firstName, lastName] = userInfo.fullName.split(' '); // Split fullName into firstName and lastName
+
+            const response = await axios.put('http://localhost:3000/api/user-profile', {
+                firstName, // Send firstName
+                lastName,  // Send lastName
+                email: userInfo.email,
+                phone: userInfo.phone,
+                company: userInfo.company,
+                address: userInfo.address,
+                profilePicture // Include the profile picture
+            }, {
+                headers: {
+                    Authorization: token // Include the token in the headers
+                }
+            });
+
+            // Show a success message to the user
+            toast.success('Profile updated successfully!');
+            fetchUserDetails(); // Fetch updated user details after successful update
+        } catch (err) {
+            console.error('Error updating profile:', err);
+            toast.error('Failed to update profile.');
+        }
     }
 
     return (
@@ -128,24 +159,25 @@ export default function Component() {
 
                     {/* Profile Form */}
                     <form onSubmit={handleSubmit} className="p-6 space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label htmlFor="fullName" className="block text-sm font-medium text-green-700 mb-1">Full Name</label>
-                                <div className="relative">
-                                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-green-500">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                                        </svg>
-                                    </span>
-                                    <input
-                                        id="fullName"
-                                        type="text"
-                                        value={userInfo.fullName}
-                                        onChange={handleInputChange}
-                                        className="pl-10 w-full border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
-                                    />
-                                </div>
+                        <div>
+                            <label htmlFor="fullName" className="block text-sm font-medium text-green-700 mb-1">Full Name</label>
+                            <div className="relative w-1/2"> {/* Added w-1/2 to restrict the width */}
+                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-green-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M5.05 2.93A7 7 0 0115.07 13.95L10 19l-5.07-5.05a7 7 0 010-9.9zM7 7a3 3 0 106 0 3 3 0 00-6 0z" clipRule="evenodd" />
+                                    </svg>
+                                </span>
+                                <input
+                                    id="fullName"
+                                    type="text"
+                                    value={userInfo.fullName}
+                                    onChange={handleInputChange}
+                                    className="pl-10 w-full border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                                />
                             </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label htmlFor="email" className="block text-sm font-medium text-green-700 mb-1">Email</label>
                                 <div className="relative">
@@ -169,30 +201,13 @@ export default function Component() {
                                 <div className="relative">
                                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-green-500">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-3a1 1 0 01-1-1V5zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" />
+                                            <path d="M2 3a1 1 0 011-1h3a1 1 0 011 1v2.271a1 1 0 01-.293.707L5.414 7.879a12.043 12.043 0 005.707 5.707l1.9-1.9a1 1 0 01.707-.293H15a1 1 0 011 1v3a1 1 0 01-1 1h-1c-7.18 0-13-5.82-13-13V4a1 1 0 011-1z" />
                                         </svg>
                                     </span>
                                     <input
                                         id="phone"
-                                        type="tel"
-                                        value={userInfo.phone}
-                                        onChange={handleInputChange}
-                                        className="pl-10 w-full border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <label htmlFor="address" className="block text-sm font-medium text-green-700 mb-1">Address</label>
-                                <div className="relative">
-                                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-green-500">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                                        </svg>
-                                    </span>
-                                    <input
-                                        id="address"
                                         type="text"
-                                        value={userInfo.address}
+                                        value={userInfo.phone}
                                         onChange={handleInputChange}
                                         className="pl-10 w-full border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
                                     />
@@ -204,7 +219,7 @@ export default function Component() {
                             <div className="relative">
                                 <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-green-500">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clipRule="evenodd" />
+                                        <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v14a1 1 0 01-1 1H4a1 1 0 01-1-1V3zm2 10h10V5H5v8z" clipRule="evenodd" />
                                     </svg>
                                 </span>
                                 <input
@@ -216,14 +231,24 @@ export default function Component() {
                                 />
                             </div>
                         </div>
-                        <div className="flex justify-end">
-                            <button
-                                type="submit"
-                                className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 shadow-md"
-                            >
-                                Save Changes
-                            </button>
+                        <div>
+                            <label htmlFor="address" className="block text-sm font-medium text-green-700 mb-1">Address</label>
+                            <div className="relative">
+                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-green-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M5.05 2.93A7 7 0 0115.07 13.95L10 19l-5.07-5.05a7 7 0 010-9.9zM7 7a3 3 0 106 0 3 3 0 00-6 0z" clipRule="evenodd" />
+                                    </svg>
+                                </span>
+                                <input
+                                    id="address"
+                                    type="text"
+                                    value={userInfo.address}
+                                    onChange={handleInputChange}
+                                    className="pl-10 w-full border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                                />
+                            </div>
                         </div>
+                        <button type="submit" className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md transition duration-300 ease-in-out">Save Changes</button>
                     </form>
                 </div>
             </div>
