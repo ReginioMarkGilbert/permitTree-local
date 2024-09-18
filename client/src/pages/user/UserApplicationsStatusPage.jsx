@@ -172,7 +172,7 @@ const UserApplicationsStatusPage = () => {
                 <h1 className="text-3xl font-bold mb-6 text-green-800">My Applications</h1>
                 <div className="mb-6 overflow-x-auto">
                     <div className="bg-gray-100 p-1 rounded-md inline-flex">
-                        {['Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected'].map((tab) => (
+                        {['Draft', 'Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected'].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => handleTabChange(tab)}

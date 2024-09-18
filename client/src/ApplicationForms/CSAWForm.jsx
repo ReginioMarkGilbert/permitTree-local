@@ -96,19 +96,37 @@ const ChainsawRegistrationForm = () => {
 
     const handleSaveAsDraft = async () => {
         try {
-            const token = localStorage.getItem('token'); // Get the token from local storage
-            const response = await axios.post('http://localhost:3000/api/csaw_saveDraft', { ...formData, status: 'Draft' }, {
-                headers: {
-                    'Authorization': token // Include the token in the headers
+            const token = localStorage.getItem('token');
+            const currentDate = new Date();
+            const formDataToSend = new FormData();
+
+            // Append all form fields
+            Object.keys(formData).forEach(key => {
+                if (key === 'files') {
+                    formData[key].forEach(file => {
+                        formDataToSend.append('files', file);
+                    });
+                } else if (key !== 'status' && key !== 'dateOfSubmission') {
+                    formDataToSend.append(key, formData[key]);
                 }
             });
+            formDataToSend.append('dateOfSubmission', currentDate.toISOString());
+            formDataToSend.append('status', 'Draft');
+
+            const response = await axios.post('http://localhost:3000/api/csaw_saveDraft', formDataToSend, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': token
+                }
+            });
+
             setModalContent({
                 title: 'Draft saved successfully!',
-                message: 'Do you want to view your application?'
+                message: 'Do you want to view your applications?'
             });
             setModalOpen(true);
         } catch (error) {
-            console.error('Error saving draft:', error); // Log the error
+            console.error('Error saving draft:', error);
             toast.error("Error saving draft");
         }
     };

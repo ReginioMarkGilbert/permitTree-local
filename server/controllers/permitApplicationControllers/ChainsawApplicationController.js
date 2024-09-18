@@ -119,11 +119,49 @@ const csaw_createApplication = async (req, res) => {
 
 const csaw_saveDraft = async (req, res) => {
     try {
-        const { applicationType = 'Chainsaw Registration', registrationType, chainsawStore, ownerName, address, phone, brand, model, serialNumber, dateOfAcquisition, powerOutput, maxLengthGuidebar, countryOfOrigin, purchasePrice, dateOfSubmission, status } = req.body;
+        console.log('Request body:', req.body);
+        console.log('Request files:', req.files);
+
+        const {
+            applicationType = 'Chainsaw Registration',
+            registrationType,
+            chainsawStore,
+            ownerName,
+            address,
+            phone,
+            brand,
+            model,
+            serialNumber,
+            dateOfAcquisition,
+            powerOutput,
+            maxLengthGuidebar,
+            countryOfOrigin,
+            purchasePrice,
+            dateOfSubmission,
+            status
+        } = req.body;
+
+        // Ensure dateOfSubmission is a valid date
+        const parsedDateOfSubmission = new Date(dateOfSubmission);
+        if (isNaN(parsedDateOfSubmission)) {
+            throw new Error('Invalid dateOfSubmission');
+        }
 
         // Generate customId
-        const customId = await generateCustomId();
+        const customId = await CSAW_CustomId();
 
+        // Process uploaded files
+        let files = [];
+        if (req.files && req.files.files) {
+            const uploadedFiles = Array.isArray(req.files.files) ? req.files.files : [req.files.files];
+            files = uploadedFiles.map(file => ({
+                filename: file.name,
+                contentType: file.mimetype,
+                data: file.data
+            }));
+        }
+
+        // Create a new draft application
         const newDraft = new Application({
             customId,
             applicationType,
@@ -140,16 +178,20 @@ const csaw_saveDraft = async (req, res) => {
             maxLengthGuidebar,
             countryOfOrigin,
             purchasePrice,
-            dateOfSubmission,
-            status,
-            userId: req.user.id // Associate with the logged-in user's ID
+            dateOfSubmission: parsedDateOfSubmission,
+            status: 'Draft',
+            files,
+            userId: req.user.id
         });
-        const savedDraft = await newDraft.save();
 
-        res.status(201).json(savedDraft);
-    } catch (err) {
-        console.error('Error:', err);
-        res.status(400).json({ error: err.message });
+        // Save the draft to the database
+        await newDraft.save();
+        console.log('Draft saved:', newDraft);
+
+        res.status(201).json({ message: 'Draft saved successfully', application: newDraft });
+    } catch (error) {
+        console.error('Error saving draft:', error);
+        res.status(500).json({ error: error.message });
     }
 };
 

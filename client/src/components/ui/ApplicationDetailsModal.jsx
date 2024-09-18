@@ -16,10 +16,10 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 pt-20">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh]">
-                <div className="flex justify-between items-center p-6 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-2xl">
-                    <h2 className="text-2xl font-semibold">Chainsaw Registration Details</h2>
-                    <button onClick={onClose} className="hover:bg-white hover:bg-opacity-20 p-2 rounded-full transition-colors duration-200">
-                        <X size={24} />
+                <div className="flex justify-between items-center p-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-2xl">
+                    <h2 className="text-xl font-semibold">Chainsaw Registration Details</h2>
+                    <button onClick={onClose} className="hover:bg-white hover:bg-opacity-20 p-1 rounded-full transition-colors duration-200">
+                        <X size={20} />
                     </button>
                 </div>
                 <div className="flex-grow overflow-y-auto p-6 space-y-6 custom-scrollbar">
@@ -42,7 +42,7 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
                         <Field label="Power Output" value={`${application.powerOutput} HP`} />
                         <Field label="Max Length Guidebar" value={`${application.maxLengthGuidebar} inches`} />
                         <Field label="Country of Origin" value={application.countryOfOrigin} />
-                        <Field label="Purchase Price" value={`$${application.purchasePrice.toFixed(2)}`} />
+                        <Field label="Purchase Price" value={`₱${application.purchasePrice.toFixed(2)}`} />
                     </Section>
 
                     <Section title="Dates">
@@ -58,7 +58,7 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
                         </Section>
                     )}
                 </div>
-                <div className="p-6 bg-gray-50 flex justify-end rounded-b-2xl">
+                <div className="p-5 bg-gray-50 flex justify-end rounded-b-2xl">
                     <button
                         onClick={onClose}
                         className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition duration-300 shadow-md hover:shadow-lg"
