@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Eye, Edit, Printer, Archive, ChevronUp, ChevronDown, Leaf } from 'lucide-react';
+import Modal from '../../components/ui/Modal';
+import ApplicationDetailsModal from '../../components/ui/ApplicationDetailsModal';
 
 const UserApplicationsStatusPage = () => {
     const [applications, setApplications] = useState([]);
@@ -11,6 +13,8 @@ const UserApplicationsStatusPage = () => {
     const [filterType, setFilterType] = useState('');
     const [dateRange, setDateRange] = useState('');
     const [sortConfig, setSortConfig] = useState(null);
+    const [selectedApplication, setSelectedApplication] = useState(null);
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
     useEffect(() => {
         fetchApplications();
@@ -19,34 +23,21 @@ const UserApplicationsStatusPage = () => {
     const fetchApplications = async () => {
         try {
             const token = localStorage.getItem('token');
-            const params = { status: activeTab.toLowerCase() };
             const response = await axios.get('http://localhost:3000/api/csaw_getApplications', {
-                params,
+                params: {
+                    status: ['Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected']
+                },
                 headers: {
-                    'Authorization': token
+                    Authorization: token
                 }
             });
-
-            let filteredApps = response.data.filter(app =>
-                (searchTerm === '' || app.customId.toLowerCase().includes(searchTerm.toLowerCase()) || app.applicationType.toLowerCase().includes(searchTerm.toLowerCase())) &&
-                (filterType === '' || app.applicationType === filterType) &&
-                (dateRange === '' || new Date(app.dateOfSubmission).toLocaleDateString() === new Date(dateRange).toLocaleDateString())
-            );
-
-            if (sortConfig !== null) {
-                filteredApps.sort((a, b) => {
-                    if (a[sortConfig.key] < b[sortConfig.key]) return sortConfig.direction === 'asc' ? -1 : 1;
-                    if (a[sortConfig.key] > b[sortConfig.key]) return sortConfig.direction === 'asc' ? 1 : -1;
-                    return 0;
-                });
-            }
-
-            setApplications(filteredApps);
+            setApplications(response.data);
             setLoading(false);
-        } catch (err) {
-            console.error('Error fetching applications:', err);
-            setError('Failed to fetch applications.');
+        } catch (error) {
+            console.error('Error fetching applications:', error);
+            setError('Failed to fetch applications');
             setLoading(false);
+            toast.error('Failed to fetch applications');
         }
     };
 
@@ -67,6 +58,25 @@ const UserApplicationsStatusPage = () => {
 
     const handleAction = (action, application) => {
         console.log(`Action: ${action}`, application);
+    };
+
+    const handleView = async (id) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`http://localhost:3000/api/csaw_getApplicationById/${id}`, {
+                headers: { Authorization: token }
+            });
+            setSelectedApplication(response.data);
+            setIsViewModalOpen(true);
+        } catch (error) {
+            console.error('Error fetching application details:', error);
+            toast.error('Failed to fetch application details');
+        }
+    };
+
+    const formatDate = (dateString) => {
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        return new Date(dateString).toLocaleDateString(undefined, options);
     };
 
     const renderTable = () => {
@@ -122,7 +132,7 @@ const UserApplicationsStatusPage = () => {
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <button className="text-green-600 hover:text-green-900 mr-2" onClick={() => handleAction('view', app)}>
+                                    <button className="text-green-600 hover:text-green-900 mr-2" onClick={() => handleView(app._id)}>
                                         <Eye className="inline w-4 h-4 mr-1" /> View
                                     </button>
                                     <button className="text-blue-600 hover:text-blue-900 mr-2" onClick={() => handleAction('edit', app)}>
@@ -155,7 +165,7 @@ const UserApplicationsStatusPage = () => {
             <div className="container mx-auto px-6 py-8">
                 <h1 className="text-3xl font-bold mb-6 text-green-800">My Applications</h1>
                 <div className="mb-6 overflow-x-auto">
-                    <div className="flex bg-gray-100 p-1 rounded-md inline-flex">
+                    <div className="bg-gray-100 p-1 rounded-md inline-flex">
                         {['Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected'].map((tab) => (
                             <button
                                 key={tab}
@@ -194,6 +204,12 @@ const UserApplicationsStatusPage = () => {
                 </div>
                 {renderTable()}
             </div>
+
+            <ApplicationDetailsModal
+                isOpen={isViewModalOpen}
+                onClose={() => setIsViewModalOpen(false)}
+                application={selectedApplication}
+            />
         </div>
     );
 };

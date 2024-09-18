@@ -236,11 +236,27 @@ const resetCounter = async (req, res) => {
     }
 };
 
+// Add this new function
+const csaw_getApplicationById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const application = await Application.findById(id);
+        if (!application) {
+            return res.status(404).json({ error: 'Application not found' });
+        }
+        res.status(200).json(application);
+    } catch (err) {
+        console.error('Error fetching application:', err);
+        res.status(500).json({ error: err.message });
+    }
+};
+
 module.exports = {
     csaw_createApplication,
     csaw_getApplications,
     csaw_updateApplication,
     csaw_deleteApplication,
     csaw_saveDraft,
-    resetCounter
+    resetCounter,
+    csaw_getApplicationById  // Make sure this line is added
 };
