@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Eye, Edit, Printer, Archive, ChevronUp, ChevronDown, Leaf } from 'lucide-react';
 import ApplicationDetailsModal from '../../components/ui/ApplicationDetailsModal';
+import EditApplicationModal from '../../components/ui/EditApplicationModal';
+import { toast } from 'react-toastify';
 
 const UserApplicationsStatusPage = () => {
     const [applications, setApplications] = useState([]);
@@ -14,6 +16,8 @@ const UserApplicationsStatusPage = () => {
     const [sortConfig, setSortConfig] = useState(null);
     const [selectedApplication, setSelectedApplication] = useState(null);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [selectedEditApplication, setSelectedEditApplication] = useState(null);
 
     useEffect(() => {
         fetchApplications();
@@ -25,8 +29,7 @@ const UserApplicationsStatusPage = () => {
             const token = localStorage.getItem('token');
             const response = await axios.get('http://localhost:3000/api/csaw_getApplications', {
                 params: {
-                    // status: ['Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected']
-                    status: activeTab // Send only the active tab status
+                    status: activeTab
                 },
                 headers: {
                     Authorization: token
@@ -73,6 +76,17 @@ const UserApplicationsStatusPage = () => {
             console.error('Error fetching application details:', error);
             toast.error('Failed to fetch application details');
         }
+    };
+
+    const handleEdit = (application) => {
+        setSelectedEditApplication(application);
+        setIsEditModalOpen(true);
+    };
+
+    const handleUpdateApplication = (updatedApplication) => {
+        setApplications(applications.map(app =>
+            app._id === updatedApplication._id ? updatedApplication : app
+        ));
     };
 
     const formatDate = (dateString) => {
@@ -136,7 +150,7 @@ const UserApplicationsStatusPage = () => {
                                     <button className="text-green-600 hover:text-green-900 mr-2" onClick={() => handleView(app._id)}>
                                         <Eye className="inline w-4 h-4 mr-1" /> View
                                     </button>
-                                    <button className="text-blue-600 hover:text-blue-900 mr-2" onClick={() => handleAction('edit', app)}>
+                                    <button className="text-blue-600 hover:text-blue-900 mr-2" onClick={() => handleEdit(app)}>
                                         <Edit className="inline w-4 h-4 mr-1" /> Edit
                                     </button>
                                     <button className="text-purple-600 hover:text-purple-900 mr-2" onClick={() => handleAction('print', app)}>
@@ -215,6 +229,13 @@ const UserApplicationsStatusPage = () => {
                 isOpen={isViewModalOpen}
                 onClose={() => setIsViewModalOpen(false)}
                 application={selectedApplication}
+            />
+
+            <EditApplicationModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                application={selectedEditApplication}
+                onUpdate={handleUpdateApplication}
             />
         </div>
     );

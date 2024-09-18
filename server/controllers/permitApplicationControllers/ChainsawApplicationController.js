@@ -232,20 +232,24 @@ const csaw_getApplications = async (req, res) => {
 const csaw_updateApplication = async (req, res) => {
     try {
         const { id } = req.params;
-        const { registrationType, chainsawStore, ownerName, address, phone, brand, model, serialNumber, dateOfAcquisition, powerOutput, maxLengthGuidebar, countryOfOrigin, purchasePrice, status, dateOfSubmission } = req.body;
-        const updatedApplication = await Application.findByIdAndUpdate(id, { registrationType, chainsawStore, ownerName, address, phone, brand, model, serialNumber, dateOfAcquisition, powerOutput, maxLengthGuidebar, countryOfOrigin, purchasePrice, status, dateOfSubmission }, { new: true });
-        if (!updatedApplication) {
-            return res.status(404).json({ error: 'Application not found' });
-        }
+        const updateData = req.body;
 
-        const notification = new Notification({
-            message: `Your application status was updated to ${updatedApplication.status}.`
-        });
-        await notification.save();
-        // console.log('Notification created:', notification); // Log the notification
+        // Ensure the user can only update their own applications
+        updateData.userId = req.user.id;
+
+        const updatedApplication = await Application.findOneAndUpdate(
+            { _id: id, userId: req.user.id },
+            updateData,
+            { new: true }
+        );
+
+        if (!updatedApplication) {
+            return res.status(404).json({ error: 'Application not found or you do not have permission to update it' });
+        }
 
         res.status(200).json(updatedApplication);
     } catch (err) {
+        console.error('Error updating application:', err);
         res.status(400).json({ error: err.message });
     }
 };
