@@ -33,7 +33,7 @@ export default function UserProfilePage() {
                     Authorization: token
                 }
             });
-            console.log('User details response:', response.data);
+            // console.log('User details response:', response.data);
             const { firstName, lastName, email, phone, address, company, profilePicture } = response.data.user;
             const fetchedData = {
                 fullName: `${firstName} ${lastName}`,

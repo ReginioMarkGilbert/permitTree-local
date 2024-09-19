@@ -5,13 +5,13 @@ import UserSidebar from './components/layout/UserSidebar';
 import AdminSidebar from './components/layout/AdminSidebar';
 import HomePage from './pages/user/HomePage';
 import AdminPage from './pages/admin/AdminPage';
-import PermitsPage from './pages/user/PermitsPage';
+import PermitsPage from './pages/user/permitsPage';
 import ApplicationForm from './pages/user/ApplicationForm';
 import MessageBox from './pages/user/MessageBox';
 import StatusPage from './pages/user/StatusPage';
 import UserAuthPage from './pages/UserAuthPage';
 import ProtectedRoute from './components/ProtectedRoute';
-import { isAuthenticated, getUserRole } from './utils/auth';
+import { isAuthenticated, getUserRole, isTokenExpired, logout, getToken } from './utils/auth';
 import useSidebarToggle from './hooks/useSidebarToggle';
 import LandingPage from './pages/LandingPage';
 import AboutPage from './pages/AboutPage';
@@ -29,6 +29,37 @@ const App = () => {
     const location = useLocation();
     const [selectedStore, setSelectedStore] = useState(null);
     const userRole = getUserRole();
+
+    useEffect(() => {
+        const checkTokenExpiration = () => {
+            const token = getToken();
+            if (token) {
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    const expirationTime = payload.iat * 1000 + 7 * 24 * 60 * 60 * 1000; // Set expiration time to 7 days from issued time
+                    const currentTime = Date.now();
+                    const timeLeft = expirationTime - currentTime;
+
+                    // console.log(`Time left: ${Math.ceil(timeLeft / 1000)} seconds`);
+
+                    if (timeLeft <= 0) {
+                        // console.log('Token has expired. Logging out...');
+                        logout();
+                        navigate('/auth');
+                        // } else if (timeLeft <= 10000) { // 10 seconds
+                        //     console.log(`Token will expire in ${Math.ceil(timeLeft / 1000)} seconds`);
+                    }
+                } catch (error) {
+                    console.error('Error checking token expiration:', error);
+                }
+            }
+        };
+
+        checkTokenExpiration();
+        const intervalId = setInterval(checkTokenExpiration, 1000);
+
+        return () => clearInterval(intervalId);
+    }, [navigate]);
 
     useEffect(() => {
         if (!isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/about' && location.pathname !== '/services' && location.pathname !== '/contact' && location.pathname !== '/learnMore') {

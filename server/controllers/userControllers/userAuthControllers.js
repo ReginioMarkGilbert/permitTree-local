@@ -43,8 +43,8 @@ const signup = async (req, res) => {
         const token = jwt.sign(
             { id: newUser.id, username: newUser.username, role: newUser.role },
             process.env.JWT_SECRET || 'default_secret',
-            { expiresIn: '1h' }
-            // { expiresIn: '7d' }
+            // { expiresIn: '1h' }
+            { expiresIn: '7d' }
         );
 
         res.status(201).json({ message: 'User created successfully', user: newUser, token: `Bearer ${token}` });
@@ -84,8 +84,10 @@ const login = async (req, res) => {
         };
 
         // Generate JWT token
-        // const token = jwt.sign(payload, process.env.JWT_SECRET || 'default_secret', { expiresIn: '1h' });
-        const token = jwt.sign(payload, process.env.JWT_SECRET || 'default_secret', { expiresIn: '7d' }); // extend token expiration here
+        const token = jwt.sign(
+            { id: user.id, username: user.username, role: user.role, exp: Math.floor(Date.now() / 1000) + 30 },
+            process.env.JWT_SECRET || 'default_secret'
+        );
         res.status(200).json({ message: 'Login successful', token: `Bearer ${token}` });
     } catch (err) {
         console.error('Login error:', err);
