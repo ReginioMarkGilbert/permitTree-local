@@ -8,7 +8,8 @@ const {
     csaw_deleteApplication,
     csaw_saveDraft,
     resetCounter,
-    csaw_getApplicationById  // Add this line
+    csaw_getApplicationById,
+    submitDraft
 } = require('../../controllers/permitApplicationControllers/ChainsawApplicationController');
 
 router.post('/csaw_createApplication', passport.authenticate('jwt', { session: false }), csaw_createApplication);
@@ -18,5 +19,6 @@ router.delete('/csaw_deleteApplication/:id', passport.authenticate('jwt', { sess
 router.post('/csaw_saveDraft', passport.authenticate('jwt', { session: false }), csaw_saveDraft);
 router.post('/resetCounterChainsaw', passport.authenticate('jwt', { session: false }), resetCounter);
 router.get('/csaw_getApplicationById/:id', passport.authenticate('jwt', { session: false }), csaw_getApplicationById);
+router.put('/csaw_submitDraft/:id', passport.authenticate('jwt', { session: false }), submitDraft);
 
 module.exports = router;

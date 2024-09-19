@@ -297,6 +297,26 @@ const csaw_getApplicationById = async (req, res) => {
     }
 };
 
+
+const submitDraft = async (req, res) => {
+    try {
+        const application = await ChainsawApplication.findById(req.params.id);
+        if (!application) {
+            return res.status(404).json({ success: false, message: 'Application not found' });
+        }
+        if (application.status !== 'Draft') {
+            return res.status(400).json({ success: false, message: 'Only draft applications can be submitted' });
+        }
+        application.status = 'Submitted';
+        application.dateOfSubmission = new Date();
+        await application.save();
+        res.json({ success: true, message: 'Application submitted successfully' });
+    } catch (error) {
+        console.error('Error submitting draft application:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
 module.exports = {
     csaw_createApplication,
     csaw_getApplications,
@@ -304,5 +324,6 @@ module.exports = {
     csaw_deleteApplication,
     csaw_saveDraft,
     resetCounter,
-    csaw_getApplicationById  // Make sure this line is added
+    csaw_getApplicationById,
+    submitDraft
 };

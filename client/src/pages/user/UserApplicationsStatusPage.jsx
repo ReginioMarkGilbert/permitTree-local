@@ -89,6 +89,24 @@ const UserApplicationsStatusPage = () => {
         ));
     };
 
+    const handleSubmitDraft = async (application) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.put(`http://localhost:3000/api/csaw_submitDraft/${application._id}`, {}, {
+                headers: { Authorization: token }
+            });
+            if (response.data.success) {
+                toast.success('Application submitted successfully');
+                fetchApplications(); // Refresh the applications list
+            } else {
+                toast.error('Failed to submit application');
+            }
+        } catch (error) {
+            console.error('Error submitting draft application:', error);
+            toast.error('Failed to submit application');
+        }
+    };
+
     const formatDate = (dateString) => {
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
         return new Date(dateString).toLocaleDateString(undefined, options);
@@ -156,9 +174,14 @@ const UserApplicationsStatusPage = () => {
                                     <button className="text-purple-600 hover:text-purple-900 mr-2" onClick={() => handleAction('print', app)}>
                                         <Printer className="inline w-4 h-4 mr-1" /> Print
                                     </button>
-                                    <button className="text-gray-600 hover:text-gray-900" onClick={() => handleAction('archive', app)}>
+                                    <button className="text-gray-600 hover:text-gray-900 mr-2" onClick={() => handleAction('archive', app)}>
                                         <Archive className="inline w-4 h-4 mr-1" /> Archive
                                     </button>
+                                    {app.status === 'Draft' && (
+                                        <button className="text-yellow-600 hover:text-yellow-900" onClick={() => handleSubmitDraft(app)}>
+                                            <Leaf className="inline w-4 h-4 mr-1" /> Submit
+                                        </button>
+                                    )}
                                 </td>
                             </tr>
                         ))}
