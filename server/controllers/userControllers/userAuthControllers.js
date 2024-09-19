@@ -44,6 +44,7 @@ const signup = async (req, res) => {
             { id: newUser.id, username: newUser.username, role: newUser.role },
             process.env.JWT_SECRET || 'default_secret',
             { expiresIn: '1h' }
+            // { expiresIn: '7d' }
         );
 
         res.status(201).json({ message: 'User created successfully', user: newUser, token: `Bearer ${token}` });
@@ -83,7 +84,8 @@ const login = async (req, res) => {
         };
 
         // Generate JWT token
-        const token = jwt.sign(payload, process.env.JWT_SECRET || 'default_secret', { expiresIn: '1h' });
+        // const token = jwt.sign(payload, process.env.JWT_SECRET || 'default_secret', { expiresIn: '1h' });
+        const token = jwt.sign(payload, process.env.JWT_SECRET || 'default_secret', { expiresIn: '7d' }); // extend token expiration here
         res.status(200).json({ message: 'Login successful', token: `Bearer ${token}` });
     } catch (err) {
         console.error('Login error:', err);
@@ -143,7 +145,7 @@ const getUserDetails = async (req, res) => {
                 ? {
                     data: user.profilePicture.data.toString('base64'),
                     contentType: user.profilePicture.contentType
-                  }
+                }
                 : null
         };
 
