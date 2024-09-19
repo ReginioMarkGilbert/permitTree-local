@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../components/ui/Card';
 import Input from '../components/ui/Input';
@@ -10,7 +10,7 @@ import { Download, X } from "lucide-react";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../components/ui/Modal';
-// import HomeFooter from '../components/ui/HomeFooter';
+import '../components/ui/styles/CSAWFormScrollbar.css';
 
 const ChainsawRegistrationForm = () => {
     const navigate = useNavigate();
@@ -30,9 +30,20 @@ const ChainsawRegistrationForm = () => {
         maxLengthGuidebar: '',
         countryOfOrigin: '',
         purchasePrice: '',
-        files: [],
+        files: {
+            specialPowerOfAttorney: [],
+            forestTenureAgreement: [],
+            businessPermit: [],
+            certificateOfRegistration: [],
+            woodProcessingPlantPermit: []
+        },
         dateOfSubmission: '',
-        status: ''
+        status: '',
+        isOwner: false,
+        isTenureHolder: false,
+        isBusinessOwner: false,
+        isPLTPRHolder: false,
+        isWPPHolder: false,
     });
     const [modalOpen, setModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState({ title: '', message: '' });
@@ -54,15 +65,27 @@ const ChainsawRegistrationForm = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleFileChange = (e) => {
+    const handleFileChange = (e, documentType) => {
         if (e.target.files) {
             const newFiles = Array.from(e.target.files);
-            setFormData(prev => ({ ...prev, files: [...prev.files, ...newFiles] }));
+            setFormData(prev => ({
+                ...prev,
+                files: {
+                    ...prev.files,
+                    [documentType]: [...prev.files[documentType], ...newFiles]
+                }
+            }));
         }
     };
 
-    const removeFile = (fileToRemove) => {
-        setFormData(prev => ({ ...prev, files: prev.files.filter(file => file !== fileToRemove) }));
+    const removeFile = (documentType, fileToRemove) => {
+        setFormData(prev => ({
+            ...prev,
+            files: {
+                ...prev.files,
+                [documentType]: prev.files[documentType].filter(file => file !== fileToRemove)
+            }
+        }));
     };
 
     const handleNextStep = () => {
@@ -111,8 +134,10 @@ const ChainsawRegistrationForm = () => {
             // Append all form fields
             Object.keys(formData).forEach(key => {
                 if (key === 'files') {
-                    formData[key].forEach(file => {
-                        formDataToSend.append('files', file);
+                    Object.keys(formData[key]).forEach(docType => {
+                        formData[key][docType].forEach(file => {
+                            formDataToSend.append(`${docType}[]`, file);
+                        });
                     });
                 } else if (key !== 'status' && key !== 'dateOfSubmission') {
                     formDataToSend.append(key, formData[key]);
@@ -149,8 +174,10 @@ const ChainsawRegistrationForm = () => {
             // Append all form fields
             Object.keys(formData).forEach(key => {
                 if (key === 'files') {
-                    formData[key].forEach(file => {
-                        formDataToSend.append('files', file);
+                    Object.keys(formData[key]).forEach(docType => {
+                        formData[key][docType].forEach(file => {
+                            formDataToSend.append(`${docType}[]`, file);
+                        });
                     });
                 } else if (key !== 'status' && key !== 'dateOfSubmission') { // Exclude status and dateOfSubmission
                     formDataToSend.append(key, formData[key]);
@@ -179,9 +206,15 @@ const ChainsawRegistrationForm = () => {
         }
     };
 
+    const handleCheckboxChange = (e) => {
+        const { name, checked } = e.target;
+        setFormData(prev => ({ ...prev, [name]: checked }));
+    };
+
     const steps = [
         { title: "Registration Type", description: "Choose registration type" },
         { title: "Chainsaw Store", description: "Select chainsaw store" },
+        { title: "Document Requirements", description: "Specify document requirements" },
         { title: "Upload Documents", description: "Upload necessary documents" },
         { title: "Application Details", description: "Fill in application details" },
         { title: "Review", description: "Review your application" },
@@ -193,6 +226,9 @@ const ChainsawRegistrationForm = () => {
             .replace(/([A-Z])/g, ' $1') // Insert space before capital letters
             .replace(/^./, str => str.toUpperCase()); // Capitalize the first letter
     };
+
+    const uploadCardsCount = Object.values(formData).filter(value => value === true).length;
+    const isScrollable = uploadCardsCount > 3;
 
     return (
         <div className="min-h-screen bg-green-50 flex flex-col justify-between pt-24">
@@ -244,186 +280,237 @@ const ChainsawRegistrationForm = () => {
 
                             {currentStep === 2 && (
                                 <div className="space-y-4">
-                                    <div className="mb-6">
-                                        <div className="flex flex-col gap-4">
-                                            <label
-                                                htmlFor="file-upload"
-                                                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 cursor-pointer w-fit"
-                                            >
-                                                <Download className="h-4 w-4" />
-                                                Choose Files
-                                            </label>
-                                            <input
-                                                id="file-upload"
-                                                type="file"
-                                                className="hidden"
-                                                onChange={handleFileChange}
-                                                multiple
-                                                accept=".png,.jpg,.jpeg,.pdf,.docx"
-                                            />
-                                            {formData.files.length > 0 && (
-                                                <div className="mt-2 space-y-2">
-                                                    {formData.files.map((file, index) => (
-                                                        <div key={index} className="flex items-center justify-between bg-white p-2 rounded-md border border-gray-200">
-                                                            <span className="text-sm text-gray-600 truncate">{file.name}</span>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => removeFile(file)}
-                                                                className="text-red-500 hover:text-red-700 focus:outline-none"
-                                                            >
-                                                                <X className="h-5 w-5" />
-                                                            </button>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                            {formData.files.length === 0 && (
-                                                <p className="text-sm text-gray-500">No files chosen</p>
-                                            )}
-                                        </div>
+                                    {/* <h3 className="text-lg font-semibold mb-2 text-green-700">Document Requirements</h3> */}
+                                    <div className="space-y-2">
+                                        <CheckboxItem
+                                            id="isOwner"
+                                            label="Are you the owner of the Chainsaw?"
+                                            checked={formData.isOwner}
+                                            onChange={handleCheckboxChange}
+                                        />
+                                        <CheckboxItem
+                                            id="isTenureHolder"
+                                            label="Are you a Tenure holder?"
+                                            checked={formData.isTenureHolder}
+                                            onChange={handleCheckboxChange}
+                                        />
+                                        <CheckboxItem
+                                            id="isBusinessOwner"
+                                            label="Are you a business owner?"
+                                            checked={formData.isBusinessOwner}
+                                            onChange={handleCheckboxChange}
+                                        />
+                                        <CheckboxItem
+                                            id="isPLTPRHolder"
+                                            label="Are you a Private Land Tree Plantation Registration (PLTPR) holder?"
+                                            checked={formData.isPLTPRHolder}
+                                            onChange={handleCheckboxChange}
+                                        />
+                                        <CheckboxItem
+                                            id="isWPPHolder"
+                                            label="Are you a Licensed Wood Processor/Wood Processing Plant (WPP) holder?"
+                                            checked={formData.isWPPHolder}
+                                            onChange={handleCheckboxChange}
+                                        />
                                     </div>
                                 </div>
                             )}
 
                             {currentStep === 3 && (
-                                <div className="space-y-5 h-[630px]">
-                                    <div>
-                                        <h3 className="text-lg font-semibold mb-1 text-green-700">Owner Details</h3>
-                                        <div className="space-y-2">
+                                <div className="space-y-4">
+                                    {/* <h3 className="text-lg font-semibold mb-2 text-green-700">Upload Documents</h3> */}
+                                    <div className={`space-y-4 ${isScrollable ? 'h-96 overflow-y-auto csaw-form-scrollbar pr-4' : ''}`}>
+                                        {formData.isOwner && (
+                                            <UploadCard
+                                                label="Are you the owner of the Chainsaw?"
+                                                documentLabel="Upload Special Power of Attorney document"
+                                                files={formData.files.specialPowerOfAttorney}
+                                                onFileChange={(e) => handleFileChange(e, 'specialPowerOfAttorney')}
+                                                onRemoveFile={(file) => removeFile('specialPowerOfAttorney', file)}
+                                            />
+                                        )}
+                                        {formData.isTenureHolder && (
+                                            <UploadCard
+                                                label="Are you a Tenure holder?"
+                                                documentLabel="Upload certified True copy of forest Tenure Agreement"
+                                                files={formData.files.forestTenureAgreement}
+                                                onFileChange={(e) => handleFileChange(e, 'forestTenureAgreement')}
+                                                onRemoveFile={(file) => removeFile('forestTenureAgreement', file)}
+                                            />
+                                        )}
+                                        {formData.isBusinessOwner && (
+                                            <UploadCard
+                                                label="Are you a business owner?"
+                                                documentLabel="Upload Business Permit"
+                                                files={formData.files.businessPermit}
+                                                onFileChange={(e) => handleFileChange(e, 'businessPermit')}
+                                                onRemoveFile={(file) => removeFile('businessPermit', file)}
+                                            />
+                                        )}
+                                        {formData.isPLTPRHolder && (
+                                            <UploadCard
+                                                label="Are you a Private Land Tree Plantation Registration (PLTPR) holder?"
+                                                documentLabel="Upload Certificate of Registration"
+                                                files={formData.files.certificateOfRegistration}
+                                                onFileChange={(e) => handleFileChange(e, 'certificateOfRegistration')}
+                                                onRemoveFile={(file) => removeFile('certificateOfRegistration', file)}
+                                            />
+                                        )}
+                                        {formData.isWPPHolder && (
+                                            <UploadCard
+                                                label="Are you a Licensed Wood Processor/Wood Processing Plant (WPP) holder?"
+                                                documentLabel="Upload Wood Processing Plant Permit"
+                                                files={formData.files.woodProcessingPlantPermit}
+                                                onFileChange={(e) => handleFileChange(e, 'woodProcessingPlantPermit')}
+                                                onRemoveFile={(file) => removeFile('woodProcessingPlantPermit', file)}
+                                            />
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {currentStep === 4 && (
+                                <div className="space-y-4">
+                                    <h3 className="text-lg font-semibold mb-2 text-green-700">Application Details</h3>
+                                    <div className="space-y-5 h-[630px]">
+                                        <div>
+                                            <h3 className="text-lg font-semibold mb-1 text-green-700">Owner Details</h3>
                                             <div className="space-y-2">
-                                                <Label htmlFor="ownerName">Name</Label>
-                                                <Input
-                                                    id="ownerName"
-                                                    name="ownerName"
-                                                    value={formData.ownerName}
-                                                    onChange={handleInputChange}
-                                                    placeholder="Full Name"
-                                                    required
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="address">Address</Label>
-                                                <Input
-                                                    id="address"
-                                                    name="address"
-                                                    value={formData.address}
-                                                    onChange={handleInputChange}
-                                                    placeholder="Barangay, Bayan, Probinsya"
-                                                    required
-                                                    className="w-48 h-16 resize-none"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="phone">Phone Number</Label>
-                                                <Input
-                                                    id="phone"
-                                                    name="phone"
-                                                    value={formData.phone}
-                                                    onChange={handleInputChange}
-                                                    placeholder="e.g. 09123456789"
-                                                    required
-                                                />
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="ownerName">Name</Label>
+                                                    <Input
+                                                        id="ownerName"
+                                                        name="ownerName"
+                                                        value={formData.ownerName}
+                                                        onChange={handleInputChange}
+                                                        placeholder="Full Name"
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="address">Address</Label>
+                                                    <Input
+                                                        id="address"
+                                                        name="address"
+                                                        value={formData.address}
+                                                        onChange={handleInputChange}
+                                                        placeholder="Barangay, Bayan, Probinsya"
+                                                        required
+                                                        className="w-48 h-16 resize-none"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="phone">Phone Number</Label>
+                                                    <Input
+                                                        id="phone"
+                                                        name="phone"
+                                                        value={formData.phone}
+                                                        onChange={handleInputChange}
+                                                        placeholder="e.g. 09123456789"
+                                                        required
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-semibold mb-2 text-green-700">Chainsaw Details</h3>
-                                        <div className="space-y-4">
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div>
-                                                    <Label htmlFor="brand">Brand</Label>
-                                                    <Input
-                                                        id="brand"
-                                                        name="brand"
-                                                        value={formData.brand}
-                                                        onChange={handleInputChange}
-                                                        placeholder="Enter Brand"
-                                                        required
-                                                    />
+                                        <div>
+                                            <h3 className="text-lg font-semibold mb-2 text-green-700">Chainsaw Details</h3>
+                                            <div className="space-y-4">
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <Label htmlFor="brand">Brand</Label>
+                                                        <Input
+                                                            id="brand"
+                                                            name="brand"
+                                                            value={formData.brand}
+                                                            onChange={handleInputChange}
+                                                            placeholder="Enter Brand"
+                                                            required
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <Label htmlFor="model">Model</Label>
+                                                        <Input
+                                                            id="model"
+                                                            name="model"
+                                                            value={formData.model}
+                                                            onChange={handleInputChange}
+                                                            placeholder="Enter Model"
+                                                            required
+                                                        />
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <Label htmlFor="model">Model</Label>
-                                                    <Input
-                                                        id="model"
-                                                        name="model"
-                                                        value={formData.model}
-                                                        onChange={handleInputChange}
-                                                        placeholder="Enter Model"
-                                                        required
-                                                    />
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <Label htmlFor="serialNumber">Serial No.</Label>
+                                                        <Input
+                                                            id="serialNumber"
+                                                            name="serialNumber"
+                                                            value={formData.serialNumber}
+                                                            onChange={handleInputChange}
+                                                            placeholder="Enter Serial Number"
+                                                            required
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <Label htmlFor="dateOfAcquisition">Date of Acquisition</Label>
+                                                        <Input
+                                                            id="dateOfAcquisition"
+                                                            name="dateOfAcquisition"
+                                                            type="date"
+                                                            value={formData.dateOfAcquisition}
+                                                            onChange={handleInputChange}
+                                                            required
+                                                        />
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div>
-                                                    <Label htmlFor="serialNumber">Serial No.</Label>
-                                                    <Input
-                                                        id="serialNumber"
-                                                        name="serialNumber"
-                                                        value={formData.serialNumber}
-                                                        onChange={handleInputChange}
-                                                        placeholder="Enter Serial Number"
-                                                        required
-                                                    />
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <Label htmlFor="powerOutput">Power Output (kW/bhp)</Label>
+                                                        <Input
+                                                            id="powerOutput"
+                                                            name="powerOutput"
+                                                            value={formData.powerOutput}
+                                                            onChange={handleInputChange}
+                                                            placeholder="e.g. 5 kW or 6.7 bhp"
+                                                            required
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <Label htmlFor="maxLengthGuidebar">Maximum Length of Guidebar</Label>
+                                                        <Input
+                                                            id="maxLengthGuidebar"
+                                                            name="maxLengthGuidebar"
+                                                            value={formData.maxLengthGuidebar}
+                                                            onChange={handleInputChange}
+                                                            placeholder="e.g. 20 inches"
+                                                            required
+                                                        />
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <Label htmlFor="dateOfAcquisition">Date of Acquisition</Label>
-                                                    <Input
-                                                        id="dateOfAcquisition"
-                                                        name="dateOfAcquisition"
-                                                        type="date"
-                                                        value={formData.dateOfAcquisition}
-                                                        onChange={handleInputChange}
-                                                        required
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div>
-                                                    <Label htmlFor="powerOutput">Power Output (kW/bhp)</Label>
-                                                    <Input
-                                                        id="powerOutput"
-                                                        name="powerOutput"
-                                                        value={formData.powerOutput}
-                                                        onChange={handleInputChange}
-                                                        placeholder="e.g. 5 kW or 6.7 bhp"
-                                                        required
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <Label htmlFor="maxLengthGuidebar">Maximum Length of Guidebar</Label>
-                                                    <Input
-                                                        id="maxLengthGuidebar"
-                                                        name="maxLengthGuidebar"
-                                                        value={formData.maxLengthGuidebar}
-                                                        onChange={handleInputChange}
-                                                        placeholder="e.g. 20 inches"
-                                                        required
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div>
-                                                    <Label htmlFor="countryOfOrigin">Country of Origin</Label>
-                                                    <Input
-                                                        id="countryOfOrigin"
-                                                        name="countryOfOrigin"
-                                                        value={formData.countryOfOrigin}
-                                                        onChange={handleInputChange}
-                                                        placeholder="Enter Country of Origin"
-                                                        required
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <Label htmlFor="purchasePrice">Purchase Price</Label>
-                                                    <Input
-                                                        id="purchasePrice"
-                                                        name="purchasePrice"
-                                                        type="number"
-                                                        value={formData.purchasePrice}
-                                                        onChange={handleInputChange}
-                                                        placeholder="Enter Purchase Price"
-                                                        required
-                                                    />
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <Label htmlFor="countryOfOrigin">Country of Origin</Label>
+                                                        <Input
+                                                            id="countryOfOrigin"
+                                                            name="countryOfOrigin"
+                                                            value={formData.countryOfOrigin}
+                                                            onChange={handleInputChange}
+                                                            placeholder="Enter Country of Origin"
+                                                            required
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <Label htmlFor="purchasePrice">Purchase Price</Label>
+                                                        <Input
+                                                            id="purchasePrice"
+                                                            name="purchasePrice"
+                                                            type="number"
+                                                            value={formData.purchasePrice}
+                                                            onChange={handleInputChange}
+                                                            placeholder="Enter Purchase Price"
+                                                            required
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -431,7 +518,7 @@ const ChainsawRegistrationForm = () => {
                                 </div>
                             )}
 
-                            {currentStep === 4 && (
+                            {currentStep === 5 && (
                                 <div className="space-y-4">
                                     <h3 className="text-lg font-semibold mb-2 text-green-700">Review Your Application</h3>
                                     <div className="grid grid-cols-2 gap-4">
@@ -494,7 +581,80 @@ const ChainsawRegistrationForm = () => {
                 onHome={() => navigate('/')}
                 onApplications={() => navigate('/applicationsStatus')}
             />
-            {/* <HomeFooter /> */}
+        </div>
+    );
+};
+
+const CheckboxItem = ({ id, label, checked, onChange }) => (
+    <div className="flex items-center">
+        <input
+            type="checkbox"
+            id={id}
+            name={id}
+            checked={checked}
+            onChange={onChange}
+            className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+        />
+        <label htmlFor={id} className="ml-2 block text-sm text-gray-900">
+            {label}
+        </label>
+    </div>
+);
+
+const UploadCard = ({ label, documentLabel, files, onFileChange, onRemoveFile }) => {
+    return (
+        <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <div className="flex items-center mb-2">
+                <span className="text-green-600 mr-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                </span>
+                <span className="font-medium">{label}</span>
+            </div>
+            <div className="mt-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">{documentLabel}</label>
+                <div className="space-y-4">
+                    <div className="mb-6">
+                        <div className="flex flex-col gap-4">
+                            <label
+                                htmlFor={`file-upload-${label}`}
+                                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 cursor-pointer w-fit"
+                            >
+                                <Download className="h-4 w-4" />
+                                Choose Files
+                            </label>
+                            <input
+                                id={`file-upload-${label}`}
+                                type="file"
+                                className="hidden"
+                                onChange={onFileChange}
+                                multiple
+                                accept=".png,.jpg,.jpeg,.pdf,.docx"
+                            />
+                            {files.length > 0 && (
+                                <div className="mt-2 space-y-2">
+                                    {files.map((file, index) => (
+                                        <div key={index} className="flex items-center justify-between bg-white p-2 rounded-md border border-gray-200">
+                                            <span className="text-sm text-gray-600 truncate">{file.name}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => onRemoveFile(file)}
+                                                className="text-red-500 hover:text-red-700 focus:outline-none"
+                                            >
+                                                <X className="h-5 w-5" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            {files.length === 0 && (
+                                <p className="text-sm text-gray-500">No files chosen</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };

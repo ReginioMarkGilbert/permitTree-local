@@ -16,7 +16,7 @@
 }
 
 .recent-applications-card:hover .custom-scrollbar {
-    scrollbar-color: #a0e4ce #E5E7EB;
+    scrollbar-color: #a0e4ce transparent;
 }
 
 .recent-applications-card:hover .custom-scrollbar::-webkit-scrollbar-track {

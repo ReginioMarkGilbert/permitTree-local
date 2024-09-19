@@ -1,0 +1,18 @@
+.csaw-form-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #a0e4ce transparent;
+}
+
+.csaw-form-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.csaw-form-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.csaw-form-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(155, 155, 155, 0.7);
+    border-radius: 20px;
+    border: transparent;
+}
