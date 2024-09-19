@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Ca
 import { FaLeaf, FaBars, FaTimes, FaHome, FaClipboardList, FaBell, FaUser } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
 import HomeFooter from '../../components/ui/HomeFooter';
+// Import the custom scrollbar styles
+import '../../components/ui/styles/customScrollBar.css';
 
 export default function HomePage() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -102,34 +104,37 @@ export default function HomePage() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <Card className="lg:col-span-2 bg-white">
+                    <Card className="lg:col-span-2 bg-white recent-applications-card">
                         <CardHeader>
                             <CardTitle className="text-green-800">Recent Applications</CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="relative">
                             {loading ? (
                                 <p className="text-center text-gray-500">Loading applications...</p>
                             ) : error ? (
                                 <p className="text-center text-red-500">{error}</p>
                             ) : (
-                                <div className="space-y-4">
-                                    {recentApplications.map((app, index) => (
-                                        <div key={index} className="flex items-center justify-between border-b border-gray-200 pb-2 last:border-b-0 last:pb-0">
-                                            <div>
+                                <div className="space-y-4 h-64 overflow-y-auto custom-scrollbar applications-container">
+                                    {recentApplications.slice(0, 5).map((app, index) => (
+                                        <div key={index} className="flex items-center border-b border-gray-200 pb-2 last:border-b-0 last:pb-0">
+                                            <div className="flex-grow pr-4">
                                                 <p className="font-semibold text-green-800">{app.applicationType}</p>
                                                 <p className="text-sm text-gray-500">Application ID: {app.customId}</p>
                                                 <p className="text-sm text-gray-500">Submitted: {new Date(app.dateOfSubmission).toLocaleDateString()}</p>
                                             </div>
-                                            <span className={`px-2 py-1 rounded-full text-xs ${app.status === "Approved" ? "bg-green-200 text-green-800" :
-                                                app.status === "Pending" ? "bg-yellow-200 text-yellow-800" :
-                                                    "bg-blue-200 text-blue-800"
-                                                }`}>
-                                                {app.status}
-                                            </span>
+                                            <div className="flex-shrink-0 w-24 text-right mr-4">
+                                                <span className={`inline-block px-2 py-1 rounded-full text-xs ${app.status === "Approved" ? "bg-green-200 text-green-800" :
+                                                    app.status === "Pending" ? "bg-yellow-200 text-yellow-800" :
+                                                        "bg-blue-200 text-blue-800"
+                                                    }`}>
+                                                    {app.status}
+                                                </span>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
                             )}
+                            <div className="absolute right-0 top-0 bottom-0 w-2 bg-white pointer-events-none"></div>
                             <Button className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white">View All Applications</Button>
                         </CardContent>
                     </Card>
