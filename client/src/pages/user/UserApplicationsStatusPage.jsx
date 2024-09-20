@@ -22,7 +22,7 @@ const UserApplicationsStatusPage = () => {
 
     useEffect(() => {
         fetchApplications();
-    }, [activeTab, filterType]); // Add filterType to the dependency array
+    }, [activeTab]);
 
     const fetchApplications = async () => {
         try {
@@ -30,8 +30,7 @@ const UserApplicationsStatusPage = () => {
             const token = localStorage.getItem('token');
             const response = await axios.get('http://localhost:3000/api/csaw_getApplications', {
                 params: {
-                    status: activeTab,
-                    applicationType: filterType // Add this line
+                    status: activeTab
                 },
                 headers: {
                     Authorization: token
@@ -172,9 +171,11 @@ const UserApplicationsStatusPage = () => {
                                         <button className="text-green-600 hover:text-green-900 action-icon" onClick={() => handleView(app._id)}>
                                             <Eye className="inline w-4 h-4" />
                                         </button>
-                                        <button className="text-blue-600 hover:text-blue-900 action-icon" onClick={() => handleEdit(app)}>
-                                            <Edit className="inline w-4 h-4" />
-                                        </button>
+                                        {app.status !== 'Submitted' && (
+                                            <button className="text-blue-600 hover:text-blue-900 action-icon" onClick={() => handleEdit(app)}>
+                                                <Edit className="inline w-4 h-4" />
+                                            </button>
+                                        )}
                                         <button className="text-purple-600 hover:text-purple-900 action-icon" onClick={() => handleAction('print', app)}>
                                             <Printer className="inline w-4 h-4" />
                                         </button>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { X } from 'lucide-react';
+import { X, FileText } from 'lucide-react';
 import './styles/customScrollBar.css';
 
 const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
@@ -11,6 +11,48 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
             month: '2-digit',
             day: '2-digit'
         });
+    };
+
+    // Updated renderFileLinks function
+    const renderFileLinks = (files) => {
+        return Object.entries(files).map(([key, fileArray]) => {
+            // Only render if the fileArray is not empty
+            if (fileArray && fileArray.length > 0) {
+                return (
+                    <div key={key} className="mb-4">
+                        <h4 className="font-semibold text-gray-700 mb-2">{formatDocumentLabel(key)}</h4>
+                        {fileArray.map((file, index) => (
+                            <div key={`${key}-${index}`} className="flex items-center space-x-2 ml-4">
+                                <FileText size={16} className="text-gray-500" />
+                                <a
+                                    href={`http://localhost:3000/api/file/${application._id}/${key}/${index}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-500 hover:underline"
+                                >
+                                    {file.filename || `${key} ${index + 1}`}
+                                </a>
+                            </div>
+                        ))}
+                    </div>
+                );
+            }
+            return null; // Return null for empty file arrays
+        }).filter(Boolean); // Filter out null values
+    };
+
+    // Helper function to format document labels
+    const formatDocumentLabel = (key) => {
+        const labels = {
+            officialReceipt: "Official Receipt",
+            deedOfSale: "Deed of Sale",
+            specialPowerOfAttorney: "Special Power of Attorney",
+            forestTenureAgreement: "Forest Tenure Agreement",
+            businessPermit: "Business Permit",
+            certificateOfRegistration: "Certificate of Registration",
+            woodProcessingPlantPermit: "Wood Processing Plant Permit"
+        };
+        return labels[key] || key.replace(/([A-Z])/g, ' $1').trim();
     };
 
     return (
@@ -51,11 +93,11 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
                         <Field label="Date of Submission" value={formatDate(application.dateOfSubmission)} />
                     </Section>
 
-                    {application.files && application.files.length > 0 && (
-                        <Section title="Uploaded Files">
-                            {application.files.map((file, index) => (
-                                <Field key={index} label={`File ${index + 1}`} value={file.filename} />
-                            ))}
+                    {application.files && Object.keys(application.files).length > 0 && (
+                        <Section title="Uploaded Documents">
+                            <div className="col-span-2">
+                                {renderFileLinks(application.files)}
+                            </div>
                         </Section>
                     )}
                 </div>

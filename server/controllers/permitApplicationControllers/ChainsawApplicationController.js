@@ -304,6 +304,24 @@ const csaw_getApplicationById = async (req, res) => {
     }
 };
 
+const csaw_getFile = async (req, res) => {
+    try {
+        const { id, fileType, index } = req.params;
+        const application = await Application.findById(id);
+        if (!application) {
+            return res.status(404).json({ error: 'Application not found' });
+        }
+        const file = application.files[fileType][index];
+        if (!file) {
+            return res.status(404).json({ error: 'File not found' });
+        }
+        res.contentType(file.contentType);
+        res.send(file.data);
+    } catch (err) {
+        console.error('Error fetching file:', err);
+        res.status(500).json({ error: err.message });
+    }
+};
 
 const submitDraft = async (req, res) => {
     try {
@@ -332,5 +350,6 @@ module.exports = {
     csaw_saveDraft,
     resetCounter,
     csaw_getApplicationById,
+    csaw_getFile,
     submitDraft
 };
