@@ -198,18 +198,20 @@ const ChainsawRegistrationForm = () => {
             const currentDate = new Date();
             const formDataToSend = new FormData();
 
-            // Append all form fields
+            // Append non-file fields
             Object.keys(formData).forEach(key => {
-                if (key === 'files') {
-                    Object.keys(formData[key]).forEach(docType => {
-                        formData[key][docType].forEach(file => {
-                            formDataToSend.append(`${docType}[]`, file);
-                        });
-                    });
-                } else if (key !== 'status' && key !== 'dateOfSubmission') {
+                if (key !== 'files') {
                     formDataToSend.append(key, formData[key]);
                 }
             });
+
+            // Append files
+            Object.keys(formData.files).forEach(fileType => {
+                formData.files[fileType].forEach(file => {
+                    formDataToSend.append(fileType, file);
+                });
+            });
+
             formDataToSend.append('dateOfSubmission', currentDate.toISOString());
             formDataToSend.append('status', 'Submitted');
 
@@ -240,7 +242,7 @@ const ChainsawRegistrationForm = () => {
                 toast.error("Unauthorized: Please log in again.");
                 // Optionally, redirect to login page or clear token
             } else {
-                toast.error("Error submitting application: " + (error.response ? error.response.data.error : error.message));
+                toast.error(`Error submitting application: ${error.response?.data?.error || error.message}`);
             }
         }
     };
