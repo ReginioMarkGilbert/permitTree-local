@@ -58,3 +58,34 @@
         margin-bottom: 0.5rem;
     }
 }
+
+.upload-cards-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-right: 16px;
+}
+
+.upload-cards-container.csaw-form-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #a0e4ce transparent;
+}
+
+.upload-cards-container.csaw-form-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.upload-cards-container.csaw-form-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.upload-cards-container.csaw-form-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(155, 155, 155, 0.7);
+    border-radius: 20px;
+    border: transparent;
+}
+
+.step-3-container {
+    height: 600px; /* Match the height used in other steps */
+    display: flex;
+    flex-direction: column;
+}

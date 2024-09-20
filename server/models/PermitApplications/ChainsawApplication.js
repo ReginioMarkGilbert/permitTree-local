@@ -17,6 +17,8 @@ const ChainsawApplicationSchema = new mongoose.Schema({
     countryOfOrigin: { type: String, required: true },
     purchasePrice: { type: Number, required: true },
     files: {
+        officialReceipt: [{ filename: String, contentType: String, data: Buffer }],
+        deedOfSale: [{ filename: String, contentType: String, data: Buffer }],
         specialPowerOfAttorney: [{ filename: String, contentType: String, data: Buffer }],
         forestTenureAgreement: [{ filename: String, contentType: String, data: Buffer }],
         businessPermit: [{ filename: String, contentType: String, data: Buffer }],

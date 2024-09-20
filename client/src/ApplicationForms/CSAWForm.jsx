@@ -31,6 +31,8 @@ const ChainsawRegistrationForm = () => {
         countryOfOrigin: '',
         purchasePrice: '',
         files: {
+            officialReceipt: [],
+            deedOfSale: [],
             specialPowerOfAttorney: [],
             forestTenureAgreement: [],
             businessPermit: [],
@@ -303,7 +305,6 @@ const ChainsawRegistrationForm = () => {
 
                             {currentStep === 1 && (
                                 <div className="space-y-4 pt-2 h-36">
-                                    {/* <Label htmlFor="chainsawStore" className="text-lg font-semibold">Accredited Chainsaw Store</Label> */}
                                     <p className="text-sm text-gray-700 mb-3 font-semibold">
                                         Please select the store where you purchased your chainsaw. You cannot proceed if your chainsaw was not purchased from one of the accredited stores.
                                     </p>
@@ -326,7 +327,6 @@ const ChainsawRegistrationForm = () => {
 
                             {currentStep === 2 && (
                                 <div className="space-y-4">
-                                    {/* <h3 className="text-lg font-semibold mb-2 text-green-700">Document Requirements</h3> */}
                                     <p className="text-sm text-gray-700 mb-4 font-semibold">
                                         Please check the boxes that apply to you. In the next step, you will be required to upload the corresponding documents.
                                     </p>
@@ -366,13 +366,29 @@ const ChainsawRegistrationForm = () => {
                             )}
 
                             {currentStep === 3 && (
-                                <div className="space-y-4">
-                                    {/* <h3 className="text-lg font-semibold mb-2 text-green-700">Upload Documents</h3> */}
-                                    <div className={`space-y-4 ${isScrollable ? 'h-96 overflow-y-auto csaw-form-scrollbar pr-4' : ''}`}>
+                                <div className="step-3-container">
+                                    <p className="text-sm text-gray-700 mb-4 font-semibold">
+                                        Please upload the required documents.
+                                    </p>
+                                    <div className="upload-cards-container csaw-form-scrollbar">
+                                        <UploadCard
+                                            label="Official Receipt of Chainsaw Purchase"
+                                            documentLabel="Upload 1 certified copy and 1 original for verification (or Affidavit of Ownership if original is lost)"
+                                            files={formData.files.officialReceipt}
+                                            onFileChange={(e) => handleFileChange(e, 'officialReceipt')}
+                                            onRemoveFile={(file) => removeFile('officialReceipt', file)}
+                                        />
+                                        <UploadCard
+                                            label="Notarized Deed of Absolute Sale"
+                                            documentLabel="Upload 1 original (required if transfer of ownership)"
+                                            files={formData.files.deedOfSale}
+                                            onFileChange={(e) => handleFileChange(e, 'deedOfSale')}
+                                            onRemoveFile={(file) => removeFile('deedOfSale', file)}
+                                        />
                                         {formData.isOwner && (
                                             <UploadCard
-                                                label="Are you the owner of the Chainsaw?"
-                                                documentLabel="Upload Special Power of Attorney document"
+                                                label="Special Power of Attorney"
+                                                documentLabel="Upload document if you are the owner of the Chainsaw"
                                                 files={formData.files.specialPowerOfAttorney}
                                                 onFileChange={(e) => handleFileChange(e, 'specialPowerOfAttorney')}
                                                 onRemoveFile={(file) => removeFile('specialPowerOfAttorney', file)}
@@ -380,7 +396,7 @@ const ChainsawRegistrationForm = () => {
                                         )}
                                         {formData.isTenureHolder && (
                                             <UploadCard
-                                                label="Are you a Tenure holder?"
+                                                label="Forest Tenure Agreement"
                                                 documentLabel="Upload certified True copy of forest Tenure Agreement"
                                                 files={formData.files.forestTenureAgreement}
                                                 onFileChange={(e) => handleFileChange(e, 'forestTenureAgreement')}
@@ -389,7 +405,7 @@ const ChainsawRegistrationForm = () => {
                                         )}
                                         {formData.isBusinessOwner && (
                                             <UploadCard
-                                                label="Are you a business owner?"
+                                                label="Business Permit"
                                                 documentLabel="Upload Business Permit"
                                                 files={formData.files.businessPermit}
                                                 onFileChange={(e) => handleFileChange(e, 'businessPermit')}
@@ -398,8 +414,8 @@ const ChainsawRegistrationForm = () => {
                                         )}
                                         {formData.isPLTPRHolder && (
                                             <UploadCard
-                                                label="Are you a Private Land Tree Plantation Registration (PLTPR) holder?"
-                                                documentLabel="Upload Certificate of Registration"
+                                                label="Certificate of Registration"
+                                                documentLabel="Upload Certificate of Registration for Private Land Tree Plantation Registration (PLTPR)"
                                                 files={formData.files.certificateOfRegistration}
                                                 onFileChange={(e) => handleFileChange(e, 'certificateOfRegistration')}
                                                 onRemoveFile={(file) => removeFile('certificateOfRegistration', file)}
@@ -407,7 +423,7 @@ const ChainsawRegistrationForm = () => {
                                         )}
                                         {formData.isWPPHolder && (
                                             <UploadCard
-                                                label="Are you a Licensed Wood Processor/Wood Processing Plant (WPP) holder?"
+                                                label="Wood Processing Plant Permit"
                                                 documentLabel="Upload Wood Processing Plant Permit"
                                                 files={formData.files.woodProcessingPlantPermit}
                                                 onFileChange={(e) => handleFileChange(e, 'woodProcessingPlantPermit')}

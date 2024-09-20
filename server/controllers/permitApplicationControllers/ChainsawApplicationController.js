@@ -69,14 +69,12 @@ const csaw_createApplication = async (req, res) => {
         if (req.files) {
             for (const [key, fileData] of Object.entries(req.files)) {
                 if (Array.isArray(fileData)) {
-                    // If it's already an array, map it
                     files[key] = fileData.map(file => ({
                         filename: file.name,
                         contentType: file.mimetype,
                         data: file.data
                     }));
                 } else if (fileData && typeof fileData === 'object') {
-                    // If it's a single file object, wrap it in an array
                     files[key] = [{
                         filename: fileData.name,
                         contentType: fileData.mimetype,
