@@ -258,14 +258,16 @@ const ChainsawRegistrationForm = () => {
         { title: "Document Requirements", description: "Specify document requirements" },
         { title: "Upload Documents", description: "Upload necessary documents" },
         { title: "Application Details", description: "Fill in application details" },
-        { title: "Review", description: "Review your application" },
+        { title: "Review  Your Application", description: "Review your application" },
     ];
 
     // Add a helper function to format the labels
     const formatLabel = (key) => {
         return key
             .replace(/([A-Z])/g, ' $1') // Insert space before capital letters
-            .replace(/^./, str => str.toUpperCase()); // Capitalize the first letter
+            .replace(/^./, str => str.toUpperCase()) // Capitalize the first letter
+            .replace(/([a-z])([A-Z])/g, '$1 $2') // Insert space between lower and upper case letters
+            .replace(/\b(PLTPR|WPP)\b/g, match => match.toUpperCase()); // Keep PLTPR and WPP in uppercase
     };
 
     const uploadCardsCount = Object.values(formData).filter(value => value === true).length;
@@ -566,52 +568,88 @@ const ChainsawRegistrationForm = () => {
                             )}
 
                             {currentStep === 5 && (
-                                <div className="space-y-4">
-                                    <h3 className="text-lg font-semibold mb-2 text-green-700">Review Your Application</h3>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        {Object.entries(formData)
-                                            .filter(([key]) => key !== 'status' && key !== 'dateOfSubmission') // Exclude 'status' and 'dateOfSubmission' from review
-                                            .map(([key, value]) => (
-                                                <div key={key} className="space-y-1">
-                                                    <Label className="font-semibold">{formatLabel(key)}</Label> {/* Use formatted label */}
-                                                    <p className="text-gray-700">
-                                                        {Array.isArray(value)
-                                                            ? value.map(file => file.name).join(', ')
-                                                            : typeof value === 'object' && value !== null
-                                                                ? Object.keys(value).map(docType => (
-                                                                    <span key={docType}>
-                                                                        {docType}: {value[docType].map(file => file.name).join(', ')}
-                                                                    </span>
-                                                                ))
-                                                                : value}
-                                                    </p>
-                                                </div>
-                                            ))}
+                                <div className="space-y-6 h-[630px] flex flex-col">
+                                    {/* <h3 className="text-xl font-semibold mb-4 text-green-700">Review Your Application</h3> */}
+                                    <div className="review-step-container csaw-form-scrollbar flex-grow overflow-auto">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {Object.entries(formData)
+                                                .filter(([key]) => key !== 'status' && key !== 'dateOfSubmission' && key !== 'files')
+                                                .map(([key, value]) => (
+                                                    <div key={key} className="bg-white p-3 rounded-lg shadow">
+                                                        <h4 className="font-semibold text-green-600 mb-1 text-sm">{formatLabel(key)}</h4>
+                                                        <p className="text-gray-700 text-sm">
+                                                            {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value}
+                                                        </p>
+                                                    </div>
+                                                ))}
+                                        </div>
+
+                                        <div className="bg-white p-3 rounded-lg shadow mt-4">
+                                            <h4 className="font-semibold text-green-600 mb-2 text-sm">Uploaded Files</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                {Object.entries(formData.files).map(([docType, files]) => (
+                                                    <div key={docType} className="border-b pb-2">
+                                                        <h5 className="font-medium text-gray-700 mb-1 text-xs">{formatLabel(docType)}</h5>
+                                                        {files.length > 0 ? (
+                                                            <ul className="list-disc list-inside">
+                                                                {files.map((file, index) => (
+                                                                    <li key={index} className="text-xs text-gray-600">{file.name}</li>
+                                                                ))}
+                                                            </ul>
+                                                        ) : (
+                                                            <p className="text-xs text-gray-500">No files uploaded</p>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             )}
                         </form>
                     </CardContent>
-                    <CardFooter className="mt-4 flex justify-between">
-                        {currentStep > 0 && (
-                            <Button type="button" variant="outline" onClick={handlePrevStep}>
-                                Previous
-                            </Button>
-                        )}
-                        {currentStep < steps.length - 1 ? (
-                            <Button type="button" onClick={handleNextStep} className="bg-green-600 hover:bg-green-700 text-white">
-                                Next
-                            </Button>
-                        ) : (
-                            <div className="space-x-2">
-                                <Button type="button" variant="outline" onClick={handleSaveAsDraft}>
-                                    Save as Draft
+                    <CardFooter className="mt-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div className="w-full sm:w-auto">
+                            {currentStep > 0 && (
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={handlePrevStep}
+                                    className="w-full sm:w-auto"
+                                >
+                                    Previous
                                 </Button>
-                                <Button type="submit" onClick={handleSubmit} className="bg-green-600 hover:bg-green-700 text-white">
-                                    Submit Application
+                            )}
+                        </div>
+                        <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-2">
+                            {currentStep < steps.length - 1 ? (
+                                <Button
+                                    type="button"
+                                    onClick={handleNextStep}
+                                    className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
+                                >
+                                    Next
                                 </Button>
-                            </div>
-                        )}
+                            ) : (
+                                <>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={handleSaveAsDraft}
+                                        className="w-full sm:w-auto"
+                                    >
+                                        Save as Draft
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        onClick={handleSubmit}
+                                        className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
+                                    >
+                                        Submit Application
+                                    </Button>
+                                </>
+                            )}
+                        </div>
                     </CardFooter>
                 </Card>
             </div>
