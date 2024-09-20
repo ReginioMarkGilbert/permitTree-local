@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Eye, Edit, Printer, Archive, ChevronUp, ChevronDown, Leaf } from 'lucide-react';
+import { Eye, Edit, Printer, Archive, ChevronUp, ChevronDown, Leaf, Undo } from 'lucide-react';
 import ApplicationDetailsModal from '../../components/ui/ApplicationDetailsModal';
 import EditApplicationModal from '../../components/ui/EditApplicationModal';
+import ConfirmationModal from '../../components/ui/ConfirmationModal';
 import { toast } from 'react-toastify';
 import './styles/UserApplicationStatusPage.css';
 
@@ -19,10 +20,11 @@ const UserApplicationsStatusPage = () => {
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [selectedEditApplication, setSelectedEditApplication] = useState(null);
+    const [confirmationModal, setConfirmationModal] = useState({ isOpen: false, type: null, application: null });
 
     useEffect(() => {
         fetchApplications();
-    }, [activeTab]);
+    }, [activeTab, filterType]);
 
     const fetchApplications = async () => {
         try {
@@ -30,7 +32,8 @@ const UserApplicationsStatusPage = () => {
             const token = localStorage.getItem('token');
             const response = await axios.get('http://localhost:3000/api/csaw_getApplications', {
                 params: {
-                    status: activeTab
+                    status: activeTab,
+                    applicationType: filterType
                 },
                 headers: {
                     Authorization: token
@@ -90,21 +93,53 @@ const UserApplicationsStatusPage = () => {
         ));
     };
 
-    const handleSubmitDraft = async (application) => {
+    const handleSubmitDraft = (application) => {
+        setConfirmationModal({
+            isOpen: true,
+            type: 'submit',
+            application,
+            title: 'Submit Application',
+            message: "Are you sure you want to submit this draft application? Once submitted, you won't be able to edit it further."
+        });
+    };
+
+    const handleUnsubmit = (application) => {
+        setConfirmationModal({
+            isOpen: true,
+            type: 'unsubmit',
+            application,
+            title: 'Unsubmit Application',
+            message: "Are you sure you want to unsubmit this application? It will be moved back to drafts."
+        });
+    };
+
+    const handleConfirmAction = async () => {
+        const { type, application } = confirmationModal;
+        setConfirmationModal({ isOpen: false, type: null, application: null });
+
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.put(`http://localhost:3000/api/csaw_submitDraft/${application._id}`, {}, {
-                headers: { Authorization: token }
-            });
+            let response;
+
+            if (type === 'submit') {
+                response = await axios.put(`http://localhost:3000/api/csaw_submitDraft/${application._id}`, {}, {
+                    headers: { Authorization: token }
+                });
+            } else if (type === 'unsubmit') {
+                response = await axios.put(`http://localhost:3000/api/csaw_unsubmitApplication/${application._id}`, {}, {
+                    headers: { Authorization: token }
+                });
+            }
+
             if (response.data.success) {
-                toast.success('Application submitted successfully');
-                fetchApplications(); // Refresh the applications list
+                toast.success(`Application ${type === 'submit' ? 'submitted' : 'unsubmitted'} successfully`);
+                fetchApplications();
             } else {
-                toast.error('Failed to submit application');
+                toast.error(`Failed to ${type} application`);
             }
         } catch (error) {
-            console.error('Error submitting draft application:', error);
-            toast.error('Failed to submit application');
+            console.error(`Error ${type}ting application:`, error);
+            toast.error(`Failed to ${type} application`);
         }
     };
 
@@ -171,7 +206,7 @@ const UserApplicationsStatusPage = () => {
                                         <button className="text-green-600 hover:text-green-900 action-icon" onClick={() => handleView(app._id)}>
                                             <Eye className="inline w-4 h-4" />
                                         </button>
-                                        {app.status !== 'Submitted' && (
+                                        {app.status === 'Draft' && (
                                             <button className="text-blue-600 hover:text-blue-900 action-icon" onClick={() => handleEdit(app)}>
                                                 <Edit className="inline w-4 h-4" />
                                             </button>
@@ -183,8 +218,21 @@ const UserApplicationsStatusPage = () => {
                                             <Archive className="inline w-4 h-4" />
                                         </button>
                                         {app.status === 'Draft' && (
-                                            <button className="text-yellow-600 hover:text-yellow-900" onClick={() => handleSubmitDraft(app)}>
+                                            <button
+                                                className="text-yellow-600 hover:text-yellow-900 flex items-center gap-1 px-2 py-1 rounded-md bg-yellow-100 hover:bg-yellow-200 transition-colors duration-200"
+                                                onClick={() => handleSubmitDraft(app)}
+                                            >
                                                 <Leaf className="inline w-4 h-4" />
+                                                <span className="text-xs font-medium">Submit</span>
+                                            </button>
+                                        )}
+                                        {app.status === 'Submitted' && (
+                                            <button
+                                                className="text-orange-600 hover:text-orange-900 flex items-center gap-1 px-2 py-1 rounded-md bg-orange-100 hover:bg-orange-200 transition-colors duration-200"
+                                                onClick={() => handleUnsubmit(app)}
+                                            >
+                                                <Undo className="inline w-4 h-4" />
+                                                <span className="text-xs font-medium">Unsubmit</span>
                                             </button>
                                         )}
                                     </div>
@@ -265,6 +313,14 @@ const UserApplicationsStatusPage = () => {
                 onClose={() => setIsEditModalOpen(false)}
                 application={selectedEditApplication}
                 onUpdate={handleUpdateApplication}
+            />
+
+            <ConfirmationModal
+                isOpen={confirmationModal.isOpen}
+                onClose={() => setConfirmationModal({ isOpen: false, type: null, application: null })}
+                onConfirm={handleConfirmAction}
+                title={confirmationModal.title}
+                message={confirmationModal.message}
             />
         </div>
     );

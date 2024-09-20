@@ -304,22 +304,22 @@ const csaw_getApplicationById = async (req, res) => {
     }
 };
 
-const csaw_getFile = async (req, res) => {
+// Add this new function
+const unsubmitApplication = async (req, res) => {
     try {
-        const { id, fileType, index } = req.params;
-        const application = await Application.findById(id);
+        const application = await Application.findById(req.params.id);
         if (!application) {
-            return res.status(404).json({ error: 'Application not found' });
+            return res.status(404).json({ success: false, message: 'Application not found' });
         }
-        const file = application.files[fileType][index];
-        if (!file) {
-            return res.status(404).json({ error: 'File not found' });
+        if (application.status !== 'Submitted') {
+            return res.status(400).json({ success: false, message: 'Only submitted applications can be unsubmitted' });
         }
-        res.contentType(file.contentType);
-        res.send(file.data);
-    } catch (err) {
-        console.error('Error fetching file:', err);
-        res.status(500).json({ error: err.message });
+        application.status = 'Draft';
+        await application.save();
+        res.json({ success: true, message: 'Application unsubmitted successfully', application });
+    } catch (error) {
+        console.error('Error unsubmitting application:', error);
+        res.status(500).json({ success: false, message: 'Server error', error: error.message });
     }
 };
 
@@ -350,6 +350,6 @@ module.exports = {
     csaw_saveDraft,
     resetCounter,
     csaw_getApplicationById,
-    csaw_getFile,
+    unsubmitApplication,
     submitDraft
 };
