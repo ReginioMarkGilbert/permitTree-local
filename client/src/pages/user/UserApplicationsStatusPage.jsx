@@ -4,6 +4,7 @@ import { Eye, Edit, Printer, Archive, ChevronUp, ChevronDown, Leaf } from 'lucid
 import ApplicationDetailsModal from '../../components/ui/ApplicationDetailsModal';
 import EditApplicationModal from '../../components/ui/EditApplicationModal';
 import { toast } from 'react-toastify';
+import './styles/UserApplicationStatusPage.css';
 
 const UserApplicationsStatusPage = () => {
     const [applications, setApplications] = useState([]);
@@ -21,7 +22,7 @@ const UserApplicationsStatusPage = () => {
 
     useEffect(() => {
         fetchApplications();
-    }, [activeTab]);
+    }, [activeTab, filterType]); // Add filterType to the dependency array
 
     const fetchApplications = async () => {
         try {
@@ -29,7 +30,8 @@ const UserApplicationsStatusPage = () => {
             const token = localStorage.getItem('token');
             const response = await axios.get('http://localhost:3000/api/csaw_getApplications', {
                 params: {
-                    status: activeTab
+                    status: activeTab,
+                    applicationType: filterType // Add this line
                 },
                 headers: {
                     Authorization: token
@@ -130,19 +132,20 @@ const UserApplicationsStatusPage = () => {
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSort('customId')}>
-                                Application Number {renderSortIcon('customId')}
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSort('customId')}>
+                                APPLICATION NUMBER {renderSortIcon('customId')}
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Application Type
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+                                APPLICATION TYPE
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSort('dateOfSubmission')}>
-                                Date Submitted {renderSortIcon('dateOfSubmission')}
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hidden sm:table-cell" onClick={() => handleSort('dateOfSubmission')}>
+                                DATE  {renderSortIcon('dateOfSubmission')}
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+
                                 Status
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Actions
                             </th>
                         </tr>
@@ -150,38 +153,40 @@ const UserApplicationsStatusPage = () => {
                     <tbody className="bg-white divide-y divide-gray-200">
                         {applications.map((app) => (
                             <tr key={app._id}>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {app.customId}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 hidden sm:table-cell">
                                     {app.applicationType}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 hidden sm:table-cell">
                                     {new Date(app.dateOfSubmission).toLocaleDateString()}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <div className="flex items-center">
-                                        <span className="ml-2">{app.status}</span>
-                                    </div>
+                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        {app.status}
+                                    </span>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <button className="text-green-600 hover:text-green-900 mr-2" onClick={() => handleView(app._id)}>
-                                        <Eye className="inline w-4 h-4 mr-1" /> View
-                                    </button>
-                                    <button className="text-blue-600 hover:text-blue-900 mr-2" onClick={() => handleEdit(app)}>
-                                        <Edit className="inline w-4 h-4 mr-1" /> Edit
-                                    </button>
-                                    <button className="text-purple-600 hover:text-purple-900 mr-2" onClick={() => handleAction('print', app)}>
-                                        <Printer className="inline w-4 h-4 mr-1" /> Print
-                                    </button>
-                                    <button className="text-gray-600 hover:text-gray-900 mr-2" onClick={() => handleAction('archive', app)}>
-                                        <Archive className="inline w-4 h-4 mr-1" /> Archive
-                                    </button>
-                                    {app.status === 'Draft' && (
-                                        <button className="text-yellow-600 hover:text-yellow-900" onClick={() => handleSubmitDraft(app)}>
-                                            <Leaf className="inline w-4 h-4 mr-1" /> Submit
+                                <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div className="flex flex-wrap gap-2">
+                                        <button className="text-green-600 hover:text-green-900 action-icon" onClick={() => handleView(app._id)}>
+                                            <Eye className="inline w-4 h-4" />
                                         </button>
-                                    )}
+                                        <button className="text-blue-600 hover:text-blue-900 action-icon" onClick={() => handleEdit(app)}>
+                                            <Edit className="inline w-4 h-4" />
+                                        </button>
+                                        <button className="text-purple-600 hover:text-purple-900 action-icon" onClick={() => handleAction('print', app)}>
+                                            <Printer className="inline w-4 h-4" />
+                                        </button>
+                                        <button className="text-gray-600 hover:text-gray-900 action-icon" onClick={() => handleAction('archive', app)}>
+                                            <Archive className="inline w-4 h-4" />
+                                        </button>
+                                        {app.status === 'Draft' && (
+                                            <button className="text-yellow-600 hover:text-yellow-900" onClick={() => handleSubmitDraft(app)}>
+                                                <Leaf className="inline w-4 h-4" />
+                                            </button>
+                                        )}
+                                    </div>
                                 </td>
                             </tr>
                         ))}
@@ -205,33 +210,33 @@ const UserApplicationsStatusPage = () => {
                 </div>
             </nav>
 
-            <div className="container mx-auto px-6 py-8">
+            <div className="container mx-auto px-4 sm:px-6 py-8">
                 <h1 className="text-3xl font-bold mb-6 text-green-800">My Applications</h1>
                 <div className="mb-6 overflow-x-auto">
-                    <div className="bg-gray-100 p-1 rounded-md inline-flex">
+                    <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
                         {['Draft', 'Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected'].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => handleTabChange(tab)}
-                                className={`px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap ${activeTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
+                                className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
                             >
                                 {tab}
                             </button>
                         ))}
                     </div>
                 </div>
-                <div className="mb-6 flex flex-wrap gap-4">
+                <div className="mb-6 flex flex-col sm:flex-row gap-4">
                     <input
                         type="text"
                         placeholder="Search applications..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="border rounded-md p-2 flex-grow"
+                        className="border rounded-md p-2 w-full sm:w-auto"
                     />
                     <select
                         value={filterType}
                         onChange={(e) => setFilterType(e.target.value)}
-                        className="border rounded-md p-2"
+                        className="border rounded-md p-2 w-full sm:w-auto"
                     >
                         <option value="">All Types</option>
                         {['Chainsaw Registration', 'Certificate of Verification', 'Private Tree Plantation Registration (PTPR)', 'Government Project Timber Permit', 'Private Land Timber Permit', 'Public Land Timber Permit'].map(type => (
@@ -242,7 +247,7 @@ const UserApplicationsStatusPage = () => {
                         type="date"
                         value={dateRange}
                         onChange={(e) => setDateRange(e.target.value)}
-                        className="border rounded-md p-2"
+                        className="border rounded-md p-2 w-full sm:w-auto"
                     />
                 </div>
                 {renderTable()}

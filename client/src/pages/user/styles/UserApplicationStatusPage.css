@@ -1,0 +1,30 @@
+/* Remove hover background effect for action icons */
+.action-icon,
+.action-icon:hover,
+.action-icon:focus,
+.action-icon:active {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+/* Optionally, you can add a subtle color change on hover if desired */
+.action-icon:hover svg {
+    color: #4a5568;
+    /* Adjust this color as needed */
+}
+
+/* If using Tailwind, we might need to override some utility classes */
+.action-icon.hover\:bg-gray-100:hover {
+    background-color: transparent !important;
+}
+
+/* If the above doesn't work, try targeting the parent element */
+td .action-icon,
+td .action-icon:hover,
+td .action-icon:focus,
+td .action-icon:active {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+}

@@ -205,16 +205,19 @@ const csaw_saveDraft = async (req, res) => {
 
 const csaw_getApplications = async (req, res) => {
     try {
-        const { sort, status } = req.query;
-        let filter = { userId: req.user.id }; // Filter by the logged-in user's ID
+        const { sort, status, applicationType } = req.query;
+        let filter = { userId: req.user.id };
 
         if (status) {
-            // Check if status is an array and handle accordingly
             if (Array.isArray(status)) {
                 filter.status = { $in: status.map(s => new RegExp(`^${s}$`, 'i')) };
             } else {
                 filter.status = { $regex: new RegExp(`^${status}$`, 'i') };
             }
+        }
+
+        if (applicationType) {
+            filter.applicationType = applicationType;
         }
 
         let sortOption = {};
@@ -225,11 +228,7 @@ const csaw_getApplications = async (req, res) => {
             sortOption.dateOfSubmission = -1;
         }
 
-        // console.log('Filter:', filter);
-        // console.log('Sort Option:', sortOption);
-
         const applications = await Application.find(filter).sort(sortOption);
-        // console.log('Applications Fetched:', applications);
         res.status(200).json(applications);
     } catch (err) {
         console.error('Error fetching applications:', err);
