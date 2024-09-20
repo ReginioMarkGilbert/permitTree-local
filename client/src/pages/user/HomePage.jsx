@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from '../../components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '../../components/ui/Card';
 import { FaLeaf, FaBars, FaTimes, FaHome, FaClipboardList, FaBell, FaUser } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
 import HomeFooter from '../../components/ui/HomeFooter';
@@ -46,6 +46,9 @@ export default function HomePage() {
     const fetchRecentApplications = async () => {
         try {
             const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found.');
+            }
             const response = await axios.get('http://localhost:3000/api/csaw_getApplications', {
                 params: {
                     status: ['Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected']
@@ -58,6 +61,7 @@ export default function HomePage() {
             setLoading(false);
         } catch (err) {
             console.log('Error fetching recent applications:', err);
+            setError('Failed to fetch recent applications.');
             setLoading(false);
         }
     };
@@ -108,11 +112,15 @@ export default function HomePage() {
                         <CardHeader>
                             <CardTitle className="text-green-800">Recent Applications</CardTitle>
                         </CardHeader>
-                        <CardContent className="relative">
+                        <CardContent className="relative flex flex-col h-full">
                             {loading ? (
                                 <p className="text-center text-gray-500">Loading applications...</p>
                             ) : error ? (
                                 <p className="text-center text-red-500">{error}</p>
+                            ) : recentApplications.length === 0 ? (
+                                <div className="flex-grow flex items-center justify-center">  {/* Centering the message */}
+                                    <p className="text-gray-500 pt-12">No recent applications</p>
+                                </div>
                             ) : (
                                 <div className="space-y-4 h-64 overflow-y-auto custom-scrollbar applications-container">
                                     {recentApplications.slice(0, 5).map((app, index) => (
@@ -134,9 +142,10 @@ export default function HomePage() {
                                     ))}
                                 </div>
                             )}
-                            <div className="absolute right-0 top-0 bottom-0 w-2 bg-white pointer-events-none"></div>
-                            <Button className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white">View All Applications</Button>
                         </CardContent>
+                        <CardFooter>
+                            <Button className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white">View All Applications</Button>
+                        </CardFooter>
                     </Card>
                     <Card className="bg-white">
                         <CardHeader>

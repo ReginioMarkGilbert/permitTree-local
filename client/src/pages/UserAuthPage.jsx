@@ -10,7 +10,7 @@ import Label from '../components/ui/Label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs';
 import { FaLeaf } from 'react-icons/fa';
 import '../styles/UserAuthPage.css';
-import api from '../utils/api';
+// import api from '../utils/api';
 
 const UserAuthPage = () => {
     const [activeTab, setActiveTab] = useState('signup');
@@ -58,7 +58,7 @@ const UserAuthPage = () => {
             return;
         }
         try {
-            const response = await api.post('/signup', {
+            const response = await axios.post('http://localhost:3000/api/signup', {
                 firstName,
                 lastName,
                 username,
@@ -89,7 +89,7 @@ const UserAuthPage = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await api.post('/login', {
+            const response = await axios.post('http://localhost:3000/api/login', {
                 username: loginUsername,
                 password: loginPassword,
             });

@@ -1,11 +1,15 @@
 import React from 'react';
+import { FaTimes } from 'react-icons/fa';
 
 const Modal = ({ isOpen, title, message, onClose, onHome, onApplications }) => {
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full relative">
+                <button onClick={onClose} className="absolute top-2 right-2 text-gray-600 hover:text-gray-800">
+                    <FaTimes />
+                </button>
                 <h2 className="text-xl font-semibold mb-4">{title}</h2>
                 <p className="mb-6">{message}</p>
                 <div className="flex justify-end space-x-4">

@@ -16,15 +16,22 @@ const ChainsawApplicationSchema = new mongoose.Schema({
     maxLengthGuidebar: { type: String, required: true },
     countryOfOrigin: { type: String, required: true },
     purchasePrice: { type: Number, required: true },
-    files: [{
-        filename: String,
-        contentType: String,
-        data: Buffer
-    }],
+    files: {
+        specialPowerOfAttorney: [{ filename: String, contentType: String, data: Buffer }],
+        forestTenureAgreement: [{ filename: String, contentType: String, data: Buffer }],
+        businessPermit: [{ filename: String, contentType: String, data: Buffer }],
+        certificateOfRegistration: [{ filename: String, contentType: String, data: Buffer }],
+        woodProcessingPlantPermit: [{ filename: String, contentType: String, data: Buffer }]
+    },
     dateOfSubmission: { type: Date, required: true },
     status: { type: String, required: true },
     uploadedRequirements: { type: String, default: 'No' },
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    isOwner: { type: Boolean, default: false },
+    isTenureHolder: { type: Boolean, default: false },
+    isBusinessOwner: { type: Boolean, default: false },
+    isPLTPRHolder: { type: Boolean, default: false },
+    isWPPHolder: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('ChainsawApplication', ChainsawApplicationSchema);

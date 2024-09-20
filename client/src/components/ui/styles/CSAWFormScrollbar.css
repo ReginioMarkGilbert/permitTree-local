@@ -16,3 +16,9 @@
     border-radius: 20px;
     border: transparent;
 }
+
+.dropdown-width {
+    width: auto; /* Allow the width to adjust based on content */
+    min-width: 200px; /* Set a minimum width */
+    max-width: 300px; /* Set a maximum width to prevent it from being too wide */
+}

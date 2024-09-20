@@ -94,10 +94,32 @@ const ChainsawRegistrationForm = () => {
             return;
         }
         if (currentStep === 1 && !formData.chainsawStore) {
-            toast.error("Please select a chainsaw store");
+            toast.error("Please select a chainsaw store from the accredited list to proceed.");
             return;
         }
-        if (currentStep === 3) {
+        // if (currentStep === 3) {
+        //     if (formData.isOwner && (!formData.files.specialPowerOfAttorney || formData.files.specialPowerOfAttorney.length === 0)) {
+        //         toast.error("Please upload the Special Power of Attorney document");
+        //         return;
+        //     }
+        //     if (formData.isTenureHolder && (!formData.files.forestTenureAgreement || formData.files.forestTenureAgreement.length === 0)) {
+        //         toast.error("Please upload the Forest Tenure Agreement document");
+        //         return;
+        //     }
+        //     if (formData.isBusinessOwner && (!formData.files.businessPermit || formData.files.businessPermit.length === 0)) {
+        //         toast.error("Please upload the Business Permit document");
+        //         return;
+        //     }
+        //     if (formData.isPLTPRHolder && (!formData.files.certificateOfRegistration || formData.files.certificateOfRegistration.length === 0)) {
+        //         toast.error("Please upload the Certificate of Registration document");
+        //         return;
+        //     }
+        //     if (formData.isWPPHolder && (!formData.files.woodProcessingPlantPermit || formData.files.woodProcessingPlantPermit.length === 0)) {
+        //         toast.error("Please upload the Wood Processing Plant Permit document");
+        //         return;
+        //     }
+        // }
+        if (currentStep === 4) {
             const requiredFields = [
                 'ownerName',
                 'address',
@@ -168,6 +190,11 @@ const ChainsawRegistrationForm = () => {
         e.preventDefault();
         try {
             const token = localStorage.getItem('token'); // Get the token from local storage
+            if (!token) {
+                toast.error("No authentication token found. Please log in.");
+                return;
+            }
+
             const currentDate = new Date();
             const formDataToSend = new FormData();
 
@@ -179,12 +206,17 @@ const ChainsawRegistrationForm = () => {
                             formDataToSend.append(`${docType}[]`, file);
                         });
                     });
-                } else if (key !== 'status' && key !== 'dateOfSubmission') { // Exclude status and dateOfSubmission
+                } else if (key !== 'status' && key !== 'dateOfSubmission') {
                     formDataToSend.append(key, formData[key]);
                 }
             });
             formDataToSend.append('dateOfSubmission', currentDate.toISOString());
-            formDataToSend.append('status', 'Submitted'); // Append status once
+            formDataToSend.append('status', 'Submitted');
+
+            // Log the form data
+            for (let pair of formDataToSend.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
 
             const response = await axios.post('http://localhost:3000/api/csaw_createApplication', formDataToSend, {
                 headers: {
@@ -202,7 +234,14 @@ const ChainsawRegistrationForm = () => {
             setModalOpen(true);
         } catch (error) {
             console.error('Error submitting application:', error);
-            toast.error("Error submitting application");
+
+            // Enhanced error handling
+            if (error.response && error.response.status === 401) {
+                toast.error("Unauthorized: Please log in again.");
+                // Optionally, redirect to login page or clear token
+            } else {
+                toast.error("Error submitting application: " + (error.response ? error.response.data.error : error.message));
+            }
         }
     };
 
@@ -213,7 +252,7 @@ const ChainsawRegistrationForm = () => {
 
     const steps = [
         { title: "Registration Type", description: "Choose registration type" },
-        { title: "Chainsaw Store", description: "Select chainsaw store" },
+        { title: "Accredited Chainsaw Store", description: "Select chainsaw store" },
         { title: "Document Requirements", description: "Specify document requirements" },
         { title: "Upload Documents", description: "Upload necessary documents" },
         { title: "Application Details", description: "Fill in application details" },
@@ -259,14 +298,17 @@ const ChainsawRegistrationForm = () => {
                             )}
 
                             {currentStep === 1 && (
-                                <div className="space-y-4 pt-8 h-36">
-                                    <Label htmlFor="chainsawStore" className="text-lg font-semibold">Accredited Chainsaw Store</Label>
+                                <div className="space-y-4 pt-2 h-36">
+                                    {/* <Label htmlFor="chainsawStore" className="text-lg font-semibold">Accredited Chainsaw Store</Label> */}
+                                    <p className="text-sm text-gray-700 mb-3 font-semibold">
+                                        Please select the store where you purchased your chainsaw. You cannot proceed if your chainsaw was not purchased from one of the accredited stores.
+                                    </p>
                                     <select
                                         id="chainsawStore"
                                         name="chainsawStore"
                                         value={formData.chainsawStore}
                                         onChange={(e) => handleSelectChange('chainsawStore', e.target.value)}
-                                        className="w-full p-2 border border-gray-300 rounded-md"
+                                        className="w-full p-2 border border-gray-300 rounded-md dropdown-width"
                                     >
                                         <option value="" disabled>Select a store</option>
                                         {chainsawStores.map((store) => (
@@ -281,6 +323,9 @@ const ChainsawRegistrationForm = () => {
                             {currentStep === 2 && (
                                 <div className="space-y-4">
                                     {/* <h3 className="text-lg font-semibold mb-2 text-green-700">Document Requirements</h3> */}
+                                    <p className="text-sm text-gray-700 mb-4 font-semibold">
+                                        Please check the boxes that apply to you. In the next step, you will be required to upload the corresponding documents.
+                                    </p>
                                     <div className="space-y-2">
                                         <CheckboxItem
                                             id="isOwner"
@@ -371,7 +416,7 @@ const ChainsawRegistrationForm = () => {
 
                             {currentStep === 4 && (
                                 <div className="space-y-4">
-                                    <h3 className="text-lg font-semibold mb-2 text-green-700">Application Details</h3>
+                                    {/* <h3 className="text-lg font-semibold mb-2 text-green-700">Application Details</h3> */}
                                     <div className="space-y-5 h-[630px]">
                                         <div>
                                             <h3 className="text-lg font-semibold mb-1 text-green-700">Owner Details</h3>
@@ -530,16 +575,12 @@ const ChainsawRegistrationForm = () => {
                                                     <p className="text-gray-700">
                                                         {Array.isArray(value)
                                                             ? value.map(file => file.name).join(', ')
-                                                            : value instanceof Date
-                                                                ? value.toLocaleString('en-US', {
-                                                                    month: '2-digit',
-                                                                    day: '2-digit',
-                                                                    year: 'numeric',
-                                                                    hour: '2-digit',
-                                                                    minute: '2-digit',
-                                                                    second: '2-digit',
-                                                                    hour12: true
-                                                                })
+                                                            : typeof value === 'object' && value !== null
+                                                                ? Object.keys(value).map(docType => (
+                                                                    <span key={docType}>
+                                                                        {docType}: {value[docType].map(file => file.name).join(', ')}
+                                                                    </span>
+                                                                ))
                                                                 : value}
                                                     </p>
                                                 </div>
