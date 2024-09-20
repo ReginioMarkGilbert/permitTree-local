@@ -181,7 +181,7 @@ export default function UserProfilePage() {
                         />
                     </div>
                     <div className="text-center">
-                        <h2 className="text-2xl font-bold text-green-800">{user.firstName} {user.lastName}</h2>
+                        <h2 className="text-2xl font-bold text-green-800">{userInfo.fullName}</h2>
                         <p className="text-green-600">Permit Applicant</p>
                     </div>
                 </div>
