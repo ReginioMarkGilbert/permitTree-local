@@ -5,24 +5,6 @@ const Application = require('../../models/PermitApplications/ChainsawApplication
 const Notification = require('../../models/User/Notification');
 const Counter = require('../../models/admin/counter');
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        // const uploadPath = path.join(__dirname, '../../uploads/chainsaw');
-        // if (!fs.existsSync(uploadPath)) {
-        //     fs.mkdirSync(uploadPath, { recursive: true });
-        // }
-        cb(null, uploadPath);
-    },
-    filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`);
-        // const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        // cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-    }
-});
-
-const upload = multer({ storage });
-
 const CSAW_CustomId = async () => {
     try {
         const counter = await Counter.findOneAndUpdate(
@@ -47,22 +29,7 @@ const CSAW_CustomId = async () => {
 };
 
 const csaw_createApplication = async (req, res) => {
-    // const uploadMiddleware = upload.fields([
-    //     { name: 'specialPowerOfAttorney', maxCount: 5 },
-    //     { name: 'forestTenureAgreement', maxCount: 5 },
-    //     { name: 'businessPermit', maxCount: 5 },
-    //     { name: 'certificateOfRegistration', maxCount: 5 },
-    //     { name: 'woodProcessingPlantPermit', maxCount: 5 }
-    // ]);
-
-    // uploadMiddleware(req, res, async (err) => {
-    //     if (err) {
-    //         console.error('Error in uploadMiddleware:', err);
-    //         return res.status(400).json({ error: err.message });
-    //     }
-
     try {
-        // Log the received form data and files
         console.log('Request body:', req.body);
         console.log('Request files:', req.files);
 
@@ -82,15 +49,14 @@ const csaw_createApplication = async (req, res) => {
             countryOfOrigin,
             purchasePrice,
             dateOfSubmission,
-            status
-            // isOwner,
-            // isTenureHolder,
-            // isBusinessOwner,
-            // isPLTPRHolder,
-            // isWPPHolder
+            status,
+            isOwner,
+            isTenureHolder,
+            isBusinessOwner,
+            isPLTPRHolder,
+            isWPPHolder
         } = req.body;
 
-        // Ensure dateOfSubmission is a valid date
         const parsedDateOfSubmission = new Date(dateOfSubmission);
         if (isNaN(parsedDateOfSubmission)) {
             throw new Error('Invalid dateOfSubmission');
@@ -98,29 +64,27 @@ const csaw_createApplication = async (req, res) => {
 
         const customId = await CSAW_CustomId();
 
-        // const files = {};
-        // for (const field in req.files) {
-        //     files[field] = req.files[field].map(file => ({
-        //         filename: file.filename,
-        //         path: file.path
-        //     }));
-        // }
-
         // Process uploaded files
-        let files = [];
-        if (req.files && req.files.files) {
-            const uploadedFiles = Array.isArray(req.files.files) ? req.files.files : [req.files.files];
-            files = uploadedFiles.map(file => ({
-                filename: file.name,
-                contentType: file.mimetype,
-                data: file.data
-            }));
+        const files = {};
+        if (req.files) {
+            for (const [key, fileData] of Object.entries(req.files)) {
+                if (Array.isArray(fileData)) {
+                    // If it's already an array, map it
+                    files[key] = fileData.map(file => ({
+                        filename: file.name,
+                        contentType: file.mimetype,
+                        data: file.data
+                    }));
+                } else if (fileData && typeof fileData === 'object') {
+                    // If it's a single file object, wrap it in an array
+                    files[key] = [{
+                        filename: fileData.name,
+                        contentType: fileData.mimetype,
+                        data: fileData.data
+                    }];
+                }
+            }
         }
-        // Ensure files are sent as an array of filenames for rendering
-        const formattedFiles = Object.keys(files).reduce((acc, key) => {
-            acc[key] = files[key].map(file => file.filename); // Only keep filenames
-            return acc;
-        }, {});
 
         const newApplication = new Application({
             customId,
@@ -140,12 +104,12 @@ const csaw_createApplication = async (req, res) => {
             purchasePrice,
             dateOfSubmission: parsedDateOfSubmission,
             status,
-            // isOwner: isOwner === 'true',
-            // isTenureHolder: isTenureHolder === 'true',
-            // isBusinessOwner: isBusinessOwner === 'true',
-            // isPLTPRHolder: isPLTPRHolder === 'true',
-            // isWPPHolder: isWPPHolder === 'true',
-            files: formattedFiles, // Use formatted files
+            isOwner: isOwner === 'true',
+            isTenureHolder: isTenureHolder === 'true',
+            isBusinessOwner: isBusinessOwner === 'true',
+            isPLTPRHolder: isPLTPRHolder === 'true',
+            isWPPHolder: isWPPHolder === 'true',
+            files,
             userId: req.user.id
         });
 
@@ -155,7 +119,6 @@ const csaw_createApplication = async (req, res) => {
         console.error('Error creating application:', error);
         res.status(500).json({ error: error.message });
     }
-    // });
 };
 
 const csaw_saveDraft = async (req, res) => {
@@ -179,35 +142,32 @@ const csaw_saveDraft = async (req, res) => {
             countryOfOrigin,
             purchasePrice,
             dateOfSubmission,
-            status,
-            // isOwner,
-            // isTenureHolder,
-            // isBusinessOwner,
-            // isPLTPRHolder,
-            // isWPPHolder
+            isOwner,
+            isTenureHolder,
+            isBusinessOwner,
+            isPLTPRHolder,
+            isWPPHolder
         } = req.body;
 
-        // Ensure dateOfSubmission is a valid date
         const parsedDateOfSubmission = new Date(dateOfSubmission);
         if (isNaN(parsedDateOfSubmission)) {
             throw new Error('Invalid dateOfSubmission');
         }
 
-        // Generate customId
         const customId = await CSAW_CustomId();
 
         // Process uploaded files
-        let files = [];
-        if (req.files && req.files.files) {
-            const uploadedFiles = Array.isArray(req.files.files) ? req.files.files : [req.files.files];
-            files = uploadedFiles.map(file => ({
-                filename: file.name,
-                contentType: file.mimetype,
-                data: file.data
-            }));
+        const files = {};
+        if (req.files) {
+            for (const [key, fileArray] of Object.entries(req.files)) {
+                files[key] = fileArray.map(file => ({
+                    filename: file.name,
+                    contentType: file.mimetype,
+                    data: file.data
+                }));
+            }
         }
 
-        // Create a new draft application
         const newDraft = new Application({
             customId,
             applicationType,
@@ -226,11 +186,15 @@ const csaw_saveDraft = async (req, res) => {
             purchasePrice,
             dateOfSubmission: parsedDateOfSubmission,
             status: 'Draft',
+            isOwner: isOwner === 'true',
+            isTenureHolder: isTenureHolder === 'true',
+            isBusinessOwner: isBusinessOwner === 'true',
+            isPLTPRHolder: isPLTPRHolder === 'true',
+            isWPPHolder: isWPPHolder === 'true',
             files,
             userId: req.user.id
         });
 
-        // Save the draft to the database
         await newDraft.save();
         console.log('Draft saved:', newDraft);
 

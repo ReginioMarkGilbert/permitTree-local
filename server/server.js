@@ -25,15 +25,15 @@ app.use(cors(corsOptions));
 app.use(fileUpload({
     createParentPath: true,
     limits: {
-        fileSize: 5 * 1024 * 1024 // 5 MB max file size
+        fileSize: 50 * 1024 * 1024 // 50 MB
     },
 }));
 // Serve static files from the 'uploads' folder
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Increase the size limit for file uploads (to fix PayloadTooLargeError)
-app.use(bodyParser.json({ limit: '10mb' })); // Adjust size as needed
-app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
+app.use(bodyParser.json({ limit: '50mb' })); // Adjust size as needed
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 // Session middleware
 app.use(session({
