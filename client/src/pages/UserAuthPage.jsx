@@ -13,7 +13,7 @@ import '../styles/UserAuthPage.css';
 // import api from '../utils/api';
 
 const UserAuthPage = () => {
-    const [activeTab, setActiveTab] = useState('signup');
+    const [activeTab, setActiveTab] = useState('signin'); // Change this line
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [username, setUsername] = useState('');
@@ -130,11 +130,31 @@ const UserAuthPage = () => {
             </header>
             <main className="flex-1 flex items-center justify-center">
                 <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
-                    <Tabs defaultValue={activeTab} className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 mb-8">
-                            <TabsTrigger value="signup" onClick={() => setActiveTab('signup')}>Sign Up</TabsTrigger>
-                            <TabsTrigger value="signin" onClick={() => setActiveTab('signin')}>Sign In</TabsTrigger>
+                    <Tabs defaultValue="signin" className="w-full">
+                        <TabsList>
+                            <TabsTrigger value="signin">Sign In</TabsTrigger>
+                            <TabsTrigger value="signup">Sign Up</TabsTrigger>
                         </TabsList>
+                        <TabsContent value="signin">
+                            <form className="space-y-4" onSubmit={handleLogin}>
+                                <div className="space-y-2">
+                                    <Label htmlFor="login-username">Username</Label>
+                                    <Input id="login-username" placeholder="john_doe" required value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="password">Password</Label>
+                                    <div className="input-container relative">
+                                        <Input id="password-signin" required type={showPassword ? 'text' : 'password'} value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} />
+                                        <div className="flex items-center pt-2">
+                                            <input type="checkbox" id="showPassword" checked={showPassword} onChange={() => setShowPassword(!showPassword)} className="mr-2" />
+                                            <label htmlFor="showPassword" className="text-sm text-gray-600">Show password</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <AuthButton className="w-full rounded-md text-white bg-green-600 hover:bg-green-700">Sign In</AuthButton>
+                                <p className="mt-4 text-center">Don't have an account? <span onClick={() => setActiveTab('signup')} className="text-blue-500 hover:text-blue-700 cursor-pointer">Sign Up</span></p>
+                            </form>
+                        </TabsContent>
                         <TabsContent value="signup">
                             <form className="space-y-4 pt-2" onSubmit={handleSignup}>
                                 <div className="space-y-2">
@@ -172,26 +192,6 @@ const UserAuthPage = () => {
                                 </div>
                                 <AuthButton className="w-full text-white bg-green-600 hover:bg-green-700">Sign Up</AuthButton>
                                 <p className="mt-4 text-center">Already have an account? <span onClick={() => setActiveTab('signin')} className="text-blue-500 hover:text-blue-700 cursor-pointer">Sign In</span></p>
-                            </form>
-                        </TabsContent>
-                        <TabsContent value="signin">
-                            <form className="space-y-4" onSubmit={handleLogin}>
-                                <div className="space-y-2">
-                                    <Label htmlFor="login-username">Username</Label>
-                                    <Input id="login-username" placeholder="john_doe" required value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="password">Password</Label>
-                                    <div className="input-container relative">
-                                        <Input id="password-signin" required type={showPassword ? 'text' : 'password'} value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} />
-                                        <div className="flex items-center pt-2">
-                                            <input type="checkbox" id="showPassword" checked={showPassword} onChange={() => setShowPassword(!showPassword)} className="mr-2" />
-                                            <label htmlFor="showPassword" className="text-sm text-gray-600">Show password</label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <AuthButton className="w-full rounded-md text-white bg-green-600 hover:bg-green-700">Sign In</AuthButton>
-                                <p className="mt-4 text-center">Don't have an account? <span onClick={() => setActiveTab('signup')} className="text-blue-500 hover:text-blue-700 cursor-pointer">Sign Up</span></p>
                             </form>
                         </TabsContent>
                     </Tabs>
