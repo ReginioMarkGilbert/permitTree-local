@@ -1,12 +1,23 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Button } from "../../components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "../../components/ui/Card";
 import { Bell, ClipboardList, Users, Settings, TrendingUp, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
+import '../../components/ui/styles/customScrollBar.css'; // Ensure this import is present
 
 const AdminHomePage = () => {
     const [recentApplications, setRecentApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // Mock data for quick stats
+    const dashboardStats = {
+        totalUsers: 1234,
+        applicationsForReview: 56,
+        approvedToday: 23,
+        returnedApplications: 5,
+        applicationIncrease: 12
+    };
 
     const quickActions = [
         { title: "Manage Users", icon: <Users className="h-6 w-6" />, link: "/admin/users" },
@@ -16,15 +27,30 @@ const AdminHomePage = () => {
     ];
 
     useEffect(() => {
-        // Simulating API call to fetch recent applications
-        setTimeout(() => {
-            setRecentApplications([
-                { id: "PMDQ-CSAW-2024-0920-00011", type: "Chainsaw Registration", status: "Pending", date: "9/20/2024" },
-                { id: "PMDQ-CSAW-2024-0920-00013", type: "Chainsaw Registration", status: "Approved", date: "9/20/2024" },
-                { id: "PMDQ-CSAW-2024-0920-00014", type: "Chainsaw Registration", status: "Returned", date: "9/20/2024" },
-            ]);
-            setLoading(false);
-        }, 1000);
+        const fetchAllApplications = async () => {
+            setLoading(true);
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('No authentication token found.');
+                }
+                const response = await axios.get('http://localhost:3000/api/admin/all-applications', {
+                    // Remove status filtering to fetch all applications
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                setRecentApplications(response.data);
+                setLoading(false);
+            } catch (err) {
+                console.error('Error fetching all applications:', err);
+                setError('Failed to fetch applications. Please try again later.');
+                setLoading(false);
+            }
+        };
+
+        fetchAllApplications();
     }, []);
 
     return (
@@ -48,7 +74,7 @@ const AdminHomePage = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <Card className="lg:col-span-2 bg-white">
+                <Card className="lg:col-span-2 bg-white recent-applications-card">
                     <CardHeader>
                         <CardTitle className="text-green-800">Recent Applications</CardTitle>
                     </CardHeader>
@@ -58,20 +84,22 @@ const AdminHomePage = () => {
                         ) : error ? (
                             <p className="text-center text-red-500">{error}</p>
                         ) : (
-                            <div className="space-y-4">
-                                {recentApplications.map((app, index) => (
+                            <div className="space-y-4 h-80 overflow-y-auto custom-scrollbar">
+                                {recentApplications.slice(0, 7).map((app, index) => (
                                     <div key={index} className="flex items-center justify-between border-b border-gray-200 pb-2 last:border-b-0">
                                         <div>
-                                            <p className="font-semibold text-green-800">{app.type}</p>
-                                            <p className="text-sm text-gray-500">ID: {app.id}</p>
-                                            <p className="text-sm text-gray-500">Date: {app.date}</p>
+                                            <p className="font-semibold text-green-800">{app.applicationType}</p>
+                                            <p className="text-sm text-gray-500">ID: {app.customId}</p>
+                                            <p className="text-sm text-gray-500">Date: {new Date(app.dateOfSubmission).toLocaleDateString()}</p>
                                         </div>
-                                        <span className={`px-2 py-1 rounded-full text-xs ${app.status === "Approved" ? "bg-green-200 text-green-800" :
-                                                app.status === "Pending" ? "bg-yellow-200 text-yellow-800" :
-                                                    "bg-red-200 text-red-800"
-                                            }`}>
-                                            {app.status}
-                                        </span>
+                                        <div className="flex-shrink-0 w-24 text-right mr-4"> {/* Spacing for status */}
+                                            <span className={`px-2 py-1 rounded-full text-xs ${app.status === "Approved" ? "bg-green-200 text-green-800" :
+                                                app.status === "Submitted" ? "bg-yellow-200 text-yellow-800" : // Change this line
+                                                "bg-red-200 text-red-800"
+                                                }`}>
+                                                {app.status === "Submitted" ? "For Review" : app.status} {/* Change this line */}
+                                            </span>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -91,14 +119,14 @@ const AdminHomePage = () => {
                                 <div className="bg-green-100 p-4 rounded-lg">
                                     <div className="flex items-center justify-between">
                                         <Users className="h-6 w-6 text-green-600" />
-                                        <span className="text-2xl font-bold text-green-800">1,234</span>
+                                        <span className="text-2xl font-bold text-green-800">{dashboardStats.totalUsers}</span>
                                     </div>
                                     <p className="text-sm text-green-600 mt-2">Total Users</p>
                                 </div>
                                 <div className="bg-yellow-100 p-4 rounded-lg">
                                     <div className="flex items-center justify-between">
                                         <AlertTriangle className="h-6 w-6 text-yellow-600" />
-                                        <span className="text-2xl font-bold text-yellow-800">56</span>
+                                        <span className="text-2xl font-bold text-yellow-800">{dashboardStats.applicationsForReview}</span>
                                     </div>
                                     <p className="text-sm text-yellow-600 mt-2">Applications for Review</p>
                                 </div>
@@ -107,14 +135,14 @@ const AdminHomePage = () => {
                                 <div className="bg-blue-100 p-4 rounded-lg">
                                     <div className="flex items-center justify-between">
                                         <CheckCircle className="h-6 w-6 text-blue-600" />
-                                        <span className="text-2xl font-bold text-blue-800">23</span>
+                                        <span className="text-2xl font-bold text-blue-800">{dashboardStats.approvedToday}</span>
                                     </div>
                                     <p className="text-sm text-blue-600 mt-2">Approved Today</p>
                                 </div>
                                 <div className="bg-orange-100 p-4 rounded-lg">
                                     <div className="flex items-center justify-between">
                                         <XCircle className="h-6 w-6 text-orange-600" />
-                                        <span className="text-2xl font-bold text-orange-800">5</span>
+                                        <span className="text-2xl font-bold text-orange-800">{dashboardStats.returnedApplications}</span>
                                     </div>
                                     <p className="text-sm text-orange-600 mt-2">Returned Applications</p>
                                 </div>
@@ -122,7 +150,7 @@ const AdminHomePage = () => {
                             <div className="bg-purple-100 p-4 rounded-lg">
                                 <div className="flex items-center justify-between">
                                     <TrendingUp className="h-6 w-6 text-purple-600" />
-                                    <span className="text-2xl font-bold text-purple-800">12%</span>
+                                    <span className="text-2xl font-bold text-purple-800">{dashboardStats.applicationIncrease}%</span>
                                 </div>
                                 <p className="text-sm text-purple-600 mt-2">Application Increase (Last 30 days)</p>
                             </div>

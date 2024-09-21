@@ -62,11 +62,15 @@ app.use('/api', chainsawRoutes);
 const authRoutes = require('./routes/UserRoutes/userAuthRoutes');
 app.use('/api', authRoutes);
 
+const contactRoutes = require('./routes/UserRoutes/contactRoutes');
+app.use('/api', contactRoutes);
+
 const adminRoutes = require('./routes/AdminRoutes/adminAuthRoutes');
 app.use('/api/admin', adminRoutes);
 
-const contactRoutes = require('./routes/UserRoutes/contactRoutes');
-app.use('/api', contactRoutes);
+const adminDashboardRoutes = require('./routes/AdminRoutes/adminDashboardRoutes');
+app.use('/api/admin', adminDashboardRoutes);
+
 
 // Start the server
 const port = process.env.PORT || 3000;

@@ -1,7 +1,8 @@
-const Admin = require('../../models/admin/adminAuthSchema');
+const Admin = require('../../models/Admin/adminAuthSchema');
 
 // Existing createAdmin method
 const createAdmin = async (req, res) => {
+
     try {
         const { username, email, password } = req.body;
         const newAdmin = new Admin({ username, email, password, role: 'admin' });
