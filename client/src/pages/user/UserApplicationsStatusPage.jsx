@@ -225,9 +225,9 @@ const UserApplicationsStatusPage = () => {
                                                 <Edit className="inline w-4 h-4" />
                                             </button>
                                         )}
-                                        <button className="text-purple-600 hover:text-purple-900 action-icon" onClick={() => handleAction('print', app)}>
+                                        {/* <button className="text-purple-600 hover:text-purple-900 action-icon" onClick={() => handleAction('print', app)}>
                                             <Printer className="inline w-4 h-4" />
-                                        </button>
+                                        </button> */}
                                         <button className="text-gray-600 hover:text-gray-900 action-icon" onClick={() => handleAction('archive', app)}>
                                             <Archive className="inline w-4 h-4" />
                                         </button>
