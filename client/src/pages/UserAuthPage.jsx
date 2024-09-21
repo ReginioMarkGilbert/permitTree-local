@@ -147,7 +147,13 @@ const UserAuthPage = () => {
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="username">Generated Username</Label>
-                                    <Input id="username" placeholder="john_doe" required value={username} readOnly />
+                                    <Input
+                                        id="username"
+                                        placeholder="john_doe"
+                                        required
+                                        value={username}
+                                        readOnly
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="password">Password</Label>
