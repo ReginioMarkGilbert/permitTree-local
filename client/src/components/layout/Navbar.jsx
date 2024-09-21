@@ -1,10 +1,25 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import { Leaf } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 
 const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
+    const location = useLocation();
+
+    useEffect(() => {
+        if (location.pathname === '/home') {
+            if (!sidebarToggle) {
+                setSidebarToggle(true);
+            }
+        } else {
+            if (sidebarToggle) {
+                setSidebarToggle(false);
+            }
+        }
+    }, [location.pathname]);
+
     const handleToggle = () => {
-        setSidebarToggle(!sidebarToggle);
+        setSidebarToggle(prev => !prev);
     };
 
     return (
