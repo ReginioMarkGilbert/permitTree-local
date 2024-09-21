@@ -6,7 +6,11 @@ const useSidebarToggle = () => {
     const location = useLocation();
 
     useEffect(() => {
-        setSidebarToggle(false);
+        if (location.pathname === '/home') {
+            setSidebarToggle(true);
+        } else {
+            setSidebarToggle(false);
+        }
     }, [location]);
 
     const toggleSidebar = () => setSidebarToggle(!sidebarToggle);
