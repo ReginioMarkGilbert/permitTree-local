@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Eye, Edit, Printer, Archive, ChevronUp, ChevronDown, Leaf, Undo } from 'lucide-react';
+import { Eye, Edit, Printer, Archive, ChevronUp, ChevronDown, Leaf, Undo, Trash2 } from 'lucide-react';
 import ApplicationDetailsModal from '../../components/ui/ApplicationDetailsModal';
 import EditApplicationModal from '../../components/ui/EditApplicationModal';
 import ConfirmationModal from '../../components/ui/ConfirmationModal';
@@ -113,6 +113,16 @@ const UserApplicationsStatusPage = () => {
         });
     };
 
+    const handleDelete = (application) => {
+        setConfirmationModal({
+            isOpen: true,
+            type: 'delete',
+            application,
+            title: 'Delete Application',
+            message: "Are you sure you want to delete this draft application? This action cannot be undone."
+        });
+    };
+
     const handleConfirmAction = async () => {
         const { type, application } = confirmationModal;
         setConfirmationModal({ isOpen: false, type: null, application: null });
@@ -129,16 +139,20 @@ const UserApplicationsStatusPage = () => {
                 response = await axios.put(`http://localhost:3000/api/csaw_unsubmitApplication/${application._id}`, {}, {
                     headers: { Authorization: token }
                 });
+            } else if (type === 'delete') {
+                response = await axios.delete(`http://localhost:3000/api/csaw_deleteApplication/${application._id}`, {
+                    headers: { Authorization: token }
+                });
             }
 
             if (response.data.success) {
-                toast.success(`Application ${type === 'submit' ? 'submitted' : 'unsubmitted'} successfully`);
+                toast.success(`Application ${type === 'delete' ? 'deleted' : type === 'submit' ? 'submitted' : 'unsubmitted'} successfully`);
                 fetchApplications();
             } else {
                 toast.error(`Failed to ${type} application`);
             }
         } catch (error) {
-            console.error(`Error ${type}ting application:`, error);
+            console.error(`Error ${type}ing application:`, error);
             toast.error(`Failed to ${type} application`);
         }
     };
@@ -217,6 +231,14 @@ const UserApplicationsStatusPage = () => {
                                         <button className="text-gray-600 hover:text-gray-900 action-icon" onClick={() => handleAction('archive', app)}>
                                             <Archive className="inline w-4 h-4" />
                                         </button>
+                                        {app.status === 'Draft' && (
+                                            <button
+                                                className="text-red-600 hover:text-red-900 action-icon"
+                                                onClick={() => handleDelete(app)}
+                                            >
+                                                <Trash2 className="inline w-4 h-4" />
+                                            </button>
+                                        )}
                                         {app.status === 'Draft' && (
                                             <button
                                                 className="text-yellow-600 hover:text-yellow-900 flex items-center gap-1 px-2 py-1 rounded-md bg-yellow-100 hover:bg-yellow-200 transition-colors duration-200"

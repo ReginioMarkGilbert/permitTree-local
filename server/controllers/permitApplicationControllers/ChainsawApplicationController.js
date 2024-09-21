@@ -264,13 +264,21 @@ const csaw_updateApplication = async (req, res) => {
 const csaw_deleteApplication = async (req, res) => {
     try {
         const { id } = req.params;
-        const deletedApplication = await Application.findByIdAndDelete(id);
-        if (!deletedApplication) {
-            return res.status(404).json({ error: 'Application not found' });
+        const application = await Application.findOne({ _id: id, userId: req.user.id });
+
+        if (!application) {
+            return res.status(404).json({ success: false, error: 'Application not found or you do not have permission to delete it' });
         }
-        res.status(200).json({ message: 'Application deleted successfully' });
+
+        if (application.status !== 'Draft') {
+            return res.status(400).json({ success: false, error: 'Only draft applications can be deleted' });
+        }
+
+        await Application.findByIdAndDelete(id);
+        res.status(200).json({ success: true, message: 'Application deleted successfully' });
     } catch (err) {
-        res.status(400).json({ error: err.message });
+        console.error('Error deleting application:', err);
+        res.status(500).json({ success: false, error: err.message });
     }
 };
 
