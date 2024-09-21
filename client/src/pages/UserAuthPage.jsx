@@ -99,7 +99,7 @@ const UserAuthPage = () => {
                 setToken(data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
                 const userRole = getUserRole();
-                navigate(userRole === 'admin' ? '/admin' : '/home?newUser=false', { replace: true });
+                navigate(userRole === 'admin' ? '/admin/home' : '/home?newUser=false', { replace: true });
                 // toast.success('Login successful!', {
                 //     position: 'top-center',
                 //     autoClose: 10,

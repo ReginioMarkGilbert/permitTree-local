@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '../../comp
 import { FaLeaf, FaBars, FaTimes, FaHome, FaClipboardList, FaBell, FaUser } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
 import HomeFooter from '../../components/ui/HomeFooter';
-// Import the custom scrollbar styles
 import '../../components/ui/styles/customScrollBar.css';
 
 export default function HomePage() {
@@ -144,7 +143,12 @@ export default function HomePage() {
                             )}
                         </CardContent>
                         <CardFooter>
-                            <Button className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white">View All Applications</Button>
+                            <Button
+                                className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white"
+                                onClick={() => window.location.href = '/applicationsStatus'}
+                            >
+                                View All Applications
+                            </Button>
                         </CardFooter>
                     </Card>
                     <Card className="bg-white">

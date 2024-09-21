@@ -4,7 +4,7 @@ import Navbar from './components/layout/Navbar';
 import UserSidebar from './components/layout/UserSidebar';
 import AdminSidebar from './pages/admin/AdminSidebar';
 import HomePage from './pages/user/HomePage';
-import AdminPage from './pages/admin/AdminPage';
+import AdminHomePage from './pages/admin/AdminHomePage';
 import PermitsPage from './pages/user/permitsPage';
 import ApplicationForm from './pages/user/ApplicationForm';
 import UserAuthPage from './pages/UserAuthPage';
@@ -86,13 +86,14 @@ const App = () => {
                         <Route path="/permits" element={<ProtectedRoute roles={['user']}><PermitsPage /></ProtectedRoute>} />
                         <Route path="/applicationsStatus" element={<ProtectedRoute roles={['user']}><UserApplicationsPage /></ProtectedRoute>} />
                         <Route path="/apply/:formType" element={<ProtectedRoute roles={['user']}><ApplicationForm /></ProtectedRoute>} />
-                        <Route path="/admin" element={<ProtectedRoute roles={['admin']}><AdminPage /></ProtectedRoute>} />
                         <Route path="/unauthorized" element={<div>Unauthorized Access</div>} />
                         <Route path="/about" element={<AboutPage />} />
                         <Route path="/services" element={<ServicesPage />} />
                         <Route path="/contact" element={<ContactPage />} />
                         <Route path="/learnMore" element={<LearnMorePage />} />
                         <Route path="/profile" element={<UserProfilePage />} />
+
+                        <Route path="/admin/home" element={<ProtectedRoute roles={['admin']}><AdminHomePage /></ProtectedRoute>} />
                     </Routes>
                 </div>
             </div>
