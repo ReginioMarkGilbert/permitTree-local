@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { Button } from "../../components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "../../components/ui/Card";
 import { Bell, ClipboardList, Users, Settings, TrendingUp, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
@@ -9,6 +10,7 @@ const AdminHomePage = () => {
     const [recentApplications, setRecentApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const navigate = useNavigate(); // Initialize useNavigate
 
     // Mock data for quick stats
     const dashboardStats = {
@@ -52,6 +54,10 @@ const AdminHomePage = () => {
 
         fetchAllApplications();
     }, []);
+
+    const handleViewAllApplications = () => {
+        navigate('/admin/dashboard'); // Redirect to /admin/dashboard
+    };
 
     return (
         <div className="min-h-screen bg-green-50 flex flex-col p-8">
@@ -106,7 +112,12 @@ const AdminHomePage = () => {
                         )}
                     </CardContent>
                     <CardFooter>
-                        <Button className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white">View All Applications</Button>
+                        <Button
+                            className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white"
+                            onClick={handleViewAllApplications}
+                        >
+                            View All Applications
+                        </Button>
                     </CardFooter>
                 </Card>
                 <Card className="bg-white">

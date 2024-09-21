@@ -5,6 +5,7 @@ import UserSidebar from './components/layout/UserSidebar';
 import AdminSidebar from './pages/admin/AdminSidebar';
 import HomePage from './pages/user/HomePage';
 import AdminHomePage from './pages/admin/AdminHomePage';
+import AdminDashboard from './pages/admin/AdminDashboard'; // Import AdminDashboard
 import PermitsPage from './pages/user/permitsPage';
 import ApplicationForm from './pages/user/ApplicationForm';
 import UserAuthPage from './pages/UserAuthPage';
@@ -94,6 +95,7 @@ const App = () => {
                         <Route path="/profile" element={<UserProfilePage />} />
 
                         <Route path="/admin/home" element={<ProtectedRoute roles={['admin']}><AdminHomePage /></ProtectedRoute>} />
+                        <Route path="/admin/dashboard" element={<ProtectedRoute roles={['admin']}><AdminDashboard /></ProtectedRoute>} /> {/* New route for AdminDashboard */}
                     </Routes>
                 </div>
             </div>
