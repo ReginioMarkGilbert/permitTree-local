@@ -2,9 +2,11 @@ import { React, useState } from 'react';
 // import Navbar from '../../components/layout/Navbar';
 // import UserSidebar from '../../components/layout/UserSidebar';
 import { useNavigate } from 'react-router-dom';
-import '../../styles/PermitsPage.css';
+import './styles/PermitsPage.css';
 
 const PermitsPage = () => {
+
+
     const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
 

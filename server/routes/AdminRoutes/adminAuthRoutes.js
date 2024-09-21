@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createAdmin, getAdmins } = require('../../controllers/adminControllers/adminControllers');
+const { createAdmin, getAdmins } = require('../../controllers/adminControllers/adminAuthControllers');
 
 // http://localhost:3000/api/admin/create-admin
 router.post('/create-admin', createAdmin);

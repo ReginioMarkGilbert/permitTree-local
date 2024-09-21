@@ -3,9 +3,12 @@ import { Link } from 'react-router-dom'; // Ensure this import is correct
 import { FaTree, FaShieldAlt, FaFileAlt, FaMapMarkerAlt, FaTruck, FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
 import { Button } from '../components/ui/Button';
 import Header from '../components/Header';
-import '../styles/LandingPage.css';
+import '../pages/user/styles/LandingPage.css';
 
 const LandingPage = () => {
+
+
+
     return (
         <div className="flex flex-col min-h-screen bg-green-50">
             <Header />

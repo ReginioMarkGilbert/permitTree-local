@@ -62,7 +62,7 @@ app.use('/api', chainsawRoutes);
 const authRoutes = require('./routes/UserRoutes/userAuthRoutes');
 app.use('/api', authRoutes);
 
-const adminRoutes = require('./routes/AdminRoutes/adminRoutes');
+const adminRoutes = require('./routes/AdminRoutes/adminAuthRoutes');
 app.use('/api/admin', adminRoutes);
 
 const contactRoutes = require('./routes/UserRoutes/contactRoutes');

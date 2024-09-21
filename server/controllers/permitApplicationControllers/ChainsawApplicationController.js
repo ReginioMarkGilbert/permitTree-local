@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const Application = require('../../models/PermitApplications/ChainsawApplication');
 const Notification = require('../../models/User/Notification');
-const Counter = require('../../models/admin/counter');
+const Counter = require('../../models/PermitApplications/PermitIDCounters/CSAWcounter');
 
 const CSAW_CustomId = async () => {
     try {

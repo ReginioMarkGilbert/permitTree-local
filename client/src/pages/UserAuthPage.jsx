@@ -9,8 +9,9 @@ import Input from '../components/ui/Input';
 import Label from '../components/ui/Label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs';
 import { FaLeaf } from 'react-icons/fa';
-import '../styles/UserAuthPage.css';
+import '../pages/user/styles/UserAuthPage.css';
 // import api from '../utils/api';
+
 
 const UserAuthPage = () => {
     const [activeTab, setActiveTab] = useState('signin'); // Change this line

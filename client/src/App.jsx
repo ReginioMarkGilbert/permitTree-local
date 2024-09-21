@@ -2,13 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import UserSidebar from './components/layout/UserSidebar';
-import AdminSidebar from './components/layout/AdminSidebar';
+import AdminSidebar from './pages/admin/AdminSidebar';
 import HomePage from './pages/user/HomePage';
 import AdminPage from './pages/admin/AdminPage';
 import PermitsPage from './pages/user/permitsPage';
 import ApplicationForm from './pages/user/ApplicationForm';
-import MessageBox from './pages/user/MessageBox';
-import StatusPage from './pages/user/StatusPage';
 import UserAuthPage from './pages/UserAuthPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { isAuthenticated, getUserRole, isTokenExpired, logout, getToken } from './utils/auth';
@@ -88,8 +86,6 @@ const App = () => {
                         <Route path="/permits" element={<ProtectedRoute roles={['user']}><PermitsPage /></ProtectedRoute>} />
                         <Route path="/applicationsStatus" element={<ProtectedRoute roles={['user']}><UserApplicationsPage /></ProtectedRoute>} />
                         <Route path="/apply/:formType" element={<ProtectedRoute roles={['user']}><ApplicationForm /></ProtectedRoute>} />
-                        <Route path="/message" element={<ProtectedRoute roles={['user']}><MessageBox /></ProtectedRoute>} />
-                        <Route path="/status" element={<ProtectedRoute roles={['user']}><StatusPage /></ProtectedRoute>} />
                         <Route path="/admin" element={<ProtectedRoute roles={['admin']}><AdminPage /></ProtectedRoute>} />
                         <Route path="/unauthorized" element={<div>Unauthorized Access</div>} />
                         <Route path="/about" element={<AboutPage />} />
