@@ -461,7 +461,7 @@ const ChainsawRegistrationForm = () => {
                                                         onChange={handleInputChange}
                                                         placeholder="Barangay, Bayan, Probinsya"
                                                         required
-                                                        className="w-48 h-16 resize-none"
+                                                        autocomplete="street-address"
                                                     />
                                                 </div>
                                                 <div className="space-y-2">
@@ -473,6 +473,7 @@ const ChainsawRegistrationForm = () => {
                                                         onChange={handleInputChange}
                                                         placeholder="e.g. 09123456789"
                                                         required
+                                                        autocomplete="tel"
                                                     />
                                                 </div>
                                             </div>

@@ -1,5 +1,7 @@
 const Application = require('../../models/PermitApplications/ChainsawApplication');
 const User = require('../../models/User/userAuthSchema');
+const fs = require('fs').promises;
+const path = require('path');
 
 // Get all applications
 const getAllApplications = async (req, res) => {
@@ -35,6 +37,69 @@ const getAllApplications = async (req, res) => {
     }
 };
 
+const getApplicationById = async (req, res) => {
+    try {
+        const application = await Application.findById(req.params.id);
+        if (!application) {
+            return res.status(404).json({ message: 'Application not found' });
+        }
+        res.status(200).json(application);
+    } catch (error) {
+        console.error('Error fetching application by ID:', error);
+        res.status(500).json({ message: 'Error fetching application by ID' });
+    }
+};
+
+const getFile = async (req, res) => {
+    try {
+        const { applicationId, fileType, fileIndex } = req.params;
+        const application = await Application.findById(applicationId);
+
+        if (!application) {
+            return res.status(404).json({ message: 'Application not found' });
+        }
+
+        if (!application.files || !application.files[fileType] || !application.files[fileType][fileIndex]) {
+            return res.status(404).json({ message: 'File not found in application' });
+        }
+
+        const file = application.files[fileType][fileIndex];
+
+        // Check if the file data is stored in the database
+        if (file.data) {
+            res.contentType(file.contentType);
+            return res.send(file.data);  // Make sure it's sending the actual data, not a buffer
+        }
+
+        // If not in the database, try to find it in the filesystem
+        const filePath = path.join(__dirname, '../../../uploads', file.filename);
+
+        try {
+            await fs.access(filePath);
+        } catch (error) {
+            console.error('File not found on server:', filePath);
+            return res.status(404).json({ message: 'File not found on server' });
+        }
+
+        res.setHeader('Content-Type', file.contentType);
+        res.setHeader('Content-Disposition', `inline; filename="${file.filename}"`);
+
+        const fileStream = fs.createReadStream(filePath);
+        fileStream.pipe(res);
+
+        console.log('File details:', {
+            filename: file.filename,
+            contentType: file.contentType,
+            size: file.data ? file.data.length : 'N/A'
+        });
+    } catch (error) {
+        console.error('Error retrieving file:', error);
+        res.status(500).json({ message: 'Error retrieving file' });
+    }
+};
+
 module.exports = {
-    getAllApplications
+    getAllApplications,
+    getApplicationById,
+    getFile
 };

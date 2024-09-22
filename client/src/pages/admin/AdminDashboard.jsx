@@ -5,6 +5,7 @@ import ApplicationDetailsModal from '../../components/ui/ApplicationDetailsModal
 import EditApplicationModal from '../../components/ui/EditApplicationModal';
 import ConfirmationModal from '../../components/ui/ConfirmationModal';
 import { toast } from 'react-toastify';
+import AdminApplicationDetailsModal from './components/AdminApplicationDetailsModal';
 
 const AdminDashboard = () => {
     const [applications, setApplications] = useState([]);
@@ -35,7 +36,7 @@ const AdminDashboard = () => {
                 ...app,
                 status: app.status === 'Submitted' ? 'For Review' : app.status // Change status for admin view
             }));
-
+            // toast.success('Applications fetched successfully');
             setApplications(updatedApplications);
             setLoading(false);
         } catch (error) {
@@ -48,15 +49,18 @@ const AdminDashboard = () => {
 
     const handleView = async (id) => {
         try {
+            setLoading(true); // Set loading to true before making the API call
             const token = localStorage.getItem('token');
-            const response = await axios.get(`http://localhost:3000/api/csaw_getApplicationById/${id}`, {
+            const response = await axios.get(`http://localhost:3000/api/admin/getApplicationById/${id}`, {
                 headers: { Authorization: token }
             });
             setSelectedApplication(response.data);
             setIsViewModalOpen(true);
+            setLoading(false); // Set loading to false after the API call is complete
         } catch (error) {
             console.error('Error fetching application details:', error);
             toast.error('Failed to fetch application details');
+            setLoading(false); // Set loading to false in case of error
         }
     };
 
@@ -143,9 +147,9 @@ const AdminDashboard = () => {
                                                 <Edit className="inline w-4 h-4" />
                                             </button>
                                         )}
-                                        <button className="text-red-600 hover:text-red-900 action-icon" onClick={() => handleDelete(app)}>
+                                        {/* <button className="text-red-600 hover:text-red-900 action-icon" onClick={() => handleDelete(app)}>
                                             <Trash2 className="inline w-4 h-4" />
-                                        </button>
+                                        </button> */}
                                     </div>
                                 </td>
                             </tr>
@@ -195,7 +199,7 @@ const AdminDashboard = () => {
                 {renderTable()}
             </div>
 
-            <ApplicationDetailsModal
+            <AdminApplicationDetailsModal
                 isOpen={isViewModalOpen}
                 onClose={() => setIsViewModalOpen(false)}
                 application={selectedApplication}
