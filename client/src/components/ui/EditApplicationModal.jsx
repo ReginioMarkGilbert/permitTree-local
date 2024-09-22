@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, FileText, Trash2, Upload } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import './styles/customScrollBar.css';
 
 const EditApplicationModal = ({ isOpen, onClose, application, onUpdate }) => {
     const [formData, setFormData] = useState({});
+    const [files, setFiles] = useState({});
 
     const chainsawStores = [
         { value: "Green Chainsaw Co.", label: "Green Chainsaw Co." },
@@ -38,20 +39,57 @@ const EditApplicationModal = ({ isOpen, onClose, application, onUpdate }) => {
                 countryOfOrigin: application.countryOfOrigin,
                 purchasePrice: application.purchasePrice,
             });
+            setFiles(application.files || {});
         }
     }, [application]);
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleFileChange = (e, documentType) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const newFiles = { ...files };
+                if (!newFiles[documentType]) {
+                    newFiles[documentType] = [];
+                }
+                newFiles[documentType].push({
+                    filename: file.name,
+                    data: event.target.result.split(',')[1], // Base64 encoded file data
+                    contentType: file.type
+                });
+                setFiles(newFiles);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const removeFile = (documentType, index) => {
+        const newFiles = { ...files };
+        newFiles[documentType].splice(index, 1);
+        if (newFiles[documentType].length === 0) {
+            delete newFiles[documentType];
+        }
+        setFiles(newFiles);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.put(`http://localhost:3000/api/csaw_updateApplication/${application._id}`, formData, {
-                headers: { Authorization: token }
+            const dataToSend = {
+                ...formData,
+                files: files
+            };
+
+            const response = await axios.put(`http://localhost:3000/api/csaw_updateApplication/${application._id}`, dataToSend, {
+                headers: {
+                    Authorization: token,
+                    'Content-Type': 'application/json'
+                }
             });
             onUpdate(response.data);
             onClose();
@@ -62,7 +100,32 @@ const EditApplicationModal = ({ isOpen, onClose, application, onUpdate }) => {
         }
     };
 
+    const formatDocumentLabel = (key) => {
+        const labels = {
+            officialReceipt: "Official Receipt",
+            deedOfSale: "Deed of Sale",
+            specialPowerOfAttorney: "Special Power of Attorney",
+            forestTenureAgreement: "Forest Tenure Agreement",
+            businessPermit: "Business Permit",
+            certificateOfRegistration: "Certificate of Registration",
+            woodProcessingPlantPermit: "Wood Processing Plant Permit"
+        };
+        return labels[key] || key.replace(/([A-Z])/g, ' $1').trim();
+    };
+
+    const getRequiredDocuments = () => {
+        const documents = ['officialReceipt', 'deedOfSale'];
+        if (formData.isOwner) documents.push('specialPowerOfAttorney');
+        if (formData.isTenureHolder) documents.push('forestTenureAgreement');
+        if (formData.isBusinessOwner) documents.push('businessPermit');
+        if (formData.isPLTPRHolder) documents.push('certificateOfRegistration');
+        if (formData.isWPPHolder) documents.push('woodProcessingPlantPermit');
+        return documents;
+    };
+
     if (!isOpen || !application) return null;
+
+    const requiredDocuments = getRequiredDocuments();
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 pt-20">
@@ -75,13 +138,21 @@ const EditApplicationModal = ({ isOpen, onClose, application, onUpdate }) => {
                 </div>
                 <form onSubmit={handleSubmit} className="flex-grow overflow-y-auto p-6 space-y-6 custom-scrollbar">
                     <Section title="Application Information">
-                        <Field label="Application ID" value={application.customId} />
+                        <div className="bg-white p-3 rounded-lg shadow-sm">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Application ID</label>
+                            <input
+                                type="text"
+                                value={formData.customId || ''}
+                                readOnly
+                                className="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50"
+                            />
+                        </div>
                         <div className="bg-white p-3 rounded-lg shadow-sm">
                             <label className="block text-sm font-medium text-gray-700 mb-1">Registration Type</label>
                             <select
                                 name="registrationType"
                                 value={formData.registrationType}
-                                onChange={handleInputChange}
+                                onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50"
                             >
                                 <option value="" disabled>Select registration type</option>
@@ -97,7 +168,7 @@ const EditApplicationModal = ({ isOpen, onClose, application, onUpdate }) => {
                             <select
                                 name="chainsawStore"
                                 value={formData.chainsawStore}
-                                onChange={handleInputChange}
+                                onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50"
                             >
                                 <option value="" disabled>Select a store</option>
@@ -111,23 +182,57 @@ const EditApplicationModal = ({ isOpen, onClose, application, onUpdate }) => {
                     </Section>
 
                     <Section title="Owner Information">
-                        <Field label="Owner Name" name="ownerName" value={formData.ownerName} onChange={handleInputChange} />
-                        <Field label="Address" name="address" value={formData.address} onChange={handleInputChange} />
-                        <Field label="Phone" name="phone" value={formData.phone} onChange={handleInputChange} />
+                        <Field label="Owner Name" name="ownerName" value={formData.ownerName} onChange={handleChange} />
+                        <Field label="Address" name="address" value={formData.address} onChange={handleChange} />
+                        <Field label="Phone" name="phone" value={formData.phone} onChange={handleChange} />
                     </Section>
 
                     <Section title="Chainsaw Details">
-                        <Field label="Brand" name="brand" value={formData.brand} onChange={handleInputChange} />
-                        <Field label="Model" name="model" value={formData.model} onChange={handleInputChange} />
-                        <Field label="Serial Number" name="serialNumber" value={formData.serialNumber} onChange={handleInputChange} />
-                        <Field label="Power Output" name="powerOutput" value={formData.powerOutput} onChange={handleInputChange} />
-                        <Field label="Max Length Guidebar" name="maxLengthGuidebar" value={formData.maxLengthGuidebar} onChange={handleInputChange} />
-                        <Field label="Country of Origin" name="countryOfOrigin" value={formData.countryOfOrigin} onChange={handleInputChange} />
-                        <Field label="Purchase Price" name="purchasePrice" value={formData.purchasePrice} onChange={handleInputChange} type="number" />
+                        <Field label="Brand" name="brand" value={formData.brand} onChange={handleChange} />
+                        <Field label="Model" name="model" value={formData.model} onChange={handleChange} />
+                        <Field label="Serial Number" name="serialNumber" value={formData.serialNumber} onChange={handleChange} />
+                        <Field label="Power Output" name="powerOutput" value={formData.powerOutput} onChange={handleChange} />
+                        <Field label="Max Length Guidebar" name="maxLengthGuidebar" value={formData.maxLengthGuidebar} onChange={handleChange} />
+                        <Field label="Country of Origin" name="countryOfOrigin" value={formData.countryOfOrigin} onChange={handleChange} />
+                        <Field label="Purchase Price" name="purchasePrice" value={formData.purchasePrice} onChange={handleChange} type="number" />
                     </Section>
 
                     <Section title="Dates">
-                        <Field label="Date of Acquisition" name="dateOfAcquisition" value={formData.dateOfAcquisition} onChange={handleInputChange} type="date" />
+                        <Field label="Date of Acquisition" name="dateOfAcquisition" value={formData.dateOfAcquisition} onChange={handleChange} type="date" />
+                    </Section>
+
+                    <Section title="Documents">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 col-span-2">
+                            {requiredDocuments.map(documentType => (
+                                <div key={documentType} className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                                    <h4 className="font-semibold text-gray-700 mb-2">{formatDocumentLabel(documentType)}</h4>
+                                    {files[documentType] && files[documentType].map((file, index) => (
+                                        <div key={index} className="flex items-center justify-between mb-2 bg-gray-100 p-2 rounded">
+                                            <div className="flex items-center overflow-hidden">
+                                                <FileText size={16} className="mr-2 text-gray-500 flex-shrink-0" />
+                                                <span className="text-sm text-gray-600 truncate">{file.filename}</span>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => removeFile(documentType, index)}
+                                                className="text-red-500 hover:text-red-700 ml-2 flex-shrink-0"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <label className="flex items-center justify-center w-full px-4 py-2 bg-green-500 text-white rounded-lg cursor-pointer hover:bg-green-600 transition-colors mt-2">
+                                        <Upload size={16} className="mr-2" />
+                                        <span>Add {formatDocumentLabel(documentType)}</span>
+                                        <input
+                                            type="file"
+                                            onChange={(e) => handleFileChange(e, documentType)}
+                                            className="hidden"
+                                        />
+                                    </label>
+                                </div>
+                            ))}
+                        </div>
                     </Section>
                 </form>
                 <div className="p-5 bg-gray-50 flex justify-end rounded-b-2xl">

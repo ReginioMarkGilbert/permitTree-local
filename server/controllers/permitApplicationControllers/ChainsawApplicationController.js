@@ -2,7 +2,6 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const Application = require('../../models/PermitApplications/ChainsawApplication');
-const Notification = require('../../models/User/Notification');
 const Counter = require('../../models/PermitApplications/PermitIDCounters/CSAWcounter');
 
 const CSAW_CustomId = async () => {
@@ -238,11 +237,24 @@ const csaw_getApplications = async (req, res) => {
 
 const csaw_updateApplication = async (req, res) => {
     try {
+        // console.log('Update request received:', req.params, req.body);
+
         const { id } = req.params;
         const updateData = req.body;
 
         // Ensure the user can only update their own applications
         updateData.userId = req.user.id;
+
+        // Handle file updates
+        if (updateData.files) {
+            for (const [documentType, fileArray] of Object.entries(updateData.files)) {
+                updateData.files[documentType] = fileArray.map(file => ({
+                    filename: file.filename,
+                    contentType: file.contentType,
+                    data: Buffer.from(file.data, 'base64')
+                }));
+            }
+        }
 
         const updatedApplication = await Application.findOneAndUpdate(
             { _id: id, userId: req.user.id },
@@ -254,10 +266,11 @@ const csaw_updateApplication = async (req, res) => {
             return res.status(404).json({ error: 'Application not found or you do not have permission to update it' });
         }
 
+        // console.log('Application updated successfully:', updatedApplication);
         res.status(200).json(updatedApplication);
     } catch (err) {
         console.error('Error updating application:', err);
-        res.status(400).json({ error: err.message });
+        res.status(500).json({ error: err.message });
     }
 };
 
