@@ -2,6 +2,7 @@ const Application = require('../../models/PermitApplications/ChainsawApplication
 const User = require('../../models/User/userAuthSchema');
 const fs = require('fs').promises;
 const path = require('path');
+const PDFDocument = require('pdfkit');
 
 // Get all applications
 const getAllApplications = async (req, res) => {
@@ -98,8 +99,47 @@ const getFile = async (req, res) => {
     }
 };
 
+const printApplication = async (req, res) => {
+    try {
+        const application = await Application.findById(req.params.id);
+        if (!application) {
+            return res.status(404).json({ message: 'Application not found' });
+        }
+
+        // Create a new PDF document
+        const doc = new PDFDocument();
+
+        // Set response headers for PDF
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=application_${application.customId}.pdf`);
+
+        // Pipe the PDF document to the response
+        doc.pipe(res);
+
+        // Add content to the PDF
+        doc.fontSize(18).text('Application Details', { align: 'center' });
+        doc.moveDown();
+        doc.fontSize(12).text(`Application ID: ${application.customId}`);
+        doc.text(`Status: ${application.status}`);
+        doc.text(`Application Type: ${application.applicationType}`);
+        doc.text(`Owner Name: ${application.ownerName}`);
+        doc.text(`Address: ${application.address}`);
+        doc.text(`Phone: ${application.phone}`);
+        doc.text(`Date of Submission: ${application.dateOfSubmission}`);
+        // Add more fields as needed
+
+        // Finalize the PDF and end the stream
+        doc.end();
+
+    } catch (error) {
+        console.error('Error printing application:', error);
+        res.status(500).json({ message: 'Error printing application' });
+    }
+};
+
 module.exports = {
     getAllApplications,
     getApplicationById,
-    getFile
+    getFile,
+    printApplication
 };

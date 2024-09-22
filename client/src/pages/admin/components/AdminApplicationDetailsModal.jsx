@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { X, FileText, Image as ImageIcon } from 'lucide-react';
+import { X, FileText, Image as ImageIcon, Printer } from 'lucide-react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 import '../../../components/ui/styles/customScrollBar.css';
 
 const AdminApplicationDetailsModal = ({ isOpen, onClose, application }) => {
@@ -78,6 +80,26 @@ const AdminApplicationDetailsModal = ({ isOpen, onClose, application }) => {
         return labels[key] || key.replace(/([A-Z])/g, ' $1').trim();
     };
 
+    const handlePrint = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`http://localhost:3000/api/admin/print/${application._id}`, {
+                headers: { Authorization: token },
+                responseType: 'blob', // Important for receiving binary data
+            });
+
+            // Create a blob from the PDF data
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+
+            // Open the PDF in a new window
+            window.open(url);
+        } catch (error) {
+            console.error('Error printing application:', error);
+            toast.error('Failed to print application');
+        }
+    };
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 pt-20 z-50 overflow-y-auto">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh]">
@@ -125,7 +147,14 @@ const AdminApplicationDetailsModal = ({ isOpen, onClose, application }) => {
                         </Section>
                     )}
                 </div>
-                <div className="p-5 bg-gray-50 flex justify-end rounded-b-2xl">
+                <div className="p-5 bg-gray-50 flex justify-end rounded-b-2xl space-x-4">
+                    <button
+                        onClick={handlePrint}
+                        className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition duration-300 shadow-md hover:shadow-lg flex items-center"
+                    >
+                        <Printer className="mr-2" size={20} />
+                        Print
+                    </button>
                     <button
                         onClick={onClose}
                         className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-300 shadow-md hover:shadow-lg"

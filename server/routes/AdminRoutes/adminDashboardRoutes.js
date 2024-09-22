@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getAllApplications, getApplicationById, getFile } = require('../../controllers/adminControllers/adminDashboardControllers');
+const { getAllApplications, getApplicationById, getFile, printApplication } = require('../../controllers/adminControllers/adminDashboardControllers');
 const passport = require('passport');
 
 // Route to get dashboard statistics
@@ -10,5 +10,6 @@ const passport = require('passport');
 router.get('/all-applications', getAllApplications);
 router.get('/getApplicationById/:id', getApplicationById);
 router.get('/file/:applicationId/:fileType/:fileIndex', getFile);
+router.get('/print/:id', printApplication);
 
 module.exports = router;

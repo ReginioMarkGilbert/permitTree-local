@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Eye, Edit, Trash2, Leaf } from 'lucide-react';
+import { Eye, Edit, Trash2, Leaf, Printer } from 'lucide-react';
 import ApplicationDetailsModal from '../../components/ui/ApplicationDetailsModal';
 import EditApplicationModal from '../../components/ui/EditApplicationModal';
 import ConfirmationModal from '../../components/ui/ConfirmationModal';
@@ -98,6 +98,26 @@ const AdminDashboard = () => {
         }
     };
 
+    const handlePrint = async (id) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`http://localhost:3000/api/admin/print/${id}`, {
+                headers: { Authorization: token },
+                responseType: 'blob', // Important for receiving binary data
+            });
+
+            // Create a blob from the PDF data
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+
+            // Open the PDF in a new window
+            window.open(url);
+        } catch (error) {
+            console.error('Error printing application:', error);
+            toast.error('Failed to print application');
+        }
+    };
+
     const renderTable = () => {
         if (loading) {
             return <p className="text-center text-gray-500">Loading applications...</p>;
@@ -142,11 +162,9 @@ const AdminDashboard = () => {
                                         <button className="text-green-600 hover:text-green-900 action-icon" onClick={() => handleView(app._id)}>
                                             <Eye className="inline w-4 h-4" />
                                         </button>
-                                        {app.status === 'Draft' && (
-                                            <button className="text-blue-600 hover:text-blue-900 action-icon" onClick={() => handleEdit(app)}>
-                                                <Edit className="inline w-4 h-4" />
-                                            </button>
-                                        )}
+                                        <button className="text-blue-600 hover:text-blue-900 action-icon" onClick={() => handlePrint(app._id)}>
+                                            <Printer className="inline w-4 h-4" />
+                                        </button>
                                         {/* <button className="text-red-600 hover:text-red-900 action-icon" onClick={() => handleDelete(app)}>
                                             <Trash2 className="inline w-4 h-4" />
                                         </button> */}
