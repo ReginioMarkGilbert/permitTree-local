@@ -269,14 +269,15 @@ const ChainsawRegistrationForm = () => {
             .replace(/([A-Z])/g, ' $1') // Insert space before capital letters
             .replace(/^./, str => str.toUpperCase()) // Capitalize the first letter
             .replace(/([a-z])([A-Z])/g, '$1 $2') // Insert space between lower and upper case letters
-            .replace(/\b(PLTPR|WPP)\b/g, match => match.toUpperCase()); // Keep PLTPR and WPP in uppercase
+            .replace(/\b(P L T P R|W P P)\b/g, match => match.replace(/ /g, '')) // Remove spaces in PLTPR and WPP
+        // .replace(/\b(PLTPR|WPP)\b/g, match => `${match}`);
     };
 
     const uploadCardsCount = Object.values(formData).filter(value => value === true).length;
     const isScrollable = uploadCardsCount > 3;
 
     return (
-        <div className="min-h-screen bg-green-50 flex flex-col justify-between pt-24">
+        <div className="min-h-screen bg-green-50 flex flex-col justify-between pt-[83px]">
             <div className="container mx-auto px-4 flex-grow">
                 <h1 className="text-3xl font-[700] text-green-800 mb-6 text-center">Chainsaw Registration Application</h1>
                 <Card className="max-w-2xl mx-auto shadow-lg">
@@ -437,7 +438,7 @@ const ChainsawRegistrationForm = () => {
                             {currentStep === 4 && (
                                 <div className="space-y-4">
                                     {/* <h3 className="text-lg font-semibold mb-2 text-green-700">Application Details</h3> */}
-                                    <div className="space-y-5 h-[630px]">
+                                    <div className="space-y-5 h-[600px]">
                                         <div>
                                             <h3 className="text-lg font-semibold mb-1 text-green-700">Owner Details</h3>
                                             <div className="space-y-2">
@@ -542,7 +543,7 @@ const ChainsawRegistrationForm = () => {
                                                         />
                                                     </div>
                                                     <div>
-                                                        <Label htmlFor="maxLengthGuidebar">Maximum Length of Guidebar</Label>
+                                                        <Label htmlFor="maxLengthGuidebar">Maximum Length of Guidebar (Inches)</Label>
                                                         <Input
                                                             id="maxLengthGuidebar"
                                                             name="maxLengthGuidebar"
@@ -584,7 +585,7 @@ const ChainsawRegistrationForm = () => {
                                 </div>
                             )}
 
-                            {currentStep === 5 && (
+                            {currentStep === 5 && ( // Review Your Application
                                 <div className="space-y-6 h-[630px] flex flex-col">
                                     {/* <h3 className="text-xl font-semibold mb-4 text-green-700">Review Your Application</h3> */}
                                     <div className="review-step-container csaw-form-scrollbar flex-grow overflow-auto">

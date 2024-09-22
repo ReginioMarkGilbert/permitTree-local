@@ -4,6 +4,20 @@ const fs = require('fs').promises;
 const path = require('path');
 const PDFDocument = require('pdfkit');
 
+// Helper function to format date
+const formatDate = (dateString) => {
+    const options = {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        timeZone: 'Asia/Manila'
+    };
+    return new Date(dateString).toLocaleString('en-US', options);
+};
+
 // Get all applications
 const getAllApplications = async (req, res) => {
     try {
@@ -116,6 +130,16 @@ const printApplication = async (req, res) => {
         // Pipe the PDF document to the response
         doc.pipe(res);
 
+        // Load the custom font (Roboto-Regular in this case)
+        doc.font(path.join(__dirname, '../../fonts', 'Roboto-Regular.ttf'));
+
+        // Function to format currency
+        const formatCurrency = (amount) => {
+            // Remove any non-numeric characters except decimal point
+            const numericAmount = parseFloat(amount.toString().replace(/[^\d.]/g, ''));
+            return isNaN(numericAmount) ? '0.00' : numericAmount.toFixed(2);
+        };
+
         // Add content to the PDF
         doc.fontSize(18).text('Application Details', { align: 'center' });
         doc.moveDown();
@@ -125,8 +149,19 @@ const printApplication = async (req, res) => {
         doc.text(`Owner Name: ${application.ownerName}`);
         doc.text(`Address: ${application.address}`);
         doc.text(`Phone: ${application.phone}`);
-        doc.text(`Date of Submission: ${application.dateOfSubmission}`);
-        // Add more fields as needed
+        doc.text(`Date of Submission: ${formatDate(application.dateOfSubmission)}`);
+        doc.text(`Date of Acquisition: ${formatDate(application.dateOfAcquisition)}`);
+
+        // Add more fields
+        doc.text(`Registration Type: ${application.registrationType}`);
+        doc.text(`Chainsaw Store: ${application.chainsawStore}`);
+        doc.text(`Brand: ${application.brand}`);
+        doc.text(`Model: ${application.model}`);
+        doc.text(`Serial Number: ${application.serialNumber}`);
+        doc.text(`Power Output (kW/bhp): ${application.powerOutput}`);
+        doc.text(`Max Length Guidebar (Inches): ${application.maxLengthGuidebar}`);
+        doc.text(`Country of Origin: ${application.countryOfOrigin}`);
+        doc.text(`Purchase Price: ₱${formatCurrency(application.purchasePrice)}`);
 
         // Finalize the PDF and end the stream
         doc.end();

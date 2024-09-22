@@ -10,11 +10,16 @@ const AdminApplicationDetailsModal = ({ isOpen, onClose, application }) => {
     if (!isOpen || !application) return null;
 
     const formatDate = (dateString) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
+        const options = {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
             year: 'numeric',
-            month: '2-digit',
-            day: '2-digit'
-        });
+            hour: 'numeric',
+            minute: 'numeric',
+            timeZone: 'Asia/Manila'
+        };
+        return new Date(dateString).toLocaleString('en-US', options);
     };
 
     const renderFileLinks = (files) => {
