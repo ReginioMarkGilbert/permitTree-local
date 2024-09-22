@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
-import { X, FileText, Image as ImageIcon, Printer } from 'lucide-react';
+import { X, FileText, Image as ImageIcon, Printer, Plus, Minus } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import '../../../components/ui/styles/customScrollBar.css';
 
 const AdminApplicationDetailsModal = ({ isOpen, onClose, application }) => {
     const [previewImage, setPreviewImage] = useState(null);
+    const [zoomLevel, setZoomLevel] = useState(1);
+    const [center, setCenter] = useState({ x: 50, y: 50 }); // Center of the image
+    const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
+    const [initialZoom, setInitialZoom] = useState(1);
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
     if (!isOpen || !application) return null;
 
@@ -69,6 +75,15 @@ const AdminApplicationDetailsModal = ({ isOpen, onClose, application }) => {
 
     const handleFileClick = (file, key, index) => {
         const fileUrl = `http://localhost:3000/api/admin/file/${application._id}/${key}/${index}`;
+        const img = new Image();
+        img.onload = () => {
+            const containerWidth = window.innerWidth * 0.9;
+            const containerHeight = window.innerHeight * 0.9;
+            const initialZoom = calculateInitialZoom(img.width, img.height, containerWidth, containerHeight);
+            setInitialZoom(initialZoom);
+            setZoomLevel(initialZoom);
+        };
+        img.src = fileUrl;
         setPreviewImage(fileUrl);
     };
 
@@ -102,6 +117,61 @@ const AdminApplicationDetailsModal = ({ isOpen, onClose, application }) => {
         } catch (error) {
             console.error('Error printing application:', error);
             toast.error('Failed to print application');
+        }
+    };
+
+    const handleZoom = (newZoom) => {
+        setZoomLevel(prevZoom => {
+            const zoomChange = newZoom / prevZoom;
+            const newCenter = {
+                x: center.x + (50 - center.x) * (1 - 1 / zoomChange),
+                y: center.y + (50 - center.y) * (1 - 1 / zoomChange)
+            };
+            setCenter(newCenter);
+            return newZoom;
+        });
+    };
+
+    const handleZoomIn = () => handleZoom(Math.min(zoomLevel + 0.1, 3));
+    const handleZoomOut = () => handleZoom(Math.max(zoomLevel - 0.1, 0.5));
+
+    const calculateInitialZoom = (imgWidth, imgHeight, containerWidth, containerHeight) => {
+        const widthRatio = containerWidth / imgWidth;
+        const heightRatio = containerHeight / imgHeight;
+        return Math.min(1, widthRatio, heightRatio);
+    };
+
+    const handleMouseDown = (e) => {
+        setIsDragging(true);
+        setDragStart({ x: e.clientX, y: e.clientY });
+    };
+
+    const handleMouseMove = (e) => {
+        if (isDragging) {
+            const dx = e.clientX - dragStart.x;
+            const dy = e.clientY - dragStart.y;
+            setCenter(prevCenter => ({
+                x: prevCenter.x - (dx / zoomLevel),
+                y: prevCenter.y - (dy / zoomLevel)
+            }));
+            setDragStart({ x: e.clientX, y: e.clientY });
+        }
+    };
+
+    const handleMouseUp = () => {
+        setIsDragging(false);
+    };
+
+    const handleMouseLeave = () => {
+        setIsDragging(false);
+    };
+
+    const handleBackgroundClick = (e) => {
+        // Close the preview if clicking outside the image
+        if (e.target === e.currentTarget) {
+            setPreviewImage(null);
+            setZoomLevel(initialZoom);
+            setCenter({ x: 50, y: 50 });
         }
     };
 
@@ -168,20 +238,47 @@ const AdminApplicationDetailsModal = ({ isOpen, onClose, application }) => {
                     </button>
                 </div>
                 {previewImage && (
-                    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-60">
-                        <div className="max-w-3xl max-h-[90vh] relative">
+                    <div
+                        className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-60"
+                        onClick={handleBackgroundClick}
+                    >
+                        <div className="w-[60vw] h-[95vh] relative flex items-center justify-center overflow-hidden">
                             <img
                                 src={previewImage}
                                 alt="Preview"
-                                className="max-w-full max-h-full object-contain"
+                                className="max-w-none max-h-none"
+                                style={{
+                                    transform: `scale(${zoomLevel})`,
+                                    transformOrigin: `${center.x}% ${center.y}%`,
+                                    transition: 'transform 0.2s ease-out',
+                                }}
+                                onMouseMove={handleMouseMove}
                                 onError={(e) => {
                                     console.error("Error loading image:", e);
-                                    e.target.src = "path/to/fallback/image.png"; // Replace with a path to a fallback image
+                                    e.target.src = "path/to/fallback/image.png";
                                 }}
                             />
+                            {/* <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-4">
+                                <button
+                                    onClick={handleZoomOut}
+                                    className="bg-white rounded-full p-2 text-black hover:bg-gray-200"
+                                >
+                                    <Minus size={24} />
+                                </button>
+                                <button
+                                    onClick={handleZoomIn}
+                                    className="bg-white rounded-full p-2 text-black hover:bg-gray-200"
+                                >
+                                    <Plus size={24} />
+                                </button>
+                            </div> */}
                             <button
-                                onClick={() => setPreviewImage(null)}
-                                className="absolute top-[-10px] right-[-47px]  rounded-full p-2 text-white hover:bg-gray-200 hover:text-black"
+                                onClick={() => {
+                                    setPreviewImage(null);
+                                    setZoomLevel(initialZoom);
+                                    setCenter({ x: 50, y: 50 });
+                                }}
+                                className="absolute top-[10px] right-[12rem] text-white rounded-full p-2 hover:bg-gray-200 hover:text-black"
                             >
                                 <X size={24} />
                             </button>
