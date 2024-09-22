@@ -1,64 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import ProtectedRoute from './components/ProtectedRoute';
+
 import Navbar from './components/layout/Navbar';
 import UserSidebar from './components/layout/UserSidebar';
-import AdminSidebar from './pages/admin/AdminSidebar';
+import useSidebarToggle from './hooks/useSidebarToggle';
 import HomePage from './pages/user/HomePage';
-import AdminHomePage from './pages/admin/AdminHomePage';
-import AdminDashboard from './pages/admin/AdminDashboard'; // Import AdminDashboard
+import UserProfilePage from './pages/user/UserProfilePage';
 import PermitsPage from './pages/user/permitsPage';
+import UserApplicationsPage from './pages/user/UserApplicationsStatusPage';
 import ApplicationForm from './pages/user/ApplicationForm';
 import UserAuthPage from './pages/UserAuthPage';
-import ProtectedRoute from './components/ProtectedRoute';
-import { isAuthenticated, getUserRole, isTokenExpired, logout, getToken } from './utils/auth';
-import useSidebarToggle from './hooks/useSidebarToggle';
+
 import LandingPage from './pages/LandingPage';
+import LearnMorePage from './pages/LearnMorePage';
 import AboutPage from './pages/AboutPage';
 import ServicesPage from './pages/ServicesPage';
 import ContactPage from './pages/ContactPage';
-import LearnMorePage from './pages/LearnMorePage';
-import UserProfilePage from './pages/user/UserProfilePage';
+
+import AdminSidebar from './pages/admin/AdminSidebar';
+import AdminHomePage from './pages/admin/AdminHomePage';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminApplicationReviewPage from './pages/admin/AdminApplicationReviewPage';
+
+import { isAuthenticated, getUserRole, isTokenExpired, logout, getToken } from './utils/auth';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import UserApplicationsPage from './pages/user/UserApplicationsStatusPage';
 
 const App = () => {
     const { sidebarToggle, toggleSidebar } = useSidebarToggle();
     const navigate = useNavigate();
     const location = useLocation();
-    const [selectedStore, setSelectedStore] = useState(null);
     const userRole = getUserRole();
-
-    // useEffect(() => {
-    //     const checkTokenExpiration = () => {
-    //         const token = getToken();
-    //         if (token) {
-    //             try {
-    //                 const payload = JSON.parse(atob(token.split('.')[1]));
-    //                 const expirationTime = payload.iat * 1000 + 7 * 24 * 60 * 60 * 1000; // Set expiration time to 7 days from issued time
-    //                 const currentTime = Date.now();
-    //                 const timeLeft = expirationTime - currentTime;
-
-    //                 // console.log(`Time left: ${Math.ceil(timeLeft / 1000)} seconds`);
-
-    //                 if (timeLeft <= 0) {
-    //                     // console.log('Token has expired. Logging out...');
-    //                     logout();
-    //                     navigate('/auth');
-    //                     // } else if (timeLeft <= 10000) { // 10 seconds
-    //                     //     console.log(`Token will expire in ${Math.ceil(timeLeft / 1000)} seconds`);
-    //                 }
-    //             } catch (error) {
-    //                 console.error('Error checking token expiration:', error);
-    //             }
-    //         }
-    //     };
-
-    //     checkTokenExpiration();
-    //     const intervalId = setInterval(checkTokenExpiration, 1000);
-
-    //     return () => clearInterval(intervalId);
-    // }, [navigate]);
 
     useEffect(() => {
         if (!isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/about' && location.pathname !== '/services' && location.pathname !== '/contact' && location.pathname !== '/learnMore') {
@@ -95,7 +68,8 @@ const App = () => {
                         <Route path="/profile" element={<UserProfilePage />} />
 
                         <Route path="/admin/home" element={<ProtectedRoute roles={['admin']}><AdminHomePage /></ProtectedRoute>} />
-                        <Route path="/admin/dashboard" element={<ProtectedRoute roles={['admin']}><AdminDashboard /></ProtectedRoute>} /> {/* New route for AdminDashboard */}
+                        <Route path="/admin/dashboard" element={<ProtectedRoute roles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+                        <Route path="/admin/review/:id" element={<ProtectedRoute roles={['admin']}><AdminApplicationReviewPage /></ProtectedRoute>} />
                     </Routes>
                 </div>
             </div>

@@ -6,6 +6,7 @@ import EditApplicationModal from '../../components/ui/EditApplicationModal';
 import ConfirmationModal from '../../components/ui/ConfirmationModal';
 import { toast } from 'react-toastify';
 import AdminApplicationDetailsModal from './components/AdminApplicationDetailsModal';
+import { Link } from 'react-router-dom';
 
 const AdminDashboard = () => {
     const [applications, setApplications] = useState([]);
@@ -165,9 +166,12 @@ const AdminDashboard = () => {
                                         <button className="text-blue-600 hover:text-blue-900 action-icon" onClick={() => handlePrint(app._id)}>
                                             <Printer className="inline w-4 h-4" />
                                         </button>
-                                        {/* <button className="text-red-600 hover:text-red-900 action-icon" onClick={() => handleDelete(app)}>
-                                            <Trash2 className="inline w-4 h-4" />
-                                        </button> */}
+                                        <Link
+                                            to={`/admin/review/${app._id}`}
+                                            className="text-indigo-600 hover:text-indigo-900"
+                                        >
+                                            Review
+                                        </Link>
                                     </div>
                                 </td>
                             </tr>

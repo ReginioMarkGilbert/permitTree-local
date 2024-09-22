@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaTachometerAlt, FaUsers, FaChartLine, FaCog, FaSignInAlt, FaHome } from 'react-icons/fa';
+import { FaTachometerAlt, FaUsers, FaChartLine, FaCog, FaSignInAlt, FaHome, FaClipboardCheck } from 'react-icons/fa';
 import permitTreeLogo from '../../assets/denr-logo.png';
 
 const AdminSidebar = ({ isOpen }) => {
@@ -21,6 +21,10 @@ const AdminSidebar = ({ isOpen }) => {
                         <NavLink to="/admin/dashboard" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
                             <span className="mr-3"><FaTachometerAlt /></span>
                             <span>Dashboard</span>
+                        </NavLink>
+                        <NavLink to="/admin/review" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
+                            <span className="mr-3"><FaClipboardCheck /></span>
+                            <span>Review Applications</span>
                         </NavLink>
                         <NavLink to="/admin/users" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
                             <span className="mr-3"><FaUsers /></span>

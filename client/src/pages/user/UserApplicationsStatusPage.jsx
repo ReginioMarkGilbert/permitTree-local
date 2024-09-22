@@ -21,9 +21,11 @@ const UserApplicationsStatusPage = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [selectedEditApplication, setSelectedEditApplication] = useState(null);
     const [confirmationModal, setConfirmationModal] = useState({ isOpen: false, type: null, application: null });
+    const [notifications, setNotifications] = useState([]);
 
     useEffect(() => {
         fetchApplications();
+        fetchNotifications();
     }, [activeTab, filterType]);
 
     const fetchApplications = async () => {
@@ -46,6 +48,18 @@ const UserApplicationsStatusPage = () => {
             setError('Failed to fetch applications');
             setLoading(false);
             toast.error('Failed to fetch applications');
+        }
+    };
+
+    const fetchNotifications = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get('http://localhost:3000/api/user/notifications', {
+                headers: { Authorization: token }
+            });
+            setNotifications(response.data);
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
         }
     };
 

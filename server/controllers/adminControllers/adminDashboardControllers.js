@@ -172,9 +172,73 @@ const printApplication = async (req, res) => {
     }
 };
 
+const updateApplicationStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status, reviewNotes } = req.body;
+
+        const application = await Application.findById(id);
+        if (!application) {
+            return res.status(404).json({ message: 'Application not found' });
+        }
+
+        application.status = status;
+        if (reviewNotes) {
+            application.reviewNotes = reviewNotes;
+        }
+
+        await application.save();
+
+        // Create a notification for the user
+        const notification = new Notification({
+            userId: application.userId,
+            message: `Your application ${application.customId} status has been updated to ${status}.`,
+            applicationId: application._id
+        });
+        await notification.save();
+
+        res.status(200).json({ message: 'Application status updated successfully', application });
+    } catch (error) {
+        console.error('Error updating application status:', error);
+        res.status(500).json({ message: 'Error updating application status' });
+    }
+};
+
+const returnApplication = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { returnRemarks } = req.body;
+
+        const application = await Application.findById(id);
+        if (!application) {
+            return res.status(404).json({ message: 'Application not found' });
+        }
+
+        application.status = 'Returned';
+        application.returnRemarks = returnRemarks;
+        await application.save();
+
+        // Create a notification for the user
+        const notification = new Notification({
+            userId: application.userId,
+            message: `Your application ${application.customId} has been returned. Please check the remarks and resubmit.`,
+            applicationId: application._id,
+            type: 'application_returned'
+        });
+        await notification.save();
+
+        res.status(200).json({ message: 'Application returned successfully', application });
+    } catch (error) {
+        console.error('Error returning application:', error);
+        res.status(500).json({ message: 'Error returning application' });
+    }
+};
+
 module.exports = {
     getAllApplications,
     getApplicationById,
     getFile,
-    printApplication
+    printApplication,
+    updateApplicationStatus,
+    returnApplication
 };
