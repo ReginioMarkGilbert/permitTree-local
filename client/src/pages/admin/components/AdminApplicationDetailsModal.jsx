@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, FileText, Image as ImageIcon, Printer, Plus, Minus } from 'lucide-react';
+import { Button } from '../../../components/ui/button';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import '../../../components/ui/styles/customScrollBar.css';
@@ -100,23 +101,35 @@ const AdminApplicationDetailsModal = ({ isOpen, onClose, application }) => {
         return labels[key] || key.replace(/([A-Z])/g, ' $1').trim();
     };
 
-    const handlePrint = async () => {
+    const handleAccept = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`http://localhost:3000/api/admin/print/${application._id}`, {
-                headers: { Authorization: token },
-                responseType: 'blob', // Important for receiving binary data
-            });
-
-            // Create a blob from the PDF data
-            const blob = new Blob([response.data], { type: 'application/pdf' });
-            const url = window.URL.createObjectURL(blob);
-
-            // Open the PDF in a new window
-            window.open(url);
+            await axios.put(
+                `http://localhost:3000/api/admin/update-status/${application._id}`,
+                { status: 'Accepted' },
+                { headers: { Authorization: token } }
+            );
+            toast.success('Application status updated to Accepted');
+            onClose(); // Close the modal after accepting
         } catch (error) {
-            console.error('Error printing application:', error);
-            toast.error('Failed to print application');
+            console.error('Error updating application status:', error);
+            toast.error('Failed to update application status');
+        }
+    };
+
+    const handleReturn = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.put(
+                `http://localhost:3000/api/admin/update-status/${application._id}`,
+                { status: 'Returned' },
+                { headers: { Authorization: token } }
+            );
+            toast.success('Application status updated to Returned');
+            onClose(); // Close the modal after returning
+        } catch (error) {
+            console.error('Error updating application status:', error);
+            toast.error('Failed to update application status');
         }
     };
 
@@ -223,19 +236,19 @@ const AdminApplicationDetailsModal = ({ isOpen, onClose, application }) => {
                     )}
                 </div>
                 <div className="p-5 bg-gray-50 flex justify-end rounded-b-2xl space-x-4">
-                    <button
-                        onClick={handlePrint}
-                        className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition duration-300 shadow-md hover:shadow-lg flex items-center"
+                    <Button
+                        onClick={handleReturn}
+                        className="w-full sm:w-auto border-1 border-green-600"
+                        variant="outline"
                     >
-                        <Printer className="mr-2" size={20} />
-                        Print
-                    </button>
-                    <button
-                        onClick={onClose}
-                        className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-300 shadow-md hover:shadow-lg"
+                        Return
+                    </Button>
+                    <Button
+                        onClick={handleAccept}
+                        // className="px-6 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg transition duration-300"
                     >
-                        Close
-                    </button>
+                        Accept
+                    </Button>
                 </div>
                 {previewImage && (
                     <div
@@ -258,20 +271,6 @@ const AdminApplicationDetailsModal = ({ isOpen, onClose, application }) => {
                                     e.target.src = "path/to/fallback/image.png";
                                 }}
                             />
-                            {/* <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-4">
-                                <button
-                                    onClick={handleZoomOut}
-                                    className="bg-white rounded-full p-2 text-black hover:bg-gray-200"
-                                >
-                                    <Minus size={24} />
-                                </button>
-                                <button
-                                    onClick={handleZoomIn}
-                                    className="bg-white rounded-full p-2 text-black hover:bg-gray-200"
-                                >
-                                    <Plus size={24} />
-                                </button>
-                            </div> */}
                             <button
                                 onClick={() => {
                                     setPreviewImage(null);

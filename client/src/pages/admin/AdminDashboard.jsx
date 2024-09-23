@@ -208,9 +208,11 @@ const AdminDashboard = () => {
                                 </td>
                                 <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
                                     <div className="flex flex-wrap gap-2">
-                                        <button className="text-green-600 hover:text-green-900 action-icon" onClick={() => handleView(app._id)}>
-                                            <Eye className="inline w-4 h-4" />
-                                        </button>
+                                        {activeTab !== 'For Review' && (
+                                            <button className="text-green-600 hover:text-green-900 action-icon" onClick={() => handleView(app._id)}>
+                                                <Eye className="inline w-4 h-4" />
+                                            </button>
+                                        )}
                                         <button className="text-blue-600 hover:text-blue-900 action-icon" onClick={() => handlePrint(app._id)}>
                                             <Printer className="inline w-4 h-4" />
                                         </button>
