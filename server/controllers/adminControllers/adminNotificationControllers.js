@@ -1,4 +1,4 @@
-const Notification = require('../../models/User/userNotificationSchema');
+const Notification = require('../../models/admin/adminNotificationSchema');
 
 const sendNotificationToUser = async (req, res) => {
     try {

@@ -17,8 +17,15 @@ const AdminDashboard = () => {
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [selectedEditApplication, setSelectedEditApplication] = useState(null);
-    const [confirmationModal, setConfirmationModal] = useState({ isOpen: false, type: null, application: null });
+    const [confirmationModal, setConfirmationModal] = useState({
+        isOpen: false,
+        type: null,
+        application: null,
+        title: '',
+        message: ''
+    });
     const [activeTab, setActiveTab] = useState('For Review'); // Default tab
+    const [reviewConfirmation, setReviewConfirmation] = useState({ isOpen: false, applicationId: null });
 
     useEffect(() => {
         fetchApplications();
@@ -82,7 +89,7 @@ const AdminDashboard = () => {
 
     const handleConfirmAction = async () => {
         const { type, application } = confirmationModal;
-        setConfirmationModal({ isOpen: false, type: null, application: null });
+        setConfirmationModal({ isOpen: false, type: null, application: null, title: '', message: '' });
 
         try {
             const token = localStorage.getItem('token');
@@ -119,6 +126,34 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleReview = async (id) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.put(
+                `http://localhost:3000/api/admin/update-status/${id}`,
+                { status: 'In Progress' },
+                {
+                    headers: { Authorization: token }
+                }
+            );
+            toast.success('Application status updated to In Progress');
+            fetchApplications(); // Refresh the applications list
+        } catch (error) {
+            console.error('Error updating application status:', error);
+            toast.error('Failed to update application status');
+        }
+    };
+
+    const confirmHandleReview = (id) => {
+        setReviewConfirmation({ isOpen: true, applicationId: id });
+    };
+
+    const handleConfirmReview = async () => {
+        const { applicationId } = reviewConfirmation;
+        await handleReview(applicationId);
+        setReviewConfirmation({ isOpen: false, applicationId: null });
+    };
+
     const renderTable = () => {
         if (loading) {
             return <p className="text-center text-gray-500">Loading applications...</p>;
@@ -135,6 +170,12 @@ const AdminDashboard = () => {
         // Filter applications based on the active tab
         const filteredApplications = applications.filter(app => app.status === activeTab);
 
+        // Further filter based on search term
+        const searchedApplications = filteredApplications.filter(app =>
+            app.customId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            app.ownerName.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
         return (
             <div className="bg-white rounded-lg shadow overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -148,13 +189,20 @@ const AdminDashboard = () => {
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {filteredApplications.map((app) => (
+                        {searchedApplications.map((app) => (
                             <tr key={app._id}>
                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{app.customId}</td>
                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{app.applicationType}</td>
                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(app.dateOfSubmission).toLocaleDateString()}</td>
                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                        app.status === 'For Review' ? 'bg-yellow-100 text-yellow-800' :
+                                        app.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
+                                        app.status === 'Returned' ? 'bg-orange-100 text-orange-800' :
+                                        app.status === 'Accepted' ? 'bg-green-100 text-green-800' :
+                                        app.status === 'Released' ? 'bg-purple-100 text-purple-800' :
+                                        'bg-red-100 text-red-800'
+                                    }`}>
                                         {app.status}
                                     </span>
                                 </td>
@@ -166,12 +214,13 @@ const AdminDashboard = () => {
                                         <button className="text-blue-600 hover:text-blue-900 action-icon" onClick={() => handlePrint(app._id)}>
                                             <Printer className="inline w-4 h-4" />
                                         </button>
-                                        <Link
-                                            to={`/admin/review/${app._id}`}
+                                        <button
                                             className="text-indigo-600 hover:text-indigo-900"
+                                            onClick={() => confirmHandleReview(app._id)}
+                                            disabled={app.status === 'In Progress' || app.status === 'Accepted' || app.status === 'Released' || app.status === 'Rejected'}
                                         >
                                             Review
-                                        </Link>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -201,7 +250,9 @@ const AdminDashboard = () => {
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
+                                className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${
+                                    activeTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'
+                                }`}
                             >
                                 {tab}
                             </button>
@@ -221,6 +272,7 @@ const AdminDashboard = () => {
                 {renderTable()}
             </div>
 
+            {/* View Application Modal */}
             <AdminApplicationDetailsModal
                 isOpen={isViewModalOpen}
                 onClose={() => setIsViewModalOpen(false)}
@@ -233,12 +285,21 @@ const AdminDashboard = () => {
                 application={selectedEditApplication}
             />
 
+            {/* Delete Confirmation Modal */}
             <ConfirmationModal
                 isOpen={confirmationModal.isOpen}
-                onClose={() => setConfirmationModal({ isOpen: false, type: null, application: null })}
+                onClose={() => setConfirmationModal({ isOpen: false, type: null, application: null, title: '', message: '' })}
                 onConfirm={handleConfirmAction}
                 title={confirmationModal.title}
                 message={confirmationModal.message}
+            />
+
+            <ConfirmationModal
+                isOpen={reviewConfirmation.isOpen}
+                onClose={() => setReviewConfirmation({ isOpen: false, applicationId: null })}
+                onConfirm={handleConfirmReview}
+                title="Confirm Review"
+                message="Are you sure you want to mark this application as In Progress?"
             />
         </div>
     );

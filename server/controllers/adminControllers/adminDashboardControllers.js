@@ -1,5 +1,6 @@
 const Application = require('../../models/PermitApplications/ChainsawApplication');
 const User = require('../../models/User/userAuthSchema');
+const Notification = require('../../models/admin/adminNotificationSchema'); // Added import
 const fs = require('fs').promises;
 const path = require('path');
 const PDFDocument = require('pdfkit');
@@ -177,6 +178,10 @@ const updateApplicationStatus = async (req, res) => {
         const { id } = req.params;
         const { status, reviewNotes } = req.body;
 
+        if (!status) {
+            return res.status(400).json({ message: 'Status field is required.' });
+        }
+
         const application = await Application.findById(id);
         if (!application) {
             return res.status(404).json({ message: 'Application not found' });
@@ -200,6 +205,9 @@ const updateApplicationStatus = async (req, res) => {
         res.status(200).json({ message: 'Application status updated successfully', application });
     } catch (error) {
         console.error('Error updating application status:', error);
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: error.message });
+        }
         res.status(500).json({ message: 'Error updating application status' });
     }
 };
