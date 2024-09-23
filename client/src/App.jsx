@@ -22,6 +22,7 @@ import AdminSidebar from './pages/admin/AdminSidebar';
 import AdminHomePage from './pages/admin/AdminHomePage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminApplicationReviewPage from './pages/admin/AdminApplicationReviewPage';
+import AdminApplicationViewModal from './pages/admin/components/AdminApplicationViewModal';
 
 import { isAuthenticated, getUserRole, isTokenExpired, logout, getToken } from './utils/auth';
 import { ToastContainer } from 'react-toastify';
@@ -70,6 +71,7 @@ const App = () => {
                         <Route path="/admin/home" element={<ProtectedRoute roles={['admin']}><AdminHomePage /></ProtectedRoute>} />
                         <Route path="/admin/dashboard" element={<ProtectedRoute roles={['admin']}><AdminDashboard /></ProtectedRoute>} />
                         <Route path="/admin/review/:id" element={<ProtectedRoute roles={['admin']}><AdminApplicationReviewPage /></ProtectedRoute>} />
+                        <Route path="/admin/view/:id" element={<ProtectedRoute roles={['admin']}><AdminApplicationViewModal /></ProtectedRoute>} />
                     </Routes>
                 </div>
             </div>

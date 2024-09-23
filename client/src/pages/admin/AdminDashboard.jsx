@@ -5,7 +5,8 @@ import ApplicationDetailsModal from '../../components/ui/ApplicationDetailsModal
 import EditApplicationModal from '../../components/ui/EditApplicationModal';
 import ConfirmationModal from '../../components/ui/ConfirmationModal';
 import { toast } from 'react-toastify';
-import AdminApplicationDetailsModal from './components/AdminApplicationDetailsModal';
+import AdminApplicationReviewModal from './components/AdminApplicationReviewModal';
+import AdminApplicationViewModal from './components/AdminApplicationViewModal';
 import { Link } from 'react-router-dom';
 
 const AdminDashboard = () => {
@@ -26,6 +27,7 @@ const AdminDashboard = () => {
     });
     const [activeTab, setActiveTab] = useState('For Review'); // Default tab
     const [reviewConfirmation, setReviewConfirmation] = useState({ isOpen: false, applicationId: null });
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
     useEffect(() => {
         fetchApplications();
@@ -55,7 +57,7 @@ const AdminDashboard = () => {
         }
     };
 
-    const handleView = async (id) => {
+    const handleView = async (id, status) => {
         try {
             setLoading(true); // Set loading to true before making the API call
             const token = localStorage.getItem('token');
@@ -63,7 +65,11 @@ const AdminDashboard = () => {
                 headers: { Authorization: token }
             });
             setSelectedApplication(response.data);
-            setIsViewModalOpen(true);
+            if (status === 'In Progress') {
+                setIsReviewModalOpen(true); // Open review modal for 'In Progress'
+            } else {
+                setIsViewModalOpen(true); // Open view modal for other statuses
+            }
             setLoading(false); // Set loading to false after the API call is complete
         } catch (error) {
             console.error('Error fetching application details:', error);
@@ -195,34 +201,35 @@ const AdminDashboard = () => {
                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{app.applicationType}</td>
                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(app.dateOfSubmission).toLocaleDateString()}</td>
                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                        app.status === 'For Review' ? 'bg-yellow-100 text-yellow-800' :
-                                        app.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
-                                        app.status === 'Returned' ? 'bg-orange-100 text-orange-800' :
-                                        app.status === 'Accepted' ? 'bg-green-100 text-green-800' :
-                                        app.status === 'Released' ? 'bg-purple-100 text-purple-800' :
-                                        'bg-red-100 text-red-800'
-                                    }`}>
+                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${app.status === 'For Review' ? 'bg-yellow-100 text-yellow-800' :
+                                            app.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
+                                                app.status === 'Returned' ? 'bg-orange-100 text-orange-800' :
+                                                    app.status === 'Accepted' ? 'bg-green-100 text-green-800' :
+                                                        app.status === 'Released' ? 'bg-purple-100 text-purple-800' :
+                                                            'bg-red-100 text-red-800'
+                                        }`}>
                                         {app.status}
                                     </span>
                                 </td>
                                 <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
                                     <div className="flex flex-wrap gap-2">
                                         {activeTab !== 'For Review' && (
-                                            <button className="text-green-600 hover:text-green-900 action-icon" onClick={() => handleView(app._id)}>
+                                            <button className="text-green-600 hover:text-green-900 action-icon" onClick={() => handleView(app._id, app.status)}>
                                                 <Eye className="inline w-4 h-4" />
                                             </button>
                                         )}
                                         <button className="text-blue-600 hover:text-blue-900 action-icon" onClick={() => handlePrint(app._id)}>
                                             <Printer className="inline w-4 h-4" />
                                         </button>
-                                        <button
-                                            className="text-indigo-600 hover:text-indigo-900"
-                                            onClick={() => confirmHandleReview(app._id)}
-                                            disabled={app.status === 'In Progress' || app.status === 'Accepted' || app.status === 'Released' || app.status === 'Rejected'}
-                                        >
-                                            Review
-                                        </button>
+                                        {activeTab !== 'In Progress' && (
+                                            <button
+                                                className="text-indigo-600 hover:text-indigo-900"
+                                                onClick={() => confirmHandleReview(app._id)}
+                                                disabled={app.status === 'In Progress' || app.status === 'Accepted' || app.status === 'Released' || app.status === 'Rejected'}
+                                            >
+                                                Review
+                                            </button>
+                                        )}
                                     </div>
                                 </td>
                             </tr>
@@ -252,9 +259,8 @@ const AdminDashboard = () => {
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${
-                                    activeTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'
-                                }`}
+                                className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'
+                                    }`}
                             >
                                 {tab}
                             </button>
@@ -274,12 +280,21 @@ const AdminDashboard = () => {
                 {renderTable()}
             </div>
 
-            {/* View Application Modal */}
-            <AdminApplicationDetailsModal
-                isOpen={isViewModalOpen}
-                onClose={() => setIsViewModalOpen(false)}
-                application={selectedApplication}
-            />
+            {isViewModalOpen && (
+                <AdminApplicationViewModal
+                    isOpen={isViewModalOpen}
+                    onClose={() => setIsViewModalOpen(false)}
+                    application={selectedApplication}
+                />
+            )}
+
+            {isReviewModalOpen && (
+                <AdminApplicationReviewModal
+                    isOpen={isReviewModalOpen}
+                    onClose={() => setIsReviewModalOpen(false)}
+                    application={selectedApplication}
+                />
+            )}
 
             <EditApplicationModal
                 isOpen={isEditModalOpen}
