@@ -4,10 +4,13 @@ const validator = require('validator');
 
 // Check if the model already exists before defining it
 const AdminSchema = new mongoose.Schema({
+    adminId: { type: Number, unique: true }, // Add adminId field
     username: { type: String, required: true, unique: true },
     // email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    role: { type: String, default: 'admin', enum: ['admin'] }
+    role: { type: String, default: 'admin', enum: ['admin'] },
+    firstName: { type: String },
+    lastName: { type: String }
 });
 
 AdminSchema.pre('save', async function (next) {

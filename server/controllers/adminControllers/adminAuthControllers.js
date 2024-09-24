@@ -1,11 +1,29 @@
 const Admin = require('../../models/Admin/adminAuthSchema');
+const AdminIdCounter = require('../../models/Admin/adminIdCounterSchema');
+const jwt = require('jsonwebtoken');
 
 // Existing createAdmin method
 const createAdmin = async (req, res) => {
-
     try {
-        const { username, email, password } = req.body;
-        const newAdmin = new Admin({ username, email, password, role: 'admin' });
+        const { username, email, password, firstName, lastName } = req.body;
+
+        // Generate adminId
+        const adminIdCounter = await AdminIdCounter.findOneAndUpdate(
+            { name: 'adminId' },
+            { $inc: { value: 1 } },
+            { new: true, upsert: true }
+        );
+
+        const newAdmin = new Admin({
+            adminId: adminIdCounter.value,
+            username,
+            email,
+            password,
+            firstName,
+            lastName,
+            role: 'admin'
+        });
+
         await newAdmin.save();
         res.status(201).send('Admin created successfully');
     } catch (error) {
