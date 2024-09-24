@@ -1,5 +1,6 @@
 const express = require('express');
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
+const connectDB = require('./config/database');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const session = require('express-session');
@@ -10,6 +11,9 @@ const fileUpload = require('express-fileupload');
 const path = require('path');
 
 const app = express();
+
+// Connect to MongoDB Database
+connectDB();
 
 // Middleware
 
@@ -49,11 +53,6 @@ app.use(session({
 
 // Passport middleware
 app.use(passport.initialize());
-
-// MongoDB connection
-mongoose.connect('mongodb://localhost:27017/PermiTree-db')
-    .then(() => console.log('MongoDB connected...'))
-    .catch(err => console.log(err));
 
 // Routes
 const chainsawRoutes = require('./routes/PermitApplicationsRoutes/chainsawApplicationRoutes');
