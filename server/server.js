@@ -55,19 +55,19 @@ app.use(session({
 app.use(passport.initialize());
 
 // Routes
-const chainsawRoutes = require('./routes/PermitApplicationsRoutes/chainsawApplicationRoutes');
+const chainsawRoutes = require('./User/routes/PermitApplicationsRoutes/chainsawApplicationRoutes');
 app.use('/api', chainsawRoutes);
 
-const authRoutes = require('./routes/UserRoutes/userAuthRoutes');
+const authRoutes = require('./User/routes/userAuthRoutes');
 app.use('/api', authRoutes);
 
-const contactRoutes = require('./routes/UserRoutes/contactRoutes');
+const contactRoutes = require('./User/routes/contactRoutes');
 app.use('/api', contactRoutes);
 
-const adminRoutes = require('./routes/AdminRoutes/adminAuthRoutes');
+const adminRoutes = require('./Admin/routes/adminAuthRoutes');
 app.use('/api/admin', adminRoutes);
 
-const adminDashboardRoutes = require('./routes/AdminRoutes/adminDashboardRoutes');
+const adminDashboardRoutes = require('./Admin/routes/adminDashboardRoutes');
 app.use('/api/admin', adminDashboardRoutes);
 
 

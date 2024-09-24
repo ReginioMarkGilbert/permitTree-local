@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getAllApplications, getApplicationById, getFile, printApplication, updateApplicationStatus, returnApplication } = require('../../controllers/adminControllers/adminDashboardControllers');
+const { getAllApplications, getApplicationById, getFile, printApplication, updateApplicationStatus, returnApplication } = require('../controllers/adminDashboardControllers');
 const passport = require('passport');
 
 // Route to get dashboard statistics

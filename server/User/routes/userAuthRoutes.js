@@ -1,6 +1,6 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
-const { signup, login, logout, getUserDetails, updateUserProfile } = require('../../controllers/userControllers/userAuthControllers');
+const { signup, login, logout, getUserDetails, updateUserProfile } = require('../controllers/userAuthControllers');
 const roleMiddleware = require('../../middleware/roleMiddleware');
 const passport = require('passport');
 const router = express.Router();

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getUserNotifications, markNotificationAsRead } = require('../../controllers/userControllers/userNotificationController');
+const { getUserNotifications, markNotificationAsRead } = require('../controllers/userNotificationController');
 const passport = require('passport');
 
 router.get('/notifications', passport.authenticate('jwt', { session: false }), getUserNotifications);

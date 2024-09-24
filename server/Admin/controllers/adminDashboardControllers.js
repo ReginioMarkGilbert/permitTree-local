@@ -1,6 +1,6 @@
-const Application = require('../../models/PermitApplications/ChainsawApplication');
-const User = require('../../models/User/userAuthSchema');
-const Notification = require('../../models/admin/adminNotificationSchema'); // Added import
+const Application = require('../../User/models/PermitApplications/ChainsawApplication');
+const User = require('../../User/models/userAuthSchema');
+const Notification = require('../models/adminNotificationSchema');
 const fs = require('fs').promises;
 const path = require('path');
 const PDFDocument = require('pdfkit');
