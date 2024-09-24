@@ -100,8 +100,14 @@ const AdminHomePage = () => {
                                         </div>
                                         <div className="flex-shrink-0 w-24 text-right mr-4"> {/* Spacing for status */}
                                             <span className={`px-2 py-1 rounded-full text-xs ${app.status === "Approved" ? "bg-green-200 text-green-800" :
-                                                app.status === "Submitted" ? "bg-yellow-200 text-yellow-800" : // Change this line
-                                                "bg-red-200 text-red-800"
+                                                app.status === "Submitted" ? "bg-yellow-200 text-yellow-800" :
+                                                    app.status === "In Progress" ? "bg-blue-200 text-blue-800" :
+                                                        app.status === "Accepted" ? "bg-green-200 text-green-800" :
+                                                            app.status === "Released" ? "bg-green-200 text-green-800" :
+                                                                app.status === "Expired" ? "bg-red-200 text-red-800" :
+                                                                    app.status === "Rejected" ? "bg-red-200 text-red-800" :
+                                                                        app.status === "Returned" ? "bg-orange-200 text-orange-800" :
+                                                                            "bg-red-200 text-red-800"
                                                 }`}>
                                                 {app.status === "Submitted" ? "For Review" : app.status} {/* Change this line */}
                                             </span>
