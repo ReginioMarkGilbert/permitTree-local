@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { Button } from "../../components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "../../components/ui/Card";
 import { Bell, ClipboardList, Users, Settings, TrendingUp, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
-import '../../components/ui/styles/customScrollBar.css'; // Ensure this import is present
+import { FaChartLine } from 'react-icons/fa';
+import '../../components/ui/styles/customScrollBar.css';
 
 const AdminHomePage = () => {
     const [recentApplications, setRecentApplications] = useState([]);
@@ -22,10 +23,10 @@ const AdminHomePage = () => {
     };
 
     const quickActions = [
-        { title: "Manage Users", icon: <Users className="h-6 w-6" />, link: "/admin/users" },
-        { title: "All Applications", icon: <ClipboardList className="h-6 w-6" />, link: "/admin/applications" },
-        { title: "System Settings", icon: <Settings className="h-6 w-6" />, link: "/admin/settings" },
-        { title: "Notifications", icon: <Bell className="h-6 w-6" />, link: "/admin/notifications" },
+        { title: "Reports", icon: <FaChartLine className="h-6 w-6" />, link: "/chief-rps/reports" },
+        { title: "All Applications", icon: <ClipboardList className="h-6 w-6" />, link: "/chief-rps/applications" },
+        { title: "System Settings", icon: <Settings className="h-6 w-6" />, link: "/chief-rps/settings" },
+        { title: "Notifications", icon: <Bell className="h-6 w-6" />, link: "/chief-rps/notifications" },
     ];
 
     useEffect(() => {
@@ -56,7 +57,7 @@ const AdminHomePage = () => {
     }, []);
 
     const handleViewAllApplications = () => {
-        navigate('/admin/dashboard'); // Redirect to /admin/dashboard
+        navigate('/chief-rps/dashboard'); // Redirect to /chief-rps/dashboard
     };
 
     return (
@@ -71,7 +72,9 @@ const AdminHomePage = () => {
                             <div className="text-green-600">{action.icon}</div>
                         </CardHeader>
                         <CardContent>
-                            <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
+                            <Button
+                                className="w-full bg-green-600 hover:bg-green-700 text-white"
+                                onClick={() => navigate(action.link)}>
                                 Go to {action.title}
                             </Button>
                         </CardContent>

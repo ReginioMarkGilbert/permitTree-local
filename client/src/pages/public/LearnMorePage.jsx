@@ -1,7 +1,7 @@
 import React from 'react';
 import { FaTree, FaShieldAlt, FaFileAlt, FaMapMarkerAlt, FaTruck, FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
-import { Button } from '../components/ui/Button';
-import Header from '../components/Header';
+import { Button } from '../../components/ui/Button';
+import Header from '../../components/Header';
 import { Link } from 'react-router-dom';
 // import '../styles/LearnMorePage.css';
 

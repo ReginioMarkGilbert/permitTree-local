@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom'; // Ensure this import is correct
 import { FaTree, FaShieldAlt, FaFileAlt, FaMapMarkerAlt, FaTruck, FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
-import { Button } from '../components/ui/Button';
-import Header from '../components/Header';
-import '../pages/user/styles/LandingPage.css';
+import { Button } from '../../components/ui/Button';
+import Header from '../../components/Header';
+import './styles/LandingPage.css';
 
 const LandingPage = () => {
 

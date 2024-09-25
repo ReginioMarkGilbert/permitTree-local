@@ -21,7 +21,7 @@ const createAdmin = async (req, res) => {
             password,
             firstName,
             lastName,
-            role: role === 'superadmin' ? 'superadmin' : 'admin'
+            role: role === 'superadmin' ? 'superadmin' : 'ChiefRPS'
         });
 
         await newAdmin.save();

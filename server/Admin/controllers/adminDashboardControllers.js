@@ -1,4 +1,4 @@
-const Application = require('../../User/models/PermitApplications/ChainsawApplication');
+const Application = require('../../User/models/PermitApplications/ChainsawApplicationSchema');
 const User = require('../../User/models/userAuthSchema');
 const Notification = require('../models/adminNotificationSchema');
 const fs = require('fs').promises;

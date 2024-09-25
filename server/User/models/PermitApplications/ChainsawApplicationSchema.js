@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const ChainsawApplicationSchema = new mongoose.Schema({
-    customId: { type: String, unique: true }, // Add this line
+    customId: { type: String, unique: true },
     applicationType: { type: String, default: 'Chainsaw Registration', required: true },
     registrationType: { type: String, required: true },
     chainsawStore: { type: String, required: true },

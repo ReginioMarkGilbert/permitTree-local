@@ -5,11 +5,11 @@ import ApplicationDetailsModal from '../../components/ui/ApplicationDetailsModal
 import EditApplicationModal from '../../components/ui/EditApplicationModal';
 import ConfirmationModal from '../../components/ui/ConfirmationModal';
 import { toast } from 'react-toastify';
-import AdminApplicationReviewModal from './components/AdminApplicationReviewModal';
-import AdminApplicationViewModal from './components/AdminApplicationViewModal';
+import ChiefRPSApplicationReviewModal from './components/ChiefRPSApplicationReviewModal';
+import ChiefRPSApplicationViewModal from './components/ChiefRPSApplicationViewModal';
 import { Link } from 'react-router-dom';
 
-const AdminDashboard = () => {
+const ChiefRPSDashboard = () => {
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -202,11 +202,11 @@ const AdminDashboard = () => {
                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(app.dateOfSubmission).toLocaleDateString()}</td>
                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${app.status === 'For Review' ? 'bg-yellow-100 text-yellow-800' :
-                                            app.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
-                                                app.status === 'Returned' ? 'bg-orange-100 text-orange-800' :
-                                                    app.status === 'Accepted' ? 'bg-green-100 text-green-800' :
-                                                        app.status === 'Released' ? 'bg-purple-100 text-purple-800' :
-                                                            'bg-red-100 text-red-800'
+                                        app.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
+                                            app.status === 'Returned' ? 'bg-orange-100 text-orange-800' :
+                                                app.status === 'Accepted' ? 'bg-green-100 text-green-800' :
+                                                    app.status === 'Released' ? 'bg-purple-100 text-purple-800' :
+                                                        'bg-red-100 text-red-800'
                                         }`}>
                                         {app.status}
                                     </span>
@@ -281,7 +281,7 @@ const AdminDashboard = () => {
             </div>
 
             {isViewModalOpen && (
-                <AdminApplicationViewModal
+                <ChiefRPSApplicationViewModal
                     isOpen={isViewModalOpen}
                     onClose={() => setIsViewModalOpen(false)}
                     application={selectedApplication}
@@ -289,7 +289,7 @@ const AdminDashboard = () => {
             )}
 
             {isReviewModalOpen && (
-                <AdminApplicationReviewModal
+                <ChiefRPSApplicationReviewModal
                     isOpen={isReviewModalOpen}
                     onClose={() => setIsReviewModalOpen(false)}
                     application={selectedApplication}
@@ -322,4 +322,4 @@ const AdminDashboard = () => {
     );
 };
 
-export default AdminDashboard;
+export default ChiefRPSDashboard;

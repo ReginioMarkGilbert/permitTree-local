@@ -40,7 +40,7 @@ const AdminApplicationReviewPage = () => {
                 { headers: { Authorization: token } }
             );
             toast.success(`Application status updated to ${newStatus}`);
-            navigate('/admin/dashboard');
+            navigate('/chief-rps/dashboard');
         } catch (error) {
             console.error('Error updating application status:', error);
             toast.error('Failed to update application status');
@@ -55,7 +55,7 @@ const AdminApplicationReviewPage = () => {
                 { headers: { Authorization: token } }
             );
             toast.success('Application returned to user');
-            navigate('/admin/dashboard');
+            navigate('/chief-rps/dashboard');
         } catch (error) {
             console.error('Error returning application:', error);
             toast.error('Failed to return application');

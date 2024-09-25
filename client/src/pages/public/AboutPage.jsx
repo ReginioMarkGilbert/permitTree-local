@@ -1,6 +1,6 @@
 import React from 'react';
 import { Leaf, Shield, TreePine } from "lucide-react";
-import Header from '../components/Header';
+import Header from '../../components/Header';
 import { Link } from 'react-router-dom';
 import { FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
 

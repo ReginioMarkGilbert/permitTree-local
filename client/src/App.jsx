@@ -10,27 +10,32 @@ import UserProfilePage from './pages/user/UserProfilePage';
 import PermitsPage from './pages/user/permitsPage';
 import UserApplicationsPage from './pages/user/UserApplicationsStatusPage';
 import ApplicationForm from './pages/user/ApplicationForm';
-import UserAuthPage from './pages/UserAuthPage';
+import UserAuthPage from './pages/public/UserAuthPage';
 
-import LandingPage from './pages/LandingPage';
-import LearnMorePage from './pages/LearnMorePage';
-import AboutPage from './pages/AboutPage';
-import ServicesPage from './pages/ServicesPage';
-import ContactPage from './pages/ContactPage';
+import LandingPage from './pages/public/LandingPage';
+import LearnMorePage from './pages/public/LearnMorePage';
+import AboutPage from './pages/public/AboutPage';
+import ServicesPage from './pages/public/ServicesPage';
+import ContactPage from './pages/public/ContactPage';
 
-import AdminSidebar from './pages/admin/AdminSidebar';
-import AdminHomePage from './pages/admin/AdminHomePage';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminApplicationReviewPage from './pages/admin/AdminApplicationReviewPage';
-import AdminApplicationViewModal from './pages/admin/components/AdminApplicationViewModal';
+import ChiefRPSSidebar from './pages/chiefRPS/ChiefRPSSidebar';
+import ChiefRPSHomePage from './pages/chiefRPS/ChiefRPSHomePage';
+import ChiefRPSDashboard from './pages/chiefRPS/ChiefRPSDashboard';
+import ChiefRPSReportsPage from './pages/chiefRPS/ChiefRPSReportsPage';
+import ChiefRPSSettingsPage from './pages/chiefRPS/ChiefRPSSettingsPage';
+import ChiefRPSApplicationReviewModal from './pages/chiefRPS/components/ChiefRPSApplicationReviewModal';
+import ChiefRPSApplicationViewModal from './pages/chiefRPS/components/ChiefRPSApplicationViewModal';
 
 import { isAuthenticated, getUserRole, isTokenExpired, logout, getToken } from './utils/auth';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-import SuperAdminSidebar from './pages/admin/SuperAdmin/SuperAdminSidebar';
-import SuperAdminDashboard from './pages/admin/SuperAdmin/SuperAdminDashboard';
-import SuperAdminHomePage from './pages/admin/SuperAdmin/SuperAdminHomePage';
+import SuperAdminSidebar from './pages/SuperAdmin/SuperAdminSidebar';
+import SuperAdminDashboard from './pages/SuperAdmin/SuperAdminDashboard';
+import SuperAdminHomePage from './pages/SuperAdmin/SuperAdminHomePage';
+import SuperAdminmanageUsersPage from './pages/SuperAdmin/SuperAdminmanageUsersPage';
+import SuperAdminReportsPage from './pages/SuperAdmin/SuperAdminReportsPage';
+import SuperAdminSettingsPage from './pages/SuperAdmin/SuperAdminSettingsPage';
 
 const App = () => {
     const { sidebarToggle, toggleSidebar } = useSidebarToggle();
@@ -50,8 +55,8 @@ const App = () => {
                 <>
                     {userRole === 'superadmin' ? (
                         <SuperAdminSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
-                    ) : userRole === 'admin' ? (
-                        <AdminSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
+                    ) : userRole === 'ChiefRPS' ? (
+                        <ChiefRPSSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
                     ) : (
                         <UserSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
                     )}
@@ -74,13 +79,18 @@ const App = () => {
                         <Route path="/learnMore" element={<LearnMorePage />} />
                         <Route path="/profile" element={<UserProfilePage />} />
 
-                        <Route path="/admin/home" element={<ProtectedRoute roles={['admin']}><AdminHomePage /></ProtectedRoute>} />
-                        <Route path="/admin/dashboard" element={<ProtectedRoute roles={['admin']}><AdminDashboard /></ProtectedRoute>} />
-                        <Route path="/admin/review/:id" element={<ProtectedRoute roles={['admin']}><AdminApplicationReviewPage /></ProtectedRoute>} />
-                        <Route path="/admin/view/:id" element={<ProtectedRoute roles={['admin']}><AdminApplicationViewModal /></ProtectedRoute>} />
+                        <Route path="/chief-rps/home" element={<ProtectedRoute roles={['ChiefRPS']}><ChiefRPSHomePage /></ProtectedRoute>} />
+                        <Route path="/chief-rps/dashboard" element={<ProtectedRoute roles={['ChiefRPS']}><ChiefRPSDashboard /></ProtectedRoute>} />
+                        <Route path="/chief-rps/review/:id" element={<ProtectedRoute roles={['ChiefRPS']}><ChiefRPSApplicationReviewModal /></ProtectedRoute>} />
+                        <Route path="/chief-rps/view/:id" element={<ProtectedRoute roles={['ChiefRPS']}><ChiefRPSApplicationViewModal /></ProtectedRoute>} />
+                        <Route path="/chief-rps/settings" element={<ProtectedRoute roles={['ChiefRPS']}><ChiefRPSSettingsPage /></ProtectedRoute>} />
+                        <Route path="/chief-rps/reports" element={<ProtectedRoute roles={['ChiefRPS']}><ChiefRPSReportsPage /></ProtectedRoute>} />
 
                         <Route path="/superadmin/home" element={<ProtectedRoute roles={['superadmin']}><SuperAdminHomePage /></ProtectedRoute>} />
                         <Route path="/superadmin/dashboard" element={<ProtectedRoute roles={['superadmin']}><SuperAdminDashboard /></ProtectedRoute>} />
+                        <Route path="/superadmin/manage-users" element={<ProtectedRoute roles={['superadmin']}><SuperAdminmanageUsersPage /></ProtectedRoute>} />
+                        <Route path="/superadmin/reports" element={<ProtectedRoute roles={['superadmin']}><SuperAdminReportsPage /></ProtectedRoute>} />
+                        <Route path="/superadmin/settings" element={<ProtectedRoute roles={['superadmin']}><SuperAdminSettingsPage /></ProtectedRoute>} />
 
                     </Routes>
                 </div>

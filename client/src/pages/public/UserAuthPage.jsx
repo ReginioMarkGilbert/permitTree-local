@@ -3,13 +3,13 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { setToken, getUserRole } from '../utils/auth';
-import AuthButton from '../components/ui/AuthButton';
-import Input from '../components/ui/Input';
-import Label from '../components/ui/Label';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs';
+import { setToken, getUserRole } from '../../utils/auth';
+import AuthButton from '../../components/ui/AuthButton';
+import Input from '../../components/ui/Input';
+import Label from '../../components/ui/Label';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/Tabs';
 import { FaLeaf } from 'react-icons/fa';
-import '../pages/user/styles/UserAuthPage.css';
+import './styles/UserAuthPage.css';
 // import api from '../utils/api';
 
 
@@ -101,8 +101,8 @@ const UserAuthPage = () => {
                 const userRole = getUserRole();
                 if (userRole === 'superadmin') {
                     navigate('/superadmin/home', { replace: true });
-                } else if (userRole === 'admin') {
-                    navigate('/admin/home', { replace: true });
+                } else if (userRole === 'ChiefRPS') {
+                    navigate('/chief-rps/home', { replace: true });
                 } else {
                     navigate('/home?newUser=false', { replace: true });
                 }

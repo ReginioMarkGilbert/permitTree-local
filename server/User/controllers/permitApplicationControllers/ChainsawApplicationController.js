@@ -1,7 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const Application = require('../../models/PermitApplications/ChainsawApplication');
+const Application = require('../../models/PermitApplications/ChainsawApplicationSchema');
 const Counter = require('../../models/PermitApplications/PermitIDCounters/CSAWcounter');
 
 const CSAW_CustomId = async () => {

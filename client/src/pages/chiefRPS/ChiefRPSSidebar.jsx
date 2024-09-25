@@ -14,27 +14,23 @@ const AdminSidebar = ({ isOpen }) => {
                     </div>
                     <div className="line" style={{ borderBottom: '1px solid #ffffff', marginTop: '20px', width: '190px' }}></div>
                     <nav className="mt-7">
-                        <NavLink to="/admin/home" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
+                        <NavLink to="/chief-rps/home" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
                             <span className="mr-3"><FaHome /></span>
                             <span>Home</span>
                         </NavLink>
-                        <NavLink to="/admin/dashboard" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
+                        <NavLink to="/chief-rps/dashboard" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
                             <span className="mr-3"><FaTachometerAlt /></span>
                             <span>Dashboard</span>
                         </NavLink>
-                        <NavLink to="/admin/review" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
+                        <NavLink to="/chief-rps/review" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
                             <span className="mr-3"><FaClipboardCheck /></span>
                             <span>Review Applications</span>
                         </NavLink>
-                        <NavLink to="/admin/users" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
-                            <span className="mr-3"><FaUsers /></span>
-                            <span>Manage Users</span>
-                        </NavLink>
-                        <NavLink to="/admin/reports" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
+                        <NavLink to="/chief-rps/reports" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
                             <span className="mr-3"><FaChartLine /></span>
                             <span>Reports</span>
                         </NavLink>
-                        <NavLink to="/admin/settings" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
+                        <NavLink to="/chief-rps/settings" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
                             <span className="mr-3"><FaCog /></span>
                             <span>Settings</span>
                         </NavLink>
