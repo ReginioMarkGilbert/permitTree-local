@@ -132,21 +132,22 @@ const ChiefRPSDashboard = () => {
         }
     };
 
-    const handleReview = async (id) => {
+    const handleReview = async (applicationId) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.put(
-                `http://localhost:3000/api/admin/update-status/${id}`,
-                { status: 'In Progress' },
-                {
-                    headers: { Authorization: token }
-                }
-            );
-            toast.success('Application status updated to In Progress');
-            fetchApplications(); // Refresh the applications list
+            const response = await axios.post(`http://localhost:3000/api/admin/review-application/${applicationId}`, {}, {
+                headers: { Authorization: token }
+            });
+
+            if (response.data.success) {
+                toast.success('Application marked for review');
+                fetchApplications(); // Refresh the applications list
+            } else {
+                toast.error('Failed to mark application for review');
+            }
         } catch (error) {
-            console.error('Error updating application status:', error);
-            toast.error('Failed to update application status');
+            console.error('Error marking application for review:', error);
+            toast.error('Error marking application for review');
         }
     };
 
@@ -221,11 +222,10 @@ const ChiefRPSDashboard = () => {
                                         <button className="text-blue-600 hover:text-blue-900 action-icon" onClick={() => handlePrint(app._id)}>
                                             <Printer className="inline w-4 h-4" />
                                         </button>
-                                        {activeTab !== 'In Progress' && (
+                                        {app.status === 'For Review' && (
                                             <button
+                                                onClick={() => handleReview(app._id)}
                                                 className="text-indigo-600 hover:text-indigo-900"
-                                                onClick={() => confirmHandleReview(app._id)}
-                                                disabled={app.status === 'In Progress' || app.status === 'Accepted' || app.status === 'Released' || app.status === 'Rejected'}
                                             >
                                                 Review
                                             </button>

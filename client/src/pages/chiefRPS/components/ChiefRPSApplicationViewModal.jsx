@@ -4,7 +4,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import '../../../components/ui/styles/customScrollBar.css';
 
-const AdminApplicationViewModal = ({ isOpen, onClose, application }) => {
+const ChiefRPSApplicationViewModal = ({ isOpen, onClose, application }) => {
     const [previewImage, setPreviewImage] = useState(null);
     const [zoomLevel, setZoomLevel] = useState(1);
     const [center, setCenter] = useState({ x: 50, y: 50 }); // Center of the image
@@ -310,4 +310,4 @@ function Field({ label, value }) {
     );
 }
 
-export default AdminApplicationViewModal;
+export default ChiefRPSApplicationViewModal;

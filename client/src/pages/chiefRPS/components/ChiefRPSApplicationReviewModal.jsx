@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { X, FileText, Image as ImageIcon, Printer, Plus, Minus } from 'lucide-react';
-import { Button } from '../../../components/ui/button';
+import { Button } from '../../../components/ui/Button';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import '../../../components/ui/styles/customScrollBar.css';
 
-const AdminApplicationReviewModal = ({ isOpen, onClose, application }) => {
+const ChiefRPSApplicationReviewModal = ({ isOpen, onClose, application }) => {
     const [previewImage, setPreviewImage] = useState(null);
     const [zoomLevel, setZoomLevel] = useState(1);
     const [center, setCenter] = useState({ x: 50, y: 50 }); // Center of the image
@@ -245,7 +245,7 @@ const AdminApplicationReviewModal = ({ isOpen, onClose, application }) => {
                     </Button>
                     <Button
                         onClick={handleAccept}
-                        // className="px-6 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg transition duration-300"
+                    // className="px-6 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg transition duration-300"
                     >
                         Accept
                     </Button>
@@ -309,4 +309,4 @@ function Field({ label, value }) {
     );
 }
 
-export default AdminApplicationReviewModal;
+export default ChiefRPSApplicationReviewModal;

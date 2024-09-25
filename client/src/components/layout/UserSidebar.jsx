@@ -5,9 +5,11 @@ import permitTreeLogo from '../../assets/denr-logo.png';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { isAuthenticated, removeToken } from '../../utils/auth';
+import { useNotification } from '../../pages/user/contexts/NotificationContext';
 
 const Sidebar = ({ isOpen }) => {
     const navigate = useNavigate();
+    const { unreadCount } = useNotification();
 
     const handleLogout = async () => {
         try {
@@ -62,8 +64,15 @@ const Sidebar = ({ isOpen }) => {
                             <span className="mr-3"><FaClipboardList /></span>
                             <span>Application Status</span>
                         </NavLink>
-                        <NavLink to="/notifications" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
-                            <span className="mr-3"><FaBell /></span>
+                        <NavLink to="/notifications" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2 relative">
+                            <div className="relative mr-3">
+                                {unreadCount > 0 && (
+                                    <span className="absolute -top-2 -left-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
+                                        {unreadCount}
+                                    </span>
+                                )}
+                                <FaBell className="text-xl" />
+                            </div>
                             <span>Notifications</span>
                         </NavLink>
                     </nav>
@@ -71,7 +80,7 @@ const Sidebar = ({ isOpen }) => {
             </div>
             <div className="line ml-4" style={{ borderBottom: '1px solid #ffffff', marginTop: '22.5em', width: '190px' }}></div>
             <div className="mb-10 ml-4">
-                <h2 className="px-4 text-xs text-white uppercase">Account Pages</h2>
+                <h2 className="px-4 text-sm text-white uppercase">Account Pages</h2>
                 <NavLink to="/profile" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
                     <span className="mr-3"><FaUser /></span>
                     <span>Profile</span>

@@ -1,9 +1,11 @@
 const Application = require('../../User/models/PermitApplications/ChainsawApplicationSchema');
 const User = require('../../User/models/userAuthSchema');
-const Notification = require('../models/adminNotificationSchema');
+const Notification = require('../models/ChiefRPSNotificationSchema');
 const fs = require('fs').promises;
 const path = require('path');
 const PDFDocument = require('pdfkit');
+const UserNotification = require('../../User/models/userNotificationSchema');
+const Admin = require('../models/adminAuthSchema');
 
 // Helper function to format date
 const formatDate = (dateString) => {
@@ -242,11 +244,47 @@ const returnApplication = async (req, res) => {
     }
 };
 
+const reviewApplication = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const adminId = req.user.id;
+
+        const admin = await Admin.findById(adminId);
+        if (!admin) {
+            return res.status(404).json({ success: false, message: 'Admin not found' });
+        }
+
+        const application = await Application.findById(id);
+        if (!application) {
+            return res.status(404).json({ success: false, message: 'Application not found' });
+        }
+
+        application.status = 'In Progress';
+        application.reviewedBy = `${admin.firstName} ${admin.lastName}`.trim(); // Use firstName and lastName
+        await application.save();
+
+        // Create a notification for the user
+        const notification = new UserNotification({
+            userId: application.userId,
+            message: `Your application ${application.customId} is now In Progress and being reviewed by ${application.reviewedBy}.`,
+            applicationId: application._id,
+            type: 'application_in_progress'
+        });
+        await notification.save();
+
+        res.json({ success: true, message: 'Application marked as In Progress', application });
+    } catch (error) {
+        console.error('Error marking application for review:', error);
+        res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    }
+};
+
 module.exports = {
     getAllApplications,
     getApplicationById,
     getFile,
     printApplication,
     updateApplicationStatus,
-    returnApplication
+    returnApplication,
+    reviewApplication
 };

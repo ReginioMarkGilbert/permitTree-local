@@ -33,7 +33,8 @@ const ChainsawApplicationSchema = new mongoose.Schema({
     isTenureHolder: { type: Boolean, default: false },
     isBusinessOwner: { type: Boolean, default: false },
     isPLTPRHolder: { type: Boolean, default: false },
-    isWPPHolder: { type: Boolean, default: false }
+    isWPPHolder: { type: Boolean, default: false },
+    reviewedBy: { type: String }
 }, { timestamps: true });
 
 module.exports = mongoose.model('ChainsawApplication', ChainsawApplicationSchema);

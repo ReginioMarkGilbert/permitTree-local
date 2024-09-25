@@ -7,13 +7,15 @@ import { FaLeaf, FaBars, FaTimes, FaHome, FaClipboardList, FaBell, FaUser } from
 import { toast, ToastContainer } from 'react-toastify';
 import HomeFooter from '../../components/ui/HomeFooter';
 import '../../components/ui/styles/customScrollBar.css';
+import { useNotification } from './contexts/NotificationContext';
 
-export default function HomePage() {
+const HomePage = () => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [recentApplications, setRecentApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [user, setUser] = useState({ firstName: '', lastName: '' });
+    const { unreadCount } = useNotification();
 
     const location = useLocation();  // Use location to get the query parameter
     const queryParams = new URLSearchParams(location.search);
@@ -22,7 +24,20 @@ export default function HomePage() {
     const quickActions = [
         { title: "New Application", icon: <FaClipboardList className="h-6 w-6" />, link: "/permits" },
         { title: "My Applications", icon: <FaClipboardList className="h-6 w-6" />, link: "/applicationsStatus" },
-        { title: "Notifications", icon: <FaBell className="h-6 w-6" />, link: "/notifications" },
+        {
+            title: "Notifications",
+            icon: (
+                <div className="relative">
+                    <FaBell className="h-6 w-6" />
+                    {unreadCount > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                            {unreadCount}
+                        </span>
+                    )}
+                </div>
+            ),
+            link: "/notifications"
+        },
         { title: "Profile", icon: <FaUser className="h-6 w-6" />, link: "/profile" },
     ];
 
@@ -153,7 +168,14 @@ export default function HomePage() {
                     </Card>
                     <Card className="bg-white">
                         <CardHeader>
-                            <CardTitle className="text-green-800">Notifications</CardTitle>
+                            <CardTitle className="text-green-800 flex items-center justify-between">
+                                Notifications
+                                {unreadCount > 0 && (
+                                    <span className="bg-red-500 text-white rounded-full px-2 py-1 text-xs">
+                                        {unreadCount} new
+                                    </span>
+                                )}
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
@@ -174,3 +196,5 @@ export default function HomePage() {
         </div>
     );
 }
+
+export default HomePage;

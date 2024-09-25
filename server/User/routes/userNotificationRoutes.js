@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { getUserNotifications, markNotificationAsRead } = require('../controllers/userNotificationController');
-const passport = require('passport');
+const { getUserNotifications, deleteNotification, markNotificationAsRead, markNotificationAsUnread, getUnreadNotificationCount } = require('../controllers/userNotificationController');
+const { authenticateToken } = require('../../middleware/authMiddleware');
 
-router.get('/notifications', passport.authenticate('jwt', { session: false }), getUserNotifications);
-router.put('/notifications/:id/read', passport.authenticate('jwt', { session: false }), markNotificationAsRead);
-
+router.get('/notifications', authenticateToken, getUserNotifications);
+router.delete('/notifications/:id', authenticateToken, deleteNotification);
+router.patch('/notifications/:id/read', authenticateToken, markNotificationAsRead);
+router.patch('/notifications/:id/unread', authenticateToken, markNotificationAsUnread);
+router.get('/notifications/unread-count', authenticateToken, getUnreadNotificationCount);
 module.exports = router;

@@ -80,6 +80,9 @@ app.use('/api/admin', adminDashboardRoutes);
 const adminReportsRoutes = require('./Admin/routes/adminReportsRoutes');
 app.use('/api/admin/reports', adminReportsRoutes);
 
+const userNotificationRoutes = require('./User/routes/userNotificationRoutes');
+app.use('/api/user', userNotificationRoutes);
+
 // Start the server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
