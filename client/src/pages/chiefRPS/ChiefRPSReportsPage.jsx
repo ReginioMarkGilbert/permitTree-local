@@ -1,43 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/Card";
-import { Users } from "lucide-react";
+import { Users, AlertTriangle } from "lucide-react";
 
 function ChiefRPSReportsPage() {
-    const [totalUsers, setTotalUsers] = useState(null);
+    const [reportData, setReportData] = useState({
+        totalUsers: null,
+        applicationsForReview: null
+    });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchTotalUsers = async () => {
+        const fetchReportData = async () => {
             try {
                 const token = localStorage.getItem('token');
-                // console.log('Token:', token);
                 if (!token) {
                     throw new Error('No token found');
                 }
-                const response = await axios.get('http://localhost:3000/api/admin/reports/total-users', {
-                    headers: {
-                        'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`
-                    }
+                const [usersResponse, applicationsResponse] = await Promise.all([
+                    axios.get('http://localhost:3000/api/admin/reports/total-users', {
+                        headers: { 'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}` }
+                    }),
+                    axios.get('http://localhost:3000/api/admin/reports/applications-for-review', {
+                        headers: { 'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}` }
+                    })
+                ]);
+
+                setReportData({
+                    totalUsers: usersResponse.data.totalUsers,
+                    applicationsForReview: applicationsResponse.data.applicationsForReview
                 });
-                setTotalUsers(response.data.totalUsers);
                 setLoading(false);
             } catch (err) {
-                console.error('Error fetching total users:', err.response ? err.response.data : err.message);
-                setError('Failed to fetch total users. Please try again later.');
+                console.error('Error fetching report data:', err.response ? err.response.data : err.message);
+                setError('Failed to fetch report data. Please try again later.');
                 setLoading(false);
             }
         };
 
-        fetchTotalUsers();
+        fetchReportData();
     }, []);
 
     return (
-        <div className='flex flex-col items-center justify-start min-h-screen bg-green-50 p-8'>
-            <h1 className="text-3xl font-bold text-green-800 mb-6">Chief RPS Reports</h1>
+        <div className='flex flex-col items-center justify-start min-h-screen bg-green-50 p-28'>
+            {/* <h1 className="text-3xl font-bold text-green-800 mb-6">Chief RPS Reports</h1> */}
 
-            <div className="w-full max-w-md">
+            <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card className="bg-white shadow-md">
                     <CardHeader>
                         <CardTitle className="text-green-800">Total Users</CardTitle>
@@ -50,7 +59,25 @@ function ChiefRPSReportsPage() {
                         ) : (
                             <div className="flex items-center justify-between">
                                 <Users className="h-8 w-8 text-green-600" />
-                                <span className="text-3xl font-bold text-green-800">{totalUsers}</span>
+                                <span className="text-3xl font-bold text-green-800">{reportData.totalUsers}</span>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                <Card className="bg-white shadow-md">
+                    <CardHeader>
+                        <CardTitle className="text-yellow-800">Applications for Review</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        {loading ? (
+                            <p className="text-center text-gray-500">Loading...</p>
+                        ) : error ? (
+                            <p className="text-center text-red-500">{error}</p>
+                        ) : (
+                            <div className="flex items-center justify-between">
+                                <AlertTriangle className="h-8 w-8 text-yellow-600" />
+                                <span className="text-3xl font-bold text-yellow-800">{reportData.applicationsForReview}</span>
                             </div>
                         )}
                     </CardContent>

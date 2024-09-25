@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "../../components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "../../components/ui/Card";
-import { Bell, ClipboardList, Users, Settings, TrendingUp, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
+import { Bell, ClipboardList, Users, Settings, TrendingUp, CheckCircle, XCircle, ClipboardCheck } from "lucide-react";
 import { FaChartLine } from 'react-icons/fa';
 import '../../components/ui/styles/customScrollBar.css';
 
@@ -16,7 +16,7 @@ const AdminHomePage = () => {
     // State for dashboard stats
     const [dashboardStats, setDashboardStats] = useState({
         totalUsers: 0,
-        applicationsForReview: 56,  // Mock data
+        applicationsForReview: 0,  // Changed from mock data to 0
         approvedToday: 23,  // Mock data
         returnedApplications: 5,  // Mock data
         applicationIncrease: 12  // Mock data
@@ -34,28 +34,28 @@ const AdminHomePage = () => {
             setLoading(true);
             try {
                 const token = localStorage.getItem('token');
-                // console.log('Token:', token);
                 if (!token) {
                     throw new Error('No authentication token found.');
                 }
-                const response = await axios.get('http://localhost:3000/api/admin/reports/total-users', {
-                    headers: {
-                        Authorization: token
-                    }
-                });
 
-                // console.log('Total users response:', response.data);
+                const [totalUsersResponse, applicationsForReviewResponse] = await Promise.all([
+                    axios.get('http://localhost:3000/api/admin/reports/total-users', {
+                        headers: { Authorization: token }
+                    }),
+                    axios.get('http://localhost:3000/api/admin/reports/applications-for-review', {
+                        headers: { Authorization: token }
+                    })
+                ]);
 
                 setDashboardStats(prevStats => ({
                     ...prevStats,
-                    totalUsers: response.data.totalUsers,
+                    totalUsers: totalUsersResponse.data.totalUsers,
+                    applicationsForReview: applicationsForReviewResponse.data.applicationsForReview
                 }));
 
                 // Fetch all applications (for recent applications display)
                 const applicationsResponse = await axios.get('http://localhost:3000/api/admin/all-applications', {
-                    headers: {
-                        Authorization: token
-                    }
+                    headers: { Authorization: token }
                 });
 
                 setRecentApplications(applicationsResponse.data);
@@ -168,7 +168,7 @@ const AdminHomePage = () => {
                                 </div>
                                 <div className="bg-yellow-100 p-4 rounded-lg">
                                     <div className="flex items-center justify-between">
-                                        <AlertTriangle className="h-6 w-6 text-yellow-600" />
+                                        <ClipboardCheck className="h-6 w-6 text-yellow-600" />
                                         <span className="text-2xl font-bold text-yellow-800">{dashboardStats.applicationsForReview}</span>
                                     </div>
                                     <p className="text-sm text-yellow-600 mt-2">Applications for Review</p>
