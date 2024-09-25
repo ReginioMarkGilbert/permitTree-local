@@ -99,17 +99,13 @@ const UserAuthPage = () => {
                 setToken(data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
                 const userRole = getUserRole();
-                navigate(userRole === 'admin' ? '/admin/home' : '/home?newUser=false', { replace: true });
-                // toast.success('Login successful!', {
-                //     position: 'top-center',
-                //     autoClose: 10,
-                //     hideProgressBar: true,
-                //     onClose: () => {
-                //         const userRole = getUserRole();
-                //         // Add a flag for returning users
-                //         navigate(userRole === 'admin' ? '/admin' : '/home?newUser=false', { replace: true });
-                //     },
-                // });
+                if (userRole === 'superadmin') {
+                    navigate('/superadmin/home', { replace: true });
+                } else if (userRole === 'admin') {
+                    navigate('/admin/home', { replace: true });
+                } else {
+                    navigate('/home?newUser=false', { replace: true });
+                }
             } else {
                 toast.error('Login failed: Invalid username or password');
             }

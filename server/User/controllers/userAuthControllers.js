@@ -80,7 +80,7 @@ const login = async (req, res) => {
             username: user.username,
             firstName: user.firstName,
             lastName: user.lastName,
-            role: user.role // User or Admin role
+            role: user.role
         };
 
         const token = jwt.sign(payload, process.env.JWT_SECRET || 'default_secret', { expiresIn: '1h' });

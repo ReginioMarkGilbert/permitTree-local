@@ -28,6 +28,10 @@ import { isAuthenticated, getUserRole, isTokenExpired, logout, getToken } from '
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+import SuperAdminSidebar from './pages/admin/SuperAdmin/SuperAdminSidebar';
+import SuperAdminDashboard from './pages/admin/SuperAdmin/SuperAdminDashboard';
+import SuperAdminHomePage from './pages/admin/SuperAdmin/SuperAdminHomePage';
+
 const App = () => {
     const { sidebarToggle, toggleSidebar } = useSidebarToggle();
     const navigate = useNavigate();
@@ -44,7 +48,9 @@ const App = () => {
         <div className="flex">
             {isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && (
                 <>
-                    {userRole === 'admin' ? (
+                    {userRole === 'superadmin' ? (
+                        <SuperAdminSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
+                    ) : userRole === 'admin' ? (
                         <AdminSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
                     ) : (
                         <UserSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
@@ -72,6 +78,10 @@ const App = () => {
                         <Route path="/admin/dashboard" element={<ProtectedRoute roles={['admin']}><AdminDashboard /></ProtectedRoute>} />
                         <Route path="/admin/review/:id" element={<ProtectedRoute roles={['admin']}><AdminApplicationReviewPage /></ProtectedRoute>} />
                         <Route path="/admin/view/:id" element={<ProtectedRoute roles={['admin']}><AdminApplicationViewModal /></ProtectedRoute>} />
+
+                        <Route path="/superadmin/home" element={<ProtectedRoute roles={['superadmin']}><SuperAdminHomePage /></ProtectedRoute>} />
+                        <Route path="/superadmin/dashboard" element={<ProtectedRoute roles={['superadmin']}><SuperAdminDashboard /></ProtectedRoute>} />
+
                     </Routes>
                 </div>
             </div>

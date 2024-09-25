@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 // Existing createAdmin method
 const createAdmin = async (req, res) => {
     try {
-        const { username, email, password, firstName, lastName } = req.body;
+        const { username, email, password, firstName, lastName, role } = req.body;
 
         // Generate adminId
         const adminIdCounter = await AdminIdCounter.findOneAndUpdate(
@@ -21,7 +21,7 @@ const createAdmin = async (req, res) => {
             password,
             firstName,
             lastName,
-            role: 'admin'
+            role: role === 'superadmin' ? 'superadmin' : 'admin'
         });
 
         await newAdmin.save();
