@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import { Button } from "../../components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "../../components/ui/Card";
 import { Bell, ClipboardList, Users, Settings, TrendingUp, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
@@ -11,16 +11,16 @@ const AdminHomePage = () => {
     const [recentApplications, setRecentApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const navigate = useNavigate(); // Initialize useNavigate
+    const navigate = useNavigate();
 
-    // Mock data for quick stats
-    const dashboardStats = {
-        totalUsers: 1234,
-        applicationsForReview: 56,
-        approvedToday: 23,
-        returnedApplications: 5,
-        applicationIncrease: 12
-    };
+    // State for dashboard stats
+    const [dashboardStats, setDashboardStats] = useState({
+        totalUsers: 0,
+        applicationsForReview: 56,  // Mock data
+        approvedToday: 23,  // Mock data
+        returnedApplications: 5,  // Mock data
+        applicationIncrease: 12  // Mock data
+    });
 
     const quickActions = [
         { title: "Reports", icon: <FaChartLine className="h-6 w-6" />, link: "/chief-rps/reports" },
@@ -30,40 +30,60 @@ const AdminHomePage = () => {
     ];
 
     useEffect(() => {
-        const fetchAllApplications = async () => {
+        const fetchData = async () => {
             setLoading(true);
             try {
                 const token = localStorage.getItem('token');
+                // console.log('Token:', token);
                 if (!token) {
                     throw new Error('No authentication token found.');
                 }
-                const response = await axios.get('http://localhost:3000/api/admin/all-applications', {
-                    // Remove status filtering to fetch all applications
+                const response = await axios.get('http://localhost:3000/api/admin/reports/total-users', {
                     headers: {
-                        'Authorization': `Bearer ${token}`
+                        Authorization: token
                     }
                 });
 
-                setRecentApplications(response.data);
+                // console.log('Total users response:', response.data);
+
+                setDashboardStats(prevStats => ({
+                    ...prevStats,
+                    totalUsers: response.data.totalUsers,
+                }));
+
+                // Fetch all applications (for recent applications display)
+                const applicationsResponse = await axios.get('http://localhost:3000/api/admin/all-applications', {
+                    headers: {
+                        Authorization: token
+                    }
+                });
+
+                setRecentApplications(applicationsResponse.data);
+
                 setLoading(false);
             } catch (err) {
-                console.error('Error fetching all applications:', err);
-                setError('Failed to fetch applications. Please try again later.');
+                console.error('Error fetching data:', err.response ? err.response.data : err.message);
+                setError('Failed to fetch data. Please try again later.');
                 setLoading(false);
             }
         };
 
-        fetchAllApplications();
+        fetchData();
     }, []);
 
     const handleViewAllApplications = () => {
-        navigate('/chief-rps/dashboard'); // Redirect to /chief-rps/dashboard
+        navigate('/chief-rps/dashboard');
+    };
+
+    const handleViewDetailedAnalytics = () => {
+        navigate('/chief-rps/reports');
     };
 
     return (
         <div className="min-h-screen bg-green-50 flex flex-col p-8">
             <h1 className="text-3xl font-bold text-green-800 mb-6">Admin Dashboard</h1>
 
+            {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {quickActions.map((action, index) => (
                     <Card key={index} className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
@@ -83,6 +103,7 @@ const AdminHomePage = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Recent Applications Card */}
                 <Card className="lg:col-span-2 bg-white recent-applications-card">
                     <CardHeader>
                         <CardTitle className="text-green-800">Recent Applications</CardTitle>
@@ -93,7 +114,7 @@ const AdminHomePage = () => {
                         ) : error ? (
                             <p className="text-center text-red-500">{error}</p>
                         ) : (
-                            <div className="space-y-4 h-80 overflow-y-auto custom-scrollbar">
+                            <div className="space-y-4 h-[21.5rem] overflow-y-auto custom-scrollbar"> {/* Increased height to h-96 */}
                                 {recentApplications.slice(0, 7).map((app, index) => (
                                     <div key={index} className="flex items-center justify-between border-b border-gray-200 pb-2 last:border-b-0">
                                         <div>
@@ -129,6 +150,8 @@ const AdminHomePage = () => {
                         </Button>
                     </CardFooter>
                 </Card>
+
+                {/* Quick Stats Card */}
                 <Card className="bg-white">
                     <CardHeader>
                         <CardTitle className="text-green-800">Quick Stats</CardTitle>
@@ -177,7 +200,12 @@ const AdminHomePage = () => {
                         </div>
                     </CardContent>
                     <CardFooter>
-                        <Button className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white">View Detailed Analytics</Button>
+                        <Button
+                            className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white"
+                            onClick={handleViewDetailedAnalytics}
+                        >
+                            View Detailed Analytics
+                        </Button>
                     </CardFooter>
                 </Card>
             </div>

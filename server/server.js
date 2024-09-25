@@ -54,6 +54,13 @@ app.use(session({
 // Passport middleware
 app.use(passport.initialize());
 
+// Add this before your routes
+app.use((req, res, next) => {
+    console.log(`Incoming request: ${req.method} ${req.path}`);
+    console.log('Headers:', req.headers);
+    next();
+});
+
 // Routes
 const chainsawRoutes = require('./User/routes/PermitApplicationsRoutes/chainsawApplicationRoutes');
 app.use('/api', chainsawRoutes);
@@ -70,6 +77,8 @@ app.use('/api/admin', adminRoutes);
 const adminDashboardRoutes = require('./Admin/routes/adminDashboardRoutes');
 app.use('/api/admin', adminDashboardRoutes);
 
+const adminReportsRoutes = require('./Admin/routes/adminReportsRoutes');
+app.use('/api/admin/reports', adminReportsRoutes);
 
 // Start the server
 const port = process.env.PORT || 3000;
