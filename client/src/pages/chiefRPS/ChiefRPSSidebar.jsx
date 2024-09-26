@@ -60,10 +60,10 @@ const AdminSidebar = ({ isOpen }) => {
                             <span className="mr-3"><FaTachometerAlt /></span>
                             <span>Dashboard</span>
                         </NavLink>
-                        <NavLink to="/chief-rps/review" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
+                        {/* <NavLink to="/chief-rps/review" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
                             <span className="mr-3"><FaClipboardCheck /></span>
                             <span>Review Applications</span>
-                        </NavLink>
+                        </NavLink> */}
                         <NavLink to="/chief-rps/notifications" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2 relative">
                             <div className="relative mr-3">
                                 {unreadCount > 0 && (

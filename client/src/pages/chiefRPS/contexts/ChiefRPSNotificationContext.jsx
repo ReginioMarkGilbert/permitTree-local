@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { isAuthenticated } from '../../../utils/auth';
+import { isAuthenticated } from '../../../utils/auth'; // Import the authentication check function
 
 const ChiefRPSNotificationContext = createContext();
 
@@ -9,7 +9,7 @@ export const useChiefRPSNotification = () => useContext(ChiefRPSNotificationCont
 const ChiefRPSNotificationProvider = ({ children }) => {
     const [unreadCount, setUnreadCount] = useState(0);
 
-    const fetchUnreadCount = useCallback(async () => {
+    const fetchUnreadCount = async () => {
         if (!isAuthenticated()) {
             setUnreadCount(0); // Reset count if not authenticated
             return;
@@ -23,7 +23,7 @@ const ChiefRPSNotificationProvider = ({ children }) => {
         } catch (error) {
             console.error('Error fetching unread notification count:', error);
         }
-    }, []);
+    };
 
     useEffect(() => {
         let intervalId;
@@ -35,7 +35,7 @@ const ChiefRPSNotificationProvider = ({ children }) => {
         return () => {
             if (intervalId) clearInterval(intervalId);
         };
-
+        // fetchUnreadCount();
     }, [fetchUnreadCount]);
 
     const value = {

@@ -7,7 +7,7 @@ import { useNotification } from './contexts/UserNotificationContext';
 import { isAuthenticated } from '../../utils/auth';
 
 function UserNotificationsPage() {
-    const { fetchUnreadCount } = useNotification();
+    const { fetchUnreadCount, unreadCount } = useNotification();
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedNotification, setSelectedNotification] = useState(null);
@@ -26,16 +26,18 @@ function UserNotificationsPage() {
     }, [showUndo]);
 
     const fetchNotifications = useCallback(async () => {
+        if (!isAuthenticated()) return;
+        setLoading(true);
         try {
             const token = localStorage.getItem('token');
             const response = await axios.get('http://localhost:3000/api/user/notifications', {
                 headers: { Authorization: token }
             });
             setNotifications(response.data);
-            setLoading(false);
         } catch (error) {
             console.error('Error fetching notifications:', error);
             toast.error('Failed to fetch notifications');
+        } finally {
             setLoading(false);
         }
     }, []);
@@ -50,7 +52,7 @@ function UserNotificationsPage() {
         return () => {
             if (intervalId) clearInterval(intervalId);
         };
-    }, [fetchNotifications]);
+    }, [fetchNotifications, unreadCount]);
 
     const handleNotificationClick = async (notification) => {
         setSelectedNotification(notification);

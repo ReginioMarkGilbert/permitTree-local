@@ -9,7 +9,7 @@ export const useNotification = () => useContext(NotificationContext);
 const NotificationProvider = ({ children }) => {
     const [unreadCount, setUnreadCount] = useState(0);
 
-    const fetchUnreadCount = useCallback(async () => {
+    const fetchUnreadCount = async () => {
         if (!isAuthenticated()) {
             setUnreadCount(0);
             return;
@@ -23,7 +23,7 @@ const NotificationProvider = ({ children }) => {
         } catch (error) {
             console.error('Error fetching unread notification count:', error);
         }
-    }, []);
+    };
 
     useEffect(() => {
         let intervalId;
