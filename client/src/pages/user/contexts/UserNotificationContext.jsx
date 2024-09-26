@@ -29,7 +29,7 @@ const NotificationProvider = ({ children }) => {
         let intervalId;
         if (isAuthenticated()) {
             fetchUnreadCount();
-            intervalId = setInterval(fetchUnreadCount, 10000);
+            intervalId = setInterval(fetchUnreadCount, 9000);
         }
 
         return () => {

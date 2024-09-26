@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Bell, X, AlertCircle, CheckCircle, Clock, FileText, RotateCcw } from 'lucide-react';
@@ -14,7 +14,7 @@ function ChiefRPSNotificationPage() {
     const [deletedNotification, setDeletedNotification] = useState(null);
     const [showUndo, setShowUndo] = useState(false);
 
-    const fetchNotifications = async () => {
+    const fetchNotifications = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
             const response = await axios.get('http://localhost:3000/api/admin/notifications', {
@@ -27,7 +27,7 @@ function ChiefRPSNotificationPage() {
             toast.error('Failed to fetch notifications');
             setLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         let intervalId;

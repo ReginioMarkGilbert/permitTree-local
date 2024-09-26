@@ -38,7 +38,7 @@ function UserNotificationsPage() {
             toast.error('Failed to fetch notifications');
             setLoading(false);
         }
-    }, []); // Empty dependency array
+    }, []);
 
     useEffect(() => {
         let intervalId;

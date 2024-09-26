@@ -29,7 +29,7 @@ const ChiefRPSNotificationProvider = ({ children }) => {
         let intervalId;
         if (isAuthenticated()) {
             fetchUnreadCount();
-            intervalId = setInterval(fetchUnreadCount, 5000);
+            intervalId = setInterval(fetchUnreadCount, 9000);
         }
 
         return () => {
