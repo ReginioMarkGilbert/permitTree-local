@@ -68,6 +68,9 @@ app.use('/api', chainsawRoutes);
 const authRoutes = require('./User/routes/userAuthRoutes');
 app.use('/api', authRoutes);
 
+const userNotificationRoutes = require('./User/routes/userNotificationRoutes');
+app.use('/api/user', userNotificationRoutes);
+
 const contactRoutes = require('./User/routes/contactRoutes');
 app.use('/api', contactRoutes);
 
@@ -80,8 +83,9 @@ app.use('/api/admin', adminDashboardRoutes);
 const adminReportsRoutes = require('./Admin/routes/adminReportsRoutes');
 app.use('/api/admin/reports', adminReportsRoutes);
 
-const userNotificationRoutes = require('./User/routes/userNotificationRoutes');
-app.use('/api/user', userNotificationRoutes);
+const adminNotificationRoutes = require('./Admin/routes/ChiefRPSNotificationRoutes');
+app.use('/api/admin', adminNotificationRoutes);
+
 
 // Start the server
 const port = process.env.PORT || 3000;

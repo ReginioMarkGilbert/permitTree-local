@@ -363,6 +363,34 @@ const submitDraft = async (req, res) => {
     }
 };
 
+const submitReturnedApplication = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const application = await Application.findById(req.params.id);
+
+        if (!application) {
+            return res.status(404).json({ success: false, message: 'Application not found' });
+        }
+
+        if (application.userId.toString() !== req.user.id) {
+            return res.status(403).json({ success: false, message: 'Not authorized to submit this application' });
+        }
+
+        if (application.status !== 'Returned') {
+            return res.status(400).json({ success: false, message: 'Application is not in Returned status' });
+        }
+
+        application.status = 'Submitted';
+        application.dateOfSubmission = new Date();
+        await application.save();
+
+        res.json({ success: true, message: 'Application resubmitted successfully' });
+    } catch (error) {
+        console.error('Error resubmitting application:', error);
+        res.status(500).json({ success: false, message: 'Error resubmitting application' });
+    }
+};
+
 module.exports = {
     csaw_createApplication,
     csaw_getApplications,
@@ -372,5 +400,6 @@ module.exports = {
     resetCounter,
     csaw_getApplicationById,
     unsubmitApplication,
-    submitDraft
+    submitDraft,
+    submitReturnedApplication
 };

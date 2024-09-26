@@ -2,8 +2,11 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { FaTachometerAlt, FaUsers, FaChartLine, FaCog, FaSignInAlt, FaHome, FaClipboardCheck, FaBell } from 'react-icons/fa';
 import permitTreeLogo from '../../assets/denr-logo.png';
+import { useChiefRPSNotification } from './contexts/ChiefRPSNotificationContext';
 
 const AdminSidebar = ({ isOpen }) => {
+    const { unreadCount } = useChiefRPSNotification();
+
     return (
         <div className={`h-full bg-green-800 text-white flex flex-col justify-between fixed top-0 left-0 w-56 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:w-64 z-10`}>
             <div className="mt-6 ml-4">
@@ -26,11 +29,17 @@ const AdminSidebar = ({ isOpen }) => {
                             <span className="mr-3"><FaClipboardCheck /></span>
                             <span>Review Applications</span>
                         </NavLink>
-                        <NavLink to="/chief-rps/notifications" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
-                            <span className="mr-3"><FaBell /></span>
+                        <NavLink to="/chief-rps/notifications" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2 relative">
+                            <div className="relative mr-3">
+                                {unreadCount > 0 && (
+                                    <span className="absolute -top-2 -left-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
+                                        {unreadCount}
+                                    </span>
+                                )}
+                                <FaBell className="text-xl" />
+                            </div>
                             <span>Notifications</span>
                         </NavLink>
-
                         <NavLink to="/chief-rps/reports" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
                             <span className="mr-3"><FaChartLine /></span>
                             <span>Reports</span>

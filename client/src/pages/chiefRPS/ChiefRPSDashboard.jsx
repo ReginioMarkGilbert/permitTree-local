@@ -140,14 +140,15 @@ const ChiefRPSDashboard = () => {
             });
 
             if (response.data.success) {
-                toast.success('Application marked for review');
+                toast.success('Application marked as In Progress');
                 fetchApplications(); // Refresh the applications list
+                setReviewConfirmation({ isOpen: false, applicationId: null });
             } else {
-                toast.error('Failed to mark application for review');
+                toast.error('Failed to update application status');
             }
         } catch (error) {
-            console.error('Error marking application for review:', error);
-            toast.error('Error marking application for review');
+            console.error('Error updating application status:', error);
+            toast.error('Failed to update application status');
         }
     };
 
@@ -155,10 +156,18 @@ const ChiefRPSDashboard = () => {
         setReviewConfirmation({ isOpen: true, applicationId: id });
     };
 
-    const handleConfirmReview = async () => {
-        const { applicationId } = reviewConfirmation;
-        await handleReview(applicationId);
-        setReviewConfirmation({ isOpen: false, applicationId: null });
+    const handleConfirmReview = () => {
+        if (reviewConfirmation.applicationId) {
+            handleReview(reviewConfirmation.applicationId);
+        }
+    };
+
+    const onUpdateStatus = (applicationId, newStatus) => {
+        setApplications(prevApplications =>
+            prevApplications.map(app =>
+                app._id === applicationId ? { ...app, status: newStatus } : app
+            )
+        );
     };
 
     const renderTable = () => {
@@ -224,8 +233,8 @@ const ChiefRPSDashboard = () => {
                                         </button>
                                         {app.status === 'For Review' && (
                                             <button
-                                                onClick={() => handleReview(app._id)}
-                                                className="text-indigo-600 hover:text-indigo-900"
+                                                onClick={() => setReviewConfirmation({ isOpen: true, applicationId: app._id })}
+                                                className="text-blue-600 hover:text-blue-900"
                                             >
                                                 Review
                                             </button>
@@ -293,6 +302,7 @@ const ChiefRPSDashboard = () => {
                     isOpen={isReviewModalOpen}
                     onClose={() => setIsReviewModalOpen(false)}
                     application={selectedApplication}
+                    onUpdateStatus={onUpdateStatus}
                 />
             )}
 

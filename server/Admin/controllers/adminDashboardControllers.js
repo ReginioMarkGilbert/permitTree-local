@@ -218,29 +218,36 @@ const returnApplication = async (req, res) => {
     try {
         const { id } = req.params;
         const { returnRemarks } = req.body;
+        const adminId = req.user.id;
+
+        const admin = await Admin.findById(adminId);
+        if (!admin) {
+            return res.status(404).json({ success: false, message: 'Admin not found' });
+        }
 
         const application = await Application.findById(id);
         if (!application) {
-            return res.status(404).json({ message: 'Application not found' });
+            return res.status(404).json({ success: false, message: 'Application not found' });
         }
 
         application.status = 'Returned';
         application.returnRemarks = returnRemarks;
+        application.reviewedBy = `${admin.firstName} ${admin.lastName}`.trim();
         await application.save();
 
         // Create a notification for the user
-        const notification = new Notification({
+        const notification = new UserNotification({
             userId: application.userId,
-            message: `Your application ${application.customId} has been returned. Please check the remarks and resubmit.`,
+            message: `Your application ${application.customId} has been returned. Remarks: ${returnRemarks}`,
             applicationId: application._id,
             type: 'application_returned'
         });
         await notification.save();
 
-        res.status(200).json({ message: 'Application returned successfully', application });
+        res.status(200).json({ success: true, message: 'Application returned successfully', application });
     } catch (error) {
         console.error('Error returning application:', error);
-        res.status(500).json({ message: 'Error returning application' });
+        res.status(500).json({ success: false, message: 'Error returning application', error: error.message });
     }
 };
 

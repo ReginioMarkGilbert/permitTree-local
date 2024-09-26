@@ -5,7 +5,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import '../../../components/ui/styles/customScrollBar.css';
 
-const ChiefRPSApplicationReviewModal = ({ isOpen, onClose, application }) => {
+const ChiefRPSApplicationReviewModal = ({ isOpen, onClose, application, onUpdateStatus }) => {
     const [previewImage, setPreviewImage] = useState(null);
     const [zoomLevel, setZoomLevel] = useState(1);
     const [center, setCenter] = useState({ x: 50, y: 50 }); // Center of the image
@@ -13,6 +13,8 @@ const ChiefRPSApplicationReviewModal = ({ isOpen, onClose, application }) => {
     const [initialZoom, setInitialZoom] = useState(1);
     const [isDragging, setIsDragging] = useState(false);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+    const [isReturning, setIsReturning] = useState(false);
+    const [remarks, setRemarks] = useState('');
 
     if (!isOpen || !application) return null;
 
@@ -118,18 +120,29 @@ const ChiefRPSApplicationReviewModal = ({ isOpen, onClose, application }) => {
     };
 
     const handleReturn = async () => {
+        if (!remarks.trim()) {
+            toast.error('Please provide remarks for returning the application.');
+            return;
+        }
+
         try {
             const token = localStorage.getItem('token');
-            await axios.put(
-                `http://localhost:3000/api/admin/update-status/${application._id}`,
-                { status: 'Returned' },
+            const response = await axios.put(
+                `http://localhost:3000/api/admin/return-application/${application._id}`,
+                { returnRemarks: remarks },
                 { headers: { Authorization: token } }
             );
-            toast.success('Application status updated to Returned');
-            onClose(); // Close the modal after returning
+
+            if (response.data.success) {
+                toast.success('Application returned successfully');
+                onUpdateStatus(application._id, 'Returned');
+                onClose();
+            } else {
+                toast.error(response.data.message || 'Failed to return application');
+            }
         } catch (error) {
-            console.error('Error updating application status:', error);
-            toast.error('Failed to update application status');
+            console.error('Error returning application:', error);
+            toast.error('An error occurred while returning the application');
         }
     };
 
@@ -236,19 +249,46 @@ const ChiefRPSApplicationReviewModal = ({ isOpen, onClose, application }) => {
                     )}
                 </div>
                 <div className="p-5 bg-gray-50 flex justify-end rounded-b-2xl space-x-4">
-                    <Button
-                        onClick={handleReturn}
-                        className="w-full sm:w-auto border-1 border-green-600"
-                        variant="outline"
-                    >
-                        Return
-                    </Button>
-                    <Button
+                    {!isReturning && (
+                        <button
+                            onClick={() => setIsReturning(true)}
+                            className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                        >
+                            Return
+                        </button>
+                    )}
+                    {isReturning && (
+                        <>
+                            <div className="mb-4">
+                                <label htmlFor="remarks" className="block mb-2">Remarks:</label>
+                                <textarea
+                                    id="remarks"
+                                    value={remarks}
+                                    onChange={(e) => setRemarks(e.target.value)}
+                                    className="w-full p-2 border rounded"
+                                    rows="4"
+                                ></textarea>
+                            </div>
+                            <button
+                                onClick={handleReturn}
+                                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                            >
+                                Confirm Return
+                            </button>
+                            <button
+                                onClick={() => setIsReturning(false)}
+                                className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+                            >
+                                Cancel
+                            </button>
+                        </>
+                    )}
+                    <button
                         onClick={handleAccept}
-                    // className="px-6 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg transition duration-300"
+                        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                     >
                         Accept
-                    </Button>
+                    </button>
                 </div>
                 {previewImage && (
                     <div

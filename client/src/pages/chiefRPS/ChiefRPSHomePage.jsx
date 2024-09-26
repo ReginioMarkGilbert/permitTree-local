@@ -6,27 +6,42 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "../../comp
 import { Bell, ClipboardList, Users, Settings, TrendingUp, CheckCircle, XCircle, ClipboardCheck } from "lucide-react";
 import { FaChartLine } from 'react-icons/fa';
 import '../../components/ui/styles/customScrollBar.css';
+import { useChiefRPSNotification } from './contexts/ChiefRPSNotificationContext';
 
 const AdminHomePage = () => {
     const [recentApplications, setRecentApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const { unreadCount } = useChiefRPSNotification();
 
     // State for dashboard stats
     const [dashboardStats, setDashboardStats] = useState({
         totalUsers: 0,
-        applicationsForReview: 0,  // Changed from mock data to 0
-        approvedToday: 23,  // Mock data
-        returnedApplications: 5,  // Mock data
-        applicationIncrease: 12  // Mock data
+        applicationsForReview: 0,
+        approvedToday: 23,
+        returnedApplications: 5,
+        applicationIncrease: 12
     });
 
     const quickActions = [
         { title: "Reports", icon: <FaChartLine className="h-6 w-6" />, link: "/chief-rps/reports" },
         { title: "All Applications", icon: <ClipboardList className="h-6 w-6" />, link: "/chief-rps/applications" },
         { title: "System Settings", icon: <Settings className="h-6 w-6" />, link: "/chief-rps/settings" },
-        { title: "Notifications", icon: <Bell className="h-6 w-6" />, link: "/chief-rps/notifications" },
+        {
+            title: "Notifications",
+            icon: (
+                <div className="relative">
+                    <Bell className="h-6 w-6" />
+                    {unreadCount > 0 && (
+                        <span className="absolute -top-2 left-3 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
+                            {unreadCount}
+                        </span>
+                    )}
+                </div>
+            ),
+            link: "/chief-rps/notifications"
+        },
     ];
 
     useEffect(() => {
@@ -88,8 +103,10 @@ const AdminHomePage = () => {
                 {quickActions.map((action, index) => (
                     <Card key={index} className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-green-800">{action.title}</CardTitle>
-                            <div className="text-green-600">{action.icon}</div>
+                            <div className="flex items-center space-x-2">
+                                <div className="text-green-600">{action.icon}</div>
+                                <CardTitle className="text-sm font-medium text-green-800">{action.title}</CardTitle>
+                            </div>
                         </CardHeader>
                         <CardContent>
                             <Button

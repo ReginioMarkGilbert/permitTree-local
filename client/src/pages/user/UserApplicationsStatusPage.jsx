@@ -26,20 +26,14 @@ const UserApplicationsStatusPage = () => {
     useEffect(() => {
         fetchApplications();
         fetchNotifications();
-    }, [activeTab, filterType]);
+    }, [activeTab]);
 
     const fetchApplications = async () => {
         try {
-            setLoading(true);
             const token = localStorage.getItem('token');
             const response = await axios.get('http://localhost:3000/api/csaw_getApplications', {
-                params: {
-                    status: activeTab,
-                    applicationType: filterType
-                },
-                headers: {
-                    Authorization: token
-                }
+                params: { status: activeTab },
+                headers: { Authorization: token }
             });
             setApplications(response.data);
             setLoading(false);
@@ -47,7 +41,6 @@ const UserApplicationsStatusPage = () => {
             console.error('Error fetching applications:', error);
             setError('Failed to fetch applications');
             setLoading(false);
-            toast.error('Failed to fetch applications');
         }
     };
 
@@ -145,10 +138,28 @@ const UserApplicationsStatusPage = () => {
             const token = localStorage.getItem('token');
             let response;
 
-            if (type === 'submit') {
-                response = await axios.put(`http://localhost:3000/api/csaw_submitDraft/${application._id}`, {}, {
+            if (type === 'submit' || type === 'resubmit') {
+                const endpoint = type === 'submit' ? 'csaw_submitApplication' : 'csaw_submitReturnedApplication';
+                response = await axios.put(`http://localhost:3000/api/${endpoint}/${application._id}`, {}, {
                     headers: { Authorization: token }
                 });
+
+                // Create notification for Chief RPS if resubmitting
+                if (type === 'resubmit' && response.data.success) {
+                    const userResponse = await axios.get('http://localhost:3000/api/user-details', {
+                        headers: { Authorization: token }
+                    });
+                    const user = userResponse.data.user;
+
+                    await axios.post('http://localhost:3000/api/admin/notifications', {
+                        message: `${user.firstName} ${user.lastName} has resubmitted their returned application.`,
+                        applicationId: application._id,
+                        userId: application.userId,
+                        type: 'application_resubmitted'
+                    }, {
+                        headers: { Authorization: token }
+                    });
+                }
             } else if (type === 'unsubmit') {
                 response = await axios.put(`http://localhost:3000/api/csaw_unsubmitApplication/${application._id}`, {}, {
                     headers: { Authorization: token }
@@ -159,8 +170,8 @@ const UserApplicationsStatusPage = () => {
                 });
             }
 
-            if (response.data.success) {
-                toast.success(`Application ${type === 'delete' ? 'deleted' : type === 'submit' ? 'submitted' : 'unsubmitted'} successfully`);
+            if (response && response.data.success) {
+                toast.success(`Application ${type === 'delete' ? 'deleted' : type === 'submit' ? 'submitted' : type === 'resubmit' ? 'resubmitted' : 'unsubmitted'} successfully`);
                 fetchApplications();
             } else {
                 toast.error(`Failed to ${type} application`);
@@ -234,7 +245,7 @@ const UserApplicationsStatusPage = () => {
                                         <button className="text-green-600 hover:text-green-900 action-icon" onClick={() => handleView(app._id)}>
                                             <Eye className="inline w-4 h-4" />
                                         </button>
-                                        {app.status === 'Draft' && (
+                                        {(app.status === 'Draft' || app.status === 'Returned') && (
                                             <button className="text-blue-600 hover:text-blue-900 action-icon" onClick={() => handleEdit(app)}>
                                                 <Edit className="inline w-4 h-4" />
                                             </button>
@@ -262,6 +273,15 @@ const UserApplicationsStatusPage = () => {
                                                 <span className="text-xs font-medium">Submit</span>
                                             </button>
                                         )}
+                                        {app.status === 'Returned' && (
+                                            <button
+                                                className="text-yellow-600 hover:text-yellow-900 flex items-center gap-1 px-2 py-1 rounded-md bg-yellow-100 hover:bg-yellow-200 transition-colors duration-200"
+                                                onClick={() => handleSubmitReturned(app)}
+                                            >
+                                                <Leaf className="inline w-4 h-4" />
+                                                <span className="text-xs font-medium">Resubmit</span>
+                                            </button>
+                                        )}
                                         {app.status === 'Submitted' && (
                                             <button
                                                 className="text-orange-600 hover:text-orange-900 flex items-center gap-1 px-2 py-1 rounded-md bg-orange-100 hover:bg-orange-200 transition-colors duration-200"
@@ -284,6 +304,16 @@ const UserApplicationsStatusPage = () => {
     const handleTabChange = (tab) => {
         setActiveTab(tab);
         // fetchApplications will be called automatically due to the useEffect dependency
+    };
+
+    const handleSubmitReturned = (application) => {
+        setConfirmationModal({
+            isOpen: true,
+            type: 'resubmit',
+            application,
+            title: 'Resubmit Application',
+            message: "Are you sure you want to resubmit this returned application? Make sure you've addressed all the issues mentioned in the return remarks."
+        });
     };
 
     return (

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
+const { authenticateToken } = require('../../../middleware/authMiddleware');
 const fileUpload = require('express-fileupload');
 const {
     csaw_createApplication,
@@ -11,7 +12,8 @@ const {
     resetCounter,
     csaw_getApplicationById,
     submitDraft,
-    unsubmitApplication
+    unsubmitApplication,
+    submitReturnedApplication
 } = require('../../controllers/permitApplicationControllers/ChainsawApplicationController');
 
 router.post('/csaw_createApplication', passport.authenticate('jwt', { session: false }), csaw_createApplication);
@@ -26,5 +28,6 @@ router.post('/resetCounterChainsaw', passport.authenticate('jwt', { session: fal
 router.get('/csaw_getApplicationById/:id', passport.authenticate('jwt', { session: false }), csaw_getApplicationById);
 router.put('/csaw_submitDraft/:id', passport.authenticate('jwt', { session: false }), submitDraft);
 router.put('/csaw_unsubmitApplication/:id', passport.authenticate('jwt', { session: false }), unsubmitApplication);
+router.put('/csaw_submitReturnedApplication/:id', authenticateToken, submitReturnedApplication);
 
 module.exports = router;
