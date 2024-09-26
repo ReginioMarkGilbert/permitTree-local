@@ -56,7 +56,7 @@ app.use(session({
 app.use(passport.initialize());
 
 // Use the request logger middleware
-app.use(requestLogger);
+// app.use(requestLogger);
 
 // Routes
 const chainsawRoutes = require('./User/routes/PermitApplicationsRoutes/chainsawApplicationRoutes');

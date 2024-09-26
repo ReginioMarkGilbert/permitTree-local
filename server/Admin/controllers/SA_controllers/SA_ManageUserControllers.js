@@ -44,7 +44,16 @@ const createUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
     try {
-        const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, { new: true }).select('-password');
+        const { id } = req.params;
+        const { userType, ...updateData } = req.body;
+
+        let updatedUser;
+        if (userType === 'Personnel') {
+            updatedUser = await Admin.findByIdAndUpdate(id, updateData, { new: true }).select('-password');
+        } else {
+            updatedUser = await User.findByIdAndUpdate(id, updateData, { new: true }).select('-password');
+        }
+
         if (!updatedUser) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -56,10 +65,18 @@ const updateUser = async (req, res) => {
 
 const deleteUser = async (req, res) => {
     try {
-        const deletedUser = await User.findByIdAndDelete(req.params.id);
-        if (!deletedUser) {
+        const { id } = req.params;
+        const user = await User.findById(id);
+        const admin = await Admin.findById(id);
+
+        if (user) {
+            await User.findByIdAndDelete(id);
+        } else if (admin) {
+            await Admin.findByIdAndDelete(id);
+        } else {
             return res.status(404).json({ message: 'User not found' });
         }
+
         res.json({ message: 'User deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Error deleting user', error: error.message });
