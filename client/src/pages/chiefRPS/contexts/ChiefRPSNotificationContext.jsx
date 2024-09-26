@@ -22,7 +22,7 @@ const ChiefRPSNotificationProvider = ({ children }) => {
 
     useEffect(() => {
         fetchUnreadCount();
-    }, []);
+    }, [fetchUnreadCount]);
 
     const value = {
         unreadCount,

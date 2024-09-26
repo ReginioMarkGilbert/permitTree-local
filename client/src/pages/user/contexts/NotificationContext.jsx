@@ -22,7 +22,7 @@ const NotificationProvider = ({ children }) => {
 
     useEffect(() => {
         fetchUnreadCount();
-    }, []);
+    }, [fetchUnreadCount]);
 
     const value = {
         unreadCount,

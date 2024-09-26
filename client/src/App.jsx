@@ -46,11 +46,14 @@ const App = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const userRole = getUserRole();
+    const [showNavbar, setShowNavbar] = useState(false);
 
     useEffect(() => {
         if (!isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/about' && location.pathname !== '/services' && location.pathname !== '/contact' && location.pathname !== '/learnMore') {
             navigate('/auth');
         }
+        // Set showNavbar based on authentication and current path
+        setShowNavbar(isAuthenticated() && location.pathname !== '/');
     }, [navigate, location.pathname]);
 
     return (
@@ -66,10 +69,10 @@ const App = () => {
                             ) : (
                                 <UserSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
                             )}
-                            <Navbar sidebarToggle={sidebarToggle} setSidebarToggle={toggleSidebar} />
+                            {showNavbar && <Navbar sidebarToggle={sidebarToggle} setSidebarToggle={toggleSidebar} />}
                         </>
                     )}
-                    <div className={`flex-1 transition-all duration-300 ${sidebarToggle ? 'ml-64' : 'ml-0'}`}>
+                    <div className={`flex-1 transition-all duration-300 ${sidebarToggle && showNavbar ? 'ml-64' : 'ml-0'}`}>
                         <div className="p-0">
                             <Routes>
                                 <Route path="/" element={<LandingPage />} />
