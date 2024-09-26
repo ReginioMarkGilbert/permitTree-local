@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
+import { isAuthenticated } from '../../../utils/auth'; // Import the authentication check function
 
 const NotificationContext = createContext();
 
@@ -9,6 +10,10 @@ const NotificationProvider = ({ children }) => {
     const [unreadCount, setUnreadCount] = useState(0);
 
     const fetchUnreadCount = async () => {
+        if (!isAuthenticated()) {
+            setUnreadCount(0); // Reset count if not authenticated
+            return;
+        }
         try {
             const token = localStorage.getItem('token');
             const response = await axios.get('http://localhost:3000/api/user/notifications/unread-count', {
@@ -21,6 +26,15 @@ const NotificationProvider = ({ children }) => {
     };
 
     useEffect(() => {
+        // let intervalId;
+        // if (isAuthenticated()) {
+        //     fetchUnreadCount();
+        //     intervalId = setInterval(fetchUnreadCount, 60000);
+        // }
+
+        // return () => {
+        //     if (intervalId) clearInterval(intervalId);
+        // };
         fetchUnreadCount();
     }, [fetchUnreadCount]);
 
