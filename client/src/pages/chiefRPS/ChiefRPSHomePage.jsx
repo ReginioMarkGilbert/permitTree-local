@@ -26,7 +26,7 @@ const AdminHomePage = () => {
 
     const quickActions = [
         { title: "Reports", icon: <FaChartLine className="h-6 w-6" />, link: "/chief-rps/reports" },
-        { title: "All Applications", icon: <ClipboardList className="h-6 w-6" />, link: "/chief-rps/applications" },
+        { title: "All Applications", icon: <ClipboardList className="h-6 w-6" />, link: "/chief-rps/dashboard" },
         { title: "System Settings", icon: <Settings className="h-6 w-6" />, link: "/chief-rps/settings" },
         {
             title: "Notifications",

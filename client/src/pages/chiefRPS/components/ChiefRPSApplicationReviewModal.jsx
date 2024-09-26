@@ -248,47 +248,51 @@ const ChiefRPSApplicationReviewModal = ({ isOpen, onClose, application, onUpdate
                         </Section>
                     )}
                 </div>
-                <div className="p-5 bg-gray-50 flex justify-end rounded-b-2xl space-x-4">
-                    {!isReturning && (
-                        <button
-                            onClick={() => setIsReturning(true)}
-                            className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-                        >
-                            Return
-                        </button>
-                    )}
-                    {isReturning && (
-                        <>
-                            <div className="mb-4">
-                                <label htmlFor="remarks" className="block mb-2">Remarks:</label>
+                <div className="p-5 bg-gray-50 rounded-b-2xl">
+                    {!isReturning ? (
+                        <div className="flex justify-end space-x-4">
+                            <button
+                                onClick={() => setIsReturning(true)}
+                                className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
+                            >
+                                Return
+                            </button>
+                            <button
+                                onClick={handleAccept}
+                                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                            >
+                                Accept
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            <div>
+                                <label htmlFor="remarks" className="block mb-2 font-medium text-gray-700">Remarks:</label>
                                 <textarea
                                     id="remarks"
                                     value={remarks}
                                     onChange={(e) => setRemarks(e.target.value)}
-                                    className="w-full p-2 border rounded"
+                                    className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     rows="4"
+                                    placeholder="Enter your remarks here..."
                                 ></textarea>
                             </div>
-                            <button
-                                onClick={handleReturn}
-                                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-                            >
-                                Confirm Return
-                            </button>
-                            <button
-                                onClick={() => setIsReturning(false)}
-                                className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
-                            >
-                                Cancel
-                            </button>
-                        </>
+                            <div className="flex justify-end space-x-4">
+                                <button
+                                    onClick={() => setIsReturning(false)}
+                                    className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleReturn}
+                                    className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                                >
+                                    Confirm Return
+                                </button>
+                            </div>
+                        </div>
                     )}
-                    <button
-                        onClick={handleAccept}
-                        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                    >
-                        Accept
-                    </button>
                 </div>
                 {previewImage && (
                     <div
