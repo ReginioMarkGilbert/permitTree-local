@@ -6,7 +6,8 @@ const {
     getChiefRPSNotifications,
     markNotificationAsRead,
     getUnreadNotificationCount,
-    markNotificationAsUnread
+    markNotificationAsUnread,
+    markAllNotificationsAsRead
 } = require('../controllers/ChiefRPSNotificationControllers');
 
 router.post('/notifications', authenticateToken, createNotification);
@@ -14,5 +15,5 @@ router.get('/notifications', authenticateToken, getChiefRPSNotifications);
 router.patch('/notifications/:id/read', authenticateToken, markNotificationAsRead);
 router.get('/notifications/unread-count', authenticateToken, getUnreadNotificationCount);
 router.patch('/notifications/:id/unread', authenticateToken, markNotificationAsUnread);
-
+router.post('/notifications/mark-all-read', authenticateToken, markAllNotificationsAsRead);
 module.exports = router;

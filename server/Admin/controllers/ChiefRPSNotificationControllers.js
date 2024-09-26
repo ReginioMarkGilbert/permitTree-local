@@ -102,11 +102,25 @@ const deleteNotification = async (req, res) => {
     }
 };
 
+const markAllNotificationsAsRead = async (req, res) => {
+    try {
+        await ChiefRPSNotification.updateMany(
+            { read: false },
+            { $set: { read: true } }
+        );
+        res.json({ message: 'All notifications marked as read' });
+    } catch (error) {
+        console.error('Error marking all notifications as read:', error);
+        res.status(500).json({ message: 'Error updating notifications' });
+    }
+};
+
 module.exports = {
     createNotification,
     getChiefRPSNotifications,
     markNotificationAsRead,
     getUnreadNotificationCount,
     markNotificationAsUnread,
-    deleteNotification
+    deleteNotification,
+    markAllNotificationsAsRead
 };

@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { Bell, X, AlertCircle, CheckCircle, Clock, FileText, RotateCcw } from 'lucide-react';
+import { Bell, X, AlertCircle, CheckCircle, Clock, FileText, RotateCcw, Mail } from 'lucide-react';
 import '../../components/ui/styles/customScrollBar.css';
 import { useChiefRPSNotification } from './contexts/ChiefRPSNotificationContext';
-import { isAuthenticated } from '../../utils/auth'; // Assuming you have this utility function
+import { isAuthenticated } from '../../utils/auth';
+import './styles/ChiefRPSNotification.css';
 
 function ChiefRPSNotificationPage() {
     const { fetchUnreadCount } = useChiefRPSNotification();
@@ -84,7 +85,7 @@ function ChiefRPSNotificationPage() {
             setNotifications(notifications.filter(n => n._id !== id));
             setDeletedNotification(notificationToDelete);
             setShowUndo(true);
-            toast.success('Notification deleted successfully');
+            // toast.success('Notification deleted successfully');
             fetchUnreadCount(); // Update unread count
         } catch (error) {
             console.error('Error deleting notification:', error);
@@ -130,17 +131,48 @@ function ChiefRPSNotificationPage() {
         }
     };
 
+    const handleMarkAllAsRead = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.post(
+                'http://localhost:3000/api/admin/notifications/mark-all-read',
+                {},
+                { headers: { Authorization: token } }
+            );
+            setNotifications(notifications.map(n => ({ ...n, read: true })));
+            fetchUnreadCount();
+            toast.success('All notifications marked as read');
+        } catch (error) {
+            console.error('Error marking all notifications as read:', error);
+            toast.error('Failed to mark all notifications as read');
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 p-24">
             <div className="max-w-3xl mx-auto">
                 <header className="flex items-center justify-between mb-8">
-                    <h1 className="text-2xl font-bold text-green-800">Chief RPS Notifications</h1>
-                    <Bell className="w-6 h-6 text-green-600" />
+                    <h1 className="text-2xl font-bold text-green-800">Notifications</h1>
+                    <div className="flex items-center space-x-4">
+                        <div className="relative group">
+                            <button
+                                onClick={handleMarkAllAsRead}
+                                className="p-2 rounded-full hover:bg-gray-200 transition-colors"
+                                aria-label="Mark all as read"
+                            >
+                                <Mail className="w-6 h-6 text-gray-600 group-hover:text-blue-600" />
+                            </button>
+                            <span className="absolute hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2 -left-8 top-full mt-1 transform -translate-x-1/2 whitespace-nowrap">
+                                Mark all as read
+                            </span>
+                        </div>
+                        {/* <Bell className="w-6 h-6 text-green-600" /> */}
+                    </div>
                 </header>
 
                 {/* Notifications container */}
                 <div className="bg-white rounded-lg shadow-md p-6">
-                    <div className="h-[calc(100vh-15.9375rem)] max-h-[41rem] overflow-y-auto pr-4 custom-scrollbar">
+                    <div className="h-[calc(100vh-15.9375rem)] max-h-[40rem] overflow-y-auto pr-4 custom-scrollbar">
                         {loading ? (
                             <p>Loading notifications...</p>
                         ) : notifications.length === 0 ? (
