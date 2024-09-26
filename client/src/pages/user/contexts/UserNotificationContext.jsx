@@ -1,6 +1,6 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { isAuthenticated } from '../../../utils/auth'; // Import the authentication check function
+import { isAuthenticated } from '../../../utils/auth';
 
 const NotificationContext = createContext();
 
@@ -9,9 +9,9 @@ export const useNotification = () => useContext(NotificationContext);
 const NotificationProvider = ({ children }) => {
     const [unreadCount, setUnreadCount] = useState(0);
 
-    const fetchUnreadCount = async () => {
+    const fetchUnreadCount = useCallback(async () => {
         if (!isAuthenticated()) {
-            setUnreadCount(0); // Reset count if not authenticated
+            setUnreadCount(0);
             return;
         }
         try {
@@ -23,19 +23,19 @@ const NotificationProvider = ({ children }) => {
         } catch (error) {
             console.error('Error fetching unread notification count:', error);
         }
-    };
+    }, []);
 
     useEffect(() => {
         let intervalId;
         if (isAuthenticated()) {
             fetchUnreadCount();
-            intervalId = setInterval(fetchUnreadCount, 5000);
+            intervalId = setInterval(fetchUnreadCount, 10000);
         }
 
         return () => {
             if (intervalId) clearInterval(intervalId);
         };
-        fetchUnreadCount();
+
     }, [fetchUnreadCount]);
 
     const value = {

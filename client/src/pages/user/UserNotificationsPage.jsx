@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Bell, X, AlertCircle, CheckCircle, Clock, FileText, RotateCcw } from 'lucide-react';
 import '../../components/ui/styles/customScrollBar.css';
 import { useNotification } from './contexts/UserNotificationContext';
+import { isAuthenticated } from '../../utils/auth';
 
 function UserNotificationsPage() {
     const { fetchUnreadCount } = useNotification();
@@ -12,10 +13,6 @@ function UserNotificationsPage() {
     const [selectedNotification, setSelectedNotification] = useState(null);
     const [deletedNotification, setDeletedNotification] = useState(null);
     const [showUndo, setShowUndo] = useState(false);
-
-    useEffect(() => {
-        fetchNotifications();
-    }, []);
 
     useEffect(() => {
         let timer;
@@ -28,7 +25,7 @@ function UserNotificationsPage() {
         return () => clearTimeout(timer);
     }, [showUndo]);
 
-    const fetchNotifications = async () => {
+    const fetchNotifications = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
             const response = await axios.get('http://localhost:3000/api/user/notifications', {
@@ -41,7 +38,19 @@ function UserNotificationsPage() {
             toast.error('Failed to fetch notifications');
             setLoading(false);
         }
-    };
+    }, []); // Empty dependency array
+
+    useEffect(() => {
+        let intervalId;
+        if (isAuthenticated()) {
+            fetchNotifications();
+            intervalId = setInterval(fetchNotifications, 10000);
+        }
+
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        };
+    }, [fetchNotifications]);
 
     const handleNotificationClick = async (notification) => {
         setSelectedNotification(notification);

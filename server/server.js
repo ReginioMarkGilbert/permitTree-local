@@ -1,4 +1,5 @@
 const express = require('express');
+const requestLogger = require('./middleware/requestLogger');
 // const mongoose = require('mongoose');
 const connectDB = require('./config/database');
 const bodyParser = require('body-parser');
@@ -54,12 +55,8 @@ app.use(session({
 // Passport middleware
 app.use(passport.initialize());
 
-// Add this before your routes
-app.use((req, res, next) => {
-    console.log(`Incoming request: ${req.method} ${req.path}`);
-    console.log('Headers:', req.headers);
-    next();
-});
+// Use the request logger middleware
+app.use(requestLogger);
 
 // Routes
 const chainsawRoutes = require('./User/routes/PermitApplicationsRoutes/chainsawApplicationRoutes');
@@ -85,7 +82,6 @@ app.use('/api/admin/reports', adminReportsRoutes);
 
 const adminNotificationRoutes = require('./Admin/routes/ChiefRPSNotificationRoutes');
 app.use('/api/admin', adminNotificationRoutes);
-
 
 // Start the server
 const port = process.env.PORT || 3000;

@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import { Bell, X, AlertCircle, CheckCircle, Clock, FileText, RotateCcw } from 'lucide-react';
 import '../../components/ui/styles/customScrollBar.css';
 import { useChiefRPSNotification } from './contexts/ChiefRPSNotificationContext';
+import { isAuthenticated } from '../../utils/auth'; // Assuming you have this utility function
 
 function ChiefRPSNotificationPage() {
     const { fetchUnreadCount } = useChiefRPSNotification();
@@ -12,21 +13,6 @@ function ChiefRPSNotificationPage() {
     const [selectedNotification, setSelectedNotification] = useState(null);
     const [deletedNotification, setDeletedNotification] = useState(null);
     const [showUndo, setShowUndo] = useState(false);
-
-    useEffect(() => {
-        fetchNotifications();
-    }, []);
-
-    useEffect(() => {
-        let timer;
-        if (showUndo) {
-            timer = setTimeout(() => {
-                setShowUndo(false);
-                setDeletedNotification(null);
-            }, 5000);
-        }
-        return () => clearTimeout(timer);
-    }, [showUndo]);
 
     const fetchNotifications = async () => {
         try {
@@ -42,6 +28,29 @@ function ChiefRPSNotificationPage() {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        let intervalId;
+        if (isAuthenticated()) {
+            fetchNotifications();
+            intervalId = setInterval(fetchNotifications, 10000);
+        }
+
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        };
+    }, [fetchNotifications]);
+
+    useEffect(() => {
+        let timer;
+        if (showUndo) {
+            timer = setTimeout(() => {
+                setShowUndo(false);
+                setDeletedNotification(null);
+            }, 5000);
+        }
+        return () => clearTimeout(timer);
+    }, [showUndo]);
 
     const handleNotificationClick = async (notification) => {
         setSelectedNotification(notification);
