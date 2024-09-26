@@ -3,7 +3,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Bell, X, AlertCircle, CheckCircle, Clock, FileText, RotateCcw } from 'lucide-react';
 import '../../components/ui/styles/customScrollBar.css';
-import { useNotification } from './contexts/NotificationContext';
+import { useNotification } from './contexts/UserNotificationContext';
 
 function UserNotificationsPage() {
     const { fetchUnreadCount } = useNotification();

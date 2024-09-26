@@ -12,7 +12,7 @@ import UserApplicationsPage from './pages/user/UserApplicationsStatusPage';
 import ApplicationForm from './pages/user/ApplicationForm';
 import UserAuthPage from './pages/public/UserAuthPage';
 import UserNotificationsPage from './pages/user/UserNotificationsPage';
-import NotificationProvider from './pages/user/contexts/NotificationContext';
+import NotificationProvider from './pages/user/contexts/UserNotificationContext';
 
 import LandingPage from './pages/public/LandingPage';
 import LearnMorePage from './pages/public/LearnMorePage';

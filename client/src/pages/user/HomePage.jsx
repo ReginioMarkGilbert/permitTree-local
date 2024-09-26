@@ -7,7 +7,7 @@ import { FaLeaf, FaBars, FaTimes, FaHome, FaClipboardList, FaBell, FaUser } from
 import { toast, ToastContainer } from 'react-toastify';
 import HomeFooter from '../../components/ui/HomeFooter';
 import '../../components/ui/styles/customScrollBar.css';
-import { useNotification } from './contexts/NotificationContext';
+import { useNotification } from './contexts/UserNotificationContext';
 
 const HomePage = () => {
     const [sidebarOpen, setSidebarOpen] = useState(true);

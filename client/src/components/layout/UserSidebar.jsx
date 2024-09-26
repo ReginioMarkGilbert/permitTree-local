@@ -5,7 +5,7 @@ import permitTreeLogo from '../../assets/denr-logo.png';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { isAuthenticated, removeToken } from '../../utils/auth';
-import { useNotification } from '../../pages/user/contexts/NotificationContext';
+import { useNotification } from '../../pages/user/contexts/UserNotificationContext';
 
 const Sidebar = ({ isOpen }) => {
     const navigate = useNavigate();
