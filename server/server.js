@@ -83,6 +83,9 @@ app.use('/api/admin/reports', adminReportsRoutes);
 const adminNotificationRoutes = require('./Admin/routes/ChiefRPSNotificationRoutes');
 app.use('/api/admin', adminNotificationRoutes);
 
+const SA_ManageUserRoutes = require('./Admin/routes/SA_routes/SA_ManageUserRoutes');
+app.use('/api/admin/super', SA_ManageUserRoutes);
+
 // Start the server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
