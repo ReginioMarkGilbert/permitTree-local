@@ -3,11 +3,17 @@ const ChiefRPSNotification = require('../models/ChiefRPSNotificationSchema');
 const createNotification = async (req, res) => {
     try {
         const { message, applicationId, userId, type } = req.body;
+
+        // Format the type to sentence case
+        const formattedType = type
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
+
         const newNotification = new ChiefRPSNotification({
             message,
             applicationId,
             userId,
-            type
+            type: formattedType // Use the formatted type
         });
         await newNotification.save();
         res.status(201).json({ success: true, notification: newNotification });

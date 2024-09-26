@@ -124,11 +124,19 @@ function UserNotificationsPage() {
         }
     };
 
+    const formatNotificationType = (type) => {
+        return type.split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
+    };
+
     const getIcon = (type) => {
-        switch (type) {
-            case 'warning': return <AlertCircle className="w-5 h-5 text-yellow-500" />;
-            case 'success': return <CheckCircle className="w-5 h-5 text-green-500" />;
-            case 'info': return <FileText className="w-5 h-5 text-blue-500" />;
+        const formattedType = formatNotificationType(type).toLowerCase();
+        switch (formattedType) {
+            case 'application returned': return <AlertCircle className="w-5 h-5 text-yellow-500" />;
+            case 'application accepted': return <CheckCircle className="w-5 h-5 text-green-500" />;
+            case 'application submitted': return <FileText className="w-5 h-5 text-blue-500" />;
+            // ... other cases
             default: return <Bell className="w-5 h-5 text-gray-500" />;
         }
     };
@@ -161,7 +169,7 @@ function UserNotificationsPage() {
                                             {getIcon(notification.type)}
                                             <div>
                                                 <h2 className={`text-lg font-semibold mb-1 ${!notification.read ? 'text-green-700' : 'text-gray-700'
-                                                    }`}>{notification.type}</h2>
+                                                    }`}>{formatNotificationType(notification.type)}</h2>
                                                 <p className="text-sm text-gray-600 mb-2">{notification.message}</p>
                                                 <p className="text-xs text-gray-400 flex items-center">
                                                     <Clock className="w-3 h-3 mr-1" />
