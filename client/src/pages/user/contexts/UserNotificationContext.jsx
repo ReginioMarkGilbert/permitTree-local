@@ -26,15 +26,15 @@ const NotificationProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        // let intervalId;
-        // if (isAuthenticated()) {
-        //     fetchUnreadCount();
-        //     intervalId = setInterval(fetchUnreadCount, 60000);
-        // }
+        let intervalId;
+        if (isAuthenticated()) {
+            fetchUnreadCount();
+            intervalId = setInterval(fetchUnreadCount, 5000);
+        }
 
-        // return () => {
-        //     if (intervalId) clearInterval(intervalId);
-        // };
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        };
         fetchUnreadCount();
     }, [fetchUnreadCount]);
 
