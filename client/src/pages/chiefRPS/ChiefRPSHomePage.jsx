@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "../../components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "../../components/ui/Card";
-import { Bell, ClipboardList, Users, Settings, TrendingUp, CheckCircle, XCircle, ClipboardCheck } from "lucide-react";
+import { Bell, ClipboardList, Users, Settings, TrendingUp, CheckCircle, XCircle, ClipboardCheck, RotateCcw } from "lucide-react";
 import { FaChartLine } from 'react-icons/fa';
 import '../../components/ui/styles/customScrollBar.css';
 import { useChiefRPSNotification } from './contexts/ChiefRPSNotificationContext';
@@ -20,7 +20,7 @@ const AdminHomePage = () => {
         totalUsers: 0,
         applicationsForReview: 0,
         approvedToday: 23,
-        returnedApplications: 5,
+        applicationsReturned: 0,
         applicationIncrease: 12
     });
 
@@ -53,11 +53,14 @@ const AdminHomePage = () => {
                     throw new Error('No authentication token found.');
                 }
 
-                const [totalUsersResponse, applicationsForReviewResponse] = await Promise.all([
+                const [totalUsersResponse, applicationsForReviewResponse, applicationsReturnedResponse] = await Promise.all([
                     axios.get('http://localhost:3000/api/admin/reports/total-users', {
                         headers: { Authorization: token }
                     }),
                     axios.get('http://localhost:3000/api/admin/reports/applications-for-review', {
+                        headers: { Authorization: token }
+                    }),
+                    axios.get('http://localhost:3000/api/admin/reports/applications-returned', {
                         headers: { Authorization: token }
                     })
                 ]);
@@ -65,7 +68,8 @@ const AdminHomePage = () => {
                 setDashboardStats(prevStats => ({
                     ...prevStats,
                     totalUsers: totalUsersResponse.data.totalUsers,
-                    applicationsForReview: applicationsForReviewResponse.data.applicationsForReview
+                    applicationsForReview: applicationsForReviewResponse.data.applicationsForReview,
+                    applicationsReturned: applicationsReturnedResponse.data.applicationsReturned
                 }));
 
                 // Fetch all applications (for recent applications display)
@@ -201,10 +205,10 @@ const AdminHomePage = () => {
                                 </div>
                                 <div className="bg-orange-100 p-4 rounded-lg">
                                     <div className="flex items-center justify-between">
-                                        <XCircle className="h-6 w-6 text-orange-600" />
-                                        <span className="text-2xl font-bold text-orange-800">{dashboardStats.returnedApplications}</span>
+                                        <RotateCcw className="h-6 w-6 text-orange-600" />
+                                        <span className="text-2xl font-bold text-orange-800">{dashboardStats.applicationsReturned}</span>
                                     </div>
-                                    <p className="text-sm text-orange-600 mt-2">Returned Applications</p>
+                                    <p className="text-sm text-orange-600 mt-2">Applications Returned</p>
                                 </div>
                             </div>
                             <div className="bg-purple-100 p-4 rounded-lg">
