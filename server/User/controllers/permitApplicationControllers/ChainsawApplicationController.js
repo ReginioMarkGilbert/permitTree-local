@@ -120,85 +120,38 @@ const csaw_createApplication = async (req, res) => {
 
 const csaw_saveDraft = async (req, res) => {
     try {
-        console.log('Request body:', req.body);
-        console.log('Request files:', req.files);
+        const customId = await CSAW_CustomId(); // Changed from generateCustomId to CSAW_CustomId
+        console.log('Generated customId:', customId);
 
-        const {
-            applicationType = 'Chainsaw Registration',
-            registrationType,
-            chainsawStore,
-            ownerName,
-            address,
-            phone,
-            brand,
-            model,
-            serialNumber,
-            dateOfAcquisition,
-            powerOutput,
-            maxLengthGuidebar,
-            countryOfOrigin,
-            purchasePrice,
-            dateOfSubmission,
-            isOwner,
-            isTenureHolder,
-            isBusinessOwner,
-            isPLTPRHolder,
-            isWPPHolder
-        } = req.body;
+        const applicationData = {
+            ...req.body,
+            customId: customId,
+            userId: req.user._id,
+            status: 'Draft'
+        };
 
-        const parsedDateOfSubmission = new Date(dateOfSubmission);
-        if (isNaN(parsedDateOfSubmission)) {
-            throw new Error('Invalid dateOfSubmission');
-        }
+        // Handle file uploads
+        const fileFields = ['officialReceipt', 'deedOfSale', 'specialPowerOfAttorney', 'forestTenureAgreement', 'businessPermit', 'certificateOfRegistration', 'woodProcessingPlantPermit'];
+        applicationData.files = {};
 
-        const customId = await CSAW_CustomId();
-
-        // Process uploaded files
-        const files = {};
-        if (req.files) {
-            for (const [key, fileArray] of Object.entries(req.files)) {
-                files[key] = fileArray.map(file => ({
+        for (const field of fileFields) {
+            if (req.files && req.files[field]) {
+                const fileArray = Array.isArray(req.files[field]) ? req.files[field] : [req.files[field]];
+                applicationData.files[field] = fileArray.map(file => ({
                     filename: file.name,
-                    contentType: file.mimetype,
-                    data: file.data
+                    data: file.data,
+                    contentType: file.mimetype
                 }));
             }
         }
 
-        const newDraft = new Application({
-            customId,
-            applicationType,
-            registrationType,
-            chainsawStore,
-            ownerName,
-            address,
-            phone,
-            brand,
-            model,
-            serialNumber,
-            dateOfAcquisition,
-            powerOutput,
-            maxLengthGuidebar,
-            countryOfOrigin,
-            purchasePrice,
-            dateOfSubmission: parsedDateOfSubmission,
-            status: 'Draft',
-            isOwner: isOwner === 'true',
-            isTenureHolder: isTenureHolder === 'true',
-            isBusinessOwner: isBusinessOwner === 'true',
-            isPLTPRHolder: isPLTPRHolder === 'true',
-            isWPPHolder: isWPPHolder === 'true',
-            files,
-            userId: req.user.id
-        });
+        const newApplication = new Application(applicationData);
+        await newApplication.save();
 
-        await newDraft.save();
-        console.log('Draft saved:', newDraft);
-
-        res.status(201).json({ message: 'Draft saved successfully', application: newDraft });
+        res.status(201).json({ message: 'Draft saved successfully', application: newApplication });
     } catch (error) {
         console.error('Error saving draft:', error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ message: 'Error saving draft', error: error.message });
     }
 };
 
