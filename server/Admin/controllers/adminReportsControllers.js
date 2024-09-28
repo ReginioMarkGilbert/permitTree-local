@@ -21,7 +21,18 @@ const getApplicationsForReview = async (req, res) => {
     }
 };
 
+const getApplicationsReturned = async (req, res) => {
+    try {
+        const applicationsReturned = await Application.countDocuments({ status: 'Returned' });
+        res.json({ applicationsReturned });
+    } catch (error) {
+        console.error('Error fetching returned applications:', error);
+        res.status(500).json({ message: 'Error fetching returned applications' });
+    }
+};
+
 module.exports = {
     getTotalUsers,
-    getApplicationsForReview
+    getApplicationsForReview,
+    getApplicationsReturned
 };
