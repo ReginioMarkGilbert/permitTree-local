@@ -19,6 +19,7 @@
     "clsx": "^2.1.1",
     "connect-mongo": "^5.1.0",
     "express-session": "^1.18.0",
+    "framer-motion": "^11.9.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.439.0",
     "passport": "^0.7.0",

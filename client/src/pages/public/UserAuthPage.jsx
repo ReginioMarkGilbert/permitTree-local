@@ -10,11 +10,11 @@ import Label from '../../components/ui/Label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/Tabs';
 import { FaLeaf } from 'react-icons/fa';
 import './styles/UserAuthPage.css';
-// import api from '../utils/api';
-
+import { motion } from 'framer-motion';
+import { fadeIn, slideUp } from '../../utils/animations';
 
 const UserAuthPage = () => {
-    const [activeTab, setActiveTab] = useState('signin'); // Change this line
+    const [activeTab, setActiveTab] = useState('signin');
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [username, setUsername] = useState('');
@@ -116,7 +116,12 @@ const UserAuthPage = () => {
 
 
     return (
-        <div className="flex flex-col min-h-screen bg-green-50">
+        <motion.div
+            className="flex flex-col min-h-screen bg-green-50"
+            initial="hidden"
+            animate="visible"
+            variants={fadeIn}
+        >
             <header className="bg-white shadow-sm w-full">
                 <div className="container mx-auto px-4">
                     <div className="flex items-center justify-between h-16">
@@ -127,7 +132,10 @@ const UserAuthPage = () => {
                     </div>
                 </div>
             </header>
-            <main className="flex-1 flex items-center justify-center">
+            <motion.main
+                className="flex-1 flex items-center justify-center"
+                variants={slideUp}
+            >
                 <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
                     <Tabs defaultValue="signin" className="w-full">
                         <TabsList>
@@ -195,12 +203,12 @@ const UserAuthPage = () => {
                         </TabsContent>
                     </Tabs>
                 </div>
-            </main>
+            </motion.main>
             <footer className="py-6 text-center bg-green-800 text-white">
                 <p className="text-sm">&copy; 2023 DENR-PENRO. All rights reserved.</p>
             </footer>
             <ToastContainer />
-        </div>
+        </motion.div>
     );
 };
 

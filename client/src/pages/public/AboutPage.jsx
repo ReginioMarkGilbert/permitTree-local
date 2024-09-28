@@ -3,16 +3,31 @@ import { Leaf, Shield, TreePine } from "lucide-react";
 import Header from '../../components/Header';
 import { Link } from 'react-router-dom';
 import { FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
+import { motion } from 'framer-motion';
+import { fadeIn, slideUp, staggerChildren } from '../../utils/animations';
 
-export default function AboutPage() {
+const AboutPage = () => {
     return (
         <div className="flex flex-col min-h-screen bg-green-50">
             <Header />
-            <main className="flex-1 mb-14">
+            <motion.main
+                className="flex-1 mb-14"
+                initial="hidden"
+                animate="visible"
+                variants={fadeIn}
+            >
                 <div className="container mx-auto px-4 py-12">
-                    <h1 className="text-4xl font-bold text-green-800 mb-14 text-center">About PermitTree</h1>
-                    <div className="grid md:grid-cols-2 gap-12 items-center">
-                        <div>
+                    <motion.h1
+                        className="text-4xl font-bold text-green-800 mb-14 text-center"
+                        variants={slideUp}
+                    >
+                        About PermitTree
+                    </motion.h1>
+                    <motion.div
+                        className="grid md:grid-cols-2 gap-12 items-center"
+                        variants={staggerChildren}
+                    >
+                        <motion.div variants={slideUp}>
                             <p className="text-lg mb-6">
                                 <span className="font-bold">PermitTree</span> is the official online permit issuance and management system of the Department of Environment and Natural Resources - Provincial Environment and Natural Resources Office (DENR-PENRO). Our mission is to streamline the process of obtaining permits for tree-related activities while ensuring the conservation and proper management of our country's natural resources.
                             </p>
@@ -22,8 +37,11 @@ export default function AboutPage() {
                             <p className="text-lg">
                                 Our team is committed to providing efficient, transparent, and environmentally responsible services to all our users. With PermitTree, you can be confident that your tree-related activities are in compliance with local regulations and contribute to sustainable forest management practices.
                             </p>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 justify-items-center">
+                        </motion.div>
+                        <motion.div
+                            className="grid grid-cols-1 sm:grid-cols-2 gap-6 justify-items-center"
+                            variants={staggerChildren}
+                        >
                             <div className="bg-white p-6 rounded-lg shadow-md flex flex-col items-center text-center">
                                 <Leaf className="h-16 w-16 text-green-600 mb-4" />
                                 <h3 className="text-xl font-semibold mb-2">Eco-Friendly</h3>
@@ -46,11 +64,16 @@ export default function AboutPage() {
                                 <h3 className="text-xl font-semibold mb-2">Efficient</h3>
                                 <p>Streamlining processes for faster permit issuance</p>
                             </div>
-                        </div>
-                    </div>
+                        </motion.div>
+                    </motion.div>
                 </div>
-            </main>
-            <footer className="bg-green-800 text-white py-12">
+            </motion.main>
+            <motion.footer
+                className="bg-green-800 text-white py-12"
+                variants={fadeIn}
+                initial="hidden"
+                animate="visible"
+            >
                 <div className="container mx-auto px-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div>
@@ -94,7 +117,9 @@ export default function AboutPage() {
                         <p className="text-sm">&copy; 2023 PermitTree - DENR-PENRO. All rights reserved.</p>
                     </div>
                 </div>
-            </footer>
+            </motion.footer>
         </div>
     );
-}
+};
+
+export default AboutPage;

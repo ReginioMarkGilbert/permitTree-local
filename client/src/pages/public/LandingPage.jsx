@@ -1,26 +1,47 @@
 import React from 'react';
-import { Link } from 'react-router-dom'; // Ensure this import is correct
+import { Link } from 'react-router-dom';
 import { FaTree, FaShieldAlt, FaFileAlt, FaMapMarkerAlt, FaTruck, FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
+import { motion } from 'framer-motion';
 import { Button } from '../../components/ui/Button';
 import Header from '../../components/Header';
 import './styles/LandingPage.css';
+import { fadeIn, slideUp, staggerChildren } from '../../utils/animations';
 
 const LandingPage = () => {
-
-
-
     return (
         <div className="flex flex-col min-h-screen bg-green-50">
             <Header />
-            <main className="flex-1">
-                <section className="bg-green-100 py-20">
+            <motion.main
+                className="flex-1"
+                initial="hidden"
+                animate="visible"
+                variants={fadeIn}
+            >
+                <motion.section
+                    className="bg-green-100 py-20"
+                    variants={fadeIn}
+                >
                     <div className="container mx-auto px-4">
-                        <div className="max-w-3xl mx-auto text-center">
-                            <h1 className="text-4xl font-bold text-green-800 mb-4">Welcome to PermitTree</h1>
-                            <p className="text-xl text-gray-600 mb-8">
+                        <motion.div
+                            className="max-w-3xl mx-auto text-center"
+                            variants={staggerChildren}
+                        >
+                            <motion.h1
+                                className="text-4xl font-bold text-green-800 mb-4"
+                                variants={slideUp}
+                            >
+                                Welcome to PermitTree
+                            </motion.h1>
+                            <motion.p
+                                className="text-xl text-gray-600 mb-8"
+                                variants={slideUp}
+                            >
                                 Streamlined permitting for tree-related activities. Protecting our environment, one permit at a time.
-                            </p>
-                            <div className="space-x-4">
+                            </motion.p>
+                            <motion.div
+                                className="space-x-4"
+                                variants={slideUp}
+                            >
                                 <Link to="/auth">
                                     <Button className="bg-green-600 hover:bg-green-700 text-white">Get Started</Button>
                                 </Link>
@@ -29,49 +50,53 @@ const LandingPage = () => {
                                         Learn More
                                     </Button>
                                 </Link>
-                            </div>
-                        </div>
+                            </motion.div>
+                        </motion.div>
                     </div>
-                </section>
-                <section className="py-20">
+                </motion.section>
+                <motion.section
+                    className="py-20"
+                    variants={fadeIn}
+                >
                     <div className="container mx-auto px-4">
-                        <h2 className="text-3xl font-bold text-green-800 text-center mb-12">Our Services</h2>
-                        <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                            <div className="bg-white p-6 rounded-lg shadow-md">
-                                <FaTree className="h-12 w-12 text-green-600 mb-4" />
-                                <h3 className="text-xl font-semibold text-green-800 mb-2">Tree Cutting Permits</h3>
-                                <p className="text-gray-600">Apply for permits to legally cut trees, ensuring sustainable forest management practices.</p>
-                            </div>
-                            <div className="bg-white p-6 rounded-lg shadow-md">
-                                <FaShieldAlt className="h-12 w-12 text-green-600 mb-4" />
-                                <h3 className="text-xl font-semibold text-green-800 mb-2">Chainsaw Registration</h3>
-                                <p className="text-gray-600">Register your chainsaw to comply with regulations and promote responsible use of forestry equipment.</p>
-                            </div>
-                            <div className="bg-white p-6 rounded-lg shadow-md">
-                                <FaFileAlt className="h-12 w-12 text-green-600 mb-4" />
-                                <h3 className="text-xl font-semibold text-green-800 mb-2">Certificate of Verification (COV)</h3>
-                                <p className="text-gray-600">Obtain a COV for transporting planted trees and non-timber forest products within private land.</p>
-                            </div>
-                            <div className="bg-white p-6 rounded-lg shadow-md">
-                                <FaMapMarkerAlt className="h-12 w-12 text-green-600 mb-4" />
-                                <h3 className="text-xl font-semibold text-green-800 mb-2">Private Tree Plantation Registration (PTPR)</h3>
-                                <p className="text-gray-600">Register your private tree plantations to establish ownership and comply with DENR policies.</p>
-                            </div>
-                            <div className="bg-white p-6 rounded-lg shadow-md">
-                                <FaTruck className="h-12 w-12 text-green-600 mb-4" />
-                                <h3 className="text-xl font-semibold text-green-800 mb-2">National Government Agency Projects</h3>
-                                <p className="text-gray-600">Get permits for tree cutting or earth balling for trees affected by national government agency projects.</p>
-                            </div>
-                            <div className="bg-white p-6 rounded-lg shadow-md">
-                                <FaTree className="h-12 w-12 text-green-600 mb-4" />
-                                <h3 className="text-xl font-semibold text-green-800 mb-2">Private Land Timber Permits</h3>
-                                <p className="text-gray-600">Apply for PLTP for non-premium species or SPLTP for premium/naturally-grown trees on private lands.</p>
-                            </div>
-                        </div>
+                        <motion.h2
+                            className="text-3xl font-bold text-green-800 text-center mb-12"
+                            variants={slideUp}
+                        >
+                            Our Services
+                        </motion.h2>
+                        <motion.div
+                            className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                            variants={staggerChildren}
+                        >
+                            {[
+                                { icon: FaTree, title: "Tree Cutting Permits", description: "Apply for permits to legally cut trees, ensuring sustainable forest management practices." },
+                                { icon: FaShieldAlt, title: "Chainsaw Registration", description: "Register your chainsaw to comply with regulations and promote responsible use of forestry equipment." },
+                                { icon: FaFileAlt, title: "Certificate of Verification (COV)", description: "Obtain a COV for transporting planted trees and non-timber forest products within private land." },
+                                { icon: FaMapMarkerAlt, title: "Private Tree Plantation Registration (PTPR)", description: "Register your private tree plantations to establish ownership and comply with DENR policies." },
+                                { icon: FaTruck, title: "National Government Agency Projects", description: "Get permits for tree cutting or earth balling for trees affected by national government agency projects." },
+                                { icon: FaTree, title: "Private Land Timber Permits", description: "Apply for PLTP for non-premium species or SPLTP for premium/naturally-grown trees on private lands." }
+                            ].map((service, index) => (
+                                <motion.div
+                                    key={index}
+                                    className="bg-white p-6 rounded-lg shadow-md"
+                                    variants={slideUp}
+                                >
+                                    <service.icon className="h-12 w-12 text-green-600 mb-4" />
+                                    <h3 className="text-xl font-semibold text-green-800 mb-2">{service.title}</h3>
+                                    <p className="text-gray-600">{service.description}</p>
+                                </motion.div>
+                            ))}
+                        </motion.div>
                     </div>
-                </section>
-            </main>
-            <footer className="bg-green-800 text-white py-12">
+                </motion.section>
+            </motion.main>
+            <motion.footer
+                className="bg-green-800 text-white py-12"
+                variants={fadeIn}
+                initial="hidden"
+                animate="visible"
+            >
                 <div className="container mx-auto px-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div>
@@ -115,7 +140,7 @@ const LandingPage = () => {
                         <p className="text-sm">&copy; 2023 PermitTree - DENR-PENRO. All rights reserved.</p>
                     </div>
                 </div>
-            </footer>
+            </motion.footer>
         </div>
     );
 };

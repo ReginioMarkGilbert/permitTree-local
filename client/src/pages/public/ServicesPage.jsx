@@ -3,6 +3,8 @@ import { TreePine, Shield, FileText, MapPin, Truck } from "lucide-react";
 import Header from '../../components/Header';
 import { Link } from 'react-router-dom';
 import { FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
+import { motion } from 'framer-motion';
+import { fadeIn, slideUp, staggerChildren } from '../../utils/animations';
 
 export default function ServicesPage() {
     const services = [
@@ -41,24 +43,49 @@ export default function ServicesPage() {
     return (
         <div className="flex flex-col min-h-screen bg-green-50">
             <Header />
-            <main className="flex-1">
+            <motion.main
+                className="flex-1"
+                initial="hidden"
+                animate="visible"
+                variants={fadeIn}
+            >
                 <div className="container mx-auto px-4 py-12">
-                    <h1 className="text-4xl font-bold text-green-800 mb-8 text-center">Our Services</h1>
-                    <p className="text-lg text-center mb-12 max-w-3xl mx-auto">
+                    <motion.h1
+                        className="text-4xl font-bold text-green-800 mb-8 text-center"
+                        variants={slideUp}
+                    >
+                        Our Services
+                    </motion.h1>
+                    <motion.p
+                        className="text-lg text-center mb-12 max-w-3xl mx-auto"
+                        variants={slideUp}
+                    >
                         PermitTree offers a comprehensive range of services to help you manage your tree-related activities in compliance with environmental regulations. Explore our services below:
-                    </p>
-                    <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                    </motion.p>
+                    <motion.div
+                        className="grid gap-8 md:grid-cols-2 lg:grid-cols-3"
+                        variants={staggerChildren}
+                    >
                         {services.map((service, index) => (
-                            <div key={index} className="bg-white p-6 rounded-lg shadow-md flex flex-col items-center text-center">
+                            <motion.div
+                                key={index}
+                                className="bg-white p-6 rounded-lg shadow-md flex flex-col items-center text-center"
+                                variants={slideUp}
+                            >
                                 {service.icon}
                                 <h3 className="text-xl font-semibold mt-4 mb-2 text-green-800">{service.title}</h3>
                                 <p className="text-gray-600">{service.description}</p>
-                            </div>
+                            </motion.div>
                         ))}
-                    </div>
+                    </motion.div>
                 </div>
-            </main>
-            <footer className="bg-green-800 text-white py-12">
+            </motion.main>
+            <motion.footer
+                className="bg-green-800 text-white py-12"
+                variants={fadeIn}
+                initial="hidden"
+                animate="visible"
+            >
                 <div className="container mx-auto px-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div>
@@ -102,7 +129,7 @@ export default function ServicesPage() {
                         <p className="text-sm">&copy; 2023 PermitTree - DENR-PENRO. All rights reserved.</p>
                     </div>
                 </div>
-            </footer>
+            </motion.footer>
         </div>
     );
 }

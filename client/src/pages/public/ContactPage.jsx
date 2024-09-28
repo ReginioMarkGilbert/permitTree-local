@@ -5,6 +5,7 @@ import Header from '../../components/Header';
 import { FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { motion } from 'framer-motion';
 
 const Textarea = ({ id, name, placeholder, rows, required, value, onChange }) => (
     <textarea
@@ -48,12 +49,40 @@ const ContactPage = () => {
         }
     };
 
+    const fadeIn = {
+        hidden: { opacity: 0 },
+        visible: { opacity: 1, transition: { duration: 0.6 } }
+    };
+
+    const slideUp = {
+        hidden: { y: 20, opacity: 0 },
+        visible: {
+            y: 0,
+            opacity: 1,
+            transition: {
+                type: "spring",
+                stiffness: 100,
+                damping: 12
+            }
+        }
+    };
+
     return (
         <div className="flex flex-col min-h-screen bg-green-50">
             <Header />
-            <main className="flex-1">
+            <motion.main
+                className="flex-1"
+                initial="hidden"
+                animate="visible"
+                variants={fadeIn}
+            >
                 <div className="container mx-auto px-4 py-12">
-                    <h1 className="text-4xl font-bold text-green-800 mb-8 text-center">Contact Us</h1>
+                    <motion.h1
+                        className="text-4xl font-bold text-green-800 mb-8 text-center"
+                        variants={slideUp}
+                    >
+                        Contact Us
+                    </motion.h1>
                     <div className="grid md:grid-cols-2 gap-12">
                         <div>
                             <p className="text-lg mb-6">
@@ -102,8 +131,13 @@ const ContactPage = () => {
                         </div>
                     </div>
                 </div>
-            </main>
-            <footer className="bg-green-800 text-white py-12">
+            </motion.main>
+            <motion.footer
+                className="bg-green-800 text-white py-12"
+                variants={fadeIn}
+                initial="hidden"
+                animate="visible"
+            >
                 <div className="container mx-auto px-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div>
@@ -147,7 +181,7 @@ const ContactPage = () => {
                         <p className="text-sm">&copy; 2023 PermitTree - DENR-PENRO. All rights reserved.</p>
                     </div>
                 </div>
-            </footer>
+            </motion.footer>
         </div>
     );
 };
