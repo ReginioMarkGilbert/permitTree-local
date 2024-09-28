@@ -1,13 +1,116 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaTree, FaShieldAlt, FaFileAlt, FaMapMarkerAlt, FaTruck, FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { Button } from '../../components/ui/Button';
 import Header from '../../components/Header';
+import ExpandableServiceCard from '../../components/ui/ExpandableServiceCard';
 import './styles/LandingPage.css';
 import { fadeIn, slideUp, staggerChildren } from '../../utils/animations';
 
 const LandingPage = () => {
+    const [expandedCard, setExpandedCard] = useState(null);
+
+    const services = [
+        {
+            icon: FaTree,
+            title: "Tree Cutting Permits",
+            description: "Apply for permits to legally cut trees, ensuring sustainable forest management practices.",
+            process: [
+                "Submit application form online",
+                "Upload required documents (land title, site plan, etc.)",
+                "Pay application fee through our secure payment system",
+                "Schedule site inspection with a DENR representative",
+                "Receive permit decision within 15 working days",
+                "If approved, download and print your tree cutting permit"
+            ],
+            expandDirection: 'right-bottom'
+        },
+        {
+            icon: FaShieldAlt,
+            title: "Chainsaw Registration",
+            description: "Register your chainsaw to comply with regulations and promote responsible use of forestry equipment.",
+            process: [
+                "Fill out online registration form",
+                "Upload proof of ownership (receipt or deed of sale)",
+                "Provide chainsaw specifications and photos",
+                "Pay registration fee",
+                "Schedule chainsaw inspection at nearest DENR office",
+                "Receive digital registration certificate within 7 working days"
+            ],
+            expandDirection: 'center-bottom'
+        },
+        {
+            icon: FaFileAlt,
+            title: "Certificate of Verification (COV)",
+            description: "Obtain a COV for transporting planted trees and non-timber forest products within private land.",
+            process: [
+                "Submit online application for COV",
+                "Upload proof of land ownership and plantation details",
+                "Provide inventory of trees/products to be transported",
+                "Pay processing fee",
+                "Undergo virtual verification process",
+                "Receive digital COV within 5 working days",
+                "Present digital or printed COV during transport"
+            ],
+            expandDirection: 'left-bottom'
+        },
+        {
+            icon: FaMapMarkerAlt,
+            title: "Private Tree Plantation Registration (PTPR)",
+            description: "Register your private tree plantations to establish ownership and comply with DENR policies.",
+            process: [
+                "Complete online PTPR application form",
+                "Upload land title or proof of ownership",
+                "Provide detailed map and inventory of plantation",
+                "Submit management plan for the plantation",
+                "Pay registration fee",
+                "Schedule on-site verification by DENR personnel",
+                "Receive PTPR certificate within 30 days of successful verification"
+            ],
+            expandDirection: 'right-top'
+        },
+        {
+            icon: FaTruck,
+            title: "National Government Agency Projects",
+            description: "Get permits for tree cutting or earth balling for trees affected by national government agency projects.",
+            process: [
+                "Submit project proposal and justification online",
+                "Provide detailed environmental impact assessment",
+                "Upload project plans and tree inventory",
+                "Propose tree replacement or relocation plan",
+                "Pay processing fee",
+                "Undergo review by DENR technical committee",
+                "Attend virtual consultation if required",
+                "Receive decision within 45 days",
+                "If approved, download special tree cutting/earth balling permit"
+            ],
+            expandDirection: 'center-top'
+        },
+        {
+            icon: FaTree,
+            title: "Private Land Timber Permits",
+            description: "Apply for PLTP for non-premium species or SPLTP for premium/naturally-grown trees on private lands.",
+            process: [
+                "Choose between PLTP or SPLTP based on tree species",
+                "Complete online application form",
+                "Upload land title and proof of tree ownership",
+                "Provide comprehensive tree inventory and harvesting plan",
+                "Submit sustainable management plan for the area",
+                "Pay application fee",
+                "Schedule and undergo field validation by DENR",
+                "Attend online seminar on sustainable harvesting practices",
+                "Receive permit decision within 30 days of field validation",
+                "If approved, download digital permit for immediate use"
+            ],
+            expandDirection: 'left-top'
+        }
+    ];
+
+    const toggleExpand = (index) => {
+        setExpandedCard(expandedCard === index ? null : index);
+    };
+
     return (
         <div className="flex flex-col min-h-screen bg-green-50">
             <Header />
@@ -69,23 +172,17 @@ const LandingPage = () => {
                             className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
                             variants={staggerChildren}
                         >
-                            {[
-                                { icon: FaTree, title: "Tree Cutting Permits", description: "Apply for permits to legally cut trees, ensuring sustainable forest management practices." },
-                                { icon: FaShieldAlt, title: "Chainsaw Registration", description: "Register your chainsaw to comply with regulations and promote responsible use of forestry equipment." },
-                                { icon: FaFileAlt, title: "Certificate of Verification (COV)", description: "Obtain a COV for transporting planted trees and non-timber forest products within private land." },
-                                { icon: FaMapMarkerAlt, title: "Private Tree Plantation Registration (PTPR)", description: "Register your private tree plantations to establish ownership and comply with DENR policies." },
-                                { icon: FaTruck, title: "National Government Agency Projects", description: "Get permits for tree cutting or earth balling for trees affected by national government agency projects." },
-                                { icon: FaTree, title: "Private Land Timber Permits", description: "Apply for PLTP for non-premium species or SPLTP for premium/naturally-grown trees on private lands." }
-                            ].map((service, index) => (
-                                <motion.div
+                            {services.map((service, index) => (
+                                <ExpandableServiceCard
                                     key={index}
-                                    className="bg-white p-6 rounded-lg shadow-md"
-                                    variants={slideUp}
-                                >
-                                    <service.icon className="h-12 w-12 text-green-600 mb-4" />
-                                    <h3 className="text-xl font-semibold text-green-800 mb-2">{service.title}</h3>
-                                    <p className="text-gray-600">{service.description}</p>
-                                </motion.div>
+                                    icon={service.icon}
+                                    title={service.title}
+                                    description={service.description}
+                                    process={service.process}
+                                    expandDirection={service.expandDirection}
+                                    isExpanded={expandedCard === index}
+                                    onToggle={() => toggleExpand(index)}
+                                />
                             ))}
                         </motion.div>
                     </div>
