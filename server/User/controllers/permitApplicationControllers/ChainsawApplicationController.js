@@ -306,6 +306,9 @@ const submitDraft = async (req, res) => {
         if (application.status !== 'Draft') {
             return res.status(400).json({ success: false, message: 'Only draft applications can be submitted' });
         }
+        if (application.userId.toString() !== req.user.id) {
+            return res.status(403).json({ success: false, message: 'Not authorized to submit this application' });
+        }
         application.status = 'Submitted';
         application.dateOfSubmission = new Date();
         await application.save();

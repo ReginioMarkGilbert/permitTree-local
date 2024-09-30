@@ -138,16 +138,17 @@ const UserApplicationsStatusPage = () => {
             const token = localStorage.getItem('token');
             let response;
 
-            if (type === 'submit' || type === 'resubmit') {
-                const endpoint = type === 'submit' ? 'csaw_submitApplication' : 'csaw_submitReturnedApplication';
-                response = await axios.put(`http://localhost:3000/api/${endpoint}/${application._id}`, {}, {
+            if (type === 'submit') {
+                response = await axios.put(`http://localhost:3000/api/csaw_submitDraft/${application._id}`, {}, {
+                    headers: { Authorization: token }
+                });
+            } else if (type === 'resubmit') {
+                response = await axios.put(`http://localhost:3000/api/csaw_submitReturnedApplication/${application._id}`, {}, {
                     headers: { Authorization: token }
                 });
 
                 // Create notification for Chief RPS if resubmitting
-                // In the handleConfirmAction function, update the notification creation:
-
-                if (type === 'resubmit' && response.data.success) {
+                if (response.data.success) {
                     const userResponse = await axios.get('http://localhost:3000/api/user-details', {
                         headers: { Authorization: token }
                     });
