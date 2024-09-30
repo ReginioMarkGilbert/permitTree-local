@@ -5,9 +5,16 @@ const createNotification = async (req, res) => {
         const { message, applicationId, userId, type } = req.body;
 
         // Format the type to sentence case
-        const formattedType = type
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-            .join(' ');
+        let formattedType;
+        if (Array.isArray(type)) {
+            formattedType = type
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                .join(' ');
+        } else if (typeof type === 'string') {
+            formattedType = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+        } else {
+            throw new Error('Invalid type format');
+        }
 
         const newNotification = new ChiefRPSNotification({
             message,

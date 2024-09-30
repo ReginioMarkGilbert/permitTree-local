@@ -145,6 +145,8 @@ const UserApplicationsStatusPage = () => {
                 });
 
                 // Create notification for Chief RPS if resubmitting
+                // In the handleConfirmAction function, update the notification creation:
+
                 if (type === 'resubmit' && response.data.success) {
                     const userResponse = await axios.get('http://localhost:3000/api/user-details', {
                         headers: { Authorization: token }
@@ -152,7 +154,7 @@ const UserApplicationsStatusPage = () => {
                     const user = userResponse.data.user;
 
                     await axios.post('http://localhost:3000/api/admin/notifications', {
-                        message: `${user.firstName} ${user.lastName} has resubmitted their returned application.`,
+                        message: `${user.firstName} ${user.lastName} has resubmitted their returned application (ID: ${application.customId}).`,
                         applicationId: application._id,
                         userId: application.userId,
                         type: 'application_resubmitted'

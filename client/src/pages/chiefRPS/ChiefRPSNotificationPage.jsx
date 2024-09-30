@@ -122,11 +122,18 @@ function ChiefRPSNotificationPage() {
         }
     };
 
+    const formatNotificationType = (type) => {
+        return type.split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
+    };
+
     const getIcon = (type) => {
-        switch (type) {
-            case 'warning': return <AlertCircle className="w-5 h-5 text-yellow-500" />;
-            case 'success': return <CheckCircle className="w-5 h-5 text-green-500" />;
-            case 'info': return <FileText className="w-5 h-5 text-blue-500" />;
+        const formattedType = formatNotificationType(type).toLowerCase();
+        switch (formattedType) {
+            case 'application returned': return <AlertCircle className="w-5 h-5 text-yellow-500" />;
+            case 'application accepted': return <CheckCircle className="w-5 h-5 text-green-500" />;
+            case 'application submitted': return <FileText className="w-5 h-5 text-blue-500" />;
             default: return <Bell className="w-5 h-5 text-gray-500" />;
         }
     };
