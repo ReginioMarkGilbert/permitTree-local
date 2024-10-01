@@ -22,7 +22,7 @@ export const isTokenExpired = () => {
 
 export const checkTokenExpiration = (navigate) => {
     if (isTokenExpired()) {
-        console.log('Token has expired. Logging out...'); // Add this line
+        console.log('Token has expired. Logging out...');
         removeToken();
         navigate('/auth');
         return true; // Return true if token has expired
