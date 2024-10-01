@@ -28,7 +28,7 @@ import ChiefRPSSettingsPage from './pages/chiefRPS/ChiefRPSSettingsPage';
 import ChiefRPSApplicationReviewModal from './pages/chiefRPS/components/ChiefRPSApplicationReviewModal';
 import ChiefRPSApplicationViewModal from './pages/chiefRPS/components/ChiefRPSApplicationViewModal';
 
-import { isAuthenticated, getUserRole, isTokenExpired, logout, getToken } from './utils/auth';
+import { isAuthenticated, getUserRole, logout } from './utils/auth';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -40,6 +40,8 @@ import SuperAdminReportsPage from './pages/SuperAdmin/SuperAdminReportsPage';
 import SuperAdminSettingsPage from './pages/SuperAdmin/SuperAdminSettingsPage';
 import ChiefRPSNotificationPage from './pages/chiefRPS/ChiefRPSNotificationPage';
 import ChiefRPSNotificationProvider from './pages/chiefRPS/contexts/ChiefRPSNotificationContext';
+
+import { checkTokenExpiration } from './utils/tokenManager';
 
 const App = () => {
     const { sidebarToggle, toggleSidebar } = useSidebarToggle();
@@ -55,6 +57,15 @@ const App = () => {
         // Set showNavbar based on authentication and current path
         setShowNavbar(isAuthenticated() && location.pathname !== '/');
     }, [navigate, location.pathname]);
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            checkTokenExpiration(navigate);
+            // console.log('checking token expiration');
+        }, 60000); // Check every minute
+
+        return () => clearInterval(intervalId);
+    }, [navigate]);
 
     return (
         <NotificationProvider>

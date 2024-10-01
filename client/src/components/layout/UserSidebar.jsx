@@ -1,10 +1,10 @@
 import React from 'react';
 import { FaHome, FaFileAlt, FaBell, FaUser, FaSignInAlt, FaClipboardList } from 'react-icons/fa';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import permitTreeLogo from '../../assets/denr-logo.png';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { isAuthenticated, removeToken } from '../../utils/auth';
+import { isAuthenticated } from '../../utils/auth';
+import { removeToken } from '../../utils/tokenManager'; // Update this import
 import { useNotification } from '../../pages/user/contexts/UserNotificationContext';
 
 const Sidebar = ({ isOpen }) => {
@@ -16,12 +16,12 @@ const Sidebar = ({ isOpen }) => {
             const apiUrl = window.location.hostname === 'localhost'
                 ? 'http://localhost:3000/api/logout'
                 : window.location.hostname === '192.168.1.12'
-                    ? 'http://192.168.1.12:3000/api/logout' // for other laptop
+                    ? 'http://192.168.1.12:3000/api/logout'
                     : window.location.hostname === '192.168.1.15'
-                        ? 'http://192.168.1.15:3000/api/logout' // for new url
-                        : 'http://192.168.137.1:3000/api/logout'; // for mobile
+                        ? 'http://192.168.1.15:3000/api/logout'
+                        : 'http://192.168.137.1:3000/api/logout';
             await axios.get(apiUrl);
-            removeToken();
+            removeToken(); // Use the new removeToken function
             navigate('/auth');
             console.log('Logout successful!');
         } catch (error) {

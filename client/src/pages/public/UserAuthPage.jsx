@@ -3,7 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { setToken, getUserRole } from '../../utils/auth';
+import { setToken } from '../../utils/tokenManager'; // Update this import
+import { getUserRole } from '../../utils/auth';
 import AuthButton from '../../components/ui/AuthButton';
 import Input from '../../components/ui/Input';
 import Label from '../../components/ui/Label';
@@ -65,7 +66,7 @@ const UserAuthPage = () => {
             });
             if (response.status === 201) {
                 const data = response.data;
-                setToken(data.token);
+                setToken(data.token); // Use the new setToken function
                 localStorage.setItem('user', JSON.stringify(data.user));
                 toast.success('Signup successful!', {
                     position: 'top-center',
@@ -73,7 +74,6 @@ const UserAuthPage = () => {
                     hideProgressBar: true,
                     onClose: () => {
                         const userRole = getUserRole();
-                        // Add a flag for new users
                         navigate(userRole === 'admin' ? '/admin' : '/home?newUser=true', { replace: true });
                     },
                 });
@@ -94,7 +94,7 @@ const UserAuthPage = () => {
             });
             if (response.status === 200) {
                 const data = response.data;
-                setToken(data.token);
+                setToken(data.token); // Use the new setToken function
                 localStorage.setItem('user', JSON.stringify(data.user));
                 const userRole = getUserRole();
                 if (userRole === 'superadmin') {

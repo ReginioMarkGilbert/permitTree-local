@@ -83,7 +83,7 @@ const login = async (req, res) => {
             role: user.role
         };
 
-        const token = jwt.sign(payload, process.env.JWT_SECRET || 'default_secret', { expiresIn: '1h' });
+        const token = jwt.sign(payload, process.env.JWT_SECRET || 'default_secret', { expiresIn: '2h' });
 
         res.status(200).json({ message: 'Login successful', token: `Bearer ${token}` });
     } catch (err) {

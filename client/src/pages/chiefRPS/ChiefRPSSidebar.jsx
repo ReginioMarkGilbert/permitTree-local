@@ -4,7 +4,8 @@ import { NavLink } from 'react-router-dom';
 import permitTreeLogo from '../../assets/denr-logo.png';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { isAuthenticated, removeToken } from '../../utils/auth';
+import { isAuthenticated } from '../../utils/auth';
+import { removeToken } from '../../utils/tokenManager'; // Import removeToken from tokenManager instead
 import { useChiefRPSNotification } from './contexts/ChiefRPSNotificationContext';
 
 const AdminSidebar = ({ isOpen }) => {

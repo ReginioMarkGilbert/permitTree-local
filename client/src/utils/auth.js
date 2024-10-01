@@ -1,19 +1,8 @@
-export const getToken = () => {
-    const token = localStorage.getItem('token');
-    // console.log('Retrieved Token:', token);
-    return token;
-};
-
-export const setToken = (token) => {
-    localStorage.setItem('token', token);
-};
-
-export const removeToken = () => {
-    localStorage.removeItem('token');
-};
+import { getToken, isTokenExpired, removeToken } from './tokenManager';
 
 export const isAuthenticated = () => {
-    return !!getToken();
+    const token = getToken();
+    return token && !isTokenExpired();
 };
 
 export const getUserRole = () => {
@@ -37,20 +26,5 @@ export const logout = () => {
     window.location.href = '/auth'; // Redirect to the login page
 };
 
-// Add the token expiration check function
-export const isTokenExpired = () => {
-    const token = getToken();
-    if (!token) return true;
-
-    try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const payload = JSON.parse(window.atob(base64));
-        const currentTime = Math.floor(Date.now() / 1000);
-
-        return payload.exp < currentTime;
-    } catch (error) {
-        console.error('Failed to decode token:', error);
-        return true;
-    }
-};
+// Re-export getToken from tokenManager
+export { getToken };
