@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../components/ui/Card';
 import Input from '../components/ui/Input';
@@ -11,6 +11,14 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../components/ui/Modal';
 import '../components/ui/styles/CSAWFormScrollbar.css';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import { CheckIcon, ChevronDownIcon } from "@radix-ui/react-icons";
 
 const ChainsawRegistrationForm = () => {
     const navigate = useNavigate();
@@ -99,28 +107,6 @@ const ChainsawRegistrationForm = () => {
             toast.error("Please select a chainsaw store from the accredited list to proceed.");
             return;
         }
-        // if (currentStep === 3) {
-        //     if (formData.isOwner && (!formData.files.specialPowerOfAttorney || formData.files.specialPowerOfAttorney.length === 0)) {
-        //         toast.error("Please upload the Special Power of Attorney document");
-        //         return;
-        //     }
-        //     if (formData.isTenureHolder && (!formData.files.forestTenureAgreement || formData.files.forestTenureAgreement.length === 0)) {
-        //         toast.error("Please upload the Forest Tenure Agreement document");
-        //         return;
-        //     }
-        //     if (formData.isBusinessOwner && (!formData.files.businessPermit || formData.files.businessPermit.length === 0)) {
-        //         toast.error("Please upload the Business Permit document");
-        //         return;
-        //     }
-        //     if (formData.isPLTPRHolder && (!formData.files.certificateOfRegistration || formData.files.certificateOfRegistration.length === 0)) {
-        //         toast.error("Please upload the Certificate of Registration document");
-        //         return;
-        //     }
-        //     if (formData.isWPPHolder && (!formData.files.woodProcessingPlantPermit || formData.files.woodProcessingPlantPermit.length === 0)) {
-        //         toast.error("Please upload the Wood Processing Plant Permit document");
-        //         return;
-        //     }
-        // }
         if (currentStep === 4) {
             const requiredFields = [
                 'ownerName',
@@ -273,9 +259,71 @@ const ChainsawRegistrationForm = () => {
         // .replace(/\b(PLTPR|WPP)\b/g, match => `${match}`);
     };
 
+    const CustomSelect = ({ value, onChange, options }) => {
+        const [isOpen, setIsOpen] = useState(false);
+        const [width, setWidth] = useState('auto');
+        const selectRef = useRef(null);
+        const measureRef = useRef(null);
+
+        useEffect(() => {
+            const handleClickOutside = (event) => {
+                if (selectRef.current && !selectRef.current.contains(event.target)) {
+                    setIsOpen(false);
+                }
+            };
+
+            document.addEventListener('mousedown', handleClickOutside);
+            return () => {
+                document.removeEventListener('mousedown', handleClickOutside);
+            };
+        }, []);
+
+        useEffect(() => {
+            if (measureRef.current) {
+                const longestOption = options.reduce((a, b) => a.label.length > b.label.length ? a : b);
+                measureRef.current.textContent = longestOption.label;
+                const width = measureRef.current.offsetWidth;
+                setWidth(`${width + 40}px`); // Add some padding
+            }
+        }, [options]);
+
+        return (
+            <div ref={selectRef} className="relative" style={{ width }}>
+                <div
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
+                >
+                    {value ? options.find(opt => opt.value === value)?.label : "Select a store"}
+                    <ChevronDownIcon className="h-4 w-4 opacity-50 ml-2 flex-shrink-0" />
+                </div>
+                {isOpen && (
+                    <div className="absolute z-50 w-full mt-1 bg-popover rounded-md border shadow-md">
+                        {options.map((option) => (
+                            <div
+                                key={option.value}
+                                onClick={() => {
+                                    onChange(option.value);
+                                    setIsOpen(false);
+                                }}
+                                className="relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground"
+                            >
+                                {option.label}
+                                {value === option.value && (
+                                    <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">
+                                        <CheckIcon className="h-4 w-4" />
+                                    </span>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
+                <span ref={measureRef} className="absolute opacity-0 pointer-events-none whitespace-nowrap" />
+            </div>
+        );
+    };
+
     const uploadCardsCount = Object.values(formData).filter(value => value === true).length;
     const isScrollable = uploadCardsCount > 3;
-
     return (
         <div className="min-h-screen bg-green-50 flex flex-col justify-between pt-[83px]">
             <div className="container mx-auto px-4 flex-grow">
@@ -305,24 +353,15 @@ const ChainsawRegistrationForm = () => {
                             )}
 
                             {currentStep === 1 && (
-                                <div className="space-y-4 pt-2 h-36">
+                                <div className="space-y-4 pt-2">
                                     <p className="text-sm text-gray-700 mb-3 font-semibold">
                                         Please select the store where you purchased your chainsaw. You cannot proceed if your chainsaw was not purchased from one of the accredited stores.
                                     </p>
-                                    <select
-                                        id="chainsawStore"
-                                        name="chainsawStore"
+                                    <CustomSelect
                                         value={formData.chainsawStore}
-                                        onChange={(e) => handleSelectChange('chainsawStore', e.target.value)}
-                                        className="w-full p-2 border border-gray-300 rounded-md dropdown-width"
-                                    >
-                                        <option value="" disabled>Select a store</option>
-                                        {chainsawStores.map((store) => (
-                                            <option key={store.value} value={store.value}>
-                                                {store.label}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        onChange={(value) => handleSelectChange('chainsawStore', value)}
+                                        options={chainsawStores}
+                                    />
                                 </div>
                             )}
 
