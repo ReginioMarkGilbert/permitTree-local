@@ -6,6 +6,8 @@ import { FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { motion } from 'framer-motion';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Textarea = ({ id, name, placeholder, rows, required, value, onChange }) => (
     <textarea
@@ -40,12 +42,26 @@ const ContactPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // console.log('Form Data:', formData);
         try {
             const response = await axios.post('http://localhost:3000/api/contact', formData);
-            alert(response.data.message);
+            toast.success(response.data.message, {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+            });
+            setFormData({ name: '', email: '', subject: '', message: '' }); // Reset form
         } catch (error) {
-            alert('Failed to send message');
+            toast.error('Failed to send message. Please try again later.', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+            });
         }
     };
 
