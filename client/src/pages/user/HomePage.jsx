@@ -9,6 +9,13 @@ import HomeFooter from '../../components/ui/HomeFooter';
 import '../../components/ui/styles/customScrollBar.css';
 import { useNotification } from './contexts/UserNotificationContext';
 
+const formatNotificationType = (type) => {
+    return type
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+};
+
 const HomePage = () => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [recentApplications, setRecentApplications] = useState([]);
@@ -16,6 +23,9 @@ const HomePage = () => {
     const [error, setError] = useState(null);
     const [user, setUser] = useState({ firstName: '', lastName: '' });
     const { unreadCount } = useNotification();
+    const [recentNotifications, setRecentNotifications] = useState([]);
+    const [notificationsLoading, setNotificationsLoading] = useState(true);
+    const [notificationsError, setNotificationsError] = useState(null);
 
     const location = useLocation();  // Use location to get the query parameter
     const queryParams = new URLSearchParams(location.search);
@@ -55,6 +65,7 @@ const HomePage = () => {
     useEffect(() => {
         fetchRecentApplications();
         fetchUserDetails();
+        fetchRecentNotifications();
     }, []);
 
     const fetchRecentApplications = async () => {
@@ -92,6 +103,29 @@ const HomePage = () => {
         } catch (err) {
             console.error('Error fetching user details:', err);
             toast.error('Failed to fetch user details.');
+        }
+    };
+
+    const fetchRecentNotifications = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found.');
+            }
+            const response = await axios.get('http://localhost:3000/api/user/notifications', {
+                headers: {
+                    'Authorization': token
+                },
+                params: {
+                    limit: 7 // Fetch only 7 notifications
+                }
+            });
+            setRecentNotifications(response.data);
+            setNotificationsLoading(false);
+        } catch (err) {
+            console.error('Error fetching recent notifications:', err);
+            setNotificationsError('Failed to fetch recent notifications.');
+            setNotificationsLoading(false);
         }
     };
 
@@ -166,7 +200,7 @@ const HomePage = () => {
                             </Button>
                         </CardFooter>
                     </Card>
-                    <Card className="bg-white">
+                    <Card className="bg-white notifications-card group">
                         <CardHeader>
                             <CardTitle className="text-green-800 flex items-center justify-between">
                                 Notifications
@@ -177,18 +211,46 @@ const HomePage = () => {
                                 )}
                             </CardTitle>
                         </CardHeader>
-                        <CardContent>
-                            <div className="space-y-4">
-                                <div className="bg-green-100 border-l-4 border-green-500 p-4">
-                                    <p className="font-semibold text-green-800">System Maintenance</p>
-                                    <p className="text-sm text-green-700">PermitTree will be undergoing maintenance on June 1, 2023, from 10 PM to 2 AM.</p>
+                        <CardContent className="relative flex flex-col h-full">
+                            {notificationsLoading ? (
+                                <p className="text-center text-gray-500">Loading notifications...</p>
+                            ) : notificationsError ? (
+                                <p className="text-center text-red-500">{notificationsError}</p>
+                            ) : recentNotifications.length === 0 ? (
+                                <p className="text-center text-gray-500">No recent notifications</p>
+                            ) : (
+                                <div className="space-y-4 h-[365px] overflow-y-auto custom-scrollbar notifications-container group-hover:scrollbar-visible">
+                                    {recentNotifications.map((notification, index) => (
+                                        <div
+                                            key={index}
+                                            className={`p-4 mb-2 last:mb-0 border-l-4 ${
+                                                notification.read
+                                                    ? 'bg-white border-gray-300'
+                                                    : 'bg-green-100 border-green-500'
+                                            }`}
+                                        >
+                                            <p className={`font-semibold ${notification.read ? 'text-gray-800' : 'text-green-800'}`}>
+                                                {formatNotificationType(notification.type)}
+                                            </p>
+                                            <p className={`text-sm ${notification.read ? 'text-gray-600' : 'text-green-700'}`}>
+                                                {notification.message}
+                                            </p>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                {new Date(notification.createdAt).toLocaleDateString()}
+                                            </p>
+                                        </div>
+                                    ))}
                                 </div>
-                                <div className="bg-green-100 border-l-4 border-green-500 p-4">
-                                    <p className="font-semibold text-green-800">New Regulation Update</p>
-                                    <p className="text-sm text-green-700">Updated guidelines for Chainsaw Registration will be effective starting July 1, 2023.</p>
-                                </div>
-                            </div>
+                            )}
                         </CardContent>
+                        <CardFooter>
+                            <Button
+                                className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white"
+                                onClick={() => window.location.href = '/notifications'}
+                            >
+                                View All Notifications
+                            </Button>
+                        </CardFooter>
                     </Card>
                 </div>
             </main>

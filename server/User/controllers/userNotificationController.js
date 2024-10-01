@@ -2,9 +2,10 @@ const UserNotification = require('../models/userNotificationSchema');
 
 const getUserNotifications = async (req, res) => {
     try {
+        const limit = parseInt(req.query.limit) || 20; // Default to 20 if no limit is provided
         const notifications = await UserNotification.find({ userId: req.user.id })
             .sort({ createdAt: -1 })
-            .limit(20);  // Limit to the 20 most recent notifications
+            .limit(limit);
         res.json(notifications);
     } catch (error) {
         console.error('Error fetching user notifications:', error);
