@@ -122,7 +122,7 @@ const HomePage = () => {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <Card className="lg:col-span-2 bg-white recent-applications-card">
+                    <Card className="lg:col-span-2 bg-white recent-applications-card group">
                         <CardHeader>
                             <CardTitle className="text-green-800">Recent Applications</CardTitle>
                         </CardHeader>
@@ -136,8 +136,8 @@ const HomePage = () => {
                                     <p className="text-gray-500 pt-12">No recent applications</p>
                                 </div>
                             ) : (
-                                <div className="space-y-4 h-64 overflow-y-auto custom-scrollbar applications-container">
-                                    {recentApplications.slice(0, 5).map((app, index) => (
+                                <div className="space-y-4 h-[365px] overflow-y-auto custom-scrollbar applications-container group-hover:scrollbar-visible">
+                                    {recentApplications.slice(0, 7).map((app, index) => (
                                         <div key={index} className="flex items-center border-b border-gray-200 pb-2 last:border-b-0 last:pb-0">
                                             <div className="flex-grow pr-4">
                                                 <p className="font-semibold text-green-800">{app.applicationType}</p>
