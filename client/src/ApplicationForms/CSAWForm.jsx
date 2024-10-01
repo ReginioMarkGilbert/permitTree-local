@@ -386,10 +386,10 @@ const ChainsawRegistrationForm = () => {
                                             onFileChange={(e) => handleFileChange(e, 'deedOfSale')}
                                             onRemoveFile={(file) => removeFile('deedOfSale', file)}
                                         />
-                                        {formData.isOwner && (
+                                        {!formData.isOwner && (
                                             <UploadCard
                                                 label="Special Power of Attorney"
-                                                documentLabel="Upload document if you are the owner of the Chainsaw"
+                                                documentLabel="Upload document if you are not the owner of the Chainsaw"
                                                 files={formData.files.specialPowerOfAttorney}
                                                 onFileChange={(e) => handleFileChange(e, 'specialPowerOfAttorney')}
                                                 onRemoveFile={(file) => removeFile('specialPowerOfAttorney', file)}
