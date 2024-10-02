@@ -91,7 +91,7 @@ export default function ModernChartsPage() {
 
     return (
         <div className="min-h-screen bg-green-50 p-8">
-            <h1 className="text-4xl font-bold text-green-700 mb-8">Dashboard</h1>
+            <h1 className="text-4xl font-bold text-green-700 mb-10 pt-14 pl-4">Reports</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <StatCard title="Total Users" value={reportData.totalUsers} icon={<Users className="h-8 w-8 text-green-700" />} />
                 <StatCard title="Applications for Review" value={reportData.applicationsForReview} icon={<FileCheck className="h-8 w-8 text-green-700" />} />
