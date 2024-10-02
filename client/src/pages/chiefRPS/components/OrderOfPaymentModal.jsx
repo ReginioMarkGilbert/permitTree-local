@@ -19,6 +19,8 @@ const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
     const [tsdSignature, setTsdSignature] = useState(null);
     const rpsNameRef = useRef(null);
     const tsdNameRef = useRef(null);
+    const rpsFileInputRef = useRef(null);
+    const tsdFileInputRef = useRef(null);
 
     const addRow = (e) => {
         e.preventDefault(); // Prevent the default button behavior
@@ -35,28 +37,22 @@ const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
     };
 
     const handleSignatureUpload = (event, setSignature, nameRef) => {
+        event.preventDefault(); // Prevent default behavior
+        event.stopPropagation(); // Stop event propagation
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = (e) => {
                 setSignature(e.target.result);
-                if (nameRef.current) {
-                    const nameInput = nameRef.current;
-                    const signatureImg = document.createElement('img');
-                    signatureImg.src = e.target.result;
-                    signatureImg.alt = "E-Signature";
-                    signatureImg.style.maxWidth = '100px';
-                    signatureImg.style.maxHeight = '50px';
-                    signatureImg.style.position = 'absolute';
-                    signatureImg.style.bottom = '100%';
-                    signatureImg.style.left = '50%';
-                    signatureImg.style.transform = 'translateX(-50%)';
-                    nameInput.style.position = 'relative';
-                    nameInput.parentNode.insertBefore(signatureImg, nameInput);
-                }
             };
             reader.readAsDataURL(file);
         }
+    };
+
+    const triggerFileInput = (e, inputRef) => {
+        e.preventDefault(); // Prevent default behavior
+        e.stopPropagation(); // Stop event propagation
+        inputRef.current.click();
     };
 
     const handleSubmit = (e) => {
@@ -80,7 +76,7 @@ const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
                 <div className="overflow-y-auto flex-grow p-6 custom-scrollbar"> {/* Added custom-scrollbar class here */}
                     <p className="text-center mb-4 text-sm">(SPLTP/ PLTP/ Clearance to cut/ Certification/ WRP/TCP)</p>
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-6"> {/* Increased space between form elements */}
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <Label htmlFor="billNo">Bill No.</Label>
@@ -142,8 +138,8 @@ const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
                             </TableBody>
                         </Table>
 
-                        <div className="flex justify-between items-center">
-                            <Button variant="outline" onClick={addRow} size="sm" type="button"> {/* Change type to "button" */}
+                        <div className="flex justify-between items-center mt-6"> {/* Added margin top */}
+                            <Button variant="outline" onClick={addRow} size="sm" type="button">
                                 <PlusIcon className="h-4 w-4 mr-2" /> Add Row
                             </Button>
                             <div className="flex items-center">
@@ -152,19 +148,61 @@ const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="text-center">
+                        <div className="grid grid-cols-2 gap-8 mt-8"> {/* Increased gap and added margin top */}
+                            <div className="text-center relative">
+                                <div className="h-24 mb-4"> {/* Added fixed height container for signature */}
+                                    {rpsSignature && (
+                                        <img
+                                            src={rpsSignature}
+                                            alt="RPS E-Signature"
+                                            className="max-w-full max-h-full mx-auto object-contain"
+                                        />
+                                    )}
+                                </div>
                                 <Input ref={rpsNameRef} className="text-center font-semibold" defaultValue="SIMEON R. DIAZ" />
-                                <p className="text-xs">SVEMS/Chief, RPS</p>
-                                <Button variant="outline" size="sm" className="mt-2">
+                                <p className="text-xs mt-1">SVEMS/Chief, RPS</p>
+                                <input
+                                    type="file"
+                                    ref={rpsFileInputRef}
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={(e) => handleSignatureUpload(e, setRpsSignature, rpsNameRef)}
+                                />
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="mt-2"
+                                    onClick={(e) => triggerFileInput(e, rpsFileInputRef)}
+                                >
                                     <UploadIcon className="h-4 w-4 mr-2" />
                                     Upload E-Signature
                                 </Button>
                             </div>
-                            <div className="text-center">
+                            <div className="text-center relative">
+                                <div className="h-24 mb-4"> {/* Added fixed height container for signature */}
+                                    {tsdSignature && (
+                                        <img
+                                            src={tsdSignature}
+                                            alt="TSD E-Signature"
+                                            className="max-w-full max-h-full mx-auto object-contain"
+                                        />
+                                    )}
+                                </div>
                                 <Input ref={tsdNameRef} className="text-center font-semibold" defaultValue="Engr. CYNTHIA U. LOZANO" />
-                                <p className="text-xs">Chief, Technical Services Division</p>
-                                <Button variant="outline" size="sm" className="mt-2">
+                                <p className="text-xs mt-1">Chief, Technical Services Division</p>
+                                <input
+                                    type="file"
+                                    ref={tsdFileInputRef}
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={(e) => handleSignatureUpload(e, setTsdSignature, tsdNameRef)}
+                                />
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="mt-2"
+                                    onClick={(e) => triggerFileInput(e, tsdFileInputRef)}
+                                >
                                     <UploadIcon className="h-4 w-4 mr-2" />
                                     Upload E-Signature
                                 </Button>
