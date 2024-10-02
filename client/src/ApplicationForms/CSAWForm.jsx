@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../components/ui/Card';
-import Input from '../components/ui/Input';
-import Label from '../components/ui/Label';
+import { Input } from '../components/ui/Input';
+import { Label } from '../components/ui/Label';
 import { RadioGroup, RadioGroupItem } from '../components/ui/RadioGroup';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -11,49 +11,49 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../components/ui/Modal';
 import '../components/ui/styles/CSAWFormScrollbar.css';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
+
 import { CheckIcon, ChevronDownIcon } from "@radix-ui/react-icons";
 
 const ChainsawRegistrationForm = () => {
     const navigate = useNavigate();
-    const [currentStep, setCurrentStep] = useState(0);
-    const [formData, setFormData] = useState({
-        applicationType: 'Chainsaw Registration', // Set default application type
-        registrationType: '', // New field for registration type
-        chainsawStore: '',
-        ownerName: '',
-        address: '',
-        phone: '',
-        brand: '',
-        model: '',
-        serialNumber: '',
-        dateOfAcquisition: '',
-        powerOutput: '',
-        maxLengthGuidebar: '',
-        countryOfOrigin: '',
-        purchasePrice: '',
-        files: {
-            officialReceipt: [],
-            deedOfSale: [],
-            specialPowerOfAttorney: [],
-            forestTenureAgreement: [],
-            businessPermit: [],
-            certificateOfRegistration: [],
-            woodProcessingPlantPermit: []
-        },
-        dateOfSubmission: '',
-        status: '',
-        isOwner: false,
-        isTenureHolder: false,
-        isBusinessOwner: false,
-        isPLTPRHolder: false,
-        isWPPHolder: false,
+    const [currentStep, setCurrentStep] = useState(() => {
+        const savedStep = localStorage.getItem('csawFormStep');
+        return savedStep ? parseInt(savedStep, 10) : 0;
+    });
+    const [formData, setFormData] = useState(() => {
+        const savedFormData = localStorage.getItem('csawFormData');
+        return savedFormData ? JSON.parse(savedFormData) : {
+            applicationType: 'Chainsaw Registration', // Set default application type
+            registrationType: '', // New field for registration type
+            chainsawStore: '',
+            ownerName: '',
+            address: '',
+            phone: '',
+            brand: '',
+            model: '',
+            serialNumber: '',
+            dateOfAcquisition: '',
+            powerOutput: '',
+            maxLengthGuidebar: '',
+            countryOfOrigin: '',
+            purchasePrice: '',
+            files: {
+                officialReceipt: [],
+                deedOfSale: [],
+                specialPowerOfAttorney: [],
+                forestTenureAgreement: [],
+                businessPermit: [],
+                certificateOfRegistration: [],
+                woodProcessingPlantPermit: []
+            },
+            dateOfSubmission: '',
+            status: '',
+            isOwner: false,
+            isTenureHolder: false,
+            isBusinessOwner: false,
+            isPLTPRHolder: false,
+            isWPPHolder: false,
+        };
     });
     const [modalOpen, setModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState({ title: '', message: '' });
@@ -222,6 +222,10 @@ const ChainsawRegistrationForm = () => {
                 message: 'Do you want to view your application?'
             });
             setModalOpen(true);
+
+            // If submission is successful, clear localStorage
+            localStorage.removeItem('csawFormStep');
+            localStorage.removeItem('csawFormData');
         } catch (error) {
             console.error('Error submitting application:', error);
 
@@ -324,6 +328,15 @@ const ChainsawRegistrationForm = () => {
 
     const uploadCardsCount = Object.values(formData).filter(value => value === true).length;
     const isScrollable = uploadCardsCount > 3;
+
+    useEffect(() => {
+        localStorage.setItem('csawFormStep', currentStep.toString());
+    }, [currentStep]);
+
+    useEffect(() => {
+        localStorage.setItem('csawFormData', JSON.stringify(formData));
+    }, [formData]);
+
     return (
         <div className="min-h-screen bg-green-50 flex flex-col justify-between pt-[83px]">
             <div className="container mx-auto px-4 flex-grow">
@@ -501,7 +514,7 @@ const ChainsawRegistrationForm = () => {
                                                         onChange={handleInputChange}
                                                         placeholder="Barangay, Bayan, Probinsya"
                                                         required
-                                                        autocomplete="street-address"
+                                                        autoComplete="street-address"
                                                     />
                                                 </div>
                                                 <div className="space-y-2">
@@ -513,7 +526,7 @@ const ChainsawRegistrationForm = () => {
                                                         onChange={handleInputChange}
                                                         placeholder="e.g. 09123456789"
                                                         required
-                                                        autocomplete="tel"
+                                                        autoComplete="tel"
                                                     />
                                                 </div>
                                             </div>
