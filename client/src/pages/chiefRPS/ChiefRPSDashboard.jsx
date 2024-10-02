@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Eye, Edit, Trash2, Leaf, Printer } from 'lucide-react';
+import { Eye, Edit, Trash2, Leaf, Printer, FileText } from 'lucide-react';
 import ApplicationDetailsModal from '../../components/ui/ApplicationDetailsModal';
 import EditApplicationModal from '../../components/ui/EditApplicationModal';
 import ConfirmationModal from '../../components/ui/ConfirmationModal';
@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import ChiefRPSApplicationReviewModal from './components/ChiefRPSApplicationReviewModal';
 import ChiefRPSApplicationViewModal from './components/ChiefRPSApplicationViewModal';
 import { Link } from 'react-router-dom';
+import OrderOfPaymentModal from './components/OrderOfPaymentModal';
 
 const ChiefRPSDashboard = () => {
     const [applications, setApplications] = useState([]);
@@ -28,6 +29,8 @@ const ChiefRPSDashboard = () => {
     const [activeTab, setActiveTab] = useState('For Review'); // Default tab
     const [reviewConfirmation, setReviewConfirmation] = useState({ isOpen: false, applicationId: null });
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+    const [isOrderOfPaymentModalOpen, setIsOrderOfPaymentModalOpen] = useState(false);
+    const [selectedOrderOfPaymentApp, setSelectedOrderOfPaymentApp] = useState(null);
 
     useEffect(() => {
         fetchApplications();
@@ -170,6 +173,11 @@ const ChiefRPSDashboard = () => {
         );
     };
 
+    const handleOrderOfPayment = (application) => {
+        setSelectedOrderOfPaymentApp(application);
+        setIsOrderOfPaymentModalOpen(true);
+    };
+
     const renderTable = () => {
         if (loading) {
             return <p className="text-center text-gray-500">Loading applications...</p>;
@@ -237,6 +245,15 @@ const ChiefRPSDashboard = () => {
                                                 className="text-blue-600 hover:text-blue-900"
                                             >
                                                 Review
+                                            </button>
+                                        )}
+                                        {app.status === 'Accepted' && (
+                                            <button
+                                                className="text-indigo-600 hover:text-indigo-900 action-icon"
+                                                onClick={() => handleOrderOfPayment(app)}
+                                            >
+                                                <FileText className="inline w-4 h-4" />
+                                                <span className="sr-only">Create Order of Payment</span>
                                             </button>
                                         )}
                                     </div>
@@ -327,6 +344,13 @@ const ChiefRPSDashboard = () => {
                 onConfirm={handleConfirmReview}
                 title="Confirm Review"
                 message="Are you sure you want to mark this application as In Progress?"
+            />
+
+            {/* Order of Payment Modal */}
+            <OrderOfPaymentModal
+                isOpen={isOrderOfPaymentModalOpen}
+                onClose={() => setIsOrderOfPaymentModalOpen(false)}
+                application={selectedOrderOfPaymentApp}
             />
         </div>
     );
