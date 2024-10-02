@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { TimePicker } from "@/components/ui/time-picker";
 import { format } from "date-fns";
 import "@/components/ui/styles/customScrollbar.css";  // Import the custom scrollbar CSS
 
@@ -19,9 +20,10 @@ const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
     const rpsNameRef = useRef(null);
     const tsdNameRef = useRef(null);
 
-    const addRow = () => {
+    const addRow = (e) => {
+        e.preventDefault(); // Prevent the default button behavior
         const newRow = { id: Date.now(), legalBasis: '', description: '', amount: '' };
-        setRows([...rows, newRow]);
+        setRows(prevRows => [...prevRows, newRow]); // Use functional update to ensure we're working with the latest state
     };
 
     const removeRow = (id) => {
@@ -75,7 +77,7 @@ const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
                         <X className="w-6 h-6" />
                     </button>
                 </div>
-                <div className="overflow-y-auto flex-grow p-4 custom-scrollbar"> {/* Added custom-scrollbar class here */}
+                <div className="overflow-y-auto flex-grow p-6 custom-scrollbar"> {/* Added custom-scrollbar class here */}
                     <p className="text-center mb-4 text-sm">(SPLTP/ PLTP/ Clearance to cut/ Certification/ WRP/TCP)</p>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -141,7 +143,7 @@ const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
                         </Table>
 
                         <div className="flex justify-between items-center">
-                            <Button variant="outline" onClick={addRow} size="sm">
+                            <Button variant="outline" onClick={addRow} size="sm" type="button"> {/* Change type to "button" */}
                                 <PlusIcon className="h-4 w-4 mr-2" /> Add Row
                             </Button>
                             <div className="flex items-center">
@@ -184,7 +186,7 @@ const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
                                             <Calendar mode="single" selected={paymentDate} onSelect={setPaymentDate} initialFocus />
                                         </PopoverContent>
                                     </Popover>
-                                    <Input placeholder="Time" className="w-24" />
+                                    <TimePicker className="w-[120px]" />
                                 </div>
                             </div>
                             <div>
@@ -201,7 +203,7 @@ const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
                                             <Calendar mode="single" selected={receiptDate} onSelect={setReceiptDate} initialFocus />
                                         </PopoverContent>
                                     </Popover>
-                                    <Input placeholder="Time" className="w-24" />
+                                    <TimePicker className="w-[120px]" />
                                 </div>
                             </div>
                         </div>
