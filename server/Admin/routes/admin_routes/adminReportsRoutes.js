@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { getTotalUsers, getApplicationsForReview, getApplicationsReturned, getUserGraph } = require('../controllers/adminReportsControllers');
-const { authenticateToken } = require('../../middleware/authMiddleware');
+const { getTotalUsers, getApplicationsForReview, getApplicationsReturned, getUserGraph } = require('../../controllers/admin_controllers/adminReportsControllers');
+const { authenticateToken } = require('../../../middleware/authMiddleware');
 
 router.get('/total-users', authenticateToken, getTotalUsers);
 router.get('/applications-for-review', authenticateToken, getApplicationsForReview);

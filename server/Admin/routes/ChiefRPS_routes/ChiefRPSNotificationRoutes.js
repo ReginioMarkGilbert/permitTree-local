@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { authenticateToken } = require('../../middleware/authMiddleware');
+const { authenticateToken } = require('../../../middleware/authMiddleware');
 const {
     createNotification,
     getChiefRPSNotifications,
@@ -8,7 +8,7 @@ const {
     getUnreadNotificationCount,
     markNotificationAsUnread,
     markAllNotificationsAsRead
-} = require('../controllers/ChiefRPSNotificationControllers');
+} = require('../../controllers/ChiefRPS_controllers/ChiefRPSNotificationControllers');
 
 router.post('/notifications', authenticateToken, createNotification);
 router.get('/notifications', authenticateToken, getChiefRPSNotifications);

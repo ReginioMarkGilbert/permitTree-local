@@ -1,5 +1,5 @@
-const Admin = require('../models/adminAuthSchema');
-const AdminIdCounter = require('../models/adminIdCounterSchema');
+const Admin = require('../../models/admin_models/adminAuthSchema');
+const AdminIdCounter = require('../../models/admin_models/adminIdCounterSchema');
 const jwt = require('jsonwebtoken');
 
 // Existing createAdmin method

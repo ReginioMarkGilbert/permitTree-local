@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getAllUsers, getUser, createUser, updateUser, deleteUser } = require('../../controllers/SA_controllers/SA_ManageUserControllers');
+const { getAllUsers, getUser, createUser, updateUser, deleteUser } = require('../../controllers/SuperAdmin_controllers/SA_ManageUserControllers');
 const { authenticateSuperAdmin } = require('../../../middleware/authMiddleware');
 
 // Get all users

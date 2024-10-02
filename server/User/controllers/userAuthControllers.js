@@ -1,6 +1,6 @@
 const User = require('../models/userAuthSchema');
 const UserIdCounter = require('../models/UserIdcounterSchema');
-const Admin = require('../../Admin/models/adminAuthSchema');
+const Admin = require('../../Admin/models/admin_models/adminAuthSchema');
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');

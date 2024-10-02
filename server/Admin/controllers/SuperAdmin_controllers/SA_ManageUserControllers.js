@@ -1,5 +1,5 @@
 const User = require('../../../User/models/userAuthSchema');
-const Admin = require('../../models/adminAuthSchema');
+const Admin = require('../../models/admin_models/adminAuthSchema');
 
 const getAllUsers = async (req, res) => {
     try {
@@ -11,7 +11,7 @@ const getAllUsers = async (req, res) => {
                 ...user.toObject(),
                 userType: user.role === 'user' ? 'Client' : user.role
             })),
-            ...chiefRPSUsers.map(user => ({...user.toObject(), userType: 'Personnel'}))
+            ...chiefRPSUsers.map(user => ({ ...user.toObject(), userType: 'Personnel' }))
         ];
 
         res.json(allUsers);

@@ -1,11 +1,11 @@
-const Application = require('../../User/models/PermitApplications/ChainsawApplicationSchema');
-const User = require('../../User/models/userAuthSchema');
-const Notification = require('../models/ChiefRPSNotificationSchema');
+const Application = require('../../../User/models/PermitApplications/ChainsawApplicationSchema');
+const User = require('../../../User/models/userAuthSchema');
+const Notification = require('../../models/ChiefRPS_models/ChiefRPSNotificationSchema');
 const fs = require('fs').promises;
 const path = require('path');
 const PDFDocument = require('pdfkit');
-const UserNotification = require('../../User/models/userNotificationSchema');
-const Admin = require('../models/adminAuthSchema');
+const UserNotification = require('../../../User/models/userNotificationSchema');
+const Admin = require('../../models/admin_models/adminAuthSchema');
 
 // Helper function to format date
 const formatDate = (dateString) => {

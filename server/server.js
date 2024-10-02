@@ -71,19 +71,19 @@ app.use('/api/user', userNotificationRoutes);
 const contactRoutes = require('./User/routes/contactRoutes');
 app.use('/api', contactRoutes);
 
-const adminRoutes = require('./Admin/routes/adminAuthRoutes');
+const adminRoutes = require('./Admin/routes/admin_routes/adminAuthRoutes');
 app.use('/api/admin', adminRoutes);
 
-const adminDashboardRoutes = require('./Admin/routes/adminDashboardRoutes');
+const adminDashboardRoutes = require('./Admin/routes/admin_routes/adminDashboardRoutes');
 app.use('/api/admin', adminDashboardRoutes);
 
-const adminReportsRoutes = require('./Admin/routes/adminReportsRoutes');
+const adminReportsRoutes = require('./Admin/routes/admin_routes/adminReportsRoutes');
 app.use('/api/admin/reports', adminReportsRoutes);
 
-const adminNotificationRoutes = require('./Admin/routes/ChiefRPSNotificationRoutes');
+const adminNotificationRoutes = require('./Admin/routes/ChiefRPS_routes/ChiefRPSNotificationRoutes');
 app.use('/api/admin', adminNotificationRoutes);
 
-const SA_ManageUserRoutes = require('./Admin/routes/SA_routes/SA_ManageUserRoutes');
+const SA_ManageUserRoutes = require('./Admin/routes/SuperAdmin_routes/SA_ManageUserRoutes');
 app.use('/api/admin/super', SA_ManageUserRoutes);
 
 // Start the server

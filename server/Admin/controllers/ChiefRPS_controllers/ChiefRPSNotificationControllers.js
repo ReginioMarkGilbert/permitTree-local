@@ -1,4 +1,4 @@
-const ChiefRPSNotification = require('../models/ChiefRPSNotificationSchema');
+const ChiefRPSNotification = require('../../models/ChiefRPS_models/ChiefRPSNotificationSchema');
 
 const createNotification = async (req, res) => {
     try {

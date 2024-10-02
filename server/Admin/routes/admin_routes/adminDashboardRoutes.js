@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { getAllApplications, getApplicationById, getFile, printApplication, updateApplicationStatus, returnApplication, reviewApplication } = require('../controllers/adminDashboardControllers');
-const { authenticateToken } = require('../../middleware/authMiddleware');
+const { getAllApplications, getApplicationById, getFile, printApplication, updateApplicationStatus, returnApplication, reviewApplication } = require('../../controllers/admin_controllers/adminDashboardControllers');
+const { authenticateToken } = require('../../../middleware/authMiddleware');
 
 // Route to get dashboard statistics
 // router.get('/dashboard-stats', passport.authenticate('jwt', { session: false }), isAdmin, getDashboardStats);
