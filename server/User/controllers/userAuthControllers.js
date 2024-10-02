@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 
 const signup = async (req, res) => {
-    const { firstName, lastName, password } = req.body;
+    const { firstName, lastName, password, createdAt } = req.body;
     const username = `${firstName.toLowerCase()}_${lastName.toLowerCase()}`;
 
     const validatePassword = (password) => {
@@ -35,7 +35,8 @@ const signup = async (req, res) => {
             firstName,
             lastName,
             username,
-            password
+            password,
+            createdAt: createdAt ? new Date(createdAt) : undefined // Use provided date or let MongoDB set it
         });
 
         await newUser.save();

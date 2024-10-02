@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
     lastName: { type: String, required: true },
     role: { type: String, enum: ['admin', 'user'], default: 'user' },
 
-    email: { type: String, required: false, unique: true },
+    email: { type: String, required: false, unique: false },
     phone: { type: String, required: false, match: [/^\d{11}$/, 'Please fill a valid phone number'] },
     company: { type: String, required: false },
     address: { type: String, required: false },
@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
         data: Buffer,
         contentType: String
     },
-});
+}, { timestamps: true });
 
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next();
