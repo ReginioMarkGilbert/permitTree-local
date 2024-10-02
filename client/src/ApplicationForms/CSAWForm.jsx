@@ -6,13 +6,13 @@ import { Label } from '../components/ui/Label';
 import { RadioGroup, RadioGroupItem } from '../components/ui/RadioGroup';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Download, X } from "lucide-react";
+import { Download, X, CalendarIcon } from "lucide-react";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../components/ui/Modal';
 import '../components/ui/styles/CSAWFormScrollbar.css';
-
-import { CheckIcon, ChevronDownIcon } from "@radix-ui/react-icons";
+import { CheckIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
+import { format, parseISO, isValid } from "date-fns";
 
 const ChainsawRegistrationForm = () => {
     const navigate = useNavigate();
@@ -177,7 +177,7 @@ const ChainsawRegistrationForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem('token'); // Get the token from local storage
+            const token = localStorage.getItem('token');
             if (!token) {
                 toast.error("No authentication token found. Please log in.");
                 return;
@@ -211,7 +211,7 @@ const ChainsawRegistrationForm = () => {
             const response = await axios.post('http://localhost:3000/api/csaw_createApplication', formDataToSend, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
-                    'Authorization': token // Include the token in the headers
+                    'Authorization': token
                 }
             });
 
@@ -228,20 +228,17 @@ const ChainsawRegistrationForm = () => {
             localStorage.removeItem('csawFormData');
         } catch (error) {
             console.error('Error submitting application:', error);
-
-            // Enhanced error handling
-            if (error.response && error.response.status === 401) {
-                toast.error("Unauthorized: Please log in again.");
-                // Optionally, redirect to login page or clear token
-            } else {
-                toast.error(`Error submitting application: ${error.response?.data?.error || error.message}`);
-            }
+            toast.error(`Error submitting application: ${error.message}`);
         }
     };
 
     const handleCheckboxChange = (e) => {
         const { name, checked } = e.target;
         setFormData(prev => ({ ...prev, [name]: checked }));
+    };
+
+    const handleDateChange = (date) => {
+        setFormData(prev => ({ ...prev, dateOfAcquisition: date }));
     };
 
     const steps = [
@@ -261,6 +258,16 @@ const ChainsawRegistrationForm = () => {
             .replace(/([a-z])([A-Z])/g, '$1 $2') // Insert space between lower and upper case letters
             .replace(/\b(P L T P R|W P P)\b/g, match => match.replace(/ /g, '')) // Remove spaces in PLTPR and WPP
         // .replace(/\b(PLTPR|WPP)\b/g, match => `${match}`);
+    };
+
+    const formatReviewValue = (key, value) => {
+        if (key === 'dateOfAcquisition' && value) {
+            return format(parseISO(value), 'MMMM d, yyyy');
+        }
+        if (typeof value === 'boolean') {
+            return value ? 'Yes' : 'No';
+        }
+        return value;
     };
 
     const CustomSelect = ({ value, onChange, options }) => {
@@ -326,6 +333,104 @@ const ChainsawRegistrationForm = () => {
         );
     };
 
+    const CustomDatePicker = ({ selectedDate, onChange }) => {
+        const [isOpen, setIsOpen] = useState(false);
+        const [currentMonth, setCurrentMonth] = useState(selectedDate ? parseISO(selectedDate) : new Date());
+        const datePickerRef = useRef(null);
+
+        useEffect(() => {
+            const handleClickOutside = (event) => {
+                if (datePickerRef.current && !datePickerRef.current.contains(event.target)) {
+                    setIsOpen(false);
+                }
+            };
+
+            document.addEventListener('mousedown', handleClickOutside);
+            return () => {
+                document.removeEventListener('mousedown', handleClickOutside);
+            };
+        }, []);
+
+        const daysInMonth = (date) => {
+            return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+        };
+
+        const firstDayOfMonth = (date) => {
+            return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+        };
+
+        const handleDateClick = (day) => {
+            const newDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+            if (isValid(newDate)) {
+                onChange(newDate.toISOString());
+                setIsOpen(false);
+            } else {
+                console.error('Invalid date selected');
+                // Optionally, show an error message to the user
+            }
+        };
+
+        const renderCalendar = () => {
+            const days = daysInMonth(currentMonth);
+            const firstDay = firstDayOfMonth(currentMonth);
+            const calendarDays = [];
+
+            for (let i = 0; i < firstDay; i++) {
+                calendarDays.push(<div key={`empty-${i}`} className="w-8 h-8"></div>);
+            }
+
+            for (let day = 1; day <= days; day++) {
+                const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+                const isSelected = selectedDate && date.toDateString() === selectedDate.toDateString();
+                calendarDays.push(
+                    <button
+                        key={day}
+                        onClick={() => handleDateClick(day)}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${isSelected ? 'bg-green-600 text-white' : 'hover:bg-gray-200'
+                            }`}
+                    >
+                        {day}
+                    </button>
+                );
+            }
+
+            return calendarDays;
+        };
+
+        return (
+            <div ref={datePickerRef} className="relative">
+                <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="w-full justify-start text-left font-normal"
+                >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {selectedDate ? format(parseISO(selectedDate), "PPP") : <span>Pick a date</span>}
+                </Button>
+                {isOpen && (
+                    <div className="absolute z-10 mt-1 w-64 bg-white border rounded-md shadow-lg">
+                        <div className="flex justify-between items-center p-2 border-b">
+                            <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}>
+                                <ChevronLeftIcon className="h-4 w-4" />
+                            </button>
+                            <span>{format(currentMonth, "MMMM yyyy")}</span>
+                            <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}>
+                                <ChevronRightIcon className="h-4 w-4" />
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-7 gap-1 p-2">
+                            {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
+                                <div key={day} className="text-center text-xs font-medium text-gray-500">{day}</div>
+                            ))}
+                            {renderCalendar()}
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     const uploadCardsCount = Object.values(formData).filter(value => value === true).length;
     const isScrollable = uploadCardsCount > 3;
 
@@ -336,6 +441,14 @@ const ChainsawRegistrationForm = () => {
     useEffect(() => {
         localStorage.setItem('csawFormData', JSON.stringify(formData));
     }, [formData]);
+
+    useEffect(() => {
+        // Cleanup function to remove localStorage items when component unmounts
+        return () => {
+            localStorage.removeItem('csawFormStep');
+            localStorage.removeItem('csawFormData');
+        };
+    }, []);
 
     return (
         <div className="min-h-screen bg-green-50 flex flex-col justify-between pt-[83px]">
@@ -489,7 +602,6 @@ const ChainsawRegistrationForm = () => {
 
                             {currentStep === 4 && (
                                 <div className="space-y-4">
-                                    {/* <h3 className="text-lg font-semibold mb-2 text-green-700">Application Details</h3> */}
                                     <div className="space-y-5 h-[600px]">
                                         <div>
                                             <h3 className="text-lg font-semibold mb-1 text-green-700">Owner Details</h3>
@@ -572,13 +684,9 @@ const ChainsawRegistrationForm = () => {
                                                     </div>
                                                     <div>
                                                         <Label htmlFor="dateOfAcquisition">Date of Acquisition</Label>
-                                                        <Input
-                                                            id="dateOfAcquisition"
-                                                            name="dateOfAcquisition"
-                                                            type="date"
-                                                            value={formData.dateOfAcquisition}
-                                                            onChange={handleInputChange}
-                                                            required
+                                                        <CustomDatePicker
+                                                            selectedDate={formData.dateOfAcquisition}
+                                                            onChange={handleDateChange}
                                                         />
                                                     </div>
                                                 </div>
@@ -639,7 +747,6 @@ const ChainsawRegistrationForm = () => {
 
                             {currentStep === 5 && ( // Review Your Application
                                 <div className="space-y-6 h-[630px] flex flex-col">
-                                    {/* <h3 className="text-xl font-semibold mb-4 text-green-700">Review Your Application</h3> */}
                                     <div className="review-step-container csaw-form-scrollbar flex-grow overflow-auto">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {Object.entries(formData)
@@ -648,7 +755,7 @@ const ChainsawRegistrationForm = () => {
                                                     <div key={key} className="bg-white p-3 rounded-lg shadow">
                                                         <h4 className="font-semibold text-green-600 mb-1 text-sm">{formatLabel(key)}</h4>
                                                         <p className="text-gray-700 text-sm">
-                                                            {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value}
+                                                            {formatReviewValue(key, value)}
                                                         </p>
                                                     </div>
                                                 ))}
@@ -678,7 +785,7 @@ const ChainsawRegistrationForm = () => {
                             )}
                         </form>
                     </CardContent>
-                    <CardFooter className="mt-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <CardFooter className="mt-14 flex flex-col sm:flex-row justify-between items-center gap-4">
                         <div className="w-full sm:w-auto">
                             {currentStep > 0 && (
                                 <Button
@@ -723,7 +830,17 @@ const ChainsawRegistrationForm = () => {
                     </CardFooter>
                 </Card>
             </div>
-            <ToastContainer />
+            <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+            />
             <Modal
                 isOpen={modalOpen}
                 title={modalContent.title}

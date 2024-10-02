@@ -3,11 +3,11 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { setToken } from '../../utils/tokenManager'; // Update this import
+import { setToken } from '../../utils/tokenManager';
 import { getUserRole } from '../../utils/auth';
 import AuthButton from '../../components/ui/AuthButton';
-import Input from '../../components/ui/Input';
-import Label from '../../components/ui/Label';
+import { Input } from '../../components/ui/Input';
+import { Label } from '../../components/ui/Label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/Tabs';
 import { FaLeaf } from 'react-icons/fa';
 import './styles/UserAuthPage.css';
