@@ -74,7 +74,7 @@ const HomePage = () => {
             if (!token) {
                 throw new Error('No authentication token found.');
             }
-            const response = await axios.get('http://localhost:3000/api/csaw_getApplications', {
+            const response = await axios.get('http://localhost:3000/api/getAllApplications', {
                 params: {
                     status: ['Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected']
                 },

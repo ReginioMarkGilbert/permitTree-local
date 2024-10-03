@@ -155,7 +155,7 @@ const csaw_saveDraft = async (req, res) => {
     }
 };
 
-const csaw_getApplications = async (req, res) => {
+const getAllApplications = async (req, res) => {
     try {
         const { sort, status, applicationType } = req.query;
         let filter = { userId: req.user.id };
@@ -180,6 +180,7 @@ const csaw_getApplications = async (req, res) => {
             sortOption.dateOfSubmission = -1;
         }
 
+        // Use a more generic approach to fetch applications
         const applications = await Application.find(filter).sort(sortOption);
         res.status(200).json(applications);
     } catch (err) {
@@ -344,7 +345,7 @@ const submitReturnedApplication = async (req, res) => {
 
 module.exports = {
     csaw_createApplication,
-    csaw_getApplications,
+    getAllApplications,
     csaw_updateApplication,
     csaw_deleteApplication,
     csaw_saveDraft,

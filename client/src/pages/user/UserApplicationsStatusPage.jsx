@@ -31,7 +31,7 @@ const UserApplicationsStatusPage = () => {
     const fetchApplications = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:3000/api/csaw_getApplications', {
+            const response = await axios.get('http://localhost:3000/api/getAllApplications', {
                 params: { status: activeTab },
                 headers: { Authorization: token }
             });

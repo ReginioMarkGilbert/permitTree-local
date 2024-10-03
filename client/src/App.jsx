@@ -42,6 +42,7 @@ import ChiefRPSNotificationPage from './pages/chiefRPS/ChiefRPSNotificationPage'
 import ChiefRPSNotificationProvider from './pages/chiefRPS/contexts/ChiefRPSNotificationContext';
 
 import { checkTokenExpiration } from './utils/tokenManager';
+import ChiefRPSorderOfPaymentPage from './pages/chiefRPS/ChiefRPSorderOfPaymentPage';
 
 const App = () => {
     const { sidebarToggle, toggleSidebar } = useSidebarToggle();
@@ -107,6 +108,8 @@ const App = () => {
                                 <Route path="/chief-rps/settings" element={<ProtectedRoute roles={['ChiefRPS']}><ChiefRPSSettingsPage /></ProtectedRoute>} />
                                 <Route path="/chief-rps/reports" element={<ProtectedRoute roles={['ChiefRPS']}><ChiefRPSReportsPage /></ProtectedRoute>} />
                                 <Route path="/chief-rps/notifications" element={<ProtectedRoute roles={['ChiefRPS']}><ChiefRPSNotificationPage /></ProtectedRoute>} />
+                                <Route path="/chief-rps/order-of-payment" element={<ProtectedRoute roles={['ChiefRPS']}><ChiefRPSorderOfPaymentPage /></ProtectedRoute>} />
+                                <Route path="/chief-rps/order-of-payment/:applicationId" element={<ProtectedRoute roles={['ChiefRPS']}><ChiefRPSorderOfPaymentPage /></ProtectedRoute>} />
 
                                 <Route path="/superadmin/home" element={<ProtectedRoute roles={['superadmin']}><SuperAdminHomePage /></ProtectedRoute>} />
                                 <Route path="/superadmin/dashboard" element={<ProtectedRoute roles={['superadmin']}><SuperAdminDashboard /></ProtectedRoute>} />

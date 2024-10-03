@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaTachometerAlt, FaUsers, FaChartLine, FaCog, FaSignInAlt, FaHome, FaClipboardCheck, FaBell } from 'react-icons/fa';
+import { FaTachometerAlt, FaUsers, FaChartLine, FaCog, FaSignInAlt, FaHome, FaClipboardCheck, FaBell, FaFileInvoiceDollar } from 'react-icons/fa';
 import { NavLink } from 'react-router-dom';
 import permitTreeLogo from '../../assets/denr-logo.png';
 import { useNavigate } from 'react-router-dom';
@@ -83,6 +83,10 @@ const AdminSidebar = ({ isOpen }) => {
                         <NavLink to="/chief-rps/settings" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
                             <span className="mr-3"><FaCog /></span>
                             <span>Settings</span>
+                        </NavLink>
+                        <NavLink to="/chief-rps/order-of-payment" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
+                            <span className="mr-3"><FaFileInvoiceDollar /></span>
+                            <span>Order of Payment</span>
                         </NavLink>
                     </nav>
                 </div>

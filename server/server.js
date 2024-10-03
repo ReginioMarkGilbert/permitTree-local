@@ -86,6 +86,10 @@ app.use('/api/admin', adminNotificationRoutes);
 const SA_ManageUserRoutes = require('./Admin/routes/SuperAdmin_routes/SA_ManageUserRoutes');
 app.use('/api/admin/super', SA_ManageUserRoutes);
 
+// Add this line with your other route declarations
+const allPermitsRoutes = require('./User/routes/PermitApplicationsRoutes/allPermitsRoutes');
+app.use('/api/permits', allPermitsRoutes);
+
 // Start the server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
