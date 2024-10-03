@@ -8,9 +8,9 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { TimePicker } from "@/components/ui/time-picker";
 import { format } from "date-fns";
-import "@/components/ui/styles/customScrollbar.css";  // Import the custom scrollbar CSS
+import "@/components/ui/styles/customScrollbar.css";
 
-const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
+const OrderOfPayment = ({ isOpen, onClose, application }) => {
     const [rows, setRows] = useState([{ id: 1, legalBasis: '', description: '', amount: '' }]);
     const [billDate, setBillDate] = useState(new Date());
     const [paymentDate, setPaymentDate] = useState(null);
@@ -49,7 +49,7 @@ const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
         }
     };
 
-    const triggerFileInput = (e, inputRef) => {
+    const triggerFilt = (e, inputRef) => {
         e.preventDefault(); // Prevent default behavior
         e.stopPropagation(); // Stop event propagation
         inputRef.current.click();
@@ -255,4 +255,4 @@ const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
     );
 };
 
-export default OrderOfPaymentModal;
+export default OrderOfPayment;
