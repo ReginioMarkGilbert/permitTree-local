@@ -190,15 +190,11 @@ const csaw_getApplications = async (req, res) => {
 
 const csaw_updateApplication = async (req, res) => {
     try {
-        // console.log('Update request received:', req.params, req.body);
-
         const { id } = req.params;
         const updateData = req.body;
 
-        // Ensure the user can only update their own applications
         updateData.userId = req.user.id;
 
-        // Handle file updates
         if (updateData.files) {
             for (const [documentType, fileArray] of Object.entries(updateData.files)) {
                 updateData.files[documentType] = fileArray.map(file => ({
@@ -213,13 +209,12 @@ const csaw_updateApplication = async (req, res) => {
             { _id: id, userId: req.user.id },
             updateData,
             { new: true }
-        );
+        ).collection('chainsawapplications');
 
         if (!updatedApplication) {
             return res.status(404).json({ error: 'Application not found or you do not have permission to update it' });
         }
 
-        // console.log('Application updated successfully:', updatedApplication);
         res.status(200).json(updatedApplication);
     } catch (err) {
         console.error('Error updating application:', err);
@@ -230,7 +225,7 @@ const csaw_updateApplication = async (req, res) => {
 const csaw_deleteApplication = async (req, res) => {
     try {
         const { id } = req.params;
-        const application = await Application.findOne({ _id: id, userId: req.user.id });
+        const application = await Application.findOne({ _id: id, userId: req.user.id }).collection('chainsawapplications');
 
         if (!application) {
             return res.status(404).json({ success: false, error: 'Application not found or you do not have permission to delete it' });
@@ -240,7 +235,7 @@ const csaw_deleteApplication = async (req, res) => {
             return res.status(400).json({ success: false, error: 'Only draft applications can be deleted' });
         }
 
-        await Application.findByIdAndDelete(id);
+        await Application.findByIdAndDelete(id).collection('chainsawapplications');
         res.status(200).json({ success: true, message: 'Application deleted successfully' });
     } catch (err) {
         console.error('Error deleting application:', err);
@@ -267,7 +262,7 @@ const resetCounter = async (req, res) => {
 const csaw_getApplicationById = async (req, res) => {
     try {
         const { id } = req.params;
-        const application = await Application.findById(id);
+        const application = await Application.findById(id).collection('chainsawapplications');
         if (!application) {
             return res.status(404).json({ error: 'Application not found' });
         }
@@ -281,7 +276,7 @@ const csaw_getApplicationById = async (req, res) => {
 // Add this new function
 const unsubmitApplication = async (req, res) => {
     try {
-        const application = await Application.findById(req.params.id);
+        const application = await Application.findById(req.params.id).collection('chainsawapplications');
         if (!application) {
             return res.status(404).json({ success: false, message: 'Application not found' });
         }
@@ -299,7 +294,7 @@ const unsubmitApplication = async (req, res) => {
 
 const submitDraft = async (req, res) => {
     try {
-        const application = await Application.findById(req.params.id);
+        const application = await Application.findById(req.params.id).collection('chainsawapplications');
         if (!application) {
             return res.status(404).json({ success: false, message: 'Application not found' });
         }
@@ -322,7 +317,7 @@ const submitDraft = async (req, res) => {
 const submitReturnedApplication = async (req, res) => {
     try {
         const { id } = req.params;
-        const application = await Application.findById(req.params.id);
+        const application = await Application.findById(id).collection('chainsawapplications');
 
         if (!application) {
             return res.status(404).json({ success: false, message: 'Application not found' });
