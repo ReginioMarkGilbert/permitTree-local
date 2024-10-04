@@ -71,6 +71,9 @@ app.use('/api/user', userNotificationRoutes);
 const contactRoutes = require('./User/routes/contactRoutes');
 app.use('/api', contactRoutes);
 
+const allPermitsRoutes = require('./User/routes/PermitApplicationsRoutes/allPermitsRoutes');
+app.use('/api/permits', allPermitsRoutes);
+
 const adminRoutes = require('./Admin/routes/admin_routes/adminAuthRoutes');
 app.use('/api/admin', adminRoutes);
 
@@ -83,12 +86,12 @@ app.use('/api/admin/reports', adminReportsRoutes);
 const adminNotificationRoutes = require('./Admin/routes/ChiefRPS_routes/ChiefRPSNotificationRoutes');
 app.use('/api/admin', adminNotificationRoutes);
 
+const adminOrderOfPaymentRoutes = require('./Admin/routes/ChiefRPS_routes/OrderOfPaymentRoutes');
+app.use('/api/admin', adminOrderOfPaymentRoutes);
+
 const SA_ManageUserRoutes = require('./Admin/routes/SuperAdmin_routes/SA_ManageUserRoutes');
 app.use('/api/admin/super', SA_ManageUserRoutes);
 
-// Add this line with your other route declarations
-const allPermitsRoutes = require('./User/routes/PermitApplicationsRoutes/allPermitsRoutes');
-app.use('/api/permits', allPermitsRoutes);
 
 // Start the server
 const port = process.env.PORT || 3000;

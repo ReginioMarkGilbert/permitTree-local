@@ -1,258 +1,213 @@
-import React, { useState, useRef } from 'react';
-import { X, CalendarIcon, PlusIcon, MinusIcon, UploadIcon } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { TimePicker } from "@/components/ui/time-picker";
-import { format } from "date-fns";
-import "@/components/ui/styles/customScrollbar.css";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from 'react-toastify';
+import axios from 'axios';
 
-const OrderOfPayment = ({ isOpen, onClose, application }) => {
-    const [rows, setRows] = useState([{ id: 1, legalBasis: '', description: '', amount: '' }]);
-    const [billDate, setBillDate] = useState(new Date());
-    const [paymentDate, setPaymentDate] = useState(null);
-    const [receiptDate, setReceiptDate] = useState(null);
-    const [rpsSignature, setRpsSignature] = useState(null);
-    const [tsdSignature, setTsdSignature] = useState(null);
-    const rpsNameRef = useRef(null);
-    const tsdNameRef = useRef(null);
-    const rpsFileInputRef = useRef(null);
-    const tsdFileInputRef = useRef(null);
+const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
+    const [step, setStep] = useState(1);
+    const [formData, setFormData] = useState({
+        applicationId: '',
+        applicantName: '',
+        items: [{ description: '', amount: 0 }],
+        totalAmount: 0
+    });
+    const [acceptedApplications, setAcceptedApplications] = useState([]);
 
-    const addRow = (e) => {
-        e.preventDefault(); // Prevent the default button behavior
-        const newRow = { id: Date.now(), legalBasis: '', description: '', amount: '' };
-        setRows(prevRows => [...prevRows, newRow]); // Use functional update to ensure we're working with the latest state
-    };
+    useEffect(() => {
+        if (isOpen) {
+            fetchAcceptedApplications();
+        }
+    }, [isOpen]);
 
-    const removeRow = (id) => {
-        setRows(rows.filter(row => row.id !== id));
-    };
-
-    const updateRow = (id, field, value) => {
-        setRows(rows.map(row => row.id === id ? { ...row, [field]: value } : row));
-    };
-
-    const handleSignatureUpload = (event, setSignature, nameRef) => {
-        event.preventDefault(); // Prevent default behavior
-        event.stopPropagation(); // Stop event propagation
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                setSignature(e.target.result);
-            };
-            reader.readAsDataURL(file);
+    const fetchAcceptedApplications = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get('http://localhost:3000/api/permits/getAllApplications?status=Accepted', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            setAcceptedApplications(response.data);
+        } catch (error) {
+            console.error('Error fetching accepted applications:', error);
+            toast.error('Failed to fetch accepted applications');
         }
     };
 
-    const triggerFilt = (e, inputRef) => {
-        e.preventDefault(); // Prevent default behavior
-        e.stopPropagation(); // Stop event propagation
-        inputRef.current.click();
+    const handleApplicationSelect = (applicationId) => {
+        const selectedApp = acceptedApplications.find(app => app._id === applicationId);
+        if (selectedApp) {
+            setFormData({
+                ...formData,
+                applicationId: selectedApp.customId || selectedApp._id,
+                applicantName: selectedApp.ownerName || ''
+            });
+        }
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        // TODO: Implement submission logic
-        console.log('Form submitted:', { rows, billDate, paymentDate, receiptDate, rpsSignature, tsdSignature });
-        onClose();
+    const handleInputChange = (e, index) => {
+        const { name, value } = e.target;
+        if (name === 'description' || name === 'amount') {
+            const newItems = [...formData.items];
+            newItems[index][name] = name === 'amount' ? parseFloat(value) : value;
+            setFormData(prevState => ({
+                ...prevState,
+                items: newItems,
+                totalAmount: newItems.reduce((sum, item) => sum + (item.amount || 0), 0)
+            }));
+        } else {
+            setFormData(prevState => ({ ...prevState, [name]: value }));
+        }
     };
 
-    if (!isOpen) return null;
+    const addItem = () => {
+        setFormData(prevState => ({
+            ...prevState,
+            items: [...prevState.items, { description: '', amount: 0 }]
+        }));
+    };
+
+    const removeItem = (index) => {
+        setFormData(prevState => {
+            const newItems = prevState.items.filter((_, i) => i !== index);
+            return {
+                ...prevState,
+                items: newItems,
+                totalAmount: newItems.reduce((sum, item) => sum + (item.amount || 0), 0)
+            };
+        });
+    };
+
+    const handleSubmit = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.post('http://localhost:3000/api/admin/order-of-payments', formData, {
+                headers: { Authorization: token }
+            });
+            toast.success('Order of Payment created successfully');
+            onClose();
+        } catch (error) {
+            console.error('Error creating Order of Payment:', error);
+            toast.error('Failed to create Order of Payment');
+        }
+    };
+
+    const renderStep = () => {
+        switch (step) {
+            case 1:
+                return (
+                    <>
+                        <Label htmlFor="applicationSelect">Select Application</Label>
+                        <Select onValueChange={handleApplicationSelect}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select an application" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {acceptedApplications.map((app) => (
+                                    <SelectItem key={app._id} value={app._id}>
+                                        {app.customId || app._id} - {app.ownerName}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <Label htmlFor="applicationId">Application ID</Label>
+                        <Input
+                            id="applicationId"
+                            name="applicationId"
+                            value={formData.applicationId}
+                            onChange={(e) => handleInputChange(e)}
+                            disabled
+                        />
+                        <Label htmlFor="applicantName">Applicant Name</Label>
+                        <Input
+                            id="applicantName"
+                            name="applicantName"
+                            value={formData.applicantName}
+                            onChange={(e) => handleInputChange(e)}
+                            disabled
+                        />
+                    </>
+                );
+            case 2:
+                return (
+                    <>
+                        {formData.items.map((item, index) => (
+                            <div key={index} className="flex gap-2 mb-2">
+                                <Input
+                                    name="description"
+                                    placeholder="Description"
+                                    value={item.description}
+                                    onChange={(e) => handleInputChange(e, index)}
+                                />
+                                <Input
+                                    name="amount"
+                                    type="number"
+                                    placeholder="Amount"
+                                    value={item.amount}
+                                    onChange={(e) => handleInputChange(e, index)}
+                                />
+                                <Button type="button" onClick={() => removeItem(index)}>Remove</Button>
+                            </div>
+                        ))}
+                        <Button type="button" onClick={addItem}>Add Item</Button>
+                        <div className="mt-4">
+                            <Label>Total Amount</Label>
+                            <Input value={formData.totalAmount.toFixed(2)} disabled />
+                        </div>
+                    </>
+                );
+            case 3:
+                return (
+                    <div>
+                        <h3>Review Order of Payment</h3>
+                        <p>Application ID: {formData.applicationId}</p>
+                        <p>Applicant Name: {formData.applicantName}</p>
+                        <h4>Items:</h4>
+                        <ul>
+                            {formData.items.map((item, index) => (
+                                <li key={index}>{item.description}: ₱{item.amount.toFixed(2)}</li>
+                            ))}
+                        </ul>
+                        <p>Total Amount: ₱{formData.totalAmount.toFixed(2)}</p>
+                    </div>
+                );
+            default:
+                return null;
+        }
+    };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-            <div className="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
-                <div className="flex justify-between items-center p-4 border-b">
-                    <h2 className="text-xl font-bold">Assessment of Fees and Charges</h2>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-                        <X className="w-6 h-6" />
-                    </button>
-                </div>
-                <div className="overflow-y-auto flex-grow p-6 custom-scrollbar"> {/* Added custom-scrollbar class here */}
-                    <p className="text-center mb-4 text-sm">(SPLTP/ PLTP/ Clearance to cut/ Certification/ WRP/TCP)</p>
-
-                    <form onSubmit={handleSubmit} className="space-y-6"> {/* Increased space between form elements */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <Label htmlFor="billNo">Bill No.</Label>
-                                <Input id="billNo" className="w-full" />
-                            </div>
-                            <div>
-                                <Label htmlFor="billDate">Date</Label>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button id="billDate" variant="outline" className="w-full justify-start text-left">
-                                            <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {billDate ? format(billDate, "MMM d, yyyy") : <span>Pick a date</span>}
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0">
-                                        <Calendar mode="single" selected={billDate} onSelect={setBillDate} initialFocus />
-                                    </PopoverContent>
-                                </Popover>
-                            </div>
-                        </div>
-
-                        <div>
-                            <Label htmlFor="name">Name/Payee:</Label>
-                            <Input id="name" className="w-full" />
-                        </div>
-                        <div>
-                            <Label htmlFor="address">Address:</Label>
-                            <Input id="address" className="w-full" />
-                        </div>
-                        <div>
-                            <Label htmlFor="nature">Nature of Application/Permit/Documents being secured:</Label>
-                            <Input id="nature" className="w-full" />
-                        </div>
-
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead className="w-1/4">Legal Basis (DAO/SEC)</TableHead>
-                                    <TableHead className="w-1/2">Description and Computation of Fees and Charges Assessed</TableHead>
-                                    <TableHead className="w-1/4">Amount</TableHead>
-                                    <TableHead className="w-10"></TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {rows.map((row, index) => (
-                                    <TableRow key={row.id}>
-                                        <TableCell><Input value={row.legalBasis} onChange={(e) => updateRow(row.id, 'legalBasis', e.target.value)} /></TableCell>
-                                        <TableCell><Input value={row.description} onChange={(e) => updateRow(row.id, 'description', e.target.value)} /></TableCell>
-                                        <TableCell><Input value={row.amount} onChange={(e) => updateRow(row.id, 'amount', e.target.value)} /></TableCell>
-                                        <TableCell>
-                                            {index > 0 && (
-                                                <Button variant="ghost" size="icon" onClick={() => removeRow(row.id)}>
-                                                    <MinusIcon className="h-4 w-4" />
-                                                </Button>
-                                            )}
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-
-                        <div className="flex justify-between items-center mt-6"> {/* Added margin top */}
-                            <Button variant="outline" onClick={addRow} size="sm" type="button">
-                                <PlusIcon className="h-4 w-4 mr-2" /> Add Row
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>{application ? 'View Order of Payment' : 'Create Order of Payment'}</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={(e) => e.preventDefault()}>
+                    {renderStep()}
+                    <DialogFooter>
+                        {step > 1 && (
+                            <Button type="button" onClick={() => setStep(step - 1)}>
+                                Previous
                             </Button>
-                            <div className="flex items-center">
-                                <Label className="mr-2">Total:</Label>
-                                <Input className="w-32" value={`P ${rows.reduce((sum, row) => sum + (parseFloat(row.amount) || 0), 0).toFixed(2)}`} readOnly />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-8 mt-8"> {/* Increased gap and added margin top */}
-                            <div className="text-center relative">
-                                <div className="h-24 mb-4"> {/* Added fixed height container for signature */}
-                                    {rpsSignature && (
-                                        <img
-                                            src={rpsSignature}
-                                            alt="RPS E-Signature"
-                                            className="max-w-full max-h-full mx-auto object-contain"
-                                        />
-                                    )}
-                                </div>
-                                <Input ref={rpsNameRef} className="text-center font-semibold" defaultValue="SIMEON R. DIAZ" />
-                                <p className="text-xs mt-1">SVEMS/Chief, RPS</p>
-                                <input
-                                    type="file"
-                                    ref={rpsFileInputRef}
-                                    className="hidden"
-                                    accept="image/*"
-                                    onChange={(e) => handleSignatureUpload(e, setRpsSignature, rpsNameRef)}
-                                />
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="mt-2"
-                                    onClick={(e) => triggerFileInput(e, rpsFileInputRef)}
-                                >
-                                    <UploadIcon className="h-4 w-4 mr-2" />
-                                    Upload E-Signature
-                                </Button>
-                            </div>
-                            <div className="text-center relative">
-                                <div className="h-24 mb-4"> {/* Added fixed height container for signature */}
-                                    {tsdSignature && (
-                                        <img
-                                            src={tsdSignature}
-                                            alt="TSD E-Signature"
-                                            className="max-w-full max-h-full mx-auto object-contain"
-                                        />
-                                    )}
-                                </div>
-                                <Input ref={tsdNameRef} className="text-center font-semibold" defaultValue="Engr. CYNTHIA U. LOZANO" />
-                                <p className="text-xs mt-1">Chief, Technical Services Division</p>
-                                <input
-                                    type="file"
-                                    ref={tsdFileInputRef}
-                                    className="hidden"
-                                    accept="image/*"
-                                    onChange={(e) => handleSignatureUpload(e, setTsdSignature, tsdNameRef)}
-                                />
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="mt-2"
-                                    onClick={(e) => triggerFileInput(e, tsdFileInputRef)}
-                                >
-                                    <UploadIcon className="h-4 w-4 mr-2" />
-                                    Upload E-Signature
-                                </Button>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <Label>Date of payment of applicant:</Label>
-                                <div className="flex space-x-2 mt-1">
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <Button variant="outline" className="w-full justify-start text-left">
-                                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                                {paymentDate ? format(paymentDate, "MMM d, yyyy") : <span>Pick a date</span>}
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0">
-                                            <Calendar mode="single" selected={paymentDate} onSelect={setPaymentDate} initialFocus />
-                                        </PopoverContent>
-                                    </Popover>
-                                    <TimePicker className="w-[120px]" />
-                                </div>
-                            </div>
-                            <div>
-                                <Label>Date for statutory receipt by applicant:</Label>
-                                <div className="flex space-x-2 mt-1">
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <Button variant="outline" className="w-full justify-start text-left">
-                                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                                {receiptDate ? format(receiptDate, "MMM d, yyyy") : <span>Pick a date</span>}
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0">
-                                            <Calendar mode="single" selected={receiptDate} onSelect={setReceiptDate} initialFocus />
-                                        </PopoverContent>
-                                    </Popover>
-                                    <TimePicker className="w-[120px]" />
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div className="border-t p-4 flex justify-end">
-                    <Button type="submit" onClick={handleSubmit}>Submit Form</Button>
-                </div>
-            </div>
-        </div>
+                        )}
+                        {step < 3 ? (
+                            <Button type="button" onClick={() => setStep(step + 1)}>
+                                Next
+                            </Button>
+                        ) : (
+                            <Button type="button" onClick={handleSubmit}>
+                                {application ? 'Update' : 'Create'}
+                            </Button>
+                        )}
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
     );
 };
 
-export default OrderOfPayment;
+export default OrderOfPaymentModal;

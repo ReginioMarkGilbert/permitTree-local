@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Application = require('../../models/PermitApplications/PermitApplicationSchema');
 
 // Import all permit application schemas
 const ChainsawApplication = require('../../models/PermitApplications/ChainsawApplicationSchema');
@@ -9,13 +10,13 @@ const ChainsawApplication = require('../../models/PermitApplications/ChainsawApp
 const getAllApplications = async (req, res) => {
     try {
         const { sort, status, applicationType } = req.query;
-        let filter = { status: { $ne: 'Draft' } };
+        let filter = {};
 
         if (status) {
             if (Array.isArray(status)) {
                 filter.status = { $in: status.map(s => new RegExp(`^${s}$`, 'i')) };
             } else {
-                filter.status = { $regex: new RegExp(`^${status}$`, 'i') };
+                filter.status = new RegExp(`^${status}$`, 'i');
             }
         }
 
@@ -38,6 +39,7 @@ const getAllApplications = async (req, res) => {
         res.status(500).json({ message: 'Error fetching applications' });
     }
 };
+
 const getApplicationById = async (req, res) => {
     try {
         const { id, applicationType } = req.params;
