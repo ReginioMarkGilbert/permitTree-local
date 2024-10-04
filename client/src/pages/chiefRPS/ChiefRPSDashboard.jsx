@@ -268,14 +268,8 @@ const ChiefRPSDashboard = () => {
 
     return (
         <div className="min-h-screen bg-green-50">
-            <nav className="bg-white shadow-md z-10 flex justify-between items-center p-4">
-                <div className="flex items-center space-x-2">
-                    <Leaf className="h-8 w-8 text-green-600" />
-                    <span className="text-2xl font-bold text-green-800">PermitTree</span>
-                </div>
-            </nav>
 
-            <div className="container mx-auto px-4 sm:px-6 py-8">
+            <div className="container mx-auto px-4 sm:px-6 py-8 pt-24">
                 <h1 className="text-3xl font-bold mb-6 text-green-800">All Applications</h1>
 
                 {/* Tab Buttons */}
