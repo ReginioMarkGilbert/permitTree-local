@@ -13,11 +13,50 @@ const getAllOrderOfPayments = async (req, res) => {
 
 const createOrderOfPayment = async (req, res) => {
     try {
-        const newOrderOfPayment = new OrderOfPayment(req.body);
-        await newOrderOfPayment.save();
-        res.status(201).json(newOrderOfPayment);
+        console.log('Received data:', req.body); // Log the received data
+
+        const {
+            applicationId,
+            applicantName,
+            billNo,
+            date,
+            address,
+            natureOfApplication,
+            items,
+            totalAmount,
+            status,
+            signatures,
+            paymentDate,
+            receiptDate
+        } = req.body;
+
+        const newOrderOfPayment = new OrderOfPayment({
+            applicationId,
+            applicantName,
+            billNo,
+            dateCreated: date,
+            address,
+            natureOfApplication,
+            items,
+            totalAmount,
+            status: status || 'Pending Signature',
+            signatures,
+            paymentDate,
+            receiptDate
+        });
+
+        console.log('New Order of Payment object:', newOrderOfPayment); // Log the created object
+
+        const savedOrderOfPayment = await newOrderOfPayment.save();
+        res.status(201).json(savedOrderOfPayment);
     } catch (error) {
-        res.status(400).json({ message: 'Error creating order of payment', error: error.message });
+        console.error('Error creating order of payment:', error);
+        if (error.name === 'ValidationError') {
+            const validationErrors = Object.values(error.errors).map(err => err.message);
+            res.status(400).json({ message: 'Validation error', errors: validationErrors });
+        } else {
+            res.status(400).json({ message: 'Error creating order of payment', error: error.message });
+        }
     }
 };
 

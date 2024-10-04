@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from 'react-toastify';
 import { Calendar } from "@/components/ui/calendar";
@@ -11,13 +12,13 @@ import { format } from "date-fns";
 import { CalendarIcon, PlusIcon, MinusIcon, UploadIcon } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import "@/components/ui/styles/customScrollbar.css";
-import { TimePicker } from "@/components/ui/time-picker";
-import axios from 'axios';
 
-
-const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
+const OrderOfPaymentForm = ({ onClose }) => {
+    const navigate = useNavigate();
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
+        applicationId: '',
+        applicantName: '',
         billNo: '',
         date: new Date(),
         namePayee: '',
@@ -37,10 +38,8 @@ const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
     const tsdFileInputRef = useRef(null);
 
     useEffect(() => {
-        if (isOpen) {
-            fetchAcceptedApplications();
-        }
-    }, [isOpen]);
+        fetchAcceptedApplications();
+    }, []);
 
     const fetchAcceptedApplications = async () => {
         try {
@@ -63,7 +62,10 @@ const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
             setFormData({
                 ...formData,
                 applicationId: selectedApp.customId || selectedApp._id,
-                applicantName: selectedApp.ownerName || ''
+                applicantName: selectedApp.ownerName || '',
+                namePayee: selectedApp.ownerName || '',
+                address: selectedApp.address || '',
+                natureOfApplication: selectedApp.permitType || ''
             });
         }
     };
@@ -117,21 +119,84 @@ const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
         setFormData(prev => ({ ...prev, [field]: date }));
     };
 
-    const handleTimeChange = (newValue, field) => {
-        setFormData(prev => ({ ...prev, [field]: newValue }));
+    const handleTimeChange = (e, field) => {
+        setFormData(prev => ({
+            ...prev,
+            [field]: e.target.value
+        }));
     };
 
-    const handleSubmit = async () => {
+    const handleNext = () => {
+        if (step === 1 && !formData.applicationId) {
+            toast.error('Please select an application before proceeding.');
+            return;
+        }
+        setStep(step + 1);
+    };
+
+    const handlePrevious = () => {
+        setStep(step - 1);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.post('http://localhost:3000/api/admin/order-of-payments', formData, {
-                headers: { Authorization: token }
+
+            // Calculate total amount
+            const totalAmount = formData.fees.reduce((sum, fee) => sum + Number(fee.amount || 0), 0);
+
+            // Combine date and time for payment and receipt
+            const combineDateTime = (date, time) => {
+                if (!date || !time) return null;
+                const [hours, minutes] = time.split(':');
+                const newDate = new Date(date);
+                newDate.setHours(parseInt(hours), parseInt(minutes));
+                return newDate;
+            };
+
+            const paymentDateTime = combineDateTime(formData.paymentDate, formData.paymentTime);
+            const receiptDateTime = combineDateTime(formData.receiptDate, formData.receiptTime);
+
+            // Prepare the data for submission
+            const submissionData = {
+                applicationId: formData.applicationId,
+                applicantName: formData.namePayee,
+                billNo: formData.billNo,
+                date: formData.date,
+                address: formData.address,
+                natureOfApplication: formData.natureOfApplication,
+                items: formData.fees.map(fee => ({
+                    legalBasis: fee.legalBasis,
+                    description: fee.description,
+                    amount: Number(fee.amount)
+                })),
+                totalAmount: totalAmount,
+                status: 'Pending Signature',
+                signatures: {},
+                paymentDate: paymentDateTime,
+                receiptDate: receiptDateTime
+            };
+
+            // Add signatures if present
+            if (formData.rpsSignature) {
+                submissionData.signatures.chiefRPS = new Date();
+            }
+            if (formData.tsdSignature) {
+                submissionData.signatures.technicalServices = new Date();
+            }
+
+            console.log('Submitting data:', submissionData); // Log the data being sent
+
+            const response = await axios.post('http://localhost:3000/api/admin/order-of-payments', submissionData, {
+                headers: { Authorization: `Bearer ${token}` }
             });
+            console.log('Response:', response.data); // Log the response
             toast.success('Order of Payment created successfully');
-            onClose();
+            navigate('/chief-rps/order-of-payment');
         } catch (error) {
-            console.error('Error creating Order of Payment:', error);
-            toast.error('Failed to create Order of Payment');
+            console.error('Error creating Order of Payment:', error.response?.data || error.message);
+            toast.error(`Failed to create Order of Payment: ${error.response?.data?.message || error.message}`);
         }
     };
 
@@ -139,7 +204,7 @@ const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
         switch (step) {
             case 1:
                 return (
-                    <>
+                    <div className="space-y-4">
                         <Label htmlFor="applicationSelect">Select Application</Label>
                         <Select onValueChange={handleApplicationSelect}>
                             <SelectTrigger>
@@ -158,7 +223,7 @@ const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
                             id="applicationId"
                             name="applicationId"
                             value={formData.applicationId}
-                            onChange={(e) => handleInputChange(e)}
+                            onChange={handleInputChange}
                             disabled
                         />
                         <Label htmlFor="applicantName">Applicant Name</Label>
@@ -166,16 +231,16 @@ const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
                             id="applicantName"
                             name="applicantName"
                             value={formData.applicantName}
-                            onChange={(e) => handleInputChange(e)}
+                            onChange={handleInputChange}
                             disabled
                         />
-                    </>
+                    </div>
                 );
             case 2:
                 return (
                     <div className="space-y-6 h-[630px] flex flex-col">
                         <div className="flex-grow overflow-auto custom-scrollbar pr-4">
-                            <form className="space-y-6">
+                            <div className="space-y-6">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <Label htmlFor="billNo">Bill No.</Label>
@@ -370,10 +435,10 @@ const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
                                                     />
                                                 </PopoverContent>
                                             </Popover>
-                                            <TimePicker
-                                                className="w-[140px]"
-                                                value={formData.paymentTime}
-                                                onChange={(newValue) => handleTimeChange(newValue, 'paymentTime')}
+                                            <Input
+                                                type="time"
+                                                value={formData.paymentTime || ''}
+                                                onChange={(e) => handleTimeChange(e, 'paymentTime')}
                                             />
                                         </div>
                                     </div>
@@ -396,31 +461,16 @@ const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
                                                     />
                                                 </PopoverContent>
                                             </Popover>
-                                            <TimePicker
-                                                className="w-[140px]"
-                                                value={formData.receiptTime}
-                                                onChange={(newValue) => handleTimeChange(newValue, 'receiptTime')}
+                                            <Input
+                                                type="time"
+                                                value={formData.receiptTime || ''}
+                                                onChange={(e) => handleTimeChange(e, 'receiptTime')}
                                             />
                                         </div>
                                     </div>
                                 </div>
-                            </form>
+                            </div>
                         </div>
-                    </div>
-                );
-            case 3:
-                return (
-                    <div>
-                        <h3>Review Order of Payment</h3>
-                        <p>Application ID: {formData.applicationId}</p>
-                        <p>Applicant Name: {formData.applicantName}</p>
-                        <h4>Items:</h4>
-                        <ul>
-                            {formData.items.map((item, index) => (
-                                <li key={index}>{item.description}: ₱{item.amount.toFixed(2)}</li>
-                            ))}
-                        </ul>
-                        <p>Total Amount: ₱{formData.totalAmount.toFixed(2)}</p>
                     </div>
                 );
             default:
@@ -429,34 +479,29 @@ const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className={step === 2 ? "max-w-[800px] w-full" : ""}>
-                <DialogHeader>
-                    <DialogTitle>{application ? 'View Order of Payment' : 'Create Order of Payment'}</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={(e) => e.preventDefault()}>
+        <div className="container mx-auto px-4 py-8">
+            <div className="bg-white shadow-md rounded-lg p-6">
+                <h2 className="text-2xl font-bold mb-6">Create Order of Payment</h2>
+                <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
                     {renderStep()}
-                    <DialogFooter>
+                    <div className="flex justify-between mt-6">
                         {step > 1 && (
-                            <Button type="button" onClick={() => setStep(step - 1)}>
+                            <Button type="button" onClick={handlePrevious}>
                                 Previous
                             </Button>
                         )}
-                        {step < 3 ? (
-                            <Button type="button" onClick={() => setStep(step + 1)}>
+                        {step < 2 ? (
+                            <Button type="button" onClick={handleNext}>
                                 Next
                             </Button>
                         ) : (
-                            <Button type="button" onClick={handleSubmit}>
-                                {application ? 'Update' : 'Create'}
-                            </Button>
+                            <Button type="button" onClick={handleSubmit}>Create Order of Payment</Button>
                         )}
-                    </DialogFooter>
+                    </div>
                 </form>
-            </DialogContent>
-        </Dialog>
+            </div>
+        </div>
     );
 };
 
-export default OrderOfPaymentModal;
-
+export default OrderOfPaymentForm;

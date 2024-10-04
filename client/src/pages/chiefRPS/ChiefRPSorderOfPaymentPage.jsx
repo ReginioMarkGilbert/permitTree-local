@@ -1,26 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from 'react-toastify';
-import { Leaf, Eye, FileText, DollarSign } from "lucide-react";
-import OrderOfPaymentModal from './components/OrderOfPaymentModal';
+import { Leaf, Eye, FileText } from "lucide-react";
+import OrderOfPaymentForm from './components/OrderOfPaymentForm';
 
 const ChiefRPSorderOfPaymentPage = () => {
     const navigate = useNavigate();
+    const { action } = useParams();
     const [activeTab, setActiveTab] = useState('Pending Signature');
     const [orderOfPayments, setOrderOfPayments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [selectedOrderOfPayment, setSelectedOrderOfPayment] = useState(null);
 
     useEffect(() => {
-        fetchOrderOfPayments();
-    }, [activeTab]);
+        if (action !== 'create-oop') {
+            fetchOrderOfPayments();
+        }
+    }, [activeTab, action]);
 
     const fetchOrderOfPayments = async () => {
         try {
@@ -41,12 +42,12 @@ const ChiefRPSorderOfPaymentPage = () => {
     };
 
     const handleCreateOrderOfPayment = () => {
-        setIsCreateModalOpen(true);
+        navigate('/chief-rps/order-of-payment/create-oop');
     };
 
     const handleViewOrderOfPayment = (orderOfPayment) => {
-        setSelectedOrderOfPayment(orderOfPayment);
-        setIsCreateModalOpen(true);
+        // Implement view functionality
+        console.log("Viewing order of payment:", orderOfPayment);
     };
 
     const renderTable = () => {
@@ -108,55 +109,55 @@ const ChiefRPSorderOfPaymentPage = () => {
             </nav>
 
             <div className="container mx-auto px-4 sm:px-6 py-8">
-                <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-3xl font-bold text-green-800">Order of Payments</h1>
-                    <Button onClick={handleCreateOrderOfPayment}>
-                        <FileText className="mr-2 h-4 w-4" />
-                        Create Order of Payment
-                    </Button>
-                </div>
+                {action === 'create-oop' ? (
+                    <OrderOfPaymentForm onClose={() => navigate('/chief-rps/order-of-payment')} />
+                ) : (
+                    <>
+                        <div className="flex justify-between items-center mb-6">
+                            <h1 className="text-3xl font-bold text-green-800">Order of Payments</h1>
+                            <Button onClick={handleCreateOrderOfPayment}>
+                                <FileText className="mr-2 h-4 w-4" />
+                                Create Order of Payment
+                            </Button>
+                        </div>
 
-                <div className="mb-6 overflow-x-auto">
-                    <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-                        {['Pending Signature', 'Awaiting Payment', 'Completed'].map((tab) => (
-                            <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${
-                                    activeTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'
-                                }`}
-                            >
-                                {tab}
-                            </button>
-                        ))}
-                    </div>
-                </div>
+                        <div className="mb-6 overflow-x-auto">
+                            <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
+                                {['Pending Signature', 'Awaiting Payment', 'Completed'].map((tab) => (
+                                    <button
+                                        key={tab}
+                                        onClick={() => setActiveTab(tab)}
+                                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${
+                                            activeTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        {tab}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
 
-                <div className="mb-6">
-                    <input
-                        type="text"
-                        placeholder="Search order of payments..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="border rounded-md p-2 w-full"
-                    />
-                </div>
+                        <div className="mb-6">
+                            <input
+                                type="text"
+                                placeholder="Search order of payments..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="border rounded-md p-2 w-full"
+                            />
+                        </div>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Order of Payments - {activeTab}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        {renderTable()}
-                    </CardContent>
-                </Card>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Order of Payments - {activeTab}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                {renderTable()}
+                            </CardContent>
+                        </Card>
+                    </>
+                )}
             </div>
-
-            <OrderOfPaymentModal
-                isOpen={isCreateModalOpen}
-                onClose={() => setIsCreateModalOpen(false)}
-                application={null} // Pass null when creating a new Order of Payment
-            />
         </div>
     );
 };
