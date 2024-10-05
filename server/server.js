@@ -62,6 +62,9 @@ app.use(passport.initialize());
 const chainsawRoutes = require('./User/routes/PermitApplicationsRoutes/chainsawApplicationRoutes');
 app.use('/api', chainsawRoutes);
 
+const oopRoutes = require('./User/routes/userOOPRoutes');
+app.use('/api/', oopRoutes);
+
 const authRoutes = require('./User/routes/userAuthRoutes');
 app.use('/api', authRoutes);
 
@@ -86,12 +89,11 @@ app.use('/api/admin/reports', adminReportsRoutes);
 const chiefRPSNotificationRoutes = require('./Admin/routes/ChiefRPS_routes/ChiefRPSNotificationRoutes');
 app.use('/api/admin', chiefRPSNotificationRoutes);
 
-const adminOrderOfPaymentRoutes = require('./Admin/routes/ChiefRPS_routes/OrderOfPaymentRoutes');
-app.use('/api/admin', adminOrderOfPaymentRoutes);
+const chiefRPSOrderOfPaymentRoutes = require('./Admin/routes/ChiefRPS_routes/ChiefOrderOfPaymentRoutes');
+app.use('/api/admin', chiefRPSOrderOfPaymentRoutes);
 
 const SA_ManageUserRoutes = require('./Admin/routes/SuperAdmin_routes/SA_ManageUserRoutes');
 app.use('/api/admin/super', SA_ManageUserRoutes);
-
 
 // Start the server
 const port = process.env.PORT || 3000;

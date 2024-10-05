@@ -180,7 +180,6 @@ const getAllApplications = async (req, res) => {
             sortOption.dateOfSubmission = -1;
         }
 
-        // Use a more generic approach to fetch applications
         const applications = await Application.find(filter).sort(sortOption);
         res.status(200).json(applications);
     } catch (err) {

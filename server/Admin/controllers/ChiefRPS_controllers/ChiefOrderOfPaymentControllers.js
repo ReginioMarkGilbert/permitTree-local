@@ -1,4 +1,4 @@
-const OrderOfPayment = require('../../models/ChiefRPS_models/OrderOfPaymentSchema');
+const OrderOfPayment = require('../../models/ChiefRPS_models/ChiefOrderOfPaymentSchema');
 const Application = require('../../../User/models/PermitApplications/ChainsawApplicationSchema'); // Import the Application model
 
 const getAllOrderOfPayments = async (req, res) => {
@@ -98,14 +98,22 @@ const signOrderOfPayment = async (req, res) => {
             return res.status(404).json({ message: 'Order of payment not found' });
         }
         orderOfPayment.signatures[signatureType] = new Date();
-        // Store the signature image if needed
-        // orderOfPayment.signatureImages[signatureType] = signature;
+
         if (orderOfPayment.signatures.chiefRPS && orderOfPayment.signatures.technicalServices) {
             orderOfPayment.status = 'Awaiting Payment';
+
+            // Update the corresponding application status
+            const application = await Application.findOne({ customId: orderOfPayment.applicationId });
+            if (application) {
+                application.status = 'Awaiting Payment';
+                await application.save();
+            }
         }
+
         await orderOfPayment.save();
         res.json(orderOfPayment);
     } catch (error) {
+        console.error('Error signing order of payment:', error);
         res.status(400).json({ message: 'Error signing order of payment', error: error.message });
     }
 };
@@ -127,11 +135,25 @@ const confirmPayment = async (req, res) => {
     }
 };
 
+const getOrderOfPaymentByApplicationId = async (req, res) => {
+    try {
+        const orderOfPayment = await OrderOfPayment.findOne({ applicationId: req.params.applicationId });
+        if (!orderOfPayment) {
+            return res.status(404).json({ message: 'Order of payment not found for this application' });
+        }
+        res.json(orderOfPayment);
+    } catch (error) {
+        console.error('Error fetching order of payment:', error);
+        res.status(500).json({ message: 'Error fetching order of payment', error: error.message });
+    }
+};
+
 module.exports = {
     getAllOrderOfPayments,
     createOrderOfPayment,
     getOrderOfPaymentById,
     updateOrderOfPayment,
     signOrderOfPayment,
-    confirmPayment
+    confirmPayment,
+    getOrderOfPaymentByApplicationId
 };
