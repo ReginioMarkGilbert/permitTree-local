@@ -95,6 +95,10 @@ app.use('/api/admin', chiefRPSOrderOfPaymentRoutes);
 const SA_ManageUserRoutes = require('./Admin/routes/SuperAdmin_routes/SA_ManageUserRoutes');
 app.use('/api/admin/super', SA_ManageUserRoutes);
 
+// Add this line to use the new user OOP routes
+const userOOPRoutes = require('./User/routes/userOOPRoutes');
+app.use('/api/user', userOOPRoutes);
+
 // Start the server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

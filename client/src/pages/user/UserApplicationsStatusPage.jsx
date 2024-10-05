@@ -4,7 +4,7 @@ import { Eye, Edit, Printer, Archive, ChevronUp, ChevronDown, Leaf, Undo, Trash2
 import ApplicationDetailsModal from '../../components/ui/ApplicationDetailsModal';
 import EditApplicationModal from '../../components/ui/EditApplicationModal';
 import ConfirmationModal from '../../components/ui/ConfirmationModal';
-import ApplicantOrderOfPaymentModal from './components/UserOOPviewModal';
+import UserOOPviewModal from './components/UserOOPviewModal';
 import { toast } from 'react-toastify';
 import './styles/UserApplicationStatusPage.css';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,7 @@ const UserApplicationsStatusPage = () => {
     const [notifications, setNotifications] = useState([]);
     const [selectedOOP, setSelectedOOP] = useState(null);
     const [isOOPModalOpen, setIsOOPModalOpen] = useState(false);
+    const [selectedApplicationId, setSelectedApplicationId] = useState(null);
 
     useEffect(() => {
         fetchApplications();
@@ -196,18 +197,9 @@ const UserApplicationsStatusPage = () => {
         return new Date(dateString).toLocaleDateString(undefined, options);
     };
 
-    const handleViewOOP = async (applicationId) => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get(`http://localhost:3000/api/admin/order-of-payments/by-application/${applicationId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setSelectedOOP(response.data);
-            setIsOOPModalOpen(true);
-        } catch (error) {
-            console.error('Error fetching Order of Payment:', error);
-            toast.error('Failed to fetch Order of Payment');
-        }
+    const handleViewOOP = (applicationId) => {
+        setSelectedApplicationId(applicationId);
+        setIsOOPModalOpen(true);
     };
 
     const renderTable = () => {
@@ -435,10 +427,10 @@ const UserApplicationsStatusPage = () => {
                 message={confirmationModal.message}
             />
 
-            <ApplicantOrderOfPaymentModal
+            <UserOOPviewModal
                 isOpen={isOOPModalOpen}
                 onClose={() => setIsOOPModalOpen(false)}
-                orderOfPayment={selectedOOP}
+                applicationId={selectedApplicationId}
             />
         </div>
     );
