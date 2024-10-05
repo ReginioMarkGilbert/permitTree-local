@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon, PlusIcon, MinusIcon, UploadIcon } from "lucide-react";
+import { CalendarIcon, PlusIcon, MinusIcon, UploadIcon, ArrowLeft } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import "@/components/ui/styles/customScrollbar.css";
 
@@ -198,6 +198,10 @@ const OrderOfPaymentForm = ({ onClose }) => {
             console.error('Error creating Order of Payment:', error.response?.data || error.message);
             toast.error(`Failed to create Order of Payment: ${error.response?.data?.message || error.message}`);
         }
+    };
+
+    const handleBack = () => {
+        navigate('/chief-rps/order-of-payment');
     };
 
     const renderStep = () => {
@@ -481,7 +485,13 @@ const OrderOfPaymentForm = ({ onClose }) => {
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="bg-white shadow-md rounded-lg p-6">
-                <h2 className="text-2xl font-bold mb-6">Create Order of Payment</h2>
+                <div className="flex justify-between items-center mb-6">
+                    <Button variant="ghost" onClick={handleBack} className="flex items-center">
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Back to Dashboard
+                    </Button>
+                    <h2 className="text-2xl font-bold">Create Order of Payment</h2>
+                </div>
                 <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
                     {renderStep()}
                     <div className="flex justify-between mt-6">
