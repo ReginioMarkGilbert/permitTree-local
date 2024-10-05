@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Eye, Edit, Printer, Archive, ChevronUp, ChevronDown, Leaf, Undo, Trash2 } from 'lucide-react';
+import { Eye, Edit, Printer, Archive, ChevronUp, ChevronDown, Leaf, Undo, Trash2, RefreshCw } from 'lucide-react';
 import ApplicationDetailsModal from '../../components/ui/ApplicationDetailsModal';
 import EditApplicationModal from '../../components/ui/EditApplicationModal';
 import ConfirmationModal from '../../components/ui/ConfirmationModal';
 import { toast } from 'react-toastify';
 import './styles/UserApplicationStatusPage.css';
+import { Button } from '@/components/ui/button';
 
 const UserApplicationsStatusPage = () => {
     const [applications, setApplications] = useState([]);
@@ -30,11 +31,13 @@ const UserApplicationsStatusPage = () => {
 
     const fetchApplications = async () => {
         try {
+            setLoading(true);
             const token = localStorage.getItem('token');
             const response = await axios.get('http://localhost:3000/api/getAllApplications', {
                 params: { status: activeTab },
                 headers: { Authorization: token }
             });
+            console.log('Fetched applications:', response.data);
             setApplications(response.data);
             setLoading(false);
         } catch (error) {
@@ -326,6 +329,10 @@ const UserApplicationsStatusPage = () => {
         });
     };
 
+    const handleRefresh = () => {
+        fetchApplications();
+    };
+
     return (
         <div className="min-h-screen bg-green-50">
             <nav className="bg-white shadow-md z-10 flex justify-between items-center p-4">
@@ -336,7 +343,13 @@ const UserApplicationsStatusPage = () => {
             </nav>
 
             <div className="container mx-auto px-4 sm:px-6 py-8">
-                <h1 className="text-3xl font-bold mb-6 text-green-800">My Applications</h1>
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="text-3xl font-bold text-green-800">My Applications</h1>
+                    <Button onClick={handleRefresh} variant="outline">
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                        Refresh
+                    </Button>
+                </div>
                 <div className="mb-6 overflow-x-auto">
                     <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
                         {['Draft', 'Submitted', 'Returned', 'Accepted', 'Awaiting Payment', 'Released', 'Expired', 'Rejected'].map((tab) => (

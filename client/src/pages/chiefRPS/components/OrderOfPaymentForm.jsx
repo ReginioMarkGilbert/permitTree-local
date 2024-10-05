@@ -186,14 +186,14 @@ const OrderOfPaymentForm = ({ onClose }) => {
                 submissionData.signatures.technicalServices = new Date();
             }
 
-            console.log('Submitting data:', submissionData); // Log the data being sent
+            console.log('Submitting data:', submissionData);
 
             const response = await axios.post('http://localhost:3000/api/admin/order-of-payments', submissionData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            console.log('Response:', response.data); // Log the response
+            console.log('Response:', response.data);
             toast.success('Order of Payment created successfully');
-            navigate('/chief-rps/order-of-payment');
+            onClose();
         } catch (error) {
             console.error('Error creating Order of Payment:', error.response?.data || error.message);
             toast.error(`Failed to create Order of Payment: ${error.response?.data?.message || error.message}`);

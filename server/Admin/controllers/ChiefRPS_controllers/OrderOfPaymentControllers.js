@@ -1,4 +1,5 @@
 const OrderOfPayment = require('../../models/ChiefRPS_models/OrderOfPaymentSchema');
+const Application = require('../../../User/models/PermitApplications/ChainsawApplicationSchema'); // Import the Application model
 
 const getAllOrderOfPayments = async (req, res) => {
     try {
@@ -13,7 +14,7 @@ const getAllOrderOfPayments = async (req, res) => {
 
 const createOrderOfPayment = async (req, res) => {
     try {
-        console.log('Received data:', req.body); // Log the received data
+        console.log('Received data:', req.body);
 
         const {
             applicationId,
@@ -24,7 +25,6 @@ const createOrderOfPayment = async (req, res) => {
             natureOfApplication,
             items,
             totalAmount,
-            status,
             signatures,
             paymentDate,
             receiptDate
@@ -39,16 +39,19 @@ const createOrderOfPayment = async (req, res) => {
             natureOfApplication,
             items,
             totalAmount,
-            status: status || 'Pending Signature',
+            status: 'Pending Signature', // Change this to 'Pending Signature'
             signatures,
             paymentDate,
             receiptDate
         });
 
-        console.log('New Order of Payment object:', newOrderOfPayment); // Log the created object
+        console.log('New Order of Payment object:', newOrderOfPayment);
 
         const savedOrderOfPayment = await newOrderOfPayment.save();
-        res.status(201).json(savedOrderOfPayment);
+
+        // Don't update the application status here
+
+        res.status(201).json({ orderOfPayment: savedOrderOfPayment });
     } catch (error) {
         console.error('Error creating order of payment:', error);
         if (error.name === 'ValidationError') {
@@ -96,6 +99,20 @@ const signOrderOfPayment = async (req, res) => {
         // orderOfPayment.signatureImages[signatureType] = signature;
         if (orderOfPayment.signatures.chiefRPS && orderOfPayment.signatures.technicalServices) {
             orderOfPayment.status = 'Awaiting Payment';
+
+            // Update the application status to "Awaiting Payment"
+            const updatedApplication = await Application.findOneAndUpdate(
+                { customId: orderOfPayment.applicationId },
+                { status: 'Awaiting Payment' },
+                { new: true }
+            );
+
+            if (!updatedApplication) {
+                console.log('Application not found:', orderOfPayment.applicationId);
+                return res.status(404).json({ message: 'Application not found' });
+            }
+
+            console.log('Updated application:', updatedApplication);
         }
         await orderOfPayment.save();
         res.json(orderOfPayment);

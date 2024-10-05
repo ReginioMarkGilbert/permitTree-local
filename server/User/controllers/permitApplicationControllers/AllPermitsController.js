@@ -7,13 +7,13 @@ const ChainsawApplication = require('../../models/PermitApplications/ChainsawApp
 const getAllApplications = async (req, res) => {
     try {
         const { sort, status, applicationType } = req.query;
-        let filter = {};
+        let filter = { userId: req.user.id };
 
         if (status) {
             if (Array.isArray(status)) {
                 filter.status = { $in: status.map(s => new RegExp(`^${s}$`, 'i')) };
             } else {
-                filter.status = new RegExp(`^${status}$`, 'i');
+                filter.status = { $regex: new RegExp(`^${status}$`, 'i') };
             }
         }
 
@@ -30,10 +30,11 @@ const getAllApplications = async (req, res) => {
         }
 
         const applications = await Application.find(filter).sort(sortOption);
+        console.log('Fetched applications:', applications);
         res.status(200).json(applications);
-    } catch (error) {
-        console.error('Error fetching all applications:', error);
-        res.status(500).json({ message: 'Error fetching applications' });
+    } catch (err) {
+        console.error('Error fetching applications:', err);
+        res.status(400).json({ error: err.message });
     }
 };
 
