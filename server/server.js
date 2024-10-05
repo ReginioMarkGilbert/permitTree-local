@@ -20,9 +20,9 @@ connectDB();
 
 // CORS Configuration
 const corsOptions = {
-    origin: 'http://localhost:5173', // Allow requests from your frontend
+    origin: 'http://localhost:5173',
     optionsSuccessStatus: 200,
-    credentials: true // Allow credentials if you are using cookies/sessions
+    credentials: true // Allow credentials if using cookies/sessions
 };
 
 app.use(cors(corsOptions));
