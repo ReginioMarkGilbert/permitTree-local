@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Eye, Edit, Trash2, Leaf, Printer, FileText } from 'lucide-react';
+import { Eye, Edit, Trash2, Leaf, Printer, FileText, X } from 'lucide-react';
 import ApplicationDetailsModal from '../../components/ui/ApplicationDetailsModal';
 import EditApplicationModal from '../../components/ui/EditApplicationModal';
 import ConfirmationModal from '../../components/ui/ConfirmationModal';
@@ -96,6 +96,16 @@ const ChiefRPSDashboard = () => {
         });
     };
 
+    const handleUndoStatus = async (applicationId) => {
+        setConfirmationModal({
+            isOpen: true,
+            type: 'undo',
+            applicationId,
+            title: 'Undo Status',
+            message: "Are you sure you want to undo the status of this application? It will be set back to In Progress. This action cannot be undone."
+        });
+    };
+
     const handleConfirmAction = async () => {
         const { type, application } = confirmationModal;
         setConfirmationModal({ isOpen: false, type: null, application: null, title: '', message: '' });
@@ -114,6 +124,26 @@ const ChiefRPSDashboard = () => {
             toast.error('Failed to delete application');
         }
     };
+
+    const handleUndoConfirmAction = async () => {
+        const { type, applicationId } = confirmationModal;
+        setConfirmationModal({ isOpen: false, type: null, applicationId: null, title: '', message: '' });
+
+        try {
+            const token = localStorage.getItem('token');
+            if (type === 'undo') {
+                await axios.put(`http://localhost:3000/api/admin/update-status/${applicationId}`, { status: 'In Progress' }, {
+                    headers: { Authorization: token }
+                });
+                toast.success('Application status updated to In Progress');
+                fetchApplications(); // Refresh the applications list
+            }
+        } catch (error) {
+            console.error('Error updating application status:', error);
+            toast.error('Failed to update application status');
+        }
+    };
+
 
     const handlePrint = async (id) => {
         try {
@@ -134,6 +164,8 @@ const ChiefRPSDashboard = () => {
             toast.error('Failed to print application');
         }
     };
+
+
 
     const handleReview = async (applicationId) => {
         try {
@@ -248,14 +280,25 @@ const ChiefRPSDashboard = () => {
                                             </button>
                                         )}
                                         {app.status === 'Accepted' && (
-                                            <button
-                                                className="text-indigo-600 hover:text-indigo-900 action-icon"
-                                                onClick={() => handleOrderOfPayment(app)}
-                                            >
-                                                <FileText className="inline w-4 h-4" />
-                                                <span className="sr-only">Create Order of Payment</span>
-                                            </button>
+                                            <>
+                                                <button
+                                                    className="text-indigo-600 hover:text-indigo-900 action-icon"
+                                                    onClick={() => handleOrderOfPayment(app)}
+                                                >
+                                                    <FileText className="inline w-4 h-4" />
+                                                    <span className="sr-only">Create Order of Payment</span>
+                                                </button>
+                                                {/* undo Accepted status to In Progress */}
+                                                <button
+                                                    className="text-indigo-600 hover:text-indigo-900 action-icon"
+                                                    onClick={() => handleUndoStatus(app._id)}
+                                                >
+                                                    <X className="inline w-4 h-4" />
+                                                    <span className="sr-only">Undo Status</span>
+                                                </button>
+                                            </>
                                         )}
+
                                     </div>
                                 </td>
                             </tr>
@@ -328,6 +371,15 @@ const ChiefRPSDashboard = () => {
                 isOpen={confirmationModal.isOpen}
                 onClose={() => setConfirmationModal({ isOpen: false, type: null, application: null, title: '', message: '' })}
                 onConfirm={handleConfirmAction}
+                title={confirmationModal.title}
+                message={confirmationModal.message}
+            />
+
+            {/* Undo Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={confirmationModal.isOpen}
+                onClose={() => setConfirmationModal({ isOpen: false, type: null, applicationId: null, title: '', message: '' })}
+                onConfirm={handleUndoConfirmAction}
                 title={confirmationModal.title}
                 message={confirmationModal.message}
             />

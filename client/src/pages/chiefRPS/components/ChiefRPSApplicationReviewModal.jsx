@@ -113,6 +113,7 @@ const ChiefRPSApplicationReviewModal = ({ isOpen, onClose, application, onUpdate
             );
             toast.success('Application status updated to Accepted');
             onClose(); // Close the modal after accepting
+            window.location.reload(); // reload page
         } catch (error) {
             console.error('Error updating application status:', error);
             toast.error('Failed to update application status');
