@@ -200,7 +200,8 @@ const updateApplicationStatus = async (req, res) => {
         const notification = new Notification({
             userId: application.userId,
             message: `Your application ${application.customId} status has been updated to ${status}.`,
-            applicationId: application._id
+            applicationId: application._id,
+            type: 'application_status_changed'
         });
         await notification.save();
 
