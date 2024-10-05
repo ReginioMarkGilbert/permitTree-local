@@ -33,12 +33,14 @@ const OrderOfPaymentForm = ({ onClose }) => {
         receiptTime: null
     });
     const [acceptedApplications, setAcceptedApplications] = useState([]);
+    const [existingOOPs, setExistingOOPs] = useState([]);
 
     const rpsFileInputRef = useRef(null);
     const tsdFileInputRef = useRef(null);
 
     useEffect(() => {
         fetchAcceptedApplications();
+        fetchExistingOOPs();
     }, []);
 
     const fetchAcceptedApplications = async () => {
@@ -53,6 +55,21 @@ const OrderOfPaymentForm = ({ onClose }) => {
         } catch (error) {
             console.error('Error fetching accepted applications:', error);
             toast.error('Failed to fetch accepted applications');
+        }
+    };
+
+    const fetchExistingOOPs = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get('http://localhost:3000/api/admin/order-of-payments', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            setExistingOOPs(response.data);
+        } catch (error) {
+            console.error('Error fetching existing OOPs:', error);
+            toast.error('Failed to fetch existing Order of Payments');
         }
     };
 
@@ -215,11 +232,13 @@ const OrderOfPaymentForm = ({ onClose }) => {
                                 <SelectValue placeholder="Select an application" />
                             </SelectTrigger>
                             <SelectContent>
-                                {acceptedApplications.map((app) => (
-                                    <SelectItem key={app._id} value={app._id}>
-                                        {app.customId || app._id} - {app.ownerName}
-                                    </SelectItem>
-                                ))}
+                                {acceptedApplications
+                                    .filter(app => !existingOOPs.some(oop => oop.applicationId === app.customId))
+                                    .map((app) => (
+                                        <SelectItem key={app._id} value={app._id}>
+                                            {app.customId || app._id} - {app.ownerName}
+                                        </SelectItem>
+                                    ))}
                             </SelectContent>
                         </Select>
                         <Label htmlFor="applicationId">Application ID</Label>
