@@ -86,12 +86,14 @@ const updateOrderOfPayment = async (req, res) => {
 
 const signOrderOfPayment = async (req, res) => {
     try {
-        const { signatureType } = req.body;
+        const { signatureType, signature } = req.body;
         const orderOfPayment = await OrderOfPayment.findById(req.params.id);
         if (!orderOfPayment) {
             return res.status(404).json({ message: 'Order of payment not found' });
         }
         orderOfPayment.signatures[signatureType] = new Date();
+        // Store the signature image if needed
+        // orderOfPayment.signatureImages[signatureType] = signature;
         if (orderOfPayment.signatures.chiefRPS && orderOfPayment.signatures.technicalServices) {
             orderOfPayment.status = 'Awaiting Payment';
         }

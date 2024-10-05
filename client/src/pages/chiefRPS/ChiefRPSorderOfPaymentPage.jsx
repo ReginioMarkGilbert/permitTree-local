@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from 'react-toastify';
 import { Leaf, Eye, FileText } from "lucide-react";
 import OrderOfPaymentForm from './components/OrderOfPaymentForm';
+import OrderOfPaymentViewModal from './components/OrderOfPaymentViewModal';
 
 const ChiefRPSorderOfPaymentPage = () => {
     const navigate = useNavigate();
@@ -16,6 +17,8 @@ const ChiefRPSorderOfPaymentPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedOOP, setSelectedOOP] = useState(null);
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
     useEffect(() => {
         if (action !== 'create-oop') {
@@ -46,8 +49,8 @@ const ChiefRPSorderOfPaymentPage = () => {
     };
 
     const handleViewOrderOfPayment = (orderOfPayment) => {
-        // Implement view functionality
-        console.log("Viewing order of payment:", orderOfPayment);
+        setSelectedOOP(orderOfPayment);
+        setIsViewModalOpen(true);
     };
 
     const renderTable = () => {
@@ -121,9 +124,8 @@ const ChiefRPSorderOfPaymentPage = () => {
                                     <button
                                         key={tab}
                                         onClick={() => setActiveTab(tab)}
-                                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${
-                                            activeTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'
-                                        }`}
+                                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'
+                                            }`}
                                     >
                                         {tab}
                                     </button>
@@ -142,13 +144,18 @@ const ChiefRPSorderOfPaymentPage = () => {
                         </div>
 
                         <Card>
-                            {/* <CardHeader>
-                                <CardTitle>Order of Payments - {activeTab}</CardTitle>
-                            </CardHeader> */}
                             <CardContent>
                                 {renderTable()}
                             </CardContent>
                         </Card>
+                        {selectedOOP && (
+                            <OrderOfPaymentViewModal
+                                isOpen={isViewModalOpen}
+                                onClose={() => setIsViewModalOpen(false)}
+                                orderOfPayment={selectedOOP}
+                                refreshOrderOfPayments={fetchOrderOfPayments}
+                            />
+                        )}
                     </>
                 )}
             </div>
