@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Eye, Edit, Printer, Archive, ChevronUp, ChevronDown, Leaf, Undo, Trash2, RefreshCw } from 'lucide-react';
+import { Eye, Edit, Printer, Archive, ChevronUp, ChevronDown, Leaf, Undo, Trash2, RefreshCw, FileText, Send } from 'lucide-react';
 import ApplicationDetailsModal from '../../components/ui/ApplicationDetailsModal';
 import EditApplicationModal from '../../components/ui/EditApplicationModal';
 import ConfirmationModal from '../../components/ui/ConfirmationModal';
@@ -254,55 +254,86 @@ const UserApplicationsStatusPage = () => {
                                         {app.status}
                                     </span>
                                 </td>
-                                <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
-                                    <div className="flex flex-wrap gap-2">
-                                        <button className="text-green-600 hover:text-green-900 action-icon" onClick={() => handleView(app._id)}>
-                                            <Eye className="inline w-4 h-4" />
-                                        </button>
-                                        {(app.status === 'Draft' || app.status === 'Returned') && (
-                                            <button className="text-blue-600 hover:text-blue-900 action-icon" onClick={() => handleEdit(app)}>
-                                                <Edit className="inline w-4 h-4" />
-                                            </button>
+                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium">
+                                    <div className="flex flex-wrap gap-1">
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
+                                            className="h-6 w-6 text-green-600 hover:text-green-700 border-green-200 hover:bg-green-50"
+                                            onClick={() => handleView(app._id)}
+                                            title="View"
+                                        >
+                                            <Eye className="h-3 w-3" />
+                                        </Button>
+
+                                        {app.status === 'Awaiting Payment' && (
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                className="h-6 w-6 text-purple-600 hover:text-purple-700 border-purple-200 hover:bg-purple-50"
+                                                onClick={() => handleViewOOP(app.customId)}
+                                                title="View OOP"
+                                            >
+                                                <FileText className="h-3 w-3" />
+                                            </Button>
                                         )}
+
+                                        {(app.status === 'Draft' || app.status === 'Returned') && (
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                className="h-6 w-6 text-blue-600 hover:text-blue-700 border-blue-200 hover:bg-blue-50"
+                                                onClick={() => handleEdit(app)}
+                                                title="Edit"
+                                            >
+                                                <Edit className="h-3 w-3" />
+                                            </Button>
+                                        )}
+
                                         {app.status === 'Draft' && (
                                             <>
-                                                <button
-                                                    className="text-yellow-600 hover:text-yellow-900 flex items-center gap-1 px-2 py-1 rounded-md bg-yellow-100 hover:bg-yellow-200 transition-colors duration-200"
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="h-6 w-6 text-yellow-600 hover:text-yellow-700 border-yellow-200 hover:bg-yellow-50"
                                                     onClick={() => handleSubmitDraft(app)}
+                                                    title="Submit"
                                                 >
-                                                    <Leaf className="inline w-4 h-4" />
-                                                    <span className="text-xs font-medium">Submit</span>
-                                                </button>
-                                                <button
-                                                    className="text-red-600 hover:text-red-900 action-icon"
+                                                    <Send className="h-3 w-3" />
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="h-6 w-6 text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50"
                                                     onClick={() => handleDelete(app)}
+                                                    title="Delete"
                                                 >
-                                                    <Trash2 className="inline w-4 h-4" />
-                                                </button>
+                                                    <Trash2 className="h-3 w-3" />
+                                                </Button>
                                             </>
                                         )}
+
                                         {app.status === 'Returned' && (
-                                            <button
-                                                className="text-yellow-600 hover:text-yellow-900 flex items-center gap-1 px-2 py-1 rounded-md bg-yellow-100 hover:bg-yellow-200 transition-colors duration-200"
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                className="h-6 w-6 text-yellow-600 hover:text-yellow-700 border-yellow-200 hover:bg-yellow-50"
                                                 onClick={() => handleSubmitReturned(app)}
+                                                title="Resubmit"
                                             >
-                                                <Leaf className="inline w-4 h-4" />
-                                                <span className="text-xs font-medium">Resubmit</span>
-                                            </button>
+                                                <Send className="h-3 w-3" />
+                                            </Button>
                                         )}
+
                                         {app.status === 'Submitted' && (
-                                            <button
-                                                className="text-orange-600 hover:text-orange-900 flex items-center gap-1 px-2 py-1 rounded-md bg-orange-100 hover:bg-orange-200 transition-colors duration-200"
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                className="h-6 w-6 text-orange-600 hover:text-orange-700 border-orange-200 hover:bg-orange-50"
                                                 onClick={() => handleUnsubmit(app)}
+                                                title="Unsubmit"
                                             >
-                                                <Undo className="inline w-4 h-4" />
-                                                <span className="text-xs font-medium">Unsubmit</span>
-                                            </button>
-                                        )}
-                                        {app.status === 'Awaiting Payment' && (
-                                            <Button variant="outline" size="sm" onClick={() => handleViewOOP(app.customId)}>
-                                                <Eye className="mr-2 h-4 w-4" />
-                                                View OOP
+                                                <Undo className="h-3 w-3" />
                                             </Button>
                                         )}
                                     </div>
