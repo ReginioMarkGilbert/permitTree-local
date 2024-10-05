@@ -83,8 +83,8 @@ app.use('/api/admin', adminDashboardRoutes);
 const adminReportsRoutes = require('./Admin/routes/admin_routes/adminReportsRoutes');
 app.use('/api/admin/reports', adminReportsRoutes);
 
-const adminNotificationRoutes = require('./Admin/routes/ChiefRPS_routes/ChiefRPSNotificationRoutes');
-app.use('/api/admin', adminNotificationRoutes);
+const chiefRPSNotificationRoutes = require('./Admin/routes/ChiefRPS_routes/ChiefRPSNotificationRoutes');
+app.use('/api/admin', chiefRPSNotificationRoutes);
 
 const adminOrderOfPaymentRoutes = require('./Admin/routes/ChiefRPS_routes/OrderOfPaymentRoutes');
 app.use('/api/admin', adminOrderOfPaymentRoutes);
