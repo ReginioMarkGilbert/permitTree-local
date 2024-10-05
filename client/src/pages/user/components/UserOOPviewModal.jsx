@@ -8,12 +8,12 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from 'react-toastify';
-import { Loader2, FileText, Calendar, User, MapPin, Tag, DollarSign } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
+import '@/components/ui/styles/customScrollbar.css';
 
 const UserOOPviewModal = ({ isOpen, onClose, applicationId }) => {
   const [oopData, setOopData] = useState(null);
@@ -43,91 +43,96 @@ const UserOOPviewModal = ({ isOpen, onClose, applicationId }) => {
 
   if (!isOpen) return null;
 
+  const LabeledValue = ({ label, value }) => (
+    <div className="mb-4">
+      <Label className="font-semibold">{label}</Label>
+      <div className="mt-1">{value}</div>
+    </div>
+  );
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px]">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-green-800">Order of Payment</DialogTitle>
         </DialogHeader>
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-          </div>
-        ) : oopData ? (
-          <div className="mt-4 space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="billNo">Bill No.</Label>
-                <Input id="billNo" value={oopData.billNo} readOnly />
+        <div className="flex-grow overflow-y-auto custom-scrollbar pr-4">
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+            </div>
+          ) : oopData ? (
+            <div className="space-y-6">
+              <div className="flex justify-between items-start">
+                <div className="w-2/3">
+                  {/* Empty div to maintain layout */}
+                </div>
+                <div className="w-1/3 text-right space-y-1">
+                  <div><span className="font-semibold">Bill No.</span> {oopData.billNo}</div>
+                  <div><span className="font-semibold">Date:</span> {format(new Date(oopData.dateCreated), "MMM d, yyyy")}</div>
+                </div>
               </div>
+              <LabeledValue label="Name/Payee:" value={oopData.applicantName} />
+              <LabeledValue label="Address:" value={oopData.address} />
+              <LabeledValue label="Nature of Application/Permit/Documents being secured:" value={oopData.natureOfApplication} />
               <div>
-                <Label>Date</Label>
-                <Input value={format(new Date(oopData.dateCreated), "MMM d, yyyy")} readOnly />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="applicantName">Name/Payee:</Label>
-              <Input id="applicantName" value={oopData.applicantName} readOnly />
-            </div>
-            <div>
-              <Label htmlFor="address">Address:</Label>
-              <Input id="address" value={oopData.address} readOnly />
-            </div>
-            <div>
-              <Label htmlFor="natureOfApplication">Nature of Application/Permit/Documents being secured:</Label>
-              <Input id="natureOfApplication" value={oopData.natureOfApplication} readOnly />
-            </div>
-            <div>
-              <Label>Payment Details</Label>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Legal Basis (DAO/SEC)</TableHead>
-                    <TableHead>Description and Computation of Fees and Charges Assessed</TableHead>
-                    <TableHead>Amount</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {oopData.items.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{item.legalBasis}</TableCell>
-                      <TableCell>{item.description}</TableCell>
-                      <TableCell>₱ {item.amount.toFixed(2)}</TableCell>
+                <Label className="font-semibold">Payment Details</Label>
+                <Table className="mt-2">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Legal Basis (DAO/SEC)</TableHead>
+                      <TableHead>Description and Computation of Fees and Charges Assessed</TableHead>
+                      <TableHead>Amount</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-            <div className="flex justify-end items-center">
-              <Label className="mr-2">Total Amount:</Label>
-              <Input
-                className="w-32"
-                value={`₱ ${oopData.totalAmount.toFixed(2)}`}
-                readOnly
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-8 mt-8">
-              <div className="text-center">
-                <Label>SVEMS/Chief, RPS</Label>
-                <Input className="text-center font-semibold mt-2" value={oopData.signatures.chiefRPS ? "Signed" : "Pending"} readOnly />
+                  </TableHeader>
+                  <TableBody>
+                    {oopData.items.map((item, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{item.legalBasis}</TableCell>
+                        <TableCell>{item.description}</TableCell>
+                        <TableCell>₱ {item.amount.toFixed(2)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
-              <div className="text-center">
-                <Label>Chief, Technical Services Division</Label>
-                <Input className="text-center font-semibold mt-2" value={oopData.signatures.technicalServices ? "Signed" : "Pending"} readOnly />
+              <div className="flex justify-end items-center">
+                <Label className="mr-2 font-semibold">Total Amount:</Label>
+                <div>₱ {oopData.totalAmount.toFixed(2)}</div>
+              </div>
+              <div className="grid grid-cols-2 gap-8 mt-8">
+                <div className="text-center">
+                  <Label className="font-semibold">SVEMS/Chief, RPS</Label>
+                  <div className="mt-2">{oopData.signatures.chiefRPS ? "Signed" : "Pending"}</div>
+                </div>
+                <div className="text-center">
+                  <Label className="font-semibold">Chief, Technical Services Division</Label>
+                  <div className="mt-2">{oopData.signatures.technicalServices ? "Signed" : "Pending"}</div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <LabeledValue
+                  label="Date for statutory receipt by applicant:"
+                  value={oopData.statutoryReceiptDate ? format(new Date(oopData.statutoryReceiptDate), "MMM d, yyyy") : '-- -- --'}
+                />
+                <LabeledValue
+                  label="Date of payment of applicant:"
+                  value={oopData.paymentDate ? format(new Date(oopData.paymentDate), "MMM d, yyyy") : '-- -- --'}
+                />
+              </div>
+              <div className="bg-yellow-50 p-4 rounded-lg shadow-sm">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-yellow-800">Status:</span>
+                  <span className="px-3 py-1 rounded-full text-sm font-medium bg-yellow-200 text-yellow-800">
+                    {oopData.status}
+                  </span>
+                </div>
               </div>
             </div>
-            <div className="bg-yellow-50 p-4 rounded-lg shadow-sm">
-              <div className="flex items-center justify-between">
-                <span className="font-medium text-yellow-800">Status:</span>
-                <span className="px-3 py-1 rounded-full text-sm font-medium bg-yellow-200 text-yellow-800">
-                  {oopData.status}
-                </span>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <p className="text-center text-gray-500">No Order of Payment data found.</p>
-        )}
+          ) : (
+            <p className="text-center text-gray-500">No Order of Payment data found.</p>
+          )}
+        </div>
         <DialogFooter>
           <Button onClick={onClose} className="bg-green-600 hover:bg-green-700 text-white">
             Close

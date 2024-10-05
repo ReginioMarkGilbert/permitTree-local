@@ -437,58 +437,18 @@ const OrderOfPaymentForm = ({ onClose }) => {
                                         </Button>
                                     </div>
                                 </div>
-                                {/* Date and Time fields */}
-                                <div className="grid grid-cols-2 gap-4">
+                                {/* Date fields */}
+                                <div className="grid grid-cols-2 gap-4 mt-6">
                                     <div>
                                         <Label>Date of payment of applicant:</Label>
-                                        <div className="flex space-x-2 mt-1">
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <Button variant="outline" className="w-full justify-start text-left">
-                                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                                        {formData.paymentDate ? format(formData.paymentDate, "MMM d, yyyy") : <span>Pick a date</span>}
-                                                    </Button>
-                                                </PopoverTrigger>
-                                                <PopoverContent className="w-auto p-0">
-                                                    <Calendar
-                                                        mode="single"
-                                                        selected={formData.paymentDate}
-                                                        onSelect={(date) => handleDateChange(date, 'paymentDate')}
-                                                        initialFocus
-                                                    />
-                                                </PopoverContent>
-                                            </Popover>
-                                            <Input
-                                                type="time"
-                                                value={formData.paymentTime || ''}
-                                                onChange={(e) => handleTimeChange(e, 'paymentTime')}
-                                            />
+                                        <div className="mt-1 p-2 bg-gray-100 rounded-md text-gray-600">
+                                            -- -- --
                                         </div>
                                     </div>
                                     <div>
                                         <Label>Date for statutory receipt by applicant:</Label>
-                                        <div className="flex space-x-2 mt-1">
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <Button variant="outline" className="w-full justify-start text-left">
-                                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                                        {formData.receiptDate ? format(formData.receiptDate, "MMM d, yyyy") : <span>Pick a date</span>}
-                                                    </Button>
-                                                </PopoverTrigger>
-                                                <PopoverContent className="w-auto p-0">
-                                                    <Calendar
-                                                        mode="single"
-                                                        selected={formData.receiptDate}
-                                                        onSelect={(date) => handleDateChange(date, 'receiptDate')}
-                                                        initialFocus
-                                                    />
-                                                </PopoverContent>
-                                            </Popover>
-                                            <Input
-                                                type="time"
-                                                value={formData.receiptTime || ''}
-                                                onChange={(e) => handleTimeChange(e, 'receiptTime')}
-                                            />
+                                        <div className="mt-1 p-2 bg-gray-100 rounded-md text-gray-600">
+                                            -- -- --
                                         </div>
                                     </div>
                                 </div>

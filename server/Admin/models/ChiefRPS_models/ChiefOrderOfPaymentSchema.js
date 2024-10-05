@@ -22,6 +22,7 @@ const OrderOfPaymentSchema = new mongoose.Schema({
         chiefRPS: { type: Date },
         technicalServices: { type: Date }
     },
+    statutoryReceiptDate: { type: Date },
     paymentDate: { type: Date },
     receiptDate: { type: Date }
 });

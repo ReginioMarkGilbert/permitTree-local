@@ -20,14 +20,11 @@ const createOrderOfPayment = async (req, res) => {
             applicationId,
             applicantName,
             billNo,
-            date,
             address,
             natureOfApplication,
             items,
             totalAmount,
             signatures,
-            paymentDate,
-            receiptDate
         } = req.body;
 
         // Check if an OOP with the same billNo already exists
@@ -40,15 +37,14 @@ const createOrderOfPayment = async (req, res) => {
             applicationId,
             applicantName,
             billNo,
-            dateCreated: date,
+            dateCreated: new Date(),
             address,
             natureOfApplication,
             items,
             totalAmount,
             status: 'Pending Signature',
             signatures,
-            paymentDate,
-            receiptDate
+            statutoryReceiptDate: new Date(), // Set this when creating the OOP
         });
 
         console.log('New Order of Payment object:', newOrderOfPayment);
@@ -126,7 +122,7 @@ const confirmPayment = async (req, res) => {
             return res.status(404).json({ message: 'Order of payment not found' });
         }
         orderOfPayment.status = 'Completed';
-        orderOfPayment.paymentDate = new Date();
+        orderOfPayment.paymentDate = new Date(); // Set this when confirming payment
         orderOfPayment.receiptNumber = receiptNumber;
         await orderOfPayment.save();
         res.json(orderOfPayment);
