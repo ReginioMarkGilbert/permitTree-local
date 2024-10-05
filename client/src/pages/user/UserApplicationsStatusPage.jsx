@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Eye, Edit, Printer, Archive, ChevronUp, ChevronDown, Leaf, Undo, Trash2, RefreshCw, FileText, Send } from 'lucide-react';
+import { Eye, Edit, Printer, Archive, ChevronUp, ChevronDown, Leaf, Undo, Trash2, RefreshCw, FileText, Send, CreditCard } from 'lucide-react';
 import ApplicationDetailsModal from '../../components/ui/ApplicationDetailsModal';
 import EditApplicationModal from '../../components/ui/EditApplicationModal';
 import ConfirmationModal from '../../components/ui/ConfirmationModal';
 import UserOOPviewModal from './components/UserOOPviewModal';
+import PaymentSimulationModal from './components/PaymentSimulationModal';
 import { toast } from 'react-toastify';
 import './styles/UserApplicationStatusPage.css';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,8 @@ const UserApplicationsStatusPage = () => {
     const [selectedOOP, setSelectedOOP] = useState(null);
     const [isOOPModalOpen, setIsOOPModalOpen] = useState(false);
     const [selectedApplicationId, setSelectedApplicationId] = useState(null);
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+    const [selectedPaymentApplication, setSelectedPaymentApplication] = useState(null);
 
     useEffect(() => {
         fetchApplications();
@@ -202,6 +205,26 @@ const UserApplicationsStatusPage = () => {
         setIsOOPModalOpen(true);
     };
 
+    const handleSimulatePayment = (application) => {
+        setSelectedPaymentApplication(application);
+        setIsPaymentModalOpen(true);
+    };
+
+    const handlePaymentComplete = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.post(`http://localhost:3000/api/user/oop/${selectedPaymentApplication.customId}/simulate-payment`, {}, {
+                headers: { Authorization: token }
+            });
+            toast.success('Payment simulation completed');
+            fetchApplications(); // Refresh the applications list
+            setIsPaymentModalOpen(false);
+        } catch (error) {
+            console.error('Error simulating payment:', error);
+            toast.error('Failed to simulate payment');
+        }
+    };
+
     const renderTable = () => {
         if (loading) {
             return <p className="text-center text-gray-500">Loading applications...</p>;
@@ -267,15 +290,26 @@ const UserApplicationsStatusPage = () => {
                                         </Button>
 
                                         {app.status === 'Awaiting Payment' && (
-                                            <Button
-                                                variant="outline"
-                                                size="icon"
-                                                className="h-6 w-6 text-purple-600 hover:text-purple-700 border-purple-200 hover:bg-purple-50"
-                                                onClick={() => handleViewOOP(app.customId)}
-                                                title="View OOP"
-                                            >
-                                                <FileText className="h-3 w-3" />
-                                            </Button>
+                                            <>
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="h-6 w-6 text-purple-600 hover:text-purple-700 border-purple-200 hover:bg-purple-50"
+                                                    onClick={() => handleViewOOP(app.customId)}
+                                                    title="View OOP"
+                                                >
+                                                    <FileText className="h-3 w-3" />
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="h-6 w-6 text-green-600 hover:text-green-700 border-green-200 hover:bg-green-50"
+                                                    onClick={() => handleSimulatePayment(app)}
+                                                    title="Simulate Payment"
+                                                >
+                                                    <CreditCard className="h-3 w-3" />
+                                                </Button>
+                                            </>
                                         )}
 
                                         {(app.status === 'Draft' || app.status === 'Returned') && (
@@ -462,6 +496,13 @@ const UserApplicationsStatusPage = () => {
                 isOpen={isOOPModalOpen}
                 onClose={() => setIsOOPModalOpen(false)}
                 applicationId={selectedApplicationId}
+            />
+
+            <PaymentSimulationModal
+                isOpen={isPaymentModalOpen}
+                onClose={() => setIsPaymentModalOpen(false)}
+                onPaymentComplete={handlePaymentComplete}
+                totalAmount={selectedPaymentApplication?.totalAmount || 0}
             />
         </div>
     );

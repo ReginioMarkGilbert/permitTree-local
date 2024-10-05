@@ -1,5 +1,6 @@
 const OrderOfPayment = require('../../Admin/models/ChiefRPS_models/ChiefOrderOfPaymentSchema');
 const Application = require('../../User/models/PermitApplications/ChainsawApplicationSchema');
+const { generateReceipt } = require('../../utils/receiptGenerator');
 
 const getUserOOP = async (req, res) => {
   try {
@@ -33,6 +34,58 @@ const getUserOOP = async (req, res) => {
   }
 };
 
+const simulatePayment = async (req, res) => {
+  try {
+    const { applicationId } = req.params;
+    const oop = await OrderOfPayment.findOne({ applicationId });
+
+    if (!oop) {
+      return res.status(404).json({ message: 'Order of Payment not found' });
+    }
+
+    oop.status = 'Completed';
+    oop.paymentDate = new Date();
+    await oop.save();
+
+    // Generate receipt
+    const receiptPdf = await generateReceipt(oop);
+
+    res.json({ message: 'Payment simulated successfully', receipt: receiptPdf });
+  } catch (error) {
+    console.error('Error simulating payment:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+const uploadReceipt = async (req, res) => {
+  try {
+    const { applicationId } = req.params;
+    const oop = await OrderOfPayment.findOne({ applicationId });
+
+    if (!oop) {
+      return res.status(404).json({ message: 'Order of Payment not found' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    oop.receiptFile = {
+      filename: req.file.originalname,
+      contentType: req.file.mimetype,
+      data: req.file.buffer
+    };
+    await oop.save();
+
+    res.json({ message: 'Receipt uploaded successfully' });
+  } catch (error) {
+    console.error('Error uploading receipt:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 module.exports = {
   getUserOOP,
+  simulatePayment,
+  uploadReceipt
 };

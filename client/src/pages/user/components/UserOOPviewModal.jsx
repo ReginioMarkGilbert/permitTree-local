@@ -14,10 +14,14 @@ import { Loader2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import '@/components/ui/styles/customScrollbar.css';
+import PaymentSimulationModal from './PaymentSimulationModal';
+import ReceiptUploadModal from './ReceiptUploadModal';
 
 const UserOOPviewModal = ({ isOpen, onClose, applicationId }) => {
   const [oopData, setOopData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen && applicationId) {
@@ -38,6 +42,41 @@ const UserOOPviewModal = ({ isOpen, onClose, applicationId }) => {
       toast.error('Failed to fetch Order of Payment data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePaymentComplete = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`http://localhost:3000/api/user/oop/${applicationId}/simulate-payment`, {}, {
+        headers: { Authorization: token }
+      });
+      toast.success('Payment simulation completed');
+      fetchOOPData(); // Refresh OOP data
+      setIsPaymentModalOpen(false);
+      setIsReceiptModalOpen(true);
+    } catch (error) {
+      console.error('Error simulating payment:', error);
+      toast.error('Failed to simulate payment');
+    }
+  };
+
+  const handleReceiptUpload = async (file) => {
+    try {
+      const token = localStorage.getItem('token');
+      const formData = new FormData();
+      formData.append('receipt', file);
+      await axios.post(`http://localhost:3000/api/user/oop/${applicationId}/upload-receipt`, formData, {
+        headers: {
+          Authorization: token,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      toast.success('Receipt uploaded successfully');
+      fetchOOPData(); // Refresh OOP data
+    } catch (error) {
+      console.error('Error uploading receipt:', error);
+      toast.error('Failed to upload receipt');
     }
   };
 
@@ -139,6 +178,25 @@ const UserOOPviewModal = ({ isOpen, onClose, applicationId }) => {
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {oopData && oopData.status === 'Awaiting Payment' && (
+        <Button onClick={() => setIsPaymentModalOpen(true)} className="mt-4">
+          Simulate Payment
+        </Button>
+      )}
+
+      <PaymentSimulationModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        onPaymentComplete={handlePaymentComplete}
+        totalAmount={oopData?.totalAmount || 0}
+      />
+
+      <ReceiptUploadModal
+        isOpen={isReceiptModalOpen}
+        onClose={() => setIsReceiptModalOpen(false)}
+        onUploadComplete={handleReceiptUpload}
+      />
     </Dialog>
   );
 };
