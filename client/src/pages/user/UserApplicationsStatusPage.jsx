@@ -218,7 +218,6 @@ const UserApplicationsStatusPage = () => {
                                 DATE  {renderSortIcon('dateOfSubmission')}
                             </th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-
                                 Status
                             </th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -239,7 +238,7 @@ const UserApplicationsStatusPage = () => {
                                     {new Date(app.dateOfSubmission).toLocaleDateString()}
                                 </td>
                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(app.status)}`}>
                                         {app.status}
                                     </span>
                                 </td>
@@ -253,28 +252,22 @@ const UserApplicationsStatusPage = () => {
                                                 <Edit className="inline w-4 h-4" />
                                             </button>
                                         )}
-                                        {/* <button className="text-purple-600 hover:text-purple-900 action-icon" onClick={() => handleAction('print', app)}>
-                                            <Printer className="inline w-4 h-4" />
-                                        </button> */}
-                                        <button className="text-gray-600 hover:text-gray-900 action-icon" onClick={() => handleAction('archive', app)}>
-                                            <Archive className="inline w-4 h-4" />
-                                        </button>
                                         {app.status === 'Draft' && (
-                                            <button
-                                                className="text-red-600 hover:text-red-900 action-icon"
-                                                onClick={() => handleDelete(app)}
-                                            >
-                                                <Trash2 className="inline w-4 h-4" />
-                                            </button>
-                                        )}
-                                        {app.status === 'Draft' && (
-                                            <button
-                                                className="text-yellow-600 hover:text-yellow-900 flex items-center gap-1 px-2 py-1 rounded-md bg-yellow-100 hover:bg-yellow-200 transition-colors duration-200"
-                                                onClick={() => handleSubmitDraft(app)}
-                                            >
-                                                <Leaf className="inline w-4 h-4" />
-                                                <span className="text-xs font-medium">Submit</span>
-                                            </button>
+                                            <>
+                                                <button
+                                                    className="text-yellow-600 hover:text-yellow-900 flex items-center gap-1 px-2 py-1 rounded-md bg-yellow-100 hover:bg-yellow-200 transition-colors duration-200"
+                                                    onClick={() => handleSubmitDraft(app)}
+                                                >
+                                                    <Leaf className="inline w-4 h-4" />
+                                                    <span className="text-xs font-medium">Submit</span>
+                                                </button>
+                                                <button
+                                                    className="text-red-600 hover:text-red-900 action-icon"
+                                                    onClick={() => handleDelete(app)}
+                                                >
+                                                    <Trash2 className="inline w-4 h-4" />
+                                                </button>
+                                            </>
                                         )}
                                         {app.status === 'Returned' && (
                                             <button
@@ -302,6 +295,20 @@ const UserApplicationsStatusPage = () => {
                 </table>
             </div>
         );
+    };
+
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'Draft': return 'bg-gray-100 text-gray-800';
+            case 'Submitted': return 'bg-blue-100 text-blue-800';
+            case 'Returned': return 'bg-yellow-100 text-yellow-800';
+            case 'Accepted': return 'bg-green-100 text-green-800';
+            case 'Awaiting Payment': return 'bg-purple-100 text-purple-800';
+            case 'Released': return 'bg-indigo-100 text-indigo-800';
+            case 'Expired': return 'bg-red-100 text-red-800';
+            case 'Rejected': return 'bg-red-100 text-red-800';
+            default: return 'bg-gray-100 text-gray-800';
+        }
     };
 
     const handleTabChange = (tab) => {
@@ -332,7 +339,7 @@ const UserApplicationsStatusPage = () => {
                 <h1 className="text-3xl font-bold mb-6 text-green-800">My Applications</h1>
                 <div className="mb-6 overflow-x-auto">
                     <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-                        {['Draft', 'Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected'].map((tab) => (
+                        {['Draft', 'Submitted', 'Returned', 'Accepted', 'Awaiting Payment', 'Released', 'Expired', 'Rejected'].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => handleTabChange(tab)}

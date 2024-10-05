@@ -3,9 +3,6 @@ const Application = require('../../models/PermitApplications/PermitApplicationSc
 
 // Import all permit application schemas
 const ChainsawApplication = require('../../models/PermitApplications/ChainsawApplicationSchema');
-// Import other permit schemas as they are created
-// const PtprApplication = require('../../models/PermitApplications/PtprApplicationSchema');
-// const WppApplication = require('../../models/PermitApplications/WppApplicationSchema');
 
 const getAllApplications = async (req, res) => {
     try {
