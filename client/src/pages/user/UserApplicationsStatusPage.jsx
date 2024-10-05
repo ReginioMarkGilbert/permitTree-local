@@ -4,6 +4,7 @@ import { Eye, Edit, Printer, Archive, ChevronUp, ChevronDown, Leaf, Undo, Trash2
 import ApplicationDetailsModal from '../../components/ui/ApplicationDetailsModal';
 import EditApplicationModal from '../../components/ui/EditApplicationModal';
 import ConfirmationModal from '../../components/ui/ConfirmationModal';
+import ApplicantOrderOfPaymentModal from './components/UserOOPviewModal';
 import { toast } from 'react-toastify';
 import './styles/UserApplicationStatusPage.css';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,8 @@ const UserApplicationsStatusPage = () => {
     const [selectedEditApplication, setSelectedEditApplication] = useState(null);
     const [confirmationModal, setConfirmationModal] = useState({ isOpen: false, type: null, application: null });
     const [notifications, setNotifications] = useState([]);
+    const [selectedOOP, setSelectedOOP] = useState(null);
+    const [isOOPModalOpen, setIsOOPModalOpen] = useState(false);
 
     useEffect(() => {
         fetchApplications();
@@ -193,6 +196,20 @@ const UserApplicationsStatusPage = () => {
         return new Date(dateString).toLocaleDateString(undefined, options);
     };
 
+    const handleViewOOP = async (applicationId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`http://localhost:3000/api/admin/order-of-payments/by-application/${applicationId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setSelectedOOP(response.data);
+            setIsOOPModalOpen(true);
+        } catch (error) {
+            console.error('Error fetching Order of Payment:', error);
+            toast.error('Failed to fetch Order of Payment');
+        }
+    };
+
     const renderTable = () => {
         if (loading) {
             return <p className="text-center text-gray-500">Loading applications...</p>;
@@ -289,6 +306,12 @@ const UserApplicationsStatusPage = () => {
                                                 <Undo className="inline w-4 h-4" />
                                                 <span className="text-xs font-medium">Unsubmit</span>
                                             </button>
+                                        )}
+                                        {app.status === 'Awaiting Payment' && (
+                                            <Button variant="outline" size="sm" onClick={() => handleViewOOP(app.customId)}>
+                                                <Eye className="mr-2 h-4 w-4" />
+                                                View OOP
+                                            </Button>
                                         )}
                                     </div>
                                 </td>
@@ -410,6 +433,12 @@ const UserApplicationsStatusPage = () => {
                 onConfirm={handleConfirmAction}
                 title={confirmationModal.title}
                 message={confirmationModal.message}
+            />
+
+            <ApplicantOrderOfPaymentModal
+                isOpen={isOOPModalOpen}
+                onClose={() => setIsOOPModalOpen(false)}
+                orderOfPayment={selectedOOP}
             />
         </div>
     );
