@@ -30,6 +30,12 @@ const createOrderOfPayment = async (req, res) => {
             receiptDate
         } = req.body;
 
+        // Check if an OOP with the same billNo already exists
+        const existingOOP = await OrderOfPayment.findOne({ billNo });
+        if (existingOOP) {
+            return res.status(400).json({ message: 'An Order of Payment with this Bill No. already exists' });
+        }
+
         const newOrderOfPayment = new OrderOfPayment({
             applicationId,
             applicantName,
@@ -39,7 +45,7 @@ const createOrderOfPayment = async (req, res) => {
             natureOfApplication,
             items,
             totalAmount,
-            status: 'Pending Signature', // Change this to 'Pending Signature'
+            status: 'Pending Signature',
             signatures,
             paymentDate,
             receiptDate
@@ -49,14 +55,11 @@ const createOrderOfPayment = async (req, res) => {
 
         const savedOrderOfPayment = await newOrderOfPayment.save();
 
-        // Don't update the application status here
-
         res.status(201).json({ orderOfPayment: savedOrderOfPayment });
     } catch (error) {
         console.error('Error creating order of payment:', error);
-        if (error.name === 'ValidationError') {
-            const validationErrors = Object.values(error.errors).map(err => err.message);
-            res.status(400).json({ message: 'Validation error', errors: validationErrors });
+        if (error.code === 11000) {
+            res.status(400).json({ message: 'Duplicate Bill No. Please use a unique Bill No.' });
         } else {
             res.status(400).json({ message: 'Error creating order of payment', error: error.message });
         }
@@ -99,20 +102,6 @@ const signOrderOfPayment = async (req, res) => {
         // orderOfPayment.signatureImages[signatureType] = signature;
         if (orderOfPayment.signatures.chiefRPS && orderOfPayment.signatures.technicalServices) {
             orderOfPayment.status = 'Awaiting Payment';
-
-            // Update the application status to "Awaiting Payment"
-            const updatedApplication = await Application.findOneAndUpdate(
-                { customId: orderOfPayment.applicationId },
-                { status: 'Awaiting Payment' },
-                { new: true }
-            );
-
-            if (!updatedApplication) {
-                console.log('Application not found:', orderOfPayment.applicationId);
-                return res.status(404).json({ message: 'Application not found' });
-            }
-
-            console.log('Updated application:', updatedApplication);
         }
         await orderOfPayment.save();
         res.json(orderOfPayment);

@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const OrderOfPaymentSchema = new mongoose.Schema({
     applicationId: { type: String, required: true },
     applicantName: { type: String, required: true },
-    billNo: { type: String, required: true },
+    billNo: { type: String, required: true, unique: true },
     dateCreated: { type: Date, default: Date.now },
     address: { type: String, required: true },
     natureOfApplication: { type: String, required: true },
@@ -25,5 +25,8 @@ const OrderOfPaymentSchema = new mongoose.Schema({
     paymentDate: { type: Date },
     receiptDate: { type: Date }
 });
+
+// Remove any index on customId if it exists
+OrderOfPaymentSchema.index({ customId: 1 }, { unique: true, sparse: true });
 
 module.exports = mongoose.model('OrderOfPayment', OrderOfPaymentSchema);
