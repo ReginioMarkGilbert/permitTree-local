@@ -138,23 +138,25 @@ const AdminHomePage = () => {
                             <div className="space-y-4 h-[21.5rem] overflow-y-auto custom-scrollbar"> {/* Increased height to h-96 */}
                                 {recentApplications.slice(0, 7).map((app, index) => (
                                     <div key={index} className="flex items-center justify-between border-b border-gray-200 pb-2 last:border-b-0">
-                                        <div>
+                                        <div className="flex-grow mr-4">
                                             <p className="font-semibold text-green-800">{app.applicationType}</p>
                                             <p className="text-sm text-gray-500">ID: {app.customId}</p>
                                             <p className="text-sm text-gray-500">Date: {new Date(app.dateOfSubmission).toLocaleDateString()}</p>
                                         </div>
-                                        <div className="flex-shrink-0 w-24 text-right mr-4"> {/* Spacing for status */}
-                                            <span className={`px-2 py-1 rounded-full text-xs ${app.status === "Approved" ? "bg-green-200 text-green-800" :
+                                        <div className="flex-shrink-0 text-right">
+                                            <span className={`px-2 py-1 rounded-full text-xs whitespace-nowrap ${
+                                                app.status === "Approved" ? "bg-green-200 text-green-800" :
                                                 app.status === "Submitted" ? "bg-yellow-200 text-yellow-800" :
-                                                    app.status === "In Progress" ? "bg-blue-200 text-blue-800" :
-                                                        app.status === "Accepted" ? "bg-green-200 text-green-800" :
-                                                            app.status === "Released" ? "bg-green-200 text-green-800" :
-                                                                app.status === "Expired" ? "bg-red-200 text-red-800" :
-                                                                    app.status === "Rejected" ? "bg-red-200 text-red-800" :
-                                                                        app.status === "Returned" ? "bg-orange-200 text-orange-800" :
-                                                                            "bg-red-200 text-red-800"
-                                                }`}>
-                                                {app.status === "Submitted" ? "For Review" : app.status} {/* Change this line */}
+                                                app.status === "In Progress" ? "bg-blue-200 text-blue-800" :
+                                                app.status === "Accepted" ? "bg-green-200 text-green-800" :
+                                                app.status === "Released" ? "bg-green-200 text-green-800" :
+                                                app.status === "Expired" ? "bg-red-200 text-red-800" :
+                                                app.status === "Rejected" ? "bg-red-200 text-red-800" :
+                                                app.status === "Returned" ? "bg-orange-200 text-orange-800" :
+                                                app.status === "Payment Proof Submitted" ? "bg-purple-200 text-purple-800" :
+                                                "bg-gray-200 text-gray-800"
+                                            }`}>
+                                                {app.status === "Submitted" ? "For Review" : app.status}
                                             </span>
                                         </div>
                                     </div>
