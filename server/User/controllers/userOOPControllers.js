@@ -98,22 +98,22 @@ const uploadReceipt = async (req, res) => {
 const submitProofOfPayment = async (req, res) => {
     try {
         const { applicationId } = req.params;
-        const { orNumber } = req.body;
+        const { orNumber, proofOfPayment } = req.body;
         const oop = await OrderOfPayment.findOne({ applicationId });
 
         if (!oop) {
             return res.status(404).json({ message: 'Order of Payment not found' });
         }
 
-        if (!req.file) {
+        if (!proofOfPayment) {
             return res.status(400).json({ message: 'No file uploaded' });
         }
 
         oop.orNumber = orNumber;
         oop.proofOfPayment = {
-            filename: req.file.originalname,
-            contentType: req.file.mimetype,
-            data: req.file.buffer
+            filename: proofOfPayment.filename,
+            contentType: proofOfPayment.contentType,
+            data: Buffer.from(proofOfPayment.data, 'base64')
         };
         oop.status = 'Payment Proof Submitted';
         await oop.save();

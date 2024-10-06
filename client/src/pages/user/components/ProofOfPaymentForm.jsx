@@ -1,17 +1,33 @@
 import React, { useState } from 'react';
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 
 const ProofOfPaymentForm = ({ onSubmit }) => {
     const [orNumber, setOrNumber] = useState('');
     const [file, setFile] = useState(null);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (orNumber && file) {
-            onSubmit(orNumber, file);
+        if (!orNumber || !file) {
+            alert('Please fill in all fields');
+            return;
         }
+
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            const base64File = event.target.result.split(',')[1]; // Get the base64 part
+            const payload = {
+                orNumber,
+                proofOfPayment: {
+                    filename: file.name,
+                    contentType: file.type,
+                    data: base64File
+                }
+            };
+            onSubmit(payload);
+        };
+        reader.readAsDataURL(file);
     };
 
     return (
@@ -20,6 +36,7 @@ const ProofOfPaymentForm = ({ onSubmit }) => {
                 <Label htmlFor="orNumber">OR Number</Label>
                 <Input
                     id="orNumber"
+                    type="text"
                     value={orNumber}
                     onChange={(e) => setOrNumber(e.target.value)}
                     required

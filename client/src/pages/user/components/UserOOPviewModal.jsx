@@ -47,17 +47,13 @@ const UserOOPviewModal = ({ isOpen, onClose, applicationId }) => {
     setShowProofOfPayment(!showProofOfPayment);
   };
 
-  const handleProofOfPaymentSubmit = async (orNumber, file) => {
+  const handleProofOfPaymentSubmit = async (payload) => {
     try {
       const token = localStorage.getItem('token');
-      const formData = new FormData();
-      formData.append('orNumber', orNumber);
-      formData.append('proofOfPayment', file);
-
-      await axios.post(`http://localhost:3000/api/user/oop/${applicationId}/submit-proof`, formData, {
+      await axios.post(`http://localhost:3000/api/user/oop/${applicationId}/submit-proof`, payload, {
         headers: {
           'Authorization': token,
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'application/json'
         }
       });
 
