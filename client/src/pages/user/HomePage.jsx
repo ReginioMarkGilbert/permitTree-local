@@ -129,6 +129,25 @@ const HomePage = () => {
         }
     };
 
+    const getStatusColor = (status) => {
+        switch (status.toLowerCase()) {
+            case 'submitted':
+                return 'bg-blue-200 text-blue-800';
+            case 'accepted':
+                return 'bg-green-200 text-green-800';
+            case 'returned':
+                return 'bg-red-200 text-red-800';
+            case 'released':
+                return 'bg-purple-200 text-purple-800';
+            case 'expired':
+                return 'bg-gray-200 text-gray-800';
+            case 'rejected':
+                return 'bg-red-200 text-red-800';
+            default:
+                return 'bg-gray-200 text-gray-800';
+        }
+    };
+
     return (
         <div className="min-h-screen bg-green-50 flex flex-col pt-16">
             <ToastContainer />
@@ -179,10 +198,7 @@ const HomePage = () => {
                                                 <p className="text-sm text-gray-500">Submitted: {new Date(app.dateOfSubmission).toLocaleDateString()}</p>
                                             </div>
                                             <div className="flex-shrink-0 w-24 text-right mr-4">
-                                                <span className={`inline-block px-2 py-1 rounded-full text-xs ${app.status === "Approved" ? "bg-green-200 text-green-800" :
-                                                    app.status === "Pending" ? "bg-yellow-200 text-yellow-800" :
-                                                        "bg-blue-200 text-blue-800"
-                                                    }`}>
+                                                <span className={`inline-block px-2 py-1 rounded-full text-xs ${getStatusColor(app.status)}`}>
                                                     {app.status}
                                                 </span>
                                             </div>
@@ -223,11 +239,10 @@ const HomePage = () => {
                                     {recentNotifications.map((notification, index) => (
                                         <div
                                             key={index}
-                                            className={`p-4 mb-2 last:mb-0 border-l-4 ${
-                                                notification.read
+                                            className={`p-4 mb-2 last:mb-0 border-l-4 ${notification.read
                                                     ? 'bg-white border-gray-300'
                                                     : 'bg-green-100 border-green-500'
-                                            }`}
+                                                }`}
                                         >
                                             <p className={`font-semibold ${notification.read ? 'text-gray-800' : 'text-green-800'}`}>
                                                 {formatNotificationType(notification.type)}
