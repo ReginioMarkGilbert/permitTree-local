@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Eye, Edit, Trash2, Leaf, Printer, FileText, X } from 'lucide-react';
+import { Eye, Edit, Trash2, Leaf, Printer, FileText, X, RefreshCw } from 'lucide-react';
 import ApplicationDetailsModal from '../../components/ui/ApplicationDetailsModal';
 import EditApplicationModal from '../../components/ui/EditApplicationModal';
 import ConfirmationModal from '../../components/ui/ConfirmationModal';
@@ -9,6 +9,7 @@ import ChiefRPSApplicationReviewModal from './components/ChiefRPSApplicationRevi
 import ChiefRPSApplicationViewModal from './components/ChiefRPSApplicationViewModal';
 import { Link } from 'react-router-dom';
 import OrderOfPaymentModal from './components/OrderOfPaymentModal';
+import { Button } from "@/components/ui/button";
 
 const ChiefRPSDashboard = () => {
     const [applications, setApplications] = useState([]);
@@ -210,6 +211,23 @@ const ChiefRPSDashboard = () => {
         setIsOrderOfPaymentModalOpen(true);
     };
 
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'For Review':
+                return 'bg-yellow-100 text-yellow-800';
+            case 'In Progress':
+                return 'bg-blue-100 text-blue-800';
+            case 'Returned':
+                return 'bg-orange-100 text-orange-800';
+            case 'Accepted':
+                return 'bg-green-100 text-green-800';
+            case 'Released':
+                return 'bg-purple-100 text-purple-800';
+            default:
+                return 'bg-red-100 text-red-800';
+        }
+    };
+
     const renderTable = () => {
         if (loading) {
             return <p className="text-center text-gray-500">Loading applications...</p>;
@@ -251,54 +269,63 @@ const ChiefRPSDashboard = () => {
                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{app.applicationType}</td>
                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(app.dateOfSubmission).toLocaleDateString()}</td>
                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${app.status === 'For Review' ? 'bg-yellow-100 text-yellow-800' :
-                                        app.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
-                                            app.status === 'Returned' ? 'bg-orange-100 text-orange-800' :
-                                                app.status === 'Accepted' ? 'bg-green-100 text-green-800' :
-                                                    app.status === 'Released' ? 'bg-purple-100 text-purple-800' :
-                                                        'bg-red-100 text-red-800'
-                                        }`}>
+                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(app.status)}`}>
                                         {app.status}
                                     </span>
                                 </td>
                                 <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
-                                    <div className="flex flex-wrap gap-2">
-                                        {activeTab !== 'For Review' && (
-                                            <button className="text-green-600 hover:text-green-900 action-icon" onClick={() => handleView(app._id, app.status)}>
-                                                <Eye className="inline w-4 h-4" />
-                                            </button>
-                                        )}
-                                        <button className="text-blue-600 hover:text-blue-900 action-icon" onClick={() => handlePrint(app._id)}>
-                                            <Printer className="inline w-4 h-4" />
-                                        </button>
+                                    <div className="flex flex-wrap gap-1">
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
+                                            className="h-6 w-6 text-green-600 hover:text-green-700 border-green-200 hover:bg-green-50"
+                                            onClick={() => handleView(app._id, app.status)}
+                                            title="View"
+                                        >
+                                            <Eye className="h-3 w-3" />
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
+                                            className="h-6 w-6 text-blue-600 hover:text-blue-700 border-blue-200 hover:bg-blue-50"
+                                            onClick={() => handlePrint(app._id)}
+                                            title="Print"
+                                        >
+                                            <Printer className="h-3 w-3" />
+                                        </Button>
                                         {app.status === 'For Review' && (
-                                            <button
-                                                onClick={() => setReviewConfirmation({ isOpen: true, applicationId: app._id })}
-                                                className="text-blue-600 hover:text-blue-900"
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                className="h-6 w-6 text-yellow-600 hover:text-yellow-700 border-yellow-200 hover:bg-yellow-50"
+                                                onClick={() => confirmHandleReview(app._id)}
+                                                title="Review"
                                             >
-                                                Review
-                                            </button>
+                                                <FileText className="h-3 w-3" />
+                                            </Button>
                                         )}
                                         {app.status === 'Accepted' && (
                                             <>
-                                                <button
-                                                    className="text-indigo-600 hover:text-indigo-900 action-icon"
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="h-6 w-6 text-indigo-600 hover:text-indigo-700 border-indigo-200 hover:bg-indigo-50"
                                                     onClick={() => handleOrderOfPayment(app)}
+                                                    title="Create Order of Payment"
                                                 >
-                                                    <FileText className="inline w-4 h-4" />
-                                                    <span className="sr-only">Create Order of Payment</span>
-                                                </button>
-                                                {/* undo Accepted status to In Progress */}
-                                                <button
-                                                    className="text-indigo-600 hover:text-indigo-900 action-icon"
+                                                    <FileText className="h-3 w-3" />
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="h-6 w-6 text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50"
                                                     onClick={() => handleUndoStatus(app._id)}
+                                                    title="Undo Status"
                                                 >
-                                                    <X className="inline w-4 h-4" />
-                                                    <span className="sr-only">Undo Status</span>
-                                                </button>
+                                                    <X className="h-3 w-3" />
+                                                </Button>
                                             </>
                                         )}
-
                                     </div>
                                 </td>
                             </tr>
@@ -311,10 +338,14 @@ const ChiefRPSDashboard = () => {
 
     return (
         <div className="min-h-screen bg-green-50">
-
             <div className="container mx-auto px-4 sm:px-6 py-8 pt-24">
-                <h1 className="text-3xl font-bold mb-6 text-green-800">All Applications</h1>
-
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="text-3xl font-bold text-green-800">All Applications</h1>
+                    <Button onClick={fetchApplications} variant="outline">
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                        Refresh
+                    </Button>
+                </div>
                 {/* Tab Buttons */}
                 <div className="mb-6 overflow-x-auto">
                     <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
