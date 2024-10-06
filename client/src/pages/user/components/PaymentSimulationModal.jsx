@@ -45,6 +45,41 @@ const PaymentSimulationModal = ({ isOpen, onClose, onPaymentComplete, applicatio
         onPaymentComplete(applicationId);
     };
 
+    const formatCardNumber = (value) => {
+        const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+        const matches = v.match(/\d{4,16}/g);
+        const match = matches && matches[0] || '';
+        const parts = [];
+
+        for (let i = 0, len = match.length; i < len; i += 4) {
+            parts.push(match.substring(i, i + 4));
+        }
+
+        if (parts.length) {
+            return parts.join(' ');
+        } else {
+            return value;
+        }
+    };
+
+    const handleCardNumberChange = (e) => {
+        const formattedValue = formatCardNumber(e.target.value);
+        setCardNumber(formattedValue);
+    };
+
+    const formatExpiryDate = (value) => {
+        const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+        if (v.length >= 2) {
+            return `${v.slice(0, 2)}/${v.slice(2, 4)}`;
+        }
+        return v;
+    };
+
+    const handleExpiryDateChange = (e) => {
+        const formattedValue = formatExpiryDate(e.target.value);
+        setExpiryDate(formattedValue);
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent>
@@ -66,8 +101,9 @@ const PaymentSimulationModal = ({ isOpen, onClose, onPaymentComplete, applicatio
                                 <Input
                                     id="cardNumber"
                                     value={cardNumber}
-                                    onChange={(e) => setCardNumber(e.target.value)}
+                                    onChange={handleCardNumberChange}
                                     placeholder="1234 5678 9012 3456"
+                                    maxLength={19}
                                     required
                                 />
                             </div>
@@ -77,8 +113,9 @@ const PaymentSimulationModal = ({ isOpen, onClose, onPaymentComplete, applicatio
                                     <Input
                                         id="expiryDate"
                                         value={expiryDate}
-                                        onChange={(e) => setExpiryDate(e.target.value)}
+                                        onChange={handleExpiryDateChange}
                                         placeholder="MM/YY"
+                                        maxLength={5}
                                         required
                                     />
                                 </div>
@@ -89,6 +126,7 @@ const PaymentSimulationModal = ({ isOpen, onClose, onPaymentComplete, applicatio
                                         value={cvv}
                                         onChange={(e) => setCvv(e.target.value)}
                                         placeholder="123"
+                                        maxLength={4}
                                         required
                                     />
                                 </div>
