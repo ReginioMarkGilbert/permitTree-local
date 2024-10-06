@@ -4,6 +4,7 @@ import { FaTree, FaShieldAlt, FaFileAlt, FaMapMarkerAlt, FaTruck, FaFacebook, Fa
 import { motion } from 'framer-motion';
 import { Button } from '../../components/ui/Button';
 import Header from '../../components/Header';
+import DENRHeader from './components/DENRHeader';
 import ExpandableServiceCard from '../../components/ui/ExpandableServiceCard';
 import './styles/LandingPage.css';
 import { fadeIn, slideUp, staggerChildren } from '../../utils/animations';
@@ -114,8 +115,9 @@ const LandingPage = () => {
     return (
         <div className="flex flex-col min-h-screen bg-green-50">
             <Header />
+            <DENRHeader />
             <motion.main
-                className="flex-1"
+                className="flex-1 pt-4" // Added padding-top
                 initial="hidden"
                 animate="visible"
                 variants={fadeIn}

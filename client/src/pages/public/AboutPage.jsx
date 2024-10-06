@@ -1,6 +1,7 @@
 import React from 'react';
 import { Leaf, Shield, TreePine } from "lucide-react";
 import Header from '../../components/Header';
+import DENRHeader from './components/DENRHeader';
 import { Link } from 'react-router-dom';
 import { FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
 import { motion } from 'framer-motion';
@@ -10,6 +11,7 @@ const AboutPage = () => {
     return (
         <div className="flex flex-col min-h-screen bg-green-50">
             <Header />
+            <DENRHeader />
             <motion.main
                 className="flex-1 mb-14"
                 initial="hidden"

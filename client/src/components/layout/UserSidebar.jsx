@@ -46,9 +46,9 @@ const Sidebar = ({ isOpen }) => {
         <div className={`h-full bg-green-800 text-white flex flex-col justify-between fixed top-0 left-0 w-56 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:w-64 z-10`}>
             <div className="mt-6 ml-4">
                 <div className="mt-16">
-                    <div className="flex items-center justify-center mt-10 mr-5">
+                    <div className="flex items-center justify-start mt-10 mr-5 pl-2">
                         <img src={permitTreeLogo} alt="PermitTree Logo" className="h-12" />
-                        <span className="ml-3 text-xl font-semibold">PermitTree</span>
+                        <span className="pl-2 text-xl font-semibold">PermitTree</span>
                     </div>
                     <div className="line" style={{ borderBottom: '1px solid #ffffff', marginTop: '20px', width: '190px' }}></div>
                     <nav className="mt-7">
