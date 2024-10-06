@@ -68,6 +68,12 @@ const getOrderOfPaymentById = async (req, res) => {
         if (!orderOfPayment) {
             return res.status(404).json({ message: 'Order of payment not found' });
         }
+
+        // Convert Buffer to base64 string for the frontend
+        if (orderOfPayment.proofOfPayment && orderOfPayment.proofOfPayment.data) {
+            orderOfPayment.proofOfPayment.data = orderOfPayment.proofOfPayment.data.toString('base64');
+        }
+
         res.json(orderOfPayment);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching order of payment', error: error.message });
@@ -181,6 +187,28 @@ const reviewProofOfPayment = async (req, res) => {
     }
 };
 
+// Add this new function
+const getProofOfPaymentFile = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const oop = await OrderOfPayment.findById(id);
+
+        if (!oop || !oop.proofOfPayment) {
+            return res.status(404).json({ message: 'Proof of payment not found' });
+        }
+
+        const file = oop.proofOfPayment;
+
+        res.setHeader('Content-Type', file.contentType);
+        res.setHeader('Content-Disposition', `inline; filename="${file.filename}"`);
+
+        res.send(file.data);
+    } catch (error) {
+        console.error('Error retrieving proof of payment file:', error);
+        res.status(500).json({ message: 'Error retrieving file' });
+    }
+};
+
 module.exports = {
     getAllOrderOfPayments,
     createOrderOfPayment,
@@ -189,5 +217,6 @@ module.exports = {
     signOrderOfPayment,
     confirmPayment,
     getOrderOfPaymentByApplicationId,
-    reviewProofOfPayment
+    reviewProofOfPayment,
+    getProofOfPaymentFile
 };

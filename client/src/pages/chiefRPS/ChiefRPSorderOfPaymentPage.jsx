@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import { Leaf, Eye, FileText, FilePlus } from "lucide-react";
 import OrderOfPaymentForm from './components/OrderOfPaymentForm';
 import AffixEsignOOPFormModal from './components/AffixEsignOOPFormModal';
-import ChiefRPSProofOfPaymentReview from './components/ChiefProofOfPaymentReview';
+import ChiefProofOfPaymentReview from './components/ChiefProofOfPaymentReview';
 import ChiefOOPFormViewModal from './components/ChiefOOPFormViewModal';
 
 const ChiefRPSorderOfPaymentPage = () => {
@@ -111,7 +111,7 @@ const ChiefRPSorderOfPaymentPage = () => {
                                 )}
                                 {oop.status === 'Payment Proof Submitted' && (
                                     <Button onClick={() => handleReviewProofOfPayment(oop)}>
-                                        <FileText className="h-4 w-4 mr-2" /> Review Payment
+                                        <FileText className="h-4 w-4 mr-2 font-bold" /> Review Payment
                                     </Button>
                                 )}
                             </TableCell>
@@ -185,7 +185,7 @@ const ChiefRPSorderOfPaymentPage = () => {
                             )
                         )}
                         {selectedOOPForReview && (
-                            <ChiefRPSProofOfPaymentReview
+                            <ChiefProofOfPaymentReview
                                 isOpen={!!selectedOOPForReview}
                                 onClose={() => {
                                     setSelectedOOPForReview(null);

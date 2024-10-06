@@ -26,6 +26,7 @@ const OrderOfPaymentSchema = new mongoose.Schema({
     paymentDate: { type: Date },
     receiptDate: { type: Date },
     proofOfPayment: {
+        _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
         filename: String,
         contentType: String,
         data: Buffer

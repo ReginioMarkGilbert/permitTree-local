@@ -1,6 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const { getAllOrderOfPayments, createOrderOfPayment, getOrderOfPaymentById, updateOrderOfPayment, signOrderOfPayment, confirmPayment, getOrderOfPaymentByApplicationId, reviewProofOfPayment } = require('../../controllers/ChiefRPS_controllers/ChiefOrderOfPaymentControllers');
+const {
+    getAllOrderOfPayments,
+    createOrderOfPayment,
+    getOrderOfPaymentById,
+    updateOrderOfPayment,
+    signOrderOfPayment,
+    confirmPayment,
+    getOrderOfPaymentByApplicationId,
+    reviewProofOfPayment,
+    getProofOfPaymentFile
+} = require('../../controllers/ChiefRPS_controllers/ChiefOrderOfPaymentControllers');
 
 router.get('/order-of-payments', getAllOrderOfPayments);
 router.post('/order-of-payments', createOrderOfPayment);
@@ -10,5 +20,6 @@ router.put('/order-of-payments/:id/sign', signOrderOfPayment);
 router.put('/order-of-payments/:id/confirm-payment', confirmPayment);
 router.get('/order-of-payments/by-application/:applicationId', getOrderOfPaymentByApplicationId);
 router.put('/order-of-payments/:id/review-proof', reviewProofOfPayment);
+router.get('/order-of-payments/:id/proof-of-payment', getProofOfPaymentFile);
 
 module.exports = router;

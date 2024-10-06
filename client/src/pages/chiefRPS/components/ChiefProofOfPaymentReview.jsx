@@ -10,15 +10,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from 'react-toastify';
-import { Loader2 } from 'lucide-react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { format } from "date-fns";
-import '@/components/ui/styles/customScrollbar.css';
+import { Loader2, X, FileText } from 'lucide-react';
 
 const ChiefRPSProofOfPaymentReview = ({ isOpen, onClose, oopId }) => {
     const [oopData, setOopData] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [showProofOfPayment, setShowProofOfPayment] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState(null);
 
     useEffect(() => {
         if (isOpen && oopId) {
@@ -42,10 +39,6 @@ const ChiefRPSProofOfPaymentReview = ({ isOpen, onClose, oopId }) => {
         }
     };
 
-    const handleToggleView = () => {
-        setShowProofOfPayment(!showProofOfPayment);
-    };
-
     const handleReviewAction = async (action) => {
         try {
             const token = localStorage.getItem('token');
@@ -61,100 +54,84 @@ const ChiefRPSProofOfPaymentReview = ({ isOpen, onClose, oopId }) => {
         }
     };
 
+    const handleFileClick = () => {
+        if (oopData && oopData.proofOfPayment) {
+            const fileUrl = `http://localhost:3000/api/admin/order-of-payments/${oopId}/proof-of-payment`;
+            setPreviewUrl(fileUrl);
+        }
+    };
+
+    const handleClosePreview = () => {
+        setPreviewUrl(null);
+    };
+
     if (!isOpen) return null;
 
-    const LabeledValue = ({ label, value }) => (
-        <div className="mb-4">
-            <Label className="font-semibold">{label}</Label>
-            <div className="mt-1">{value}</div>
-        </div>
-    );
-
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col">
-                <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold text-green-800">
-                        {showProofOfPayment ? 'Review Proof of Payment' : 'Order of Payment Details'}
-                    </DialogTitle>
-                </DialogHeader>
-                <div className="flex-grow overflow-y-auto custom-scrollbar pr-4">
-                    {loading ? (
-                        <div className="flex justify-center items-center h-64">
-                            <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-                        </div>
-                    ) : showProofOfPayment ? (
-                        <div className="space-y-4">
-                            <LabeledValue label="OR Number" value={oopData.orNumber} />
-                            {oopData.proofOfPayment && (
-                                <div>
-                                    <Label className="font-semibold">Proof of Payment</Label>
-                                    <img
-                                        src={`data:${oopData.proofOfPayment.contentType};base64,${Buffer.from(oopData.proofOfPayment.data).toString('base64')}`}
-                                        alt="Proof of Payment"
-                                        className="mt-2 max-w-full h-auto"
-                                    />
-                                </div>
-                            )}
-                        </div>
-                    ) : oopData ? (
-                        <div className="space-y-6">
-                            <LabeledValue label="Applicant Name" value={oopData.applicantName} />
-                            <LabeledValue label="Application ID" value={oopData.applicationId} />
-                            <LabeledValue label="Bill No" value={oopData.billNo} />
-                            <LabeledValue label="Date Created" value={format(new Date(oopData.dateCreated), "MMM d, yyyy")} />
-                            <LabeledValue label="Address" value={oopData.address} />
-                            <LabeledValue label="Nature of Application" value={oopData.natureOfApplication} />
-                            <LabeledValue label="Total Amount" value={`₱ ${oopData.totalAmount.toFixed(2)}`} />
-                            <LabeledValue label="Status" value={oopData.status} />
-
-                            <div>
-                                <Label className="font-semibold">Items</Label>
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Legal Basis</TableHead>
-                                            <TableHead>Description</TableHead>
-                                            <TableHead>Amount</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {oopData.items.map((item, index) => (
-                                            <TableRow key={index}>
-                                                <TableCell>{item.legalBasis}</TableCell>
-                                                <TableCell>{item.description}</TableCell>
-                                                <TableCell>₱ {item.amount.toFixed(2)}</TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        </div>
-                    ) : (
-                        <p className="text-center text-gray-500">No Order of Payment data found.</p>
-                    )}
-                </div>
-                <DialogFooter>
-                    {showProofOfPayment ? (
-                        <>
-                            <Button onClick={() => handleReviewAction('approve')} className="bg-green-600 hover:bg-green-700 text-white">
-                                Approve
-                            </Button>
-                            <Button onClick={() => handleReviewAction('reject')} className="bg-red-600 hover:bg-red-700 text-white">
-                                Reject
-                            </Button>
-                        </>
-                    ) : (
-                        <Button onClick={handleToggleView} className="bg-blue-600 hover:bg-blue-700 text-white">
+        <>
+            <Dialog open={isOpen} onOpenChange={onClose}>
+                <DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col">
+                    <DialogHeader>
+                        <DialogTitle className="text-2xl font-bold text-green-800">
                             Review Proof of Payment
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="flex-grow overflow-y-auto custom-scrollbar pr-4">
+                        {loading ? (
+                            <div className="flex justify-center items-center h-64">
+                                <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+                            </div>
+                        ) : oopData ? (
+                            <div className="space-y-6">
+                                <div>
+                                    <Label className="font-semibold">OR Number</Label>
+                                    <div className="mt-1">{oopData.orNumber}</div>
+                                </div>
+                                {oopData.proofOfPayment && (
+                                    <div>
+                                        <Label className="font-semibold">Proof of Payment</Label>
+                                        <div className="mt-2">
+                                            <Button onClick={handleFileClick} className="flex items-center space-x-2">
+                                                <FileText size={20} />
+                                                <span>View Proof of Payment</span>
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <p className="text-center text-gray-500">No Order of Payment data found.</p>
+                        )}
+                    </div>
+                    <DialogFooter>
+                        <Button onClick={() => handleReviewAction('approve')} className="bg-green-600 hover:bg-green-700 text-white">
+                            Approve
                         </Button>
-                    )}
-                    <Button onClick={onClose} className="bg-gray-500 hover:bg-gray-600 text-white">
-                        Close
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+                        <Button onClick={() => handleReviewAction('reject')} className="bg-red-600 hover:bg-red-700 text-white">
+                            Reject
+                        </Button>
+                        <Button onClick={onClose} className="bg-gray-500 hover:bg-gray-600 text-white">
+                            Close
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {previewUrl && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
+                    <div className="relative w-full h-full max-w-4xl max-h-4xl bg-white p-4">
+                        <iframe
+                            src={previewUrl}
+                            title="Proof of Payment"
+                            className="w-full h-full"
+                        />
+                        <Button onClick={handleClosePreview} className="absolute top-2 right-2 bg-white text-black">
+                            <X size={20} />
+                        </Button>
+                    </div>
+                </div>
+            )}
+        </>
     );
 };
 

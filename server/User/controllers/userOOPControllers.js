@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const OrderOfPayment = require('../../Admin/models/ChiefRPS_models/ChiefOrderOfPaymentSchema');
 const Application = require('../../User/models/PermitApplications/ChainsawApplicationSchema');
 const { generateReceipt } = require('../../utils/receiptGenerator');
@@ -111,6 +112,7 @@ const submitProofOfPayment = async (req, res) => {
 
         oop.orNumber = orNumber;
         oop.proofOfPayment = {
+            _id: new mongoose.Types.ObjectId(),
             filename: proofOfPayment.filename,
             contentType: proofOfPayment.contentType,
             data: Buffer.from(proofOfPayment.data, 'base64')
