@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from 'react-toastify';
-import { Leaf, Eye, FileText } from "lucide-react";
+import { Leaf, Eye, FileText, FilePlus } from "lucide-react";
 import OrderOfPaymentForm from './components/OrderOfPaymentForm';
-import OrderOfPaymentViewModal from './components/OrderOfPaymentViewModal';
+import AffixEsignOOPFormModal from './components/AffixEsignOOPFormModal';
+import ChiefRPSProofOfPaymentReview from './components/ChiefProofOfPaymentReview';
+import ChiefOOPFormViewModal from './components/ChiefOOPFormViewModal';
 
 const ChiefRPSorderOfPaymentPage = () => {
     const navigate = useNavigate();
@@ -19,6 +21,7 @@ const ChiefRPSorderOfPaymentPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedOOP, setSelectedOOP] = useState(null);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+    const [selectedOOPForReview, setSelectedOOPForReview] = useState(null);
 
     useEffect(() => {
         if (action !== 'create-oop') {
@@ -51,6 +54,10 @@ const ChiefRPSorderOfPaymentPage = () => {
     const handleViewOrderOfPayment = (orderOfPayment) => {
         setSelectedOOP(orderOfPayment);
         setIsViewModalOpen(true);
+    };
+
+    const handleReviewProofOfPayment = (oop) => {
+        setSelectedOOPForReview(oop);
     };
 
     const renderTable = () => {
@@ -90,10 +97,23 @@ const ChiefRPSorderOfPaymentPage = () => {
                             <TableCell>{new Date(oop.dateCreated).toLocaleDateString()}</TableCell>
                             <TableCell>{oop.status}</TableCell>
                             <TableCell>
-                                <Button variant="ghost" size="sm" onClick={() => handleViewOrderOfPayment(oop)}>
-                                    <Eye className="mr-2 h-4 w-4" />
-                                    View
-                                </Button>
+                                {oop.status === 'Pending Signature' && (
+                                    <Button variant="ghost" size="sm" onClick={() => handleViewOrderOfPayment(oop)}>
+                                        <FilePlus className="mr-2 h-4 w-4" />
+                                        Affix Signature
+                                    </Button>
+                                )}
+                                {oop.status === 'Awaiting Payment' && (
+                                    <Button variant="ghost" size="sm" onClick={() => handleViewOrderOfPayment(oop)}>
+                                        <Eye className="mr-2 h-4 w-4" />
+                                        View
+                                    </Button>
+                                )}
+                                {oop.status === 'Payment Proof Submitted' && (
+                                    <Button onClick={() => handleReviewProofOfPayment(oop)}>
+                                        <FileText className="h-4 w-4 mr-2" /> Review Payment
+                                    </Button>
+                                )}
                             </TableCell>
                         </TableRow>
                     ))}
@@ -149,11 +169,29 @@ const ChiefRPSorderOfPaymentPage = () => {
                             </CardContent>
                         </Card>
                         {selectedOOP && (
-                            <OrderOfPaymentViewModal
-                                isOpen={isViewModalOpen}
-                                onClose={() => setIsViewModalOpen(false)}
-                                orderOfPayment={selectedOOP}
-                                refreshOrderOfPayments={fetchOrderOfPayments}
+                            selectedOOP.status === 'Pending Signature' ? (
+                                <AffixEsignOOPFormModal
+                                    isOpen={isViewModalOpen}
+                                    onClose={() => setIsViewModalOpen(false)}
+                                    orderOfPayment={selectedOOP}
+                                    refreshOrderOfPayments={fetchOrderOfPayments}
+                                />
+                            ) : (
+                                <ChiefOOPFormViewModal
+                                    isOpen={isViewModalOpen}
+                                    onClose={() => setIsViewModalOpen(false)}
+                                    orderOfPayment={selectedOOP}
+                                />
+                            )
+                        )}
+                        {selectedOOPForReview && (
+                            <ChiefRPSProofOfPaymentReview
+                                isOpen={!!selectedOOPForReview}
+                                onClose={() => {
+                                    setSelectedOOPForReview(null);
+                                    fetchOrderOfPayments();
+                                }}
+                                oopId={selectedOOPForReview._id}
                             />
                         )}
                     </>
