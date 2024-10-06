@@ -210,10 +210,10 @@ const UserApplicationsStatusPage = () => {
         setIsPaymentModalOpen(true);
     };
 
-    const handlePaymentComplete = async () => {
+    const handlePaymentComplete = async (applicationId) => {
         try {
             const token = localStorage.getItem('token');
-            await axios.post(`http://localhost:3000/api/user/oop/${selectedPaymentApplication.customId}/simulate-payment`, {}, {
+            await axios.post(`http://localhost:3000/api/user/oop/${applicationId}/simulate-payment`, {}, {
                 headers: { Authorization: token }
             });
             toast.success('Payment simulation completed');
@@ -503,6 +503,7 @@ const UserApplicationsStatusPage = () => {
                 onClose={() => setIsPaymentModalOpen(false)}
                 onPaymentComplete={handlePaymentComplete}
                 totalAmount={selectedPaymentApplication?.totalAmount || 0}
+                applicationId={selectedPaymentApplication?.customId}
             />
         </div>
     );

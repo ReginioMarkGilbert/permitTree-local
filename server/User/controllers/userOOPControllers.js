@@ -47,6 +47,13 @@ const simulatePayment = async (req, res) => {
     oop.paymentDate = new Date();
     await oop.save();
 
+    // Update the application status
+    const application = await Application.findOne({ customId: applicationId });
+    if (application) {
+      application.status = 'Paid';
+      await application.save();
+    }
+
     // Generate receipt
     const receiptPdf = await generateReceipt(oop);
 

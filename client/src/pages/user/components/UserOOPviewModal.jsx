@@ -90,114 +90,117 @@ const UserOOPviewModal = ({ isOpen, onClose, applicationId }) => {
   );
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-green-800">Order of Payment</DialogTitle>
-        </DialogHeader>
-        <div className="flex-grow overflow-y-auto custom-scrollbar pr-4">
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-            </div>
-          ) : oopData ? (
-            <div className="space-y-6">
-              <div className="flex justify-between items-start">
-                <div className="w-2/3">
-                  {/* Empty div to maintain layout */}
-                </div>
-                <div className="w-1/3 text-right space-y-1">
-                  <div><span className="font-semibold">Bill No.</span> {oopData.billNo}</div>
-                  <div><span className="font-semibold">Date:</span> {format(new Date(oopData.dateCreated), "MMM d, yyyy")}</div>
-                </div>
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-green-800">Order of Payment</DialogTitle>
+          </DialogHeader>
+          <div className="flex-grow overflow-y-auto custom-scrollbar pr-4">
+            {loading ? (
+              <div className="flex justify-center items-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-green-600" />
               </div>
-              <LabeledValue label="Name/Payee:" value={oopData.applicantName} />
-              <LabeledValue label="Address:" value={oopData.address} />
-              <LabeledValue label="Nature of Application/Permit/Documents being secured:" value={oopData.natureOfApplication} />
-              <div>
-                <Label className="font-semibold">Payment Details</Label>
-                <Table className="mt-2">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Legal Basis (DAO/SEC)</TableHead>
-                      <TableHead>Description and Computation of Fees and Charges Assessed</TableHead>
-                      <TableHead>Amount</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {oopData.items.map((item, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{item.legalBasis}</TableCell>
-                        <TableCell>{item.description}</TableCell>
-                        <TableCell>₱ {item.amount.toFixed(2)}</TableCell>
+            ) : oopData ? (
+              <div className="space-y-6">
+                <div className="flex justify-between items-start">
+                  <div className="w-2/3">
+                    {/* Empty div to maintain layout */}
+                  </div>
+                  <div className="w-1/3 text-right space-y-1">
+                    <div><span className="font-semibold">Bill No.</span> {oopData.billNo}</div>
+                    <div><span className="font-semibold">Date:</span> {format(new Date(oopData.dateCreated), "MMM d, yyyy")}</div>
+                  </div>
+                </div>
+                <LabeledValue label="Name/Payee:" value={oopData.applicantName} />
+                <LabeledValue label="Address:" value={oopData.address} />
+                <LabeledValue label="Nature of Application/Permit/Documents being secured:" value={oopData.natureOfApplication} />
+                <div>
+                  <Label className="font-semibold">Payment Details</Label>
+                  <Table className="mt-2">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Legal Basis (DAO/SEC)</TableHead>
+                        <TableHead>Description and Computation of Fees and Charges Assessed</TableHead>
+                        <TableHead>Amount</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-              <div className="flex justify-end items-center">
-                <Label className="mr-2 font-semibold">Total Amount:</Label>
-                <div>₱ {oopData.totalAmount.toFixed(2)}</div>
-              </div>
-              <div className="grid grid-cols-2 gap-8 mt-8">
-                <div className="text-center">
-                  <Label className="font-semibold">SVEMS/Chief, RPS</Label>
-                  <div className="mt-2">{oopData.signatures.chiefRPS ? "Signed" : "Pending"}</div>
+                    </TableHeader>
+                    <TableBody>
+                      {oopData.items.map((item, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{item.legalBasis}</TableCell>
+                          <TableCell>{item.description}</TableCell>
+                          <TableCell>₱ {item.amount.toFixed(2)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </div>
-                <div className="text-center">
-                  <Label className="font-semibold">Chief, Technical Services Division</Label>
-                  <div className="mt-2">{oopData.signatures.technicalServices ? "Signed" : "Pending"}</div>
+                <div className="flex justify-end items-center">
+                  <Label className="mr-2 font-semibold">Total Amount:</Label>
+                  <div>₱ {oopData.totalAmount.toFixed(2)}</div>
+                </div>
+                <div className="grid grid-cols-2 gap-8 mt-8">
+                  <div className="text-center">
+                    <Label className="font-semibold">SVEMS/Chief, RPS</Label>
+                    <div className="mt-2">{oopData.signatures.chiefRPS ? "Signed" : "Pending"}</div>
+                  </div>
+                  <div className="text-center">
+                    <Label className="font-semibold">Chief, Technical Services Division</Label>
+                    <div className="mt-2">{oopData.signatures.technicalServices ? "Signed" : "Pending"}</div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <LabeledValue
+                    label="Date for statutory receipt by applicant:"
+                    value={oopData.statutoryReceiptDate ? format(new Date(oopData.statutoryReceiptDate), "MMM d, yyyy") : '-- -- --'}
+                  />
+                  <LabeledValue
+                    label="Date of payment of applicant:"
+                    value={oopData.paymentDate ? format(new Date(oopData.paymentDate), "MMM d, yyyy") : '-- -- --'}
+                  />
+                </div>
+                <div className="bg-yellow-50 p-4 rounded-lg shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-yellow-800">Status:</span>
+                    <span className="px-3 py-1 rounded-full text-sm font-medium bg-yellow-200 text-yellow-800">
+                      {oopData.status}
+                    </span>
+                  </div>
                 </div>
               </div>
-              <div className="space-y-2">
-                <LabeledValue
-                  label="Date for statutory receipt by applicant:"
-                  value={oopData.statutoryReceiptDate ? format(new Date(oopData.statutoryReceiptDate), "MMM d, yyyy") : '-- -- --'}
-                />
-                <LabeledValue
-                  label="Date of payment of applicant:"
-                  value={oopData.paymentDate ? format(new Date(oopData.paymentDate), "MMM d, yyyy") : '-- -- --'}
-                />
-              </div>
-              <div className="bg-yellow-50 p-4 rounded-lg shadow-sm">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-yellow-800">Status:</span>
-                  <span className="px-3 py-1 rounded-full text-sm font-medium bg-yellow-200 text-yellow-800">
-                    {oopData.status}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <p className="text-center text-gray-500">No Order of Payment data found.</p>
-          )}
-        </div>
-        <DialogFooter>
-          <Button onClick={onClose} className="bg-green-600 hover:bg-green-700 text-white">
-            Close
+            ) : (
+              <p className="text-center text-gray-500">No Order of Payment data found.</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={onClose} className="bg-green-600 hover:bg-green-700 text-white">
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+
+        {oopData && oopData.status === 'Awaiting Payment' && (
+          <Button onClick={() => setIsPaymentModalOpen(true)} className="mt-4">
+            Simulate Payment
           </Button>
-        </DialogFooter>
-      </DialogContent>
+        )}
 
-      {oopData && oopData.status === 'Awaiting Payment' && (
-        <Button onClick={() => setIsPaymentModalOpen(true)} className="mt-4">
-          Simulate Payment
-        </Button>
-      )}
+        <PaymentSimulationModal
+          isOpen={isPaymentModalOpen}
+          onClose={() => setIsPaymentModalOpen(false)}
+          onPaymentComplete={handlePaymentComplete}
+          totalAmount={oopData?.totalAmount || 0}
+          applicationId={applicationId}
+        />
 
-      <PaymentSimulationModal
-        isOpen={isPaymentModalOpen}
-        onClose={() => setIsPaymentModalOpen(false)}
-        onPaymentComplete={handlePaymentComplete}
-        totalAmount={oopData?.totalAmount || 0}
-      />
-
-      <ReceiptUploadModal
-        isOpen={isReceiptModalOpen}
-        onClose={() => setIsReceiptModalOpen(false)}
-        onUploadComplete={handleReceiptUpload}
-      />
-    </Dialog>
+        <ReceiptUploadModal
+          isOpen={isReceiptModalOpen}
+          onClose={() => setIsReceiptModalOpen(false)}
+          onUploadComplete={handleReceiptUpload}
+        />
+      </Dialog>
+    </>
   );
 };
 
