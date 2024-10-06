@@ -13,6 +13,7 @@ const PaymentSimulationModal = ({ isOpen, onClose, onPaymentComplete, applicatio
     const [totalAmount, setTotalAmount] = useState(0);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [isProcessing, setIsProcessing] = useState(false);
 
     useEffect(() => {
         if (isOpen && applicationId) {
@@ -40,9 +41,35 @@ const PaymentSimulationModal = ({ isOpen, onClose, onPaymentComplete, applicatio
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        onPaymentComplete(applicationId);
+        setIsProcessing(true);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.post(`http://localhost:3000/api/user/oop/${applicationId}/simulate-payment`, {}, {
+                headers: { Authorization: token },
+                responseType: 'blob' // Important for handling PDF response
+            });
+
+            // Create a blob from the PDF stream
+            const file = new Blob([response.data], { type: 'application/pdf' });
+
+            // Create a link and trigger download
+            const fileURL = URL.createObjectURL(file);
+            const link = document.createElement('a');
+            link.href = fileURL;
+            link.download = `receipt_${applicationId}.pdf`;
+            link.click();
+
+            toast.success('Payment successful. Receipt downloaded.');
+            onPaymentComplete(applicationId);
+            onClose();
+        } catch (error) {
+            console.error('Error processing payment:', error);
+            toast.error('Failed to process payment');
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     const formatCardNumber = (value) => {
@@ -139,7 +166,9 @@ const PaymentSimulationModal = ({ isOpen, onClose, onPaymentComplete, applicatio
                         </div>
                         <DialogFooter className="mt-6">
                             <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-                            <Button type="submit">Pay Now</Button>
+                            <Button type="submit" disabled={isProcessing}>
+                                {isProcessing ? 'Processing...' : 'Pay Now'}
+                            </Button>
                         </DialogFooter>
                     </form>
                 )}

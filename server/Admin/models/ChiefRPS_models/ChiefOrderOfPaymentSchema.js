@@ -9,7 +9,7 @@ const OrderOfPaymentSchema = new mongoose.Schema({
     natureOfApplication: { type: String, required: true },
     status: {
         type: String,
-        enum: ['Pending Signature', 'Awaiting Payment', 'Completed'],
+        enum: ['Pending Signature', 'Awaiting Payment', 'Payment Proof Submitted', 'Completed'],
         default: 'Pending Signature'
     },
     totalAmount: { type: Number, required: true },
@@ -24,7 +24,13 @@ const OrderOfPaymentSchema = new mongoose.Schema({
     },
     statutoryReceiptDate: { type: Date },
     paymentDate: { type: Date },
-    receiptDate: { type: Date }
+    receiptDate: { type: Date },
+    proofOfPayment: {
+        filename: String,
+        contentType: String,
+        data: Buffer
+    },
+    orNumber: String
 });
 
 module.exports = mongoose.model('OrderOfPayment', OrderOfPaymentSchema);

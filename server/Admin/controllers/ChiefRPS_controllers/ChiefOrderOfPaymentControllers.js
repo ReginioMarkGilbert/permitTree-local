@@ -144,6 +144,43 @@ const getOrderOfPaymentByApplicationId = async (req, res) => {
     }
 };
 
+const reviewProofOfPayment = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { action } = req.body; // 'approve' or 'reject'
+
+        const oop = await OrderOfPayment.findById(id);
+        if (!oop) {
+            return res.status(404).json({ message: 'Order of Payment not found' });
+        }
+
+        if (action === 'approve') {
+            oop.status = 'Completed';
+            oop.paymentDate = new Date();
+        } else if (action === 'reject') {
+            oop.status = 'Awaiting Payment';
+            oop.orNumber = null;
+            oop.proofOfPayment = null;
+        } else {
+            return res.status(400).json({ message: 'Invalid action' });
+        }
+
+        await oop.save();
+
+        // Update the application status
+        const application = await Application.findOne({ customId: oop.applicationId });
+        if (application) {
+            application.status = action === 'approve' ? 'Payment Verified' : 'Awaiting Payment';
+            await application.save();
+        }
+
+        res.json({ message: `Proof of payment ${action}d successfully`, oop });
+    } catch (error) {
+        console.error('Error reviewing proof of payment:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
 module.exports = {
     getAllOrderOfPayments,
     createOrderOfPayment,
@@ -151,5 +188,6 @@ module.exports = {
     updateOrderOfPayment,
     signOrderOfPayment,
     confirmPayment,
-    getOrderOfPaymentByApplicationId
+    getOrderOfPaymentByApplicationId,
+    reviewProofOfPayment
 };

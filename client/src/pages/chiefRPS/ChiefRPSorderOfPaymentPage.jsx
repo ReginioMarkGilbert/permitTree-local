@@ -120,7 +120,7 @@ const ChiefRPSorderOfPaymentPage = () => {
 
                         <div className="mb-6 overflow-x-auto">
                             <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-                                {['Pending Signature', 'Awaiting Payment', 'Completed'].map((tab) => (
+                                {['Pending Signature', 'Awaiting Payment', 'Payment Proof Submitted', 'Completed'].map((tab) => (
                                     <button
                                         key={tab}
                                         onClick={() => setActiveTab(tab)}
