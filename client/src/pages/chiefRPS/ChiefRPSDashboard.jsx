@@ -420,7 +420,7 @@ const ChiefRPSDashboard = () => {
                 onClose={() => setReviewConfirmation({ isOpen: false, applicationId: null })}
                 onConfirm={handleConfirmReview}
                 title="Confirm Review"
-                message="Are you sure you want to mark this application as In Progress?"
+                message="Are you sure you want to mark this application as In Progress? This application will be forwarded to the chief RPS"
             />
 
             {/* Order of Payment Modal */}
