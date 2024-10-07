@@ -55,13 +55,15 @@ const ChainsawRegistrationForm = () => {
     });
     const [modalOpen, setModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState({ title: '', message: '' });
+    const [customStore, setCustomStore] = useState('');
 
     const chainsawStores = [
         { value: "Green Chainsaw Co.", label: "Green Chainsaw Co." },
         { value: "Forest Tools Inc.", label: "Forest Tools Inc." },
         { value: "EcoSaw Supplies", label: "EcoSaw Supplies" },
         { value: "Timber Tech Equipment", label: "Timber Tech Equipment" },
-        { value: "Woodland Machinery", label: "Woodland Machinery" }
+        { value: "Woodland Machinery", label: "Woodland Machinery" },
+        { value: "other", label: "Other (not listed)" }
     ];
 
     const handleInputChange = (e) => {
@@ -101,9 +103,15 @@ const ChainsawRegistrationForm = () => {
             toast.error("Please select a registration type");
             return;
         }
-        if (currentStep === 1 && !formData.chainsawStore) {
-            toast.error("Please select a chainsaw store from the accredited list to proceed.");
-            return;
+        if (currentStep === 1) {
+            if (formData.chainsawStore === "other" && !customStore) {
+                toast.error("Please enter the name of the chainsaw store.");
+                return;
+            }
+            // Update formData with custom store if "other" is selected
+            if (formData.chainsawStore === "other") {
+                setFormData(prev => ({ ...prev, chainsawStore: customStore }));
+            }
         }
         if (currentStep === 4) {
             const requiredFields = [
@@ -298,13 +306,26 @@ const ChainsawRegistrationForm = () => {
                             {currentStep === 1 && (
                                 <div className="space-y-4 pt-2">
                                     <p className="text-sm text-gray-700 mb-3 font-semibold">
-                                        Please select the store where you purchased your chainsaw. You cannot proceed if your chainsaw was not purchased from one of the accredited stores.
+                                        Please select the store where you purchased your chainsaw. If your store is not listed, please enter it manually.
                                     </p>
                                     <CustomSelect
                                         value={formData.chainsawStore}
                                         onChange={(value) => handleSelectChange('chainsawStore', value)}
                                         options={chainsawStores}
                                     />
+                                    {formData.chainsawStore === "other" && (
+                                        <div className="mt-4">
+                                            <Label htmlFor="customStore">Enter Chainsaw Store Name</Label>
+                                            <Input
+                                                id="customStore"
+                                                name="customStore"
+                                                value={customStore}
+                                                onChange={(e) => setCustomStore(e.target.value)}
+                                                placeholder="Enter the name of the store"
+                                                required
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
