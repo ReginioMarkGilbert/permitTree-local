@@ -1,5 +1,5 @@
 const OrderOfPayment = require('../../models/ChiefRPS_models/ChiefOrderOfPaymentSchema');
-const Application = require('../../../User/models/PermitApplications/ChainsawApplicationSchema'); // Import the Application model
+const { Application } = require('../../../User/modules/PermitApplicationsModules/chainsawApplicationModule'); // Import the Application model
 
 const getAllOrderOfPayments = async (req, res) => {
     try {

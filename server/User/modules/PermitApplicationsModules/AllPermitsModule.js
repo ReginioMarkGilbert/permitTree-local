@@ -1,10 +1,16 @@
+const express = require('express');
+const router = express.Router();
 const mongoose = require('mongoose');
-const Application = require('../../models/PermitApplications/PermitApplicationSchema');
+const passport = require('passport');
 
 // Import all permit application schemas
-const ChainsawApplication = require('../../models/PermitApplications/ChainsawApplicationSchema');
+const { ChainsawApplicationSchema } = require('./chainsawApplicationModule');
 
-const getAllApplications = async (req, res) => {
+// Define the ChainsawApplication model
+const ChainsawApplication = mongoose.model('ChainsawApplication', ChainsawApplicationSchema);
+
+// Combined route and controller for getting all applications
+router.get('/getAllApplications', passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
         const { sort, status, applicationType } = req.query;
         let filter = { userId: req.user.id };
@@ -36,9 +42,10 @@ const getAllApplications = async (req, res) => {
         console.error('Error fetching applications:', err);
         res.status(400).json({ error: err.message });
     }
-};
+});
 
-const getApplicationById = async (req, res) => {
+// Combined route and controller for getting an application by ID
+router.get('/getApplicationById/:id/:applicationType?', passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
         const { id, applicationType } = req.params;
         let application;
@@ -63,9 +70,6 @@ const getApplicationById = async (req, res) => {
         console.error('Error fetching application:', err);
         res.status(500).json({ error: err.message });
     }
-};
+});
 
-module.exports = {
-    getAllApplications,
-    getApplicationById
-};
+module.exports = router;

@@ -1,5 +1,5 @@
-const User = require('../../../User/models/userAuthSchema');
-const Application = require('../../../User/models/PermitApplications/ChainsawApplicationSchema');
+const { User } = require('../../../User/modules/userAuthModule');
+const { Application } = require('../../../User/modules/PermitApplicationsModules/chainsawApplicationModule');
 const moment = require('moment');
 
 const getTotalUsers = async (req, res) => {

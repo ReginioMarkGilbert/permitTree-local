@@ -1,4 +1,4 @@
-const User = require('../../../User/models/userAuthSchema');
+const User = require('../../../User/modules/userAuthModule');
 const Admin = require('../../models/admin_models/adminAuthSchema');
 
 const getAllUsers = async (req, res) => {

@@ -1,9 +1,20 @@
+const express = require('express');
+const router = express.Router();
 const mongoose = require('mongoose');
 const OrderOfPayment = require('../../Admin/models/ChiefRPS_models/ChiefOrderOfPaymentSchema');
-const Application = require('../../User/models/PermitApplications/ChainsawApplicationSchema');
+const { Application } = require('./PermitApplicationsModules/chainsawApplicationModule');
 const { generateReceipt } = require('../../utils/receiptGenerator');
+const { authenticateToken } = require('../../middleware/authMiddleware');
 
-const getUserOOP = async (req, res) => {
+// Schema (if needed, but we're using ChiefOrderOfPaymentSchema)
+// const userOOPSchema = new mongoose.Schema({
+// Define schema here if needed
+// });
+
+// const UserOOP = mongoose.model('UserOOP', userOOPSchema);
+
+// Combined route handlers and routes
+router.get('/oop/:applicationId', authenticateToken, async (req, res) => {
     try {
         const { applicationId } = req.params;
         console.log('Fetching OOP for applicationId:', applicationId);
@@ -15,7 +26,6 @@ const getUserOOP = async (req, res) => {
             return res.status(404).json({ message: 'Order of Payment not found' });
         }
 
-        // Fetch the associated application to check user authorization
         const application = await Application.findOne({ customId: applicationId });
         console.log('Associated application:', application);
 
@@ -23,8 +33,7 @@ const getUserOOP = async (req, res) => {
             return res.status(404).json({ message: 'Associated application not found' });
         }
 
-        // Check if the user is authorized to view this OOP
-        if (req.user && application.userId.toString() !== req.user.id) {
+        if (application.userId.toString() !== req.user.id) {
             return res.status(403).json({ message: 'Not authorized to view this Order of Payment' });
         }
 
@@ -33,9 +42,9 @@ const getUserOOP = async (req, res) => {
         console.error('Error fetching Order of Payment:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
-};
+});
 
-const simulatePayment = async (req, res) => {
+router.post('/oop/:applicationId/simulate-payment', authenticateToken, async (req, res) => {
     try {
         const { applicationId } = req.params;
         const oop = await OrderOfPayment.findOne({ applicationId });
@@ -46,18 +55,14 @@ const simulatePayment = async (req, res) => {
 
         oop.status = 'Awaiting Payment';
         oop.paymentDate = new Date();
-        // If you want to save the receipt number to db, generate it here and save it
-        // oop.receiptNumber = generateReceiptNumber();
         await oop.save();
 
-        // Update the application status
         const application = await Application.findOne({ customId: applicationId });
         if (application) {
             application.status = 'Awaiting Payment';
             await application.save();
         }
 
-        // Generate receipt
         const receiptPdf = await generateReceipt(oop);
 
         res.set('Content-Type', 'application/pdf');
@@ -67,9 +72,9 @@ const simulatePayment = async (req, res) => {
         console.error('Error simulating payment:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
-};
+});
 
-const uploadReceipt = async (req, res) => {
+router.post('/oop/:applicationId/upload-receipt', authenticateToken, async (req, res) => {
     try {
         const { applicationId } = req.params;
         const oop = await OrderOfPayment.findOne({ applicationId });
@@ -78,14 +83,16 @@ const uploadReceipt = async (req, res) => {
             return res.status(404).json({ message: 'Order of Payment not found' });
         }
 
-        if (!req.file) {
+        if (!req.files || !req.files.receipt) {
             return res.status(400).json({ message: 'No file uploaded' });
         }
 
+        const receiptFile = req.files.receipt;
+
         oop.receiptFile = {
-            filename: req.file.originalname,
-            contentType: req.file.mimetype,
-            data: req.file.buffer
+            filename: receiptFile.name,
+            contentType: receiptFile.mimetype,
+            data: receiptFile.data
         };
         await oop.save();
 
@@ -94,9 +101,9 @@ const uploadReceipt = async (req, res) => {
         console.error('Error uploading receipt:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
-};
+});
 
-const submitProofOfPayment = async (req, res) => {
+router.post('/oop/:applicationId/submit-proof', authenticateToken, async (req, res) => {
     try {
         const { applicationId } = req.params;
         const { orNumber, proofOfPayment } = req.body;
@@ -120,7 +127,6 @@ const submitProofOfPayment = async (req, res) => {
         oop.status = 'Payment Proof Submitted';
         await oop.save();
 
-        // Update the application status
         const application = await Application.findOne({ customId: applicationId });
         if (application) {
             application.status = 'Payment Proof Submitted';
@@ -132,11 +138,8 @@ const submitProofOfPayment = async (req, res) => {
         console.error('Error submitting proof of payment:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
-};
+});
 
 module.exports = {
-    getUserOOP,
-    simulatePayment,
-    uploadReceipt,
-    submitProofOfPayment
+    router
 };

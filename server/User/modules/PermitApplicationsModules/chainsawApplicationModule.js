@@ -1,9 +1,58 @@
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-const Application = require('../../models/PermitApplications/ChainsawApplicationSchema');
-const Counter = require('../../models/PermitApplications/PermitIDCounters/CSAWcounter');
+const express = require('express');
+const router = express.Router();
+const mongoose = require('mongoose');
+const passport = require('passport');
+const { authenticateToken } = require('../../../middleware/authMiddleware');
 
+// Schema
+const ChainsawApplicationSchema = new mongoose.Schema({
+    customId: { type: String, unique: true },
+    applicationType: { type: String, default: 'Chainsaw Registration', required: true },
+    registrationType: { type: String, required: true },
+    chainsawStore: { type: String, required: true },
+    ownerName: { type: String, required: true },
+    address: { type: String, required: true },
+    phone: { type: String, required: true },
+    brand: { type: String, required: true },
+    model: { type: String, required: true },
+    serialNumber: { type: String, required: true },
+    dateOfAcquisition: { type: Date, required: true },
+    powerOutput: { type: String, required: true },
+    maxLengthGuidebar: { type: String, required: true },
+    countryOfOrigin: { type: String, required: true },
+    purchasePrice: { type: Number, required: true },
+    files: {
+        officialReceipt: [{ filename: String, contentType: String, data: Buffer }],
+        deedOfSale: [{ filename: String, contentType: String, data: Buffer }],
+        specialPowerOfAttorney: [{ filename: String, contentType: String, data: Buffer }],
+        forestTenureAgreement: [{ filename: String, contentType: String, data: Buffer }],
+        businessPermit: [{ filename: String, contentType: String, data: Buffer }],
+        certificateOfRegistration: [{ filename: String, contentType: String, data: Buffer }],
+        woodProcessingPlantPermit: [{ filename: String, contentType: String, data: Buffer }]
+    },
+    dateOfSubmission: { type: Date, required: true },
+    status: { type: String, required: true },
+    uploadedRequirements: { type: String, default: 'No' },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    isOwner: { type: Boolean, default: false },
+    isTenureHolder: { type: Boolean, default: false },
+    isBusinessOwner: { type: Boolean, default: false },
+    isPLTPRHolder: { type: Boolean, default: false },
+    isWPPHolder: { type: Boolean, default: false },
+    reviewedBy: { type: String }
+}, { timestamps: true });
+
+const Application = mongoose.model('ChainsawApplication', ChainsawApplicationSchema);
+
+// Counter model
+const CounterSchema = new mongoose.Schema({
+    _id: { type: String, required: true },
+    seq: { type: Number, default: 0 }
+});
+
+const Counter = mongoose.model('Counter', CounterSchema);
+
+// Helper function
 const CSAW_CustomId = async () => {
     try {
         const counter = await Counter.findOneAndUpdate(
@@ -27,33 +76,16 @@ const CSAW_CustomId = async () => {
     }
 };
 
-const csaw_createApplication = async (req, res) => {
+// Route handlers
+router.post('/csaw_createApplication', passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
-        console.log('Request body:', req.body);
-        console.log('Request files:', req.files);
+        // console.log('Request body:', req.body);
+        // console.log('Request files:', req.files);
 
         const {
             applicationType = 'Chainsaw Registration',
-            registrationType,
-            chainsawStore,
-            ownerName,
-            address,
-            phone,
-            brand,
-            model,
-            serialNumber,
-            dateOfAcquisition,
-            powerOutput,
-            maxLengthGuidebar,
-            countryOfOrigin,
-            purchasePrice,
-            dateOfSubmission,
-            status,
-            isOwner,
-            isTenureHolder,
-            isBusinessOwner,
-            isPLTPRHolder,
-            isWPPHolder
+            registrationType, chainsawStore, ownerName, address, phone, brand, model, serialNumber, dateOfAcquisition, powerOutput, maxLengthGuidebar,
+            countryOfOrigin, purchasePrice, dateOfSubmission, status, isOwner, isTenureHolder, isBusinessOwner, isPLTPRHolder, isWPPHolder
         } = req.body;
 
         const parsedDateOfSubmission = new Date(dateOfSubmission);
@@ -62,7 +94,6 @@ const csaw_createApplication = async (req, res) => {
         }
 
         const customId = await CSAW_CustomId();
-
         // Process uploaded files
         const files = {};
         if (req.files) {
@@ -82,23 +113,9 @@ const csaw_createApplication = async (req, res) => {
                 }
             }
         }
-
+        // Create new application
         const newApplication = new Application({
-            customId,
-            applicationType,
-            registrationType,
-            chainsawStore,
-            ownerName,
-            address,
-            phone,
-            brand,
-            model,
-            serialNumber,
-            dateOfAcquisition,
-            powerOutput,
-            maxLengthGuidebar,
-            countryOfOrigin,
-            purchasePrice,
+            customId, applicationType, registrationType, chainsawStore, ownerName, address, phone, brand, model, serialNumber, dateOfAcquisition, powerOutput, maxLengthGuidebar, countryOfOrigin, purchasePrice,
             dateOfSubmission: parsedDateOfSubmission,
             status,
             isOwner: isOwner === 'true',
@@ -116,11 +133,11 @@ const csaw_createApplication = async (req, res) => {
         console.error('Error creating application:', error);
         res.status(500).json({ error: error.message });
     }
-};
+});
 
-const csaw_saveDraft = async (req, res) => {
+router.post('/csaw_saveDraft', passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
-        const customId = await CSAW_CustomId(); // Changed from generateCustomId to CSAW_CustomId
+        const customId = await CSAW_CustomId();
         console.log('Generated customId:', customId);
 
         const applicationData = {
@@ -153,9 +170,9 @@ const csaw_saveDraft = async (req, res) => {
         console.error('Error saving draft:', error);
         res.status(500).json({ message: 'Error saving draft', error: error.message });
     }
-};
+});
 
-const getAllApplications = async (req, res) => {
+router.get('/getAllApplications', passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
         const { sort, status, applicationType } = req.query;
         let filter = { userId: req.user.id };
@@ -174,6 +191,7 @@ const getAllApplications = async (req, res) => {
 
         let sortOption = {};
 
+
         if (sort === 'date-asc') {
             sortOption.dateOfSubmission = 1;
         } else if (sort === 'date-desc') {
@@ -186,9 +204,9 @@ const getAllApplications = async (req, res) => {
         console.error('Error fetching applications:', err);
         res.status(400).json({ error: err.message });
     }
-};
+});
 
-const csaw_updateApplication = async (req, res) => {
+router.put('/csaw_updateApplication/:id', passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
         const { id } = req.params;
         const updateData = req.body;
@@ -209,7 +227,7 @@ const csaw_updateApplication = async (req, res) => {
             { _id: id, userId: req.user.id },
             updateData,
             { new: true }
-        ).collection('chainsawapplications');
+        );
 
         if (!updatedApplication) {
             return res.status(404).json({ error: 'Application not found or you do not have permission to update it' });
@@ -220,12 +238,12 @@ const csaw_updateApplication = async (req, res) => {
         console.error('Error updating application:', err);
         res.status(500).json({ error: err.message });
     }
-};
+});
 
-const csaw_deleteApplication = async (req, res) => {
+router.delete('/csaw_deleteApplication/:id', passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
         const { id } = req.params;
-        const application = await Application.findOne({ _id: id, userId: req.user.id }).collection('chainsawapplications');
+        const application = await Application.findOne({ _id: id, userId: req.user.id });
 
         if (!application) {
             return res.status(404).json({ success: false, error: 'Application not found or you do not have permission to delete it' });
@@ -235,15 +253,16 @@ const csaw_deleteApplication = async (req, res) => {
             return res.status(400).json({ success: false, error: 'Only draft applications can be deleted' });
         }
 
-        await Application.findByIdAndDelete(id).collection('chainsawapplications');
+        await Application.findByIdAndDelete(id);
         res.status(200).json({ success: true, message: 'Application deleted successfully' });
     } catch (err) {
         console.error('Error deleting application:', err);
         res.status(500).json({ success: false, error: err.message });
     }
-};
+});
 
-const resetCounter = async (req, res) => {
+
+router.post('/resetCounterChainsaw', passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
         await Counter.findOneAndUpdate(
             { _id: 'applicationId' },
@@ -256,13 +275,13 @@ const resetCounter = async (req, res) => {
         console.error('Error resetting counter:', error);
         res.status(500).json({ error: 'Failed to reset counter' });
     }
-};
+});
 
-// Add this new function
-const csaw_getApplicationById = async (req, res) => {
+
+router.get('/csaw_getApplicationById/:id', passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
         const { id } = req.params;
-        const application = await Application.findById(id).collection('chainsawapplications');
+        const application = await Application.findById(id);
         if (!application) {
             return res.status(404).json({ error: 'Application not found' });
         }
@@ -271,12 +290,11 @@ const csaw_getApplicationById = async (req, res) => {
         console.error('Error fetching application:', err);
         res.status(500).json({ error: err.message });
     }
-};
+});
 
-// Add this new function
-const unsubmitApplication = async (req, res) => {
+router.put('/csaw_unsubmitApplication/:id', passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
-        const application = await Application.findById(req.params.id).collection('chainsawapplications');
+        const application = await Application.findById(req.params.id);
         if (!application) {
             return res.status(404).json({ success: false, message: 'Application not found' });
         }
@@ -290,11 +308,11 @@ const unsubmitApplication = async (req, res) => {
         console.error('Error unsubmitting application:', error);
         res.status(500).json({ success: false, message: 'Server error', error: error.message });
     }
-};
+});
 
-const submitDraft = async (req, res) => {
+router.put('/csaw_submitDraft/:id', passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
-        const application = await Application.findById(req.params.id).collection('chainsawapplications');
+        const application = await Application.findById(req.params.id);
         if (!application) {
             return res.status(404).json({ success: false, message: 'Application not found' });
         }
@@ -312,12 +330,12 @@ const submitDraft = async (req, res) => {
         console.error('Error submitting draft application:', error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
-};
+});
 
-const submitReturnedApplication = async (req, res) => {
+router.put('/csaw_submitReturnedApplication/:id', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
-        const application = await Application.findById(id).collection('chainsawapplications');
+        const application = await Application.findById(id);
 
         if (!application) {
             return res.status(404).json({ success: false, message: 'Application not found' });
@@ -340,17 +358,9 @@ const submitReturnedApplication = async (req, res) => {
         console.error('Error resubmitting application:', error);
         res.status(500).json({ success: false, message: 'Error resubmitting application' });
     }
-};
+});
 
 module.exports = {
-    csaw_createApplication,
-    getAllApplications,
-    csaw_updateApplication,
-    csaw_deleteApplication,
-    csaw_saveDraft,
-    resetCounter,
-    csaw_getApplicationById,
-    unsubmitApplication,
-    submitDraft,
-    submitReturnedApplication
+    router,
+    Application
 };

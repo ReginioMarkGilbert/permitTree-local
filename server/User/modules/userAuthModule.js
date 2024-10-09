@@ -1,22 +1,78 @@
-const User = require('../models/userAuthSchema');
-const UserIdCounter = require('../models/UserIdcounterSchema');
-const Admin = require('../../Admin/models/admin_models/adminAuthSchema');
-const passport = require('passport');
+const express = require('express');
+const router = express.Router();
+const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
+const passport = require('passport');
+const { body, validationResult } = require('express-validator');
+// const UserIdCounter = require('../models/UserIdcounterSchema');
+const Admin = require('../../Admin/models/admin_models/adminAuthSchema');
+require('dotenv').config();
 
-const signup = async (req, res) => {
+// User Schema
+const userSchema = new mongoose.Schema({
+    userId: { type: Number, unique: true },
+    username: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    role: { type: String, enum: ['admin', 'user'], default: 'user' },
+    email: { type: String, required: false, unique: false },
+    phone: { type: String, required: false, match: [/^\d{11}$/, 'Please fill a valid phone number'] },
+    company: { type: String, required: false },
+    address: { type: String, required: false },
+    profilePicture: {
+        data: Buffer,
+        contentType: String
+    },
+}, { timestamps: true });
+
+userSchema.pre('save', async function (next) {
+    if (!this.isModified('password')) return next();
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+});
+
+userSchema.methods.matchPassword = async function (enteredPassword) {
+    return await bcrypt.compare(enteredPassword, this.password);
+};
+
+const User = mongoose.model('User', userSchema);
+
+const UserIdCounterSchema = new mongoose.Schema({
+    name: { type: String, required: true, unique: true },
+    value: { type: Number, default: 0 }
+});
+
+const UserIdCounter = mongoose.model('UserIdCounter', UserIdCounterSchema);
+
+// Validation middleware
+const validateSignup = [
+    body('firstName').isString().notEmpty(),
+    body('lastName').isString().notEmpty(),
+    body('password').isString().isLength({ min: 8 }),
+    (req, res, next) => {
+        console.log('Validating signup data...');
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            console.log('Validation errors:', errors.array());
+            return res.status(400).json({ errors: errors.array() });
+        }
+        console.log('Validation passed.');
+        next();
+    }
+];
+
+// Route handlers
+router.post('/signup', validateSignup, async (req, res) => {
     const { firstName, lastName, password, createdAt } = req.body;
     const username = `${firstName.toLowerCase()}_${lastName.toLowerCase()}`;
 
     const validatePassword = (password) => {
-        if (!/[A-Z]/.test(password) || !/[0-9]/.test(password) || password.length < 8) {
-            return false;
-        }
-        return true;
+        return /[A-Z]/.test(password) && /[0-9]/.test(password) && password.length >= 8;
     };
 
     if (!validatePassword(password)) {
@@ -36,16 +92,14 @@ const signup = async (req, res) => {
             lastName,
             username,
             password,
-            createdAt: createdAt ? new Date(createdAt) : undefined // Use provided date or let MongoDB set it
+            createdAt: createdAt ? new Date(createdAt) : undefined
         });
 
         await newUser.save();
-        // Generate JWT token here
         const token = jwt.sign(
             { id: newUser.id, username: newUser.username, role: newUser.role },
             process.env.JWT_SECRET || 'default_secret',
             { expiresIn: '1h' }
-            // { expiresIn: '7d' }
         );
 
         res.status(201).json({ message: 'User created successfully', user: newUser, token: `Bearer ${token}` });
@@ -53,15 +107,12 @@ const signup = async (req, res) => {
         console.error('Signup error:', err);
         res.status(500).json({ error: err.message });
     }
-};
+});
 
-const login = async (req, res) => {
+router.post('/login', async (req, res) => {
     const { username, password } = req.body;
     try {
-        // First, try to find the user in the 'User' collection
         let user = await User.findOne({ username });
-
-        // If the user is not found in the 'User' collection, check the 'Admin' collection
         if (!user) {
             user = await Admin.findOne({ username });
             if (!user) {
@@ -69,13 +120,11 @@ const login = async (req, res) => {
             }
         }
 
-        // Compare the password
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        // Payload for JWT token
         const payload = {
             id: user.id,
             username: user.username,
@@ -91,42 +140,18 @@ const login = async (req, res) => {
         console.error('Login error:', err);
         res.status(500).json({ message: 'Login failed' });
     }
-};
+});
 
-const logout = (req, res) => {
+router.get('/logout', (req, res) => {
     req.logout((err) => {
         if (err) {
             return next(err);
         }
         res.status(200).json({ message: 'Logged out' });
     });
-};
+});
 
-const createAdmin = async (req, res) => {
-    if (!req.user || req.user.role !== 'admin') {
-        return res.status(403).json({ message: 'Unauthorized' });
-    }
-
-    const { username, password, firstName, lastName } = req.body;
-    try {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({
-            username,
-            password: hashedPassword,
-            firstName,
-            lastName,
-            role: 'admin'
-        });
-
-        await newUser.save();
-        res.status(201).json({ message: 'Admin created successfully', newUser });
-    } catch (err) {
-        console.error('Create admin error:', err);
-        res.status(500).json({ message: 'Failed to create admin' });
-    }
-};
-
-const getUserDetails = async (req, res) => {
+router.get('/user-details', passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
         const userId = req.user.id;
         const user = await User.findById(userId);
@@ -154,9 +179,9 @@ const getUserDetails = async (req, res) => {
         console.error('Error fetching user details:', err);
         res.status(500).json({ message: 'Error fetching user details' });
     }
-};
+});
 
-const updateUserProfile = async (req, res) => {
+router.put('/user-profile', passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
         const userId = req.user.id;
         const { firstName, lastName, email, phone, company, address, removeProfilePicture } = req.body;
@@ -195,13 +220,20 @@ const updateUserProfile = async (req, res) => {
         console.error('Error updating user profile:', err);
         res.status(500).json({ message: 'Error updating user profile', error: err.message });
     }
-};
+});
+
+router.get('/protected', passport.authenticate('jwt', { session: false }), (req, res) => {
+    res.status(200).json({ message: 'This is a protected route', user: req.user });
+});
+
+router.get('/admin', passport.authenticate('jwt', { session: false }), (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Access denied' });
+    }
+    res.status(200).json({ message: 'Welcome Admin' });
+});
 
 module.exports = {
-    signup,
-    login,
-    logout,
-    createAdmin,
-    getUserDetails,
-    updateUserProfile
+    router,
+    User
 };

@@ -59,23 +59,25 @@ app.use(passport.initialize());
 // app.use(requestLogger);
 
 // Routes
-const chainsawRoutes = require('./User/routes/PermitApplicationsRoutes/chainsawApplicationRoutes');
-app.use('/api', chainsawRoutes);
+// const chainsawRoutes = require('./User/routes/PermitApplicationsRoutes/chainsawApplicationRoutes');
+// app.use('/api', chainsawRoutes);
+const { router: chainsawApplicationRouter } = require('./User/modules/PermitApplicationsModules/chainsawApplicationModule');
+app.use('/api', chainsawApplicationRouter);
 
-const oopRoutes = require('./User/routes/userOOPRoutes');
-app.use('/api/', oopRoutes);
+const { router: userOOPRouter } = require('./User/modules/userOOPModule');
+app.use('/api/user', userOOPRouter);
 
-const authRoutes = require('./User/routes/userAuthRoutes');
-app.use('/api', authRoutes);
+const { router: userAuthRouter } = require('./User/modules/userAuthModule');
+app.use('/api', userAuthRouter);
 
-const userNotificationRoutes = require('./User/routes/userNotificationRoutes');
-app.use('/api/user', userNotificationRoutes);
+const { router: userNotificationRouter } = require('./User/modules/userNotificationModule');
+app.use('/api/user', userNotificationRouter);
 
-const contactRoutes = require('./User/routes/contactRoutes');
-app.use('/api', contactRoutes);
+const { router: contactRouter } = require('./User/modules/contactModule');
+app.use('/api', contactRouter);
 
-const allPermitsRoutes = require('./User/routes/PermitApplicationsRoutes/allPermitsRoutes');
-app.use('/api/permits', allPermitsRoutes);
+const allPermitsModule = require('./User/modules/PermitApplicationsModules/AllPermitsModule');
+app.use('/api/permits', allPermitsModule);
 
 const adminRoutes = require('./Admin/routes/admin_routes/adminAuthRoutes');
 app.use('/api/admin', adminRoutes);
@@ -94,10 +96,6 @@ app.use('/api/admin', chiefRPSOrderOfPaymentRoutes);
 
 const SA_ManageUserRoutes = require('./Admin/routes/SuperAdmin_routes/SA_ManageUserRoutes');
 app.use('/api/admin/super', SA_ManageUserRoutes);
-
-// Add this line to use the new user OOP routes
-const userOOPRoutes = require('./User/routes/userOOPRoutes');
-app.use('/api/user', userOOPRoutes);
 
 // Start the server
 const port = process.env.PORT || 3000;
