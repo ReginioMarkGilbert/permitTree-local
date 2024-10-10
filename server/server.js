@@ -1,6 +1,5 @@
 const express = require('express');
 const requestLogger = require('./middleware/requestLogger');
-// const mongoose = require('mongoose');
 const connectDB = require('./config/database');
 const bodyParser = require('body-parser');
 const cors = require('cors');

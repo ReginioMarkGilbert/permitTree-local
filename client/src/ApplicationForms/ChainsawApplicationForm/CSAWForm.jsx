@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from '../components/ui/Button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../components/ui/Card';
-import { Input } from '../components/ui/Input';
-import { Label } from '../components/ui/Label';
-import { RadioGroup, RadioGroupItem } from '../components/ui/RadioGroup';
+import { Button } from '../../components/ui/Button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../../components/ui/Card';
+import { Input } from '../../components/ui/Input';
+import { Label } from '../../components/ui/Label';
+import { RadioGroup, RadioGroupItem } from '../../components/ui/RadioGroup';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import Modal from '../components/ui/Modal';
-import '../components/ui/styles/CSAWFormScrollbar.css';
+import Modal from '../../components/ui/Modal';
+import '../../components/ui/styles/CSAWFormScrollbar.css';
 import { CheckboxItem, UploadCard, CustomSelect, CustomDatePicker, formatLabel, formatReviewValue } from './CSAWFormUtils';
 
 const ChainsawRegistrationForm = () => {

@@ -1,12 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Label } from '../components/ui/Label';
-import { Input } from '../components/ui/Input';
-import { Button } from '../components/ui/Button';
+import { Button } from '../../components/ui/Button';
 import { Download, X, CalendarIcon } from "lucide-react";
 import { CheckIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { format, parseISO, isValid } from "date-fns";
+import { formatLabel, formatReviewValue } from './formatUtils';
 
-export const CheckboxItem = ({ id, label, checked, onChange }) => (
+const CheckboxItem = ({ id, label, checked, onChange }) => (
     <div className="flex items-center">
         <input
             type="checkbox"
@@ -22,7 +21,7 @@ export const CheckboxItem = ({ id, label, checked, onChange }) => (
     </div>
 );
 
-export const UploadCard = ({ label, documentLabel, files, onFileChange, onRemoveFile }) => {
+const UploadCard = ({ label, documentLabel, files, onFileChange, onRemoveFile }) => {
     return (
         <div className="bg-white p-4 rounded-lg shadow mb-4">
             <div className="flex items-center mb-2">
@@ -80,7 +79,7 @@ export const UploadCard = ({ label, documentLabel, files, onFileChange, onRemove
     );
 };
 
-export const CustomSelect = ({ value, onChange, options }) => {
+const CustomSelect = ({ value, onChange, options }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [width, setWidth] = useState('auto');
     const selectRef = useRef(null);
@@ -143,7 +142,7 @@ export const CustomSelect = ({ value, onChange, options }) => {
     );
 };
 
-export const CustomDatePicker = ({ selectedDate, onChange }) => {
+const CustomDatePicker = ({ selectedDate, onChange }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [currentMonth, setCurrentMonth] = useState(selectedDate ? parseISO(selectedDate) : new Date());
     const datePickerRef = useRef(null);
@@ -241,20 +240,11 @@ export const CustomDatePicker = ({ selectedDate, onChange }) => {
     );
 };
 
-export const formatLabel = (key) => {
-    return key
-        .replace(/([A-Z])/g, ' $1') // Insert space before capital letters
-        .replace(/^./, str => str.toUpperCase()) // Capitalize the first letter
-        .replace(/([a-z])([A-Z])/g, '$1 $2') // Insert space between lower and upper case letters
-        .replace(/\b(P L T P R|W P P)\b/g, match => match.replace(/ /g, '')); // Remove spaces in PLTPR and WPP
-};
-
-export const formatReviewValue = (key, value) => {
-    if (key === 'dateOfAcquisition' && value) {
-        return format(parseISO(value), 'MMMM d, yyyy');
-    }
-    if (typeof value === 'boolean') {
-        return value ? 'Yes' : 'No';
-    }
-    return value;
+export {
+    CheckboxItem,
+    UploadCard,
+    CustomSelect,
+    CustomDatePicker,
+    formatLabel,
+    formatReviewValue
 };
