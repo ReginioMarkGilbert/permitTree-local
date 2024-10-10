@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from '../../components/ui/Button';
@@ -27,11 +27,11 @@ const HomePage = () => {
     const [notificationsLoading, setNotificationsLoading] = useState(true);
     const [notificationsError, setNotificationsError] = useState(null);
 
-    const location = useLocation();  // Use location to get the query parameter
+    const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
-    const isNewUser = queryParams.get('newUser') === 'true';  // Check if the user is new
+    const isNewUser = queryParams.get('newUser') === 'true';
 
-    const quickActions = [
+    const quickActions = useMemo(() => [
         { title: "New Application", icon: <FaClipboardList className="h-6 w-6" />, link: "/permits" },
         { title: "My Applications", icon: <FaClipboardList className="h-6 w-6" />, link: "/applicationsStatus" },
         {
@@ -49,26 +49,20 @@ const HomePage = () => {
             link: "/notifications"
         },
         { title: "Profile", icon: <FaUser className="h-6 w-6" />, link: "/profile" },
-    ];
+    ], [unreadCount]);
 
-    const sidebarLinks = [
+    const sidebarLinks = useMemo(() => [
         { title: "Dashboard", icon: <FaHome className="h-5 w-5" />, link: "/" },
         { title: "My Applications", icon: <FaClipboardList className="h-5 w-5" />, link: "/applications" },
         { title: "Notifications", icon: <FaBell className="h-5 w-5" />, link: "/notifications" },
         { title: "Profile", icon: <FaUser className="h-5 w-5" />, link: "/profile" },
-    ];
+    ], []);
 
-    const toggleSidebar = () => {
-        setSidebarOpen(!sidebarOpen);
-    };
-
-    useEffect(() => {
-        fetchRecentApplications();
-        fetchUserDetails();
-        fetchRecentNotifications();
+    const toggleSidebar = useCallback(() => {
+        setSidebarOpen(prev => !prev);
     }, []);
 
-    const fetchRecentApplications = async () => {
+    const fetchRecentApplications = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
             if (!token) {
@@ -89,14 +83,14 @@ const HomePage = () => {
             setError('Failed to fetch recent applications.');
             setLoading(false);
         }
-    };
+    }, []);
 
-    const fetchUserDetails = async () => {
+    const fetchUserDetails = useCallback(async () => {
         try {
-            const token = localStorage.getItem('token'); // Get the token from local storage
+            const token = localStorage.getItem('token');
             const response = await axios.get('http://localhost:3000/api/user-details', {
                 headers: {
-                    Authorization: token // Include the token in the headers
+                    Authorization: token
                 }
             });
             setUser(response.data.user);
@@ -104,9 +98,9 @@ const HomePage = () => {
             console.error('Error fetching user details:', err);
             toast.error('Failed to fetch user details.');
         }
-    };
+    }, []);
 
-    const fetchRecentNotifications = async () => {
+    const fetchRecentNotifications = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
             if (!token) {
@@ -117,7 +111,7 @@ const HomePage = () => {
                     'Authorization': token
                 },
                 params: {
-                    limit: 7 // Fetch only 7 notifications
+                    limit: 7
                 }
             });
             setRecentNotifications(response.data);
@@ -127,9 +121,15 @@ const HomePage = () => {
             setNotificationsError('Failed to fetch recent notifications.');
             setNotificationsLoading(false);
         }
-    };
+    }, []);
 
-    const getStatusColor = (status) => {
+    useEffect(() => {
+        fetchRecentApplications();
+        fetchUserDetails();
+        fetchRecentNotifications();
+    }, [fetchRecentApplications, fetchUserDetails, fetchRecentNotifications]);
+
+    const getStatusColor = useCallback((status) => {
         switch (status.toLowerCase()) {
             case 'submitted':
                 return 'bg-blue-200 text-blue-800';
@@ -146,7 +146,7 @@ const HomePage = () => {
             default:
                 return 'bg-gray-200 text-gray-800';
         }
-    };
+    }, []);
 
     return (
         <div className="min-h-screen bg-green-50 flex flex-col pt-16">
@@ -156,6 +156,7 @@ const HomePage = () => {
                     {isNewUser ? "Welcome" : "Welcome back"}, {user.firstName} {user.lastName}!
                 </h1>
 
+                {/* Quick Actions */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     {quickActions.map((action, index) => (
                         <Card key={index} className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
@@ -174,7 +175,9 @@ const HomePage = () => {
                     ))}
                 </div>
 
+                {/* Recent Applications and Notifications */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Recent Applications */}
                     <Card className="lg:col-span-2 bg-white recent-applications-card group">
                         <CardHeader>
                             <CardTitle className="text-green-800">Recent Applications</CardTitle>
@@ -216,6 +219,8 @@ const HomePage = () => {
                             </Button>
                         </CardFooter>
                     </Card>
+
+                    {/* Notifications */}
                     <Card className="bg-white notifications-card group">
                         <CardHeader>
                             <CardTitle className="text-green-800 flex items-center justify-between">
@@ -240,8 +245,8 @@ const HomePage = () => {
                                         <div
                                             key={index}
                                             className={`p-4 mb-2 last:mb-0 border-l-4 ${notification.read
-                                                    ? 'bg-white border-gray-300'
-                                                    : 'bg-green-100 border-green-500'
+                                                ? 'bg-white border-gray-300'
+                                                : 'bg-green-100 border-green-500'
                                                 }`}
                                         >
                                             <p className={`font-semibold ${notification.read ? 'text-gray-800' : 'text-green-800'}`}>
@@ -272,6 +277,6 @@ const HomePage = () => {
             <HomeFooter />
         </div>
     );
-}
+};
 
-export default HomePage;
+export default React.memo(HomePage);

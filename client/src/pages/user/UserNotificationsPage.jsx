@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Bell, X, AlertCircle, CheckCircle, Clock, FileText, RotateCcw, Mail } from 'lucide-react';
@@ -14,17 +14,6 @@ function UserNotificationsPage() {
     const [selectedNotification, setSelectedNotification] = useState(null);
     const [deletedNotification, setDeletedNotification] = useState(null);
     const [showUndo, setShowUndo] = useState(false);
-
-    useEffect(() => {
-        let timer;
-        if (showUndo) {
-            timer = setTimeout(() => {
-                setShowUndo(false);
-                setDeletedNotification(null);
-            }, 5000);
-        }
-        return () => clearTimeout(timer);
-    }, [showUndo]);
 
     const fetchNotifications = useCallback(async () => {
         if (!isAuthenticated()) return;
@@ -47,15 +36,26 @@ function UserNotificationsPage() {
         let intervalId;
         if (isAuthenticated()) {
             fetchNotifications();
-            intervalId = setInterval(fetchNotifications, 10000);
+            intervalId = setInterval(fetchNotifications, 30000);
         }
 
         return () => {
             if (intervalId) clearInterval(intervalId);
         };
-    }, [fetchNotifications, unreadCount]);
+    }, [fetchNotifications]);
 
-    const handleNotificationClick = async (notification) => {
+    useEffect(() => {
+        let timer;
+        if (showUndo) {
+            timer = setTimeout(() => {
+                setShowUndo(false);
+                setDeletedNotification(null);
+            }, 5000);
+        }
+        return () => clearTimeout(timer);
+    }, [showUndo]);
+
+    const handleNotificationClick = useCallback(async (notification) => {
         setSelectedNotification(notification);
         if (!notification.read) {
             try {
@@ -66,45 +66,43 @@ function UserNotificationsPage() {
                     { headers: { Authorization: token } }
                 );
                 const updatedNotification = response.data;
-                setNotifications(notifications.map(n =>
+                setNotifications(prev => prev.map(n =>
                     n._id === updatedNotification._id ? updatedNotification : n
                 ));
-                fetchUnreadCount(); // Update unread count
+                fetchUnreadCount();
             } catch (error) {
                 console.error('Error marking notification as read:', error);
                 toast.error('Failed to mark notification as read');
             }
         }
-    };
+    }, [fetchUnreadCount]);
 
-    const handleDelete = async (id) => {
+    const handleDelete = useCallback(async (id) => {
         try {
             const token = localStorage.getItem('token');
             await axios.delete(`http://localhost:3000/api/user/notifications/${id}`, {
                 headers: { Authorization: token }
             });
             const notificationToDelete = notifications.find(n => n._id === id);
-            setNotifications(notifications.filter(n => n._id !== id));
+            setNotifications(prev => prev.filter(n => n._id !== id));
             setDeletedNotification(notificationToDelete);
             setShowUndo(true);
-            // toast.success('Notification deleted successfully');
-            fetchUnreadCount(); // Update unread count
+            fetchUnreadCount();
         } catch (error) {
             console.error('Error deleting notification:', error);
             toast.error('Failed to delete notification');
         }
-    };
+    }, [notifications, fetchUnreadCount]);
 
-    const handleUndo = () => {
+    const handleUndo = useCallback(() => {
         if (deletedNotification) {
-            setNotifications([...notifications, deletedNotification]);
+            setNotifications(prev => [...prev, deletedNotification]);
             setShowUndo(false);
             setDeletedNotification(null);
-            // You might want to add an API call here to restore the notification in the backend
         }
-    };
+    }, [deletedNotification]);
 
-    const handleMarkUnread = async (id) => {
+    const handleMarkUnread = useCallback(async (id) => {
         try {
             const token = localStorage.getItem('token');
             const response = await axios.patch(
@@ -113,19 +111,18 @@ function UserNotificationsPage() {
                 { headers: { Authorization: token } }
             );
             const updatedNotification = response.data;
-            setNotifications(notifications.map(n =>
+            setNotifications(prev => prev.map(n =>
                 n._id === updatedNotification._id ? updatedNotification : n
             ));
             setSelectedNotification(null);
-            // toast.success('Notification marked as unread');
-            fetchUnreadCount(); // Update unread count
+            fetchUnreadCount();
         } catch (error) {
             console.error('Error marking notification as unread:', error);
             toast.error('Failed to mark notification as unread');
         }
-    };
+    }, [fetchUnreadCount]);
 
-    const handleMarkAllAsRead = async () => {
+    const handleMarkAllAsRead = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
             await axios.post(
@@ -133,31 +130,30 @@ function UserNotificationsPage() {
                 {},
                 { headers: { Authorization: token } }
             );
-            setNotifications(notifications.map(n => ({ ...n, read: true })));
+            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
             fetchUnreadCount();
             toast.success('All notifications marked as read');
         } catch (error) {
             console.error('Error marking all notifications as read:', error);
             toast.error('Failed to mark all notifications as read');
         }
-    };
+    }, [fetchUnreadCount]);
 
-    const formatNotificationType = (type) => {
+    const formatNotificationType = useMemo(() => (type) => {
         return type.split('_')
             .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
             .join(' ');
-    };
+    }, []);
 
-    const getIcon = (type) => {
+    const getIcon = useMemo(() => (type) => {
         const formattedType = formatNotificationType(type).toLowerCase();
         switch (formattedType) {
             case 'application returned': return <AlertCircle className="w-5 h-5 text-yellow-500" />;
             case 'application accepted': return <CheckCircle className="w-5 h-5 text-green-500" />;
             case 'application submitted': return <FileText className="w-5 h-5 text-blue-500" />;
-            // ... other cases
             default: return <Bell className="w-5 h-5 text-gray-500" />;
         }
-    };
+    }, [formatNotificationType]);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 p-24">
@@ -260,4 +256,4 @@ function UserNotificationsPage() {
     );
 }
 
-export default UserNotificationsPage;
+export default React.memo(UserNotificationsPage);

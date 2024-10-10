@@ -9,7 +9,7 @@ export const useNotification = () => useContext(NotificationContext);
 const NotificationProvider = ({ children }) => {
     const [unreadCount, setUnreadCount] = useState(0);
 
-    const fetchUnreadCount = async () => {
+    const fetchUnreadCount = useCallback(async () => {
         if (!isAuthenticated()) {
             setUnreadCount(0);
             return;
@@ -23,26 +23,25 @@ const NotificationProvider = ({ children }) => {
         } catch (error) {
             console.error('Error fetching unread notification count:', error);
         }
-    };
+    }, []);
 
     useEffect(() => {
         let intervalId;
         if (isAuthenticated()) {
             fetchUnreadCount();
-            intervalId = setInterval(fetchUnreadCount, 9000);
+            intervalId = setInterval(fetchUnreadCount, 30000); // Increased interval to 30 seconds
         }
 
         return () => {
             if (intervalId) clearInterval(intervalId);
         };
-
     }, [fetchUnreadCount]);
 
-    const value = {
+    const value = React.useMemo(() => ({
         unreadCount,
         setUnreadCount,
         fetchUnreadCount
-    };
+    }), [unreadCount, fetchUnreadCount]);
 
     return (
         <NotificationContext.Provider value={value}>
@@ -51,4 +50,4 @@ const NotificationProvider = ({ children }) => {
     );
 };
 
-export default NotificationProvider;
+export default React.memo(NotificationProvider);
