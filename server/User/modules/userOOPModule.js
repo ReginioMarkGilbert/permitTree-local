@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const OrderOfPayment = require('../../Admin/models/ChiefRPS_models/ChiefOrderOfPaymentSchema');
+const { OrderOfPayment } = require('../../Admin/AdminModules/chiefOrderOfPaymentModule');
 const { Application } = require('./PermitApplicationsModules/chainsawApplicationModule');
 const { generateReceipt } = require('../../utils/receiptGenerator');
 const { authenticateToken } = require('../../middleware/authMiddleware');

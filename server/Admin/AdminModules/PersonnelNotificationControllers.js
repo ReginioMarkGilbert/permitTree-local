@@ -1,10 +1,25 @@
-const ChiefRPSNotification = require('../../models/ChiefRPS_models/ChiefRPSNotificationSchema');
+const express = require('express');
+const router = express.Router();
+const mongoose = require('mongoose');
+const { authenticateToken } = require('../../middleware/authMiddleware');
 
-const createNotification = async (req, res) => {
+// Schema
+const chiefRPSNotificationSchema = new mongoose.Schema({
+    message: { type: String, required: true },
+    applicationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Application', required: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    type: { type: String, required: true },
+    read: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now }
+});
+
+const ChiefRPSNotification = mongoose.model('ChiefRPSNotification', chiefRPSNotificationSchema);
+
+// Routes
+router.post('/notifications', authenticateToken, async (req, res) => {
     try {
         const { message, applicationId, userId, type } = req.body;
 
-        // Format the type to sentence case and remove underscores
         let formattedType;
         if (Array.isArray(type)) {
             formattedType = type
@@ -25,7 +40,7 @@ const createNotification = async (req, res) => {
             message,
             applicationId,
             userId,
-            type: formattedType // Use the formatted type
+            type: formattedType
         });
         await newNotification.save();
         res.status(201).json({ success: true, notification: newNotification });
@@ -33,9 +48,9 @@ const createNotification = async (req, res) => {
         console.error('Error creating notification:', error);
         res.status(500).json({ success: false, message: 'Error creating notification' });
     }
-};
+});
 
-const getChiefRPSNotifications = async (req, res) => {
+router.get('/notifications', authenticateToken, async (req, res) => {
     try {
         const notifications = await ChiefRPSNotification.find()
             .sort({ createdAt: -1 })
@@ -46,9 +61,9 @@ const getChiefRPSNotifications = async (req, res) => {
         console.error('Error fetching Chief RPS notifications:', error);
         res.status(500).json({ message: 'Error fetching notifications' });
     }
-};
+});
 
-const markNotificationAsRead = async (req, res) => {
+router.patch('/notifications/:id/read', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
         const notification = await ChiefRPSNotification.findByIdAndUpdate(
@@ -66,9 +81,9 @@ const markNotificationAsRead = async (req, res) => {
         console.error('Error marking notification as read:', error);
         res.status(500).json({ message: 'Error updating notification' });
     }
-};
+});
 
-const getUnreadNotificationCount = async (req, res) => {
+router.get('/notifications/unread-count', authenticateToken, async (req, res) => {
     try {
         const count = await ChiefRPSNotification.countDocuments({ read: false });
         res.json({ count });
@@ -76,9 +91,9 @@ const getUnreadNotificationCount = async (req, res) => {
         console.error('Error fetching unread notification count:', error);
         res.status(500).json({ message: 'Error fetching unread notification count' });
     }
-};
+});
 
-const markNotificationAsUnread = async (req, res) => {
+router.patch('/notifications/:id/unread', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
         const notification = await ChiefRPSNotification.findByIdAndUpdate(
@@ -96,9 +111,9 @@ const markNotificationAsUnread = async (req, res) => {
         console.error('Error marking notification as unread:', error);
         res.status(500).json({ message: 'Error updating notification' });
     }
-};
+});
 
-const deleteNotification = async (req, res) => {
+router.delete('/notifications/:id', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
         const notification = await ChiefRPSNotification.findByIdAndDelete(id);
@@ -112,9 +127,9 @@ const deleteNotification = async (req, res) => {
         console.error('Error deleting notification:', error);
         res.status(500).json({ message: 'Error deleting notification' });
     }
-};
+});
 
-const markAllNotificationsAsRead = async (req, res) => {
+router.post('/notifications/mark-all-read', authenticateToken, async (req, res) => {
     try {
         await ChiefRPSNotification.updateMany(
             { read: false },
@@ -125,14 +140,9 @@ const markAllNotificationsAsRead = async (req, res) => {
         console.error('Error marking all notifications as read:', error);
         res.status(500).json({ message: 'Error updating notifications' });
     }
-};
+});
 
 module.exports = {
-    createNotification,
-    getChiefRPSNotifications,
-    markNotificationAsRead,
-    getUnreadNotificationCount,
-    markNotificationAsUnread,
-    deleteNotification,
-    markAllNotificationsAsRead
+    router,
+    ChiefRPSNotification
 };

@@ -1,7 +1,63 @@
-const User = require('../../../User/modules/userAuthModule');
-const Admin = require('../../models/admin_models/adminAuthSchema');
+const express = require('express');
+const router = express.Router();
+const mongoose = require('mongoose');
+const { authenticateToken } = require('../../middleware/authMiddleware');
+const { User } = require('../../User/modules/userAuthModule');
+const { Admin } = require('../AdminModules/adminAuthModule');
 
-const getAllUsers = async (req, res) => {
+// Schema
+const SA_ManageUserSchema = new mongoose.Schema({
+    userId: {
+        type: Number,
+        required: true,
+        unique: true
+    },
+    username: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    firstName: {
+        type: String,
+        required: true
+    },
+    lastName: {
+        type: String,
+        required: true
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    phone: {
+        type: String,
+        required: false
+    },
+    company: {
+        type: String,
+        required: false
+    },
+    address: {
+        type: String,
+        required: false
+    },
+    role: {
+        type: String,
+        required: true,
+        enum: ['user', 'ChiefRPS', 'superadmin']
+    },
+    userType: {
+        type: String,
+        required: true,
+        enum: ['Client', 'Personnel']
+    }
+}, { timestamps: true });
+
+const SA_ManageUser = mongoose.model('SA_ManageUser', SA_ManageUserSchema);
+
+// Routes
+router.get('/users', authenticateToken, async (req, res) => {
     try {
         const regularUsers = await User.find().select('-password');
         const chiefRPSUsers = await Admin.find({ role: 'ChiefRPS' }).select('-password');
@@ -18,9 +74,9 @@ const getAllUsers = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Error fetching users', error: error.message });
     }
-};
+});
 
-const getUser = async (req, res) => {
+router.get('/users/:id', authenticateToken, async (req, res) => {
     try {
         const user = await User.findById(req.params.id).select('-password');
         if (!user) {
@@ -30,9 +86,9 @@ const getUser = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Error fetching user', error: error.message });
     }
-};
+});
 
-const createUser = async (req, res) => {
+router.post('/users', authenticateToken, async (req, res) => {
     try {
         const newUser = new User(req.body);
         await newUser.save();
@@ -40,9 +96,9 @@ const createUser = async (req, res) => {
     } catch (error) {
         res.status(400).json({ message: 'Error creating user', error: error.message });
     }
-};
+});
 
-const updateUser = async (req, res) => {
+router.put('/users/:id', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
         const { userType, ...updateData } = req.body;
@@ -61,9 +117,9 @@ const updateUser = async (req, res) => {
     } catch (error) {
         res.status(400).json({ message: 'Error updating user', error: error.message });
     }
-};
+});
 
-const deleteUser = async (req, res) => {
+router.delete('/users/:id', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
         const user = await User.findById(id);
@@ -81,12 +137,9 @@ const deleteUser = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Error deleting user', error: error.message });
     }
-};
+});
 
 module.exports = {
-    getAllUsers,
-    getUser,
-    createUser,
-    updateUser,
-    deleteUser
+    router,
+    SA_ManageUser
 };

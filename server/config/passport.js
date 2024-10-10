@@ -2,7 +2,8 @@ const passport = require('passport');
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
 const { User } = require('../User/modules/userAuthModule'); // Use destructuring here
-const Admin = require('../Admin/models/admin_models/adminAuthSchema');
+// const Admin = require('../Admin/models/admin_models/adminAuthSchema');
+const { Admin } = require('../Admin/AdminModules/adminAuthModule');
 
 require('dotenv').config();
 

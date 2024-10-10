@@ -1,11 +1,12 @@
-const { Application } = require('../../../User/modules/PermitApplicationsModules/chainsawApplicationModule');
-const User = require('../../../User/modules/userAuthModule');
-const Notification = require('../../models/ChiefRPS_models/ChiefRPSNotificationSchema');
 const fs = require('fs').promises;
 const path = require('path');
 const PDFDocument = require('pdfkit');
-const { UserNotification } = require('../../../User/modules/userNotificationModule');
-const Admin = require('../../models/admin_models/adminAuthSchema');
+const express = require('express');
+const router = express.Router();
+const { UserNotification } = require('../../User/modules/userNotificationModule');
+const { Admin } = require('./adminAuthModule');
+const { Application } = require('../../User/modules/PermitApplicationsModules/chainsawApplicationModule');
+const { User } = require('../../User/modules/userAuthModule');
 
 // Helper function to format date
 const formatDate = (dateString) => {
@@ -21,8 +22,7 @@ const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString('en-US', options);
 };
 
-// Get all applications
-const getAllApplications = async (req, res) => {
+router.get('/all-applications', async (req, res) => {
     try {
         const { sort, status, applicationType } = req.query;
         let filter = { status: { $ne: 'Draft' } };
@@ -53,9 +53,9 @@ const getAllApplications = async (req, res) => {
         console.error('Error fetching all applications:', error);
         res.status(500).json({ message: 'Error fetching applications' });
     }
-};
+});
 
-const getApplicationById = async (req, res) => {
+router.get('/getApplicationById/:id', async (req, res) => {
     try {
         const application = await Application.findById(req.params.id);
         if (!application) {
@@ -66,9 +66,9 @@ const getApplicationById = async (req, res) => {
         console.error('Error fetching application by ID:', error);
         res.status(500).json({ message: 'Error fetching application by ID' });
     }
-};
+});
 
-const getFile = async (req, res) => {
+router.get('/file/:applicationId/:fileType/:fileIndex', async (req, res) => {
     try {
         const { applicationId, fileType, fileIndex } = req.params;
         const application = await Application.findById(applicationId);
@@ -114,16 +114,15 @@ const getFile = async (req, res) => {
         console.error('Error retrieving file:', error);
         res.status(500).json({ message: 'Error retrieving file' });
     }
-};
+});
 
-const printApplication = async (req, res) => {
+router.get('/print/:id', async (req, res) => {
     try {
         const application = await Application.findById(req.params.id);
         if (!application) {
             return res.status(404).json({ message: 'Application not found' });
         }
 
-        // Create a new PDF document
         const doc = new PDFDocument();
 
         // Set response headers for PDF
@@ -139,8 +138,8 @@ const printApplication = async (req, res) => {
         // Function to format currency
         const formatCurrency = (amount) => {
             // Remove any non-numeric characters except decimal point
-            const numericAmount = parseFloat(amount.toString().replace(/[^\d.]/g, ''));
-            return isNaN(numericAmount) ? '0.00' : numericAmount.toFixed(2);
+            const numericValue = amount.replace(/[^0-9.]/g, '');
+            return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(numericValue);
         };
 
         // Add content to the PDF
@@ -173,9 +172,9 @@ const printApplication = async (req, res) => {
         console.error('Error printing application:', error);
         res.status(500).json({ message: 'Error printing application' });
     }
-};
+});
 
-const updateApplicationStatus = async (req, res) => {
+router.put('/update-status/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const { status, reviewNotes } = req.body;
@@ -190,22 +189,11 @@ const updateApplicationStatus = async (req, res) => {
         }
 
         application.status = status;
-        if (reviewNotes) {
-            application.reviewNotes = reviewNotes;
-        }
+        application.reviewNotes = reviewNotes;
 
         await application.save();
 
-        // Create a notification for the user
-        const notification = new Notification({
-            userId: application.userId,
-            message: `Your application ${application.customId} status has been updated to ${status}.`,
-            applicationId: application._id,
-            type: 'application_status_changed'
-        });
-        await notification.save();
-
-        res.status(200).json({ message: 'Application status updated successfully', application });
+        res.status(200).json({ message: 'Application status updated successfully' });
     } catch (error) {
         console.error('Error updating application status:', error);
         if (error.name === 'ValidationError') {
@@ -213,9 +201,9 @@ const updateApplicationStatus = async (req, res) => {
         }
         res.status(500).json({ message: 'Error updating application status' });
     }
-};
+});
 
-const returnApplication = async (req, res) => {
+router.put('/return-application/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const { returnRemarks } = req.body;
@@ -250,9 +238,9 @@ const returnApplication = async (req, res) => {
         console.error('Error returning application:', error);
         res.status(500).json({ success: false, message: 'Error returning application', error: error.message });
     }
-};
+});
 
-const reviewApplication = async (req, res) => {
+router.post('/review-application/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const adminId = req.user.id;
@@ -285,14 +273,6 @@ const reviewApplication = async (req, res) => {
         console.error('Error marking application for review:', error);
         res.status(500).json({ success: false, message: 'Server error', error: error.message });
     }
-};
+});
 
-module.exports = {
-    getAllApplications,
-    getApplicationById,
-    getFile,
-    printApplication,
-    updateApplicationStatus,
-    returnApplication,
-    reviewApplication
-};
+module.exports = { router };

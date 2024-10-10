@@ -8,7 +8,8 @@ const path = require('path');
 const passport = require('passport');
 const { body, validationResult } = require('express-validator');
 // const UserIdCounter = require('../models/UserIdcounterSchema');
-const Admin = require('../../Admin/models/admin_models/adminAuthSchema');
+// const Admin = require('../../Admin/models/admin_models/adminAuthSchema');
+const { Admin } = require('../../Admin/AdminModules/adminAuthModule');
 require('dotenv').config();
 
 // User Schema

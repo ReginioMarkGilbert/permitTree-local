@@ -79,23 +79,23 @@ app.use('/api', contactRouter);
 const allPermitsModule = require('./User/modules/PermitApplicationsModules/AllPermitsModule');
 app.use('/api/permits', allPermitsModule);
 
-const adminRoutes = require('./Admin/routes/admin_routes/adminAuthRoutes');
-app.use('/api/admin', adminRoutes);
+const { router: adminAuthRouter } = require('./Admin/AdminModules/adminAuthModule');
+app.use('/api/admin', adminAuthRouter);
 
-const adminDashboardRoutes = require('./Admin/routes/admin_routes/adminDashboardRoutes');
-app.use('/api/admin', adminDashboardRoutes);
+const { router: adminDashboardRouter } = require('./Admin/AdminModules/adminDashboardModule');
+app.use('/api/admin', adminDashboardRouter);
 
-const adminReportsRoutes = require('./Admin/routes/admin_routes/adminReportsRoutes');
-app.use('/api/admin/reports', adminReportsRoutes);
+const { router: adminReportsRouter } = require('./Admin/AdminModules/adminReportsModule');
+app.use('/api/admin/reports', adminReportsRouter);
 
-const chiefRPSNotificationRoutes = require('./Admin/routes/ChiefRPS_routes/ChiefRPSNotificationRoutes');
-app.use('/api/admin', chiefRPSNotificationRoutes);
+const { router: personnelNotificationRouter } = require('./Admin/AdminModules/PersonnelNotificationControllers');
+app.use('/api/admin', personnelNotificationRouter);
 
-const chiefRPSOrderOfPaymentRoutes = require('./Admin/routes/ChiefRPS_routes/ChiefOrderOfPaymentRoutes');
-app.use('/api/admin', chiefRPSOrderOfPaymentRoutes);
+const { router: chiefOrderOfPaymentRouter } = require('./Admin/AdminModules/chiefOrderOfPaymentModule');
+app.use('/api/admin', chiefOrderOfPaymentRouter);
 
-const SA_ManageUserRoutes = require('./Admin/routes/SuperAdmin_routes/SA_ManageUserRoutes');
-app.use('/api/admin/super', SA_ManageUserRoutes);
+const { router: superAdminManageUsersRouter } = require('./Admin/SuperAdminModules/SA_ManageUsersModules');
+app.use('/api/admin/super', superAdminManageUsersRouter);
 
 // Start the server
 const port = process.env.PORT || 3000;
