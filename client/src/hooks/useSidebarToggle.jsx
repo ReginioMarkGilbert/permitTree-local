@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 
 const useSidebarToggle = () => {
@@ -13,7 +13,9 @@ const useSidebarToggle = () => {
         }
     }, [location]);
 
-    const toggleSidebar = () => setSidebarToggle(!sidebarToggle);
+    const toggleSidebar = useCallback(() => {
+        setSidebarToggle(prev => !prev);
+    }, []);
 
     return { sidebarToggle, toggleSidebar };
 };

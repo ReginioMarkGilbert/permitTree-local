@@ -1,17 +1,17 @@
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { FaHome, FaFileAlt, FaBell, FaUser, FaSignInAlt, FaClipboardList } from 'react-icons/fa';
 import { NavLink, useNavigate } from 'react-router-dom';
 import permitTreeLogo from '../../assets/denr-logo.png';
 import axios from 'axios';
 import { isAuthenticated } from '../../utils/auth';
-import { removeToken } from '../../utils/tokenManager'; // Update this import
+import { removeToken } from '../../utils/tokenManager';
 import { useNotification } from '../../pages/user/contexts/UserNotificationContext';
 
-const Sidebar = ({ isOpen }) => {
+const Sidebar = React.memo(({ isOpen }) => {
     const navigate = useNavigate();
     const { unreadCount } = useNotification();
 
-    const handleLogout = async () => {
+    const handleLogout = useCallback(async () => {
         try {
             const apiUrl = window.location.hostname === 'localhost'
                 ? 'http://localhost:3000/api/logout'
@@ -21,29 +21,23 @@ const Sidebar = ({ isOpen }) => {
                         ? 'http://192.168.1.15:3000/api/logout'
                         : 'http://192.168.137.1:3000/api/logout';
             await axios.get(apiUrl);
-            removeToken(); // Use the new removeToken function
+            removeToken();
             navigate('/auth');
             console.log('Logout successful!');
         } catch (error) {
             console.error('Logout failed:', error);
         }
-    };
+    }, [navigate]);
 
     React.useEffect(() => {
         const authStatus = isAuthenticated();
-        // console.log('Authentication status:', authStatus);
         if (!authStatus) {
             navigate('/auth');
         }
     }, [navigate]);
 
-    if (!isAuthenticated()) {
-        console.log('Rendering null due to failed authentication');
-        return null;
-    }
-
-    return (
-        <div className={`h-full bg-green-800 text-white flex flex-col justify-between fixed top-0 left-0 w-56 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:w-64 z-10`}>
+    const sidebarContent = useMemo(() => (
+        <>
             <div className="mt-6 ml-4">
                 <div className="mt-16">
                     <div className="flex items-center justify-start mt-10 mr-5 pl-2">
@@ -90,8 +84,21 @@ const Sidebar = ({ isOpen }) => {
                     <span>Logout</span>
                 </NavLink>
             </div>
+        </>
+    ), [unreadCount, handleLogout]);
+
+    if (!isAuthenticated()) {
+        return null;
+    }
+
+    return (
+        <div
+            className={`h-full bg-green-800 text-white flex flex-col justify-between fixed top-0 left-0 w-56 md:w-64 z-10 transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+            style={{willChange: 'transform'}}
+        >
+            {sidebarContent}
         </div>
     );
-};
+});
 
 export default Sidebar;
