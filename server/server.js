@@ -18,18 +18,18 @@ connectDB();
 
 // CORS Configuration
 const corsOptions = {
-    origin: 'http://localhost:5173',
-    optionsSuccessStatus: 200,
-    credentials: true // Allow credentials if using cookies/sessions
+  origin: 'http://localhost:5173',
+  optionsSuccessStatus: 200,
+  credentials: true // Allow credentials if using cookies/sessions
 };
 
 app.use(cors(corsOptions));
 // Enable file upload
 app.use(fileUpload({
-    createParentPath: true,
-    limits: {
-        fileSize: 50 * 1024 * 1024 // 50 MB
-    },
+  createParentPath: true,
+  limits: {
+    fileSize: 50 * 1024 * 1024 // 50 MB
+  },
 }));
 // Serve static files from the 'uploads' folder
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -40,14 +40,14 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 // Session middleware
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'default_session_secret',
-    resave: false,
-    saveUninitialized: true
-    // saveUninitialized: true,
-    // cookie: {
-    //     secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-    //     maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
-    // }
+  secret: process.env.SESSION_SECRET || 'default_session_secret',
+  resave: false,
+  saveUninitialized: true
+  // saveUninitialized: true,
+  // cookie: {
+  //     secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+  //     maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
+  // }
 }));
 
 // Passport middleware
@@ -98,5 +98,5 @@ app.use('/api/admin/super', superAdminManageUsersRouter);
 // Start the server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+  console.log(`Server is running on port ${port}`);
 });

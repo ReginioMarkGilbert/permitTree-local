@@ -13,14 +13,7 @@ const AdminSidebar = React.memo(({ isOpen }) => {
 
     const handleLogout = useCallback(async () => {
         try {
-            const apiUrl = window.location.hostname === 'localhost'
-                ? 'http://localhost:3000/api/logout'
-                : window.location.hostname === '192.168.1.12'
-                    ? 'http://192.168.1.12:3000/api/logout'
-                    : window.location.hostname === '192.168.1.15'
-                        ? 'http://192.168.1.15:3000/api/logout'
-                        : 'http://192.168.137.1:3000/api/logout';
-            await axios.get(apiUrl);
+            await axios.get('http://localhost:3000/api/logout');
             removeToken();
             localStorage.removeItem('token');
             navigate('/auth');

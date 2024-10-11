@@ -3,12 +3,15 @@ import useUsers from './hooks/useUsers';
 import UserTable from './components/UserTable';
 import SA_UserDetailsViewModal from './components/SA_userDetailsViewModal';
 import SA_UserEditDetailsModal from './components/SA_userEditDetailsModal';
+import SA_AddUserModal from './components/SA_AddUserModal';  // Make sure this import is correct
+import { Button } from "@/components/ui/button";
 
 const SuperAdminManageUsersPage = () => {
-  const { users, loading, error, updateUser } = useUsers();
+  const { users, loading, error, updateUser, addUser } = useUsers();
   const [selectedUser, setSelectedUser] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const handleViewUser = useCallback((user) => {
     setSelectedUser(user);
@@ -35,13 +38,27 @@ const SuperAdminManageUsersPage = () => {
     }
   }, [selectedUser, updateUser]);
 
+  const handleAddUser = useCallback(async (newUser) => {
+    try {
+      const addedUser = await addUser(newUser);
+      // No need to call setUsers here, as it's already done in the addUser function
+      setIsAddModalOpen(false);
+    } catch (err) {
+      console.error('Failed to add user:', err);
+      // You might want to show an error message to the user here
+    }
+  }, [addUser]);
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
   return (
     <div className="min-h-screen bg-green-50">
       <div className="container mx-auto px-4 sm:px-6 py-24">
-        <h1 className="text-3xl font-bold mb-6 text-green-800">Manage Users</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-green-800">Manage Users</h1>
+          <Button onClick={() => setIsAddModalOpen(true)}>Add New User</Button>
+        </div>
         <UserTable
           users={users}
           onViewUser={handleViewUser}
@@ -59,6 +76,11 @@ const SuperAdminManageUsersPage = () => {
         onClose={() => setIsEditModalOpen(false)}
         user={selectedUser}
         onSave={handleSaveUser}
+      />
+      <SA_AddUserModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onAddUser={handleAddUser}
       />
     </div>
   );
