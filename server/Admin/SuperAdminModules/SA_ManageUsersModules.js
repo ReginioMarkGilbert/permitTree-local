@@ -63,22 +63,26 @@ router.post('/users', authenticateSuperAdmin, async (req, res) => {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
-    // Generate a unique userId
-    const lastUser = await User.findOne().sort({ userId: -1 });
-    const newUserId = lastUser ? lastUser.userId + 1 : 1;
-
     let newUser;
-    if (userType === 'Personnel' && role === 'ChiefRPS') {
+    if (userType === 'Personnel' && (role === 'ChiefRPS' || role === 'superadmin')) {
+      // Generate a unique adminId for Admin users
+      const lastAdmin = await Admin.findOne().sort({ adminId: -1 });
+      const newAdminId = lastAdmin ? (lastAdmin.adminId || 0) + 1 : 1;
+
       newUser = new Admin({
-        userId: newUserId,
+        adminId: newAdminId,
         firstName,
         lastName,
         username,
         email,
         password,
-        role: 'ChiefRPS',
+        role: role,
       });
     } else {
+      // Generate a unique userId for regular users
+      const lastUser = await User.findOne().sort({ userId: -1 });
+      const newUserId = lastUser ? (lastUser.userId || 0) + 1 : 1;
+
       newUser = new User({
         userId: newUserId,
         firstName,
@@ -86,7 +90,7 @@ router.post('/users', authenticateSuperAdmin, async (req, res) => {
         username,
         email,
         password,
-        role: role === 'superadmin' ? 'superadmin' : 'user',
+        role: 'user',
       });
     }
 
