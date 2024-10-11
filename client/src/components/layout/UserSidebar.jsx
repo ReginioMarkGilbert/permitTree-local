@@ -1,11 +1,11 @@
+import axios from 'axios';
 import React, { useCallback, useMemo } from 'react';
-import { FaHome, FaFileAlt, FaBell, FaUser, FaSignInAlt, FaClipboardList } from 'react-icons/fa';
+import { FaBell, FaClipboardList, FaFileAlt, FaHome, FaSignInAlt, FaUser } from 'react-icons/fa';
 import { NavLink, useNavigate } from 'react-router-dom';
 import permitTreeLogo from '../../assets/denr-logo.png';
-import axios from 'axios';
+import { useNotification } from '../../pages/user/contexts/UserNotificationContext';
 import { isAuthenticated } from '../../utils/auth';
 import { removeToken } from '../../utils/tokenManager';
-import { useNotification } from '../../pages/user/contexts/UserNotificationContext';
 
 const Sidebar = React.memo(({ isOpen }) => {
     const navigate = useNavigate();
@@ -13,14 +13,7 @@ const Sidebar = React.memo(({ isOpen }) => {
 
     const handleLogout = useCallback(async () => {
         try {
-            const apiUrl = window.location.hostname === 'localhost'
-                ? 'http://localhost:3000/api/logout'
-                : window.location.hostname === '192.168.1.12'
-                    ? 'http://192.168.1.12:3000/api/logout'
-                    : window.location.hostname === '192.168.1.15'
-                        ? 'http://192.168.1.15:3000/api/logout'
-                        : 'http://192.168.137.1:3000/api/logout';
-            await axios.get(apiUrl);
+            await axios.get('http://localhost:3000/api/logout');
             removeToken();
             navigate('/auth');
             console.log('Logout successful!');
@@ -94,7 +87,7 @@ const Sidebar = React.memo(({ isOpen }) => {
     return (
         <div
             className={`h-full bg-green-800 text-white flex flex-col justify-between fixed top-0 left-0 w-56 md:w-64 z-10 transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
-            style={{willChange: 'transform'}}
+            style={{ willChange: 'transform' }}
         >
             {sidebarContent}
         </div>
