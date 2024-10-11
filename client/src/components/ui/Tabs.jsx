@@ -1,9 +1,8 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import clsx from 'clsx';
 import './styles/Tabs.css';
 
-export const Tabs = ({ children, defaultValue, className }) => {
+const Tabs = ({ children, defaultValue, className }) => {
     const [selectedTab, setSelectedTab] = useState(defaultValue);
 
     return (
@@ -19,7 +18,7 @@ export const Tabs = ({ children, defaultValue, className }) => {
     );
 };
 
-export const TabsList = ({ children, selectedTab, setSelectedTab }) => {
+const TabsList = ({ children, selectedTab, setSelectedTab }) => {
     return (
         <div className="tabs-list-container bg-gray-200 p-1 rounded-lg flex justify-between mb-4">
             {React.Children.map(children, (child) =>
@@ -29,7 +28,7 @@ export const TabsList = ({ children, selectedTab, setSelectedTab }) => {
     );
 };
 
-export const TabsTrigger = ({ children, value, selectedTab, setSelectedTab }) => {
+const TabsTrigger = ({ children, value, selectedTab, setSelectedTab }) => {
     const isActive = selectedTab === value;
     return (
         <button
@@ -44,12 +43,8 @@ export const TabsTrigger = ({ children, value, selectedTab, setSelectedTab }) =>
     );
 };
 
-export const TabsContent = ({ children, value, selectedTab }) => {
+const TabsContent = ({ children, value, selectedTab }) => {
     return selectedTab === value ? <div className="tabs-content">{children}</div> : null;
 };
 
-// const TabsContent = ({ children, value, activeTab }) => {
-//     return activeTab === value ? <div>{children}</div> : null;
-// };
-
-// export { Tabs, TabsList, TabsTrigger, TabsContent };
+export { Tabs, TabsList, TabsTrigger, TabsContent };

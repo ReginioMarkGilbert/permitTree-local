@@ -1,52 +1,41 @@
-import React from 'react';
-import { FaHome, FaFileAlt, FaBell, FaUser, FaSignInAlt, FaClipboardList } from 'react-icons/fa';
-import { NavLink } from 'react-router-dom';
-import permitTreeLogo from '../../assets/denr-logo.png';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { isAuthenticated, removeToken } from '../../utils/auth';
+import React, { useCallback, useMemo } from 'react';
+import { FaBell, FaClipboardList, FaFileAlt, FaHome, FaSignInAlt, FaUser } from 'react-icons/fa';
+import { NavLink, useNavigate } from 'react-router-dom';
+import permitTreeLogo from '../../assets/denr-logo.png';
+import { useNotification } from '../../pages/user/contexts/UserNotificationContext';
+import { isAuthenticated } from '../../utils/auth';
+import { removeToken } from '../../utils/tokenManager';
 
-const Sidebar = ({ isOpen }) => {
+const Sidebar = React.memo(({ isOpen }) => {
     const navigate = useNavigate();
+    const { unreadCount } = useNotification();
 
-    const handleLogout = async () => {
+    const handleLogout = useCallback(async () => {
         try {
-            const apiUrl = window.location.hostname === 'localhost'
-                ? 'http://localhost:3000/api/logout'
-                : window.location.hostname === '192.168.1.12'
-                    ? 'http://192.168.1.12:3000/api/logout' // for other laptop
-                    : window.location.hostname === '192.168.1.15'
-                        ? 'http://192.168.1.15:3000/api/logout' // for new url
-                        : 'http://192.168.137.1:3000/api/logout'; // for mobile
-            await axios.get(apiUrl);
+            await axios.get('http://localhost:3000/api/logout');
             removeToken();
             navigate('/auth');
             console.log('Logout successful!');
         } catch (error) {
             console.error('Logout failed:', error);
         }
-    };
+    }, [navigate]);
 
     React.useEffect(() => {
         const authStatus = isAuthenticated();
-        // console.log('Authentication status:', authStatus);
         if (!authStatus) {
             navigate('/auth');
         }
     }, [navigate]);
 
-    if (!isAuthenticated()) {
-        console.log('Rendering null due to failed authentication');
-        return null;
-    }
-
-    return (
-        <div className={`h-full bg-green-800 text-white flex flex-col justify-between fixed top-0 left-0 w-56 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:w-64 z-10`}>
+    const sidebarContent = useMemo(() => (
+        <>
             <div className="mt-6 ml-4">
                 <div className="mt-16">
-                    <div className="flex items-center justify-center mt-10 mr-5">
+                    <div className="flex items-center justify-start mt-10 mr-5 pl-2">
                         <img src={permitTreeLogo} alt="PermitTree Logo" className="h-12" />
-                        <span className="ml-3 text-xl font-semibold">PermitTree</span>
+                        <span className="pl-2 text-xl font-semibold">PermitTree</span>
                     </div>
                     <div className="line" style={{ borderBottom: '1px solid #ffffff', marginTop: '20px', width: '190px' }}></div>
                     <nav className="mt-7">
@@ -62,8 +51,15 @@ const Sidebar = ({ isOpen }) => {
                             <span className="mr-3"><FaClipboardList /></span>
                             <span>Application Status</span>
                         </NavLink>
-                        <NavLink to="/notifications" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
-                            <span className="mr-3"><FaBell /></span>
+                        <NavLink to="/notifications" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2 relative">
+                            <div className="relative mr-3">
+                                {unreadCount > 0 && (
+                                    <span className="absolute -top-2 -left-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
+                                        {unreadCount}
+                                    </span>
+                                )}
+                                <FaBell className="text-xl" />
+                            </div>
                             <span>Notifications</span>
                         </NavLink>
                     </nav>
@@ -71,7 +67,7 @@ const Sidebar = ({ isOpen }) => {
             </div>
             <div className="line ml-4" style={{ borderBottom: '1px solid #ffffff', marginTop: '22.5em', width: '190px' }}></div>
             <div className="mb-10 ml-4">
-                <h2 className="px-4 text-xs text-white uppercase">Account Pages</h2>
+                <h2 className="px-4 text-sm text-white uppercase">Account Pages</h2>
                 <NavLink to="/profile" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
                     <span className="mr-3"><FaUser /></span>
                     <span>Profile</span>
@@ -81,8 +77,21 @@ const Sidebar = ({ isOpen }) => {
                     <span>Logout</span>
                 </NavLink>
             </div>
+        </>
+    ), [unreadCount, handleLogout]);
+
+    if (!isAuthenticated()) {
+        return null;
+    }
+
+    return (
+        <div
+            className={`h-full bg-green-800 text-white flex flex-col justify-between fixed top-0 left-0 w-56 md:w-64 z-10 transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+            style={{ willChange: 'transform' }}
+        >
+            {sidebarContent}
         </div>
     );
-};
+});
 
 export default Sidebar;

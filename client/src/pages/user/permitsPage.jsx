@@ -2,9 +2,11 @@ import { React, useState } from 'react';
 // import Navbar from '../../components/layout/Navbar';
 // import UserSidebar from '../../components/layout/UserSidebar';
 import { useNavigate } from 'react-router-dom';
-import '../../styles/PermitsPage.css';
+import './styles/PermitsPage.css';
 
 const PermitsPage = () => {
+
+
     const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
 
@@ -15,7 +17,7 @@ const PermitsPage = () => {
     const permits = [
         { title: 'Chainsaw registration', description: 'Application for Chainsaw registration', formType: 'chainsaw' },
         { title: 'Certificate of Verification', description: 'Application for Certificate of Verification', formType: 'cov' },
-        { title: 'Private Tree Plantation Registration', description: 'Application for Private Tree Plantation Registration', formType: 'ptpr' },
+        { title: 'Private Land Tree Plantation Registration', description: 'Application for Private Tree Plantation Registration', formType: 'ptpr' },
         { title: 'Public Land Timber Permit', description: 'Application for Public Land Timber Permit', formType: 'tc_public' },
         { title: 'Special/Private Land Timber Permit', description: 'Application for Special Private Land Timber Permit', formType: 'tc_private' },
         { title: 'National Government Agency Tree Cutting Permit', description: 'Application for Public Tree cutting permit', formType: 'tc_nga' },
