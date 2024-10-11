@@ -186,7 +186,7 @@ const ChiefRPSApplicationViewModal = ({ isOpen, onClose, application, onUpdateSt
             if (response.data.success) {
                 toast.success(`Application status updated to ${newStatus}`);
                 onUpdateStatus({ ...application, status: newStatus });
-                onClose(); // Ensure the modal is closed after updating
+                onClose();
             } else {
                 toast.error('Failed to update application status');
             }

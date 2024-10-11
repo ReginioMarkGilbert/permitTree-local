@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { isAuthenticated } from '../../../utils/auth'; // Import the authentication check function
+import { isAuthenticated } from '../../../utils/auth';
 
 const ChiefRPSNotificationContext = createContext();
 

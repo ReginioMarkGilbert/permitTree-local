@@ -7,7 +7,7 @@ const { UserNotification } = require('../../User/modules/userNotificationModule'
 const { Admin } = require('./adminAuthModule');
 const { Application } = require('../../User/modules/PermitApplicationsModules/chainsawApplicationModule');
 const { User } = require('../../User/modules/userAuthModule');
-const jwt = require('jsonwebtoken');  // Make sure to import jwt
+const jwt = require('jsonwebtoken');
 
 // Helper function to format date
 const formatDate = (dateString) => {

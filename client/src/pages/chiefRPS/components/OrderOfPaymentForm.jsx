@@ -46,7 +46,7 @@ const OrderOfPaymentForm = ({ onClose }) => {
             const token = localStorage.getItem('token');
             const response = await axios.get('http://localhost:3000/api/admin/all-applications', {
                 params: { status: 'Accepted' },
-                headers: { Authorization: `Bearer ${token}` } // Ensure 'Bearer ' prefix
+                headers: { Authorization: `Bearer ${token}` }
             });
             setAcceptedApplications(response.data);
             setLoading(false);
