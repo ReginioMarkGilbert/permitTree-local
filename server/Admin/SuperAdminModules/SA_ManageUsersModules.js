@@ -24,16 +24,18 @@ const SA_ManageUser = mongoose.model('SA_ManageUser', SA_ManageUserSchema);
 // Routes
 router.get('/users', authenticateSuperAdmin, async (req, res) => {
   try {
-
     const regularUsers = await User.find().select('-password');
-    const chiefRPSUsers = await Admin.find({ role: 'ChiefRPS' }).select('-password');
+    const adminUsers = await Admin.find().select('-password'); // This now includes both ChiefRPS and superadmin
 
     const allUsers = [
       ...regularUsers.map(user => ({
         ...user.toObject(),
-        userType: user.role === 'user' ? 'Client' : user.role
+        userType: 'Client'
       })),
-      ...chiefRPSUsers.map(user => ({ ...user.toObject(), userType: 'Personnel' }))
+      ...adminUsers.map(user => ({
+        ...user.toObject(),
+        userType: 'Personnel'
+      }))
     ];
 
     res.json(allUsers);
@@ -65,7 +67,6 @@ router.post('/users', authenticateSuperAdmin, async (req, res) => {
 
     let newUser;
     if (userType === 'Personnel' && (role === 'ChiefRPS' || role === 'superadmin')) {
-      // Generate a unique adminId for Admin users
       const lastAdmin = await Admin.findOne().sort({ adminId: -1 });
       const newAdminId = lastAdmin ? (lastAdmin.adminId || 0) + 1 : 1;
 
@@ -79,7 +80,6 @@ router.post('/users', authenticateSuperAdmin, async (req, res) => {
         role: role,
       });
     } else {
-      // Generate a unique userId for regular users
       const lastUser = await User.findOne().sort({ userId: -1 });
       const newUserId = lastUser ? (lastUser.userId || 0) + 1 : 1;
 
