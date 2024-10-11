@@ -43,7 +43,14 @@ const OrderOfPayment = mongoose.model('OrderOfPayment', OrderOfPaymentSchema);
 // Routes
 router.get('/order-of-payments', authenticateToken, async (req, res) => {
     try {
-        const orderOfPayments = await OrderOfPayment.find();
+        const { status } = req.query;
+        let query = {};
+
+        if (status) {
+            query.status = status;
+        }
+
+        const orderOfPayments = await OrderOfPayment.find(query);
         res.json(orderOfPayments);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching order of payments', error: error.message });
