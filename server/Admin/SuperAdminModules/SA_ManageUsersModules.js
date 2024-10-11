@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const { authenticateToken } = require('../../middleware/authMiddleware');
+const { authenticateSuperAdmin } = require('../../middleware/authMiddleware');
 const { User } = require('../../User/modules/userAuthModule');
 const { Admin } = require('../AdminModules/adminAuthModule');
 
@@ -57,8 +57,9 @@ const SA_ManageUserSchema = new mongoose.Schema({
 const SA_ManageUser = mongoose.model('SA_ManageUser', SA_ManageUserSchema);
 
 // Routes
-router.get('/users', authenticateToken, async (req, res) => {
+router.get('/users', authenticateSuperAdmin, async (req, res) => {
     try {
+
         const regularUsers = await User.find().select('-password');
         const chiefRPSUsers = await Admin.find({ role: 'ChiefRPS' }).select('-password');
 
@@ -76,7 +77,7 @@ router.get('/users', authenticateToken, async (req, res) => {
     }
 });
 
-router.get('/users/:id', authenticateToken, async (req, res) => {
+router.get('/users/:id', authenticateSuperAdmin, async (req, res) => {
     try {
         const user = await User.findById(req.params.id).select('-password');
         if (!user) {
@@ -88,7 +89,7 @@ router.get('/users/:id', authenticateToken, async (req, res) => {
     }
 });
 
-router.post('/users', authenticateToken, async (req, res) => {
+router.post('/users', authenticateSuperAdmin, async (req, res) => {
     try {
         const newUser = new User(req.body);
         await newUser.save();
@@ -98,7 +99,7 @@ router.post('/users', authenticateToken, async (req, res) => {
     }
 });
 
-router.put('/users/:id', authenticateToken, async (req, res) => {
+router.put('/users/:id', authenticateSuperAdmin, async (req, res) => {
     try {
         const { id } = req.params;
         const { userType, ...updateData } = req.body;
@@ -119,7 +120,7 @@ router.put('/users/:id', authenticateToken, async (req, res) => {
     }
 });
 
-router.delete('/users/:id', authenticateToken, async (req, res) => {
+router.delete('/users/:id', authenticateSuperAdmin, async (req, res) => {
     try {
         const { id } = req.params;
         const user = await User.findById(id);

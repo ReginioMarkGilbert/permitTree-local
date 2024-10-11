@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken');
 
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
-    // console.log('Auth Header:', authHeader); // Log the full auth header
     const token = authHeader && authHeader.split(' ')[1];
 
     if (token == null) return res.status(401).json({ message: "No token provided" });
@@ -17,4 +16,16 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
-module.exports = { authenticateToken };
+const authenticateSuperAdmin = (req, res, next) => {
+    authenticateToken(req, res, () => {
+        if (req.user && req.user.role === 'superadmin') {
+            console.log('SuperAdmin authenticated');
+            next();
+        } else {
+            console.log('Access denied. SuperAdmin privileges required.');
+            res.status(403).json({ message: "Access denied. SuperAdmin privileges required." });
+        }
+    });
+};
+
+module.exports = { authenticateToken, authenticateSuperAdmin };
