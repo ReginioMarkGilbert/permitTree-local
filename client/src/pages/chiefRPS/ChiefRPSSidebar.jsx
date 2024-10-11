@@ -22,6 +22,7 @@ const AdminSidebar = React.memo(({ isOpen }) => {
                         : 'http://192.168.137.1:3000/api/logout';
             await axios.get(apiUrl);
             removeToken();
+            localStorage.removeItem('token');
             navigate('/auth');
         } catch (error) {
             console.error('Logout failed:', error);
