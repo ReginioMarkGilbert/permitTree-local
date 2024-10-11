@@ -1,249 +1,117 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { toast } from 'react-toastify';
-import { Eye, Edit, Printer, Archive, ChevronUp, ChevronDown, Leaf, Undo, Trash2, RefreshCw, FileText, Send, CreditCard } from 'lucide-react';
+import { FileText } from 'lucide-react';
 import OrderOfPaymentForm from './components/OrderOfPaymentForm';
 import AffixEsignOOPFormModal from './components/AffixEsignOOPFormModal';
 import ChiefProofOfPaymentReview from './components/ChiefProofOfPaymentReview';
 import ChiefOOPFormViewModal from './components/ChiefOOPFormViewModal';
+import OrderOfPaymentTable from './components/OrderOfPaymentTable';
+import { useOrderOfPayments } from './hooks/useOrderOfPayments';
+import { useOrderOfPaymentActions } from './hooks/useOrderOfPaymentActions';
 
 const ChiefRPSorderOfPaymentPage = () => {
     const navigate = useNavigate();
     const { action } = useParams();
     const [activeTab, setActiveTab] = useState('Pending Signature');
-    const [orderOfPayments, setOrderOfPayments] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedOOP, setSelectedOOP] = useState(null);
-    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-    const [selectedOOPForReview, setSelectedOOPForReview] = useState(null);
 
-    useEffect(() => {
-        if (action !== 'create-oop') {
-            fetchOrderOfPayments();
-        }
-    }, [activeTab, action]);
-
-    const fetchOrderOfPayments = async () => {
-        try {
-            setLoading(true);
-            const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:3000/api/admin/order-of-payments', {
-                headers: { Authorization: token },
-                params: { status: activeTab }
-            });
-            setOrderOfPayments(response.data);
-            setLoading(false);
-        } catch (error) {
-            console.error('Error fetching order of payments:', error);
-            setError('Failed to fetch order of payments');
-            setLoading(false);
-            toast.error('Failed to fetch order of payments');
-        }
-    };
+    const { orderOfPayments, loading, error, fetchOrderOfPayments } = useOrderOfPayments(activeTab);
+    const {
+        selectedOOP,
+        isViewModalOpen,
+        selectedOOPForReview,
+        handleViewOrderOfPayment,
+        handleReviewProofOfPayment,
+        setIsViewModalOpen,
+        setSelectedOOPForReview
+    } = useOrderOfPaymentActions();
 
     const handleCreateOrderOfPayment = () => {
         navigate('/chief-rps/order-of-payment/create-oop');
     };
 
-    const handleViewOrderOfPayment = (orderOfPayment) => {
-        setSelectedOOP(orderOfPayment);
-        setIsViewModalOpen(true);
-    };
-
-    const handleReviewProofOfPayment = (oop) => {
-        setSelectedOOPForReview(oop);
-    };
-
-    const renderTable = () => {
-        if (loading) {
-            return <p className="text-center text-gray-500">Loading order of payments...</p>;
-        }
-
-        if (error) {
-            return <p className="text-center text-red-500">{error}</p>;
-        }
-
-        if (orderOfPayments.length === 0) {
-            return <p className="text-center text-gray-500">No order of payments found.</p>;
-        }
-
-        const filteredOrderOfPayments = orderOfPayments.filter(oop =>
-            oop.applicationId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            oop.applicantName.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-
-        return (
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Application ID</TableHead>
-                        <TableHead>Applicant Name</TableHead>
-                        <TableHead>Date Created</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Actions</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {filteredOrderOfPayments.map((oop) => (
-                        <TableRow key={oop._id}>
-                            <TableCell>{oop.applicationId}</TableCell>
-                            <TableCell>{oop.applicantName}</TableCell>
-                            <TableCell>{new Date(oop.dateCreated).toLocaleDateString()}</TableCell>
-                            <TableCell>
-                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(oop.status)}`}>
-                                    {oop.status}
-                                </span>
-                            </TableCell>
-                            <TableCell>
-                                <div className="flex flex-wrap gap-1">
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        className="h-6 w-6 text-green-600 hover:text-green-700 border-green-200 hover:bg-green-50"
-                                        onClick={() => handleViewOrderOfPayment(oop)}
-                                        title="View"
-                                    >
-                                        <Eye className="h-3 w-3" />
-                                    </Button>
-
-                                    {oop.status === 'Pending Signature' && (
-                                        <Button
-                                            variant="outline"
-                                            size="icon"
-                                            className="h-6 w-6 text-blue-600 hover:text-blue-700 border-blue-200 hover:bg-blue-50"
-                                            onClick={() => handleViewOrderOfPayment(oop)}
-                                            title="Affix Signature"
-                                        >
-                                            <Edit className="h-3 w-3" />
-                                        </Button>
-                                    )}
-
-                                    {oop.status === 'Payment Proof Submitted' && (
-                                        <Button
-                                            variant="outline"
-                                            size="icon"
-                                            className="h-6 w-6 text-purple-600 hover:text-purple-700 border-purple-200 hover:bg-purple-50"
-                                            onClick={() => handleReviewProofOfPayment(oop)}
-                                            title="Review Payment"
-                                        >
-                                            <FileText className="h-3 w-3" />
-                                        </Button>
-                                    )}
-
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        className="h-6 w-6 text-gray-600 hover:text-gray-700 border-gray-200 hover:bg-gray-50"
-                                        onClick={() => handlePrintOrderOfPayment(oop)}
-                                        title="Print"
-                                    >
-                                        <Printer className="h-3 w-3" />
-                                    </Button>
-                                </div>
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-        );
-    };
-
-    // Add this function to get status color
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'Pending Signature': return 'bg-yellow-100 text-yellow-800';
-            case 'Awaiting Payment': return 'bg-blue-100 text-blue-800';
-            case 'Payment Proof Submitted': return 'bg-purple-100 text-purple-800';
-            case 'Completed': return 'bg-green-100 text-green-800';
-            default: return 'bg-gray-100 text-gray-800';
-        }
-    };
-
-    // Add these functions to handle new actions
-    const handlePrintOrderOfPayment = (oop) => {
-        // Implement print functionality
-        console.log('Print Order of Payment:', oop);
-    };
+    if (action === 'create-oop') {
+        return <OrderOfPaymentForm onClose={() => navigate('/chief-rps/order-of-payment')} />;
+    }
 
     return (
         <div className="min-h-screen bg-green-50">
-
             <div className="container mx-auto px-4 sm:px-6 py-8 pt-24">
-                {action === 'create-oop' ? (
-                    <OrderOfPaymentForm onClose={() => navigate('/chief-rps/order-of-payment')} />
-                ) : (
-                    <>
-                        <div className="flex justify-between items-center mb-6">
-                            <h1 className="text-3xl font-bold text-green-800">Order of Payments</h1>
-                            <Button onClick={handleCreateOrderOfPayment}>
-                                <FileText className="mr-2 h-4 w-4" />
-                                Create Order of Payment
-                            </Button>
-                        </div>
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="text-3xl font-bold text-green-800">Order of Payments</h1>
+                    <Button onClick={handleCreateOrderOfPayment}>
+                        <FileText className="mr-2 h-4 w-4" />
+                        Create Order of Payment
+                    </Button>
+                </div>
 
-                        <div className="mb-6 overflow-x-auto">
-                            <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-                                {['Pending Signature', 'Awaiting Payment', 'Payment Proof Submitted', 'Completed'].map((tab) => (
-                                    <button
-                                        key={tab}
-                                        onClick={() => setActiveTab(tab)}
-                                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'
-                                            }`}
-                                    >
-                                        {tab}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+                <div className="mb-6 overflow-x-auto">
+                    <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
+                        {['Pending Signature', 'Awaiting Payment', 'Payment Proof Submitted', 'Completed'].map((tab) => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
+                            >
+                                {tab}
+                            </button>
+                        ))}
+                    </div>
+                </div>
 
-                        <div className="mb-6">
-                            <input
-                                type="text"
-                                placeholder="Search order of payments..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="border rounded-md p-2 w-full"
-                            />
-                        </div>
+                <div className="mb-6">
+                    <input
+                        type="text"
+                        placeholder="Search order of payments..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="border rounded-md p-2 w-full"
+                    />
+                </div>
 
-                        <Card>
-                            <CardContent>
-                                {renderTable()}
-                            </CardContent>
-                        </Card>
-                        {selectedOOP && (
-                            selectedOOP.status === 'Pending Signature' ? (
-                                <AffixEsignOOPFormModal
-                                    isOpen={isViewModalOpen}
-                                    onClose={() => setIsViewModalOpen(false)}
-                                    orderOfPayment={selectedOOP}
-                                    refreshOrderOfPayments={fetchOrderOfPayments}
-                                />
-                            ) : (
-                                <ChiefOOPFormViewModal
-                                    isOpen={isViewModalOpen}
-                                    onClose={() => setIsViewModalOpen(false)}
-                                    orderOfPayment={selectedOOP}
-                                />
-                            )
-                        )}
-                        {selectedOOPForReview && (
-                            <ChiefProofOfPaymentReview
-                                isOpen={!!selectedOOPForReview}
-                                onClose={() => {
-                                    setSelectedOOPForReview(null);
-                                    fetchOrderOfPayments();
-                                }}
-                                oopId={selectedOOPForReview._id}
+                <Card>
+                    <CardContent>
+                        {loading && <p className="text-center text-gray-500">Loading order of payments...</p>}
+                        {error && <p className="text-center text-red-500">{error}</p>}
+                        {!loading && !error && (
+                            <OrderOfPaymentTable
+                                orderOfPayments={orderOfPayments}
+                                searchTerm={searchTerm}
+                                activeTab={activeTab}
+                                onViewOrderOfPayment={handleViewOrderOfPayment}
+                                onReviewProofOfPayment={handleReviewProofOfPayment}
                             />
                         )}
-                    </>
+                    </CardContent>
+                </Card>
+
+                {selectedOOP && (
+                    selectedOOP.status === 'Pending Signature' ? (
+                        <AffixEsignOOPFormModal
+                            isOpen={isViewModalOpen}
+                            onClose={() => setIsViewModalOpen(false)}
+                            orderOfPayment={selectedOOP}
+                            refreshOrderOfPayments={fetchOrderOfPayments}
+                        />
+                    ) : (
+                        <ChiefOOPFormViewModal
+                            isOpen={isViewModalOpen}
+                            onClose={() => setIsViewModalOpen(false)}
+                            orderOfPayment={selectedOOP}
+                        />
+                    )
+                )}
+                {selectedOOPForReview && (
+                    <ChiefProofOfPaymentReview
+                        isOpen={!!selectedOOPForReview}
+                        onClose={() => {
+                            setSelectedOOPForReview(null);
+                            fetchOrderOfPayments();
+                        }}
+                        oopId={selectedOOPForReview._id}
+                    />
                 )}
             </div>
         </div>
