@@ -9,7 +9,6 @@ require('dotenv').config();
 require('./config/passport');
 const fileUpload = require('express-fileupload');
 const path = require('path');
-
 const app = express();
 
 // Connect to MongoDB Database

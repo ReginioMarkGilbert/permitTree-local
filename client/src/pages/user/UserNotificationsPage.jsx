@@ -6,6 +6,7 @@ import '../../components/ui/styles/customScrollBar.css';
 import { useNotification } from './contexts/UserNotificationContext';
 import { isAuthenticated } from '../../utils/auth';
 import './styles/UserNotification.css';
+import useDebounce from '../../hooks/useDebounce';
 
 function UserNotificationsPage() {
     const { fetchUnreadCount, unreadCount } = useNotification();
@@ -14,6 +15,8 @@ function UserNotificationsPage() {
     const [selectedNotification, setSelectedNotification] = useState(null);
     const [deletedNotification, setDeletedNotification] = useState(null);
     const [showUndo, setShowUndo] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
     const fetchNotifications = useCallback(async () => {
         if (!isAuthenticated()) return;
@@ -21,7 +24,8 @@ function UserNotificationsPage() {
         try {
             const token = localStorage.getItem('token');
             const response = await axios.get('http://localhost:3000/api/user/notifications', {
-                headers: { Authorization: token }
+                headers: { Authorization: token },
+                params: { search: debouncedSearchTerm }
             });
             setNotifications(response.data);
         } catch (error) {
@@ -30,7 +34,7 @@ function UserNotificationsPage() {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [debouncedSearchTerm]);
 
     useEffect(() => {
         let intervalId;
@@ -251,6 +255,13 @@ function UserNotificationsPage() {
                         </button>
                     </div>
                 )}
+
+                <input
+                    type="text"
+                    placeholder="Search notifications..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
             </div>
         </div>
     );

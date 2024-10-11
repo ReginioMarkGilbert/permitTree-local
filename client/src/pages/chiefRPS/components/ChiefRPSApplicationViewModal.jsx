@@ -4,7 +4,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import '../../../components/ui/styles/customScrollBar.css';
 
-const ChiefRPSApplicationViewModal = ({ isOpen, onClose, application }) => {
+const ChiefRPSApplicationViewModal = ({ isOpen, onClose, application, onUpdateStatus }) => {
     const [previewImage, setPreviewImage] = useState(null);
     const [zoomLevel, setZoomLevel] = useState(1);
     const [center, setCenter] = useState({ x: 50, y: 50 }); // Center of the image
@@ -175,6 +175,27 @@ const ChiefRPSApplicationViewModal = ({ isOpen, onClose, application }) => {
         }
     };
 
+    const handleStatusChange = async (newStatus) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.put(`http://localhost:3000/api/admin/update-status/${application._id}`,
+                { status: newStatus },
+                { headers: { Authorization: token } }
+            );
+
+            if (response.data.success) {
+                toast.success(`Application status updated to ${newStatus}`);
+                onUpdateStatus({ ...application, status: newStatus });
+                onClose(); // Ensure the modal is closed after updating
+            } else {
+                toast.error('Failed to update application status');
+            }
+        } catch (error) {
+            console.error('Error updating application status:', error);
+            toast.error('Error updating application status');
+        }
+    };
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 pt-20 z-50 overflow-y-auto">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh]">
@@ -223,16 +244,38 @@ const ChiefRPSApplicationViewModal = ({ isOpen, onClose, application }) => {
                     )}
                 </div>
                 <div className="p-5 bg-gray-50 flex justify-end rounded-b-2xl space-x-4">
+                    {application.status === 'In Progress' && (
+                        <>
+                            <button
+                                onClick={() => handleStatusChange('Accepted')}
+                                className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition duration-300 shadow-md hover:shadow-lg"
+                            >
+                                Accept
+                            </button>
+                            <button
+                                onClick={() => handleStatusChange('Returned')}
+                                className="px-6 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition duration-300 shadow-md hover:shadow-lg"
+                            >
+                                Return
+                            </button>
+                            <button
+                                onClick={() => handleStatusChange('Rejected')}
+                                className="px-6 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300 shadow-md hover:shadow-lg"
+                            >
+                                Reject
+                            </button>
+                        </>
+                    )}
                     <button
                         onClick={handlePrint}
-                        className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition duration-300 shadow-md hover:shadow-lg flex items-center"
+                        className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-300 shadow-md hover:shadow-lg flex items-center"
                     >
                         <Printer className="mr-2" size={20} />
                         Print
                     </button>
                     <button
                         onClick={onClose}
-                        className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-300 shadow-md hover:shadow-lg"
+                        className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition duration-300 shadow-md hover:shadow-lg"
                     >
                         Close
                     </button>

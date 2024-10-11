@@ -7,6 +7,7 @@ import ChiefRPSApplicationViewModal from './components/ChiefRPSApplicationViewMo
 import OrderOfPaymentModal from './components/OrderOfPaymentModal';
 import ConfirmationModal from '../../components/ui/ConfirmationModal';
 import { Button } from "@/components/ui/button";
+import useDebounce from '../../hooks/useDebounce';
 
 // Separate component for table row
 const ApplicationRow = React.memo(({ app, onView, onPrint, onReview, onOrderOfPayment, onUndoStatus, getStatusColor }) => (
@@ -82,6 +83,7 @@ const ChiefRPSDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const debouncedSearchTerm = useDebounce(searchTerm, 300); // 300ms delay
     const [selectedApplication, setSelectedApplication] = useState(null);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -99,14 +101,32 @@ const ChiefRPSDashboard = () => {
     const [isOrderOfPaymentModalOpen, setIsOrderOfPaymentModalOpen] = useState(false);
     const [selectedOrderOfPaymentApp, setSelectedOrderOfPaymentApp] = useState(null);
 
+    const handleStatusUpdate = useCallback((updatedApplication) => {
+        setApplications(prevApplications =>
+            prevApplications.map(app =>
+                app._id === updatedApplication._id ? updatedApplication : app
+            ).filter(app => app.status === activeTab || 
+                (activeTab === 'For Review' && ['Submitted', 'For Review'].includes(app.status)))
+        );
+        // Don't change the active tab, just refresh the current view
+        fetchApplications();
+    }, [activeTab]);
+
     const fetchApplications = useCallback(async () => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
+            let statusFilter = activeTab;
+            if (activeTab === 'For Review') {
+                statusFilter = ['Submitted', 'For Review'];
+            }
             const response = await axios.get('http://localhost:3000/api/admin/all-applications', {
+                params: {
+                    search: debouncedSearchTerm,
+                    status: statusFilter
+                },
                 headers: { Authorization: token }
             });
-
 
             const updatedApplications = response.data.map(app => ({
                 ...app,
@@ -120,11 +140,11 @@ const ChiefRPSDashboard = () => {
             setLoading(false);
             toast.error('Failed to fetch applications');
         }
-    }, []);
+    }, [debouncedSearchTerm, activeTab]);
 
     useEffect(() => {
         fetchApplications();
-    }, [activeTab, fetchApplications]);
+    }, [fetchApplications, activeTab]);
 
     const handleView = useCallback(async (id, status) => {
         try {
@@ -167,20 +187,22 @@ const ChiefRPSDashboard = () => {
     const handleReview = useCallback(async (applicationId) => {
         try {
             const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No token found');
+            }
             const response = await axios.post(`http://localhost:3000/api/admin/review-application/${applicationId}`, {}, {
-                headers: { Authorization: token }
+                headers: { Authorization: `Bearer ${token}` }
             });
 
             if (response.data.success) {
                 toast.success('Application marked as In Progress');
                 fetchApplications();
-                setReviewConfirmation({ isOpen: false, applicationId: null });
             } else {
-                toast.error('Failed to update application status');
+                toast.error(response.data.message || 'Failed to update application status');
             }
         } catch (error) {
             console.error('Error updating application status:', error);
-            toast.error('Failed to update application status');
+            toast.error(error.response?.data?.message || 'Failed to update application status');
         }
     }, [fetchApplications]);
 
@@ -200,21 +222,32 @@ const ChiefRPSDashboard = () => {
     }, []);
 
     const handleConfirmAction = useCallback(async () => {
-        const { type, application } = confirmationModal;
-        setConfirmationModal({ isOpen: false, type: null, application: null, title: '', message: '' });
+        const { type, applicationId } = confirmationModal;
+        setConfirmationModal({ isOpen: false, type: null, applicationId: null, title: '', message: '' });
 
         try {
             const token = localStorage.getItem('token');
-            if (type === 'delete') {
-                await axios.delete(`http://localhost:3000/api/csaw_deleteApplication/${application._id}`, {
+            if (type === 'undo') {
+                const response = await axios.put(`http://localhost:3000/api/admin/undo-status/${applicationId}`,
+                    { newStatus: 'In Progress' },
+                    { headers: { Authorization: token } }
+                );
+                if (response.data.success) {
+                    toast.success('Application status undone successfully');
+                    fetchApplications(); // Refresh the applications list
+                } else {
+                    toast.error('Failed to undo application status');
+                }
+            } else if (type === 'delete') {
+                await axios.delete(`http://localhost:3000/api/csaw_deleteApplication/${applicationId}`, {
                     headers: { Authorization: token }
                 });
                 toast.success('Application deleted successfully');
                 fetchApplications();
             }
         } catch (error) {
-            console.error(`Error deleting application:`, error);
-            toast.error('Failed to delete application');
+            console.error(`Error ${type === 'undo' ? 'undoing status' : 'deleting application'}:`, error);
+            toast.error(`Failed to ${type === 'undo' ? 'undo status' : 'delete application'}`);
         }
     }, [confirmationModal, fetchApplications]);
 
@@ -244,12 +277,11 @@ const ChiefRPSDashboard = () => {
     }, []);
 
     const filteredApplications = useMemo(() => {
-        const filtered = applications.filter(app => app.status === activeTab);
-        return filtered.filter(app =>
+        return applications.filter(app =>
             app.customId.toLowerCase().includes(searchTerm.toLowerCase()) ||
             app.ownerName.toLowerCase().includes(searchTerm.toLowerCase())
         );
-    }, [applications, activeTab, searchTerm]);
+    }, [applications, searchTerm]);
 
     const renderTable = useMemo(() => {
         if (loading) {
@@ -312,7 +344,9 @@ const ChiefRPSDashboard = () => {
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
+                                className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${
+                                    activeTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'
+                                }`}
                             >
                                 {tab}
                             </button>
@@ -337,13 +371,14 @@ const ChiefRPSDashboard = () => {
                 isOpen={isViewModalOpen}
                 onClose={() => setIsViewModalOpen(false)}
                 application={selectedApplication}
+                onUpdateStatus={handleStatusUpdate}
             />
 
             <ChiefRPSApplicationReviewModal
                 isOpen={isReviewModalOpen}
                 onClose={() => setIsReviewModalOpen(false)}
                 application={selectedApplication}
-                onUpdateStatus={onUpdateStatus}
+                onUpdateStatus={handleStatusUpdate}
             />
 
             <ConfirmationModal

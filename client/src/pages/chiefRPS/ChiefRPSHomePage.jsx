@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "../../components/ui/Button";
@@ -7,6 +7,7 @@ import { Bell, ClipboardList, Users, Settings, TrendingUp, CheckCircle, XCircle,
 import { FaChartLine } from 'react-icons/fa';
 import '../../components/ui/styles/customScrollBar.css';
 import { useChiefRPSNotification } from './contexts/ChiefRPSNotificationContext';
+import useDebounce from '../../hooks/useDebounce';
 
 const AdminHomePage = () => {
     const [recentApplications, setRecentApplications] = useState([]);
@@ -14,6 +15,8 @@ const AdminHomePage = () => {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const { unreadCount } = useChiefRPSNotification();
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
+    const debouncedRefreshTrigger = useDebounce(refreshTrigger, 300);
 
     // State for dashboard stats
     const [dashboardStats, setDashboardStats] = useState({
@@ -44,51 +47,54 @@ const AdminHomePage = () => {
         },
     ];
 
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    throw new Error('No authentication token found.');
-                }
-
-                const [totalUsersResponse, applicationsForReviewResponse, applicationsReturnedResponse] = await Promise.all([
-                    axios.get('http://localhost:3000/api/admin/reports/total-users', {
-                        headers: { Authorization: token }
-                    }),
-                    axios.get('http://localhost:3000/api/admin/reports/applications-for-review', {
-                        headers: { Authorization: token }
-                    }),
-                    axios.get('http://localhost:3000/api/admin/reports/applications-returned', {
-                        headers: { Authorization: token }
-                    })
-                ]);
-
-                setDashboardStats(prevStats => ({
-                    ...prevStats,
-                    totalUsers: totalUsersResponse.data.totalUsers,
-                    applicationsForReview: applicationsForReviewResponse.data.applicationsForReview,
-                    applicationsReturned: applicationsReturnedResponse.data.applicationsReturned
-                }));
-
-                // Fetch all applications (for recent applications display)
-                const applicationsResponse = await axios.get('http://localhost:3000/api/admin/all-applications', {
-                    headers: { Authorization: token }
-                });
-
-                setRecentApplications(applicationsResponse.data);
-
-                setLoading(false);
-            } catch (err) {
-                console.error('Error fetching data:', err.response ? err.response.data : err.message);
-                setError('Failed to fetch data. Please try again later.');
-                setLoading(false);
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found.');
             }
-        };
 
-        fetchData();
+            const [totalUsersResponse, applicationsForReviewResponse, applicationsReturnedResponse] = await Promise.all([
+                axios.get('http://localhost:3000/api/admin/reports/total-users', {
+                    headers: { Authorization: token }
+                }),
+                axios.get('http://localhost:3000/api/admin/reports/applications-for-review', {
+                    headers: { Authorization: token }
+                }),
+                axios.get('http://localhost:3000/api/admin/reports/applications-returned', {
+                    headers: { Authorization: token }
+                })
+            ]);
+
+            setDashboardStats(prevStats => ({
+                ...prevStats,
+                totalUsers: totalUsersResponse.data.totalUsers,
+                applicationsForReview: applicationsForReviewResponse.data.applicationsForReview,
+                applicationsReturned: applicationsReturnedResponse.data.applicationsReturned
+            }));
+
+            // Fetch all applications (for recent applications display)
+            const applicationsResponse = await axios.get('http://localhost:3000/api/admin/all-applications', {
+                headers: { Authorization: token },
+                params: { excludeDrafts: true }
+            });
+
+            // Filter out draft applications on the client side as well
+            const nonDraftApplications = applicationsResponse.data.filter(app => app.status !== 'Draft');
+            setRecentApplications(nonDraftApplications);
+
+            setLoading(false);
+        } catch (err) {
+            console.error('Error fetching data:', err.response ? err.response.data : err.message);
+            setError('Failed to fetch data. Please try again later.');
+            setLoading(false);
+        }
     }, []);
+
+    useEffect(() => {
+        fetchData();
+    }, [debouncedRefreshTrigger, fetchData]);
 
     const handleViewAllApplications = () => {
         navigate('/chief-rps/dashboard');
@@ -96,6 +102,11 @@ const AdminHomePage = () => {
 
     const handleViewDetailedAnalytics = () => {
         navigate('/chief-rps/reports');
+    };
+
+    // Function to trigger a refresh
+    const refreshData = () => {
+        setRefreshTrigger(prev => prev + 1);
     };
 
     return (
@@ -144,18 +155,17 @@ const AdminHomePage = () => {
                                             <p className="text-sm text-gray-500">Date: {new Date(app.dateOfSubmission).toLocaleDateString()}</p>
                                         </div>
                                         <div className="flex-shrink-0 text-right">
-                                            <span className={`px-2 py-1 rounded-full text-xs whitespace-nowrap ${
-                                                app.status === "Approved" ? "bg-green-200 text-green-800" :
-                                                app.status === "Submitted" ? "bg-yellow-200 text-yellow-800" :
-                                                app.status === "In Progress" ? "bg-blue-200 text-blue-800" :
-                                                app.status === "Accepted" ? "bg-green-200 text-green-800" :
-                                                app.status === "Released" ? "bg-green-200 text-green-800" :
-                                                app.status === "Expired" ? "bg-red-200 text-red-800" :
-                                                app.status === "Rejected" ? "bg-red-200 text-red-800" :
-                                                app.status === "Returned" ? "bg-orange-200 text-orange-800" :
-                                                app.status === "Payment Proof Submitted" ? "bg-purple-200 text-purple-800" :
-                                                "bg-gray-200 text-gray-800"
-                                            }`}>
+                                            <span className={`px-2 py-1 rounded-full text-xs whitespace-nowrap ${app.status === "Approved" ? "bg-green-200 text-green-800" :
+                                                    app.status === "Submitted" ? "bg-yellow-200 text-yellow-800" :
+                                                        app.status === "In Progress" ? "bg-blue-200 text-blue-800" :
+                                                            app.status === "Accepted" ? "bg-green-200 text-green-800" :
+                                                                app.status === "Released" ? "bg-green-200 text-green-800" :
+                                                                    app.status === "Expired" ? "bg-red-200 text-red-800" :
+                                                                        app.status === "Rejected" ? "bg-red-200 text-red-800" :
+                                                                            app.status === "Returned" ? "bg-orange-200 text-orange-800" :
+                                                                                app.status === "Payment Proof Submitted" ? "bg-purple-200 text-purple-800" :
+                                                                                    "bg-gray-200 text-gray-800"
+                                                }`}>
                                                 {app.status === "Submitted" ? "For Review" : app.status}
                                             </span>
                                         </div>

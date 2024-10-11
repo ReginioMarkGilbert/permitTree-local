@@ -7,6 +7,7 @@ const { UserNotification } = require('../../User/modules/userNotificationModule'
 const { Admin } = require('./adminAuthModule');
 const { Application } = require('../../User/modules/PermitApplicationsModules/chainsawApplicationModule');
 const { User } = require('../../User/modules/userAuthModule');
+const jwt = require('jsonwebtoken');  // Make sure to import jwt
 
 // Helper function to format date
 const formatDate = (dateString) => {
@@ -24,8 +25,12 @@ const formatDate = (dateString) => {
 
 router.get('/all-applications', async (req, res) => {
     try {
-        const { sort, status, applicationType } = req.query;
-        let filter = { status: { $ne: 'Draft' } };
+        const { sort, status, applicationType, search, excludeDrafts } = req.query;
+        let filter = {};
+
+        if (excludeDrafts === 'true') {
+            filter.status = { $ne: 'Draft' };
+        }
 
         if (status) {
             if (Array.isArray(status)) {
@@ -37,6 +42,14 @@ router.get('/all-applications', async (req, res) => {
 
         if (applicationType) {
             filter.applicationType = applicationType;
+        }
+
+        if (search) {
+            filter.$or = [
+                { customId: { $regex: search, $options: 'i' } },
+                { ownerName: { $regex: search, $options: 'i' } },
+                { applicationType: { $regex: search, $options: 'i' } }
+            ];
         }
 
         let sortOption = {};
@@ -243,7 +256,26 @@ router.put('/return-application/:id', async (req, res) => {
 router.post('/review-application/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const adminId = req.user.id;
+
+        const authHeader = req.headers.authorization;
+        if (!authHeader) {
+            return res.status(401).json({ success: false, message: 'No authorization header provided' });
+        }
+
+        const token = authHeader.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ success: false, message: 'No token provided' });
+        }
+
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (error) {
+            console.error('JWT verification error:', error);
+            return res.status(401).json({ success: false, message: 'Invalid token' });
+        }
+
+        const adminId = decoded.id;
 
         const admin = await Admin.findById(adminId);
         if (!admin) {
@@ -256,7 +288,7 @@ router.post('/review-application/:id', async (req, res) => {
         }
 
         application.status = 'In Progress';
-        application.reviewedBy = `${admin.firstName} ${admin.lastName}`.trim(); // Use firstName and lastName
+        application.reviewedBy = `${admin.firstName} ${admin.lastName}`.trim();
         await application.save();
 
         // Create a notification for the user
@@ -272,6 +304,30 @@ router.post('/review-application/:id', async (req, res) => {
     } catch (error) {
         console.error('Error marking application for review:', error);
         res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    }
+});
+
+router.put('/undo-status/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { newStatus } = req.body;
+
+        if (!newStatus) {
+            return res.status(400).json({ message: 'New status is required.' });
+        }
+
+        const application = await Application.findById(id);
+        if (!application) {
+            return res.status(404).json({ message: 'Application not found' });
+        }
+
+        application.status = newStatus;
+        await application.save();
+
+        res.status(200).json({ success: true, message: 'Application status updated successfully' });
+    } catch (error) {
+        console.error('Error undoing application status:', error);
+        res.status(500).json({ success: false, message: 'Error undoing application status' });
     }
 });
 

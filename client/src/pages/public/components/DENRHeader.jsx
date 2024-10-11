@@ -16,7 +16,7 @@ const DENRHeader = () => {
                             <p className="text-xs">Kagawaran ng Kapaligiran at Likas na Yaman</p>
                             <p className="text-xs font-medium">PENRO - Marinduque</p>
                         </div>
-                        <img src={BagongPilipinasLogo} alt="Bagong Pilipinas Logo" className="h-16 w-auto ml-4" />
+                        <img src={BagongPilipinasLogo} alt="Bagong Pilipinas Logo" className="h-[8rem] w-auto ml-4 pb-0" />
                     </div>
                 </div>
             </div>
