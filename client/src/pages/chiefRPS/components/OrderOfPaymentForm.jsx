@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from "@/components/ui/button";
@@ -34,44 +34,33 @@ const OrderOfPaymentForm = ({ onClose }) => {
     });
     const [acceptedApplications, setAcceptedApplications] = useState([]);
     const [existingOOPs, setExistingOOPs] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     const rpsFileInputRef = useRef(null);
     const tsdFileInputRef = useRef(null);
 
-    useEffect(() => {
-        fetchAcceptedApplications();
-        fetchExistingOOPs();
-    }, []);
-
-    const fetchAcceptedApplications = async () => {
+    const fetchAcceptedApplications = useCallback(async () => {
         try {
+            setLoading(true);
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:3000/api/permits/getAllApplications?status=Accepted', {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
+            const response = await axios.get('http://localhost:3000/api/admin/all-applications', {
+                params: { status: 'Accepted' },
+                headers: { Authorization: `Bearer ${token}` } // Ensure 'Bearer ' prefix
             });
             setAcceptedApplications(response.data);
+            setLoading(false);
         } catch (error) {
             console.error('Error fetching accepted applications:', error);
+            setError('Failed to fetch accepted applications');
+            setLoading(false);
             toast.error('Failed to fetch accepted applications');
         }
-    };
+    }, []);
 
-    const fetchExistingOOPs = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:3000/api/admin/order-of-payments', {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            setExistingOOPs(response.data);
-        } catch (error) {
-            console.error('Error fetching existing OOPs:', error);
-            toast.error('Failed to fetch existing Order of Payments');
-        }
-    };
+    useEffect(() => {
+        fetchAcceptedApplications();
+    }, [fetchAcceptedApplications]);
 
     const handleApplicationSelect = (applicationId) => {
         const selectedApp = acceptedApplications.find(app => app._id === applicationId);

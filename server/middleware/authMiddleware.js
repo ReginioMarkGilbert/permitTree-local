@@ -4,7 +4,6 @@ const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     // console.log('Auth Header:', authHeader); // Log the full auth header
     const token = authHeader && authHeader.split(' ')[1];
-    // console.log('Extracted Token:', token); // Log the extracted token
 
     if (token == null) return res.status(401).json({ message: "No token provided" });
 

@@ -53,6 +53,7 @@ router.get('/order-of-payments', authenticateToken, async (req, res) => {
         const orderOfPayments = await OrderOfPayment.find(query);
         res.json(orderOfPayments);
     } catch (error) {
+        console.error('Error fetching order of payments:', error);
         res.status(500).json({ message: 'Error fetching order of payments', error: error.message });
     }
 });
