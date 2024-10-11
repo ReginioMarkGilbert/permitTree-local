@@ -7,7 +7,6 @@ import ChiefRPSApplicationViewModal from './components/ChiefRPSApplicationViewMo
 import OrderOfPaymentModal from './components/OrderOfPaymentModal';
 import ConfirmationModal from '../../components/ui/ConfirmationModal';
 import { Button } from "@/components/ui/button";
-import useDebounce from '../../hooks/useDebounce';
 
 // Separate component for table row
 const ApplicationRow = React.memo(({ app, onView, onPrint, onReview, onOrderOfPayment, onUndoStatus, getStatusColor }) => (
@@ -83,7 +82,6 @@ const ChiefRPSDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const debouncedSearchTerm = useDebounce(searchTerm, 300); // 300ms delay
     const [selectedApplication, setSelectedApplication] = useState(null);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -105,7 +103,7 @@ const ChiefRPSDashboard = () => {
         setApplications(prevApplications =>
             prevApplications.map(app =>
                 app._id === updatedApplication._id ? updatedApplication : app
-            ).filter(app => app.status === activeTab || 
+            ).filter(app => app.status === activeTab ||
                 (activeTab === 'For Review' && ['Submitted', 'For Review'].includes(app.status)))
         );
         // Don't change the active tab, just refresh the current view
@@ -122,7 +120,6 @@ const ChiefRPSDashboard = () => {
             }
             const response = await axios.get('http://localhost:3000/api/admin/all-applications', {
                 params: {
-                    search: debouncedSearchTerm,
                     status: statusFilter
                 },
                 headers: { Authorization: token }
@@ -140,11 +137,11 @@ const ChiefRPSDashboard = () => {
             setLoading(false);
             toast.error('Failed to fetch applications');
         }
-    }, [debouncedSearchTerm, activeTab]);
+    }, [activeTab]);
 
     useEffect(() => {
         fetchApplications();
-    }, [fetchApplications, activeTab]);
+    }, [fetchApplications]);
 
     const handleView = useCallback(async (id, status) => {
         try {
