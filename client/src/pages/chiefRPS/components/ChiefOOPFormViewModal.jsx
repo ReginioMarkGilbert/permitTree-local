@@ -1,15 +1,16 @@
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const ChiefOOPFormViewModal = ({ isOpen, onClose, orderOfPayment }) => {
-    if (!orderOfPayment) return null;
-
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-3xl">
                 <DialogHeader>
-                    <DialogTitle>Order of Payment Details</DialogTitle>
+                    <DialogTitle>View Order of Payment</DialogTitle>
+                    <DialogDescription>
+                        Review the details of this Order of Payment.
+                    </DialogDescription>
                 </DialogHeader>
                 <div className="mt-4">
                     <h3 className="text-lg font-semibold mb-2">Application Details</h3>

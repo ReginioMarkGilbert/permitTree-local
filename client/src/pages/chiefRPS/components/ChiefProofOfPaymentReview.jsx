@@ -6,6 +6,7 @@ import {
     DialogHeader,
     DialogTitle,
     DialogFooter,
+    DialogDescription
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -75,6 +76,9 @@ const ChiefRPSProofOfPaymentReview = ({ isOpen, onClose, oopId }) => {
                         <DialogTitle className="text-2xl font-bold text-green-800">
                             Review Proof of Payment
                         </DialogTitle>
+                        <DialogDescription>
+                            Review the proof of payment for this Order of Payment.
+                        </DialogDescription>
                     </DialogHeader>
                     <div className="flex-grow overflow-y-auto custom-scrollbar pr-4">
                         {loading ? (

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from 'react-toastify';
 import { UploadIcon } from "lucide-react";
@@ -43,6 +43,9 @@ const OrderOfPaymentViewModal = ({ isOpen, onClose, orderOfPayment, refreshOrder
             <DialogContent className="max-w-4xl">
                 <DialogHeader>
                     <DialogTitle>Order of Payment Details</DialogTitle>
+                    <DialogDescription>
+                        Review the details of this Order of Payment.
+                    </DialogDescription>
                 </DialogHeader>
                 <div className="mt-4 space-y-4">
                     <div>

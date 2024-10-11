@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from 'react-toastify';
 import { Calendar } from "@/components/ui/calendar";
@@ -433,6 +433,9 @@ const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
             <DialogContent className={step === 2 ? "max-w-[800px] w-full" : ""}>
                 <DialogHeader>
                     <DialogTitle>{application ? 'View Order of Payment' : 'Create Order of Payment'}</DialogTitle>
+                    <DialogDescription>
+                        Review the details of this Order of Payment.
+                    </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={(e) => e.preventDefault()}>
                     {renderStep()}
@@ -459,4 +462,3 @@ const OrderOfPaymentModal = ({ isOpen, onClose, application }) => {
 };
 
 export default OrderOfPaymentModal;
-
