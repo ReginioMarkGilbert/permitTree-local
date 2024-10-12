@@ -1,86 +1,361 @@
-// Government Project Timber Permit
-// ISSUANCE OF TREE CUTTING AND/OR EARTH BALLING PERMIT FOR TREES AFFECTED BY PROJECTS OF NATIONAL GOVERNMENT AGENCIES (DPWH, DOTR, DepEd, DA, DOH, CHED, DOE, and NIA)
-// This Permit serves as proof of authorization for the removal/cutting and/or relocation of trees affected by projects of the National Government Agencies (DPWH, DOTR, DepEd, DA, DOH, CHED, DOE and NIA)
-
 import React, { useState } from 'react';
+import './styles/TC_NGAForm.css';
 
-const TC_NGAForm = () => {
-    const [name, setName] = useState('');
-    const [address, setAddress] = useState('');
-    const [phone, setPhone] = useState('');
-    const [projectName, setProjectName] = useState('');
-    const [projectLocation, setProjectLocation] = useState('');
+const NGA = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    contactNumber: '',
+    position: '',
+    email: '',
+    province: '',
+    municipality1: '',
+    barangay1: '',
+    officeName: '',
+    officeAddress: '',
+    isProtectedArea: false,
+    barangayCert: '',
+    municipalityCert: '',
+    otherAttachment: '',
+    sitePlan: '',
+    waiver: '',
+    ecc: '',
+    fpic: '',
+    pambClearance: ''
+  });
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        const formData = { name, address, phone, projectName, projectLocation };
-        console.log('Form Data:', formData);
-    };
+  const [currentStep, setCurrentStep] = useState(1);
 
+  const steps = [
+    "Requesting Party",
+    "Project Location",
+    "Agency",
+    "Upload Requirements"
+  ];
+
+  const renderStepIndicator = () => {
     return (
-        <div className="form-container">
-            <h3>Apply for Tree Cutting and/or Earth Balling Permit (NGA)</h3>
-            <form id="tcNGAForm" onSubmit={handleSubmit}>
-                <div className="form-section">
-                    <h4 className='form-title'>Applicant Details</h4>
-                    <label htmlFor="name">Name</label>
-                    <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        placeholder="Full Name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                    />
-                    <label htmlFor="address">Address</label>
-                    <input
-                        type="text"
-                        id="address"
-                        name="address"
-                        placeholder="Barangay, Bayan, Probinsya"
-                        value={address}
-                        onChange={(e) => setAddress(e.target.value)}
-                        required
-                    />
-                    <label htmlFor="phone">Phone Number</label>
-                    <input
-                        type="tel"
-                        id="phone"
-                        name="phone"
-                        placeholder="e.g. 09123456789"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="form-section">
-                    <h4 className='form-title'>Project Details</h4>
-                    <label htmlFor="projectName">Project Name</label>
-                    <input
-                        type="text"
-                        id="projectName"
-                        name="projectName"
-                        placeholder="Enter Project Name"
-                        value={projectName}
-                        onChange={(e) => setProjectName(e.target.value)}
-                        required
-                    />
-                    <label htmlFor="projectLocation">Project Location</label>
-                    <input
-                        type="text"
-                        id="projectLocation"
-                        name="projectLocation"
-                        placeholder="Enter Project Location"
-                        value={projectLocation}
-                        onChange={(e) => setProjectLocation(e.target.value)}
-                        required
-                    />
-                </div>
-                <button className="submit-button" type="submit">Submit</button>
-            </form>
-        </div>
+      <div className="step-indicator">
+        {steps.map((step, index) => (
+          <div key={index} className={`step ${currentStep === index + 1 ? 'active' : ''} ${currentStep > index + 1 ? 'completed' : ''}`}>
+            <div className="step-number">{index + 1}</div>
+            <div className="step-title">{step}</div>
+          </div>
+        ))}
+      </div>
     );
+  };
+
+  const renderProgressBar = () => {
+    const progress = ((currentStep - 1) / (steps.length - 1)) * 100;
+    return (
+      <div className="progress-bar">
+        <div className="progress" style={{ width: `${progress}%` }}></div>
+      </div>
+    );
+  };
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === 'checkbox' ? checked : value,
+    });
+  };
+
+  const handleFileChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.files[0],
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Handle form submission logic
+    console.log(formData);
+  };
+
+  const nextStep = () => {
+    setCurrentStep(currentStep + 1);
+  };
+
+  const prevStep = () => {
+    setCurrentStep(currentStep - 1);
+  };
+
+  const offices = [
+    "DPWH - Department of Public Works and Highways",
+    "DOTr - Department of Transportation",
+    "DepED - Department of Education",
+    "DA - Department of Agriculture",
+    "DOH - Department of Health",
+    "CHED - Commission on Higher Education",
+    "DOE - Department of Energy",
+    "NIA - National Irrigation Administration"
+  ];
+
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <div className="section nature-inspired">
+            <h2>Requesting Party</h2>
+            <div className="form-group">
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Name"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <input
+                type="tel"
+                name="contactNumber"
+                value={formData.contactNumber}
+                onChange={handleChange}
+                placeholder="Contact Number"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <input
+                type="text"
+                name="position"
+                value={formData.position}
+                onChange={handleChange}
+                placeholder="Position"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Email"
+                required
+              />
+            </div>
+          </div>
+        );
+      case 2:
+        return (
+          <div className="section nature-inspired">
+            <h2>Project Location</h2>
+            <div className="form-group">
+              <input
+                type="text"
+                name="province"
+                value={formData.province}
+                onChange={handleChange}
+                placeholder="Province"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <input
+                type="text"
+                name="municipality1"
+                value={formData.municipality1}
+                onChange={handleChange}
+                placeholder="Municipality"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <input
+                type="text"
+                name="barangay1"
+                value={formData.barangay1}
+                onChange={handleChange}
+                placeholder="Barangay"
+                required
+              />
+            </div>
+            <div className="form-group checkbox">
+              <label>
+                <input
+                  type="checkbox"
+                  name="isProtectedArea"
+                  checked={formData.isProtectedArea}
+                  onChange={handleChange}
+                />
+                Is this a protected area?
+              </label>
+            </div>
+          </div>
+        );
+      case 3:
+        return (
+          <div className="section nature-inspired">
+            <h2>Agency</h2>
+            <div className="form-group">
+              <label htmlFor="officeName">Office Name:</label>
+              <select
+                id="officeName"
+                name="officeName" 
+                value={formData.officeName}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select an office</option>
+                {offices.map((office, index) => (
+                  <option key={index} value={office}>
+                    {office}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
+              <input
+                type="text"
+                name="officeAddress"
+                value={formData.officeAddress}
+                onChange={handleChange}
+                placeholder="Office Address"
+                required
+              />
+            </div>
+          </div>
+        );
+      case 4:
+        return (
+          <div className="section nature-inspired">
+            <h2>Upload Requirements</h2>
+            <div className="upload-grid">
+              <div className="upload-column">
+                <div className="form-group">
+                  <label>
+                    Barangay Certification:
+                    <input
+                      type="file"
+                      name="barangayCert"
+                      onChange={handleFileChange}
+                      required
+                    />
+                  </label>
+                </div>
+                <div className="form-group">
+                  <label>
+                    Municipality Certification:
+                    <input
+                      type="file"
+                      name="municipalityCert"
+                      onChange={handleFileChange}
+                      required
+                    />
+                  </label>
+                </div>
+                <div className="form-group">
+                  <label>
+                    Site Plan:
+                    <input
+                      type="file"
+                      name="sitePlan"
+                      onChange={handleFileChange}
+                      required
+                    />
+                  </label>
+                </div>
+                <div className="form-group">
+                  <label>
+                    Waiver:
+                    <input
+                      type="file"
+                      name="waiver"
+                      onChange={handleFileChange}
+                      required
+                    />
+                  </label>
+                </div>
+              </div>
+              <div className="upload-column">
+                <div className="form-group">
+                  <label>
+                    ECC:
+                    <input
+                      type="file"
+                      name="ecc"
+                      onChange={handleFileChange}
+                      required
+                    />
+                  </label>
+                </div>
+                <div className="form-group">
+                  <label>
+                    FPIC (if applicable):
+                    <input
+                      type="file"
+                      name="fpic"
+                      onChange={handleFileChange}
+                    />
+                  </label>
+                </div>
+                <div className="form-group">
+                  <label>
+                    PAMB Clearance (if applicable):
+                    <input
+                      type="file"
+                      name="pambClearance"
+                      onChange={handleFileChange}
+                    />
+                  </label>
+                </div>
+                <div className="form-group">
+                  <label>
+                    Other Attachment:
+                    <input
+                      type="file"
+                      name="otherAttachment"
+                      onChange={handleFileChange}
+                    />
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="form-container">
+      <h1 className="form-title">ISSUANCE OF TREE CUTTING AND/OR EARTH BALLING PERMIT FOR TREES AFFECTED BY PROJECTS OF NATIONAL GOVERNMENT AGENCIES</h1>
+      <h4>(DPWH, DOTr, DepED, DA, DOH, CHED, DOE and NIA)</h4>
+
+      {renderStepIndicator()}
+      {renderProgressBar()}
+
+      <form onSubmit={handleSubmit} className="permit-form">
+        <h2 className="current-step-title">{steps[currentStep - 1]}</h2>
+        {renderStep()}
+
+        <div className="navigation-buttons">
+          {currentStep > 1 && (
+            <button type="button" onClick={prevStep} className="prev-btn">
+              Previous
+            </button>
+          )}
+          {currentStep < steps.length && (
+            <button type="button" onClick={nextStep} className="next-btn">
+              Next
+            </button>
+          )}
+          {currentStep === steps.length && (
+            <button type="submit" className="submit-btn">
+              Submit
+            </button>
+          )}
+        </div>
+      </form>
+    </div>
+  );
 };
 
-export default TC_NGAForm;
+export default NGA;

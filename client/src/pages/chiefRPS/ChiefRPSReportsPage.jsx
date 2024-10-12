@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Users, FileCheck, RotateCcw, TrendingUp } from "lucide-react"
-import { ResponsiveLine } from '@nivo/line'
-import { ResponsiveBar } from '@nivo/bar'
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import axios from "axios"
 
 export default function ModernChartsPage() {
@@ -100,201 +99,80 @@ export default function ModernChartsPage() {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 <ChartCard title="User Growth">
-                    <div className="flex flex-col h-full">
-                        <div className="mb-4">
-                            <Select value={userGrowthFilter} onValueChange={handleUserGrowthFilterChange}>
-                                <SelectTrigger className="w-[180px]">
-                                    <SelectValue placeholder="Select period" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="day">Today</SelectItem>
-                                    <SelectItem value="week">This Week</SelectItem>
-                                    <SelectItem value="month">This Month</SelectItem>
-                                    <SelectItem value="all">All Time</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="flex-grow" style={{ height: '300px' }}>
-                            {loading ? (
-                                <p>Loading...</p>
-                            ) : error ? (
-                                <p>{error}</p>
-                            ) : reportData.userGrowth.length > 0 ? (
-                                <ResponsiveLine
-                                    data={[
-                                        {
-                                            id: "User Growth",
-                                            data: reportData.userGrowth.map(item => ({
-                                                x: item.date,
-                                                y: item.users
-                                            }))
-                                        }
-                                    ]}
-                                    margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
-                                    xScale={{ type: 'point' }}
-                                    yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: true, reverse: false }}
-                                    yFormat=" >-.0f"
-                                    axisTop={null}
-                                    axisRight={null}
-                                    axisBottom={{
-                                        tickSize: 5,
-                                        tickPadding: 5,
-                                        tickRotation: -45,
-                                        legend: 'Date',
-                                        legendOffset: 36,
-                                        legendPosition: 'middle'
-                                    }}
-                                    axisLeft={{
-                                        tickSize: 5,
-                                        tickPadding: 5,
-                                        tickRotation: 0,
-                                        legend: 'Users',
-                                        legendOffset: -40,
-                                        legendPosition: 'middle'
-                                    }}
-                                    pointSize={10}
-                                    pointColor={{ theme: 'background' }}
-                                    pointBorderWidth={2}
-                                    pointBorderColor={{ from: 'serieColor' }}
-                                    pointLabelYOffset={-12}
-                                    useMesh={true}
-                                    colors={['#15803d']}
-                                    theme={{
-                                        axis: {
-                                            ticks: { text: { fill: '#15803d' } },
-                                            legend: { text: { fill: '#15803d' } }
-                                        },
-                                        grid: { line: { stroke: '#dcfce7' } }
-                                    }}
-                                    tooltip={({ point }) => (
-                                        <div className="bg-white p-2 shadow rounded">
-                                            <strong>Date:</strong> {point.data.xFormatted}<br />
-                                            <strong>Users:</strong> {point.data.yFormatted}
-                                        </div>
-                                    )}
-                                />
-                            ) : (
-                                <p>No data available</p>
-                            )}
-                        </div>
+                    <div className="mb-4">
+                        <Select value={userGrowthFilter} onValueChange={setUserGrowthFilter}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select time range" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="day">Last 7 Days</SelectItem>
+                                <SelectItem value="week">Last 4 Weeks</SelectItem>
+                                <SelectItem value="month">Last 6 Months</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div style={{ height: '300px' }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={reportData.userGrowth}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="date" />
+                                <YAxis />
+                                <Tooltip />
+                                <Legend />
+                                <Line type="monotone" dataKey="users" stroke="#15803d" />
+                            </LineChart>
+                        </ResponsiveContainer>
                     </div>
                 </ChartCard>
                 <ChartCard title="Application Types">
                     <div style={{ height: '300px' }}>
-                        <ResponsiveBar
-                            data={reportData.applicationTypes}
-                            keys={['count']}
-                            indexBy="type"
-                            margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
-                            padding={0.3}
-                            valueScale={{ type: 'linear' }}
-                            indexScale={{ type: 'band', round: true }}
-                            colors={['#15803d']}
-                            theme={{
-                                axis: {
-                                    ticks: { text: { fill: '#15803d' } },
-                                    legend: { text: { fill: '#15803d' } }
-                                },
-                                grid: { line: { stroke: '#dcfce7' } }
-                            }}
-                            axisBottom={{ tickSize: 5, tickPadding: 5, tickRotation: 0, legend: 'Application Type', legendPosition: 'middle', legendOffset: 32 }}
-                            axisLeft={{ tickSize: 5, tickPadding: 5, tickRotation: 0, legend: 'Count', legendPosition: 'middle', legendOffset: -40 }}
-                            labelSkipWidth={12}
-                            labelSkipHeight={12}
-                            labelTextColor="#ffffff"
-                        />
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={reportData.applicationTypes}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="type" />
+                                <YAxis />
+                                <Tooltip />
+                                <Legend />
+                                <Bar dataKey="count" fill="#15803d" />
+                            </BarChart>
+                        </ResponsiveContainer>
                     </div>
                 </ChartCard>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 <ChartCard title="Application Status Overview">
                     <div style={{ height: '300px' }}>
-                        <ResponsiveBar
-                            data={reportData.applicationStatus}
-                            keys={['count']}
-                            indexBy="status"
-                            margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
-                            padding={0.3}
-                            valueScale={{ type: 'linear' }}
-                            indexScale={{ type: 'band', round: true }}
-                            colors={['#15803d', '#bbf7d0', '#86efac', '#4ade80', '#22c55e', '#16a34a', '#15803d', '#166534', '#14532d']}
-                            theme={{
-                                axis: { ticks: { text: { fill: '#15803d' } }, legend: { text: { fill: '#15803d' } } },
-                                grid: { line: { stroke: '#dcfce7' } }
-                            }}
-                            defs={[
-                                { id: 'dots', type: 'patternDots', background: 'inherit', color: '#22c55e', size: 4, padding: 1, stagger: true },
-                                { id: 'lines', type: 'patternLines', background: 'inherit', color: '#22c55e', rotation: -45, lineWidth: 6, spacing: 10 }
-                            ]}
-                            borderColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
-                            axisTop={null}
-                            axisRight={null}
-                            axisBottom={{ tickSize: 5, tickPadding: 5, tickRotation: 0, legend: 'Status', legendPosition: 'middle', legendOffset: 32 }}
-                            axisLeft={{ tickSize: 5, tickPadding: 5, tickRotation: 0, legend: 'Count', legendPosition: 'middle', legendOffset: -40 }}
-                            labelSkipWidth={12}
-                            labelSkipHeight={12}
-                            labelTextColor="#ffffff"
-                            legends={[{
-                                dataFrom: 'keys', anchor: 'bottom-right', direction: 'column', justify: false, translateX: 120, translateY: 0, itemsSpacing: 2, itemWidth: 100, itemHeight: 20, itemDirection: 'left-to-right', itemOpacity: 0.85, symbolSize: 20,
-                                effects: [{ on: 'hover', style: { itemOpacity: 1 } }]
-                            }
-                            ]}
-                            animate={true}
-                            motionStiffness={90}
-                            motionDamping={15}
-                        />
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={reportData.applicationStatus}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="status" />
+                                <YAxis />
+                                <Tooltip />
+                                <Legend />
+                                <Bar dataKey="count" fill="#15803d" />
+                            </BarChart>
+                        </ResponsiveContainer>
                     </div>
                 </ChartCard>
-                <ChartCard title="Daily Applications (Last Week)">
+                <ChartCard title="Daily Application Submissions">
                     <div style={{ height: '300px' }}>
-                        <ResponsiveBar
-                            data={reportData.dailyApplications}
-                            keys={['count']}
-                            indexBy="day"
-                            margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
-                            padding={0.3}
-                            valueScale={{ type: 'linear' }}
-                            indexScale={{ type: 'band', round: true }}
-                            colors={['#15803d']} // green-700
-                            theme={{
-                                axis: { ticks: { text: { fill: '#15803d' } }, legend: { text: { fill: '#15803d' } } },
-                                grid: { line: { stroke: '#dcfce7' } }
-                            }}
-                            defs={[
-                                { id: 'dots', type: 'patternDots', background: 'inherit', color: '#22c55e', size: 4, padding: 1, stagger: true },
-                                { id: 'lines', type: 'patternLines', background: 'inherit', color: '#22c55e', rotation: -45, lineWidth: 6, spacing: 10 }
-                            ]}
-                            borderColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
-                            axisTop={null}
-                            axisRight={null}
-                            axisBottom={{ tickSize: 5, tickPadding: 5, tickRotation: 0, legend: 'Day', legendPosition: 'middle', legendOffset: 32 }}
-                            axisLeft={{ tickSize: 5, tickPadding: 5, tickRotation: 0, legend: 'Applications', legendPosition: 'middle', legendOffset: -40 }}
-                            labelSkipWidth={12}
-                            labelSkipHeight={12}
-                            labelTextColor="#ffffff"
-                            legends={[
-                                {
-                                    dataFrom: 'keys', anchor: 'bottom-right', direction: 'column', justify: false, translateX: 120, translateY: 0, itemsSpacing: 2, itemWidth: 100, itemHeight: 20, itemDirection: 'left-to-right', itemOpacity: 0.85, symbolSize: 20,
-                                    effects: [
-                                        {
-                                            on: 'hover',
-                                            style: {
-                                                itemOpacity: 1
-                                            }
-                                        }
-                                    ]
-                                }
-                            ]}
-                            animate={true}
-                            motionStiffness={90}
-                            motionDamping={15}
-                        />
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={reportData.dailyApplications}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="day" />
+                                <YAxis />
+                                <Tooltip />
+                                <Legend />
+                                <Bar dataKey="count" fill="#15803d" />
+                            </BarChart>
+                        </ResponsiveContainer>
                     </div>
                 </ChartCard>
             </div>
         </div>
     )
 }
+
 
 function StatCard({ title, value, icon }) {
     return (

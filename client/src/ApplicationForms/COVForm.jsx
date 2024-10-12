@@ -1,82 +1,90 @@
-// CERTIFICATE OF VERIFICATION (COV) FOR THE TRANSPORT OF PLANTED TREES WITHIN PRIVATE LAND, NON-TIMBER FOREST PRODUCTS EXCEPT RATTAN AND BAMBOO
-// COV is a document to be presented when transporting planted trees within private lands not registered under the Private Tree Plantation Registration and/or non-premium trees, non-timber forest products (except rattan and bamboo)
-
 import React, { useState } from 'react';
+import './styles/COVForm.css';
 
 const COVForm = () => {
-    const [name, setName] = useState('');
-    const [address, setAddress] = useState('');
-    const [phone, setPhone] = useState('');
-    const [treeType, setTreeType] = useState('');
-    const [quantity, setQuantity] = useState('');
+    const [step, setStep] = useState(1);
+    const [formData, setFormData] = useState({
+        name: '', address: '', cellphone: '', purpose: '',
+        driverName: '', driverLicenseNumber: '', vehiclePlateNumber: '',
+        originAddress: '', destinationAddress: '',
+        letterOfIntent: null, tallySheet: null, forestCertification: null,
+        orCr: null, driverLicense: null, specialPowerOfAttorney: null,
+    });
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        const formData = { name, address, phone, treeType, quantity };
-        console.log('Form Data:', formData);
+    const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+    const handleFileChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.files[0] });
+    const nextStep = () => setStep(step + 1);
+    const prevStep = () => setStep(step - 1);
+
+    const formSections = [
+        { title: 'Applicant Details', fields: ['name', 'address', 'cellphone', 'purpose'] },
+        { title: 'Driver Information', fields: ['driverName', 'driverLicenseNumber', 'vehiclePlateNumber'] },
+        { title: 'Transport Details', fields: ['originAddress', 'destinationAddress'] },
+        { title: 'Required Documents', files: ['letterOfIntent', 'tallySheet', 'forestCertification'] },
+        { title: 'Additional Documents', files: ['orCr', 'driverLicense', 'specialPowerOfAttorney'] },
+    ];
+
+    const renderFormGroup = (name, label, type = 'text') => (
+        <div className="form-group" key={name}>
+            <input type={type} id={name} name={name} value={formData[name]} onChange={handleChange} required placeholder=" " />
+            <label htmlFor={name}>{label}</label>
+        </div>
+    );
+
+    const renderFileUpload = (name, label, required = true) => (
+        <div className="file-upload-group" key={name}>
+            <input type="file" id={name} name={name} onChange={handleFileChange} required={required} />
+            <label htmlFor={name}>{label}</label>
+        </div>
+    );
+
+    const renderSection = (section) => (
+        <div className="form-section" key={section.title}>
+            <h4 className='form-title'>{section.title}</h4>
+            {section.fields?.map(field => renderFormGroup(field, field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())))}
+            {section.files?.map(file => renderFileUpload(file, file.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()), section.title === 'Required Documents'))}
+        </div>
+    );
+
+    const renderReview = () => (
+        <div className="review-section">
+            {Object.entries(formData).map(([key, value]) => (
+                <p key={key}>{key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}: {value instanceof File ? '✓' : value || '✗'}</p>
+            ))}
+        </div>
+    );
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        console.log('Form submitted:', formData);
+        alert('Form submitted successfully!');
+    };
+
+    const handleSaveDraft = () => {
+        console.log('Draft saved:', formData);
+        alert('Application saved as draft!');
     };
 
     return (
-        <div className="form-container">
-            <h3>Apply for Certificate of Verification</h3>
+        <div className="cov-container">
+            <h3 className="cov-title">Certificate of Verification</h3>
+            <div className="progress-bar">
+                {[1, 2, 3, 4, 5, 6].map(num => (
+                    <div key={num} className={`progress-step ${step >= num ? 'active' : ''}`}>{num}</div>
+                ))}
+            </div>
             <form id="covForm" onSubmit={handleSubmit}>
-                <div className="form-section">
-                    <h4 className='form-title'>Applicant Details</h4>
-                    <label htmlFor="name">Name</label>
-                    <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        placeholder="Full Name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                    />
-                    <label htmlFor="address">Address</label>
-                    <input
-                        type="text"
-                        id="address"
-                        name="address"
-                        placeholder="Barangay, Bayan, Probinsya"
-                        value={address}
-                        onChange={(e) => setAddress(e.target.value)}
-                        required
-                    />
-                    <label htmlFor="phone">Phone Number</label>
-                    <input
-                        type="tel"
-                        id="phone"
-                        name="phone"
-                        placeholder="e.g. 09123456789"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        required
-                    />
+                {step <= 5 ? renderSection(formSections[step - 1]) : renderReview()}
+                <div className="form-navigation">
+                    {step > 1 && <button type="button" className="nav-button prev-button" onClick={prevStep}>Previous</button>}
+                    {step < 6 && <button type="button" className="nav-button next-button" onClick={nextStep}>Next</button>}
+                    {step === 6 && (
+                        <>
+                            <button type="button" className="nav-button draft-button" onClick={handleSaveDraft}>Save as Draft</button>
+                            <button type="submit" className="nav-button submit-button">Submit</button>
+                        </>
+                    )}
                 </div>
-                <div className="form-section">
-                    <h4 className='form-title'>Tree Details</h4>
-                    <label htmlFor="treeType">Tree Type</label>
-                    <input
-                        type="text"
-                        id="treeType"
-                        name="treeType"
-                        placeholder="Enter Tree Type"
-                        value={treeType}
-                        onChange={(e) => setTreeType(e.target.value)}
-                        required
-                    />
-                    <label htmlFor="quantity">Quantity</label>
-                    <input
-                        type="number"
-                        id="quantity"
-                        name="quantity"
-                        placeholder="Enter Quantity"
-                        value={quantity}
-                        onChange={(e) => setQuantity(e.target.value)}
-                        required
-                    />
-                </div>
-                <button className="submit-button" type="submit">Submit</button>
             </form>
         </div>
     );
