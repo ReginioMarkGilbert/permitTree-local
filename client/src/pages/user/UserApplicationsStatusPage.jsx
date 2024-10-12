@@ -7,11 +7,14 @@ import UserOOPviewModal from './components/UserOOPviewModal';
 import PaymentSimulationModal from './components/PaymentSimulationModal';
 import { Button } from '@/components/ui/button';
 import UserApplicationRow from './components/UserApplicationRow';
+import UserOrderOfPaymentRow from './components/UserOrderOfPaymentRow';
 import { useUserApplications } from './hooks/useUserApplications';
+import { useUserOrderOfPayments } from './hooks/useUserOrderOfPayments';
 import { useUserApplicationActions } from './hooks/useUserApplicationActions';
 
 const UserApplicationsStatusPage = () => {
-   const [activeTab, setActiveTab] = useState('Submitted');
+   const [mainTab, setMainTab] = useState('Applications');
+   const [activeTab, setActiveTab] = useState('Draft');
    const [searchTerm, setSearchTerm] = useState('');
    const [sortConfig, setSortConfig] = useState(null);
    const [selectedApplication, setSelectedApplication] = useState(null);
@@ -22,15 +25,20 @@ const UserApplicationsStatusPage = () => {
    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
    const [selectedPaymentApplication, setSelectedPaymentApplication] = useState(null);
 
-   const { applications, loading, error, fetchApplications, handleStatusUpdate } = useUserApplications(activeTab);
+   const { applications, loading: appLoading, error: appError, fetchApplications, handleStatusUpdate: handleAppStatusUpdate } = useUserApplications(mainTab === 'Applications' ? activeTab : null);
+   const { orderOfPayments, loading: oopLoading, error: oopError, fetchOrderOfPayments, handleStatusUpdate: handleOOPStatusUpdate } = useUserOrderOfPayments(mainTab === 'Order Of Payments' ? activeTab : null);
    const { handleView, handleEdit, handleSubmitDraft, handleUnsubmit, handleDelete, handleViewOOP, handleSimulatePayment } = useUserApplicationActions(fetchApplications);
 
-   const filteredApplications = useMemo(() => {
-      return applications.filter(app =>
-         app.customId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         app.applicationType.toLowerCase().includes(searchTerm.toLowerCase())
+   const applicationTabs = ['Draft', 'Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected'];
+   const oopTabs = ['Awaiting Payment', 'Payment Proof Submitted', 'Returned', 'Approved', 'Completed'];
+
+   const filteredItems = useMemo(() => {
+      const items = mainTab === 'Applications' ? applications : orderOfPayments;
+      return items.filter(item =>
+         item.customId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         (item.applicationType && item.applicationType.toLowerCase().includes(searchTerm.toLowerCase()))
       );
-   }, [applications, searchTerm]);
+   }, [mainTab, applications, orderOfPayments, searchTerm]);
 
    const handleSort = (key) => {
       let direction = 'asc';
@@ -119,17 +127,39 @@ const UserApplicationsStatusPage = () => {
       }
    };
 
+   const renderTabs = () => {
+      const tabs = mainTab === 'Applications' ? applicationTabs : oopTabs;
+      return (
+         <div className="mb-6 overflow-x-auto">
+            <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
+               {tabs.map((tab) => (
+                  <button
+                     key={tab}
+                     onClick={() => setActiveTab(tab)}
+                     className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
+                  >
+                     {tab}
+                  </button>
+               ))}
+            </div>
+         </div>
+      );
+   };
+
    const renderTable = () => {
+      const loading = mainTab === 'Applications' ? appLoading : oopLoading;
+      const error = mainTab === 'Applications' ? appError : oopError;
+
       if (loading) {
-         return <p className="text-center text-gray-500">Loading applications...</p>;
+         return <p className="text-center text-gray-500">Loading...</p>;
       }
 
       if (error) {
          return <p className="text-center text-red-500">{error}</p>;
       }
 
-      if (filteredApplications.length === 0) {
-         return <p className="text-center text-gray-500">No applications found.</p>;
+      if (filteredItems.length === 0) {
+         return <p className="text-center text-gray-500">No items found.</p>;
       }
 
       return (
@@ -138,10 +168,10 @@ const UserApplicationsStatusPage = () => {
                <thead className="bg-gray-50">
                   <tr>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSort('customId')}>
-                        APPLICATION NUMBER {renderSortIcon('customId')}
+                        {mainTab === 'Applications' ? 'APPLICATION NUMBER' : 'OOP NUMBER'} {renderSortIcon('customId')}
                      </th>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
-                        APPLICATION TYPE
+                        {mainTab === 'Applications' ? 'APPLICATION TYPE' : 'TOTAL AMOUNT'}
                      </th>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hidden sm:table-cell" onClick={() => handleSort('dateOfSubmission')}>
                         DATE  {renderSortIcon('dateOfSubmission')}
@@ -155,19 +185,29 @@ const UserApplicationsStatusPage = () => {
                   </tr>
                </thead>
                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredApplications.map((app) => (
-                     <UserApplicationRow
-                        key={app._id}
-                        app={app}
-                        onView={onView}
-                        onEdit={onEdit}
-                        onSubmitDraft={onSubmitDraft}
-                        onUnsubmit={onUnsubmit}
-                        onDelete={onDelete}
-                        onViewOOP={handleViewOOP}
-                        onSimulatePayment={handleSimulatePayment}
-                        getStatusColor={getStatusColor}
-                     />
+                  {filteredItems.map((item) => (
+                     mainTab === 'Applications' ? (
+                        <UserApplicationRow
+                           key={item._id}
+                           app={item}
+                           onView={onView}
+                           onEdit={onEdit}
+                           onSubmitDraft={onSubmitDraft}
+                           onUnsubmit={onUnsubmit}
+                           onDelete={onDelete}
+                           onViewOOP={handleViewOOP}
+                           onSimulatePayment={handleSimulatePayment}
+                           getStatusColor={getStatusColor}
+                        />
+                     ) : (
+                        <UserOrderOfPaymentRow
+                           key={item._id}
+                           oop={item}
+                           onView={handleViewOOP}
+                           onSimulatePayment={handleSimulatePayment}
+                           getStatusColor={getStatusColor}
+                        />
+                     )
                   ))}
                </tbody>
             </table>
@@ -177,31 +217,35 @@ const UserApplicationsStatusPage = () => {
 
    return (
       <div className="min-h-screen bg-green-50">
-         <div className="container mx-auto px-4 sm:px-6 py-24">
+         <div className="container mx-auto px-4 sm:px-6 py-8">
             <div className="flex justify-between items-center mb-6">
                <h1 className="text-3xl font-bold text-green-800">My Applications</h1>
-               <Button onClick={fetchApplications} variant="outline">
+               <Button onClick={mainTab === 'Applications' ? fetchApplications : fetchOrderOfPayments} variant="outline">
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Refresh
                </Button>
             </div>
-            <div className="mb-6 overflow-x-auto">
-               <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-                  {['Draft', 'Submitted', 'Returned', 'Accepted', 'Awaiting Payment', 'Released', 'Expired', 'Rejected'].map((tab) => (
-                     <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
-                     >
-                        {tab}
-                     </button>
-                  ))}
+            <div className="mb-6">
+               <div className="bg-white p-1 rounded-md inline-flex">
+                  <button
+                     onClick={() => { setMainTab('Applications'); setActiveTab('Draft'); }}
+                     className={`px-4 py-2 rounded-md text-sm font-medium ${mainTab === 'Applications' ? 'bg-green-100 text-green-800' : 'text-gray-600 hover:bg-gray-100'}`}
+                  >
+                     Applications
+                  </button>
+                  <button
+                     onClick={() => { setMainTab('Order Of Payments'); setActiveTab('Awaiting Payment'); }}
+                     className={`px-4 py-2 rounded-md text-sm font-medium ${mainTab === 'Order Of Payments' ? 'bg-green-100 text-green-800' : 'text-gray-600 hover:bg-gray-100'}`}
+                  >
+                     Order Of Payments
+                  </button>
                </div>
             </div>
+            {renderTabs()}
             <div className="mb-6">
                <input
                   type="text"
-                  placeholder="Search applications..."
+                  placeholder={`Search ${mainTab.toLowerCase()}...`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="border rounded-md p-2 w-full"
@@ -220,7 +264,7 @@ const UserApplicationsStatusPage = () => {
             isOpen={isEditModalOpen}
             onClose={() => setIsEditModalOpen(false)}
             application={selectedApplication}
-            onUpdate={handleStatusUpdate}
+            onUpdate={handleAppStatusUpdate}
          />
 
          <ConfirmationModal
@@ -247,6 +291,5 @@ const UserApplicationsStatusPage = () => {
       </div>
    );
 };
-
 
 export default UserApplicationsStatusPage;

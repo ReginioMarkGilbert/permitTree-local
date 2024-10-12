@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-export const useOrderOfPayments = (activeTab) => {
+export const useUserOrderOfPayments = (activeTab) => {
    const [orderOfPayments, setOrderOfPayments] = useState([]);
    const [loading, setLoading] = useState(true);
    const [error, setError] = useState(null);
@@ -11,7 +11,7 @@ export const useOrderOfPayments = (activeTab) => {
       try {
          setLoading(true);
          const token = localStorage.getItem('token');
-         const response = await axios.get('http://localhost:3000/api/admin/order-of-payments', {
+         const response = await axios.get('http://localhost:3000/api/getAllApplications', {
             params: { status: activeTab },
             headers: { Authorization: token }
          });
@@ -29,5 +29,14 @@ export const useOrderOfPayments = (activeTab) => {
       fetchOrderOfPayments();
    }, [fetchOrderOfPayments]);
 
-   return { orderOfPayments, loading, error, fetchOrderOfPayments };
+   const handleStatusUpdate = useCallback((updatedOOP) => {
+      setOrderOfPayments(prevOOPs =>
+         prevOOPs.map(oop =>
+            oop._id === updatedOOP._id ? updatedOOP : oop
+         )
+      );
+      fetchOrderOfPayments();
+   }, [fetchOrderOfPayments]);
+
+   return { orderOfPayments, loading, error, fetchOrderOfPayments, handleStatusUpdate };
 };
