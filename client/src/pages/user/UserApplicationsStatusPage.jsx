@@ -14,7 +14,7 @@ import { useUserApplicationActions } from './hooks/useUserApplicationActions';
 
 const UserApplicationsStatusPage = () => {
    const [mainTab, setMainTab] = useState('Applications');
-   const [activeTab, setActiveTab] = useState('Draft');
+   const [activeTab, setActiveTab] = useState('Awaiting Payment');
    const [searchTerm, setSearchTerm] = useState('');
    const [sortConfig, setSortConfig] = useState(null);
    const [selectedApplication, setSelectedApplication] = useState(null);
@@ -26,7 +26,7 @@ const UserApplicationsStatusPage = () => {
    const [selectedPaymentApplication, setSelectedPaymentApplication] = useState(null);
 
    const { applications, loading: appLoading, error: appError, fetchApplications, handleStatusUpdate: handleAppStatusUpdate } = useUserApplications(mainTab === 'Applications' ? activeTab : null);
-   const { orderOfPayments, loading: oopLoading, error: oopError, fetchOrderOfPayments, handleStatusUpdate: handleOOPStatusUpdate } = useUserOrderOfPayments(mainTab === 'Order Of Payments' ? activeTab : null);
+   const { orderOfPayments, loading: oopLoading, error: oopError, fetchOrderOfPayments, handleStatusUpdate: handleOOPStatusUpdate } = useUserOrderOfPayments(activeTab);
    const { handleView, handleEdit, handleSubmitDraft, handleUnsubmit, handleDelete, handleViewOOP, handleSimulatePayment } = useUserApplicationActions(fetchApplications);
 
    const applicationTabs = ['Draft', 'Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected'];

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const { OrderOfPayment } = require('../../Admin/AdminModules/chiefOrderOfPaymentModule');
+const OrderOfPayment = require('../../Admin/AdminModules/orderOfPaymentModule');
 const { Application } = require('./PermitApplicationsModules/chainsawApplicationModule');
 const { generateReceipt } = require('../../utils/receiptGenerator');
 const { authenticateToken } = require('../../middleware/authMiddleware');
@@ -158,6 +158,29 @@ router.get('/user/oop', authenticateToken, async (req, res) => {
 
    } catch (error) {
       console.error('User side Error fetching order of payments:', error);
+      res.status(500).json({ message: 'Server error', error: error.message });
+   }
+});
+
+router.get('/oop', authenticateToken, async (req, res) => {
+   try {
+      const userId = req.user.id;
+      const { status } = req.query;
+
+      // Find all applications for the user
+      const userApplications = await Application.find({ userId });
+      const applicationIds = userApplications.map(app => app.customId);
+
+      // Construct the query
+      let query = { applicationId: { $in: applicationIds } };
+      if (status) {
+         query.status = status;
+      }
+
+      const orderOfPayments = await OrderOfPayment.find(query);
+      res.json(orderOfPayments);
+   } catch (error) {
+      console.error('Error fetching user order of payments:', error);
       res.status(500).json({ message: 'Server error', error: error.message });
    }
 });
