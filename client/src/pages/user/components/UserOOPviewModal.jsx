@@ -1,181 +1,152 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-    DialogDescription
+   Dialog,
+   DialogContent,
+   DialogHeader,
+   DialogTitle,
+   DialogDescription
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { toast } from 'react-toastify';
-import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { format } from "date-fns";
-import '@/components/ui/styles/customScrollbar.css';
-import ProofOfPaymentForm from './ProofOfPaymentForm';
+import { ClipboardIcon, CalendarIcon, UserIcon, MapPinIcon, FileTextIcon, CheckCircleIcon } from 'lucide-react';
+import '../../../components/ui/styles/customScrollBar.css';
 
-const UserOOPviewModal = ({ isOpen, onClose, applicationId }) => {
-    const [oopData, setOopData] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [showProofOfPayment, setShowProofOfPayment] = useState(false);
+const UserOOPviewModal = ({ isOpen, onClose, billNo }) => {
+   const [oop, setOOP] = useState(null);
+   const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        if (isOpen && applicationId) {
-            fetchOOPData();
-        }
-    }, [isOpen, applicationId]);
+   useEffect(() => {
+      const fetchOOP = async () => {
+         if (!billNo) return;
 
-    const fetchOOPData = async () => {
-        setLoading(true);
-        try {
+         try {
+            setLoading(true);
             const token = localStorage.getItem('token');
-            const response = await axios.get(`http://localhost:3000/api/user/oop/${applicationId}`, {
-                headers: { Authorization: token }
+            const response = await axios.get(`http://localhost:3000/api/user/oop-by-billno/${billNo}`, {
+               headers: { Authorization: token }
             });
-            setOopData(response.data);
-        } catch (error) {
-            console.error('Error fetching OOP data:', error);
-            toast.error('Failed to fetch Order of Payment data');
-        } finally {
+            setOOP(response.data);
+         } catch (error) {
+            console.error('Error fetching OOP:', error);
+            toast.error('Failed to fetch Order of Payment details');
+         } finally {
             setLoading(false);
-        }
-    };
+         }
+      };
 
-    const handleToggleView = () => {
-        setShowProofOfPayment(!showProofOfPayment);
-    };
+      if (isOpen) {
+         fetchOOP();
+      }
+   }, [isOpen, billNo]);
 
-    const handleProofOfPaymentSubmit = async (payload) => {
-        try {
-            const token = localStorage.getItem('token');
-            await axios.post(`http://localhost:3000/api/user/oop/${applicationId}/submit-proof`, payload, {
-                headers: {
-                    'Authorization': token,
-                    'Content-Type': 'application/json'
-                }
-            });
+   if (!isOpen) return null;
 
-            toast.success('Proof of payment submitted successfully');
-            onClose();
-        } catch (error) {
-            console.error('Error submitting proof of payment:', error);
-            toast.error('Failed to submit proof of payment');
-        }
-    };
+   return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <DialogHeader>
+               <DialogTitle className="text-2xl font-bold">Order of Payment Details</DialogTitle>
+               <DialogDescription>
+                  Review the details of this Order of Payment.
+               </DialogDescription>
+            </DialogHeader>
+            {loading ? (
+               <div className="flex justify-center items-center h-64">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700"></div>
+               </div>
+            ) : oop ? (
+               <div className="mt-6 space-y-6">
+                  <div className="border rounded-lg p-4">
+                     <h3 className="text-lg font-semibold flex items-center mb-2">
+                        <ClipboardIcon className="mr-2" /> OOP Number: {oop.customId}
+                     </h3>
+                     <div className="grid grid-cols-2 gap-4 text-sm">
+                        <p className="flex items-center"><FileTextIcon className="mr-2 h-4 w-4" /> Application ID: {oop.applicationId}</p>
+                        <p className="flex items-center"><CheckCircleIcon className="mr-2 h-4 w-4" /> Status: {oop.status}</p>
+                        <p className="flex items-center"><CalendarIcon className="mr-2 h-4 w-4" /> Date Created: {new Date(oop.dateCreated).toLocaleString()}</p>
+                     </div>
+                  </div>
 
-    if (!isOpen) return null;
+                  <div className="border rounded-lg p-4">
+                     <h4 className="text-lg font-semibold mb-2 flex items-center">
+                        <UserIcon className="mr-2" /> Applicant Details
+                     </h4>
+                     <p className="flex items-center text-sm"><UserIcon className="mr-2 h-4 w-4" /> Name: {oop.applicantName}</p>
+                     <p className="flex items-center text-sm mt-1"><MapPinIcon className="mr-2 h-4 w-4" /> Address: {oop.address}</p>
+                  </div>
 
-    const LabeledValue = ({ label, value }) => (
-        <div className="mb-4">
-            <Label className="font-semibold">{label}</Label>
-            <div className="mt-1">{value}</div>
-        </div>
-    );
+                  <div className="border rounded-lg p-4">
+                     <h4 className="text-lg font-semibold mb-2">Payment Details</h4>
+                     <Table>
+                        <TableHeader>
+                           <TableRow>
+                              <TableHead className="w-2/3">Description</TableHead>
+                              <TableHead className="w-1/3 text-right">Amount</TableHead>
+                           </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                           {oop.items.map((item, index) => (
+                              <TableRow key={index}>
+                                 <TableCell>{item.description}</TableCell>
+                                 <TableCell className="text-right">₱ {item.amount.toFixed(2)}</TableCell>
+                              </TableRow>
+                           ))}
+                        </TableBody>
+                     </Table>
+                     <p className="mt-4 text-right font-semibold">Total Amount: ₱ {oop.totalAmount.toFixed(2)}</p>
+                  </div>
 
-    return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col">
-                <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold text-green-800">
-                        {showProofOfPayment ? 'Submit Proof of Payment' : 'Order of Payment'}
-                    </DialogTitle>
-                    <DialogDescription>
-                        {showProofOfPayment ? 'Submit the proof of payment for this Order of Payment.' : 'Review the details of this Order of Payment.'}
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="flex-grow overflow-y-auto custom-scrollbar pr-4">
-                    {loading ? (
-                        <div className="flex justify-center items-center h-64">
-                            <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+                  <div className="border rounded-lg p-4">
+                     <h4 className="text-lg font-semibold mb-2">Signatures</h4>
+                     <div className="grid grid-cols-2 gap-8">
+                        <div>
+                           <p className="font-medium">Chief RPS</p>
+                           {oop.signatures.chiefRPS ? (
+                              <>
+                                 <p className="text-sm text-gray-600 mt-1">
+                                    {new Date(oop.signatures.chiefRPS).toLocaleString()}
+                                 </p>
+                                 {oop.rpsSignatureImage && (
+                                    <img
+                                       src={oop.rpsSignatureImage}
+                                       alt="Chief RPS Signature"
+                                       className="max-h-24 mt-2 border-b border-gray-300 pb-2"
+                                    />
+                                 )}
+                              </>
+                           ) : (
+                              <p className="text-sm text-gray-500 mt-1">Not signed</p>
+                           )}
                         </div>
-                    ) : showProofOfPayment ? (
-                        <ProofOfPaymentForm onSubmit={handleProofOfPaymentSubmit} />
-                    ) : oopData ? (
-                        <div className="space-y-6">
-                            <div className="flex justify-between items-start">
-                                <div className="w-2/3">
-                                    {/* Empty div to maintain layout */}
-                                </div>
-                                <div className="w-1/3 text-right space-y-1">
-                                    <div><span className="font-semibold">Bill No.</span> {oopData.billNo}</div>
-                                    <div><span className="font-semibold">Date:</span> {format(new Date(oopData.dateCreated), "MMM d, yyyy")}</div>
-                                </div>
-                            </div>
-                            <LabeledValue label="Name/Payee:" value={oopData.applicantName} />
-                            <LabeledValue label="Address:" value={oopData.address} />
-                            <LabeledValue label="Nature of Application/Permit/Documents being secured:" value={oopData.natureOfApplication} />
-                            <div>
-                                <Label className="font-semibold">Payment Details</Label>
-                                <Table className="mt-2">
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Legal Basis (DAO/SEC)</TableHead>
-                                            <TableHead>Description and Computation of Fees and Charges Assessed</TableHead>
-                                            <TableHead>Amount</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {oopData.items.map((item, index) => (
-                                            <TableRow key={index}>
-                                                <TableCell>{item.legalBasis}</TableCell>
-                                                <TableCell>{item.description}</TableCell>
-                                                <TableCell>₱ {item.amount.toFixed(2)}</TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                            <div className="flex justify-end items-center">
-                                <Label className="mr-2 font-semibold">Total Amount:</Label>
-                                <div>₱ {oopData.totalAmount.toFixed(2)}</div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-8 mt-8">
-                                <div className="text-center">
-                                    <Label className="font-semibold">SVEMS/Chief, RPS</Label>
-                                    <div className="mt-2">{oopData.signatures.chiefRPS ? "Signed" : "Pending"}</div>
-                                </div>
-                                <div className="text-center">
-                                    <Label className="font-semibold">Chief, Technical Services Division</Label>
-                                    <div className="mt-2">{oopData.signatures.technicalServices ? "Signed" : "Pending"}</div>
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <LabeledValue
-                                    label="Date for statutory receipt by applicant:"
-                                    value={oopData.statutoryReceiptDate ? format(new Date(oopData.statutoryReceiptDate), "MMM d, yyyy") : '-- -- --'}
-                                />
-                                <LabeledValue
-                                    label="Date of payment of applicant:"
-                                    value={oopData.paymentDate ? format(new Date(oopData.paymentDate), "MMM d, yyyy") : '-- -- --'}
-                                />
-                            </div>
-                            <div className="bg-yellow-50 p-4 rounded-lg shadow-sm">
-                                <div className="flex items-center justify-between">
-                                    <span className="font-medium text-yellow-800">Status:</span>
-                                    <span className="px-3 py-1 rounded-full text-sm font-medium bg-yellow-200 text-yellow-800">
-                                        {oopData.status}
-                                    </span>
-                                </div>
-                            </div>
+                        <div>
+                           <p className="font-medium">Chief TSD</p>
+                           {oop.signatures.technicalServices ? (
+                              <>
+                                 <p className="text-sm text-gray-600 mt-1">
+                                    {new Date(oop.signatures.technicalServices).toLocaleString()}
+                                 </p>
+                                 {oop.tsdSignatureImage && (
+                                    <img
+                                       src={oop.tsdSignatureImage}
+                                       alt="Chief TSD Signature"
+                                       className="max-h-24 mt-2 border-b border-gray-300 pb-2"
+                                    />
+                                 )}
+                              </>
+                           ) : (
+                              <p className="text-sm text-gray-500 mt-1">Not signed</p>
+                           )}
                         </div>
-                    ) : (
-                        <p className="text-center text-gray-500">No Order of Payment data found.</p>
-                    )}
-                </div>
-                <DialogFooter>
-                    <Button onClick={handleToggleView} className="mr-2">
-                        {showProofOfPayment ? 'Back to OOP' : 'Submit Proof of Payment'}
-                    </Button>
-                    <Button onClick={onClose} className="bg-green-600 hover:bg-green-700 text-white">
-                        Close
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    );
+                     </div>
+                  </div>
+               </div>
+            ) : (
+               <p className="text-center text-red-600">No Order of Payment found for this application.</p>
+            )}
+         </DialogContent>
+      </Dialog>
+   );
 };
 
 export default UserOOPviewModal;

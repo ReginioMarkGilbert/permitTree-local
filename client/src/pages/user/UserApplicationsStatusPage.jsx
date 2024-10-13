@@ -24,6 +24,7 @@ const UserApplicationsStatusPage = () => {
    const [isOOPModalOpen, setIsOOPModalOpen] = useState(false);
    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
    const [selectedPaymentApplication, setSelectedPaymentApplication] = useState(null);
+   const [selectedOOP, setSelectedOOP] = useState(null);
 
    const { applications, loading: appLoading, error: appError, fetchApplications, handleStatusUpdate: handleAppStatusUpdate } = useUserApplications(mainTab === 'Applications' ? activeTab : null);
    const { orderOfPayments, loading: oopLoading, error: oopError, fetchOrderOfPayments, handleStatusUpdate: handleOOPStatusUpdate } = useUserOrderOfPayments(activeTab);
@@ -195,7 +196,7 @@ const UserApplicationsStatusPage = () => {
                            onSubmitDraft={onSubmitDraft}
                            onUnsubmit={onUnsubmit}
                            onDelete={onDelete}
-                           onViewOOP={handleViewOOP}
+                           onViewOOP={onViewOOP}
                            onSimulatePayment={handleSimulatePayment}
                            getStatusColor={getStatusColor}
                         />
@@ -203,7 +204,7 @@ const UserApplicationsStatusPage = () => {
                         <UserOrderOfPaymentRow
                            key={item._id}
                            oop={item}
-                           onView={handleViewOOP}
+                           onView={onViewOOP}
                            onSimulatePayment={handleSimulatePayment}
                            getStatusColor={getStatusColor}
                         />
@@ -213,6 +214,12 @@ const UserApplicationsStatusPage = () => {
             </table>
          </div>
       );
+   };
+
+   const onViewOOP = async (billNo) => {
+      const result = await handleViewOOP(billNo);
+      setSelectedOOP(result);
+      setIsOOPModalOpen(true);
    };
 
    return (
@@ -278,7 +285,7 @@ const UserApplicationsStatusPage = () => {
          <UserOOPviewModal
             isOpen={isOOPModalOpen}
             onClose={() => setIsOOPModalOpen(false)}
-            applicationId={selectedApplication?.customId}
+            billNo={selectedOOP?.billNo}
          />
 
          <PaymentSimulationModal

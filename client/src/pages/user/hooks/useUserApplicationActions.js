@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
@@ -95,23 +95,19 @@ export const useUserApplicationActions = (fetchApplications) => {
       }
    };
 
-   const handleViewOOP = async (applicationId) => {
+   const handleViewOOP = useCallback(async (billNo) => {
       try {
-         const response = await axios.get(`http://localhost:3000/api/user/oop/${applicationId}`, {
-            headers: getAuthHeader()
+         const token = localStorage.getItem('token');
+         const response = await axios.get(`http://localhost:3000/api/user/oop-by-billno/${billNo}`, {
+            headers: { Authorization: token }
          });
-         if (response.data.success) {
-            return response.data.oop;
-         } else {
-            toast.error('Failed to fetch Order of Payment');
-            throw new Error('Failed to fetch Order of Payment');
-         }
+         return response.data;
       } catch (error) {
          console.error('Error fetching Order of Payment:', error);
-         toast.error('Failed to fetch Order of Payment');
+         toast.error('Failed to fetch Order of Payment details');
          throw error;
       }
-   };
+   }, []);
 
    const handleSimulatePayment = async (application) => {
       try {
