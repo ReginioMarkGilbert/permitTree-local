@@ -50,8 +50,10 @@ const useUsers = () => {
                'Content-Type': 'application/json'
             }
          });
-         setUsers(prevUsers => [...prevUsers, response.data]);
-         return response.data;
+
+         const addedUser = response.data;
+         setUsers(prevUsers => [...prevUsers, addedUser]);
+         return addedUser;
       } catch (err) {
          console.error('Error adding user:', err.response?.data || err.message);
          throw new Error(err.response?.data?.message || 'Failed to add user');

@@ -42,6 +42,11 @@ const SA_AddUserModal = ({ isOpen, onClose, onAddUser }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Ensure all required fields are filled
+    if (!newUser.firstName || !newUser.lastName || !newUser.email || !newUser.password || !newUser.role || !newUser.userType) {
+      alert('Please fill all required fields');
+      return;
+    }
     onAddUser(newUser);
     onClose();
   };
@@ -138,7 +143,7 @@ const SA_AddUserModal = ({ isOpen, onClose, onAddUser }) => {
               </Label>
               <Select
                 onValueChange={(value) => handleSelectChange('role', value)}
-                defaultValue={newUser.role}
+                value={newUser.role}
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select role" />

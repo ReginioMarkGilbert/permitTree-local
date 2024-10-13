@@ -7,7 +7,7 @@ const router = express.Router();
 
 // Check if the model already exists before defining it
 const AdminSchema = new mongoose.Schema({
-   adminId: { type: Number, unique: true }, // Add adminId field
+   adminId: { type: Number, unique: true }, // Add unique: true here
    username: { type: String, required: true, unique: true },
    // email: { type: String, required: true, unique: true },
    password: { type: String, required: true },
@@ -29,6 +29,9 @@ const AdminSchema = new mongoose.Schema({
    firstName: { type: String },
    lastName: { type: String }
 });
+
+// Ensure index
+AdminSchema.index({ adminId: 1 }, { unique: true });
 
 AdminSchema.pre('save', async function (next) {
    const salt = await bcrypt.genSalt(10);

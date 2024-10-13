@@ -3,7 +3,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticateSuperAdmin } = require('../../middleware/authMiddleware');
 const { User } = require('../../User/modules/userAuthModule');
-const { Admin } = require('../AdminModules/adminAuthModule');
+const { Admin, AdminIdCounter } = require('../AdminModules/adminAuthModule');
 
 // Schema
 const SA_ManageUserSchema = new mongoose.Schema({
@@ -81,18 +81,19 @@ router.post('/users', authenticateSuperAdmin, async (req, res) => {
       }
 
       let newUser;
-      if (userType === 'Personnel' && (role === 'ChiefRPS' || role === 'superadmin')) {
-         const lastAdmin = await Admin.findOne().sort({ adminId: -1 });
-         const newAdminId = lastAdmin ? (lastAdmin.adminId || 0) + 1 : 1;
+      if (userType === 'Personnel' && ['Chief_RPS', 'superadmin', 'Technical_Staff', 'Chief_TSD', 'Recieving_Clerk', 'Releasing_Clerk', 'Accountant', 'Bill_Collector', 'PENR_CENR_Officer'].includes(role)) {
+         // Find the highest existing adminId
+         const highestAdmin = await Admin.findOne().sort('-adminId');
+         const nextAdminId = highestAdmin ? highestAdmin.adminId + 1 : 1;
 
          newUser = new Admin({
-            adminId: newAdminId,
+            adminId: nextAdminId,
             firstName,
             lastName,
             username,
             email,
             password,
-            role: role,
+            role,
          });
       } else {
          const lastUser = await User.findOne().sort({ userId: -1 });

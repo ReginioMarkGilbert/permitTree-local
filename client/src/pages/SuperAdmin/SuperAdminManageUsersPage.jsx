@@ -5,6 +5,7 @@ import SA_UserDetailsViewModal from './components/SA_userDetailsViewModal';
 import SA_UserEditDetailsModal from './components/SA_userEditDetailsModal';
 import SA_AddUserModal from './components/SA_AddUserModal';  // Make sure this import is correct
 import { Button } from "@/components/ui/button";
+import { toast } from 'react-hot-toast'; // Make sure you have this package installed
 
 const SuperAdminManageUsersPage = () => {
   const { users, loading, error, updateUser, addUser } = useUsers();
@@ -41,11 +42,11 @@ const SuperAdminManageUsersPage = () => {
   const handleAddUser = useCallback(async (newUser) => {
     try {
       const addedUser = await addUser(newUser);
-      // No need to call setUsers here, as it's already done in the addUser function
       setIsAddModalOpen(false);
+      toast.success('User added successfully');
     } catch (err) {
       console.error('Failed to add user:', err);
-      // You might want to show an error message to the user here
+      toast.error(err.message || 'Failed to add user');
     }
   }, [addUser]);
 
