@@ -89,7 +89,12 @@ const AffixEsignOOPFormModal = ({ isOpen, onClose, orderOfPayment, refreshOrderO
                <div>
                   <Label>Chief RPS Signature</Label>
                   {orderOfPayment.signatures?.chiefRPS ? (
-                     <p>Signed on: {new Date(orderOfPayment.signatures.chiefRPS).toLocaleString()}</p>
+                     <div>
+                        <p>Signed on: {new Date(orderOfPayment.signatures.chiefRPS).toLocaleString()}</p>
+                        {orderOfPayment.rpsSignatureImage && (
+                           <img src={orderOfPayment.rpsSignatureImage} alt="Chief RPS Signature" className="max-h-24 mt-2" />
+                        )}
+                     </div>
                   ) : (
                      <p>Not signed yet</p>
                   )}

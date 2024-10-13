@@ -47,7 +47,8 @@ router.post('/order-of-payments', authenticateToken, async (req, res) => {
          applicationId: application.customId,
          applicantName: application.ownerName,
          address: application.address,
-         natureOfApplication: application.applicationType
+         natureOfApplication: application.applicationType,
+         rpsSignatureImage: req.body.rpsSignatureImage // Add this line to save the signature image
       });
 
       const savedOrderOfPayment = await newOrderOfPayment.save();
@@ -91,11 +92,20 @@ router.put('/order-of-payments/:id', authenticateToken, async (req, res) => {
 
 router.put('/order-of-payments/:id/sign', authenticateToken, async (req, res) => {
    try {
+      const { signatureType, signature } = req.body;
       const orderOfPayment = await OrderOfPayment.findById(req.params.id);
       if (!orderOfPayment) {
          return res.status(404).json({ message: 'Order of payment not found' });
       }
-      orderOfPayment.signatures.chiefRPS = new Date();
+
+      if (signatureType === 'chiefRPS') {
+         orderOfPayment.signatures.chiefRPS = new Date();
+         orderOfPayment.rpsSignatureImage = signature;
+      } else if (signatureType === 'technicalServices') {
+         orderOfPayment.signatures.technicalServices = new Date();
+         orderOfPayment.tsdSignatureImage = signature;
+      }
+
       orderOfPayment.status = 'Awaiting Payment';
       const updatedOrderOfPayment = await orderOfPayment.save();
       res.json(updatedOrderOfPayment);

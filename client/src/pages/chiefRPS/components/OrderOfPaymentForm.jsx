@@ -154,7 +154,7 @@ const OrderOfPaymentForm = ({ onClose }) => {
 
          // Prepare the data for submission
          const submissionData = {
-            applicationId: formData.applicationId, // This should be the customId of the application
+            applicationId: formData.applicationId,
             billNo: formData.billNo,
             date: formData.date,
             address: formData.address,
@@ -166,7 +166,11 @@ const OrderOfPaymentForm = ({ onClose }) => {
             })),
             totalAmount: totalAmount,
             status: 'Pending Signature',
-            signatures: {}
+            signatures: {
+               chiefRPS: formData.rpsSignature ? new Date() : null,
+               technicalServices: null
+            },
+            rpsSignatureImage: formData.rpsSignature // Add this line to include the signature image
          };
 
          console.log('Submitting data:', submissionData);

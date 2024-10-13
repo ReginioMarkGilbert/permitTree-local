@@ -31,7 +31,9 @@ const OrderOfPaymentSchema = new mongoose.Schema({
       contentType: String,
       data: Buffer
    },
-   orNumber: String
+   orNumber: String,
+   rpsSignatureImage: String,
+   tsdSignatureImage: String // Add this line
 });
 
 const OrderOfPayment = mongoose.model('OrderOfPayment', OrderOfPaymentSchema);
