@@ -110,8 +110,8 @@ const App = () => {
                         <Route path="/chief-rps/settings" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSSettingsPage /></ProtectedRoute>} />
                         <Route path="/chief-rps/reports" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSReportsPage /></ProtectedRoute>} />
                         <Route path="/chief-rps/notifications" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSNotificationPage /></ProtectedRoute>} />
-                        <Route path="/chief-rps/order-of-payment" element={<ProtectedRoute roles={['ChiefRPS']}><ChiefRPSorderOfPaymentPage /></ProtectedRoute>} />
-                        <Route path="/chief-rps/order-of-payment/:action" element={<ProtectedRoute roles={['ChiefRPS']}><ChiefRPSorderOfPaymentPage /></ProtectedRoute>} />
+                        <Route path="/chief-rps/order-of-payment" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSorderOfPaymentPage /></ProtectedRoute>} />
+                        <Route path="/chief-rps/order-of-payment/:action" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSorderOfPaymentPage /></ProtectedRoute>} />
 
                         <Route path="/superadmin/home" element={<ProtectedRoute roles={['superadmin']}><SuperAdminHomePage /></ProtectedRoute>} />
                         <Route path="/superadmin/dashboard" element={<ProtectedRoute roles={['superadmin']}><SuperAdminDashboard /></ProtectedRoute>} />

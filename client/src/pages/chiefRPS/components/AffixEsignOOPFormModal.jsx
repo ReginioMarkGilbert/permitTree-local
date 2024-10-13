@@ -5,10 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { UploadIcon } from "lucide-react";
 
-const OrderOfPaymentViewModal = ({ isOpen, onClose, orderOfPayment, refreshOrderOfPayments }) => {
+const AffixEsignOOPFormModal = ({ isOpen, onClose, orderOfPayment, refreshOrderOfPayments }) => {
    const [tsdSignature, setTsdSignature] = useState(null);
 
    const handleSignatureUpload = (event) => {
@@ -25,7 +25,7 @@ const OrderOfPaymentViewModal = ({ isOpen, onClose, orderOfPayment, refreshOrder
    const handleSubmit = async () => {
       try {
          const token = localStorage.getItem('token');
-         await axios.put(`http://localhost:3000/api/admin/order-of-payments/${orderOfPayment._id}/sign`,
+         await axios.put(`http://localhost:3000/api/admin/order-of-payments/${orderOfPayment?._id}/sign`,
             { signatureType: 'technicalServices', signature: tsdSignature },
             { headers: { Authorization: token } }
          );
@@ -37,6 +37,10 @@ const OrderOfPaymentViewModal = ({ isOpen, onClose, orderOfPayment, refreshOrder
          toast.error('Failed to sign Order of Payment');
       }
    };
+
+   if (!orderOfPayment) {
+      return null; // or return a loading state or error message
+   }
 
    return (
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -50,15 +54,15 @@ const OrderOfPaymentViewModal = ({ isOpen, onClose, orderOfPayment, refreshOrder
             <div className="mt-4 space-y-4">
                <div>
                   <Label>Application ID</Label>
-                  <Input value={orderOfPayment?.applicationId} readOnly />
+                  <Input value={orderOfPayment.applicationId} readOnly />
                </div>
                <div>
                   <Label>Applicant Name</Label>
-                  <Input value={orderOfPayment?.applicantName} readOnly />
+                  <Input value={orderOfPayment.applicantName} readOnly />
                </div>
                <div>
                   <Label>Nature of Application</Label>
-                  <Input value={orderOfPayment?.natureOfApplication} readOnly />
+                  <Input value={orderOfPayment.natureOfApplication} readOnly />
                </div>
                <Table>
                   <TableHeader>
@@ -69,7 +73,7 @@ const OrderOfPaymentViewModal = ({ isOpen, onClose, orderOfPayment, refreshOrder
                      </TableRow>
                   </TableHeader>
                   <TableBody>
-                     {orderOfPayment?.items.map((item, index) => (
+                     {orderOfPayment.items?.map((item, index) => (
                         <TableRow key={index}>
                            <TableCell>{item.legalBasis}</TableCell>
                            <TableCell>{item.description}</TableCell>
@@ -80,11 +84,11 @@ const OrderOfPaymentViewModal = ({ isOpen, onClose, orderOfPayment, refreshOrder
                </Table>
                <div>
                   <Label>Total Amount</Label>
-                  <Input value={`₱ ${orderOfPayment?.totalAmount.toFixed(2)}`} readOnly />
+                  <Input value={`₱ ${orderOfPayment.totalAmount.toFixed(2)}`} readOnly />
                </div>
                <div>
                   <Label>Chief RPS Signature</Label>
-                  {orderOfPayment?.signatures.chiefRPS ? (
+                  {orderOfPayment.signatures?.chiefRPS ? (
                      <p>Signed on: {new Date(orderOfPayment.signatures.chiefRPS).toLocaleString()}</p>
                   ) : (
                      <p>Not signed yet</p>
@@ -123,4 +127,4 @@ const OrderOfPaymentViewModal = ({ isOpen, onClose, orderOfPayment, refreshOrder
    );
 };
 
-export default OrderOfPaymentViewModal;
+export default AffixEsignOOPFormModal;
