@@ -152,22 +152,9 @@ const OrderOfPaymentForm = ({ onClose }) => {
          // Calculate total amount
          const totalAmount = formData.fees.reduce((sum, fee) => sum + Number(fee.amount || 0), 0);
 
-         // Combine date and time for payment and receipt
-         const combineDateTime = (date, time) => {
-            if (!date || !time) return null;
-            const [hours, minutes] = time.split(':');
-            const newDate = new Date(date);
-            newDate.setHours(parseInt(hours), parseInt(minutes));
-            return newDate;
-         };
-
-         const paymentDateTime = combineDateTime(formData.paymentDate, formData.paymentTime);
-         const receiptDateTime = combineDateTime(formData.receiptDate, formData.receiptTime);
-
          // Prepare the data for submission
          const submissionData = {
-            applicationId: formData.applicationId,
-            applicantName: formData.namePayee,
+            applicationId: formData.applicationId, // This should be the customId of the application
             billNo: formData.billNo,
             date: formData.date,
             address: formData.address,
@@ -179,18 +166,8 @@ const OrderOfPaymentForm = ({ onClose }) => {
             })),
             totalAmount: totalAmount,
             status: 'Pending Signature',
-            signatures: {},
-            paymentDate: paymentDateTime,
-            receiptDate: receiptDateTime
+            signatures: {}
          };
-
-         // Add signatures if present
-         if (formData.rpsSignature) {
-            submissionData.signatures.chiefRPS = new Date();
-         }
-         if (formData.tsdSignature) {
-            submissionData.signatures.technicalServices = new Date();
-         }
 
          console.log('Submitting data:', submissionData);
 
@@ -451,7 +428,7 @@ const OrderOfPaymentForm = ({ onClose }) => {
    };
 
    return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 mt-16">
          <div className="bg-white shadow-md rounded-lg p-6">
             <div className="flex justify-between items-center mb-6">
                <Button variant="ghost" onClick={handleBack} className="flex items-center">

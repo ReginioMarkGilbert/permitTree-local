@@ -217,7 +217,7 @@ const UserApplicationsStatusPage = () => {
 
    return (
       <div className="min-h-screen bg-green-50">
-         <div className="container mx-auto px-4 sm:px-6 py-8">
+         <div className="container mx-auto px-4 sm:px-6 py-24">
             <div className="flex justify-between items-center mb-6">
                <h1 className="text-3xl font-bold text-green-800">My Applications</h1>
                <Button onClick={mainTab === 'Applications' ? fetchApplications : fetchOrderOfPayments} variant="outline">

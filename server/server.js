@@ -89,7 +89,7 @@ app.use('/api/admin/reports', adminReportsRouter);
 const { router: personnelNotificationRouter } = require('./Admin/AdminModules/PersonnelNotificationControllers');
 app.use('/api/admin', personnelNotificationRouter);
 
-const { router: chiefOrderOfPaymentRouter } = require('./Admin/AdminModules/chiefOrderOfPaymentModule');
+const chiefOrderOfPaymentRouter = require('./Admin/AdminModules/chiefOrderOfPaymentModule');
 app.use('/api/admin', chiefOrderOfPaymentRouter);
 
 const { router: superAdminManageUsersRouter } = require('./Admin/SuperAdminModules/SA_ManageUsersModules');

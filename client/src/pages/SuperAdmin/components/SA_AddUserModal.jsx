@@ -145,8 +145,15 @@ const SA_AddUserModal = ({ isOpen, onClose, onAddUser }) => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="user">User</SelectItem>
-                  <SelectItem value="ChiefRPS">Chief RPS</SelectItem>
+                  <SelectItem value="Chief_RPS">Chief RPS</SelectItem>
                   <SelectItem value="superadmin">Super Admin</SelectItem>
+                  <SelectItem value="Technical_Staff">Technical Staff</SelectItem>
+                  <SelectItem value="Chief_TSD">Chief TSD</SelectItem>
+                  <SelectItem value="Recieving_Clerk">Receiving Clerk</SelectItem>
+                  <SelectItem value="Releasing_Clerk">Releasing Clerk</SelectItem>
+                  <SelectItem value="Accountant">Accountant</SelectItem>
+                  <SelectItem value="Bill_Collector">Bill Collector</SelectItem>
+                  <SelectItem value="PENR_CENR_Officer">PENR/CENR Officer</SelectItem>
                 </SelectContent>
               </Select>
             </div>
