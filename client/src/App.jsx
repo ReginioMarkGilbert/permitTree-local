@@ -101,13 +101,13 @@ const App = () => {
                         <Route path="/profile" element={<UserProfilePage />} />
                         <Route path="/notifications" element={<ProtectedRoute roles={['user']}><UserNotificationsPage /></ProtectedRoute>} />
 
-                        <Route path="/chief-rps/home" element={<ProtectedRoute roles={['ChiefRPS']}><ChiefRPSHomePage /></ProtectedRoute>} />
-                        <Route path="/chief-rps/dashboard" element={<ProtectedRoute roles={['ChiefRPS']}><ChiefRPSDashboard /></ProtectedRoute>} />
-                        <Route path="/chief-rps/review/:id" element={<ProtectedRoute roles={['ChiefRPS']}><ChiefRPSApplicationReviewModal /></ProtectedRoute>} />
-                        <Route path="/chief-rps/view/:id" element={<ProtectedRoute roles={['ChiefRPS']}><ChiefRPSApplicationViewModal /></ProtectedRoute>} />
-                        <Route path="/chief-rps/settings" element={<ProtectedRoute roles={['ChiefRPS']}><ChiefRPSSettingsPage /></ProtectedRoute>} />
-                        <Route path="/chief-rps/reports" element={<ProtectedRoute roles={['ChiefRPS']}><ChiefRPSReportsPage /></ProtectedRoute>} />
-                        <Route path="/chief-rps/notifications" element={<ProtectedRoute roles={['ChiefRPS']}><ChiefRPSNotificationPage /></ProtectedRoute>} />
+                        <Route path="/chief-rps/home" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSHomePage /></ProtectedRoute>} />
+                        <Route path="/chief-rps/dashboard" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSDashboard /></ProtectedRoute>} />
+                        <Route path="/chief-rps/review/:id" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSApplicationReviewModal /></ProtectedRoute>} />
+                        <Route path="/chief-rps/view/:id" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSApplicationViewModal /></ProtectedRoute>} />
+                        <Route path="/chief-rps/settings" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSSettingsPage /></ProtectedRoute>} />
+                        <Route path="/chief-rps/reports" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSReportsPage /></ProtectedRoute>} />
+                        <Route path="/chief-rps/notifications" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSNotificationPage /></ProtectedRoute>} />
                         <Route path="/chief-rps/order-of-payment" element={<ProtectedRoute roles={['ChiefRPS']}><ChiefRPSorderOfPaymentPage /></ProtectedRoute>} />
                         <Route path="/chief-rps/order-of-payment/:action" element={<ProtectedRoute roles={['ChiefRPS']}><ChiefRPSorderOfPaymentPage /></ProtectedRoute>} />
 
