@@ -41,6 +41,21 @@ const useUsers = () => {
       }
    }, [users]);
 
+   const deleteUser = useCallback(async (userId) => {
+      try {
+         const token = getAuthToken();
+         await axios.delete(`http://localhost:3000/api/admin/super/users/${userId}`, {
+            headers: { Authorization: token }
+         });
+         setUsers(prevUsers => prevUsers.filter(user => user._id !== userId));
+         console.log('User deleted successfully');
+         return true;
+      } catch (err) {
+         console.error('Error deleting user:', err);
+         throw new Error(err.response?.data?.message || 'Failed to delete user');
+      }
+   }, []);
+
    const addUser = useCallback(async (newUser) => {
       try {
          const token = getAuthToken();
@@ -60,7 +75,8 @@ const useUsers = () => {
       }
    }, []);
 
-   return { users, loading, error, updateUser, addUser, setUsers };
+   return { users, loading, error, updateUser, addUser, deleteUser, setUsers };
 };
+
 
 export default useUsers;

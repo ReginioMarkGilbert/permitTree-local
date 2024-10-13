@@ -147,19 +147,19 @@ router.put('/users/:id', authenticateSuperAdmin, async (req, res) => {
 router.delete('/users/:id', authenticateSuperAdmin, async (req, res) => {
    try {
       const { id } = req.params;
-      const user = await User.findById(id);
-      const admin = await Admin.findById(id);
+      let deletedUser = await User.findByIdAndDelete(id);
 
-      if (user) {
-         await User.findByIdAndDelete(id);
-      } else if (admin) {
-         await Admin.findByIdAndDelete(id);
-      } else {
+      if (!deletedUser) {
+         deletedUser = await Admin.findByIdAndDelete(id);
+      }
+
+      if (!deletedUser) {
          return res.status(404).json({ message: 'User not found' });
       }
 
-      res.json({ message: 'User deleted successfully' });
+      res.json({ message: 'User deleted successfully', deletedUser });
    } catch (error) {
+      console.error('Error deleting user:', error);
       res.status(500).json({ message: 'Error deleting user', error: error.message });
    }
 });

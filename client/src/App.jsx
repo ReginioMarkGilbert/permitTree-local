@@ -44,6 +44,8 @@ import ChiefRPSNotificationProvider from './pages/chiefRPS/contexts/ChiefRPSNoti
 import { checkTokenExpiration } from './utils/tokenManager';
 import ChiefRPSorderOfPaymentPage from './pages/chiefRPS/ChiefRPSorderOfPaymentPage';
 
+import { Toaster } from 'sonner';
+
 const App = () => {
    const { sidebarToggle, toggleSidebar } = useSidebarToggle();
    const navigate = useNavigate();
@@ -121,6 +123,7 @@ const App = () => {
                   </div>
                </div>
                <ToastContainer />
+               <Toaster position="top-right" duration={3000} />
             </div>
          </ChiefRPSNotificationProvider>
       </NotificationProvider>
