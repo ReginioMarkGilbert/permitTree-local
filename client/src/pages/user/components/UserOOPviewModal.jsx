@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from 'sonner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ClipboardIcon, CalendarIcon, UserIcon, MapPinIcon, FileTextIcon, CheckCircleIcon } from 'lucide-react';
+import { ClipboardIcon, CalendarIcon, FileCheck, UserCheck, MapPinIcon, Hash, CheckCircleIcon, CreditCard } from 'lucide-react';
 import '../../../components/ui/styles/customScrollBar.css';
 
 const UserOOPviewModal = ({ isOpen, onClose, billNo }) => {
@@ -58,30 +58,32 @@ const UserOOPviewModal = ({ isOpen, onClose, billNo }) => {
             ) : oop ? (
                <div className="mt-6 space-y-6">
                   <div className="border rounded-lg p-4">
-                     <h3 className="text-lg font-semibold flex items-center mb-2">
-                        <ClipboardIcon className="mr-2" /> OOP Number: {oop.customId}
+                     <h3 className="text-lg font-semibold flex items-center mb-4">
+                        <FileCheck className="mr-2" /> OOP Number: {oop.customId}
                      </h3>
                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <p className="flex items-center"><FileTextIcon className="mr-2 h-4 w-4" /> Application ID: {oop.applicationId}</p>
-                        <p className="flex items-center"><CheckCircleIcon className="mr-2 h-4 w-4" /> Status: {oop.status}</p>
-                        <p className="flex items-center"><CalendarIcon className="mr-2 h-4 w-4" /> Date Created: {new Date(oop.dateCreated).toLocaleString()}</p>
+                        <p className="flex items-center font-semibold">Application ID:&nbsp;<span className="font-normal">{oop.applicationId}</span></p>
+                        <p className="flex items-center font-semibold">Status:&nbsp;<span className="font-normal">{oop.status}</span></p>
+                        <p className="flex items-center font-semibold">Date Created:&nbsp;<span className="font-normal">{new Date(oop.dateCreated).toLocaleString()}</span></p>
                      </div>
                   </div>
 
                   <div className="border rounded-lg p-4">
                      <h4 className="text-lg font-semibold mb-2 flex items-center">
-                        <UserIcon className="mr-2" /> Applicant Details
+                        <UserCheck className="mr-2" /> Applicant Details
                      </h4>
-                     <p className="flex items-center text-sm"><UserIcon className="mr-2 h-4 w-4" /> Name: {oop.applicantName}</p>
-                     <p className="flex items-center text-sm mt-1"><MapPinIcon className="mr-2 h-4 w-4" /> Address: {oop.address}</p>
+                     <p className="flex items-center text-sm font-semibold"> Name:&nbsp;<span className="font-normal">{oop.applicantName}</span></p>
+                     <p className="flex items-center text-sm font-semibold mt-2"> Address:&nbsp;<span className="font-normal">{oop.address}</span></p>
                   </div>
 
                   <div className="border rounded-lg p-4">
-                     <h4 className="text-lg font-semibold mb-2">Payment Details</h4>
+                     <h4 className="text-lg font-semibold mb-2 flex items-center">
+                        <CreditCard className="mr-2" /> Payment Details
+                     </h4>
                      <Table>
                         <TableHeader>
                            <TableRow>
-                              <TableHead className="w-2/3">Description</TableHead>
+                              <TableHead className="w-2/3 ">Description</TableHead>
                               <TableHead className="w-1/3 text-right">Amount</TableHead>
                            </TableRow>
                         </TableHeader>
