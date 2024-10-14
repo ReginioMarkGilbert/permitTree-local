@@ -44,6 +44,9 @@ import ChiefRPSNotificationProvider from './pages/chiefRPS/contexts/ChiefRPSNoti
 import { checkTokenExpiration } from './utils/tokenManager';
 import ChiefRPSorderOfPaymentPage from './pages/chiefRPS/ChiefRPSorderOfPaymentPage';
 
+import { ApolloProvider } from '@apollo/client';
+import client from './apolloClient';
+
 import { Toaster } from 'sonner';
 
 const App = () => {
@@ -71,62 +74,64 @@ const App = () => {
    }, [navigate]);
 
    return (
-      <NotificationProvider>
-         <ChiefRPSNotificationProvider>
-            <div className="flex">
-               {isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && (
-                  <>
-                     {userRole === 'superadmin' ? (
-                        <SuperAdminSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
-                     ) : userRole === 'Chief_RPS' ? (
-                        <ChiefRPSSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
-                     ) : (
-                        <UserSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
-                     )}
-                     {showNavbar && <Navbar sidebarToggle={sidebarToggle} setSidebarToggle={toggleSidebar} />}
-                  </>
-               )}
-               <div className={`flex-1 transition-all duration-300 ${sidebarToggle && showNavbar ? 'ml-64' : 'ml-0'}`}>
-                  <div className="p-0">
-                     <Routes>
-                        <Route path="/" element={<LandingPage />} />
-                        <Route path="/auth" element={<UserAuthPage />} />
-                        <Route path="/home" element={<ProtectedRoute roles={['user']}><HomePage /></ProtectedRoute>} />
-                        <Route path="/permits" element={<ProtectedRoute roles={['user']}><PermitsPage /></ProtectedRoute>} />
-                        <Route path="/applicationsStatus" element={<ProtectedRoute roles={['user']}><UserApplicationsPage /></ProtectedRoute>} />
-                        <Route path="/apply/:formType" element={<ProtectedRoute roles={['user']}><ApplicationForm /></ProtectedRoute>} />
-                        <Route path="/unauthorized" element={<div>Unauthorized Access</div>} />
-                        <Route path="/about" element={<AboutPage />} />
-                        <Route path="/services" element={<ServicesPage />} />
-                        <Route path="/contact" element={<ContactPage />} />
-                        <Route path="/learnMore" element={<LearnMorePage />} />
-                        <Route path="/profile" element={<UserProfilePage />} />
-                        <Route path="/notifications" element={<ProtectedRoute roles={['user']}><UserNotificationsPage /></ProtectedRoute>} />
+      <ApolloProvider client={client}>
+         <NotificationProvider>
+            <ChiefRPSNotificationProvider>
+               <div className="flex">
+                  {isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && (
+                     <>
+                        {userRole === 'superadmin' ? (
+                           <SuperAdminSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
+                        ) : userRole === 'Chief_RPS' ? (
+                           <ChiefRPSSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
+                        ) : (
+                           <UserSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
+                        )}
+                        {showNavbar && <Navbar sidebarToggle={sidebarToggle} setSidebarToggle={toggleSidebar} />}
+                     </>
+                  )}
+                  <div className={`flex-1 transition-all duration-300 ${sidebarToggle && showNavbar ? 'ml-64' : 'ml-0'}`}>
+                     <div className="p-0">
+                        <Routes>
+                           <Route path="/" element={<LandingPage />} />
+                           <Route path="/auth" element={<UserAuthPage />} />
+                           <Route path="/home" element={<ProtectedRoute roles={['user']}><HomePage /></ProtectedRoute>} />
+                           <Route path="/permits" element={<ProtectedRoute roles={['user']}><PermitsPage /></ProtectedRoute>} />
+                           <Route path="/applicationsStatus" element={<ProtectedRoute roles={['user']}><UserApplicationsPage /></ProtectedRoute>} />
+                           <Route path="/apply/:formType" element={<ProtectedRoute roles={['user']}><ApplicationForm /></ProtectedRoute>} />
+                           <Route path="/unauthorized" element={<div>Unauthorized Access</div>} />
+                           <Route path="/about" element={<AboutPage />} />
+                           <Route path="/services" element={<ServicesPage />} />
+                           <Route path="/contact" element={<ContactPage />} />
+                           <Route path="/learnMore" element={<LearnMorePage />} />
+                           <Route path="/profile" element={<UserProfilePage />} />
+                           <Route path="/notifications" element={<ProtectedRoute roles={['user']}><UserNotificationsPage /></ProtectedRoute>} />
 
-                        <Route path="/chief-rps/home" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSHomePage /></ProtectedRoute>} />
-                        <Route path="/chief-rps/dashboard" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSDashboard /></ProtectedRoute>} />
-                        <Route path="/chief-rps/review/:id" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSApplicationReviewModal /></ProtectedRoute>} />
-                        <Route path="/chief-rps/view/:id" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSApplicationViewModal /></ProtectedRoute>} />
-                        <Route path="/chief-rps/settings" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSSettingsPage /></ProtectedRoute>} />
-                        <Route path="/chief-rps/reports" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSReportsPage /></ProtectedRoute>} />
-                        <Route path="/chief-rps/notifications" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSNotificationPage /></ProtectedRoute>} />
-                        <Route path="/chief-rps/order-of-payment" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSorderOfPaymentPage /></ProtectedRoute>} />
-                        <Route path="/chief-rps/order-of-payment/:action" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSorderOfPaymentPage /></ProtectedRoute>} />
+                           <Route path="/chief-rps/home" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSHomePage /></ProtectedRoute>} />
+                           <Route path="/chief-rps/dashboard" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSDashboard /></ProtectedRoute>} />
+                           <Route path="/chief-rps/review/:id" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSApplicationReviewModal /></ProtectedRoute>} />
+                           <Route path="/chief-rps/view/:id" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSApplicationViewModal /></ProtectedRoute>} />
+                           <Route path="/chief-rps/settings" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSSettingsPage /></ProtectedRoute>} />
+                           <Route path="/chief-rps/reports" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSReportsPage /></ProtectedRoute>} />
+                           <Route path="/chief-rps/notifications" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSNotificationPage /></ProtectedRoute>} />
+                           <Route path="/chief-rps/order-of-payment" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSorderOfPaymentPage /></ProtectedRoute>} />
+                           <Route path="/chief-rps/order-of-payment/:action" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSorderOfPaymentPage /></ProtectedRoute>} />
 
-                        <Route path="/superadmin/home" element={<ProtectedRoute roles={['superadmin']}><SuperAdminHomePage /></ProtectedRoute>} />
-                        <Route path="/superadmin/dashboard" element={<ProtectedRoute roles={['superadmin']}><SuperAdminDashboard /></ProtectedRoute>} />
-                        <Route path="/superadmin/manage-users" element={<ProtectedRoute roles={['superadmin']}><SuperAdminManageUsersPage /></ProtectedRoute>} />
-                        <Route path="/superadmin/reports" element={<ProtectedRoute roles={['superadmin']}><SuperAdminReportsPage /></ProtectedRoute>} />
-                        <Route path="/superadmin/settings" element={<ProtectedRoute roles={['superadmin']}><SuperAdminSettingsPage /></ProtectedRoute>} />
+                           <Route path="/superadmin/home" element={<ProtectedRoute roles={['superadmin']}><SuperAdminHomePage /></ProtectedRoute>} />
+                           <Route path="/superadmin/dashboard" element={<ProtectedRoute roles={['superadmin']}><SuperAdminDashboard /></ProtectedRoute>} />
+                           <Route path="/superadmin/manage-users" element={<ProtectedRoute roles={['superadmin']}><SuperAdminManageUsersPage /></ProtectedRoute>} />
+                           <Route path="/superadmin/reports" element={<ProtectedRoute roles={['superadmin']}><SuperAdminReportsPage /></ProtectedRoute>} />
+                           <Route path="/superadmin/settings" element={<ProtectedRoute roles={['superadmin']}><SuperAdminSettingsPage /></ProtectedRoute>} />
 
-                     </Routes>
+                        </Routes>
+                     </div>
                   </div>
+                  <ToastContainer />
+                  <Toaster position="top-right" duration={3000} />
                </div>
-               <ToastContainer />
-               <Toaster position="top-right" duration={3000} />
-            </div>
-         </ChiefRPSNotificationProvider>
-      </NotificationProvider>
+            </ChiefRPSNotificationProvider>
+         </NotificationProvider>
+      </ApolloProvider>
    );
 };
 

@@ -12,6 +12,7 @@
     "test": "jest --config=client/jest.config.js"
   },
   "dependencies": {
+    "@apollo/client": "^3.11.8",
     "@nivo/bar": "^0.87.0",
     "@nivo/calendar": "^0.87.0",
     "@nivo/core": "^0.87.0",
@@ -34,6 +35,8 @@
     "date-fns": "^3.6.0",
     "express-session": "^1.18.0",
     "framer-motion": "^11.9.0",
+    "graphql": "^16.9.0",
+    "graphql-request": "^7.1.0",
     "jwt-decode": "^4.0.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.439.0",

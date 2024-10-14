@@ -1,16 +1,46 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
-import { ToastContainer, toast } from 'react-toastify';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+// import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'sonner';
 import 'react-toastify/dist/ReactToastify.css';
 import { setToken } from '../../utils/tokenManager';
-import { getUserRole } from '../../utils/auth';
+import { isAuthenticated, getUserRole } from '../../utils/auth';
+import { request } from 'graphql-request';
+import { FaLeaf } from 'react-icons/fa';
 import AuthButton from '../../components/ui/AuthButton';
 import { Input } from '../../components/ui/Input';
-import { Label } from '../../components/ui/Label';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/Tabs';
-import { FaLeaf } from 'react-icons/fa';
+import { Label } from '../../components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/Tabs';
 import './styles/UserAuthPage.css';
+import { gql, useMutation } from '@apollo/client';
+
+const REGISTER_USER = gql`
+  mutation RegisterUser($firstName: String!, $lastName: String!, $username: String!, $password: String!) {
+    registerUser(firstName: $firstName, lastName: $lastName, username: $username, password: $password) {
+      token
+      user {
+        id
+        username
+        firstName
+        lastName
+      }
+    }
+  }
+`;
+
+const LOGIN_USER = gql`
+  mutation Login($username: String!, $password: String!) {
+    login(username: $username, password: $password) {
+      token
+      user {
+        id
+        username
+        firstName
+        lastName
+      }
+    }
+  }
+`;
 
 const UserAuthPage = () => {
    const [activeTab, setActiveTab] = useState('signin');
@@ -24,6 +54,8 @@ const UserAuthPage = () => {
    const [showPassword, setShowPassword] = useState(false);
    const [passwordError, setPasswordError] = useState('');
    const navigate = useNavigate();
+   const [registerUser] = useMutation(REGISTER_USER);
+   const [loginUser] = useMutation(LOGIN_USER);
 
    useEffect(() => {
       if (firstName && lastName) {
@@ -49,6 +81,7 @@ const UserAuthPage = () => {
 
    const handleSignup = async (e) => {
       e.preventDefault();
+      console.log('Signup initiated');
       if (password !== confirmPassword) {
          toast.error('Passwords do not match.');
          return;
@@ -58,59 +91,61 @@ const UserAuthPage = () => {
          return;
       }
       try {
-         const response = await axios.post('http://localhost:3000/api/signup', {
-            firstName,
-            lastName,
-            username,
-            password,
+         console.log('Sending signup request');
+         const { data } = await registerUser({
+            variables: {
+               firstName,
+               lastName,
+               username,
+               password,
+            },
          });
-         if (response.status === 201) {
-            const data = response.data;
-            setToken(data.token); // Use the new setToken function
-            localStorage.setItem('user', JSON.stringify(data.user));
-            toast.success('Signup successful!', {
-               position: 'top-center',
-               autoClose: 500,
-               hideProgressBar: true,
-               onClose: () => {
-                  navigate('/home?newUser=true', { replace: true });
-               },
-            });
-         } else {
-            toast.error('Signup failed: An error occurred');
-         }
+         console.log('Signup successful, data:', data);
+         const { token, user } = data.registerUser;
+         setToken(token);
+         localStorage.setItem('user', JSON.stringify(user));
+         console.log('Token set and user stored');
+         toast.success('Signup successful!');
+         console.log('Navigating to home page');
+         navigate('/home?newUser=true', { replace: true });
       } catch (error) {
-         toast.error('Signup failed: An error occurred');
+         console.error('Signup error:', error);
+         toast.error(error.message || 'Signup failed. Please try again.');
       }
    };
 
    const handleLogin = async (e) => {
       e.preventDefault();
       try {
-         const response = await axios.post('http://localhost:3000/api/login', {
-            username: loginUsername,
-            password: loginPassword,
+         const { data } = await loginUser({
+            variables: {
+               username: loginUsername,
+               password: loginPassword,
+            },
          });
-         if (response.status === 200) {
-            const data = response.data;
-            setToken(data.token); // Use the new setToken function
-            localStorage.setItem('user', JSON.stringify(data.user));
-            const userRole = getUserRole();
-            if (userRole === 'superadmin') {
-               navigate('/superadmin/home', { replace: true });
-            } else if (userRole === 'Chief_RPS') {
-               navigate('/chief-rps/home', { replace: true });
-            } else {
-               navigate('/home?newUser=false', { replace: true });
-            }
-         } else {
-            toast.error('Login failed: Invalid username or password');
-         }
+         const { token, user } = data.login;
+         setToken(token);
+         localStorage.setItem('user', JSON.stringify(user));
+         const userRole = getUserRole();
+         toast.success('Login successful!', {
+            position: 'top-center',
+            autoClose: 500,
+            hideProgressBar: true,
+            onClose: () => {
+               if (userRole === 'superadmin') {
+                  navigate('/superadmin/home', { replace: true });
+               } else if (userRole === 'Chief_RPS') {
+                  navigate('/chief-rps/home', { replace: true });
+               } else {
+                  navigate('/home', { replace: true });
+               }
+            },
+         });
       } catch (error) {
-         toast.error('Login failed: An error occurred');
+         console.error('Login error:', error);
+         toast.error(error.message || 'Login failed: Invalid credentials');
       }
    };
-
 
    return (
       <div className="flex flex-col min-h-screen bg-green-50">
@@ -196,7 +231,6 @@ const UserAuthPage = () => {
          <footer className="py-6 text-center bg-green-800 text-white">
             <p className="text-sm">&copy; 2023 DENR-PENRO. All rights reserved.</p>
          </footer>
-         <ToastContainer />
       </div>
    );
 };

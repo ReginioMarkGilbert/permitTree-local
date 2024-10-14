@@ -17,6 +17,7 @@ const formatNotificationType = (type) => {
 };
 
 const HomePage = () => {
+    console.log('Rendering HomePage');
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [recentApplications, setRecentApplications] = useState([]);
     const [loading, setLoading] = useState(true);
