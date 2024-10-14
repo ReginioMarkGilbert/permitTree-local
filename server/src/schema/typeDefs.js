@@ -63,9 +63,17 @@ const typeDefs = gql`
   type Mutation {
     login(username: String!, password: String!): AuthPayload
     registerUser(firstName: String!, lastName: String!, username: String!, password: String!): AuthPayload!
-    createAdmin(username: String!, password: String!, role: String!, firstName: String, lastName: String): Admin
+    createAdmin(input: CreateAdminInput!): Admin!
     updateUserProfile(input: UpdateUserProfileInput!): User
     logout: Boolean
+  }
+
+  input CreateAdminInput {
+    username: String!
+    password: String!
+    role: String!
+    firstName: String
+    lastName: String
   }
 `;
 

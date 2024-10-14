@@ -5,6 +5,8 @@ const { graphqlUploadExpress } = require('graphql-upload-minimal');
 const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
+const jwt = require('jsonwebtoken');
+const User = require('./src/models/User');
 
 const typeDefs = require('./src/schema/typeDefs');
 const resolvers = require('./src/resolvers');
@@ -18,21 +20,27 @@ const startServer = async () => {
    const server = new ApolloServer({
       typeDefs,
       resolvers,
-      csrfPrevention: false,
    });
 
    await server.start();
 
    app.use(cors());
-   // Increase the payload size limit (e.g., to 10MB)
-   app.use(express.json({ limit: '10mb' }));
-   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-   app.use(graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 1 })); // 10MB limit
+   app.use(express.json());
+   app.use(graphqlUploadExpress());
 
    app.use('/graphql', expressMiddleware(server, {
       context: async ({ req }) => {
          const token = req.headers.authorization || '';
-         return { token };
+         if (token) {
+            try {
+               const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
+               const user = await User.findById(decoded.id);
+               return { user };
+            } catch (error) {
+               console.error('Error verifying token:', error);
+            }
+         }
+         return {};
       },
    }));
 

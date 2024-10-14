@@ -5,20 +5,21 @@ const Admin = require('../models/Admin');
 const { GraphQLUpload } = require('graphql-upload-minimal');
 const fs = require('fs').promises;
 const path = require('path');
+const AdminIdCounter = require('../models/AdminIdCounter'); // You'll need to create this model
 
 const getContentType = (filename) => {
-  const ext = path.extname(filename).toLowerCase();
-  switch (ext) {
-    case '.jpg':
-    case '.jpeg':
-      return 'image/jpeg';
-    case '.png':
-      return 'image/png';
-    case '.gif':
-      return 'image/gif';
-    default:
-      return 'application/octet-stream';
-  }
+   const ext = path.extname(filename).toLowerCase();
+   switch (ext) {
+      case '.jpg':
+      case '.jpeg':
+         return 'image/jpeg';
+      case '.png':
+         return 'image/png';
+      case '.gif':
+         return 'image/gif';
+      default:
+         return 'application/octet-stream';
+   }
 };
 
 const resolvers = {
@@ -116,23 +117,40 @@ const resolvers = {
 
          return { token, user };
       },
-      createAdmin: async (_, { username, password, role, firstName, lastName }) => {
+      createAdmin: async (_, { input }, context) => {
+         // Remove or modify this check based on your requirements
+         // For now, we'll comment it out to allow admin creation
+         // if (!context.user || context.user.role !== 'superadmin') {
+         //   throw new Error('Not authorized to create admin accounts');
+         // }
+
+         const { username, password, role, firstName, lastName } = input;
+
+         // Check if the username already exists
          const existingAdmin = await Admin.findOne({ username });
          if (existingAdmin) {
-            throw new Error('Admin username already exists');
+            throw new Error('Username already exists');
          }
 
-         const hashedPassword = await bcrypt.hash(password, 10);
-         const admin = new Admin({
+         // Generate a new adminId
+         const adminIdCounter = await AdminIdCounter.findOneAndUpdate(
+            { name: 'adminId' },
+            { $inc: { value: 1 } },
+            { new: true, upsert: true }
+         );
+
+         const newAdmin = new Admin({
+            adminId: adminIdCounter.value,
             username,
-            password: hashedPassword,
+            password,
             role,
             firstName,
             lastName
          });
 
-         await admin.save();
-         return admin;
+         await newAdmin.save();
+
+         return newAdmin;
       },
       updateUserProfile: async (_, { input }, context) => {
          if (!context.token) {

@@ -126,7 +126,7 @@ const UserAuthPage = () => {
          });
          if (data.login) {
             const { token, user } = data.login;
-            localStorage.setItem('token', token); // Make sure this line is present
+            localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
 
             if (user.role === 'superadmin') {
