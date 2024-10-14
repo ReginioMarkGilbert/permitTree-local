@@ -37,6 +37,7 @@ const LOGIN_USER = gql`
         username
         firstName
         lastName
+        role
       }
     }
   }
@@ -123,24 +124,21 @@ const UserAuthPage = () => {
                password: loginPassword,
             },
          });
-         const { token, user } = data.login;
-         setToken(token);
-         localStorage.setItem('user', JSON.stringify(user));
-         const userRole = getUserRole();
-         toast.success('Login successful!', {
-            position: 'top-center',
-            autoClose: 500,
-            hideProgressBar: true,
-            onClose: () => {
-               if (userRole === 'superadmin') {
-                  navigate('/superadmin/home', { replace: true });
-               } else if (userRole === 'Chief_RPS') {
-                  navigate('/chief-rps/home', { replace: true });
-               } else {
-                  navigate('/home', { replace: true });
-               }
-            },
-         });
+         if (data.login) {
+            const { token, user } = data.login;
+            localStorage.setItem('token', token); // Make sure this line is present
+            localStorage.setItem('user', JSON.stringify(user));
+
+            if (user.role === 'superadmin') {
+               navigate('/superadmin/home', { replace: true });
+            } else if (user.role === 'Chief_RPS') {
+               navigate('/chief-rps/home', { replace: true });
+            } else {
+               navigate('/home?newUser=false', { replace: true });
+            }
+         } else {
+            toast.error('login failed')
+         }
       } catch (error) {
          console.error('Login error:', error);
          toast.error(error.message || 'Login failed: Invalid credentials');

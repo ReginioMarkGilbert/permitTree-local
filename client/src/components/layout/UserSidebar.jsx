@@ -1,4 +1,3 @@
-import axios from 'axios';
 import React, { useCallback, useMemo } from 'react';
 import { FaBell, FaClipboardList, FaFileAlt, FaHome, FaSignInAlt, FaUser } from 'react-icons/fa';
 import { NavLink, useNavigate } from 'react-router-dom';
@@ -6,21 +5,30 @@ import permitTreeLogo from '../../assets/denr-logo.png';
 import { useNotification } from '../../pages/user/contexts/UserNotificationContext';
 import { isAuthenticated } from '../../utils/auth';
 import { removeToken } from '../../utils/tokenManager';
+import { gql, useMutation } from '@apollo/client';
+
+const LOGOUT_MUTATION = gql`
+  mutation Logout {
+    logout
+  }
+`;
 
 const Sidebar = React.memo(({ isOpen }) => {
     const navigate = useNavigate();
     const { unreadCount } = useNotification();
+    const [logout] = useMutation(LOGOUT_MUTATION);
 
     const handleLogout = useCallback(async () => {
         try {
-            await axios.get('http://localhost:3000/api/logout');
+            await logout();
             removeToken();
+            localStorage.removeItem('user');
             navigate('/auth');
             console.log('Logout successful!');
         } catch (error) {
             console.error('Logout failed:', error);
         }
-    }, [navigate]);
+    }, [logout, navigate]);
 
     React.useEffect(() => {
         const authStatus = isAuthenticated();

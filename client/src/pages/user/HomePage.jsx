@@ -8,6 +8,16 @@ import { toast, ToastContainer } from 'react-toastify';
 import HomeFooter from '../../components/ui/HomeFooter';
 import '../../components/ui/styles/customScrollBar.css';
 import { useNotification } from './contexts/UserNotificationContext';
+import { gql, useQuery } from '@apollo/client';
+
+const GET_USER_DETAILS = gql`
+  query GetUserDetails {
+    me {
+      firstName
+      lastName
+    }
+  }
+`;
 
 const formatNotificationType = (type) => {
     return type
@@ -22,7 +32,6 @@ const HomePage = () => {
     const [recentApplications, setRecentApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [user, setUser] = useState({ firstName: '', lastName: '' });
     const { unreadCount } = useNotification();
     const [recentNotifications, setRecentNotifications] = useState([]);
     const [notificationsLoading, setNotificationsLoading] = useState(true);
@@ -31,6 +40,8 @@ const HomePage = () => {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const isNewUser = queryParams.get('newUser') === 'true';
+
+    const { loading: userLoading, error: userError, data: userData } = useQuery(GET_USER_DETAILS);
 
     const quickActions = useMemo(() => [
         { title: "New Application", icon: <FaClipboardList className="h-6 w-6" />, link: "/permits" },
@@ -51,13 +62,6 @@ const HomePage = () => {
         },
         { title: "Profile", icon: <FaUser className="h-6 w-6" />, link: "/profile" },
     ], [unreadCount]);
-
-    const sidebarLinks = useMemo(() => [
-        { title: "Dashboard", icon: <FaHome className="h-5 w-5" />, link: "/" },
-        { title: "My Applications", icon: <FaClipboardList className="h-5 w-5" />, link: "/applications" },
-        { title: "Notifications", icon: <FaBell className="h-5 w-5" />, link: "/notifications" },
-        { title: "Profile", icon: <FaUser className="h-5 w-5" />, link: "/profile" },
-    ], []);
 
     const toggleSidebar = useCallback(() => {
         setSidebarOpen(prev => !prev);
@@ -86,21 +90,6 @@ const HomePage = () => {
         }
     }, []);
 
-    const fetchUserDetails = useCallback(async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:3000/api/user-details', {
-                headers: {
-                    Authorization: token
-                }
-            });
-            setUser(response.data.user);
-        } catch (err) {
-            console.error('Error fetching user details:', err);
-            toast.error('Failed to fetch user details.');
-        }
-    }, []);
-
     const fetchRecentNotifications = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
@@ -126,35 +115,32 @@ const HomePage = () => {
 
     useEffect(() => {
         fetchRecentApplications();
-        fetchUserDetails();
         fetchRecentNotifications();
-    }, [fetchRecentApplications, fetchUserDetails, fetchRecentNotifications]);
+    }, [fetchRecentApplications, fetchRecentNotifications]);
 
     const getStatusColor = useCallback((status) => {
         switch (status.toLowerCase()) {
-            case 'submitted':
-                return 'bg-blue-200 text-blue-800';
-            case 'accepted':
-                return 'bg-green-200 text-green-800';
-            case 'returned':
-                return 'bg-red-200 text-red-800';
-            case 'released':
-                return 'bg-purple-200 text-purple-800';
-            case 'expired':
-                return 'bg-gray-200 text-gray-800';
-            case 'rejected':
-                return 'bg-red-200 text-red-800';
-            default:
-                return 'bg-gray-200 text-gray-800';
+            case 'submitted': return 'bg-blue-200 text-blue-800';
+            case 'accepted': return 'bg-green-200 text-green-800';
+            case 'returned': return 'bg-red-200 text-red-800';
+            case 'released': return 'bg-purple-200 text-purple-800';
+            case 'expired': return 'bg-gray-200 text-gray-800';
+            case 'rejected': return 'bg-red-200 text-red-800';
+            default: return 'bg-gray-200 text-gray-800';
         }
     }, []);
+
+    if (userLoading) return <p>Loading user data...</p>;
+    if (userError) return <p>Error loading user data: {userError.message}</p>;
+
+    const { firstName, lastName } = userData?.me || {};
 
     return (
         <div className="min-h-screen bg-green-50 flex flex-col pt-16">
             <ToastContainer />
             <main className="flex-grow p-8">
                 <h1 className="text-3xl font-bold text-green-800 mb-6">
-                    {isNewUser ? "Welcome" : "Welcome back"}, {user.firstName} {user.lastName}!
+                    {isNewUser ? "Welcome" : "Welcome back"}, {firstName} {lastName}!
                 </h1>
 
                 {/* Quick Actions */}
