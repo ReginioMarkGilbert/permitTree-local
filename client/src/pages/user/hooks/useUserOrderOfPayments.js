@@ -29,5 +29,33 @@ export const useUserOrderOfPayments = (status) => {
       fetchOrderOfPayments();
    }, [fetchOrderOfPayments]);
 
-   return { orderOfPayments, loading, error, fetchOrderOfPayments };
+   const handleSimulatePayment = async (billNo, paymentDetails) => {
+      try {
+         const token = localStorage.getItem('token');
+         const response = await axios.post(`http://localhost:3000/api/user/oop/${billNo}/simulate-payment`, paymentDetails, {
+            headers: { Authorization: token }
+         });
+         toast.success('Payment simulated successfully');
+         return response.data;
+      } catch (error) {
+         console.error('Error simulating payment:', error);
+         toast.error('Failed to simulate payment');
+         throw error; // Rethrow the error to be caught in the component
+      }
+   };
+   const getTotalAmount = async (billNo) => {
+      try {
+         const token = localStorage.getItem('token');
+         const response = await axios.get(`http://localhost:3000/api/user/oop/${billNo}`, {
+            headers: { Authorization: token }
+         });
+         return response.data.totalAmount;
+      } catch (error) {
+         console.error('Error fetching total amount:', error);
+         toast.error('Failed to fetch total amount');
+         throw error;
+      }
+   };
+
+   return { orderOfPayments, loading, error, fetchOrderOfPayments, handleSimulatePayment, getTotalAmount };
 };

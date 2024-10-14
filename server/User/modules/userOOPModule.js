@@ -14,8 +14,6 @@ const { authenticateToken } = require('../../middleware/authMiddleware');
 // const UserOOP = mongoose.model('UserOOP', userOOPSchema);
 
 // Combined route handlers and routes
-router.get('/user/getAllOOP')
-
 
 router.get('/oop/:applicationId', authenticateToken, async (req, res) => {
    try {
@@ -39,10 +37,10 @@ router.get('/oop/:applicationId', authenticateToken, async (req, res) => {
    }
 });
 
-router.post('/oop/:applicationId/simulate-payment', authenticateToken, async (req, res) => {
+router.post('/oop/:billNo/simulate-payment', authenticateToken, async (req, res) => {
    try {
-      const { applicationId } = req.params;
-      const oop = await OrderOfPayment.findOne({ applicationId });
+      const { billNo } = req.params;
+      const oop = await OrderOfPayment.findOne({ billNo });
 
       if (!oop) {
          return res.status(404).json({ message: 'Order of Payment not found' });
@@ -52,7 +50,7 @@ router.post('/oop/:applicationId/simulate-payment', authenticateToken, async (re
       oop.paymentDate = new Date();
       await oop.save();
 
-      const application = await Application.findOne({ customId: applicationId });
+      const application = await Application.findOne({ customId: oop.applicationId });
       if (application) {
          application.status = 'Awaiting Payment';
          await application.save();
@@ -69,10 +67,10 @@ router.post('/oop/:applicationId/simulate-payment', authenticateToken, async (re
    }
 });
 
-router.post('/oop/:applicationId/upload-receipt', authenticateToken, async (req, res) => {
+router.post('/oop/:billNo/upload-receipt', authenticateToken, async (req, res) => {
    try {
-      const { applicationId } = req.params;
-      const oop = await OrderOfPayment.findOne({ applicationId });
+      const { billNo } = req.params;
+      const oop = await OrderOfPayment.findOne({ billNo });
 
       if (!oop) {
          return res.status(404).json({ message: 'Order of Payment not found' });
@@ -98,11 +96,11 @@ router.post('/oop/:applicationId/upload-receipt', authenticateToken, async (req,
    }
 });
 
-router.post('/oop/:applicationId/submit-proof', authenticateToken, async (req, res) => {
+router.post('/oop/:billNo/submit-proof', authenticateToken, async (req, res) => {
    try {
-      const { applicationId } = req.params;
+      const { billNo } = req.params;
       const { orNumber, proofOfPayment } = req.body;
-      const oop = await OrderOfPayment.findOne({ applicationId });
+      const oop = await OrderOfPayment.findOne({ billNo });
 
       if (!oop) {
          return res.status(404).json({ message: 'Order of Payment not found' });
@@ -122,7 +120,7 @@ router.post('/oop/:applicationId/submit-proof', authenticateToken, async (req, r
       oop.status = 'Payment Proof Submitted';
       await oop.save();
 
-      const application = await Application.findOne({ customId: applicationId });
+      const application = await Application.findOne({ customId: oop.applicationId });
       if (application) {
          application.status = 'Payment Proof Submitted';
          await application.save();
@@ -146,6 +144,7 @@ router.get('/user/oop', authenticateToken, async (req, res) => {
       }
 
       const orderOfPayments = await OrderOfPayment.find(query);
+
       res.json(orderOfPayments);
 
    } catch (error) {
@@ -178,25 +177,25 @@ router.get('/oop', authenticateToken, async (req, res) => {
 });
 
 router.get('/oop-by-billno/:billNo', authenticateToken, async (req, res) => {
-  try {
-    const { billNo } = req.params;
-    const oop = await OrderOfPayment.findOne({ billNo });
+   try {
+      const { billNo } = req.params;
+      const oop = await OrderOfPayment.findOne({ billNo });
 
-    if (!oop) {
-      return res.status(404).json({ message: 'Order of Payment not found' });
-    }
+      if (!oop) {
+         return res.status(404).json({ message: 'Order of Payment not found' });
+      }
 
-    // Check if the OOP belongs to the authenticated user
-    const application = await Application.findOne({ customId: oop.applicationId });
-    if (!application || application.userId.toString() !== req.user.id) {
-      return res.status(403).json({ message: 'Not authorized to view this Order of Payment' });
-    }
+      // Check if the OOP belongs to the authenticated user
+      const application = await Application.findOne({ customId: oop.applicationId });
+      if (!application || application.userId.toString() !== req.user.id) {
+         return res.status(403).json({ message: 'Not authorized to view this Order of Payment' });
+      }
 
-    res.json(oop);
-  } catch (error) {
-    console.error('Error fetching Order of Payment:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
+      res.json(oop);
+   } catch (error) {
+      console.error('Error fetching Order of Payment:', error);
+      res.status(500).json({ message: 'Server error', error: error.message });
+   }
 });
 
 module.exports = {

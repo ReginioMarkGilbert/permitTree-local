@@ -28,7 +28,7 @@ const UserOrderOfPaymentRow = React.memo(({ oop, onView, onSimulatePayment, getS
                   variant="outline"
                   size="icon"
                   className="h-6 w-6 text-blue-600 hover:text-blue-700 border-blue-200 hover:bg-blue-50"
-                  onClick={() => onSimulatePayment(oop)}
+                  onClick={() => onSimulatePayment(oop.billNo)}
                   title="Simulate Payment"
                >
                   <CreditCard className="h-3 w-3" />

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { RefreshCw, ChevronUp, ChevronDown } from 'lucide-react';
 import ApplicationDetailsModal from '../../components/ui/ApplicationDetailsModal';
 import EditApplicationModal from '../../components/ui/EditApplicationModal';
@@ -14,7 +14,7 @@ import { useUserApplicationActions } from './hooks/useUserApplicationActions';
 
 const UserApplicationsStatusPage = () => {
    const [mainTab, setMainTab] = useState('Applications');
-   const [activeTab, setActiveTab] = useState('Awaiting Payment');
+   const [activeTab, setActiveTab] = useState('Draft'); // Change this to 'Draft' for Applications
    const [searchTerm, setSearchTerm] = useState('');
    const [sortConfig, setSortConfig] = useState(null);
    const [selectedApplication, setSelectedApplication] = useState(null);
@@ -29,6 +29,7 @@ const UserApplicationsStatusPage = () => {
    const { applications, loading: appLoading, error: appError, fetchApplications, handleStatusUpdate: handleAppStatusUpdate } = useUserApplications(mainTab === 'Applications' ? activeTab : null);
    const { orderOfPayments, loading: oopLoading, error: oopError, fetchOrderOfPayments, handleStatusUpdate: handleOOPStatusUpdate } = useUserOrderOfPayments(activeTab);
    const { handleView, handleEdit, handleSubmitDraft, handleUnsubmit, handleDelete, handleViewOOP, handleSimulatePayment } = useUserApplicationActions(fetchApplications);
+   // const { handleSimulatePayment } = useUserOrderOfPayments();
 
    const applicationTabs = ['Draft', 'Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected'];
    const oopTabs = ['Awaiting Payment', 'Payment Proof Submitted', 'Returned', 'Approved', 'Completed'];
@@ -197,7 +198,7 @@ const UserApplicationsStatusPage = () => {
                            onUnsubmit={onUnsubmit}
                            onDelete={onDelete}
                            onViewOOP={onViewOOP}
-                           onSimulatePayment={handleSimulatePayment}
+                           onSimulatePayment={onSimulatePayment}
                            getStatusColor={getStatusColor}
                         />
                      ) : (
@@ -205,7 +206,7 @@ const UserApplicationsStatusPage = () => {
                            key={item._id}
                            oop={item}
                            onView={onViewOOP}
-                           onSimulatePayment={handleSimulatePayment}
+                           onSimulatePayment={onSimulatePayment}
                            getStatusColor={getStatusColor}
                         />
                      )
@@ -221,6 +222,31 @@ const UserApplicationsStatusPage = () => {
       setSelectedOOP(result);
       setIsOOPModalOpen(true);
    };
+
+   // const onSimulatePayment = useCallback((application) => {
+   //    setSelectedPaymentApplication(application);
+   //    setIsPaymentModalOpen(true);
+   // }, []);
+
+   const onSimulatePayment = async (billNo) => {
+      const result = await handleViewOOP(billNo);
+      setSelectedPaymentApplication(result);
+      setIsPaymentModalOpen(true);
+   };
+
+   const handlePaymentComplete = useCallback(async (paymentDetails) => {
+      if (selectedPaymentApplication) {
+         try {
+            const paymentResult = await handleSimulatePayment(selectedPaymentApplication.billNo, paymentDetails);
+            setIsPaymentModalOpen(false);
+            fetchOrderOfPayments(); // Refresh the OOP list
+            // No need to update totalAmount here, it's already fetched in handleSimulatePayment
+            console.log("Payment successful:", paymentResult);
+         } catch (error) {
+            console.error('Error processing payment:', error);
+         }
+      }
+   }, [selectedPaymentApplication, handleSimulatePayment, fetchOrderOfPayments]);
 
    return (
       <div className="min-h-screen bg-green-50">
@@ -241,8 +267,12 @@ const UserApplicationsStatusPage = () => {
                      Applications
                   </button>
                   <button
-                     onClick={() => { setMainTab('Order Of Payments'); setActiveTab('Awaiting Payment'); }}
-                     className={`px-4 py-2 rounded-md text-sm font-medium ${mainTab === 'Order Of Payments' ? 'bg-green-100 text-green-800' : 'text-gray-600 hover:bg-gray-100'}`}
+                     onClick={() => {
+                        setMainTab('Order Of Payments');
+                        setActiveTab('Awaiting Payment'); // Set to 'Awaiting Payment' for OOPs
+                     }}
+                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${mainTab === 'Order Of Payments' ? 'bg-green-100 text-green-800' : 'text-gray-600 hover:bg-gray-100'
+                        }`}
                   >
                      Order Of Payments
                   </button>
@@ -291,9 +321,10 @@ const UserApplicationsStatusPage = () => {
          <PaymentSimulationModal
             isOpen={isPaymentModalOpen}
             onClose={() => setIsPaymentModalOpen(false)}
-            onPaymentComplete={handleSimulatePayment}
+            onPaymentComplete={handlePaymentComplete}
             totalAmount={selectedPaymentApplication?.totalAmount || 0}
             applicationId={selectedPaymentApplication?.customId}
+            billNo={selectedPaymentApplication?.billNo}
          />
       </div>
    );
