@@ -1,11 +1,11 @@
-import { gql, useMutation } from '@apollo/client';
 import React, { useCallback, useMemo } from 'react';
 import { FaBell, FaChartLine, FaCog, FaFileInvoiceDollar, FaHome, FaSignInAlt, FaTachometerAlt } from 'react-icons/fa';
 import { NavLink, useNavigate } from 'react-router-dom';
 import permitTreeLogo from '../../../assets/denr-logo.png';
 import { removeToken } from '../../../utils/tokenManager';
 import { useChiefRPSNotification } from '../contexts/ChiefRPSNotificationContext';
-import { isAuthenticated } from '../../../utils/auth';
+import { isAuthenticated, getUserRole } from '../../../utils/auth';
+import { gql, useMutation } from '@apollo/client';
 
 const LOGOUT_MUTATION = gql`
   mutation Logout {
@@ -13,10 +13,11 @@ const LOGOUT_MUTATION = gql`
   }
 `;
 
-const AdminSidebar = React.memo(({ isOpen }) => {
+const PersonnelSidebar = React.memo(({ isOpen }) => {
    const navigate = useNavigate();
    const { unreadCount } = useChiefRPSNotification();
    const [logout] = useMutation(LOGOUT_MUTATION);
+   const userRole = getUserRole();
 
    const handleLogout = useCallback(async () => {
       try {
@@ -37,14 +38,35 @@ const AdminSidebar = React.memo(({ isOpen }) => {
       }
    }, [navigate]);
 
+   console.log("user role:", userRole);
+
+   const getDashboardLink = () => {
+      switch (userRole) {
+         case 'receiving_releasing_clerk':
+            return "/personnel/receiving-releasing";
+         case 'technical_staff':
+            return "/personnel/technical-staff";
+         case 'Chief_RPS' || 'Chief_TSD':
+            return "/personnel/chief";
+         case 'accountant':
+            return "/personnel/accountant";
+         case 'bill_collector':
+            return "/personnel/bill-collector";
+         case 'penr_cenr_officer':
+            return "/personnel/penr-cenr-officer";
+         default:
+            return "/personnel/dashboard";
+      }
+   };
+
    const sidebarLinks = useMemo(() => [
-      { to: "/chief-rps/home", icon: <FaHome />, text: "Home" },
-      { to: "/chief-rps/dashboard", icon: <FaTachometerAlt />, text: "Dashboard" },
-      { to: "/chief-rps/notifications", icon: <FaBell />, text: "Notifications", count: unreadCount },
-      { to: "/chief-rps/reports", icon: <FaChartLine />, text: "Reports" },
-      { to: "/chief-rps/settings", icon: <FaCog />, text: "Settings" },
-      { to: "/chief-rps/order-of-payment", icon: <FaFileInvoiceDollar />, text: "Order of Payment" },
-   ], [unreadCount]);
+      { to: "/personnel/home", icon: <FaHome />, text: "Home" },
+      { to: getDashboardLink(), icon: <FaTachometerAlt />, text: "Dashboard" },
+      { to: "/personnel/notifications", icon: <FaBell />, text: "Notifications", count: unreadCount },
+      { to: "/personnel/reports", icon: <FaChartLine />, text: "Reports" },
+      { to: "/personnel/settings", icon: <FaCog />, text: "Settings" },
+      { to: "/personnel/order-of-payment", icon: <FaFileInvoiceDollar />, text: "Order of Payment" },
+   ], [unreadCount, userRole]);
 
    const sidebarContent = useMemo(() => (
       <>
@@ -92,4 +114,4 @@ const AdminSidebar = React.memo(({ isOpen }) => {
    );
 });
 
-export default AdminSidebar;
+export default PersonnelSidebar;

@@ -104,7 +104,7 @@ const UserAuthPage = () => {
          setToken(token);
          localStorage.setItem('user', JSON.stringify(user));
          toast.success('Signup successful!');
-         navigate('/home?newUser=true', { replace: true }); // Ensure this is set correctly
+         navigate('/home?newUser=true', { replace: true });
       } catch (error) {
          console.error('Signup error:', error);
          toast.error(error.message || 'Signup failed. Please try again.');
@@ -124,13 +124,29 @@ const UserAuthPage = () => {
             const { token, user } = data.login;
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
-
-            if (user.role === 'superadmin') {
-               navigate('/superadmin/home', { replace: true });
-            } else if (user.role === 'Chief_RPS') {
-               navigate('/chief-rps/home', { replace: true });
-            } else {
-               navigate('/home?newUser=false', { replace: true }); // Ensure this is set correctly
+            console.log("User role:", user.role);
+            // Redirect based on user role
+            switch (user.role) {
+               case 'superadmin':
+                  navigate('/superadmin/home', { replace: true });
+                  break;
+               case 'Chief_RPS':
+               case 'Chief_TSD':
+               case 'Technical_Staff':
+               case 'Receiving_Clerk':
+               case 'Releasing_Clerk':
+               case 'Accountant':
+               case 'Bill_Collector':
+               case 'PENR_CENR_Officer':
+                  navigate('/personnel/home', { replace: true });
+                  break;
+               case 'user':
+                  navigate('/home', { replace: true });
+                  break;
+               default:
+                  toast.error('Unknown user role');
+                  localStorage.removeItem('token');
+                  localStorage.removeItem('user');
             }
          } else {
             toast.error('Login failed');

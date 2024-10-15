@@ -20,9 +20,9 @@ import AboutPage from './pages/public/AboutPage';
 import ServicesPage from './pages/public/ServicesPage';
 import ContactPage from './pages/public/ContactPage';
 
-import ChiefRPSSidebar from './pages/Personnel/components/PersonnelSidebar';
-import ChiefRPSHomePage from './pages/Personnel/ChiefRPSHomePage';
-import ChiefRPSDashboard from './pages/Personnel/ChiefRPSDashboard';
+import PersonnelSidebar from './pages/Personnel/components/PersonnelSidebar';
+import PersonnelHomePage from './pages/Personnel/PersonnelHomePage';
+// import ChiefRPSDashboard from './pages/Personnel/PersonnelDashboard';
 import ChiefRPSReportsPage from './pages/Personnel/ChiefRPSReportsPage';
 import ChiefRPSSettingsPage from './pages/Personnel/ChiefRPSSettingsPage';
 import ChiefRPSApplicationReviewModal from './pages/Personnel/components/ChiefRPSApplicationReviewModal';
@@ -49,6 +49,8 @@ import client from './apolloClient';
 
 import { Toaster } from 'sonner';
 
+import PersonnelDashboard from './pages/Personnel/PersonnelDashboard';
+
 const App = () => {
    const { sidebarToggle, toggleSidebar } = useSidebarToggle();
    const navigate = useNavigate();
@@ -73,6 +75,8 @@ const App = () => {
       return () => clearInterval(intervalId);
    }, [navigate]);
 
+   const PersonnelRoles = ['Chief_RPS', 'Chief_TSD', 'Technical_Staff', 'Receiving_Clerk', 'Releasing_Clerk', 'Accountant', 'Bill_Collector', 'PENR_CENR_Officer'];
+
    return (
       <ApolloProvider client={client}>
          <NotificationProvider>
@@ -82,8 +86,8 @@ const App = () => {
                      <>
                         {userRole === 'superadmin' ? (
                            <SuperAdminSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
-                        ) : userRole === 'Chief_RPS' ? (
-                           <ChiefRPSSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
+                        ) : PersonnelRoles.includes(userRole) ? ( // check if userRole is in PersonnelRoles
+                           <PersonnelSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
                         ) : (
                            <UserSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
                         )}
@@ -107,15 +111,19 @@ const App = () => {
                            <Route path="/profile" element={<UserProfilePage />} />
                            <Route path="/notifications" element={<ProtectedRoute roles={['user']}><UserNotificationsPage /></ProtectedRoute>} />
 
-                           <Route path="/chief-rps/home" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSHomePage /></ProtectedRoute>} />
-                           <Route path="/chief-rps/dashboard" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSDashboard /></ProtectedRoute>} />
-                           <Route path="/chief-rps/review/:id" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSApplicationReviewModal /></ProtectedRoute>} />
-                           <Route path="/chief-rps/view/:id" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSApplicationViewModal /></ProtectedRoute>} />
-                           <Route path="/chief-rps/settings" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSSettingsPage /></ProtectedRoute>} />
-                           <Route path="/chief-rps/reports" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSReportsPage /></ProtectedRoute>} />
-                           <Route path="/chief-rps/notifications" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSNotificationPage /></ProtectedRoute>} />
+                           <Route path="/personnel/home" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelHomePage /></ProtectedRoute>} />
+                           {/* <Route path="/chief-rps/dashboard" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSDashboard /></ProtectedRoute>} /> */}
+                           <Route path="/personnel/review/:id" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSApplicationReviewModal /></ProtectedRoute>} />
+                           <Route path="/personnel/view/:id" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSApplicationViewModal /></ProtectedRoute>} />
+                           <Route path="/personnel/settings" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSSettingsPage /></ProtectedRoute>} />
+                           <Route path="/personnel/reports" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSReportsPage /></ProtectedRoute>} />
+                           <Route path="/personnel/notifications" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSNotificationPage /></ProtectedRoute>} />
                            <Route path="/chief-rps/order-of-payment" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSorderOfPaymentPage /></ProtectedRoute>} />
                            <Route path="/chief-rps/order-of-payment/:action" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSorderOfPaymentPage /></ProtectedRoute>} />
+
+                           {/* Dashboard Routes for Personnels */}
+                           <Route path="/personnel/dashboard" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelDashboard /></ProtectedRoute>} />
+                           <Route path="/personnel/:role" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelDashboard /></ProtectedRoute>} />
 
                            <Route path="/superadmin/home" element={<ProtectedRoute roles={['superadmin']}><SuperAdminHomePage /></ProtectedRoute>} />
                            <Route path="/superadmin/dashboard" element={<ProtectedRoute roles={['superadmin']}><SuperAdminDashboard /></ProtectedRoute>} />
