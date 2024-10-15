@@ -13,7 +13,7 @@ const AdminSchema = new mongoose.Schema({
          'superadmin',
          'Technical_Staff',
          'Chief_TSD',
-         'Recieving_Clerk',
+         'Receiving_Clerk',
          'Releasing_Clerk',
          'Accountant',
          'Bill_Collector',
