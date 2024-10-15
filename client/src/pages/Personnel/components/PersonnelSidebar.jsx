@@ -2,10 +2,10 @@ import { gql, useMutation } from '@apollo/client';
 import React, { useCallback, useMemo } from 'react';
 import { FaBell, FaChartLine, FaCog, FaFileInvoiceDollar, FaHome, FaSignInAlt, FaTachometerAlt } from 'react-icons/fa';
 import { NavLink, useNavigate } from 'react-router-dom';
-import permitTreeLogo from '../../assets/denr-logo.png';
-import { removeToken } from '../../utils/tokenManager';
-import { useChiefRPSNotification } from './contexts/ChiefRPSNotificationContext';
-import { isAuthenticated } from '../../utils/auth';
+import permitTreeLogo from '../../../assets/denr-logo.png';
+import { removeToken } from '../../../utils/tokenManager';
+import { useChiefRPSNotification } from '../contexts/ChiefRPSNotificationContext';
+import { isAuthenticated } from '../../../utils/auth';
 
 const LOGOUT_MUTATION = gql`
   mutation Logout {

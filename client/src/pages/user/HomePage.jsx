@@ -68,69 +68,81 @@ const HomePage = () => {
    }, []);
 
    // #region
-   //  const fetchRecentApplications = useCallback(async () => {
-   //      try {
-   //          const token = localStorage.getItem('token');
-   //          if (!token) {
-   //              throw new Error('No authentication token found.');
+   // const fetchRecentApplications = useCallback(async () => {
+   //    try {
+   //       const token = localStorage.getItem('token');
+   //       if (!token) {
+   //          throw new Error('No authentication token found.');
+   //       }
+   //       const response = await axios.get('http://localhost:3000/api/getAllApplications', {
+   //          params: {
+   //             status: ['Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected']
+   //          },
+   //          headers: {
+   //             'Authorization': token
    //          }
-   //          const response = await axios.get('http://localhost:3000/api/getAllApplications', {
-   //              params: {
-   //                  status: ['Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected']
-   //              },
-   //              headers: {
-   //                  'Authorization': token
-   //              }
-   //          });
-   //          setRecentApplications(response.data);
-   //          setLoading(false);
-   //      } catch (err) {
-   //          console.log('Error fetching recent applications:', err);
-   //          setError('Failed to fetch recent applications.');
-   //          setLoading(false);
-   //      }
-   //  }, []);
+   //       });
+   //       setRecentApplications(response.data);
+   //       setLoading(false);
+   //    } catch (err) {
+   //       console.log('Error fetching recent applications:', err);
+   //       setError('Failed to fetch recent applications.');
+   //       setLoading(false);
+   //    }
+   // }, []);
 
-   //  const fetchRecentNotifications = useCallback(async () => {
-   //      try {
-   //          const token = localStorage.getItem('token');
-   //          if (!token) {
-   //              throw new Error('No authentication token found.');
+   // const fetchRecentNotifications = useCallback(async () => {
+   //    try {
+   //       const token = localStorage.getItem('token');
+   //       if (!token) {
+   //          throw new Error('No authentication token found.');
+   //       }
+   //       const response = await axios.get('http://localhost:3000/api/user/notifications', {
+   //          headers: {
+   //             'Authorization': token
+   //          },
+   //          params: {
+   //             limit: 7
    //          }
-   //          const response = await axios.get('http://localhost:3000/api/user/notifications', {
-   //              headers: {
-   //                  'Authorization': token
-   //              },
-   //              params: {
-   //                  limit: 7
-   //              }
-   //          });
-   //          setRecentNotifications(response.data);
-   //          setNotificationsLoading(false);
-   //      } catch (err) {
-   //          console.error('Error fetching recent notifications:', err);
-   //          setNotificationsError('Failed to fetch recent notifications.');
-   //          setNotificationsLoading(false);
-   //      }
-   //  }, []);
+   //       });
+   //       setRecentNotifications(response.data);
+   //       setNotificationsLoading(false);
+   //    } catch (err) {
+   //       console.error('Error fetching recent notifications:', err);
+   //       setNotificationsError('Failed to fetch recent notifications.');
+   //       setNotificationsLoading(false);
+   //    }
+   // }, []);
 
-   //  useEffect(() => {
-   //      fetchRecentApplications();
-   //      fetchRecentNotifications();
-   //  }, [fetchRecentApplications, fetchRecentNotifications]);
+   // useEffect(() => {
+   //    fetchRecentApplications();
+   //    fetchRecentNotifications();
+   // }, [fetchRecentApplications, fetchRecentNotifications]);
    // #endregion
 
    const getStatusColor = useCallback((status) => {
       switch (status.toLowerCase()) {
-         case 'submitted': return 'bg-blue-200 text-blue-800';
-         case 'accepted': return 'bg-green-200 text-green-800';
-         case 'returned': return 'bg-red-200 text-red-800';
-         case 'released': return 'bg-purple-200 text-purple-800';
-         case 'expired': return 'bg-gray-200 text-gray-800';
-         case 'rejected': return 'bg-red-200 text-red-800';
+         case 'Submitted': return 'bg-blue-200 text-blue-800';
+         case 'Accepted': return 'bg-green-200 text-green-800';
+         case 'Returned': return 'bg-red-200 text-red-800';
+         case 'Released': return 'bg-purple-200 text-purple-800';
+         case 'Expired': return 'bg-gray-200 text-gray-800';
+         case 'Rejected': return 'bg-red-200 text-red-800';
          default: return 'bg-gray-200 text-gray-800';
       }
    }, []);
+
+   useEffect(() => {
+      if (userError) {
+         console.error('Error loading user data:', userError);
+         setError('Failed to load user data.');
+         setLoading(false);
+      } else if (userLoading) {
+         setLoading(true);
+      } else {
+         setLoading(false);
+      }
+   }, [userLoading, userError]);
 
    if (userLoading) return <p>Loading user data...</p>;
    if (userError) return <p>Error loading user data: {userError.message}</p>;
@@ -144,7 +156,6 @@ const HomePage = () => {
             <h1 className="text-3xl font-bold text-green-800 mb-6">
                {isNewUser ? "Welcome" : "Welcome back"}, {firstName} {lastName}!
             </h1>
-
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                {quickActions.map((action, index) => (
@@ -268,4 +279,8 @@ const HomePage = () => {
    );
 };
 
-export default React.memo(HomePage);
+if (HomePage) {
+   console.log('homepage is true');
+}
+
+export default HomePage;

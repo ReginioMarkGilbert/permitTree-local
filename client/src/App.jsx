@@ -20,13 +20,13 @@ import AboutPage from './pages/public/AboutPage';
 import ServicesPage from './pages/public/ServicesPage';
 import ContactPage from './pages/public/ContactPage';
 
-import ChiefRPSSidebar from './pages/chiefRPS/ChiefRPSSidebar';
-import ChiefRPSHomePage from './pages/chiefRPS/ChiefRPSHomePage';
-import ChiefRPSDashboard from './pages/chiefRPS/ChiefRPSDashboard';
-import ChiefRPSReportsPage from './pages/chiefRPS/ChiefRPSReportsPage';
-import ChiefRPSSettingsPage from './pages/chiefRPS/ChiefRPSSettingsPage';
-import ChiefRPSApplicationReviewModal from './pages/chiefRPS/components/ChiefRPSApplicationReviewModal';
-import ChiefRPSApplicationViewModal from './pages/chiefRPS/components/ChiefRPSApplicationViewModal';
+import ChiefRPSSidebar from './pages/Personnel/components/PersonnelSidebar';
+import ChiefRPSHomePage from './pages/Personnel/ChiefRPSHomePage';
+import ChiefRPSDashboard from './pages/Personnel/ChiefRPSDashboard';
+import ChiefRPSReportsPage from './pages/Personnel/ChiefRPSReportsPage';
+import ChiefRPSSettingsPage from './pages/Personnel/ChiefRPSSettingsPage';
+import ChiefRPSApplicationReviewModal from './pages/Personnel/components/ChiefRPSApplicationReviewModal';
+import ChiefRPSApplicationViewModal from './pages/Personnel/components/ChiefRPSApplicationViewModal';
 
 import { isAuthenticated, getUserRole, logout } from './utils/auth';
 import { ToastContainer } from 'react-toastify';
@@ -38,11 +38,11 @@ import SuperAdminHomePage from './pages/SuperAdmin/SuperAdminHomePage';
 import SuperAdminManageUsersPage from './pages/SuperAdmin/SuperAdminManageUsersPage';
 import SuperAdminReportsPage from './pages/SuperAdmin/SuperAdminReportsPage';
 import SuperAdminSettingsPage from './pages/SuperAdmin/SuperAdminSettingsPage';
-import ChiefRPSNotificationPage from './pages/chiefRPS/ChiefRPSNotificationPage';
-import ChiefRPSNotificationProvider from './pages/chiefRPS/contexts/ChiefRPSNotificationContext';
+import ChiefRPSNotificationPage from './pages/Personnel/ChiefRPSNotificationPage';
+import ChiefRPSNotificationProvider from './pages/Personnel/contexts/ChiefRPSNotificationContext';
 
 import { checkTokenExpiration } from './utils/tokenManager';
-import ChiefRPSorderOfPaymentPage from './pages/chiefRPS/ChiefRPSorderOfPaymentPage';
+import ChiefRPSorderOfPaymentPage from './pages/Personnel/ChiefRPSorderOfPaymentPage';
 
 import { ApolloProvider } from '@apollo/client';
 import client from './apolloClient';

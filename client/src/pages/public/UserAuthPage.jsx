@@ -9,7 +9,7 @@ import { request } from 'graphql-request';
 import { FaLeaf } from 'react-icons/fa';
 import AuthButton from '../../components/ui/AuthButton';
 import { Input } from '../../components/ui/Input';
-import { Label } from '../../components/ui/label';
+import { Label } from '../../components/ui/Label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/Tabs';
 import './styles/UserAuthPage.css';
 import { gql, useMutation } from '@apollo/client';
@@ -23,6 +23,7 @@ const REGISTER_USER = gql`
         username
         firstName
         lastName
+        role
       }
     }
   }
@@ -100,11 +101,10 @@ const UserAuthPage = () => {
             },
          });
          const { token, user } = data.registerUser;
-         setToken('token', token);
+         setToken(token);
          localStorage.setItem('user', JSON.stringify(user));
-
          toast.success('Signup successful!');
-         navigate('/home?newUser=true', { replace: true });
+         navigate('/home?newUser=true', { replace: true }); // Ensure this is set correctly
       } catch (error) {
          console.error('Signup error:', error);
          toast.error(error.message || 'Signup failed. Please try again.');
@@ -130,10 +130,10 @@ const UserAuthPage = () => {
             } else if (user.role === 'Chief_RPS') {
                navigate('/chief-rps/home', { replace: true });
             } else {
-               navigate('/home?newUser=false', { replace: true });
+               navigate('/home?newUser=false', { replace: true }); // Ensure this is set correctly
             }
          } else {
-            toast.error('login failed')
+            toast.error('Login failed');
          }
       } catch (error) {
          console.error('Login error:', error);
