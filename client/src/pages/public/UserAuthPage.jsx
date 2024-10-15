@@ -82,7 +82,6 @@ const UserAuthPage = () => {
 
    const handleSignup = async (e) => {
       e.preventDefault();
-      console.log('Signup initiated');
       if (password !== confirmPassword) {
          toast.error('Passwords do not match.');
          return;
@@ -92,7 +91,6 @@ const UserAuthPage = () => {
          return;
       }
       try {
-         console.log('Sending signup request');
          const { data } = await registerUser({
             variables: {
                firstName,
@@ -101,13 +99,11 @@ const UserAuthPage = () => {
                password,
             },
          });
-         console.log('Signup successful, data:', data);
          const { token, user } = data.registerUser;
-         setToken(token);
+         setToken('token', token);
          localStorage.setItem('user', JSON.stringify(user));
-         console.log('Token set and user stored');
+
          toast.success('Signup successful!');
-         console.log('Navigating to home page');
          navigate('/home?newUser=true', { replace: true });
       } catch (error) {
          console.error('Signup error:', error);

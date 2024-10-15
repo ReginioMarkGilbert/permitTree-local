@@ -47,54 +47,55 @@ const AdminHomePage = () => {
         },
     ];
 
-    const fetchData = useCallback(async () => {
-        setLoading(true);
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                throw new Error('No authentication token found.');
-            }
+   //  #region - temporarily comment out til converted to graphql
+   //  const fetchData = useCallback(async () => {
+   //      setLoading(true);
+   //      try {
+   //          const token = localStorage.getItem('token');
+   //          if (!token) {
+   //              throw new Error('No authentication token found.');
+   //          }
 
-            const [totalUsersResponse, applicationsForReviewResponse, applicationsReturnedResponse] = await Promise.all([
-                axios.get('http://localhost:3000/api/admin/reports/total-users', {
-                    headers: { Authorization: token }
-                }),
-                axios.get('http://localhost:3000/api/admin/reports/applications-for-review', {
-                    headers: { Authorization: token }
-                }),
-                axios.get('http://localhost:3000/api/admin/reports/applications-returned', {
-                    headers: { Authorization: token }
-                })
-            ]);
+   //          const [totalUsersResponse, applicationsForReviewResponse, applicationsReturnedResponse] = await Promise.all([
+   //              axios.get('http://localhost:3000/api/admin/reports/total-users', {
+   //                  headers: { Authorization: token }
+   //              }),
+   //              axios.get('http://localhost:3000/api/admin/reports/applications-for-review', {
+   //                  headers: { Authorization: token }
+   //              }),
+   //              axios.get('http://localhost:3000/api/admin/reports/applications-returned', {
+   //                  headers: { Authorization: token }
+   //              })
+   //          ]);
 
-            setDashboardStats(prevStats => ({
-                ...prevStats,
-                totalUsers: totalUsersResponse.data.totalUsers,
-                applicationsForReview: applicationsForReviewResponse.data.applicationsForReview,
-                applicationsReturned: applicationsReturnedResponse.data.applicationsReturned
-            }));
+   //          setDashboardStats(prevStats => ({
+   //              ...prevStats,
+   //              totalUsers: totalUsersResponse.data.totalUsers,
+   //              applicationsForReview: applicationsForReviewResponse.data.applicationsForReview,
+   //              applicationsReturned: applicationsReturnedResponse.data.applicationsReturned
+   //          }));
 
-            // Fetch all applications (for recent applications display)
-            const applicationsResponse = await axios.get('http://localhost:3000/api/admin/all-applications', {
-                headers: { Authorization: token },
-                params: { excludeDrafts: true }
-            });
+   //          // Fetch all applications (for recent applications display)
+   //          const applicationsResponse = await axios.get('http://localhost:3000/api/admin/all-applications', {
+   //              headers: { Authorization: token },
+   //              params: { excludeDrafts: true }
+   //          });
 
-            // Filter out draft applications on the client side as well
-            const nonDraftApplications = applicationsResponse.data.filter(app => app.status !== 'Draft');
-            setRecentApplications(nonDraftApplications);
+   //          // Filter out draft applications on the client side as well
+   //          const nonDraftApplications = applicationsResponse.data.filter(app => app.status !== 'Draft');
+   //          setRecentApplications(nonDraftApplications);
 
-            setLoading(false);
-        } catch (err) {
-            console.error('Error fetching data:', err.response ? err.response.data : err.message);
-            setError('Failed to fetch data. Please try again later.');
-            setLoading(false);
-        }
-    }, []);
+   //          setLoading(false);
+   //      } catch (err) {
+   //          console.error('Error fetching data:', err.response ? err.response.data : err.message);
+   //          setError('Failed to fetch data. Please try again later.');
+   //          setLoading(false);
+   //      }
+   //  }, []);
 
-    useEffect(() => {
-        fetchData();
-    }, [debouncedRefreshTrigger, fetchData]);
+   //  useEffect(() => {
+   //      fetchData();
+   //  }, [debouncedRefreshTrigger, fetchData]);
 
     const handleViewAllApplications = () => {
         navigate('/chief-rps/dashboard');

@@ -6,12 +6,22 @@ const Admin = require('../models/admin');
 const authResolvers = {
   Mutation: {
     login: async (_, { username, password }) => {
+      console.log('Login attempt for username:', username);
       let user = await User.findOne({ username });
       if (!user) {
+        console.log('User not found in User model, checking Admin model');
         user = await Admin.findOne({ username });
       }
 
-      if (!user || !(await bcrypt.compare(password, user.password))) {
+      if (!user) {
+        console.log('User not found in either model');
+        throw new Error('Invalid credentials');
+      }
+
+      const isValid = await bcrypt.compare(password, user.password);
+      console.log('Password valid:', isValid);
+
+      if (!isValid) {
         throw new Error('Invalid credentials');
       }
 
