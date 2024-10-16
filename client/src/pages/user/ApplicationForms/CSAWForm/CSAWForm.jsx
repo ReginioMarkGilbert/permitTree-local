@@ -33,6 +33,25 @@ const CREATE_CSAW_PERMIT = gql`
   }
 `;
 
+const SAVE_CSAW_PERMIT_DRAFT = gql`
+  mutation SaveCSAWPermitDraft($input: CSAWPermitInput!) {
+    saveCSAWPermitDraft(input: $input) {
+      id
+      customId
+      status
+      files {
+        officialReceipt
+        deedOfSale
+        specialPowerOfAttorney
+        forestTenureAgreement
+        businessPermit
+        certificateOfRegistration
+        woodProcessingPlantPermit
+      }
+    }
+  }
+`;
+
 const ChainsawRegistrationForm = () => {
    const navigate = useNavigate();
    const [currentStep, setCurrentStep] = useState(() => {
@@ -78,6 +97,7 @@ const ChainsawRegistrationForm = () => {
    const [modalContent, setModalContent] = useState({ title: '', message: '' });
    const [customStore, setCustomStore] = useState('');
    const [createCSAWPermit] = useMutation(CREATE_CSAW_PERMIT);
+   const [saveCSAWPermitDraft] = useMutation(SAVE_CSAW_PERMIT_DRAFT);
 
    const chainsawStores = [
       { value: "Green Chainsaw Co.", label: "Green Chainsaw Co." },
@@ -165,40 +185,64 @@ const ChainsawRegistrationForm = () => {
 
    const handleSaveAsDraft = async () => {
       try {
-         const token = localStorage.getItem('token');
-         const currentDate = new Date();
-         const formDataToSend = new FormData();
+        const currentDate = new Date().toISOString();
+        const input = {
+          ...formData,
+          dateOfSubmission: currentDate,
+          status: 'Draft',
+          files: Object.fromEntries(
+            Object.entries(formData.files).map(([key, files]) => [
+              key,
+              files.map(file => file.name)
+            ])
+          ),
+          dateOfAcquisition: formData.dateOfAcquisition ? new Date(formData.dateOfAcquisition).toISOString() : null,
+          purchasePrice: formData.purchasePrice ? parseFloat(formData.purchasePrice) : null,
+          powerOutput: formData.powerOutput ? formData.powerOutput.toString() : '',
+          maxLengthGuidebar: formData.maxLengthGuidebar ? formData.maxLengthGuidebar.toString() : '',
+          isOwner: Boolean(formData.isOwner),
+          isTenureHolder: Boolean(formData.isTenureHolder),
+          isBusinessOwner: Boolean(formData.isBusinessOwner),
+          isPLTPRHolder: Boolean(formData.isPLTPRHolder),
+          isWPPHolder: Boolean(formData.isWPPHolder),
+        };
 
-         // Append all form fields
-         Object.keys(formData).forEach(key => {
-            if (key === 'files') {
-               Object.keys(formData[key]).forEach(docType => {
-                  formData[key][docType].forEach(file => {
-                     formDataToSend.append(`${docType}[]`, file);
-                  });
-               });
-            } else if (key !== 'status' && key !== 'dateOfSubmission') {
-               formDataToSend.append(key, formData[key]);
-            }
-         });
-         formDataToSend.append('dateOfSubmission', currentDate.toISOString());
-         formDataToSend.append('status', 'Draft');
-
-         const response = await axios.post('http://localhost:3000/api/csaw_saveDraft', formDataToSend, {
+        const token = localStorage.getItem('token');
+        const { data } = await saveCSAWPermitDraft({
+          variables: { input },
+          context: {
             headers: {
-               'Content-Type': 'multipart/form-data',
-               'Authorization': token
-            }
-         });
+              'Apollo-Require-Preflight': 'true',
+              'Authorization': `Bearer ${token}`,
+            },
+          },
+        });
 
-         setModalContent({
+        if (data.saveCSAWPermitDraft) {
+          setModalContent({
             title: 'Draft saved successfully!',
             message: 'Do you want to view your applications?'
-         });
-         setModalOpen(true);
+          });
+          setModalOpen(true);
+
+          // Clear localStorage
+          localStorage.removeItem('csawFormStep');
+          localStorage.removeItem('csawFormData');
+        }
       } catch (error) {
-         console.error('Error saving draft:', error);
-         toast.error("Error saving draft");
+        console.error('Error saving draft:', error);
+        if (error.graphQLErrors) {
+          error.graphQLErrors.forEach(({ message, locations, path, extensions }) => {
+            console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}, Extensions:`, extensions);
+          });
+        }
+        if (error.networkError) {
+          console.log(`[Network error]:`, error.networkError);
+          if (error.networkError.result) {
+            console.log('Error result:', error.networkError.result);
+          }
+        }
+        toast.error("Error saving draft: " + error.message);
       }
    };
 
