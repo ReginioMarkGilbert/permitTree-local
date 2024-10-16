@@ -1,4 +1,5 @@
 const { mergeResolvers } = require('@graphql-tools/merge');
+const { GraphQLUpload } = require('graphql-upload-minimal');
 const authResolvers = require('./authResolvers');
 const userResolvers = require('./userResolvers');
 const adminResolvers = require('./adminResolvers');
@@ -13,6 +14,7 @@ const oopResolvers = require('./oopResolvers');
 const certificateResolvers = require('./certificateResolvers');
 
 const resolvers = mergeResolvers([
+   { Upload: GraphQLUpload },
    authResolvers,
    userResolvers,
    adminResolvers,

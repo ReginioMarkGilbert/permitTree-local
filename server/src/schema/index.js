@@ -6,12 +6,24 @@ const certificateTypes = require('./certificateTypes');
 const queryTypes = require('./queryTypes');
 const mutationTypes = require('./mutationTypes');
 
-const rootTypes = gql`
+const rootTypeDefs = gql`
   scalar Upload
+
+  type Query {
+    _: Boolean
+  }
+
+  type Mutation {
+    _: Boolean
+  }
+
+  type Subscription {
+    _: Boolean
+  }
 `;
 
 module.exports = [
-  rootTypes,
+  rootTypeDefs,
   userTypes,
   permitTypes,
   oopTypes,

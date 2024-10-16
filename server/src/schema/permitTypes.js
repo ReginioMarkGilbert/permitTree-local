@@ -13,6 +13,8 @@ const permitTypes = gql`
 
   type CSAWPermit {
     id: ID!
+    customId: String!
+    status: String!
     registrationType: String!
     chainsawStore: String!
     brand: String!
@@ -23,7 +25,7 @@ const permitTypes = gql`
     countryOfOrigin: String!
     purchasePrice: Float!
     dateOfAcquisition: String!
-    supportingDocuments: CSAWSupportingDocuments
+    files: CSAWSupportingDocuments
   }
 
   type CSAWSupportingDocuments {
@@ -37,27 +39,38 @@ const permitTypes = gql`
   }
 
   input CSAWPermitInput {
+    applicationType: String!
     registrationType: String!
     chainsawStore: String!
+    ownerName: String!
+    address: String!
+    phone: String!
     brand: String!
     model: String!
     serialNumber: String!
+    dateOfAcquisition: String!
     powerOutput: String!
     maxLengthGuidebar: String!
     countryOfOrigin: String!
     purchasePrice: Float!
-    dateOfAcquisition: String!
-    supportingDocuments: CSAWSupportingDocumentsInput
+    isOwner: Boolean!
+    isTenureHolder: Boolean!
+    isBusinessOwner: Boolean!
+    isPLTPRHolder: Boolean!
+    isWPPHolder: Boolean!
+    files: CSAWPermitFilesInput
+    status: String
+    dateOfSubmission: String
   }
 
-  input CSAWSupportingDocumentsInput {
-    officialReceipt: [Upload]
-    deedOfSale: [Upload]
-    specialPowerOfAttorney: [Upload]
-    forestTenureAgreement: [Upload]
-    businessPermit: [Upload]
-    certificateOfRegistration: [Upload]
-    woodProcessingPlantPermit: [Upload]
+  input CSAWPermitFilesInput {
+    officialReceipt: [String]
+    deedOfSale: [String]
+    specialPowerOfAttorney: [String]
+    forestTenureAgreement: [String]
+    businessPermit: [String]
+    certificateOfRegistration: [String]
+    woodProcessingPlantPermit: [String]
   }
 
   type COVPermit {
@@ -221,6 +234,26 @@ const permitTypes = gql`
     projectProposal: [Upload]
     environmentalComplianceCertificate: [Upload]
     treeInventory: [Upload]
+  }
+
+  type CSAWFiles {
+    officialReceipt: [Upload!]!
+    deedOfSale: [Upload!]!
+    specialPowerOfAttorney: [Upload!]!
+    forestTenureAgreement: [Upload!]!
+    businessPermit: [Upload!]!
+    certificateOfRegistration: [Upload!]!
+    woodProcessingPlantPermit: [Upload!]!
+  }
+
+  input CSAWFilesInput {
+    officialReceipt: [Upload!]
+    deedOfSale: [Upload!]
+    specialPowerOfAttorney: [Upload!]
+    forestTenureAgreement: [Upload!]
+    businessPermit: [Upload!]
+    certificateOfRegistration: [Upload!]
+    woodProcessingPlantPermit: [Upload!]
   }
 `;
 

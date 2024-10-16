@@ -17,7 +17,6 @@ const userTypes = gql`
     firstName: String!
     lastName: String!
     role: String!
-    # ... (other fields)
   }
 
   input UpdateUserProfileInput {

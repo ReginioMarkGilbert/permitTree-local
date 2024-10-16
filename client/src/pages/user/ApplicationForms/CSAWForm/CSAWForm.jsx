@@ -11,6 +11,27 @@ import { useNavigate } from 'react-router-dom';
 import Modal from '../../../../components/ui/Modal';
 import '../../../../components/ui/styles/CSAWFormScrollbar.css';
 import { CheckboxItem, UploadCard, CustomSelect, CustomDatePicker, formatLabel, formatReviewValue } from './CSAWFormUtils';
+import { gql, useMutation } from '@apollo/client';
+
+const CREATE_CSAW_PERMIT = gql`
+  mutation CreateCSAWPermit($input: CSAWPermitInput!) {
+    createCSAWPermit(input: $input) {
+      id
+      customId
+      status
+      files {
+        officialReceipt
+        deedOfSale
+        specialPowerOfAttorney
+        forestTenureAgreement
+        businessPermit
+        certificateOfRegistration
+        woodProcessingPlantPermit
+      }
+      # Add any other fields you need from the response
+    }
+  }
+`;
 
 const ChainsawRegistrationForm = () => {
    const navigate = useNavigate();
@@ -56,6 +77,7 @@ const ChainsawRegistrationForm = () => {
    const [modalOpen, setModalOpen] = useState(false);
    const [modalContent, setModalContent] = useState({ title: '', message: '' });
    const [customStore, setCustomStore] = useState('');
+   const [createCSAWPermit] = useMutation(CREATE_CSAW_PERMIT);
 
    const chainsawStores = [
       { value: "Green Chainsaw Co.", label: "Green Chainsaw Co." },
@@ -183,58 +205,66 @@ const ChainsawRegistrationForm = () => {
    const handleSubmit = async (e) => {
       e.preventDefault();
       try {
-         const token = localStorage.getItem('token');
-         if (!token) {
-            toast.error("No authentication token found. Please log in.");
-            return;
-         }
+        const currentDate = new Date().toISOString();
+        const input = {
+          ...formData,
+          dateOfSubmission: currentDate,
+          status: 'Submitted',
+          files: Object.fromEntries(
+            Object.entries(formData.files).map(([key, files]) => [
+              key,
+              files.map(file => file.name)
+            ])
+          ),
+          dateOfAcquisition: new Date(formData.dateOfAcquisition).toISOString(),
+          purchasePrice: parseFloat(formData.purchasePrice),
+          powerOutput: formData.powerOutput.toString(),
+          maxLengthGuidebar: formData.maxLengthGuidebar.toString(),
+          isOwner: Boolean(formData.isOwner),
+          isTenureHolder: Boolean(formData.isTenureHolder),
+          isBusinessOwner: Boolean(formData.isBusinessOwner),
+          isPLTPRHolder: Boolean(formData.isPLTPRHolder),
+          isWPPHolder: Boolean(formData.isWPPHolder),
+        };
 
-         const currentDate = new Date();
-         const formDataToSend = new FormData();
+        console.log('Submitting input:', input); // Add this line for debugging
 
-         // Append non-file fields
-         Object.keys(formData).forEach(key => {
-            if (key !== 'files') {
-               formDataToSend.append(key, formData[key]);
-            }
-         });
-
-         // Append files
-         Object.keys(formData.files).forEach(fileType => {
-            formData.files[fileType].forEach(file => {
-               formDataToSend.append(fileType, file);
-            });
-         });
-
-         formDataToSend.append('dateOfSubmission', currentDate.toISOString());
-         formDataToSend.append('status', 'Submitted');
-
-         // Log the form data
-         for (let pair of formDataToSend.entries()) {
-            console.log(pair[0] + ': ' + pair[1]);
-         }
-
-         const response = await axios.post('http://localhost:3000/api/csaw_createApplication', formDataToSend, {
+        const token = localStorage.getItem('token'); // Assuming you store the token in localStorage
+        const { data } = await createCSAWPermit({
+          variables: { input },
+          context: {
             headers: {
-               'Content-Type': 'multipart/form-data',
-               'Authorization': token
-            }
-         });
+              'Apollo-Require-Preflight': 'true',
+              'Authorization': `Bearer ${token}`, // Add this line
+            },
+          },
+        });
 
-         // Handle successful submission
-         console.log('Application submitted:', response.data);
-         setModalContent({
+        if (data.createCSAWPermit) {
+          setModalContent({
             title: 'Application submitted successfully!',
             message: 'Do you want to view your application?'
-         });
-         setModalOpen(true);
+          });
+          setModalOpen(true);
 
-         // If submission is successful, clear localStorage
-         localStorage.removeItem('csawFormStep');
-         localStorage.removeItem('csawFormData');
+          // Clear localStorage
+          localStorage.removeItem('csawFormStep');
+          localStorage.removeItem('csawFormData');
+        }
       } catch (error) {
-         console.error('Error submitting application:', error);
-         toast.error(`Error submitting application: ${error.message}`);
+        console.error('Error submitting application:', error);
+        if (error.graphQLErrors) {
+          error.graphQLErrors.forEach(({ message, locations, path, extensions }) => {
+            console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}, Extensions:`, extensions);
+          });
+        }
+        if (error.networkError) {
+          console.log(`[Network error]:`, error.networkError);
+          if (error.networkError.result) {
+            console.log('Error result:', error.networkError.result);
+          }
+        }
+        toast.error("Error submitting application: " + error.message);
       }
    };
 
@@ -668,7 +698,7 @@ const ChainsawRegistrationForm = () => {
                </CardFooter>
             </Card>
          </div>
-         <ToastContainer
+         {/* <ToastContainer
             position="top-right"
             autoClose={5000}
             hideProgressBar={false}
@@ -678,7 +708,7 @@ const ChainsawRegistrationForm = () => {
             pauseOnFocusLoss
             draggable
             pauseOnHover
-         />
+         /> */}
          <Modal
             isOpen={modalOpen}
             title={modalContent.title}
