@@ -8,7 +8,7 @@ require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const User = require('./src/models/User');
 
-const typeDefs = require('./src/schema/typeDefs');
+const typeDefs = require('./src/schema');
 const resolvers = require('./src/resolvers');
 
 const startServer = async () => {
