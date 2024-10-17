@@ -18,12 +18,30 @@ const covResolvers = {
 
          try {
             const applicationNumber = await COV_ApplicationNumber();
+
+            // Process file inputs
+            const processedFiles = {};
+            for (const [key, files] of Object.entries(input.files)) {
+               if (files && files.length > 0) {
+                  processedFiles[key] = files.map(file => ({
+                     filename: file.filename,
+                     mimetype: file.mimetype,
+                     encoding: file.encoding,
+                     buffer: Buffer.from(file.content || '', 'base64')
+                  }));
+               } else {
+                  processedFiles[key] = [];
+               }
+            }
+
             const permitData = {
                ...input,
                applicationNumber,
                applicantId: user.id,
-               status: input.status || 'Pending',
-               dateOfSubmission: input.dateOfSubmission || new Date().toISOString(),
+               applicationType: 'Certificate of Verification',
+               status: 'Pending',
+               dateOfSubmission: new Date().toISOString(),
+               files: processedFiles,
             };
 
             const newPermit = new COVPermit(permitData);
@@ -48,7 +66,13 @@ const covResolvers = {
             throw new Error('You are not authorized to update this permit');
          }
 
-         Object.assign(permit, input);
+         // Process file uploads
+         const processedFiles = {};
+         for (const [key, uploads] of Object.entries(input.files)) {
+            processedFiles[key] = await Promise.all(uploads.map(processUpload));
+         }
+
+         Object.assign(permit, { ...input, files: processedFiles });
          return await permit.save();
       },
       saveCOVPermitDraft: async (_, { input }, { user }) => {
@@ -58,11 +82,19 @@ const covResolvers = {
 
          try {
             const applicationNumber = await COV_ApplicationNumber();
+
+            // Process file uploads
+            const processedFiles = {};
+            for (const [key, uploads] of Object.entries(input.files)) {
+               processedFiles[key] = await Promise.all(uploads.map(processUpload));
+            }
+
             const permitData = {
                ...input,
                applicationNumber,
                applicantId: user.id,
                status: 'Draft',
+               files: processedFiles,
             };
 
             const newPermit = new COVPermit(permitData);

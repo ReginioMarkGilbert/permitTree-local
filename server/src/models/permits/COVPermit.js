@@ -1,6 +1,13 @@
 const mongoose = require('mongoose');
 const Permit = require('./Permit');
 
+const FileSchema = new mongoose.Schema({
+  filename: String,
+  mimetype: String,
+  encoding: String,
+  buffer: Buffer
+});
+
 const COVPermitSchema = new mongoose.Schema({
   applicationNumber: { type: String, required: true, unique: true },
   applicationType: { type: String, required: true },
@@ -14,12 +21,12 @@ const COVPermitSchema = new mongoose.Schema({
   originAddress: { type: String, required: true },
   destinationAddress: { type: String, required: true },
   files: {
-    letterOfIntent: [String],
-    tallySheet: [String],
-    forestCertification: [String],
-    orCr: [String],
-    driverLicense: [String],
-    specialPowerOfAttorney: [String]
+    letterOfIntent: [FileSchema],
+    tallySheet: [FileSchema],
+    forestCertification: [FileSchema],
+    orCr: [FileSchema],
+    driverLicense: [FileSchema],
+    specialPowerOfAttorney: [FileSchema]
   },
   dateOfSubmission: { type: Date, default: Date.now },
   status: { type: String, required: true },

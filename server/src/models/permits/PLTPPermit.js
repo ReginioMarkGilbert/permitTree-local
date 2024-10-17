@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 const Permit = require('./Permit');
 
+const FileSchema = new mongoose.Schema({
+   filename: String,
+   contentType: String,
+   data: Buffer
+});
+
 const PLTPPermitSchema = new mongoose.Schema({
    applicationNumber: { type: String, required: true, unique: true },
    applicationType: { type: String, required: true },
@@ -10,14 +16,14 @@ const PLTPPermitSchema = new mongoose.Schema({
    treeType: { type: String, required: true },
    treeStatus: { type: String, required: true },
    landType: { type: String, required: true },
-   posingDanger: { type: Boolean },
-   forPersonalUse: { type: Boolean },
+   posingDanger: { type: Boolean, required: true },
+   forPersonalUse: { type: Boolean, required: true },
    purpose: { type: String, required: true },
    files: {
-      applicationLetter: [String],
-      lguEndorsement: [String],
-      homeownersResolution: [String],
-      ptaResolution: [String]
+      applicationLetter: [FileSchema],
+      lguEndorsement: [FileSchema],
+      homeownersResolution: [FileSchema],
+      ptaResolution: [FileSchema]
    },
    dateOfSubmission: { type: Date, default: Date.now },
    status: { type: String, required: true },

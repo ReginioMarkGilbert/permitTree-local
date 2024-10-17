@@ -24,14 +24,6 @@ const CREATE_COV_PERMIT = gql`
       applicationNumber
       status
       dateOfSubmission
-      files {
-        letterOfIntent
-        tallySheet
-        forestCertification
-        orCr
-        driverLicense
-        specialPowerOfAttorney
-      }
     }
   }
 `;
@@ -165,28 +157,37 @@ const COVForm = () => {
    const handleSubmit = async (e) => {
       e.preventDefault();
       try {
-         const currentDate = new Date().toISOString();
          const input = {
-            ...formData,
-            dateOfSubmission: currentDate,
-            status: 'Submitted',
-            files: Object.fromEntries(
-               Object.entries(formData.files).map(([key, files]) => [
-                  key,
-                  files.map(file => file.name)
-               ])
-            ),
+            name: formData.name,
+            address: formData.address,
+            cellphone: formData.cellphone,
+            purpose: formData.purpose,
+            driverName: formData.driverName,
+            driverLicenseNumber: formData.driverLicenseNumber,
+            vehiclePlateNumber: formData.vehiclePlateNumber,
+            originAddress: formData.originAddress,
+            destinationAddress: formData.destinationAddress,
+            files: {}
          };
 
-         console.log('Submitting input:', input); // For debugging
+         // Process files
+         for (const [key, files] of Object.entries(formData.files)) {
+            if (files.length > 0) {
+               input.files[key] = files.map(file => ({
+                  filename: file.name,
+                  mimetype: file.type,
+                  encoding: 'utf-8',
+                  content: null  // We'll read the file content in the resolver
+               }));
+            }
+         }
 
-         const token = localStorage.getItem('token');
          const { data } = await createCOVPermit({
             variables: { input },
             context: {
                headers: {
                   'Apollo-Require-Preflight': 'true',
-                  'Authorization': `Bearer ${token}`,
+                  'Authorization': `Bearer ${localStorage.getItem('token')}`,
                },
             },
          });

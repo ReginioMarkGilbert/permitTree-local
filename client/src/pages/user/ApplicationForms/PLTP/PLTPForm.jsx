@@ -17,6 +17,7 @@ import { gql, useMutation } from '@apollo/client';
 import { formatLabel, formatReviewValue } from '../CSAWForm/CSAWFormUtils';
 import '../../../../components/ui/styles/customScrollBar.css';
 import { RadioGroup, RadioGroupItem } from '../../../../components/ui/RadioGroup';
+import { uploadFile } from '../../../../apolloClient';
 
 const CREATE_PLTP_PERMIT = gql`
   mutation CreatePLTPPermit($input: PLTPPermitInput!) {
@@ -26,10 +27,22 @@ const CREATE_PLTP_PERMIT = gql`
       status
       dateOfSubmission
       files {
-        applicationLetter
-        lguEndorsement
-        homeownersResolution
-        ptaResolution
+        applicationLetter {
+          filename
+          contentType
+        }
+        lguEndorsement {
+          filename
+          contentType
+        }
+        homeownersResolution {
+          filename
+          contentType
+        }
+        ptaResolution {
+          filename
+          contentType
+        }
       }
     }
   }
@@ -168,35 +181,26 @@ const PLTPForm = () => {
       e.preventDefault();
       try {
          const currentDate = new Date().toISOString();
-         const formDataToSend = new FormData();
-
-         // Append non-file fields
-         Object.keys(formData).forEach(key => {
-            if (key !== 'files') {
-               formDataToSend.append(key, formData[key]);
-            }
-         });
-
-         // Append files
-         Object.entries(formData.files).forEach(([docType, files]) => {
-            files.forEach(file => {
-               formDataToSend.append(`files.${docType}`, file);
-            });
-         });
-
          const input = {
             ...formData,
             dateOfSubmission: currentDate,
             status: 'Submitted',
-            treeType: formData.treeType.join(', '), // Join array into a string
-            treeStatus: formData.treeStatus.join(', '), // Join array into a string
-            landType: formData.landType.join(', '), // Join array into a string
-            files: Object.fromEntries(
-               Object.entries(formData.files).map(([key, files]) => [
-                  key,
-                  files.map(file => file.name)
-               ])
-            ),
+            files: await Promise.all(
+               Object.entries(formData.files).map(async ([key, files]) => {
+                  const uploadedFiles = await Promise.all(files.map(async (file) => {
+                     const reader = new FileReader();
+                     return new Promise((resolve) => {
+                        reader.onload = () => resolve({
+                           filename: file.name,
+                           contentType: file.type,
+                           data: reader.result.split(',')[1] // base64 data
+                        });
+                        reader.readAsDataURL(file);
+                     });
+                  }));
+                  return [key, uploadedFiles];
+               })
+            ).then(Object.fromEntries),
          };
 
          console.log('Submitting input:', input);
