@@ -14,15 +14,14 @@ const permitTypes = gql`
 
   type File {
     filename: String!
-    mimetype: String!
-    encoding: String!
+    contentType: String!
+    data: String!
   }
 
   input FileInput {
     filename: String!
-    mimetype: String!
-    encoding: String!
-    content: String
+    contentType: String!
+    data: String!
   }
 
   type COVPermit implements Permit {

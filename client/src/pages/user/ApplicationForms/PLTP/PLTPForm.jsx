@@ -16,8 +16,6 @@ import { UploadCard } from '../CSAWForm/CSAWFormUtils';
 import { gql, useMutation } from '@apollo/client';
 import { formatLabel, formatReviewValue } from '../CSAWForm/CSAWFormUtils';
 import '../../../../components/ui/styles/customScrollBar.css';
-import { RadioGroup, RadioGroupItem } from '../../../../components/ui/RadioGroup';
-import { uploadFile } from '../../../../apolloClient';
 
 const CREATE_PLTP_PERMIT = gql`
   mutation CreatePLTPPermit($input: PLTPPermitInput!) {

@@ -3,9 +3,8 @@ const Permit = require('./Permit');
 
 const FileSchema = new mongoose.Schema({
   filename: String,
-  mimetype: String,
-  encoding: String,
-  buffer: Buffer
+  contentType: String,
+  data: Buffer
 });
 
 const COVPermitSchema = new mongoose.Schema({

@@ -173,11 +173,13 @@ const COVForm = () => {
          // Process files
          for (const [key, files] of Object.entries(formData.files)) {
             if (files.length > 0) {
-               input.files[key] = files.map(file => ({
-                  filename: file.name,
-                  mimetype: file.type,
-                  encoding: 'utf-8',
-                  content: null  // We'll read the file content in the resolver
+               input.files[key] = await Promise.all(files.map(async (file) => {
+                  const content = await readFileAsBase64(file);
+                  return {
+                     filename: file.name,
+                     contentType: file.type,
+                     data: content // This is the missing field
+                  };
                }));
             }
          }
@@ -207,6 +209,16 @@ const COVForm = () => {
          console.error('Error submitting application:', error);
          toast.error("Error submitting application: " + error.message);
       }
+   };
+
+   // Make sure this helper function is defined
+   const readFileAsBase64 = (file) => {
+      return new Promise((resolve, reject) => {
+         const reader = new FileReader();
+         reader.onload = () => resolve(reader.result.split(',')[1]);
+         reader.onerror = error => reject(error);
+         reader.readAsDataURL(file);
+      });
    };
 
    const steps = [

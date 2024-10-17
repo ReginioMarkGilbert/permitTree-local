@@ -1,5 +1,6 @@
 const COVPermit = require('../../models/permits/COVPermit');
 const { COV_ApplicationNumber } = require('../../utils/customIdGenerator');
+const { Binary } = require('mongodb');
 
 const covResolvers = {
    Query: {
@@ -25,9 +26,8 @@ const covResolvers = {
                if (files && files.length > 0) {
                   processedFiles[key] = files.map(file => ({
                      filename: file.filename,
-                     mimetype: file.mimetype,
-                     encoding: file.encoding,
-                     buffer: Buffer.from(file.content || '', 'base64')
+                     contentType: file.contentType,
+                     data: Binary.createFromBase64(file.data)
                   }));
                } else {
                   processedFiles[key] = [];
