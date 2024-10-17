@@ -1,5 +1,5 @@
 const COVPermit = require('../../models/permits/COVPermit');
-const { COV_CustomId } = require('../../utils/customIdGenerator');
+const { COV_ApplicationNumber } = require('../../utils/customIdGenerator');
 
 const covResolvers = {
    Query: {
@@ -17,14 +17,11 @@ const covResolvers = {
          }
 
          try {
-            const customId = await COV_CustomId();
-            const applicationNumber = `COV-${Date.now()}`; // Generate a unique application number
+            const applicationNumber = await COV_ApplicationNumber();
             const permitData = {
                ...input,
-               customId,
-               applicantId: user.id, // Use the user's ID as the applicantId
                applicationNumber,
-               userId: user.id,
+               applicantId: user.id,
                status: input.status || 'Pending',
                dateOfSubmission: input.dateOfSubmission || new Date().toISOString(),
             };
@@ -47,7 +44,7 @@ const covResolvers = {
             throw new Error('Permit not found');
          }
 
-         if (permit.userId.toString() !== user.id && user.role !== 'admin') {
+         if (permit.applicantId.toString() !== user.id && user.role !== 'admin') {
             throw new Error('You are not authorized to update this permit');
          }
 
@@ -60,11 +57,11 @@ const covResolvers = {
          }
 
          try {
-            const customId = await COV_CustomId();
+            const applicationNumber = await COV_ApplicationNumber();
             const permitData = {
                ...input,
-               customId,
-               userId: user.id,
+               applicationNumber,
+               applicantId: user.id,
                status: 'Draft',
             };
 

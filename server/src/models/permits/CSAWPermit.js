@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
+const Permit = require('./Permit');
 
 const CSAWPermitSchema = new mongoose.Schema({
-  customId: { type: String, required: true, unique: true },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  applicationType: { type: String, required: true },
+  applicationNumber: { type: String, required: true, unique: true },
+  applicationType: { type: String, required: true, enum: ['Chainsaw Registration'] },
   registrationType: { type: String, required: true },
   chainsawStore: { type: String, required: true },
   ownerName: { type: String, required: true },
@@ -33,8 +33,8 @@ const CSAWPermitSchema = new mongoose.Schema({
   },
   dateOfSubmission: { type: Date, default: Date.now },
   status: { type: String, required: true },
-}, { timestamps: true });
+});
 
-const CSAWPermit = mongoose.model('CSAWPermit', CSAWPermitSchema);
+const CSAWPermit = Permit.discriminator('CSAWPermit', CSAWPermitSchema);
 
-module.exports = CSAWPermit;
+module.exports = mongoose.model('CSAWPermit');

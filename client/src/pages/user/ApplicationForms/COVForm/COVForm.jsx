@@ -21,7 +21,7 @@ const CREATE_COV_PERMIT = gql`
   mutation CreateCOVPermit($input: COVPermitInput!) {
     createCOVPermit(input: $input) {
       id
-      customId
+      applicationNumber
       status
       dateOfSubmission
       files {
@@ -453,7 +453,7 @@ const COVForm = () => {
             title={modalContent.title}
             message={modalContent.message}
             onClose={() => setModalOpen(false)}
-            onHome={() => navigate('/')}
+            onHome={() => navigate('/home')}
             onApplications={() => navigate('/applicationsStatus')}
          />
       </div>

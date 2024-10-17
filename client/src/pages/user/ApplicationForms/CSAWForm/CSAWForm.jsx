@@ -17,7 +17,7 @@ const CREATE_CSAW_PERMIT = gql`
   mutation CreateCSAWPermit($input: CSAWPermitInput!) {
     createCSAWPermit(input: $input) {
       id
-      customId
+      applicationNumber
       status
       files {
         officialReceipt
@@ -753,7 +753,7 @@ const ChainsawRegistrationForm = () => {
             title={modalContent.title}
             message={modalContent.message}
             onClose={() => setModalOpen(false)}
-            onHome={() => navigate('/')}
+            onHome={() => navigate('/home')}
             onApplications={() => navigate('/applicationsStatus')}
          />
       </div>

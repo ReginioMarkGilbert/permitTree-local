@@ -13,7 +13,7 @@ const permitTypes = gql`
 
   type CSAWPermit {
     id: ID!
-    customId: String!
+    applicationNumber: String!
     status: String!
     registrationType: String!
     chainsawStore: String!
@@ -75,7 +75,7 @@ const permitTypes = gql`
 
   type COVPermit {
     id: ID!
-    customId: String!
+    applicationNumber: String!
     applicationType: String!
     name: String!
     address: String!
@@ -160,35 +160,48 @@ const permitTypes = gql`
 
   type PTPRPermit {
     id: ID!
-    landOwner: String!
-    landLocation: String!
-    totalArea: Float!
-    treeSpecies: [String!]
-    estimatedVolume: Float
-    plantingDate: String
-    supportingDocuments: PTPRSupportingDocuments
+    applicationNumber: String!
+    applicationType: String!
+    ownerName: String!
+    address: String!
+    contactNumber: String!
+    lotArea: Float!
+    treeSpecies: [String!]!
+    totalTrees: Int!
+    treeSpacing: String!
+    yearPlanted: Int!
+    files: PTPRSupportingDocuments
+    dateOfSubmission: String!
+    status: String!
   }
 
   type PTPRSupportingDocuments {
-    proofOfLandOwnership: [String]
-    plantationMap: [String]
-    inventoryReport: [String]
+    letterRequest: [String]
+    titleOrTaxDeclaration: [String]
+    darCertification: [String]
+    specialPowerOfAttorney: [String]
   }
 
   input PTPRPermitInput {
-    landOwner: String!
-    landLocation: String!
-    totalArea: Float!
-    treeSpecies: [String!]
-    estimatedVolume: Float
-    plantingDate: String
-    supportingDocuments: PTPRSupportingDocumentsInput
+    applicationType: String!
+    ownerName: String!
+    address: String!
+    contactNumber: String!
+    lotArea: Float!
+    treeSpecies: [String!]!
+    totalTrees: Int!
+    treeSpacing: String!
+    yearPlanted: Int!
+    files: PTPRSupportingDocumentsInput
+    status: String
+    dateOfSubmission: String
   }
 
   input PTPRSupportingDocumentsInput {
-    proofOfLandOwnership: [Upload]
-    plantationMap: [Upload]
-    inventoryReport: [Upload]
+    letterRequest: [String]
+    titleOrTaxDeclaration: [String]
+    darCertification: [String]
+    specialPowerOfAttorney: [String]
   }
 
   type SPLTPPermit {

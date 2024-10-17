@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Permit = require('./Permit');
 
 const COVPermitSchema = new mongoose.Schema({
-  customId: { type: String, required: true, unique: true },
+  applicationNumber: { type: String, required: true, unique: true },
   applicationType: { type: String, required: true },
   name: { type: String, required: true },
   address: { type: String, required: true },
@@ -23,9 +23,7 @@ const COVPermitSchema = new mongoose.Schema({
   },
   dateOfSubmission: { type: Date, default: Date.now },
   status: { type: String, required: true },
-  // Add these two fields
   applicantId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  applicationNumber: { type: String, required: true }
 });
 
 const COVPermit = Permit.discriminator('COVPermit', COVPermitSchema);
