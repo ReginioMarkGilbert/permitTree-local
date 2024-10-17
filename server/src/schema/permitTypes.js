@@ -125,39 +125,6 @@ const permitTypes = gql`
     specialPowerOfAttorney: [String]
   }
 
-  type PLTPPermit {
-    id: ID!
-    location: String!
-    treeSpecies: [String!]!
-    numberOfTrees: Int!
-    purposeOfCutting: String!
-    publicLandType: String!
-    supportingDocuments: PLTPSupportingDocuments
-  }
-
-  type PLTPSupportingDocuments {
-    requestLetter: [String]
-    siteInspectionReport: [String]
-    treeInventory: [String]
-    publicLandCertification: [String]
-  }
-
-  input PLTPPermitInput {
-    location: String!
-    treeSpecies: [String!]!
-    numberOfTrees: Int!
-    purposeOfCutting: String!
-    publicLandType: String!
-    supportingDocuments: PLTPSupportingDocumentsInput
-  }
-
-  input PLTPSupportingDocumentsInput {
-    requestLetter: [Upload]
-    siteInspectionReport: [Upload]
-    treeInventory: [Upload]
-    publicLandCertification: [Upload]
-  }
-
   type PTPRPermit {
     id: ID!
     applicationNumber: String!
@@ -290,6 +257,52 @@ const permitTypes = gql`
     businessPermit: [Upload!]
     certificateOfRegistration: [Upload!]
     woodProcessingPlantPermit: [Upload!]
+  }
+
+  type PLTPPermit {
+    id: ID!
+    applicationNumber: String!
+    applicationType: String!
+    name: String!
+    address: String!
+    contactNumber: String!
+    treeType: String!
+    treeStatus: String!
+    landType: String!
+    purpose: String!
+    files: PLTPSupportingDocuments
+    dateOfSubmission: String!
+    status: String!
+  }
+
+  type PLTPSupportingDocuments {
+    applicationLetter: [String]
+    lguEndorsement: [String]
+    homeownersResolution: [String]
+    ptaResolution: [String]
+  }
+
+  input PLTPPermitInput {
+    applicationType: String!
+    name: String!
+    address: String!
+    contactNumber: String!
+    treeType: String!
+    treeStatus: String!
+    landType: String!
+    posingDanger: Boolean
+    forPersonalUse: Boolean
+    purpose: String!
+    files: PLTPSupportingDocumentsInput
+    status: String
+    dateOfSubmission: String
+  }
+
+  input PLTPSupportingDocumentsInput {
+    applicationLetter: [String]
+    lguEndorsement: [String]
+    homeownersResolution: [String]
+    ptaResolution: [String]
   }
 `;
 

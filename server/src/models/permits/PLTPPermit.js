@@ -2,21 +2,26 @@ const mongoose = require('mongoose');
 const Permit = require('./Permit');
 
 const PLTPPermitSchema = new mongoose.Schema({
-   location: { type: String, required: true },
-   treeSpecies: [{ type: String, required: true }],
-   numberOfTrees: { type: Number, required: true },
-   purposeOfCutting: { type: String, required: true },
-   publicLandType: {
-      type: String,
-      required: true,
-      enum: ['Plaza', 'Public Park', 'School Premises', 'Political Subdivision']
+   applicationNumber: { type: String, required: true, unique: true },
+   applicationType: { type: String, required: true },
+   name: { type: String, required: true },
+   address: { type: String, required: true },
+   contactNumber: { type: String, required: true },
+   treeType: { type: String, required: true },
+   treeStatus: { type: String, required: true },
+   landType: { type: String, required: true },
+   posingDanger: { type: Boolean },
+   forPersonalUse: { type: Boolean },
+   purpose: { type: String, required: true },
+   files: {
+      applicationLetter: [String],
+      lguEndorsement: [String],
+      homeownersResolution: [String],
+      ptaResolution: [String]
    },
-   supportingDocuments: {
-      requestLetter: [String],
-      siteInspectionReport: [String],
-      treeInventory: [String],
-      publicLandCertification: [String]
-   }
+   dateOfSubmission: { type: Date, default: Date.now },
+   status: { type: String, required: true },
+   applicantId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 });
 
 const PLTPPermit = Permit.discriminator('PLTPPermit', PLTPPermitSchema);

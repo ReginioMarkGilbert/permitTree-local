@@ -31,5 +31,11 @@ const generateApplicationNumber = async (prefix) => {
 const CSAW_ApplicationNumber = () => generateApplicationNumber('CSAW');
 const COV_ApplicationNumber = () => generateApplicationNumber('COV');
 const PTPR_ApplicationNumber = () => generateApplicationNumber('PTPR');
+const PLTP_ApplicationNumber = () => generateApplicationNumber('PLTP');
 
-module.exports = { CSAW_ApplicationNumber, COV_ApplicationNumber, PTPR_ApplicationNumber };
+module.exports = {
+  CSAW_ApplicationNumber,
+  COV_ApplicationNumber,
+  PTPR_ApplicationNumber,
+  PLTP_ApplicationNumber
+};
