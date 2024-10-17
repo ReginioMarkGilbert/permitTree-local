@@ -21,8 +21,17 @@ const CREATE_COV_PERMIT = gql`
   mutation CreateCOVPermit($input: COVPermitInput!) {
     createCOVPermit(input: $input) {
       id
+      customId
       status
-      # Add other fields you want to receive back
+      dateOfSubmission
+      files {
+        letterOfIntent
+        tallySheet
+        forestCertification
+        orCr
+        driverLicense
+        specialPowerOfAttorney
+      }
     }
   }
 `;
@@ -168,6 +177,8 @@ const COVForm = () => {
                ])
             ),
          };
+
+         console.log('Submitting input:', input); // For debugging
 
          const token = localStorage.getItem('token');
          const { data } = await createCOVPermit({
@@ -318,7 +329,7 @@ const COVForm = () => {
                            />
                            <UploadCard
                               label="Forest Certification"
-                              documentLabel="Upload Forest Certification"
+                              documentLabel={<>Certification that the forest products are harvested within the area of the owner <strong>(For Non Timber)</strong></>}
                               files={formData.files.forestCertification}
                               onFileChange={(e) => handleFileChange(e, 'forestCertification')}
                               onRemoveFile={(file) => removeFile('forestCertification', file)}
@@ -344,7 +355,7 @@ const COVForm = () => {
                            />
                            <UploadCard
                               label="Special Power of Attorney"
-                              documentLabel="Upload Special Power of Attorney"
+                              documentLabel={<>Upload Special Power of Attorney <strong>(If Applicable)</strong></>}
                               files={formData.files.specialPowerOfAttorney}
                               onFileChange={(e) => handleFileChange(e, 'specialPowerOfAttorney')}
                               onRemoveFile={(file) => removeFile('specialPowerOfAttorney', file)}

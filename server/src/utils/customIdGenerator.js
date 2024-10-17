@@ -7,10 +7,10 @@ const CounterSchema = new mongoose.Schema({
 
 const Counter = mongoose.model('Counter', CounterSchema);
 
-const CSAW_CustomId = async () => {
+const generateCustomId = async (prefix) => {
   try {
     const counter = await Counter.findOneAndUpdate(
-      { _id: 'applicationId' },
+      { _id: `${prefix}Id` },
       { $inc: { seq: 1 } },
       { new: true, upsert: true }
     );
@@ -21,11 +21,14 @@ const CSAW_CustomId = async () => {
     const day = String(date.getDate()).padStart(2, '0');
     const id = String(counter.seq).padStart(6, '0');
 
-    return `PMDQ-CSAW-${year}-${month}${day}-${id}`;
+    return `PMDQ-${prefix}-${year}-${month}${day}-${id}`;
   } catch (error) {
-    console.error('Error generating customId:', error);
+    console.error(`Error generating ${prefix} customId:`, error);
     throw error;
   }
 };
 
-module.exports = { CSAW_CustomId };
+const CSAW_CustomId = () => generateCustomId('CSAW');
+const COV_CustomId = () => generateCustomId('COV');
+
+module.exports = { CSAW_CustomId, COV_CustomId };

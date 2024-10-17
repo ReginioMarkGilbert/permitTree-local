@@ -14,6 +14,7 @@ const mutationTypes = gql`
 
     createCOVPermit(input: COVPermitInput!): COVPermit
     updateCOVPermit(id: ID!, input: COVPermitInput!): COVPermit
+    saveCOVPermitDraft(input: COVPermitInput!): COVPermit
 
     createPLTPPermit(input: PLTPPermitInput!): PLTPPermit
     updatePLTPPermit(id: ID!, input: PLTPPermitInput!): PLTPPermit

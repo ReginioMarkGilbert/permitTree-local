@@ -75,31 +75,54 @@ const permitTypes = gql`
 
   type COVPermit {
     id: ID!
-    treeSpecies: String!
-    quantity: Int!
-    location: String!
-    purposeOfTransport: String!
+    customId: String!
+    applicationType: String!
+    name: String!
+    address: String!
+    cellphone: String!
+    purpose: String!
+    driverName: String!
+    driverLicenseNumber: String!
+    vehiclePlateNumber: String!
+    originAddress: String!
     destinationAddress: String!
-    supportingDocuments: COVSupportingDocuments
+    files: COVSupportingDocuments
+    dateOfSubmission: String!
+    status: String!
   }
 
   type COVSupportingDocuments {
-    proofOfOwnership: [String]
-    transportationPermit: [String]
+    letterOfIntent: [String]
+    tallySheet: [String]
+    forestCertification: [String]
+    orCr: [String]
+    driverLicense: [String]
+    specialPowerOfAttorney: [String]
   }
 
   input COVPermitInput {
-    treeSpecies: String!
-    quantity: Int!
-    location: String!
-    purposeOfTransport: String!
+    applicationType: String!
+    name: String!
+    address: String!
+    cellphone: String!
+    purpose: String!
+    driverName: String!
+    driverLicenseNumber: String!
+    vehiclePlateNumber: String!
+    originAddress: String!
     destinationAddress: String!
-    supportingDocuments: COVSupportingDocumentsInput
+    files: COVSupportingDocumentsInput
+    status: String
+    dateOfSubmission: String
   }
 
   input COVSupportingDocumentsInput {
-    proofOfOwnership: [Upload]
-    transportationPermit: [Upload]
+    letterOfIntent: [String]
+    tallySheet: [String]
+    forestCertification: [String]
+    orCr: [String]
+    driverLicense: [String]
+    specialPowerOfAttorney: [String]
   }
 
   type PLTPPermit {
