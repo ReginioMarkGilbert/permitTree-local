@@ -185,130 +185,130 @@ const ChainsawRegistrationForm = () => {
 
    const handleSaveAsDraft = async () => {
       try {
-        const currentDate = new Date().toISOString();
-        const input = {
-          ...formData,
-          dateOfSubmission: currentDate,
-          status: 'Draft',
-          files: Object.fromEntries(
-            Object.entries(formData.files).map(([key, files]) => [
-              key,
-              files.map(file => file.name)
-            ])
-          ),
-          dateOfAcquisition: formData.dateOfAcquisition ? new Date(formData.dateOfAcquisition).toISOString() : null,
-          purchasePrice: formData.purchasePrice ? parseFloat(formData.purchasePrice) : null,
-          powerOutput: formData.powerOutput ? formData.powerOutput.toString() : '',
-          maxLengthGuidebar: formData.maxLengthGuidebar ? formData.maxLengthGuidebar.toString() : '',
-          isOwner: Boolean(formData.isOwner),
-          isTenureHolder: Boolean(formData.isTenureHolder),
-          isBusinessOwner: Boolean(formData.isBusinessOwner),
-          isPLTPRHolder: Boolean(formData.isPLTPRHolder),
-          isWPPHolder: Boolean(formData.isWPPHolder),
-        };
+         const currentDate = new Date().toISOString();
+         const input = {
+            ...formData,
+            dateOfSubmission: currentDate,
+            status: 'Draft',
+            files: Object.fromEntries(
+               Object.entries(formData.files).map(([key, files]) => [
+                  key,
+                  files.map(file => file.name)
+               ])
+            ),
+            dateOfAcquisition: formData.dateOfAcquisition ? new Date(formData.dateOfAcquisition).toISOString() : null,
+            purchasePrice: formData.purchasePrice ? parseFloat(formData.purchasePrice) : null,
+            powerOutput: formData.powerOutput ? formData.powerOutput.toString() : '',
+            maxLengthGuidebar: formData.maxLengthGuidebar ? formData.maxLengthGuidebar.toString() : '',
+            isOwner: Boolean(formData.isOwner),
+            isTenureHolder: Boolean(formData.isTenureHolder),
+            isBusinessOwner: Boolean(formData.isBusinessOwner),
+            isPLTPRHolder: Boolean(formData.isPLTPRHolder),
+            isWPPHolder: Boolean(formData.isWPPHolder),
+         };
 
-        const token = localStorage.getItem('token');
-        const { data } = await saveCSAWPermitDraft({
-          variables: { input },
-          context: {
-            headers: {
-              'Apollo-Require-Preflight': 'true',
-              'Authorization': `Bearer ${token}`,
+         const token = localStorage.getItem('token');
+         const { data } = await saveCSAWPermitDraft({
+            variables: { input },
+            context: {
+               headers: {
+                  'Apollo-Require-Preflight': 'true',
+                  'Authorization': `Bearer ${token}`,
+               },
             },
-          },
-        });
+         });
 
-        if (data.saveCSAWPermitDraft) {
-          setModalContent({
-            title: 'Draft saved successfully!',
-            message: 'Do you want to view your applications?'
-          });
-          setModalOpen(true);
+         if (data.saveCSAWPermitDraft) {
+            setModalContent({
+               title: 'Draft saved successfully!',
+               message: 'Do you want to view your applications?'
+            });
+            setModalOpen(true);
 
-          // Clear localStorage
-          localStorage.removeItem('csawFormStep');
-          localStorage.removeItem('csawFormData');
-        }
+            // Clear localStorage
+            localStorage.removeItem('csawFormStep');
+            localStorage.removeItem('csawFormData');
+         }
       } catch (error) {
-        console.error('Error saving draft:', error);
-        if (error.graphQLErrors) {
-          error.graphQLErrors.forEach(({ message, locations, path, extensions }) => {
-            console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}, Extensions:`, extensions);
-          });
-        }
-        if (error.networkError) {
-          console.log(`[Network error]:`, error.networkError);
-          if (error.networkError.result) {
-            console.log('Error result:', error.networkError.result);
-          }
-        }
-        toast.error("Error saving draft: " + error.message);
+         console.error('Error saving draft:', error);
+         if (error.graphQLErrors) {
+            error.graphQLErrors.forEach(({ message, locations, path, extensions }) => {
+               console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}, Extensions:`, extensions);
+            });
+         }
+         if (error.networkError) {
+            console.log(`[Network error]:`, error.networkError);
+            if (error.networkError.result) {
+               console.log('Error result:', error.networkError.result);
+            }
+         }
+         toast.error("Error saving draft: " + error.message);
       }
    };
 
    const handleSubmit = async (e) => {
       e.preventDefault();
       try {
-        const currentDate = new Date().toISOString();
-        const input = {
-          ...formData,
-          dateOfSubmission: currentDate,
-          status: 'Submitted',
-          files: Object.fromEntries(
-            Object.entries(formData.files).map(([key, files]) => [
-              key,
-              files.map(file => file.name)
-            ])
-          ),
-          dateOfAcquisition: new Date(formData.dateOfAcquisition).toISOString(),
-          purchasePrice: parseFloat(formData.purchasePrice),
-          powerOutput: formData.powerOutput.toString(),
-          maxLengthGuidebar: formData.maxLengthGuidebar.toString(),
-          isOwner: Boolean(formData.isOwner),
-          isTenureHolder: Boolean(formData.isTenureHolder),
-          isBusinessOwner: Boolean(formData.isBusinessOwner),
-          isPLTPRHolder: Boolean(formData.isPLTPRHolder),
-          isWPPHolder: Boolean(formData.isWPPHolder),
-        };
+         const currentDate = new Date().toISOString();
+         const input = {
+            ...formData,
+            dateOfSubmission: currentDate,
+            status: 'Submitted',
+            files: Object.fromEntries(
+               Object.entries(formData.files).map(([key, files]) => [
+                  key,
+                  files.map(file => file.name)
+               ])
+            ),
+            dateOfAcquisition: new Date(formData.dateOfAcquisition).toISOString(),
+            purchasePrice: parseFloat(formData.purchasePrice),
+            powerOutput: formData.powerOutput.toString(),
+            maxLengthGuidebar: formData.maxLengthGuidebar.toString(),
+            isOwner: Boolean(formData.isOwner),
+            isTenureHolder: Boolean(formData.isTenureHolder),
+            isBusinessOwner: Boolean(formData.isBusinessOwner),
+            isPLTPRHolder: Boolean(formData.isPLTPRHolder),
+            isWPPHolder: Boolean(formData.isWPPHolder),
+         };
 
-        console.log('Submitting input:', input); // Add this line for debugging
+         console.log('Submitting input:', input); // Add this line for debugging
 
-        const token = localStorage.getItem('token'); // Assuming you store the token in localStorage
-        const { data } = await createCSAWPermit({
-          variables: { input },
-          context: {
-            headers: {
-              'Apollo-Require-Preflight': 'true',
-              'Authorization': `Bearer ${token}`, // Add this line
+         const token = localStorage.getItem('token'); // Assuming you store the token in localStorage
+         const { data } = await createCSAWPermit({
+            variables: { input },
+            context: {
+               headers: {
+                  'Apollo-Require-Preflight': 'true',
+                  'Authorization': `Bearer ${token}`, // Add this line
+               },
             },
-          },
-        });
+         });
 
-        if (data.createCSAWPermit) {
-          setModalContent({
-            title: 'Application submitted successfully!',
-            message: 'Do you want to view your application?'
-          });
-          setModalOpen(true);
+         if (data.createCSAWPermit) {
+            setModalContent({
+               title: 'Application submitted successfully!',
+               message: 'Do you want to view your application?'
+            });
+            setModalOpen(true);
 
-          // Clear localStorage
-          localStorage.removeItem('csawFormStep');
-          localStorage.removeItem('csawFormData');
-        }
+            // Clear localStorage
+            localStorage.removeItem('csawFormStep');
+            localStorage.removeItem('csawFormData');
+         }
       } catch (error) {
-        console.error('Error submitting application:', error);
-        if (error.graphQLErrors) {
-          error.graphQLErrors.forEach(({ message, locations, path, extensions }) => {
-            console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}, Extensions:`, extensions);
-          });
-        }
-        if (error.networkError) {
-          console.log(`[Network error]:`, error.networkError);
-          if (error.networkError.result) {
-            console.log('Error result:', error.networkError.result);
-          }
-        }
-        toast.error("Error submitting application: " + error.message);
+         console.error('Error submitting application:', error);
+         if (error.graphQLErrors) {
+            error.graphQLErrors.forEach(({ message, locations, path, extensions }) => {
+               console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}, Extensions:`, extensions);
+            });
+         }
+         if (error.networkError) {
+            console.log(`[Network error]:`, error.networkError);
+            if (error.networkError.result) {
+               console.log('Error result:', error.networkError.result);
+            }
+         }
+         toast.error("Error submitting application: " + error.message);
       }
    };
 
@@ -409,32 +409,27 @@ const ChainsawRegistrationForm = () => {
                               Please check the boxes that apply to you. In the next step, you will be required to upload the corresponding documents.
                            </p>
                            <div className="space-y-2">
-                              <CheckboxItem
-                                 id="isOwner"
+                              <CheckboxItem id="isOwner"
                                  label="Are you the owner of the Chainsaw?"
                                  checked={formData.isOwner}
                                  onChange={handleCheckboxChange}
                               />
-                              <CheckboxItem
-                                 id="isTenureHolder"
+                              <CheckboxItem id="isTenureHolder"
                                  label="Are you a Tenure holder?"
                                  checked={formData.isTenureHolder}
                                  onChange={handleCheckboxChange}
                               />
-                              <CheckboxItem
-                                 id="isBusinessOwner"
+                              <CheckboxItem id="isBusinessOwner"
                                  label="Are you a business owner?"
                                  checked={formData.isBusinessOwner}
                                  onChange={handleCheckboxChange}
                               />
-                              <CheckboxItem
-                                 id="isPLTPRHolder"
+                              <CheckboxItem id="isPLTPRHolder"
                                  label="Are you a Private Land Tree Plantation Registration (PLTPR) holder?"
                                  checked={formData.isPLTPRHolder}
                                  onChange={handleCheckboxChange}
                               />
-                              <CheckboxItem
-                                 id="isWPPHolder"
+                              <CheckboxItem id="isWPPHolder"
                                  label="Are you a Licensed Wood Processor/Wood Processing Plant (WPP) holder?"
                                  checked={formData.isWPPHolder}
                                  onChange={handleCheckboxChange}
