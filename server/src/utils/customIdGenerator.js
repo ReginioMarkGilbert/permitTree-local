@@ -33,6 +33,7 @@ const CSAW_ApplicationNumber = () => generateApplicationNumber('CSAW');
 const COV_ApplicationNumber = () => generateApplicationNumber('COV');
 const PTPR_ApplicationNumber = () => generateApplicationNumber('PTPR');
 const PLTP_ApplicationNumber = () => generateApplicationNumber('PLTP');
+const TCEBP_ApplicationNumber = () => generateApplicationNumber('TCEBP');
 
 const SPLTP_ApplicationNumber = async () => {
   const date = new Date();
@@ -55,5 +56,6 @@ module.exports = {
   COV_ApplicationNumber,
   PTPR_ApplicationNumber,
   PLTP_ApplicationNumber,
-  SPLTP_ApplicationNumber
+  SPLTP_ApplicationNumber,
+  TCEBP_ApplicationNumber
 };

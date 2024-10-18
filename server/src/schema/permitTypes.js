@@ -297,20 +297,47 @@ const permitTypes = gql`
     status: String!
     dateOfSubmission: String!
     applicantId: ID!
-    # Add other fields specific to TCEBPPermit
+    name: String!
+    address: String!
+    contactNumber: String!
+    purpose: String!
+    files: TCEBPFiles!
+  }
+
+  type TCEBPFiles {
+    letterOfIntent: [File!]
+    lguEndorsement: [File!]
+    landTenurial: [File!]
+    siteDevelopmentPlan: [File!]
+    environmentalCompliance: [File!]
+    fpic: [File!]
+    ownerConsent: [File!]
+    pambClearance: [File!]
   }
 
   input TCEBPPermitInput {
-    # Define input fields for TCEBPPermit
-    applicationType: String!
-    # Add other fields as needed
+    name: String!
+    address: String!
+    contactNumber: String!
+    purpose: String!
+    files: TCEBPFilesInput
+  }
+
+  input TCEBPFilesInput {
+    letterOfIntent: [FileInput]
+    lguEndorsement: [FileInput]
+    landTenurial: [FileInput]
+    siteDevelopmentPlan: [FileInput]
+    environmentalCompliance: [FileInput]
+    fpic: [FileInput]
+    ownerConsent: [FileInput]
+    pambClearance: [FileInput]
   }
 
   type Query {
     getAllCOVPermits: [COVPermit!]!
     getCOVPermitById(id: ID!): COVPermit
     getCOVPermitWithFiles(id: ID!): COVPermit
-
   }
 `;
 

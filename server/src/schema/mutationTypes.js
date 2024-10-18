@@ -30,6 +30,7 @@ const mutationTypes = gql`
 
     createTCEBPPermit(input: TCEBPPermitInput!): TCEBPPermit
     updateTCEBPPermit(id: ID!, input: TCEBPPermitInput!): TCEBPPermit
+    saveTCEBPPermitDraft(input: TCEBPPermitInput!): TCEBPPermit
 
     createOOP(input: OOPInput!): OOP
     updateOOP(id: ID!, input: OOPInput!): OOP
