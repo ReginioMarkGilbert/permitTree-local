@@ -9,7 +9,7 @@ const FileSchema = new mongoose.Schema({
 
 const CSAWPermitSchema = new mongoose.Schema({
   applicationNumber: { type: String, required: true, unique: true },
-  applicationType: { type: String, required: true, enum: ['Chainsaw Registration'] },
+  applicationType: { type: String, default: 'CSAW', required: true },
   registrationType: { type: String, required: true },
   chainsawStore: { type: String, required: true },
   ownerName: { type: String, required: true },

@@ -27,7 +27,7 @@ const csawResolvers = {
                   processedFiles[key] = files.map(file => ({
                      filename: file.filename,
                      contentType: file.contentType,
-                     data: Buffer.from(file.data, 'base64')
+                     data: Binary.createFromBase64(file.data)
                   }));
                } else {
                   processedFiles[key] = [];
@@ -38,7 +38,7 @@ const csawResolvers = {
                ...input,
                applicationNumber,
                applicantId: user.id,
-               applicationType: 'Chainsaw Registration',
+               applicationType: 'CSAW', // Ensure this is set to 'CSAW'
                status: 'Submitted',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
@@ -46,7 +46,10 @@ const csawResolvers = {
 
             const newPermit = new CSAWPermit(permitData);
             const savedPermit = await newPermit.save();
-            return savedPermit;
+            return {
+               ...savedPermit.toObject(),
+               id: savedPermit._id.toString()
+            };
          } catch (error) {
             console.error('Error creating CSAW permit:', error);
             throw new Error(`Failed to create CSAW permit: ${error.message}`);

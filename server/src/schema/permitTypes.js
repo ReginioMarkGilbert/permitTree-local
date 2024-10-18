@@ -377,12 +377,15 @@ const resolvePermitType = (obj) => {
     case 'Certificate of Verification':
       return 'COVPermit';
     case 'CSAW':
+    case 'Chainsaw Registration':
       return 'CSAWPermit';
     case 'PLTP':
       return 'PLTPPermit';
     case 'PTPR':
+    case 'Private Tree Plantation Registration':
       return 'PTPRPermit';
     case 'SPLTP':
+    case 'Special/Private Land Timber Permit':
       return 'SPLTPPermit';
     case 'TCEBP':
       return 'TCEBPPermit';
