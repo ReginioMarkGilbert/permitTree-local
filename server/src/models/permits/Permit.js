@@ -17,7 +17,7 @@ const PermitSchema = new mongoose.Schema({
       required: true,
       enum: ['Draft', 'Submitted', 'Under Review', 'Approved', 'Rejected', 'Completed']
    },
-   dateSubmitted: { type: Date, default: Date.now },
+   dateOfSubmission: { type: Date, default: Date.now },
    lastUpdated: { type: Date, default: Date.now }
 }, { timestamps: true });
 

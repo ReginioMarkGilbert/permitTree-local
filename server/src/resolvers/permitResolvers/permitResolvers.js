@@ -18,7 +18,12 @@ const permitResolvers = {
             query.status = status;
          }
 
-         const permits = await Permit.find(query).sort({ dateOfSubmission: -1 });
+         const permits = await Permit.find(query)
+            .sort({ dateOfSubmission: -1 })
+            .select('id applicationNumber applicationType status dateOfSubmission');
+
+         console.log('Permits fetched:', permits);
+
          return permits;
       },
    },

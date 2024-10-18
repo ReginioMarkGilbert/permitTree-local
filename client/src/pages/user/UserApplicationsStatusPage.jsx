@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,13 +34,13 @@ const UserApplicationsStatusPage = () => {
          case 'released': return 'bg-indigo-100 text-indigo-800';
          case 'expired': return 'bg-red-100 text-red-800';
          case 'rejected': return 'bg-red-100 text-red-800';
-         case 'awaiting payment': return 'bg-purple-100 text-purple-800';
-         case 'payment proof submitted': return 'bg-pink-100 text-pink-800';
-         case 'approved': return 'bg-teal-100 text-teal-800';
-         case 'completed': return 'bg-green-100 text-green-800';
          default: return 'bg-gray-100 text-gray-800';
       }
    };
+
+   useEffect(() => {
+      refetch({ status: activeSubTab });
+   }, [activeSubTab, refetch]);
 
    const renderTable = () => {
       if (loading) return <p className="text-center text-gray-500">Loading...</p>;
@@ -55,14 +55,20 @@ const UserApplicationsStatusPage = () => {
                <thead className="bg-gray-50">
                   <tr>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        {activeMainTab === 'Applications' ? 'APPLICATION NUMBER' : 'OOP NUMBER'}
+                        APPLICATION NUMBER
                      </th>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        {activeMainTab === 'Applications' ? 'APPLICATION TYPE' : 'AMOUNT'}
+                        APPLICATION TYPE
                      </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DATE</th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTIONS</th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        DATE SUBMITTED
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        STATUS
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        ACTIONS
+                     </th>
                   </tr>
                </thead>
                <tbody className="bg-white divide-y divide-gray-200">
@@ -87,7 +93,7 @@ const UserApplicationsStatusPage = () => {
          <div className="container mx-auto px-4 sm:px-6 py-8 pt-24">
             <div className="flex justify-between items-center mb-6">
                <h1 className="text-3xl font-bold text-green-800">My Applications</h1>
-               <Button onClick={refetch} variant="outline">
+               <Button onClick={() => refetch()} variant="outline">
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Refresh
                </Button>

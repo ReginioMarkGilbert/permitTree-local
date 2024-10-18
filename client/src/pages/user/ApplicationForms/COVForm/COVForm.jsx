@@ -34,6 +34,7 @@ const SAVE_COV_PERMIT_DRAFT = gql`
       id
       applicationNumber
       status
+      dateOfSubmission
       files {
         letterOfIntent { filename contentType }
         tallySheet { filename contentType }
@@ -174,6 +175,10 @@ const COVForm = () => {
    const handleSubmit = async (e) => {
       e.preventDefault();
       try {
+         // const currentDate = new Date();
+         // const formattedDate = currentDate.toLocaleDateString();
+         // console.log('Date of Submission:', formattedDate);
+
          const input = {
             name: formData.name,
             address: formData.address,
@@ -184,27 +189,33 @@ const COVForm = () => {
             vehiclePlateNumber: formData.vehiclePlateNumber,
             originAddress: formData.originAddress,
             destinationAddress: formData.destinationAddress,
+            // dateOfSubmission: currentDate.toLocaleDateString(),
             files: {}
          };
 
          // Process files
          for (const [key, files] of Object.entries(formData.files)) {
             if (files.length > 0) {
-               input.files[key] = files.map(file => ({
-                  filename: file.name,
-                  mimetype: file.type,
-                  encoding: 'utf-8',
-                  content: null  // We'll read the file content in the resolver
+               input.files[key] = await Promise.all(files.map(async (file) => {
+                  const content = await readFileAsBase64(file);
+                  return {
+                     filename: file.name,
+                     contentType: file.type,
+                     data: content
+                  };
                }));
             }
          }
 
+         console.log('Submitting input:', input);
+
+         const token = localStorage.getItem('token');
          const { data } = await createCOVPermit({
             variables: { input },
             context: {
                headers: {
                   'Apollo-Require-Preflight': 'true',
-                  'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                  'Authorization': `Bearer ${token}`,
                },
             },
          });

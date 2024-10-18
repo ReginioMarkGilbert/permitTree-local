@@ -62,6 +62,7 @@ const permitTypes = gql`
     vehiclePlateNumber: String!
     originAddress: String!
     destinationAddress: String!
+   #  dateOfSubmission: String!
     files: COVFilesInput
   }
 
