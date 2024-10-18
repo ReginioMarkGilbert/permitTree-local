@@ -38,7 +38,7 @@ const tcebpResolvers = {
                ...input,
                applicationNumber,
                applicantId: user.id,
-               status: 'Pending',
+               status: 'Submitted',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
             };

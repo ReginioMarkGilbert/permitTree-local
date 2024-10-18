@@ -39,7 +39,7 @@ const spltpResolvers = {
                applicationNumber,
                applicantId: user.id,
                applicationType: 'Special/Private Land Timber Permit',
-               status: 'Pending',
+               status: 'Submitted',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
             };

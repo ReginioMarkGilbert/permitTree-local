@@ -8,6 +8,7 @@ require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const User = require('./src/models/User');
 
+const { permitTypes } = require('./src/schema/permitTypes');
 const typeDefs = require('./src/schema');
 const resolvers = require('./src/resolvers');
 
@@ -18,7 +19,7 @@ const startServer = async () => {
    console.log('MongoDB connected');
 
    const server = new ApolloServer({
-      typeDefs,
+      typeDefs: [permitTypes, ...typeDefs],
       resolvers,
    });
 

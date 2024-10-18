@@ -39,7 +39,7 @@ const ptprResolvers = {
                applicationNumber,
                applicantId: user.id,
                applicationType: 'Private Tree Plantation Registration',
-               status: 'Pending',
+               status: 'Submitted',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
             };

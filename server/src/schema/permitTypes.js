@@ -338,7 +338,20 @@ const permitTypes = gql`
     getAllCOVPermits: [COVPermit!]!
     getCOVPermitById(id: ID!): COVPermit
     getCOVPermitWithFiles(id: ID!): COVPermit
+    getUserApplications(status: String): [Permit!]!
   }
 `;
 
-module.exports = permitTypes;
+const resolvePermitType = {
+  __resolveType(obj, context, info) {
+    if (obj.applicationType === 'Certificate of Verification') return 'COVPermit';
+    if (obj.applicationType === 'Chainsaw Registration') return 'CSAWPermit';
+    if (obj.applicationType === 'Public Land Timber Permit') return 'PLTPPermit';
+    if (obj.applicationType === 'Private Tree Plantation Registration') return 'PTPRPermit';
+    if (obj.applicationType === 'Special/Private Land Timber Permit') return 'SPLTPPermit';
+    if (obj.applicationType === 'Tree Cutting and/or Earth Balling Permit') return 'TCEBPPermit';
+    return null;
+  }
+};
+
+module.exports = { permitTypes, resolvePermitType };

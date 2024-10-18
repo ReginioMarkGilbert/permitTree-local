@@ -10,23 +10,23 @@ const pltpResolvers = require('./permitResolvers/pltpResolvers');
 const ptprResolvers = require('./permitResolvers/ptprResolvers');
 const spltpResolvers = require('./permitResolvers/spltpResolvers');
 const tcebpResolvers = require('./permitResolvers/tcebpResolvers');
-const oopResolvers = require('./oopResolvers');
-const certificateResolvers = require('./certificateResolvers');
+const { resolvePermitType } = require('../schema/permitTypes');
 
 const resolvers = mergeResolvers([
-   { Upload: GraphQLUpload },
-   authResolvers,
-   userResolvers,
-   adminResolvers,
-   permitResolvers,
-   covResolvers,
-   csawResolvers,
-   pltpResolvers,
-   ptprResolvers,
-   spltpResolvers,
-   tcebpResolvers,
-   oopResolvers,
-   certificateResolvers,
+  { Upload: GraphQLUpload },
+  authResolvers,
+  userResolvers,
+  adminResolvers,
+  permitResolvers,
+  covResolvers,
+  csawResolvers,
+  pltpResolvers,
+  ptprResolvers,
+  spltpResolvers,
+  tcebpResolvers,
+  {
+    Permit: resolvePermitType
+  }
 ]);
 
 module.exports = resolvers;

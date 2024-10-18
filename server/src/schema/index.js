@@ -25,7 +25,7 @@ const rootTypeDefs = gql`
 module.exports = [
   rootTypeDefs,
   userTypes,
-  permitTypes,
+  permitTypes.permitTypes,
   oopTypes,
   certificateTypes,
   queryTypes,

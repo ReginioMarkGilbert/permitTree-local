@@ -3,12 +3,14 @@ import { RefreshCw } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import UserApplicationRow from './components/UserApplicationRow';
+import { useUserApplications } from './hooks/useUserApplications';
 
 const UserApplicationsStatusPage = () => {
    const [searchTerm, setSearchTerm] = useState('');
    const [activeMainTab, setActiveMainTab] = useState('Applications');
    const [activeSubTab, setActiveSubTab] = useState('Draft');
-   const [applications, setApplications] = useState([]); // This should be populated with real data
+
+   const { applications, loading, error, refetch } = useUserApplications(activeSubTab);
 
    const mainTabs = ['Applications', 'Order Of Payments'];
    const subTabs = {
@@ -18,7 +20,7 @@ const UserApplicationsStatusPage = () => {
 
    const filteredApplications = useMemo(() => {
       return applications.filter(app =>
-         app.customId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         app.applicationNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
          app.applicationType.toLowerCase().includes(searchTerm.toLowerCase())
       );
    }, [applications, searchTerm]);
@@ -41,6 +43,8 @@ const UserApplicationsStatusPage = () => {
    };
 
    const renderTable = () => {
+      if (loading) return <p className="text-center text-gray-500">Loading...</p>;
+      if (error) return <p className="text-center text-red-500">Error: {error.message}</p>;
       if (filteredApplications.length === 0) {
          return <p className="text-center text-gray-500">No applications found.</p>;
       }
@@ -64,11 +68,11 @@ const UserApplicationsStatusPage = () => {
                <tbody className="bg-white divide-y divide-gray-200">
                   {filteredApplications.map((app) => (
                      <UserApplicationRow
-                        key={app._id}
+                        key={app.id}
                         app={app}
-                        onView={() => { }} // Implement these functions
-                        onEdit={() => { }}
-                        onDelete={() => { }}
+                        onView={() => {}} // Implement these functions
+                        onEdit={() => {}}
+                        onDelete={() => {}}
                         getStatusColor={getStatusColor}
                      />
                   ))}
@@ -83,7 +87,7 @@ const UserApplicationsStatusPage = () => {
          <div className="container mx-auto px-4 sm:px-6 py-8 pt-24">
             <div className="flex justify-between items-center mb-6">
                <h1 className="text-3xl font-bold text-green-800">My Applications</h1>
-               <Button onClick={() => { }} variant="outline">
+               <Button onClick={refetch} variant="outline">
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Refresh
                </Button>

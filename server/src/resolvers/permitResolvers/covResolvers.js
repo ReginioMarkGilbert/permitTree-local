@@ -57,7 +57,7 @@ const covResolvers = {
                applicationNumber,
                applicantId: user.id,
                applicationType: 'Certificate of Verification',
-               status: 'Pending',
+               status: 'Submitted',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
             };
