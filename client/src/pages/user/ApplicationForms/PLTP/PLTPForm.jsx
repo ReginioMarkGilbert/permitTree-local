@@ -40,6 +40,12 @@ const SAVE_PLTP_PERMIT_DRAFT = gql`
       id
       applicationNumber
       status
+      files {
+        applicationLetter { filename contentType }
+        lguEndorsement { filename contentType }
+        homeownersResolution { filename contentType }
+        ptaResolution { filename contentType }
+      }
     }
   }
 `;
@@ -120,21 +126,28 @@ const PLTPForm = () => {
 
    const handleSaveAsDraft = async () => {
       try {
-         const currentDate = new Date().toISOString();
          const input = {
-            ...formData,
-            dateOfSubmission: currentDate,
-            status: 'Draft',
-            treeType: formData.treeType.join(', '), // Join array into a string
-            treeStatus: formData.treeStatus.join(', '), // Join array into a string
-            landType: formData.landType.join(', '), // Join array into a string
-            files: Object.fromEntries(
-               Object.entries(formData.files).map(([key, files]) => [
-                  key,
-                  files.map(file => file.name)
-               ])
-            ),
+            name: formData.name,
+            address: formData.address,
+            contactNumber: formData.contactNumber,
+            treeType: formData.treeType,
+            treeStatus: formData.treeStatus,
+            landType: formData.landType,
+            posingDanger: formData.posingDanger,
+            forPersonalUse: formData.forPersonalUse,
+            purpose: formData.purpose,
+            files: {}
          };
+
+         // Process files
+         for (const [key, files] of Object.entries(formData.files)) {
+            if (files.length > 0) {
+               input.files[key] = files.map(file => ({
+                  filename: file.name,
+                  contentType: file.type
+               }));
+            }
+         }
 
          const token = localStorage.getItem('token');
          const { data } = await savePLTPPermitDraft({

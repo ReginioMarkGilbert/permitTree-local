@@ -37,16 +37,16 @@ const SAVE_CSAW_PERMIT_DRAFT = gql`
   mutation SaveCSAWPermitDraft($input: CSAWPermitInput!) {
     saveCSAWPermitDraft(input: $input) {
       id
-      customId
+      applicationNumber
       status
       files {
-        officialReceipt
-        deedOfSale
-        specialPowerOfAttorney
-        forestTenureAgreement
-        businessPermit
-        certificateOfRegistration
-        woodProcessingPlantPermit
+        officialReceipt { filename contentType }
+        deedOfSale { filename contentType }
+        specialPowerOfAttorney { filename contentType }
+        forestTenureAgreement { filename contentType }
+        businessPermit { filename contentType }
+        certificateOfRegistration { filename contentType }
+        woodProcessingPlantPermit { filename contentType }
       }
     }
   }
@@ -185,27 +185,37 @@ const ChainsawRegistrationForm = () => {
 
    const handleSaveAsDraft = async () => {
       try {
-         const currentDate = new Date().toISOString();
          const input = {
-            ...formData,
-            dateOfSubmission: currentDate,
-            status: 'Draft',
-            files: Object.fromEntries(
-               Object.entries(formData.files).map(([key, files]) => [
-                  key,
-                  files.map(file => file.name)
-               ])
-            ),
-            dateOfAcquisition: formData.dateOfAcquisition ? new Date(formData.dateOfAcquisition).toISOString() : null,
-            purchasePrice: formData.purchasePrice ? parseFloat(formData.purchasePrice) : null,
-            powerOutput: formData.powerOutput ? formData.powerOutput.toString() : '',
-            maxLengthGuidebar: formData.maxLengthGuidebar ? formData.maxLengthGuidebar.toString() : '',
+            registrationType: formData.registrationType,
+            chainsawStore: formData.chainsawStore,
+            ownerName: formData.ownerName,
+            address: formData.address,
+            phone: formData.phone,
+            brand: formData.brand,
+            model: formData.model,
+            serialNumber: formData.serialNumber,
+            dateOfAcquisition: new Date(formData.dateOfAcquisition).toISOString(),
+            powerOutput: formData.powerOutput.toString(),
+            maxLengthGuidebar: formData.maxLengthGuidebar.toString(),
+            countryOfOrigin: formData.countryOfOrigin,
+            purchasePrice: parseFloat(formData.purchasePrice),
             isOwner: Boolean(formData.isOwner),
             isTenureHolder: Boolean(formData.isTenureHolder),
             isBusinessOwner: Boolean(formData.isBusinessOwner),
             isPLTPRHolder: Boolean(formData.isPLTPRHolder),
             isWPPHolder: Boolean(formData.isWPPHolder),
+            files: {}
          };
+
+         // Process files
+         for (const [key, files] of Object.entries(formData.files)) {
+            if (files.length > 0) {
+               input.files[key] = files.map(file => ({
+                  filename: file.name,
+                  contentType: file.type
+               }));
+            }
+         }
 
          const token = localStorage.getItem('token');
          const { data } = await saveCSAWPermitDraft({
@@ -225,23 +235,11 @@ const ChainsawRegistrationForm = () => {
             });
             setModalOpen(true);
 
-            // Clear localStorage
             localStorage.removeItem('csawFormStep');
             localStorage.removeItem('csawFormData');
          }
       } catch (error) {
          console.error('Error saving draft:', error);
-         if (error.graphQLErrors) {
-            error.graphQLErrors.forEach(({ message, locations, path, extensions }) => {
-               console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}, Extensions:`, extensions);
-            });
-         }
-         if (error.networkError) {
-            console.log(`[Network error]:`, error.networkError);
-            if (error.networkError.result) {
-               console.log('Error result:', error.networkError.result);
-            }
-         }
          toast.error("Error saving draft: " + error.message);
       }
    };

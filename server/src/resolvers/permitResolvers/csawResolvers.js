@@ -1,5 +1,6 @@
 const CSAWPermit = require('../../models/permits/CSAWPermit');
 const { CSAW_ApplicationNumber } = require('../../utils/customIdGenerator');
+const { Binary } = require('mongodb');
 
 const csawResolvers = {
    Query: {
@@ -73,15 +74,30 @@ const csawResolvers = {
          }
 
          try {
-            const customId = await CSAW_CustomId();
-            const applicationNumber = `CSAW-DRAFT-${Date.now()}`;
+            const applicationNumber = await CSAW_ApplicationNumber();
+
+            // Process file inputs
+            const processedFiles = {};
+            for (const [key, files] of Object.entries(input.files)) {
+               if (files && files.length > 0) {
+                  processedFiles[key] = files.map(file => ({
+                     filename: file.filename,
+                     contentType: file.contentType,
+                     // We don't save the actual file data for drafts
+                  }));
+               } else {
+                  processedFiles[key] = [];
+               }
+            }
 
             const permitData = {
                ...input,
-               customId,
-               applicantId: user.id,
                applicationNumber,
+               applicantId: user.id,
+               applicationType: 'Chainsaw Registration',
                status: 'Draft',
+               dateOfSubmission: new Date().toISOString(),
+               files: processedFiles,
             };
 
             const newPermit = new CSAWPermit(permitData);

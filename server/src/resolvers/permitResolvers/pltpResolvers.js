@@ -76,11 +76,29 @@ const pltpResolvers = {
 
          try {
             const applicationNumber = await PLTP_ApplicationNumber();
+
+            // Process file inputs
+            const processedFiles = {};
+            for (const [key, files] of Object.entries(input.files)) {
+               if (files && files.length > 0) {
+                  processedFiles[key] = files.map(file => ({
+                     filename: file.filename,
+                     contentType: file.contentType,
+                     // We don't save the actual file data for drafts
+                  }));
+               } else {
+                  processedFiles[key] = [];
+               }
+            }
+
             const permitData = {
                ...input,
                applicationNumber,
                applicantId: user.id,
+               applicationType: 'Public Land Timber Permit',
                status: 'Draft',
+               dateOfSubmission: new Date().toISOString(),
+               files: processedFiles,
             };
 
             const newPermit = new PLTPPermit(permitData);

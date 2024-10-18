@@ -14,13 +14,14 @@ const permitTypes = gql`
 
   type File {
     filename: String!
-    contentType: String!
+    contentType: String
     data: String!
   }
 
   input FileInput {
     filename: String!
-    contentType: String!
+    contentType: String
+    data: String
   }
 
   type COVPermit implements Permit {
@@ -309,7 +310,7 @@ const permitTypes = gql`
     getAllCOVPermits: [COVPermit!]!
     getCOVPermitById(id: ID!): COVPermit
     getCOVPermitWithFiles(id: ID!): COVPermit
-    # ... (other queries)
+
   }
 `;
 

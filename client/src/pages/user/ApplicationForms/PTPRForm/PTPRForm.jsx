@@ -35,6 +35,12 @@ const SAVE_PTPR_PERMIT_DRAFT = gql`
       id
       applicationNumber
       status
+      files {
+        letterRequest { filename contentType }
+        titleOrTaxDeclaration { filename contentType }
+        darCertification { filename contentType }
+        specialPowerOfAttorney { filename contentType }
+      }
     }
   }
 `;
@@ -110,18 +116,27 @@ const PTPRForm = () => {
 
    const handleSaveAsDraft = async () => {
       try {
-         const currentDate = new Date().toISOString();
          const input = {
-            ...formData,
-            dateOfSubmission: currentDate,
-            status: 'Draft',
-            files: Object.fromEntries(
-               Object.entries(formData.files).map(([key, files]) => [
-                  key,
-                  files.map(file => file.name)
-               ])
-            ),
+            ownerName: formData.ownerName,
+            address: formData.address,
+            contactNumber: formData.contactNumber,
+            lotArea: parseFloat(formData.lotArea),
+            treeSpecies: formData.treeSpecies,
+            totalTrees: parseInt(formData.totalTrees, 10),
+            treeSpacing: formData.treeSpacing,
+            yearPlanted: parseInt(formData.yearPlanted, 10),
+            files: {}
          };
+
+         // Process files
+         for (const [key, files] of Object.entries(formData.files)) {
+            if (files.length > 0) {
+               input.files[key] = files.map(file => ({
+                  filename: file.name,
+                  contentType: file.type
+               }));
+            }
+         }
 
          const token = localStorage.getItem('token');
          const { data } = await savePTPRPermitDraft({

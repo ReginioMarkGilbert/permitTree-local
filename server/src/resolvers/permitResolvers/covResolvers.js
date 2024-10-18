@@ -101,17 +101,27 @@ const covResolvers = {
          try {
             const applicationNumber = await COV_ApplicationNumber();
 
-            // Process file uploads
+            // Process file inputs
             const processedFiles = {};
-            for (const [key, uploads] of Object.entries(input.files)) {
-               processedFiles[key] = await Promise.all(uploads.map(processUpload));
+            for (const [key, files] of Object.entries(input.files)) {
+               if (files && files.length > 0) {
+                  processedFiles[key] = files.map(file => ({
+                     filename: file.filename,
+                     contentType: file.contentType || 'application/octet-stream', // Provide a default value if null
+                     // We don't save the actual file data for drafts
+                  }));
+               } else {
+                  processedFiles[key] = [];
+               }
             }
 
             const permitData = {
                ...input,
                applicationNumber,
                applicantId: user.id,
+               applicationType: 'Certificate of Verification',
                status: 'Draft',
+               dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
             };
 

@@ -76,11 +76,29 @@ const ptprResolvers = {
 
          try {
             const applicationNumber = await PTPR_ApplicationNumber();
+
+            // Process file inputs
+            const processedFiles = {};
+            for (const [key, files] of Object.entries(input.files)) {
+               if (files && files.length > 0) {
+                  processedFiles[key] = files.map(file => ({
+                     filename: file.filename,
+                     contentType: file.contentType,
+                     // We don't save the actual file data for drafts
+                  }));
+               } else {
+                  processedFiles[key] = [];
+               }
+            }
+
             const permitData = {
                ...input,
                applicationNumber,
                applicantId: user.id,
+               applicationType: 'Private Tree Plantation Registration',
                status: 'Draft',
+               dateOfSubmission: new Date().toISOString(),
+               files: processedFiles,
             };
 
             const newPermit = new PTPRPermit(permitData);

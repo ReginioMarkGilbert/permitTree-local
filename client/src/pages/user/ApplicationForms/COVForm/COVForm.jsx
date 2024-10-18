@@ -32,8 +32,16 @@ const SAVE_COV_PERMIT_DRAFT = gql`
   mutation SaveCOVPermitDraft($input: COVPermitInput!) {
     saveCOVPermitDraft(input: $input) {
       id
+      applicationNumber
       status
-      # Add other fields you want to receive back
+      files {
+        letterOfIntent { filename contentType }
+        tallySheet { filename contentType }
+        forestCertification { filename contentType }
+        orCr { filename contentType }
+        driverLicense { filename contentType }
+        specialPowerOfAttorney { filename contentType }
+      }
     }
   }
 `;
@@ -113,18 +121,28 @@ const COVForm = () => {
 
    const handleSaveAsDraft = async () => {
       try {
-         const currentDate = new Date().toISOString();
          const input = {
-            ...formData,
-            dateOfSubmission: currentDate,
-            status: 'Draft',
-            files: Object.fromEntries(
-               Object.entries(formData.files).map(([key, files]) => [
-                  key,
-                  files.map(file => file.name)
-               ])
-            ),
+            name: formData.name,
+            address: formData.address,
+            cellphone: formData.cellphone,
+            purpose: formData.purpose,
+            driverName: formData.driverName,
+            driverLicenseNumber: formData.driverLicenseNumber,
+            vehiclePlateNumber: formData.vehiclePlateNumber,
+            originAddress: formData.originAddress,
+            destinationAddress: formData.destinationAddress,
+            files: {}
          };
+
+         // Process files
+         for (const [key, files] of Object.entries(formData.files)) {
+            if (files.length > 0) {
+               input.files[key] = files.map(file => ({
+                  filename: file.name,
+                  contentType: file.type || null // Add this line
+               }));
+            }
+         }
 
          const token = localStorage.getItem('token');
          const { data } = await saveCOVPermitDraft({
@@ -144,7 +162,6 @@ const COVForm = () => {
             });
             setModalOpen(true);
 
-            // Clear localStorage
             localStorage.removeItem('covFormStep');
             localStorage.removeItem('covFormData');
          }
@@ -199,7 +216,6 @@ const COVForm = () => {
             });
             setModalOpen(true);
 
-            // Clear localStorage
             localStorage.removeItem('covFormStep');
             localStorage.removeItem('covFormData');
          }
