@@ -14,6 +14,11 @@ const { resolvePermitType } = require('../schema/permitTypes');
 
 const resolvers = mergeResolvers([
   { Upload: GraphQLUpload },
+  {
+    Permit: {
+      __resolveType: resolvePermitType
+    }
+  },
   authResolvers,
   userResolvers,
   adminResolvers,
@@ -23,10 +28,7 @@ const resolvers = mergeResolvers([
   pltpResolvers,
   ptprResolvers,
   spltpResolvers,
-  tcebpResolvers,
-  {
-    Permit: resolvePermitType
-  }
+  tcebpResolvers
 ]);
 
 module.exports = resolvers;

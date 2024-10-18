@@ -38,6 +38,7 @@ const csawResolvers = {
                ...input,
                applicationNumber,
                applicantId: user.id,
+               applicationType: 'Chainsaw Registration',
                status: 'Submitted',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,

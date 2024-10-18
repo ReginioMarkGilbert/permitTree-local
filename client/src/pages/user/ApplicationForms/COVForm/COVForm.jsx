@@ -175,10 +175,6 @@ const COVForm = () => {
    const handleSubmit = async (e) => {
       e.preventDefault();
       try {
-         // const currentDate = new Date();
-         // const formattedDate = currentDate.toLocaleDateString();
-         // console.log('Date of Submission:', formattedDate);
-
          const input = {
             name: formData.name,
             address: formData.address,
@@ -189,7 +185,6 @@ const COVForm = () => {
             vehiclePlateNumber: formData.vehiclePlateNumber,
             originAddress: formData.originAddress,
             destinationAddress: formData.destinationAddress,
-            // dateOfSubmission: currentDate.toLocaleDateString(),
             files: {}
          };
 

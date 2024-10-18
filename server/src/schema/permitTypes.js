@@ -1,27 +1,13 @@
-const { gql } = require('graphql-tag');
+const { gql } = require('apollo-server-express');
 
 const permitTypes = gql`
-  scalar Upload
-
   interface Permit {
     id: ID!
     applicationNumber: String!
     applicationType: String!
     status: String!
-    dateOfSubmission: Float!
+    dateOfSubmission: String!
     applicantId: ID!
-  }
-
-  type File {
-    filename: String!
-    contentType: String
-    data: String!
-  }
-
-  input FileInput {
-    filename: String!
-    contentType: String
-    data: String
   }
 
   type COVPermit implements Permit {
@@ -29,7 +15,7 @@ const permitTypes = gql`
     applicationNumber: String!
     applicationType: String!
     status: String!
-    dateOfSubmission: Float!
+    dateOfSubmission: String!
     applicantId: ID!
     name: String!
     address: String!
@@ -40,39 +26,7 @@ const permitTypes = gql`
     vehiclePlateNumber: String!
     originAddress: String!
     destinationAddress: String!
-    files: COVFiles!
-  }
-
-  type COVFiles {
-    letterOfIntent: [File!]
-    tallySheet: [File!]
-    forestCertification: [File!]
-    orCr: [File!]
-    driverLicense: [File!]
-    specialPowerOfAttorney: [File!]
-  }
-
-  input COVPermitInput {
-    name: String!
-    address: String!
-    cellphone: String!
-    purpose: String!
-    driverName: String!
-    driverLicenseNumber: String!
-    vehiclePlateNumber: String!
-    originAddress: String!
-    destinationAddress: String!
-   #  dateOfSubmission: String!
-    files: COVFilesInput
-  }
-
-  input COVFilesInput {
-    letterOfIntent: [FileInput]
-    tallySheet: [FileInput]
-    forestCertification: [FileInput]
-    orCr: [FileInput]
-    driverLicense: [FileInput]
-    specialPowerOfAttorney: [FileInput]
+    files: COVFiles
   }
 
   type CSAWPermit implements Permit {
@@ -80,7 +34,7 @@ const permitTypes = gql`
     applicationNumber: String!
     applicationType: String!
     status: String!
-    dateOfSubmission: Float!
+    dateOfSubmission: String!
     applicantId: ID!
     registrationType: String!
     chainsawStore: String!
@@ -100,17 +54,190 @@ const permitTypes = gql`
     isBusinessOwner: Boolean!
     isPLTPRHolder: Boolean!
     isWPPHolder: Boolean!
-    files: CSAWFiles!
+    files: CSAWFiles
+  }
+
+  type PLTPPermit implements Permit {
+    id: ID!
+    applicationNumber: String!
+    applicationType: String!
+    status: String!
+    dateOfSubmission: String!
+    applicantId: ID!
+    name: String!
+    address: String!
+    contactNumber: String!
+    treeType: [String!]!
+    treeStatus: [String!]!
+    landType: [String!]!
+    posingDanger: Boolean!
+    forPersonalUse: Boolean!
+    purpose: String!
+    files: PLTPFiles
+  }
+
+  type PTPRPermit implements Permit {
+    id: ID!
+    applicationNumber: String!
+    applicationType: String!
+    status: String!
+    dateOfSubmission: String!
+    applicantId: ID!
+    ownerName: String!
+    address: String!
+    contactNumber: String!
+    lotArea: Float!
+    treeSpecies: [String!]!
+    totalTrees: Int!
+    treeSpacing: String!
+    yearPlanted: Int!
+    files: PTPRFiles
+  }
+
+  type SPLTPPermit implements Permit {
+    id: ID!
+    applicationNumber: String!
+    applicationType: String!
+    status: String!
+    dateOfSubmission: String!
+    applicantId: ID!
+    name: String!
+    address: String!
+    contactNumber: String!
+    plantedTrees: Boolean!
+    naturallyGrown: Boolean!
+    standing: Boolean!
+    blownDown: Boolean!
+    withinPrivateLand: Boolean!
+    withinTenuredForestLand: Boolean!
+    posingDanger: Boolean!
+    forPersonalUse: Boolean!
+    purpose: String!
+    files: SPLTPFiles
+  }
+
+  type TCEBPPermit implements Permit {
+    id: ID!
+    applicationNumber: String!
+    applicationType: String!
+    status: String!
+    dateOfSubmission: String!
+    applicantId: ID!
+    name: String!
+    address: String!
+    contactNumber: String!
+    purpose: String!
+    files: TCEBPFiles
+  }
+
+  type COVFiles {
+    letterOfIntent: [File]
+    tallySheet: [File]
+    forestCertification: [File]
+    orCr: [File]
+    driverLicense: [File]
+    specialPowerOfAttorney: [File]
   }
 
   type CSAWFiles {
-    officialReceipt: [File!]
-    deedOfSale: [File!]
-    specialPowerOfAttorney: [File!]
-    forestTenureAgreement: [File!]
-    businessPermit: [File!]
-    certificateOfRegistration: [File!]
-    woodProcessingPlantPermit: [File!]
+    officialReceipt: [File]
+    deedOfSale: [File]
+    specialPowerOfAttorney: [File]
+    forestTenureAgreement: [File]
+    businessPermit: [File]
+    certificateOfRegistration: [File]
+    woodProcessingPlantPermit: [File]
+  }
+
+  type PLTPFiles {
+    applicationLetter: [File]
+    lguEndorsement: [File]
+    homeownersResolution: [File]
+    ptaResolution: [File]
+  }
+
+  type PTPRFiles {
+    letterRequest: [File]
+    titleOrTaxDeclaration: [File]
+    darCertification: [File]
+    specialPowerOfAttorney: [File]
+  }
+
+  type SPLTPFiles {
+    letterOfIntent: [File]
+    lguEndorsement: [File]
+    titleCertificate: [File]
+    darCertificate: [File]
+    specialPowerOfAttorney: [File]
+    ptaResolution: [File]
+  }
+
+  type TCEBPFiles {
+    letterOfIntent: [File]
+    lguEndorsement: [File]
+    landTenurial: [File]
+    siteDevelopmentPlan: [File]
+    environmentalCompliance: [File]
+    fpic: [File]
+    ownerConsent: [File]
+    pambClearance: [File]
+  }
+
+  type File {
+    filename: String!
+    contentType: String
+    data: String
+  }
+
+  type Query {
+    getUserApplications(status: String): [Permit!]!
+    getAllCOVPermits: [COVPermit!]!
+    getCOVPermitById(id: ID!): COVPermit
+    getCOVPermitWithFiles(id: ID!): COVPermit
+    getAllCSAWPermits: [CSAWPermit!]!
+    getCSAWPermitById(id: ID!): CSAWPermit
+    getAllPLTPPermits: [PLTPPermit!]!
+    getPLTPPermitById(id: ID!): PLTPPermit
+    getAllPTPRPermits: [PTPRPermit!]!
+    getPTPRPermitById(id: ID!): PTPRPermit
+    getAllSPLTPPermits: [SPLTPPermit!]!
+    getSPLTPPermitById(id: ID!): SPLTPPermit
+    getAllTCEBPPermits: [TCEBPPermit!]!
+    getTCEBPPermitById(id: ID!): TCEBPPermit
+  }
+
+  type Mutation {
+    createCOVPermit(input: COVPermitInput!): COVPermit!
+    updateCOVPermit(id: ID!, input: COVPermitInput!): COVPermit!
+    saveCOVPermitDraft(input: COVPermitInput!): COVPermit!
+    createCSAWPermit(input: CSAWPermitInput!): CSAWPermit!
+    updateCSAWPermit(id: ID!, input: CSAWPermitInput!): CSAWPermit!
+    saveCSAWPermitDraft(input: CSAWPermitInput!): CSAWPermit!
+    createPLTPPermit(input: PLTPPermitInput!): PLTPPermit!
+    updatePLTPPermit(id: ID!, input: PLTPPermitInput!): PLTPPermit!
+    savePLTPPermitDraft(input: PLTPPermitInput!): PLTPPermit!
+    createPTPRPermit(input: PTPRPermitInput!): PTPRPermit!
+    updatePTPRPermit(id: ID!, input: PTPRPermitInput!): PTPRPermit!
+    savePTPRPermitDraft(input: PTPRPermitInput!): PTPRPermit!
+    createSPLTPPermit(input: SPLTPPermitInput!): SPLTPPermit!
+    updateSPLTPPermit(id: ID!, input: SPLTPPermitInput!): SPLTPPermit!
+    saveSPLTPPermitDraft(input: SPLTPPermitInput!): SPLTPPermit!
+    createTCEBPPermit(input: TCEBPPermitInput!): TCEBPPermit!
+    updateTCEBPPermit(id: ID!, input: TCEBPPermitInput!): TCEBPPermit!
+    saveTCEBPPermitDraft(input: TCEBPPermitInput!): TCEBPPermit!
+  }
+
+  input COVPermitInput {
+    name: String!
+    address: String!
+    cellphone: String!
+    purpose: String!
+    driverName: String!
+    driverLicenseNumber: String!
+    vehiclePlateNumber: String!
+    originAddress: String!
+    destinationAddress: String!
+    files: COVFilesInput
   }
 
   input CSAWPermitInput {
@@ -135,42 +262,6 @@ const permitTypes = gql`
     files: CSAWFilesInput
   }
 
-  input CSAWFilesInput {
-    officialReceipt: [FileInput]
-    deedOfSale: [FileInput]
-    specialPowerOfAttorney: [FileInput]
-    forestTenureAgreement: [FileInput]
-    businessPermit: [FileInput]
-    certificateOfRegistration: [FileInput]
-    woodProcessingPlantPermit: [FileInput]
-  }
-
-  type PLTPPermit implements Permit {
-    id: ID!
-    applicationNumber: String!
-    applicationType: String!
-    status: String!
-    dateOfSubmission: Float!
-    applicantId: ID!
-    name: String!
-    address: String!
-    contactNumber: String!
-    treeType: [String!]!
-    treeStatus: [String!]!
-    landType: [String!]!
-    posingDanger: Boolean!
-    forPersonalUse: Boolean!
-    purpose: String!
-    files: PLTPFiles!
-  }
-
-  type PLTPFiles {
-    applicationLetter: [File!]
-    lguEndorsement: [File!]
-    homeownersResolution: [File!]
-    ptaResolution: [File!]
-  }
-
   input PLTPPermitInput {
     name: String!
     address: String!
@@ -184,38 +275,6 @@ const permitTypes = gql`
     files: PLTPFilesInput
   }
 
-  input PLTPFilesInput {
-    applicationLetter: [FileInput]
-    lguEndorsement: [FileInput]
-    homeownersResolution: [FileInput]
-    ptaResolution: [FileInput]
-  }
-
-  type PTPRPermit implements Permit {
-    id: ID!
-    applicationNumber: String!
-    applicationType: String!
-    status: String!
-    dateOfSubmission: Float!
-    applicantId: ID!
-    ownerName: String!
-    address: String!
-    contactNumber: String!
-    lotArea: Float!
-    treeSpecies: [String!]!
-    totalTrees: Int!
-    treeSpacing: String!
-    yearPlanted: Int!
-    files: PTPRFiles!
-  }
-
-  type PTPRFiles {
-    letterRequest: [File!]
-    titleOrTaxDeclaration: [File!]
-    darCertification: [File!]
-    specialPowerOfAttorney: [File!]
-  }
-
   input PTPRPermitInput {
     ownerName: String!
     address: String!
@@ -226,44 +285,6 @@ const permitTypes = gql`
     treeSpacing: String!
     yearPlanted: Int!
     files: PTPRFilesInput
-  }
-
-  input PTPRFilesInput {
-    letterRequest: [FileInput]
-    titleOrTaxDeclaration: [FileInput]
-    darCertification: [FileInput]
-    specialPowerOfAttorney: [FileInput]
-  }
-
-  type SPLTPPermit implements Permit {
-    id: ID!
-    applicationNumber: String!
-    applicationType: String!
-    status: String!
-    dateOfSubmission: Float!
-    applicantId: ID!
-    name: String!
-    address: String!
-    contactNumber: String!
-    plantedTrees: Boolean!
-    naturallyGrown: Boolean!
-    standing: Boolean!
-    blownDown: Boolean!
-    withinPrivateLand: Boolean!
-    withinTenuredForestLand: Boolean!
-    posingDanger: Boolean!
-    forPersonalUse: Boolean!
-    purpose: String!
-    files: SPLTPFiles!
-  }
-
-  type SPLTPFiles {
-    letterOfIntent: [File!]
-    lguEndorsement: [File!]
-    titleCertificate: [File!]
-    darCertificate: [File!]
-    specialPowerOfAttorney: [File!]
-    ptaResolution: [File!]
   }
 
   input SPLTPPermitInput {
@@ -282,6 +303,47 @@ const permitTypes = gql`
     files: SPLTPFilesInput
   }
 
+  input TCEBPPermitInput {
+    name: String!
+    address: String!
+    contactNumber: String!
+    purpose: String!
+    files: TCEBPFilesInput
+  }
+
+  input COVFilesInput {
+    letterOfIntent: [FileInput]
+    tallySheet: [FileInput]
+    forestCertification: [FileInput]
+    orCr: [FileInput]
+    driverLicense: [FileInput]
+    specialPowerOfAttorney: [FileInput]
+  }
+
+  input CSAWFilesInput {
+    officialReceipt: [FileInput]
+    deedOfSale: [FileInput]
+    specialPowerOfAttorney: [FileInput]
+    forestTenureAgreement: [FileInput]
+    businessPermit: [FileInput]
+    certificateOfRegistration: [FileInput]
+    woodProcessingPlantPermit: [FileInput]
+  }
+
+  input PLTPFilesInput {
+    applicationLetter: [FileInput]
+    lguEndorsement: [FileInput]
+    homeownersResolution: [FileInput]
+    ptaResolution: [FileInput]
+  }
+
+  input PTPRFilesInput {
+    letterRequest: [FileInput]
+    titleOrTaxDeclaration: [FileInput]
+    darCertification: [FileInput]
+    specialPowerOfAttorney: [FileInput]
+  }
+
   input SPLTPFilesInput {
     letterOfIntent: [FileInput]
     lguEndorsement: [FileInput]
@@ -289,39 +351,6 @@ const permitTypes = gql`
     darCertificate: [FileInput]
     specialPowerOfAttorney: [FileInput]
     ptaResolution: [FileInput]
-  }
-
-  type TCEBPPermit implements Permit {
-    id: ID!
-    applicationNumber: String!
-    applicationType: String!
-    status: String!
-    dateOfSubmission: Float!
-    applicantId: ID!
-    name: String!
-    address: String!
-    contactNumber: String!
-    purpose: String!
-    files: TCEBPFiles!
-  }
-
-  type TCEBPFiles {
-    letterOfIntent: [File!]
-    lguEndorsement: [File!]
-    landTenurial: [File!]
-    siteDevelopmentPlan: [File!]
-    environmentalCompliance: [File!]
-    fpic: [File!]
-    ownerConsent: [File!]
-    pambClearance: [File!]
-  }
-
-  input TCEBPPermitInput {
-    name: String!
-    address: String!
-    contactNumber: String!
-    purpose: String!
-    files: TCEBPFilesInput
   }
 
   input TCEBPFilesInput {
@@ -335,23 +364,30 @@ const permitTypes = gql`
     pambClearance: [FileInput]
   }
 
-  type Query {
-    getAllCOVPermits: [COVPermit!]!
-    getCOVPermitById(id: ID!): COVPermit
-    getCOVPermitWithFiles(id: ID!): COVPermit
-    getUserApplications(status: String): [Permit!]!
+  input FileInput {
+    filename: String!
+    contentType: String
+    data: String
   }
 `;
 
-const resolvePermitType = {
-  __resolveType(obj, context, info) {
-    if (obj.applicationType === 'Certificate of Verification') return 'COVPermit';
-    if (obj.applicationType === 'Chainsaw Registration') return 'CSAWPermit';
-    if (obj.applicationType === 'Public Land Timber Permit') return 'PLTPPermit';
-    if (obj.applicationType === 'Private Tree Plantation Registration') return 'PTPRPermit';
-    if (obj.applicationType === 'Special/Private Land Timber Permit') return 'SPLTPPermit';
-    if (obj.applicationType === 'Tree Cutting and/or Earth Balling Permit') return 'TCEBPPermit';
-    return null;
+const resolvePermitType = (obj) => {
+  switch (obj.applicationType) {
+    case 'COV':
+    case 'Certificate of Verification':
+      return 'COVPermit';
+    case 'CSAW':
+      return 'CSAWPermit';
+    case 'PLTP':
+      return 'PLTPPermit';
+    case 'PTPR':
+      return 'PTPRPermit';
+    case 'SPLTP':
+      return 'SPLTPPermit';
+    case 'TCEBP':
+      return 'TCEBPPermit';
+    default:
+      throw new Error(`Unknown permit type: ${obj.applicationType}`);
   }
 };
 

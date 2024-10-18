@@ -64,7 +64,7 @@ const covResolvers = {
                ...input,
                applicationNumber,
                applicantId: user.id,
-               applicationType: 'Certificate of Verification',
+               applicationType: 'Certificate of Verification', // Set this internally
                status: 'Submitted',
                dateOfSubmission: new Date(),
                files: processedFiles,

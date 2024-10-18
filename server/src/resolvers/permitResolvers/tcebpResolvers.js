@@ -38,6 +38,7 @@ const tcebpResolvers = {
                ...input,
                applicationNumber,
                applicantId: user.id,
+               applicationType: 'Tree Cutting and Extraction of BPH',
                status: 'Submitted',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
