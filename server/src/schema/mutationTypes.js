@@ -26,6 +26,7 @@ const mutationTypes = gql`
 
     createSPLTPPermit(input: SPLTPPermitInput!): SPLTPPermit
     updateSPLTPPermit(id: ID!, input: SPLTPPermitInput!): SPLTPPermit
+    saveSPLTPPermitDraft(input: SPLTPPermitInput!): SPLTPPermit
 
     createTCEBPPermit(input: TCEBPPermitInput!): TCEBPPermit
     updateTCEBPPermit(id: ID!, input: TCEBPPermitInput!): TCEBPPermit

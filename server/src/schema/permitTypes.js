@@ -241,13 +241,53 @@ const permitTypes = gql`
     status: String!
     dateOfSubmission: String!
     applicantId: ID!
-    # Add other fields specific to SPLTPPermit
+    name: String!
+    address: String!
+    contactNumber: String!
+    plantedTrees: Boolean!
+    naturallyGrown: Boolean!
+    standing: Boolean!
+    blownDown: Boolean!
+    withinPrivateLand: Boolean!
+    withinTenuredForestLand: Boolean!
+    posingDanger: Boolean!
+    forPersonalUse: Boolean!
+    purpose: String!
+    files: SPLTPFiles!
+  }
+
+  type SPLTPFiles {
+    letterOfIntent: [File!]
+    lguEndorsement: [File!]
+    titleCertificate: [File!]
+    darCertificate: [File!]
+    specialPowerOfAttorney: [File!]
+    ptaResolution: [File!]
   }
 
   input SPLTPPermitInput {
-    # Define input fields for SPLTPPermit
-    applicationType: String!
-    # Add other fields as needed
+    name: String!
+    address: String!
+    contactNumber: String!
+    plantedTrees: Boolean!
+    naturallyGrown: Boolean!
+    standing: Boolean!
+    blownDown: Boolean!
+    withinPrivateLand: Boolean!
+    withinTenuredForestLand: Boolean!
+    posingDanger: Boolean!
+    forPersonalUse: Boolean!
+    purpose: String!
+    files: SPLTPFilesInput
+  }
+
+  input SPLTPFilesInput {
+    letterOfIntent: [FileInput]
+    lguEndorsement: [FileInput]
+    titleCertificate: [FileInput]
+    darCertificate: [FileInput]
+    specialPowerOfAttorney: [FileInput]
+    ptaResolution: [FileInput]
   }
 
   type TCEBPPermit implements Permit {
@@ -264,6 +304,13 @@ const permitTypes = gql`
     # Define input fields for TCEBPPermit
     applicationType: String!
     # Add other fields as needed
+  }
+
+  type Query {
+    getAllCOVPermits: [COVPermit!]!
+    getCOVPermitById(id: ID!): COVPermit
+    getCOVPermitWithFiles(id: ID!): COVPermit
+    # ... (other queries)
   }
 `;
 

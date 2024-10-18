@@ -171,7 +171,18 @@ const SPLTPForm = () => {
       e.preventDefault();
       try {
          const input = {
-            ...formData,
+            name: formData.name,
+            address: formData.address,
+            contactNumber: formData.contactNumber,
+            plantedTrees: formData.plantedTrees,
+            naturallyGrown: formData.naturallyGrown,
+            standing: formData.standing,
+            blownDown: formData.blownDown,
+            withinPrivateLand: formData.withinPrivateLand,
+            withinTenuredForestLand: formData.withinTenuredForestLand,
+            posingDanger: formData.posingDanger,
+            forPersonalUse: formData.forPersonalUse,
+            purpose: formData.purpose,
             files: {}
          };
 
