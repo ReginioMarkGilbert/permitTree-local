@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 const Permit = require('./Permit');
 
+const FileSchema = new mongoose.Schema({
+  filename: String,
+  contentType: String,
+  data: Buffer
+});
+
 const CSAWPermitSchema = new mongoose.Schema({
   applicationNumber: { type: String, required: true, unique: true },
   applicationType: { type: String, required: true, enum: ['Chainsaw Registration'] },
@@ -23,13 +29,13 @@ const CSAWPermitSchema = new mongoose.Schema({
   isPLTPRHolder: { type: Boolean, required: true },
   isWPPHolder: { type: Boolean, required: true },
   files: {
-    officialReceipt: [String],
-    deedOfSale: [String],
-    specialPowerOfAttorney: [String],
-    forestTenureAgreement: [String],
-    businessPermit: [String],
-    certificateOfRegistration: [String],
-    woodProcessingPlantPermit: [String],
+    officialReceipt: [FileSchema],
+    deedOfSale: [FileSchema],
+    specialPowerOfAttorney: [FileSchema],
+    forestTenureAgreement: [FileSchema],
+    businessPermit: [FileSchema],
+    certificateOfRegistration: [FileSchema],
+    woodProcessingPlantPermit: [FileSchema],
   },
   dateOfSubmission: { type: Date, default: Date.now },
   status: { type: String, required: true },

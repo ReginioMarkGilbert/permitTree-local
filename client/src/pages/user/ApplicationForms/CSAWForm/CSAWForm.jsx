@@ -19,16 +19,16 @@ const CREATE_CSAW_PERMIT = gql`
       id
       applicationNumber
       status
+      dateOfSubmission
       files {
-        officialReceipt
-        deedOfSale
-        specialPowerOfAttorney
-        forestTenureAgreement
-        businessPermit
-        certificateOfRegistration
-        woodProcessingPlantPermit
+        officialReceipt { filename contentType }
+        deedOfSale { filename contentType }
+        specialPowerOfAttorney { filename contentType }
+        forestTenureAgreement { filename contentType }
+        businessPermit { filename contentType }
+        certificateOfRegistration { filename contentType }
+        woodProcessingPlantPermit { filename contentType }
       }
-      # Add any other fields you need from the response
     }
   }
 `;
@@ -249,37 +249,57 @@ const ChainsawRegistrationForm = () => {
    const handleSubmit = async (e) => {
       e.preventDefault();
       try {
-         const currentDate = new Date().toISOString();
          const input = {
-            ...formData,
-            dateOfSubmission: currentDate,
-            status: 'Submitted',
-            files: Object.fromEntries(
-               Object.entries(formData.files).map(([key, files]) => [
-                  key,
-                  files.map(file => file.name)
-               ])
-            ),
+            registrationType: formData.registrationType,
+            chainsawStore: formData.chainsawStore === 'other' ? customStore : formData.chainsawStore, // Use customStore if 'other' is selected
+            ownerName: formData.ownerName,
+            address: formData.address,
+            phone: formData.phone,
+            brand: formData.brand,
+            model: formData.model,
+            serialNumber: formData.serialNumber,
             dateOfAcquisition: new Date(formData.dateOfAcquisition).toISOString(),
-            purchasePrice: parseFloat(formData.purchasePrice),
             powerOutput: formData.powerOutput.toString(),
             maxLengthGuidebar: formData.maxLengthGuidebar.toString(),
+            countryOfOrigin: formData.countryOfOrigin,
+            purchasePrice: parseFloat(formData.purchasePrice),
             isOwner: Boolean(formData.isOwner),
             isTenureHolder: Boolean(formData.isTenureHolder),
             isBusinessOwner: Boolean(formData.isBusinessOwner),
             isPLTPRHolder: Boolean(formData.isPLTPRHolder),
             isWPPHolder: Boolean(formData.isWPPHolder),
+            files: {}
          };
 
-         console.log('Submitting input:', input); // Add this line for debugging
+         // Validate chainsawStore
+         if (!input.chainsawStore) {
+            toast.error("Please select or enter a chainsaw store");
+            return;
+         }
 
-         const token = localStorage.getItem('token'); // Assuming you store the token in localStorage
+         // Process files
+         for (const [key, files] of Object.entries(formData.files)) {
+            if (files.length > 0) {
+               input.files[key] = await Promise.all(files.map(async (file) => {
+                  const content = await readFileAsBase64(file);
+                  return {
+                     filename: file.name,
+                     contentType: file.type,
+                     data: content
+                  };
+               }));
+            }
+         }
+
+         console.log('Submitting input:', input);
+
+         const token = localStorage.getItem('token');
          const { data } = await createCSAWPermit({
             variables: { input },
             context: {
                headers: {
                   'Apollo-Require-Preflight': 'true',
-                  'Authorization': `Bearer ${token}`, // Add this line
+                  'Authorization': token,
                },
             },
          });
@@ -302,14 +322,18 @@ const ChainsawRegistrationForm = () => {
                console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}, Extensions:`, extensions);
             });
          }
-         if (error.networkError) {
-            console.log(`[Network error]:`, error.networkError);
-            if (error.networkError.result) {
-               console.log('Error result:', error.networkError.result);
-            }
-         }
          toast.error("Error submitting application: " + error.message);
       }
+   };
+
+   // Helper function to read file as base64
+   const readFileAsBase64 = (file) => {
+      return new Promise((resolve, reject) => {
+         const reader = new FileReader();
+         reader.onload = () => resolve(reader.result.split(',')[1]);
+         reader.onerror = error => reject(error);
+         reader.readAsDataURL(file);
+      });
    };
 
    const handleCheckboxChange = (e) => {

@@ -1,83 +1,100 @@
 const CSAWPermit = require('../../models/permits/CSAWPermit');
 const { CSAW_ApplicationNumber } = require('../../utils/customIdGenerator');
+const { Binary } = require('mongodb');
 
 const csawResolvers = {
-  Query: {
-    getAllCSAWPermits: async () => {
-      return await CSAWPermit.find();
-    },
-    getCSAWPermitById: async (_, { id }) => {
-      return await CSAWPermit.findById(id);
-    },
-  },
-  Mutation: {
-    createCSAWPermit: async (_, { input }, { user }) => {
-      if (!user) {
-        throw new Error('You must be logged in to create a permit');
-      }
+   Query: {
+      getAllCSAWPermits: async () => {
+         return await CSAWPermit.find();
+      },
+      getCSAWPermitById: async (_, { id }) => {
+         return await CSAWPermit.findById(id);
+      },
+   },
+   Mutation: {
+      createCSAWPermit: async (_, { input }, { user }) => {
+         if (!user) {
+            throw new Error('You must be logged in to create a permit');
+         }
 
-      try {
-        const applicationNumber = await CSAW_ApplicationNumber();
+         try {
+            const applicationNumber = await CSAW_ApplicationNumber();
 
-        const permitData = {
-          ...input,
-          applicationNumber,
-          applicantId: user.id,
-          status: input.status || 'Pending',
-          dateOfSubmission: input.dateOfSubmission || new Date().toISOString(),
-        };
+            // Process file inputs
+            const processedFiles = {};
+            for (const [key, files] of Object.entries(input.files)) {
+               if (files && files.length > 0) {
+                  processedFiles[key] = files.map(file => ({
+                     filename: file.filename,
+                     contentType: file.contentType,
+                     data: Binary.createFromBase64(file.data)
+                  }));
+               } else {
+                  processedFiles[key] = [];
+               }
+            }
 
-        const newPermit = new CSAWPermit(permitData);
-        const savedPermit = await newPermit.save();
-        return savedPermit;
-      } catch (error) {
-        console.error('Error creating CSAW permit:', error);
-        throw new Error(`Failed to create CSAW permit: ${error.message}`);
-      }
-    },
-    updateCSAWPermit: async (_, { id, input }, { user }) => {
-      if (!user) {
-        throw new Error('You must be logged in to update a permit');
-      }
+            const permitData = {
+               ...input,
+               applicationNumber,
+               applicantId: user.id,
+               applicationType: 'Chainsaw Registration',
+               status: 'Pending',
+               dateOfSubmission: new Date().toISOString(),
+               files: processedFiles,
+            };
 
-      const permit = await CSAWPermit.findById(id);
-      if (!permit) {
-        throw new Error('Permit not found');
-      }
+            const newPermit = new CSAWPermit(permitData);
+            const savedPermit = await newPermit.save();
+            return savedPermit;
+         } catch (error) {
+            console.error('Error creating CSAW permit:', error);
+            throw new Error(`Failed to create CSAW permit: ${error.message}`);
+         }
+      },
+      updateCSAWPermit: async (_, { id, input }, { user }) => {
+         if (!user) {
+            throw new Error('You must be logged in to update a permit');
+         }
 
-      if (permit.applicantId.toString() !== user.id && user.role !== 'admin') {
-        throw new Error('You are not authorized to update this permit');
-      }
+         const permit = await CSAWPermit.findById(id);
+         if (!permit) {
+            throw new Error('Permit not found');
+         }
 
-      Object.assign(permit, input);
-      return await permit.save();
-    },
-    saveCSAWPermitDraft: async (_, { input }, { user }) => {
-      if (!user) {
-        throw new Error('You must be logged in to save a draft');
-      }
+         if (permit.applicantId.toString() !== user.id && user.role !== 'admin') {
+            throw new Error('You are not authorized to update this permit');
+         }
 
-      try {
-        const customId = await CSAW_CustomId();
-        const applicationNumber = `CSAW-DRAFT-${Date.now()}`;
+         Object.assign(permit, input);
+         return await permit.save();
+      },
+      saveCSAWPermitDraft: async (_, { input }, { user }) => {
+         if (!user) {
+            throw new Error('You must be logged in to save a draft');
+         }
 
-        const permitData = {
-          ...input,
-          customId,
-          applicantId: user.id,
-          applicationNumber,
-          status: 'Draft',
-        };
+         try {
+            const customId = await CSAW_CustomId();
+            const applicationNumber = `CSAW-DRAFT-${Date.now()}`;
 
-        const newPermit = new CSAWPermit(permitData);
-        const savedPermit = await newPermit.save();
-        return savedPermit;
-      } catch (error) {
-        console.error('Error saving CSAW permit draft:', error);
-        throw new Error(`Failed to save CSAW permit draft: ${error.message}`);
-      }
-    },
-  },
+            const permitData = {
+               ...input,
+               customId,
+               applicantId: user.id,
+               applicationNumber,
+               status: 'Draft',
+            };
+
+            const newPermit = new CSAWPermit(permitData);
+            const savedPermit = await newPermit.save();
+            return savedPermit;
+         } catch (error) {
+            console.error('Error saving CSAW permit draft:', error);
+            throw new Error(`Failed to save CSAW permit draft: ${error.message}`);
+         }
+      },
+   },
 };
 
 module.exports = csawResolvers;

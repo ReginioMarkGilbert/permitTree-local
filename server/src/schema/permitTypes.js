@@ -81,13 +81,67 @@ const permitTypes = gql`
     status: String!
     dateOfSubmission: String!
     applicantId: ID!
-    # Add other fields specific to CSAWPermit
+    registrationType: String!
+    chainsawStore: String!
+    ownerName: String!
+    address: String!
+    phone: String!
+    brand: String!
+    model: String!
+    serialNumber: String!
+    dateOfAcquisition: String!
+    powerOutput: String!
+    maxLengthGuidebar: String!
+    countryOfOrigin: String!
+    purchasePrice: Float!
+    isOwner: Boolean!
+    isTenureHolder: Boolean!
+    isBusinessOwner: Boolean!
+    isPLTPRHolder: Boolean!
+    isWPPHolder: Boolean!
+    files: CSAWFiles!
+  }
+
+  type CSAWFiles {
+    officialReceipt: [File!]
+    deedOfSale: [File!]
+    specialPowerOfAttorney: [File!]
+    forestTenureAgreement: [File!]
+    businessPermit: [File!]
+    certificateOfRegistration: [File!]
+    woodProcessingPlantPermit: [File!]
   }
 
   input CSAWPermitInput {
-    # Define input fields for CSAWPermit
-    applicationType: String!
-    # Add other fields as needed
+    registrationType: String!
+    chainsawStore: String!
+    ownerName: String!
+    address: String!
+    phone: String!
+    brand: String!
+    model: String!
+    serialNumber: String!
+    dateOfAcquisition: String!
+    powerOutput: String!
+    maxLengthGuidebar: String!
+    countryOfOrigin: String!
+    purchasePrice: Float!
+    isOwner: Boolean!
+    isTenureHolder: Boolean!
+    isBusinessOwner: Boolean!
+    isPLTPRHolder: Boolean!
+    isWPPHolder: Boolean!
+    files: CSAWFilesInput
+  }
+
+  input CSAWFilesInput {
+    officialReceipt: [FileInput]
+    deedOfSale: [FileInput]
+    specialPowerOfAttorney: [FileInput]
+    forestTenureAgreement: [FileInput]
+    businessPermit: [FileInput]
+    certificateOfRegistration: [FileInput]
+    woodProcessingPlantPermit: [FileInput]
   }
 
   type PLTPPermit implements Permit {
