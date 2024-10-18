@@ -91,9 +91,9 @@ const HomePage = () => {
    const { firstName, lastName } = userData?.me || {};
 
    return (
-      <div className="min-h-screen bg-green-50 flex flex-col pt-16 pl-14">
+      <div className="min-h-screen bg-green-50 flex flex-col pt-16">
          <ToastContainer />
-         <main className="flex-grow p-8">
+         <main className="container mx-auto py-8 flex-grow mt-4">
             <h1 className="text-3xl font-bold text-green-800 mb-6">
                {isNewUser ? "Welcome" : "Welcome back"}, {firstName}!
             </h1>

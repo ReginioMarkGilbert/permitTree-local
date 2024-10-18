@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
-import { FaBell, FaClipboardList, FaFileAlt, FaHome, FaSignInAlt, FaUser } from 'react-icons/fa';
+import { FaBell, FaClipboardList, FaFileAlt, FaHome, FaSignInAlt, FaUser, FaSignOutAlt } from 'react-icons/fa';
 import { NavLink, useNavigate } from 'react-router-dom';
 import permitTreeLogo from '../../assets/denr-logo.png';
 import { useNotification } from '../../pages/user/contexts/UserNotificationContext';
@@ -47,21 +47,25 @@ const Sidebar = React.memo(({ isOpen }) => {
       }
    }, [navigate]);
 
-   const navItems = useMemo(() => [
-      { to: "/home", icon: <FaHome />, text: "Home" },
-      { to: "/permits", icon: <FaFileAlt />, text: "Apply" },
-      { to: "/applicationsStatus", icon: <FaClipboardList />, text: "Application Status" },
-      { to: "/notifications", icon: <FaBell />, text: "Notifications", badge: unreadCount },
-      { to: "/profile", icon: <FaUser />, text: "Profile" },
-      { to: "#", icon: <FaSignInAlt />, text: "Logout", onClick: handleLogout },
-   ], [unreadCount, handleLogout]);
+   const navItems = [
+      { to: '/home', icon: <FaHome />, text: 'Home' },
+      { to: '/permits', icon: <FaFileAlt />, text: 'Apply' },
+      { to: '/applicationsStatus', icon: <FaClipboardList />, text: 'Application Status' },
+      { to: '/notifications', icon: <FaBell />, text: 'Notifications', badge: unreadCount },
+      { to: '/profile', icon: <FaUser />, text: 'Profile' },
+      { to: '/logout', icon: <FaSignOutAlt />, text: 'Logout' }
+   ];
 
    const renderNavItem = (item, index) => (
       <NavLink
          key={index}
          to={item.to}
-         onClick={item.onClick}
-         className={`flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2 ${isOpen ? '' : 'justify-center'}`}
+         className={({ isActive }) => `
+            flex items-center py-2.5 px-4 rounded-md mt-2
+            ${isOpen ? '' : 'justify-center'}
+            ${isActive && item.to !== '/logout' ? 'bg-green-700 text-white' : 'hover:bg-gray-700 hover:text-white'}
+         `}
+         onClick={item.to === '/logout' ? handleLogout : undefined}
       >
          <div className="relative w-6 h-6 flex items-center justify-center">
             {item.badge > 0 && (
