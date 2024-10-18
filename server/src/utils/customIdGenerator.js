@@ -33,29 +33,14 @@ const CSAW_ApplicationNumber = () => generateApplicationNumber('CSAW');
 const COV_ApplicationNumber = () => generateApplicationNumber('COV');
 const PTPR_ApplicationNumber = () => generateApplicationNumber('PTPR');
 const PLTP_ApplicationNumber = () => generateApplicationNumber('PLTP');
+const SPLTP_ApplicationNumber = () => generateApplicationNumber('SPLTP');
 const TCEBP_ApplicationNumber = () => generateApplicationNumber('TCEBP');
 
-const SPLTP_ApplicationNumber = async () => {
-  const date = new Date();
-  const year = date.getFullYear().toString().slice(-2);
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-
-  const latestPermit = await SPLTPPermit.findOne({}, {}, { sort: { 'applicationNumber' : -1 } });
-
-  let sequenceNumber = 1;
-  if (latestPermit && latestPermit.applicationNumber) {
-    const latestSequenceNumber = parseInt(latestPermit.applicationNumber.slice(-4));
-    sequenceNumber = latestSequenceNumber + 1;
-  }
-
-  return `SPLTP-${year}${month}-${sequenceNumber.toString().padStart(4, '0')}`;
-};
-
 module.exports = {
-  CSAW_ApplicationNumber,
-  COV_ApplicationNumber,
-  PTPR_ApplicationNumber,
-  PLTP_ApplicationNumber,
-  SPLTP_ApplicationNumber,
-  TCEBP_ApplicationNumber
+   CSAW_ApplicationNumber,
+   COV_ApplicationNumber,
+   PTPR_ApplicationNumber,
+   PLTP_ApplicationNumber,
+   SPLTP_ApplicationNumber,
+   TCEBP_ApplicationNumber
 };
