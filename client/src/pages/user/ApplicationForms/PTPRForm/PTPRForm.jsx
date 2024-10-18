@@ -20,10 +20,10 @@ const CREATE_PTPR_PERMIT = gql`
       status
       dateOfSubmission
       files {
-        letterRequest
-        titleOrTaxDeclaration
-        darCertification
-        specialPowerOfAttorney
+        letterRequest { filename contentType }
+        titleOrTaxDeclaration { filename contentType }
+        darCertification { filename contentType }
+        specialPowerOfAttorney { filename contentType }
       }
     }
   }
@@ -153,21 +153,31 @@ const PTPRForm = () => {
    const handleSubmit = async (e) => {
       e.preventDefault();
       try {
-         const currentDate = new Date().toISOString();
          const input = {
-            ...formData,
-            dateOfSubmission: currentDate,
-            status: 'Submitted',
+            ownerName: formData.ownerName,
+            address: formData.address,
+            contactNumber: formData.contactNumber,
             lotArea: parseFloat(formData.lotArea),
+            treeSpecies: formData.treeSpecies,
             totalTrees: parseInt(formData.totalTrees, 10),
+            treeSpacing: formData.treeSpacing,
             yearPlanted: parseInt(formData.yearPlanted, 10),
-            files: Object.fromEntries(
-               Object.entries(formData.files).map(([key, files]) => [
-                  key,
-                  files.map(file => file.name)
-               ])
-            ),
+            files: {}
          };
+
+         // Process files
+         for (const [key, files] of Object.entries(formData.files)) {
+            if (files.length > 0) {
+               input.files[key] = await Promise.all(files.map(async (file) => {
+                  const content = await readFileAsBase64(file);
+                  return {
+                     filename: file.name,
+                     contentType: file.type,
+                     data: content
+                  };
+               }));
+            }
+         }
 
          console.log('Submitting input:', input);
 
@@ -196,6 +206,16 @@ const PTPRForm = () => {
          console.error('Error submitting application:', error);
          toast.error("Error submitting application: " + error.message);
       }
+   };
+
+   // Helper function to read file as base64
+   const readFileAsBase64 = (file) => {
+      return new Promise((resolve, reject) => {
+         const reader = new FileReader();
+         reader.onload = () => resolve(reader.result.split(',')[1]);
+         reader.onerror = error => reject(error);
+         reader.readAsDataURL(file);
+      });
    };
 
    const steps = [

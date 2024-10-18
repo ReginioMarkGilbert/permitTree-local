@@ -1,5 +1,6 @@
 const PTPRPermit = require('../../models/permits/PTPRPermit');
 const { PTPR_ApplicationNumber } = require('../../utils/customIdGenerator');
+const { Binary } = require('mongodb');
 
 const ptprResolvers = {
    Query: {
@@ -18,12 +19,29 @@ const ptprResolvers = {
 
          try {
             const applicationNumber = await PTPR_ApplicationNumber();
+
+            // Process file inputs
+            const processedFiles = {};
+            for (const [key, files] of Object.entries(input.files)) {
+               if (files && files.length > 0) {
+                  processedFiles[key] = files.map(file => ({
+                     filename: file.filename,
+                     contentType: file.contentType,
+                     data: Binary.createFromBase64(file.data)
+                  }));
+               } else {
+                  processedFiles[key] = [];
+               }
+            }
+
             const permitData = {
                ...input,
                applicationNumber,
                applicantId: user.id,
-               status: input.status || 'Pending',
-               dateOfSubmission: input.dateOfSubmission || new Date().toISOString(),
+               applicationType: 'Private Tree Plantation Registration',
+               status: 'Pending',
+               dateOfSubmission: new Date().toISOString(),
+               files: processedFiles,
             };
 
             const newPermit = new PTPRPermit(permitData);

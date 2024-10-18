@@ -167,13 +167,41 @@ const permitTypes = gql`
     status: String!
     dateOfSubmission: String!
     applicantId: ID!
-    # Add other fields specific to PTPRPermit
+    ownerName: String!
+    address: String!
+    contactNumber: String!
+    lotArea: Float!
+    treeSpecies: [String!]!
+    totalTrees: Int!
+    treeSpacing: String!
+    yearPlanted: Int!
+    files: PTPRFiles!
+  }
+
+  type PTPRFiles {
+    letterRequest: [File!]
+    titleOrTaxDeclaration: [File!]
+    darCertification: [File!]
+    specialPowerOfAttorney: [File!]
   }
 
   input PTPRPermitInput {
-    # Define input fields for PTPRPermit
-    applicationType: String!
-    # Add other fields as needed
+    ownerName: String!
+    address: String!
+    contactNumber: String!
+    lotArea: Float!
+    treeSpecies: [String!]!
+    totalTrees: Int!
+    treeSpacing: String!
+    yearPlanted: Int!
+    files: PTPRFilesInput
+  }
+
+  input PTPRFilesInput {
+    letterRequest: [FileInput]
+    titleOrTaxDeclaration: [FileInput]
+    darCertification: [FileInput]
+    specialPowerOfAttorney: [FileInput]
   }
 
   type SPLTPPermit implements Permit {
