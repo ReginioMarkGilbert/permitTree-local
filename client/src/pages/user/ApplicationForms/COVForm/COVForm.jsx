@@ -173,13 +173,11 @@ const COVForm = () => {
          // Process files
          for (const [key, files] of Object.entries(formData.files)) {
             if (files.length > 0) {
-               input.files[key] = await Promise.all(files.map(async (file) => {
-                  const content = await readFileAsBase64(file);
-                  return {
-                     filename: file.name,
-                     contentType: file.type,
-                     data: content // This is the missing field
-                  };
+               input.files[key] = files.map(file => ({
+                  filename: file.name,
+                  mimetype: file.type,
+                  encoding: 'utf-8',
+                  content: null  // We'll read the file content in the resolver
                }));
             }
          }

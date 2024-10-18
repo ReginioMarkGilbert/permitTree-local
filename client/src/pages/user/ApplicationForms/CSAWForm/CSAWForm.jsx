@@ -251,7 +251,7 @@ const ChainsawRegistrationForm = () => {
       try {
          const input = {
             registrationType: formData.registrationType,
-            chainsawStore: formData.chainsawStore === 'other' ? customStore : formData.chainsawStore, // Use customStore if 'other' is selected
+            chainsawStore: formData.chainsawStore,
             ownerName: formData.ownerName,
             address: formData.address,
             phone: formData.phone,
@@ -270,12 +270,6 @@ const ChainsawRegistrationForm = () => {
             isWPPHolder: Boolean(formData.isWPPHolder),
             files: {}
          };
-
-         // Validate chainsawStore
-         if (!input.chainsawStore) {
-            toast.error("Please select or enter a chainsaw store");
-            return;
-         }
 
          // Process files
          for (const [key, files] of Object.entries(formData.files)) {
@@ -299,7 +293,7 @@ const ChainsawRegistrationForm = () => {
             context: {
                headers: {
                   'Apollo-Require-Preflight': 'true',
-                  'Authorization': token,
+                  'Authorization': `Bearer ${token}`,
                },
             },
          });
@@ -321,6 +315,12 @@ const ChainsawRegistrationForm = () => {
             error.graphQLErrors.forEach(({ message, locations, path, extensions }) => {
                console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}, Extensions:`, extensions);
             });
+         }
+         if (error.networkError) {
+            console.log(`[Network error]:`, error.networkError);
+            if (error.networkError.result) {
+               console.log('Error result:', error.networkError.result);
+            }
          }
          toast.error("Error submitting application: " + error.message);
       }

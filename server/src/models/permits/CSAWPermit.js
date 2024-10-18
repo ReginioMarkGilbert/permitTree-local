@@ -35,7 +35,7 @@ const CSAWPermitSchema = new mongoose.Schema({
     forestTenureAgreement: [FileSchema],
     businessPermit: [FileSchema],
     certificateOfRegistration: [FileSchema],
-    woodProcessingPlantPermit: [FileSchema],
+    woodProcessingPlantPermit: [FileSchema]
   },
   dateOfSubmission: { type: Date, default: Date.now },
   status: { type: String, required: true },

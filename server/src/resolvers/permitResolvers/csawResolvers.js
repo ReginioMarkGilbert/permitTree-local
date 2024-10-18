@@ -1,6 +1,5 @@
 const CSAWPermit = require('../../models/permits/CSAWPermit');
 const { CSAW_ApplicationNumber } = require('../../utils/customIdGenerator');
-const { Binary } = require('mongodb');
 
 const csawResolvers = {
    Query: {
@@ -27,7 +26,7 @@ const csawResolvers = {
                   processedFiles[key] = files.map(file => ({
                      filename: file.filename,
                      contentType: file.contentType,
-                     data: Binary.createFromBase64(file.data)
+                     data: Buffer.from(file.data, 'base64')
                   }));
                } else {
                   processedFiles[key] = [];
@@ -38,7 +37,6 @@ const csawResolvers = {
                ...input,
                applicationNumber,
                applicantId: user.id,
-               applicationType: 'Chainsaw Registration',
                status: 'Pending',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,

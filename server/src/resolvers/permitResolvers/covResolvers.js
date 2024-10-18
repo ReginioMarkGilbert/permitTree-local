@@ -10,6 +10,24 @@ const covResolvers = {
       getCOVPermitById: async (_, { id }) => {
          return await COVPermit.findById(id);
       },
+      getCOVPermitWithFiles: async (_, { id }) => {
+         const permit = await COVPermit.findById(id);
+         if (!permit) {
+            throw new Error('Permit not found');
+         }
+         // Convert Buffer to Base64 string for each file
+         const filesWithBase64 = {};
+         for (const [key, files] of Object.entries(permit.files)) {
+            filesWithBase64[key] = files.map(file => ({
+               ...file.toObject(),
+               buffer: file.buffer.toString('base64')
+            }));
+         }
+         return {
+            ...permit.toObject(),
+            files: filesWithBase64
+         };
+      },
    },
    Mutation: {
       createCOVPermit: async (_, { input }, { user }) => {
