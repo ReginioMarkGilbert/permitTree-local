@@ -1,5 +1,6 @@
 const PLTPPermit = require('../../models/permits/PLTPPermit');
 const { PLTP_ApplicationNumber } = require('../../utils/customIdGenerator');
+const { Binary } = require('mongodb');
 
 const pltpResolvers = {
    Query: {
@@ -19,22 +20,27 @@ const pltpResolvers = {
          try {
             const applicationNumber = await PLTP_ApplicationNumber();
 
-            // Process file uploads
+            // Process file inputs
             const processedFiles = {};
             for (const [key, files] of Object.entries(input.files)) {
-               processedFiles[key] = files.map(file => ({
-                  filename: file.filename,
-                  contentType: file.contentType,
-                  data: Buffer.from(file.data, 'base64')
-               }));
+               if (files && files.length > 0) {
+                  processedFiles[key] = files.map(file => ({
+                     filename: file.filename,
+                     contentType: file.contentType,
+                     data: Binary.createFromBase64(file.data)
+                  }));
+               } else {
+                  processedFiles[key] = [];
+               }
             }
 
             const permitData = {
                ...input,
                applicationNumber,
                applicantId: user.id,
-               status: input.status || 'Pending',
-               dateOfSubmission: input.dateOfSubmission || new Date().toISOString(),
+               applicationType: 'Public Land Timber Permit',
+               status: 'Pending',
+               dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
             };
 

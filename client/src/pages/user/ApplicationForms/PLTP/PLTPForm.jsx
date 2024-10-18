@@ -25,22 +25,10 @@ const CREATE_PLTP_PERMIT = gql`
       status
       dateOfSubmission
       files {
-        applicationLetter {
-          filename
-          contentType
-        }
-        lguEndorsement {
-          filename
-          contentType
-        }
-        homeownersResolution {
-          filename
-          contentType
-        }
-        ptaResolution {
-          filename
-          contentType
-        }
+        applicationLetter { filename contentType }
+        lguEndorsement { filename contentType }
+        homeownersResolution { filename contentType }
+        ptaResolution { filename contentType }
       }
     }
   }
@@ -178,28 +166,32 @@ const PLTPForm = () => {
    const handleSubmit = async (e) => {
       e.preventDefault();
       try {
-         const currentDate = new Date().toISOString();
          const input = {
-            ...formData,
-            dateOfSubmission: currentDate,
-            status: 'Submitted',
-            files: await Promise.all(
-               Object.entries(formData.files).map(async ([key, files]) => {
-                  const uploadedFiles = await Promise.all(files.map(async (file) => {
-                     const reader = new FileReader();
-                     return new Promise((resolve) => {
-                        reader.onload = () => resolve({
-                           filename: file.name,
-                           contentType: file.type,
-                           data: reader.result.split(',')[1] // base64 data
-                        });
-                        reader.readAsDataURL(file);
-                     });
-                  }));
-                  return [key, uploadedFiles];
-               })
-            ).then(Object.fromEntries),
+            name: formData.name,
+            address: formData.address,
+            contactNumber: formData.contactNumber,
+            treeType: formData.treeType,
+            treeStatus: formData.treeStatus,
+            landType: formData.landType,
+            posingDanger: formData.posingDanger,
+            forPersonalUse: formData.forPersonalUse,
+            purpose: formData.purpose,
+            files: {}
          };
+
+         // Process files
+         for (const [key, files] of Object.entries(formData.files)) {
+            if (files.length > 0) {
+               input.files[key] = await Promise.all(files.map(async (file) => {
+                  const content = await readFileAsBase64(file);
+                  return {
+                     filename: file.name,
+                     contentType: file.type,
+                     data: content
+                  };
+               }));
+            }
+         }
 
          console.log('Submitting input:', input);
 
@@ -228,6 +220,16 @@ const PLTPForm = () => {
          console.error('Error submitting application:', error);
          toast.error("Error submitting application: " + error.message);
       }
+   };
+
+   // Helper function to read file as base64
+   const readFileAsBase64 = (file) => {
+      return new Promise((resolve, reject) => {
+         const reader = new FileReader();
+         reader.onload = () => resolve(reader.result.split(',')[1]);
+         reader.onerror = error => reject(error);
+         reader.readAsDataURL(file);
+      });
    };
 
    const steps = [
