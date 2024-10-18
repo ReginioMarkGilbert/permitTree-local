@@ -46,7 +46,10 @@ const pltpResolvers = {
 
             const newPermit = new PLTPPermit(permitData);
             const savedPermit = await newPermit.save();
-            return savedPermit;
+            return {
+               ...savedPermit.toObject(),
+               id: savedPermit._id.toString()
+            };
          } catch (error) {
             console.error('Error creating PLTP permit:', error);
             throw new Error(`Failed to create PLTP permit: ${error.message}`);

@@ -46,7 +46,10 @@ const spltpResolvers = {
 
             const newPermit = new SPLTPPermit(permitData);
             const savedPermit = await newPermit.save();
-            return savedPermit;
+            return {
+               ...savedPermit.toObject(),
+               id: savedPermit._id.toString()
+            };
          } catch (error) {
             console.error('Error creating SPLTP permit:', error);
             throw new Error(`Failed to create SPLTP permit: ${error.message}`);

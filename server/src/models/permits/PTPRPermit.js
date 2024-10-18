@@ -31,4 +31,4 @@ const PTPRPermitSchema = new mongoose.Schema({
 
 const PTPRPermit = Permit.discriminator('PTPRPermit', PTPRPermitSchema);
 
-module.exports = mongoose.model('PTPRPermit');
+module.exports = PTPRPermit;

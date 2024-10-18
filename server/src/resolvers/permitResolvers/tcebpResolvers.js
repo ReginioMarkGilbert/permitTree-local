@@ -45,7 +45,10 @@ const tcebpResolvers = {
 
             const newPermit = new TCEBPPermit(permitData);
             const savedPermit = await newPermit.save();
-            return savedPermit;
+            return {
+               ...savedPermit.toObject(),
+               id: savedPermit._id.toString()
+            };
          } catch (error) {
             console.error('Error creating TCEBP permit:', error);
             throw new Error(`Failed to create TCEBP permit: ${error.message}`);

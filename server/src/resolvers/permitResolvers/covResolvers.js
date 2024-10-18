@@ -5,10 +5,18 @@ const { Binary } = require('mongodb');
 const covResolvers = {
    Query: {
       getAllCOVPermits: async () => {
-         return await COVPermit.find();
+         const permits = await COVPermit.find().lean().exec();
+         return permits.map(permit => ({
+            ...permit,
+            id: permit._id.toString()
+         }));
       },
       getCOVPermitById: async (_, { id }) => {
-         return await COVPermit.findById(id);
+         const permit = await COVPermit.findById(id).lean().exec();
+         return permit ? {
+            ...permit,
+            id: permit._id.toString()
+         } : null;
       },
       getCOVPermitWithFiles: async (_, { id }) => {
          const permit = await COVPermit.findById(id);
@@ -58,13 +66,17 @@ const covResolvers = {
                applicantId: user.id,
                applicationType: 'Certificate of Verification',
                status: 'Submitted',
-               dateOfSubmission: new Date().toISOString(),
+               dateOfSubmission: new Date(),
                files: processedFiles,
             };
 
             const newPermit = new COVPermit(permitData);
             const savedPermit = await newPermit.save();
-            return savedPermit;
+            const plainPermit = savedPermit.toObject();
+            return {
+               ...plainPermit,
+               id: plainPermit._id.toString()
+            };
          } catch (error) {
             console.error('Error creating COV permit:', error);
             throw new Error(`Failed to create COV permit: ${error.message}`);

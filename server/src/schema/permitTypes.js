@@ -8,7 +8,7 @@ const permitTypes = gql`
     applicationNumber: String!
     applicationType: String!
     status: String!
-    dateOfSubmission: String!
+    dateOfSubmission: Float!
     applicantId: ID!
   }
 
@@ -29,7 +29,7 @@ const permitTypes = gql`
     applicationNumber: String!
     applicationType: String!
     status: String!
-    dateOfSubmission: String!
+    dateOfSubmission: Float!
     applicantId: ID!
     name: String!
     address: String!
@@ -80,7 +80,7 @@ const permitTypes = gql`
     applicationNumber: String!
     applicationType: String!
     status: String!
-    dateOfSubmission: String!
+    dateOfSubmission: Float!
     applicantId: ID!
     registrationType: String!
     chainsawStore: String!
@@ -150,7 +150,7 @@ const permitTypes = gql`
     applicationNumber: String!
     applicationType: String!
     status: String!
-    dateOfSubmission: String!
+    dateOfSubmission: Float!
     applicantId: ID!
     name: String!
     address: String!
@@ -196,7 +196,7 @@ const permitTypes = gql`
     applicationNumber: String!
     applicationType: String!
     status: String!
-    dateOfSubmission: String!
+    dateOfSubmission: Float!
     applicantId: ID!
     ownerName: String!
     address: String!
@@ -240,7 +240,7 @@ const permitTypes = gql`
     applicationNumber: String!
     applicationType: String!
     status: String!
-    dateOfSubmission: String!
+    dateOfSubmission: Float!
     applicantId: ID!
     name: String!
     address: String!
@@ -296,7 +296,7 @@ const permitTypes = gql`
     applicationNumber: String!
     applicationType: String!
     status: String!
-    dateOfSubmission: String!
+    dateOfSubmission: Float!
     applicantId: ID!
     name: String!
     address: String!

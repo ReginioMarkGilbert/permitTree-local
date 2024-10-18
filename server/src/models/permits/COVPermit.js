@@ -5,14 +5,9 @@ const FileSchema = new mongoose.Schema({
    filename: String,
    contentType: String,
    data: Buffer
-   //   mimetype: String,
-   //   encoding: String,
-   //   buffer: Buffer
 });
 
 const COVPermitSchema = new mongoose.Schema({
-   applicationNumber: { type: String, required: true, unique: true },
-   applicationType: { type: String, required: true },
    name: { type: String, required: true },
    address: { type: String, required: true },
    cellphone: { type: String, required: true },
@@ -29,12 +24,9 @@ const COVPermitSchema = new mongoose.Schema({
       orCr: [FileSchema],
       driverLicense: [FileSchema],
       specialPowerOfAttorney: [FileSchema]
-   },
-   dateOfSubmission: { type: Date, default: Date.now },
-   status: { type: String, required: true },
-   applicantId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+   }
 });
 
 const COVPermit = Permit.discriminator('COVPermit', COVPermitSchema);
 
-module.exports = mongoose.model('COVPermit');
+module.exports = COVPermit;

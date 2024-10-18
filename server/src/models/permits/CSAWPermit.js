@@ -43,4 +43,4 @@ const CSAWPermitSchema = new mongoose.Schema({
 
 const CSAWPermit = Permit.discriminator('CSAWPermit', CSAWPermitSchema);
 
-module.exports = mongoose.model('CSAWPermit');
+module.exports = CSAWPermit;

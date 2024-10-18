@@ -3,6 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Eye, Edit, Trash2 } from 'lucide-react';
 
 const UserApplicationRow = ({ app, onView, onEdit, onDelete, getStatusColor }) => {
+   // Function to format the date
+   const formatDate = (timestamp) => {
+      // Check if the timestamp is in milliseconds (13 digits) or seconds (10 digits)
+      const date = timestamp.toString().length === 13
+         ? new Date(parseInt(timestamp))
+         : new Date(parseInt(timestamp) * 1000);
+
+      return date.toLocaleDateString();
+   };
 
    return (
       <tr>
@@ -14,7 +23,7 @@ const UserApplicationRow = ({ app, onView, onEdit, onDelete, getStatusColor }) =
          </td>
          <td className="px-4 py-3 whitespace-nowrap">
             <div className="text-sm text-gray-900">
-               {app.dateOfSubmission}
+               {formatDate(app.dateOfSubmission)}
             </div>
          </td>
          <td className="px-4 py-3 whitespace-nowrap">
