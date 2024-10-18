@@ -21,7 +21,6 @@ const permitTypes = gql`
   input FileInput {
     filename: String!
     contentType: String!
-    data: String!
   }
 
   type COVPermit implements Permit {

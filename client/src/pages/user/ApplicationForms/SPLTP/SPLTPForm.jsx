@@ -127,18 +127,31 @@ const SPLTPForm = () => {
 
    const handleSaveAsDraft = async () => {
       try {
-         const currentDate = new Date().toISOString();
          const input = {
-            ...formData,
-            dateOfSubmission: currentDate,
-            status: 'Draft',
-            files: Object.fromEntries(
-               Object.entries(formData.files).map(([key, files]) => [
-                  key,
-                  files.map(file => file.name)
-               ])
-            ),
+            name: formData.name,
+            address: formData.address,
+            contactNumber: formData.contactNumber,
+            plantedTrees: formData.plantedTrees,
+            naturallyGrown: formData.naturallyGrown,
+            standing: formData.standing,
+            blownDown: formData.blownDown,
+            withinPrivateLand: formData.withinPrivateLand,
+            withinTenuredForestLand: formData.withinTenuredForestLand,
+            posingDanger: formData.posingDanger,
+            forPersonalUse: formData.forPersonalUse,
+            purpose: formData.purpose,
+            files: {}
          };
+
+         // Process files
+         for (const [key, files] of Object.entries(formData.files)) {
+            if (files.length > 0) {
+               input.files[key] = files.map(file => ({
+                  filename: file.name,
+                  contentType: file.type
+               }));
+            }
+         }
 
          const token = localStorage.getItem('token');
          const { data } = await saveSPLTPPermitDraft({

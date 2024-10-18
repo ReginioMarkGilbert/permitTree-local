@@ -80,7 +80,9 @@ const spltpResolvers = {
                ...input,
                applicationNumber,
                applicantId: user.id,
+               applicationType: 'Special/Private Land Timber Permit',
                status: 'Draft',
+               dateOfSubmission: new Date().toISOString(),
             };
 
             const newPermit = new SPLTPPermit(permitData);
