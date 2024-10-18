@@ -27,7 +27,6 @@ const formatNotificationType = (type) => {
 };
 
 const HomePage = () => {
-   const [sidebarOpen, setSidebarOpen] = useState(true);
    const [recentApplications, setRecentApplications] = useState([]);
    const [loading, setLoading] = useState(true);
    const [error, setError] = useState(null);
@@ -62,63 +61,6 @@ const HomePage = () => {
       { title: "Profile", icon: <FaUser className="h-6 w-6" />, link: "/profile" },
    ], [unreadCount]);
 
-   const toggleSidebar = useCallback(() => {
-      setSidebarOpen(prev => !prev);
-   }, []);
-
-   // #region
-   // const fetchRecentApplications = useCallback(async () => {
-   //    try {
-   //       const token = localStorage.getItem('token');
-   //       if (!token) {
-   //          throw new Error('No authentication token found.');
-   //       }
-   //       const response = await axios.get('http://localhost:3000/api/getAllApplications', {
-   //          params: {
-   //             status: ['Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected']
-   //          },
-   //          headers: {
-   //             'Authorization': token
-   //          }
-   //       });
-   //       setRecentApplications(response.data);
-   //       setLoading(false);
-   //    } catch (err) {
-   //       console.log('Error fetching recent applications:', err);
-   //       setError('Failed to fetch recent applications.');
-   //       setLoading(false);
-   //    }
-   // }, []);
-
-   // const fetchRecentNotifications = useCallback(async () => {
-   //    try {
-   //       const token = localStorage.getItem('token');
-   //       if (!token) {
-   //          throw new Error('No authentication token found.');
-   //       }
-   //       const response = await axios.get('http://localhost:3000/api/user/notifications', {
-   //          headers: {
-   //             'Authorization': token
-   //          },
-   //          params: {
-   //             limit: 7
-   //          }
-   //       });
-   //       setRecentNotifications(response.data);
-   //       setNotificationsLoading(false);
-   //    } catch (err) {
-   //       console.error('Error fetching recent notifications:', err);
-   //       setNotificationsError('Failed to fetch recent notifications.');
-   //       setNotificationsLoading(false);
-   //    }
-   // }, []);
-
-   // useEffect(() => {
-   //    fetchRecentApplications();
-   //    fetchRecentNotifications();
-   // }, [fetchRecentApplications, fetchRecentNotifications]);
-   // #endregion
-
    const getStatusColor = useCallback((status) => {
       switch (status.toLowerCase()) {
          case 'Submitted': return 'bg-blue-200 text-blue-800';
@@ -149,7 +91,7 @@ const HomePage = () => {
    const { firstName, lastName } = userData?.me || {};
 
    return (
-      <div className="min-h-screen bg-green-50 flex flex-col pt-16">
+      <div className="min-h-screen bg-green-50 flex flex-col pt-16 pl-14">
          <ToastContainer />
          <main className="flex-grow p-8">
             <h1 className="text-3xl font-bold text-green-800 mb-6">
