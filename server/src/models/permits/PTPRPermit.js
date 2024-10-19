@@ -10,7 +10,7 @@ const FileSchema = new mongoose.Schema({
 const PTPRPermitSchema = new mongoose.Schema({
    applicationNumber: { type: String, required: true, unique: true },
    applicantId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-   applicationType: { type: String, required: true, enum: ['Private Tree Plantation Registration'] },
+   applicationType: { type: String, required: true, enum: ['PTPR'] },
    ownerName: { type: String, required: true },
    address: { type: String, required: true },
    contactNumber: { type: String, required: true },

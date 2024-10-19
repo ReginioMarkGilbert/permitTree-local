@@ -38,7 +38,7 @@ const ptprResolvers = {
                ...input,
                applicationNumber,
                applicantId: user.id,
-               applicationType: 'Private Tree Plantation Registration',
+               applicationType: 'PTPR',
                status: 'Submitted',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,

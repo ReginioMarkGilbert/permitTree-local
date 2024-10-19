@@ -101,15 +101,7 @@ const covResolvers = {
             if (input[key] !== undefined) {
                if (key === 'files') {
                   // Handle file updates
-                  Object.keys(input.files).forEach(fileType => {
-                     if (input.files[fileType] && input.files[fileType].length > 0) {
-                        permit.files[fileType] = input.files[fileType].map(file => ({
-                           filename: file.filename,
-                           contentType: file.contentType,
-                           data: file.data && file.data !== '' ? Binary.createFromBase64(file.data) : permit.files[fileType]?.[0]?.data
-                        }));
-                     }
-                  });
+                  permit.files = input.files;
                } else {
                   permit[key] = input[key];
                }

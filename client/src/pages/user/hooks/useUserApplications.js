@@ -118,6 +118,21 @@ export const useUserApplications = (status) => {
     console.log('Updating COV permit:', id);
     console.log('Update input:', input);
     try {
+      // Remove __typename and ensure data field is present
+      const filesWithoutTypename = Object.fromEntries(
+        Object.entries(input.files || {}).map(([key, value]) => [
+          key,
+          Array.isArray(value) ? value.map(file => ({
+            filename: file.filename,
+            contentType: file.contentType,
+            data: file.data || '' // Provide an empty string if data is missing
+          })) : value
+        ])
+      );
+
+      // Remove __typename from the top level of files object
+      delete filesWithoutTypename.__typename;
+
       const { data } = await updateCOVPermitMutation({
         variables: {
           id,
@@ -131,38 +146,7 @@ export const useUserApplications = (status) => {
             vehiclePlateNumber: input.vehiclePlateNumber,
             originAddress: input.originAddress,
             destinationAddress: input.destinationAddress,
-            files: input.files ? {
-              letterOfIntent: input.files.letterOfIntent?.map(file => ({
-                filename: file.filename,
-                contentType: file.contentType,
-                data: file.data || '' // Provide an empty string if data is not available
-              })),
-              tallySheet: input.files.tallySheet?.map(file => ({
-                filename: file.filename,
-                contentType: file.contentType,
-                data: file.data || ''
-              })),
-              forestCertification: input.files.forestCertification?.map(file => ({
-                filename: file.filename,
-                contentType: file.contentType,
-                data: file.data || ''
-              })),
-              orCr: input.files.orCr?.map(file => ({
-                filename: file.filename,
-                contentType: file.contentType,
-                data: file.data || ''
-              })),
-              driverLicense: input.files.driverLicense?.map(file => ({
-                filename: file.filename,
-                contentType: file.contentType,
-                data: file.data || ''
-              })),
-              specialPowerOfAttorney: input.files.specialPowerOfAttorney?.map(file => ({
-                filename: file.filename,
-                contentType: file.contentType,
-                data: file.data || ''
-              }))
-            } : undefined
+            files: filesWithoutTypename
           }
         },
         refetchQueries: [{ query: GET_USER_APPLICATIONS, variables: { status } }]

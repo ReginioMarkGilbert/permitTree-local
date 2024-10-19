@@ -8,8 +8,6 @@ const FileSchema = new mongoose.Schema({
 });
 
 const CSAWPermitSchema = new mongoose.Schema({
-  applicationNumber: { type: String, required: true, unique: true },
-  applicationType: { type: String, default: 'CSAW', required: true },
   registrationType: { type: String, required: true },
   chainsawStore: { type: String, required: true },
   ownerName: { type: String, required: true },
@@ -37,8 +35,7 @@ const CSAWPermitSchema = new mongoose.Schema({
     certificateOfRegistration: [FileSchema],
     woodProcessingPlantPermit: [FileSchema]
   },
-  dateOfSubmission: { type: Date, default: Date.now },
-  status: { type: String, required: true },
+  applicationType: { type: String, default: 'CSAW', required: true }
 });
 
 const CSAWPermit = Permit.discriminator('CSAWPermit', CSAWPermitSchema);
