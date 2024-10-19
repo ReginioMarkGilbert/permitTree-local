@@ -111,11 +111,11 @@ const covResolvers = {
                      // Remove the file if an empty array is sent
                      permit.files[fileType] = undefined;
                   } else {
-                     // Update the file if new data is sent
+                     // Update or add new files
                      permit.files[fileType] = input.files[fileType].map(file => ({
                         filename: file.filename,
                         contentType: file.contentType,
-                        data: file.data ? Binary.createFromBase64(file.data) : permit.files[fileType]?.[0]?.data
+                        data: file.data ? Binary.createFromBase64(file.data) : undefined
                      }));
                   }
                }

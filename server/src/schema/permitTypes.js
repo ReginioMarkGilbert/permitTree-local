@@ -363,11 +363,11 @@ const permitTypes = gql`
     ownerConsent: [FileInput]
     pambClearance: [FileInput]
   }
-# this is for draft but also for changing files in the draft edit modal but the data: String! causes conflict, need to fix it
+
   input FileInput {
     filename: String!
     contentType: String!
-    data: String!
+    data: String
   }
 `;
 

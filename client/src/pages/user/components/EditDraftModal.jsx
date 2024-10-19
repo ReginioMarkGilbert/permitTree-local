@@ -39,6 +39,7 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
                files: {
                   ...prevData.files,
                   [documentType]: [
+                     ...(prevData.files[documentType] || []),
                      {
                         filename: file.name,
                         contentType: file.type,
@@ -54,10 +55,13 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
       }
    };
 
-   const removeFile = (documentType) => {
+   const removeFile = (documentType, index) => {
       setFormData(prevData => {
          const updatedFiles = { ...prevData.files };
-         delete updatedFiles[documentType];
+         updatedFiles[documentType] = updatedFiles[documentType].filter((_, i) => i !== index);
+         if (updatedFiles[documentType].length === 0) {
+            delete updatedFiles[documentType];
+         }
          return { ...prevData, files: updatedFiles };
       });
    };

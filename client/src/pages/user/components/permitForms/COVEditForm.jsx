@@ -27,7 +27,7 @@ const COVEditForm = ({ formData, handleInputChange, handleFileChange, removeFile
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => removeFile(type)}
+                  onClick={() => removeFile(type, index)}
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -40,16 +40,16 @@ const COVEditForm = ({ formData, handleInputChange, handleFileChange, removeFile
           )}
           <div className="flex items-center mt-2">
             <Input
-              id={type}
+              id={`${type}-${formData.files?.[type]?.length || 0}`}
               name={type}
               type="file"
               onChange={(e) => handleFileChange(e, type)}
               className="hidden"
             />
-            <Label htmlFor={type} className="cursor-pointer flex items-center justify-center w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+            <Label htmlFor={`${type}-${formData.files?.[type]?.length || 0}`} className="cursor-pointer flex items-center justify-center w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
               <Upload className="mr-2 h-4 w-4" />
               {formData.files && formData.files[type] && formData.files[type].length > 0
-                ? `Replace ${type.charAt(0).toUpperCase() + type.slice(1).replace(/([A-Z])/g, ' $1')}`
+                ? `Add Another ${type.charAt(0).toUpperCase() + type.slice(1).replace(/([A-Z])/g, ' $1')}`
                 : `Upload ${type.charAt(0).toUpperCase() + type.slice(1).replace(/([A-Z])/g, ' $1')}`
               }
             </Label>
