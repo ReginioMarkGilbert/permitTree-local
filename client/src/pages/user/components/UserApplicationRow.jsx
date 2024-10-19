@@ -3,13 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Eye, Edit, Trash2 } from 'lucide-react';
 
 const UserApplicationRow = ({ app, onView, onEdit, onDelete, getStatusColor }) => {
-   // Function to format the date
    const formatDate = (timestamp) => {
       // Check if the timestamp is in milliseconds (13 digits) or seconds (10 digits)
       const date = timestamp.toString().length === 13
          ? new Date(parseInt(timestamp))
          : new Date(parseInt(timestamp) * 1000);
-
       // return date.toLocaleDateString(); // format: month/day/year, eg: 6/25/2024
       return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }); // Format: Month Day, Year, eg: June 25, 2024
    };
@@ -41,7 +39,7 @@ const UserApplicationRow = ({ app, onView, onEdit, onDelete, getStatusColor }) =
                   <Button onClick={() => onEdit(app.id)} className="mr-2" variant="outline" size="sm">
                      <Edit className="h-4 w-4 mr-1" /> Edit
                   </Button>
-                  <Button onClick={() => onDelete(app.id)} variant="outline" size="sm" className="text-red-600 hover:text-red-800">
+                  <Button onClick={() => onDelete(app)} variant="outline" size="sm" className="text-red-600 hover:text-red-800">
                      <Trash2 className="h-4 w-4 mr-1" /> Delete
                   </Button>
                </>

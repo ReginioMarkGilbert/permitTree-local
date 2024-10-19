@@ -4,13 +4,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import UserApplicationRow from './components/UserApplicationRow';
 import { useUserApplications } from './hooks/useUserApplications';
+import { toast } from 'react-toastify';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const UserApplicationsStatusPage = () => {
    const [searchTerm, setSearchTerm] = useState('');
    const [activeMainTab, setActiveMainTab] = useState('Applications');
    const [activeSubTab, setActiveSubTab] = useState('Draft');
+   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+   const [applicationToDelete, setApplicationToDelete] = useState(null);
 
-   const { applications, loading, error, refetch } = useUserApplications(activeSubTab);
+   const { applications, loading, error, refetch, deletePermit } = useUserApplications(activeSubTab);
 
    const mainTabs = ['Applications', 'Order Of Payments'];
    const subTabs = {
@@ -35,6 +46,25 @@ const UserApplicationsStatusPage = () => {
          case 'expired': return 'bg-red-100 text-red-800';
          case 'rejected': return 'bg-red-100 text-red-800';
          default: return 'bg-gray-100 text-gray-800';
+      }
+   };
+
+   const handleDeleteClick = (application) => {
+      setApplicationToDelete(application);
+      setDeleteDialogOpen(true);
+   };
+
+   const handleDeleteConfirm = async () => {
+      if (applicationToDelete) {
+         try {
+            await deletePermit(applicationToDelete.id);
+            toast.success('Draft deleted successfully');
+            setDeleteDialogOpen(false);
+            setApplicationToDelete(null);
+         } catch (error) {
+            console.error('Error deleting draft:', error);
+            toast.error(`Error deleting draft: ${error.message || 'Unknown error occurred'}`);
+         }
       }
    };
 
@@ -78,7 +108,7 @@ const UserApplicationsStatusPage = () => {
                         app={app}
                         onView={() => {}} // Implement these functions
                         onEdit={() => {}}
-                        onDelete={() => {}}
+                        onDelete={handleDeleteClick}
                         getStatusColor={getStatusColor}
                      />
                   ))}
@@ -138,6 +168,24 @@ const UserApplicationsStatusPage = () => {
             </div>
             {renderTable()}
          </div>
+         <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <DialogContent>
+               <DialogHeader>
+                  <DialogTitle>Confirm Deletion</DialogTitle>
+                  <DialogDescription>
+                     Are you sure you want to delete this draft application? This action cannot be undone.
+                  </DialogDescription>
+               </DialogHeader>
+               <DialogFooter>
+                  <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+                     Cancel
+                  </Button>
+                  <Button variant="destructive" onClick={handleDeleteConfirm}>
+                     Delete
+                  </Button>
+               </DialogFooter>
+            </DialogContent>
+         </Dialog>
       </div>
    );
 };

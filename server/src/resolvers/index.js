@@ -13,22 +13,22 @@ const tcebpResolvers = require('./permitResolvers/tcebpResolvers');
 const { resolvePermitType } = require('../schema/permitTypes');
 
 const resolvers = mergeResolvers([
-  { Upload: GraphQLUpload },
-  {
-    Permit: {
-      __resolveType: resolvePermitType
-    }
-  },
-  authResolvers,
-  userResolvers,
-  adminResolvers,
-  permitResolvers,
-  covResolvers,
-  csawResolvers,
-  pltpResolvers,
-  ptprResolvers,
-  spltpResolvers,
-  tcebpResolvers
+   { Upload: GraphQLUpload },
+   {
+      Permit: {
+         __resolveType: resolvePermitType
+      }
+   },
+   authResolvers,
+   userResolvers,
+   adminResolvers,
+   permitResolvers,
+   covResolvers,
+   csawResolvers,
+   pltpResolvers,
+   ptprResolvers,
+   spltpResolvers,
+   tcebpResolvers
 ]);
 
 module.exports = resolvers;

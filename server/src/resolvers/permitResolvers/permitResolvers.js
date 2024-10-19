@@ -42,6 +42,27 @@ const permitResolvers = {
             id: updatedPermit._id.toString()
          };
       },
+      deletePermit: async (_, { id }, { user }) => {
+         if (!user) {
+            throw new Error('You must be logged in to delete a permit');
+         }
+
+         const permit = await Permit.findById(id);
+         if (!permit) {
+            throw new Error('Permit not found');
+         }
+
+         if (permit.applicantId.toString() !== user.id && user.role !== 'admin') {
+            throw new Error('You are not authorized to delete this permit');
+         }
+
+         if (permit.status !== 'Draft') {
+            throw new Error('Only draft permits can be deleted');
+         }
+
+         await Permit.findByIdAndDelete(id);
+         return true;
+      },
    },
 };
 

@@ -39,6 +39,8 @@ const mutationTypes = gql`
     updateCertificate(id: ID!, input: CertificateInput!): Certificate
 
     saveCSAWPermitDraft(input: CSAWPermitInput!): CSAWPermit
+
+    deletePermit(id: ID!): Boolean
   }
 `;
 
