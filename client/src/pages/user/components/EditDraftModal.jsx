@@ -37,9 +37,9 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
             setFormData(prevData => ({
                ...prevData,
                files: {
-                  ...prevData.files,
+                  ...(prevData.files || {}),  // Use empty object if files is null or undefined
                   [documentType]: [
-                     ...(prevData.files[documentType] || []),
+                     ...(prevData.files?.[documentType] || []),
                      {
                         filename: file.name,
                         contentType: file.type,
@@ -57,10 +57,12 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
 
    const removeFile = (documentType, index) => {
       setFormData(prevData => {
-         const updatedFiles = { ...prevData.files };
-         updatedFiles[documentType] = updatedFiles[documentType].filter((_, i) => i !== index);
-         if (updatedFiles[documentType].length === 0) {
-            delete updatedFiles[documentType];
+         const updatedFiles = { ...(prevData.files || {}) };
+         if (updatedFiles[documentType]) {
+            updatedFiles[documentType] = updatedFiles[documentType].filter((_, i) => i !== index);
+            if (updatedFiles[documentType].length === 0) {
+               updatedFiles[documentType] = [];  // Set to empty array instead of deleting
+            }
          }
          return { ...prevData, files: updatedFiles };
       });
