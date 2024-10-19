@@ -16,7 +16,7 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
       const { name, value } = e.target;
       setFormData(prevData => ({
          ...prevData,
-         [name]: value
+         [name]: name === 'dateOfAcquisition' ? new Date(value).toISOString() : value
       }));
    };
 

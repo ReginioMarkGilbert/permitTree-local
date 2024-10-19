@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { X, Upload } from 'lucide-react';
 import '@/components/ui/styles/customScrollbar.css';
 import { Checkbox } from "@/components/ui/checkbox";
-import { format, isValid } from 'date-fns';
+import { format, parseISO, isValid } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const CSAWEditForm = ({ formData, handleInputChange, handleFileChange, removeFile, handleCheckboxChange }) => {
@@ -88,8 +88,31 @@ const CSAWEditForm = ({ formData, handleInputChange, handleFileChange, removeFil
   };
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return isValid(date) ? format(date, 'yyyy-MM-dd') : '';
+    if (!dateString) return '';
+
+    let date;
+
+    // Check if the dateString is a number (timestamp)
+    if (!isNaN(dateString)) {
+      date = new Date(parseInt(dateString));
+    } else {
+      // Try parsing as ISO string
+      date = parseISO(dateString);
+    }
+
+    // If not valid, try creating a new Date object
+    if (!isValid(date)) {
+      date = new Date(dateString);
+    }
+
+    // If still not valid, return empty string
+    if (!isValid(date)) {
+      console.error('Invalid date:', dateString);
+      return '';
+    }
+
+    // Format the date
+    return format(date, 'yyyy-MM-dd');
   };
 
   console.log('CSAWEditForm rendered with formData:', formData);

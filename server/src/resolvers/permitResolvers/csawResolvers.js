@@ -42,6 +42,7 @@ const csawResolvers = {
                status: 'Submitted',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
+               dateOfAcquisition: new Date(input.dateOfAcquisition).toISOString(),
             };
 
             const newPermit = new CSAWPermit(permitData);
@@ -99,6 +100,10 @@ const csawResolvers = {
          // Ensure the files field is marked as modified
          permit.markModified('files');
 
+         if (input.dateOfAcquisition) {
+            input.dateOfAcquisition = new Date(input.dateOfAcquisition).toISOString();
+         }
+
          await permit.save();
 
          return permit;
@@ -133,6 +138,7 @@ const csawResolvers = {
                status: 'Draft',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
+               dateOfAcquisition: input.dateOfAcquisition ? new Date(input.dateOfAcquisition).toISOString() : null,
             };
 
             const newPermit = new CSAWPermit(permitData);
