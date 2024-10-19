@@ -8,53 +8,36 @@ const GET_USER_APPLICATIONS = gql`
       applicationType
       status
       dateOfSubmission
-      ... on COVPermit {
-        name
-        address
-        cellphone
-        purpose
-        driverName
-        driverLicenseNumber
-        vehiclePlateNumber
-        originAddress
-        destinationAddress
-        files {
-          letterOfIntent { filename contentType }
-          tallySheet { filename contentType }
-          forestCertification { filename contentType }
-          orCr { filename contentType }
-          driverLicense { filename contentType }
-          specialPowerOfAttorney { filename contentType }
-        }
-      }
       ... on CSAWPermit {
+        registrationType
+        chainsawStore
         ownerName
         address
         phone
+        brand
+        model
+        serialNumber
+        dateOfAcquisition
+        powerOutput
+        maxLengthGuidebar
+        countryOfOrigin
+        purchasePrice
+        isOwner
+        isTenureHolder
+        isBusinessOwner
+        isPLTPRHolder
+        isWPPHolder
+        files {
+          officialReceipt { filename contentType }
+          deedOfSale { filename contentType }
+          specialPowerOfAttorney { filename contentType }
+          forestTenureAgreement { filename contentType }
+          businessPermit { filename contentType }
+          certificateOfRegistration { filename contentType }
+          woodProcessingPlantPermit { filename contentType }
+        }
       }
-      ... on PLTPPermit {
-        name
-        address
-        contactNumber
-        purpose
-      }
-      ... on PTPRPermit {
-        ownerName
-        address
-        contactNumber
-      }
-      ... on SPLTPPermit {
-        name
-        address
-        contactNumber
-        purpose
-      }
-      ... on TCEBPPermit {
-        name
-        address
-        contactNumber
-        purpose
-      }
+      # ... (other permit types)
     }
   }
 `;

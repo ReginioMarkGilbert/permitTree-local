@@ -194,11 +194,11 @@ const ChainsawRegistrationForm = () => {
             brand: formData.brand,
             model: formData.model,
             serialNumber: formData.serialNumber,
-            dateOfAcquisition: new Date(formData.dateOfAcquisition).toISOString(),
-            powerOutput: formData.powerOutput.toString(),
-            maxLengthGuidebar: formData.maxLengthGuidebar.toString(),
+            dateOfAcquisition: formData.dateOfAcquisition ? new Date(formData.dateOfAcquisition).toISOString() : null,
+            powerOutput: formData.powerOutput ? formData.powerOutput.toString() : '',
+            maxLengthGuidebar: formData.maxLengthGuidebar ? formData.maxLengthGuidebar.toString() : '',
             countryOfOrigin: formData.countryOfOrigin,
-            purchasePrice: parseFloat(formData.purchasePrice),
+            purchasePrice: formData.purchasePrice ? parseFloat(formData.purchasePrice) : 0,
             isOwner: Boolean(formData.isOwner),
             isTenureHolder: Boolean(formData.isTenureHolder),
             isBusinessOwner: Boolean(formData.isBusinessOwner),
@@ -209,13 +209,16 @@ const ChainsawRegistrationForm = () => {
 
          // Process files
          for (const [key, files] of Object.entries(formData.files)) {
-            if (files.length > 0) {
-               input.files[key] = files.map(file => ({
+            if (files && files.length > 0) {
+               input.files[key] = await Promise.all(files.map(async file => ({
                   filename: file.name,
-                  contentType: file.type
-               }));
+                  contentType: file.type,
+                  data: await readFileAsBase64(file)
+               })));
             }
          }
+
+         console.log('Saving draft with input:', input);
 
          const token = localStorage.getItem('token');
          const { data } = await saveCSAWPermitDraft({

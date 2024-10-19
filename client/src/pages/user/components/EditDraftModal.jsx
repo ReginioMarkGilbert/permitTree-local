@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import COVEditForm from './permitForms/COVEditForm';
-// import CSAWEditForm from './permitForms/CSAWEditForm';
+import CSAWEditForm from './permitForms/CSAWEditForm';
 import '@/components/ui/styles/customScrollBar.css';
 
 const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
@@ -17,6 +17,13 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
       setFormData(prevData => ({
          ...prevData,
          [name]: value
+      }));
+   };
+
+   const handleCheckboxChange = (name, checked) => {
+      setFormData(prevData => ({
+         ...prevData,
+         [name]: checked
       }));
    };
 
@@ -91,10 +98,15 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
                handleInputChange={handleInputChange}
                handleFileChange={handleFileChange}
                removeFile={removeFile}
-               removeAllFiles={removeAllFiles}
             />;
-         // case 'CSAW':
-         //    return <CSAWEditForm formData={formData} handleInputChange={handleInputChange} />;
+         case 'Chainsaw Registration':
+            return <CSAWEditForm
+               formData={formData}
+               handleInputChange={handleInputChange}
+               handleFileChange={handleFileChange}
+               removeFile={removeFile}
+               handleCheckboxChange={handleCheckboxChange}
+            />;
          // Add cases for other permit types
          default:
             return <p>Unsupported permit type: {application.applicationType}</p>;
