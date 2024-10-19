@@ -36,15 +36,19 @@ const CSAWEditForm = ({ formData, handleInputChange, handleFileChange, removeFil
 
   const renderFileInputs = () => {
     const fileTypes = [
-      'officialReceipt', 'deedOfSale', 'specialPowerOfAttorney',
-      'forestTenureAgreement', 'businessPermit', 'certificateOfRegistration',
-      'woodProcessingPlantPermit'
+      { type: 'officialReceipt', label: 'Official Receipt', condition: true },
+      { type: 'deedOfSale', label: 'Deed of Sale', condition: true },
+      { type: 'specialPowerOfAttorney', label: 'Special Power of Attorney', condition: !formData.isOwner },
+      { type: 'forestTenureAgreement', label: 'Forest Tenure Agreement', condition: formData.isTenureHolder },
+      { type: 'businessPermit', label: 'Business Permit', condition: formData.isBusinessOwner },
+      { type: 'certificateOfRegistration', label: 'Certificate of Registration', condition: formData.isPLTPRHolder },
+      { type: 'woodProcessingPlantPermit', label: 'Wood Processing Plant Permit', condition: formData.isWPPHolder }
     ];
 
-    return fileTypes.map(type => (
+    return fileTypes.filter(fileType => fileType.condition).map(({ type, label }) => (
       <div key={type} className="mb-4">
         <Label htmlFor={type} className="block mb-2">
-          {type.charAt(0).toUpperCase() + type.slice(1).replace(/([A-Z])/g, ' $1')}
+          {label}
         </Label>
         <div>
           {formData.files && formData.files[type] && formData.files[type].length > 0 ? (
@@ -77,8 +81,8 @@ const CSAWEditForm = ({ formData, handleInputChange, handleFileChange, removeFil
             <Label htmlFor={`${type}-${formData.files?.[type]?.length || 0}`} className="cursor-pointer flex items-center justify-center w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
               <Upload className="mr-2 h-4 w-4" />
               {formData.files && formData.files[type] && formData.files[type].length > 0
-                ? `Add Another ${type.charAt(0).toUpperCase() + type.slice(1).replace(/([A-Z])/g, ' $1')}`
-                : `Upload ${type.charAt(0).toUpperCase() + type.slice(1).replace(/([A-Z])/g, ' $1')}`
+                ? `Add Another ${label}`
+                : `Upload ${label}`
               }
             </Label>
           </div>
