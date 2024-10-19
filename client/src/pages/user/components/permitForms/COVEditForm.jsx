@@ -3,10 +3,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { X, Upload, Trash2 } from 'lucide-react';
+import { X, Upload } from 'lucide-react';
 import '@/components/ui/styles/customScrollBar.css';
 
-const COVEditForm = ({ formData, handleInputChange, handleFileChange, removeFile, removeAllFiles }) => {
+const COVEditForm = ({ formData, handleInputChange, handleFileChange, removeFile }) => {
   const renderFileInputs = () => {
     const fileTypes = [
       'letterOfIntent', 'tallySheet', 'forestCertification',
@@ -20,31 +20,19 @@ const COVEditForm = ({ formData, handleInputChange, handleFileChange, removeFile
         </Label>
         <div>
           {formData.files && formData.files[type] && formData.files[type].length > 0 ? (
-            <>
-              {formData.files[type].map((file, index) => (
-                <div key={index} className="flex items-center justify-between mb-2 bg-gray-100 p-2 rounded">
-                  <span className="text-sm text-gray-600 truncate">{file.filename}</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeFile(type, index)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-              <Button
-                type="button"
-                variant="destructive"
-                size="sm"
-                onClick={() => removeAllFiles(type)}
-                className="mt-2"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Remove All
-              </Button>
-            </>
+            formData.files[type].map((file, index) => (
+              <div key={index} className="flex items-center justify-between mb-2 bg-gray-100 p-2 rounded">
+                <span className="text-sm text-gray-600 truncate">{file.filename}</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeFile(type, index)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ))
           ) : (
             <div className="mb-2 bg-gray-100 p-2 rounded">
               <span className="text-sm text-gray-500">No uploaded file</span>
