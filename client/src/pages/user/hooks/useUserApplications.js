@@ -134,27 +134,33 @@ export const useUserApplications = (status) => {
             files: input.files ? {
               letterOfIntent: input.files.letterOfIntent?.map(file => ({
                 filename: file.filename,
-                contentType: file.contentType
+                contentType: file.contentType,
+                data: file.data || '' // Provide an empty string if data is not available
               })),
               tallySheet: input.files.tallySheet?.map(file => ({
                 filename: file.filename,
-                contentType: file.contentType
+                contentType: file.contentType,
+                data: file.data || ''
               })),
               forestCertification: input.files.forestCertification?.map(file => ({
                 filename: file.filename,
-                contentType: file.contentType
+                contentType: file.contentType,
+                data: file.data || ''
               })),
               orCr: input.files.orCr?.map(file => ({
                 filename: file.filename,
-                contentType: file.contentType
+                contentType: file.contentType,
+                data: file.data || ''
               })),
               driverLicense: input.files.driverLicense?.map(file => ({
                 filename: file.filename,
-                contentType: file.contentType
+                contentType: file.contentType,
+                data: file.data || ''
               })),
               specialPowerOfAttorney: input.files.specialPowerOfAttorney?.map(file => ({
                 filename: file.filename,
-                contentType: file.contentType
+                contentType: file.contentType,
+                data: file.data || ''
               }))
             } : undefined
           }

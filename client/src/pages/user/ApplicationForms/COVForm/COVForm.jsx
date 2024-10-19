@@ -138,13 +138,17 @@ const COVForm = () => {
          // Process files
          for (const [key, files] of Object.entries(formData.files)) {
             if (files.length > 0) {
-               input.files[key] = files.map(file => ({
-                  filename: file.name,
-                  contentType: file.type || null // Add this line
+               input.files[key] = await Promise.all(files.map(async (file) => {
+                  const content = await readFileAsBase64(file);
+                  return {
+                     filename: file.name,
+                     contentType: file.type,
+                     data: content
+                  };
                }));
             }
          }
-
+         console.log('save as draft:', input)
          const token = localStorage.getItem('token');
          const { data } = await saveCOVPermitDraft({
             variables: { input },

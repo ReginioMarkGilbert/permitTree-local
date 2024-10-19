@@ -96,10 +96,23 @@ const covResolvers = {
             throw new Error('You are not authorized to update this permit');
          }
 
-         // Update only the fields that are provided in the input
+         // Update fields
          Object.keys(input).forEach(key => {
             if (input[key] !== undefined) {
-               permit[key] = input[key];
+               if (key === 'files') {
+                  // Handle file updates
+                  Object.keys(input.files).forEach(fileType => {
+                     if (input.files[fileType] && input.files[fileType].length > 0) {
+                        permit.files[fileType] = input.files[fileType].map(file => ({
+                           filename: file.filename,
+                           contentType: file.contentType,
+                           data: file.data && file.data !== '' ? Binary.createFromBase64(file.data) : permit.files[fileType]?.[0]?.data
+                        }));
+                     }
+                  });
+               } else {
+                  permit[key] = input[key];
+               }
             }
          });
 
@@ -122,7 +135,7 @@ const covResolvers = {
                   processedFiles[key] = files.map(file => ({
                      filename: file.filename,
                      contentType: file.contentType || 'application/octet-stream', // Provide a default value if null
-                     // We don't save the actual file data for drafts
+                     data: Binary.createFromBase64(file.data)
                   }));
                } else {
                   processedFiles[key] = [];

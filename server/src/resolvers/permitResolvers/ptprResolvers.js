@@ -84,7 +84,7 @@ const ptprResolvers = {
                   processedFiles[key] = files.map(file => ({
                      filename: file.filename,
                      contentType: file.contentType,
-                     // We don't save the actual file data for drafts
+                     data: Binary.createFromBase64(file.data)
                   }));
                } else {
                   processedFiles[key] = [];

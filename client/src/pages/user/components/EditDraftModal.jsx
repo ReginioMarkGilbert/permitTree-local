@@ -20,11 +20,20 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
       }));
    };
 
-   const handleFileChange = (e, documentType) => {
+   const readFileAsBase64 = (file) => {
+      return new Promise((resolve, reject) => {
+         const reader = new FileReader();
+         reader.onload = () => resolve(reader.result.split(',')[1]);
+         reader.onerror = (error) => reject(error);
+         reader.readAsDataURL(file);
+      });
+   };
+
+   const handleFileChange = async (e, documentType) => {
       const file = e.target.files[0];
       if (file) {
-         const reader = new FileReader();
-         reader.onload = (event) => {
+         try {
+            const content = await readFileAsBase64(file);
             setFormData(prevData => ({
                ...prevData,
                files: {
@@ -34,13 +43,15 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
                      {
                         filename: file.name,
                         contentType: file.type,
-                        data: event.target.result.split(',')[1] // Base64 encoded file data
+                        data: content
                      }
                   ]
                }
             }));
-         };
-         reader.readAsDataURL(file);
+         } catch (error) {
+            console.error('Error processing file:', error);
+            // Handle the error (e.g., show a toast notification)
+         }
       }
    };
 

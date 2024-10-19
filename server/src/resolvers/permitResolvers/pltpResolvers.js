@@ -86,8 +86,8 @@ const pltpResolvers = {
                if (files && files.length > 0) {
                   processedFiles[key] = files.map(file => ({
                      filename: file.filename,
-                     contentType: file.contentType,
-                     // We don't save the actual file data for drafts
+                     contentType: file.contentType || 'application/octet-stream',
+                     data: Binary.createFromBase64(file.data)
                   }));
                } else {
                   processedFiles[key] = [];
