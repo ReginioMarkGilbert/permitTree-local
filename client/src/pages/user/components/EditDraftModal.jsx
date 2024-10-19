@@ -66,6 +66,14 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
       });
    };
 
+   const removeAllFiles = (documentType) => {
+      setFormData(prevData => {
+         const updatedFiles = { ...prevData.files };
+         delete updatedFiles[documentType];
+         return { ...prevData, files: updatedFiles };
+      });
+   };
+
    const handleSubmit = (e) => {
       e.preventDefault();
       console.log('Submitting updated formData:', formData);
@@ -81,6 +89,7 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
                handleInputChange={handleInputChange}
                handleFileChange={handleFileChange}
                removeFile={removeFile}
+               removeAllFiles={removeAllFiles}
             />;
          // case 'CSAW':
          //    return <CSAWEditForm formData={formData} handleInputChange={handleInputChange} />;

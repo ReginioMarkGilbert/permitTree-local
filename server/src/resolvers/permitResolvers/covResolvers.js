@@ -105,24 +105,20 @@ const covResolvers = {
 
          // Update files
          if (input.files) {
+            const updatedFiles = {};
             Object.keys(input.files).forEach(fileType => {
-               if (Array.isArray(input.files[fileType])) {
-                  if (input.files[fileType].length === 0) {
-                     // Remove the file if an empty array is sent
-                     permit.files[fileType] = undefined;
-                  } else {
-                     // Update or add new files
-                     permit.files[fileType] = input.files[fileType].map(file => ({
-                        filename: file.filename,
-                        contentType: file.contentType,
-                        data: file.data ? Binary.createFromBase64(file.data) : undefined
-                     }));
-                  }
+               if (Array.isArray(input.files[fileType]) && input.files[fileType].length > 0) {
+                  updatedFiles[fileType] = input.files[fileType].map(file => ({
+                     filename: file.filename,
+                     contentType: file.contentType,
+                     data: file.data ? Binary.createFromBase64(file.data) : undefined
+                  }));
                }
             });
+            permit.files = updatedFiles;
          }
 
-         // Remove undefined fields to ensure they're actually deleted in MongoDB
+         // Ensure the files field is marked as modified
          permit.markModified('files');
 
          await permit.save();
