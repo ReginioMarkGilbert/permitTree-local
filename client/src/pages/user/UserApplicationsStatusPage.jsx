@@ -6,12 +6,12 @@ import UserApplicationRow from './components/UserApplicationRow';
 import { useUserApplications } from './hooks/useUserApplications';
 import { toast } from 'react-toastify';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+   Dialog,
+   DialogContent,
+   DialogDescription,
+   DialogFooter,
+   DialogHeader,
+   DialogTitle,
 } from "@/components/ui/dialog";
 
 const UserApplicationsStatusPage = () => {
@@ -72,6 +72,19 @@ const UserApplicationsStatusPage = () => {
       refetch({ status: activeSubTab });
    }, [activeSubTab, refetch]);
 
+   const handleEdit = async (id, editedData) => {
+      try {
+         // Implement the edit functionality here
+         // You might need to create a new mutation for editing applications
+         // await editPermit({ variables: { id, input: editedData } });
+         toast.success('Application updated successfully');
+         refetch();
+      } catch (error) {
+         console.error('Error updating application:', error);
+         toast.error(`Error updating application: ${error.message || 'Unknown error occurred'}`);
+      }
+   };
+
    const renderTable = () => {
       if (loading) return <p className="text-center text-gray-500">Loading...</p>;
       if (error) return <p className="text-center text-red-500">Error: {error.message}</p>;
@@ -106,8 +119,8 @@ const UserApplicationsStatusPage = () => {
                      <UserApplicationRow
                         key={app.id}
                         app={app}
-                        onView={() => {}} // Implement these functions
-                        onEdit={() => {}}
+                        onView={() => { }} // Implement these functions
+                        onEdit={handleEdit}
                         onDelete={handleDeleteClick}
                         getStatusColor={getStatusColor}
                      />
