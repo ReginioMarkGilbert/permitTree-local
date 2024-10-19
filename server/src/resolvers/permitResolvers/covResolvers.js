@@ -96,19 +96,13 @@ const covResolvers = {
             throw new Error('You are not authorized to update this permit');
          }
 
-         const updatedFields = {
-            name: input.name,
-            address: input.address,
-            cellphone: input.cellphone,
-            purpose: input.purpose,
-            driverName: input.driverName,
-            driverLicenseNumber: input.driverLicenseNumber,
-            vehiclePlateNumber: input.vehiclePlateNumber,
-            originAddress: input.originAddress,
-            destinationAddress: input.destinationAddress,
-         };
+         // Update only the fields that are provided in the input
+         Object.keys(input).forEach(key => {
+            if (input[key] !== undefined) {
+               permit[key] = input[key];
+            }
+         });
 
-         Object.assign(permit, updatedFields);
          await permit.save();
 
          return permit;

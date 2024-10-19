@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, FileText, Trash2, Upload } from 'lucide-react';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import './styles/customScrollBar.css';
 
 const EditApplicationModal = ({ isOpen, onClose, application, onUpdate }) => {

@@ -2,128 +2,174 @@ import React from 'react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { X, Upload } from 'lucide-react';
+import '@/components/ui/styles/customScrollBar.css';
 
-const COVEditForm = ({ formData, handleInputChange }) => {
+const COVEditForm = ({ formData, handleInputChange, handleFileChange, removeFile }) => {
+  const renderFileInputs = () => {
+    const fileTypes = [
+      'letterOfIntent', 'tallySheet', 'forestCertification',
+      'orCr', 'driverLicense', 'specialPowerOfAttorney'
+    ];
+
+    return (
+      <div className="grid grid-cols-2 gap-4">
+        {fileTypes.map((type, index) => (
+          <React.Fragment key={type}>
+            <div className="mb-4">
+              <Label htmlFor={type} className="block mb-2">
+                {type.charAt(0).toUpperCase() + type.slice(1).replace(/([A-Z])/g, ' $1')}
+              </Label>
+              <div>
+                {formData.files && formData.files[type] && formData.files[type].length > 0 ? (
+                  formData.files[type].map((file, fileIndex) => (
+                    <div key={fileIndex} className="flex items-center justify-between mb-2 bg-gray-100 p-2 rounded">
+                      <span className="text-sm text-gray-600 truncate">{file.filename}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFile(type, fileIndex)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))
+                ) : (
+                  <div className="mb-2 bg-gray-100 p-2 rounded">
+                    <span className="text-sm text-gray-500">No uploaded file</span>
+                  </div>
+                )}
+                <div className="flex items-center mt-2">
+                  <Input
+                    id={type}
+                    name={type}
+                    type="file"
+                    onChange={(e) => handleFileChange(e, type)}
+                    className="hidden"
+                  />
+                  <Label htmlFor={type} className="cursor-pointer flex items-center justify-center w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-600 transition-colors">
+                    <Upload className="mr-2 h-4 w-4" />
+                    {formData.files && formData.files[type] && formData.files[type].length > 0
+                      ? `Replace ${type.charAt(0).toUpperCase() + type.slice(1).replace(/([A-Z])/g, ' $1')}`
+                      : `Upload ${type.charAt(0).toUpperCase() + type.slice(1).replace(/([A-Z])/g, ' $1')}`
+                    }
+                  </Label>
+                </div>
+              </div>
+            </div>
+            {index % 2 === 1 && index < fileTypes.length - 1 && (
+              <div className="col-span-2 border-b border-gray-200 my-4"></div>
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+    );
+  };
+
+  console.log('COVEditForm rendered with formData:', formData);
+
   return (
-    <div className="grid gap-4 py-4">
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="name" className="text-right">
-          Name
-        </Label>
+    <div className="pl-2 space-y-4 custom-scrollbar pr-4" style={{ maxHeight: 'calc(80vh - 200px)', overflowY: 'auto' }}>
+      <div>
+        <Label htmlFor="name">Name</Label>
         <Input
           id="name"
           name="name"
-          className="col-span-3"
           value={formData.name || ''}
-          onChange={handleInputChange}
+          onChange={(e) => {
+            handleInputChange(e);
+            console.log('Name changed to:', e.target.value);
+          }}
           required
         />
       </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="address" className="text-right">
-          Address
-        </Label>
+      <div>
+        <Label htmlFor="address">Address</Label>
         <Input
           id="address"
           name="address"
-          className="col-span-3"
           value={formData.address || ''}
           onChange={handleInputChange}
           required
         />
       </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="cellphone" className="text-right">
-          Cellphone
-        </Label>
+      <div>
+        <Label htmlFor="cellphone">Cellphone</Label>
         <Input
           id="cellphone"
           name="cellphone"
-          className="col-span-3"
           value={formData.cellphone || ''}
           onChange={handleInputChange}
           required
         />
       </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="purpose" className="text-right">
-          Purpose
-        </Label>
+      <div>
+        <Label htmlFor="purpose">Purpose</Label>
         <Textarea
           id="purpose"
           name="purpose"
-          className="col-span-3"
           value={formData.purpose || ''}
           onChange={handleInputChange}
           required
         />
       </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="driverName" className="text-right">
-          Driver Name
-        </Label>
+      <div>
+        <Label htmlFor="driverName">Driver Name</Label>
         <Input
           id="driverName"
           name="driverName"
-          className="col-span-3"
           value={formData.driverName || ''}
           onChange={handleInputChange}
           required
         />
       </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="driverLicenseNumber" className="text-right">
-          Driver License Number
-        </Label>
+      <div>
+        <Label htmlFor="driverLicenseNumber">Driver License Number</Label>
         <Input
           id="driverLicenseNumber"
           name="driverLicenseNumber"
-          className="col-span-3"
           value={formData.driverLicenseNumber || ''}
           onChange={handleInputChange}
           required
         />
       </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="vehiclePlateNumber" className="text-right">
-          Vehicle Plate Number
-        </Label>
+      <div>
+        <Label htmlFor="vehiclePlateNumber">Vehicle Plate Number</Label>
         <Input
           id="vehiclePlateNumber"
           name="vehiclePlateNumber"
-          className="col-span-3"
           value={formData.vehiclePlateNumber || ''}
           onChange={handleInputChange}
           required
         />
       </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="originAddress" className="text-right">
-          Origin Address
-        </Label>
+      <div>
+        <Label htmlFor="originAddress">Origin Address</Label>
         <Input
           id="originAddress"
           name="originAddress"
-          className="col-span-3"
           value={formData.originAddress || ''}
           onChange={handleInputChange}
           required
         />
       </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="destinationAddress" className="text-right">
-          Destination Address
-        </Label>
+      <div>
+        <Label htmlFor="destinationAddress">Destination Address</Label>
         <Input
           id="destinationAddress"
           name="destinationAddress"
-          className="col-span-3"
           value={formData.destinationAddress || ''}
           onChange={handleInputChange}
           required
         />
       </div>
-      {/* Add more fields specific to COV */}
+
+      <div className="border-t border-gray-200 pt-4 mt-4">
+        <h3 className="text-lg font-semibold mb-4">Documents</h3>
+        {renderFileInputs()}
+      </div>
     </div>
   );
 };

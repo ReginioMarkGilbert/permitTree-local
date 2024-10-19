@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import UserApplicationRow from './components/UserApplicationRow';
 import { useUserApplications } from './hooks/useUserApplications';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import {
    Dialog,
    DialogContent,
@@ -21,7 +21,7 @@ const UserApplicationsStatusPage = () => {
    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
    const [applicationToDelete, setApplicationToDelete] = useState(null);
 
-   const { applications, loading, error, refetch, deletePermit } = useUserApplications(activeSubTab);
+   const { applications, loading, error, refetch, deletePermit, updateCOVPermit } = useUserApplications(activeSubTab);
 
    const mainTabs = ['Applications', 'Order Of Payments'];
    const subTabs = {
@@ -82,9 +82,9 @@ const UserApplicationsStatusPage = () => {
 
    const handleEdit = async (id, editedData) => {
       try {
-         // Implement the edit functionality here
-         // You might need to create a new mutation for editing applications
-         // await editPermit({ variables: { id, input: editedData } });
+         console.log('Attempting to edit application:', id);
+         console.log('Edited data:', editedData);
+         await updateCOVPermit(id, editedData);
          toast.success('Application updated successfully');
          refetch();
       } catch (error) {

@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Button } from "@/components/ui/button";
 import COVEditForm from './permitForms/COVEditForm';
 // import CSAWEditForm from './permitForms/CSAWEditForm';
+import '@/components/ui/styles/customScrollBar.css';
 
 const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
    const [formData, setFormData] = useState(application);
@@ -19,8 +20,43 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
       }));
    };
 
+   const handleFileChange = (e, documentType) => {
+      const file = e.target.files[0];
+      if (file) {
+         const reader = new FileReader();
+         reader.onload = (event) => {
+            setFormData(prevData => ({
+               ...prevData,
+               files: {
+                  ...prevData.files,
+                  [documentType]: [
+                     ...(prevData.files[documentType] || []),
+                     {
+                        filename: file.name,
+                        contentType: file.type,
+                        data: event.target.result.split(',')[1] // Base64 encoded file data
+                     }
+                  ]
+               }
+            }));
+         };
+         reader.readAsDataURL(file);
+      }
+   };
+
+   const removeFile = (documentType, index) => {
+      setFormData(prevData => ({
+         ...prevData,
+         files: {
+            ...prevData.files,
+            [documentType]: prevData.files[documentType].filter((_, i) => i !== index)
+         }
+      }));
+   };
+
    const handleSubmit = (e) => {
       e.preventDefault();
+      console.log('Submitting updated formData:', formData);
       onSave(formData);
       onClose();
    };
@@ -28,7 +64,12 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
    const renderFormByType = () => {
       switch (application.applicationType) {
          case 'Certificate of Verification':
-            return <COVEditForm formData={formData} handleInputChange={handleInputChange} />;
+            return <COVEditForm
+               formData={formData}
+               handleInputChange={handleInputChange}
+               handleFileChange={handleFileChange}
+               removeFile={removeFile}
+            />;
          // case 'CSAW':
          //    return <CSAWEditForm formData={formData} handleInputChange={handleInputChange} />;
          // Add cases for other permit types
@@ -39,19 +80,22 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
 
    return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-         <DialogContent className="sm:max-w-[425px]">
+         <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col">
             <DialogHeader>
                <DialogTitle>Edit Draft Application</DialogTitle>
                <DialogDescription>
                   Edit the details of this draft application.
                </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleSubmit}>
-               {renderFormByType()}
-               <DialogFooter>
-                  <Button type="submit">Save changes</Button>
-               </DialogFooter>
+            <form onSubmit={handleSubmit} className="flex-grow overflow-y-auto custom-scrollbar">
+               <div>
+                  {renderFormByType()}
+               </div>
             </form>
+            <DialogFooter className="mt-4">
+               <Button type="button" onClick={onClose} variant="outline">Cancel</Button>
+               <Button type="submit" onClick={handleSubmit}>Save changes</Button>
+            </DialogFooter>
          </DialogContent>
       </Dialog>
    );

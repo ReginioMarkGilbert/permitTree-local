@@ -18,6 +18,14 @@ const GET_USER_APPLICATIONS = gql`
         vehiclePlateNumber
         originAddress
         destinationAddress
+        files {
+          letterOfIntent { filename contentType }
+          tallySheet { filename contentType }
+          forestCertification { filename contentType }
+          orCr { filename contentType }
+          driverLicense { filename contentType }
+          specialPowerOfAttorney { filename contentType }
+        }
       }
       ... on CSAWPermit {
         ownerName
@@ -57,6 +65,23 @@ const DELETE_PERMIT = gql`
   }
 `;
 
+const UPDATE_COV_PERMIT = gql`
+  mutation UpdateCOVPermit($id: ID!, $input: COVPermitInput!) {
+    updateCOVPermit(id: $id, input: $input) {
+      id
+      name
+      address
+      cellphone
+      purpose
+      driverName
+      driverLicenseNumber
+      vehiclePlateNumber
+      originAddress
+      destinationAddress
+    }
+  }
+`;
+
 export const useUserApplications = (status) => {
   console.log('useUserApplications called with status:', status);
 
@@ -68,6 +93,7 @@ export const useUserApplications = (status) => {
   });
 
   const [deletePermitMutation] = useMutation(DELETE_PERMIT);
+  const [updateCOVPermitMutation] = useMutation(UPDATE_COV_PERMIT);
 
   const deletePermit = async (id) => {
     console.log('Attempting to delete permit with id:', id);
@@ -88,6 +114,65 @@ export const useUserApplications = (status) => {
     }
   };
 
+  const updateCOVPermit = async (id, input) => {
+    console.log('Updating COV permit:', id);
+    console.log('Update input:', input);
+    try {
+      const { data } = await updateCOVPermitMutation({
+        variables: {
+          id,
+          input: {
+            name: input.name,
+            address: input.address,
+            cellphone: input.cellphone,
+            purpose: input.purpose,
+            driverName: input.driverName,
+            driverLicenseNumber: input.driverLicenseNumber,
+            vehiclePlateNumber: input.vehiclePlateNumber,
+            originAddress: input.originAddress,
+            destinationAddress: input.destinationAddress,
+            files: input.files ? {
+              letterOfIntent: input.files.letterOfIntent?.map(file => ({
+                filename: file.filename,
+                contentType: file.contentType
+              })),
+              tallySheet: input.files.tallySheet?.map(file => ({
+                filename: file.filename,
+                contentType: file.contentType
+              })),
+              forestCertification: input.files.forestCertification?.map(file => ({
+                filename: file.filename,
+                contentType: file.contentType
+              })),
+              orCr: input.files.orCr?.map(file => ({
+                filename: file.filename,
+                contentType: file.contentType
+              })),
+              driverLicense: input.files.driverLicense?.map(file => ({
+                filename: file.filename,
+                contentType: file.contentType
+              })),
+              specialPowerOfAttorney: input.files.specialPowerOfAttorney?.map(file => ({
+                filename: file.filename,
+                contentType: file.contentType
+              }))
+            } : undefined
+          }
+        },
+        refetchQueries: [{ query: GET_USER_APPLICATIONS, variables: { status } }]
+      });
+      console.log('Update mutation result:', data);
+      if (data.updateCOVPermit) {
+        return data.updateCOVPermit;
+      } else {
+        throw new Error('Failed to update permit');
+      }
+    } catch (error) {
+      console.error('Error updating permit:', error);
+      throw error;
+    }
+  };
+
   console.log('useUserApplications returning. Applications:', data?.getUserApplications);
 
   return {
@@ -95,6 +180,7 @@ export const useUserApplications = (status) => {
     loading,
     error,
     refetch,
-    deletePermit
+    deletePermit,
+    updateCOVPermit
   };
 };
