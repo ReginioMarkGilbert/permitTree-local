@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import COVEditForm from './permitForms/COVEditForm';
+// import CSAWEditForm from './permitForms/CSAWEditForm';
 
 const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
    const [formData, setFormData] = useState(application);
+
+   useEffect(() => {
+      setFormData(application);
+   }, [application]);
 
    const handleInputChange = (e) => {
       const { name, value } = e.target;
@@ -22,6 +25,18 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
       onClose();
    };
 
+   const renderFormByType = () => {
+      switch (application.applicationType) {
+         case 'Certificate of Verification':
+            return <COVEditForm formData={formData} handleInputChange={handleInputChange} />;
+         // case 'CSAW':
+         //    return <CSAWEditForm formData={formData} handleInputChange={handleInputChange} />;
+         // Add cases for other permit types
+         default:
+            return <p>Unsupported permit type: {application.applicationType}</p>;
+      }
+   };
+
    return (
       <Dialog open={isOpen} onOpenChange={onClose}>
          <DialogContent className="sm:max-w-[425px]">
@@ -32,48 +47,7 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
                </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit}>
-               <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                     <Label htmlFor="name" className="text-right">
-                        Name
-                     </Label>
-                     <Input
-                        id="name"
-                        name="name"
-                        className="col-span-3"
-                        value={formData.name || ''}
-                        onChange={handleInputChange}
-                        required
-                     />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                     <Label htmlFor="address" className="text-right">
-                        Address
-                     </Label>
-                     <Input
-                        id="address"
-                        name="address"
-                        className="col-span-3"
-                        value={formData.address || ''}
-                        onChange={handleInputChange}
-                        required
-                     />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                     <Label htmlFor="purpose" className="text-right">
-                        Purpose
-                     </Label>
-                     <Textarea
-                        id="purpose"
-                        name="purpose"
-                        className="col-span-3"
-                        value={formData.purpose || ''}
-                        onChange={handleInputChange}
-                        required
-                     />
-                  </div>
-                  {/* Add more fields as needed */}
-               </div>
+               {renderFormByType()}
                <DialogFooter>
                   <Button type="submit">Save changes</Button>
                </DialogFooter>

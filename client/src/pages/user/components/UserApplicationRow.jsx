@@ -7,9 +7,7 @@ const UserApplicationRow = ({ app, onView, onEdit, onDelete, getStatusColor }) =
    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
    const formatDate = (timestamp) => {
-      const date = timestamp.toString().length === 13
-         ? new Date(parseInt(timestamp))
-         : new Date(parseInt(timestamp) * 1000);
+      const date = new Date(parseInt(timestamp));
       return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
    };
 
@@ -19,6 +17,7 @@ const UserApplicationRow = ({ app, onView, onEdit, onDelete, getStatusColor }) =
 
    const handleEditSave = (editedData) => {
       onEdit(app.id, editedData);
+      setIsEditModalOpen(false);
    };
 
    return (

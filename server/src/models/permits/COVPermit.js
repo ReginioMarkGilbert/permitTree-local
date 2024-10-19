@@ -8,10 +8,6 @@ const FileSchema = new mongoose.Schema({
 });
 
 const COVPermitSchema = new mongoose.Schema({
-   // applicationType: {
-   //    type: String,
-   //    default: 'Certificate of Verification'
-   // },
    applicationNumber: { type: String, required: true, unique: true },
    applicationType: { type: String, required: true, enum: ['Certificate of Verification'] },
    name: { type: String, required: true },

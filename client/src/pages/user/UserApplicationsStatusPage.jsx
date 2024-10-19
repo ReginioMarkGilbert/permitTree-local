@@ -49,15 +49,27 @@ const UserApplicationsStatusPage = () => {
       }
    };
 
+   useEffect(() => {
+      console.log('UserApplicationsStatusPage useEffect triggered. ActiveSubTab:', activeSubTab);
+      refetch();
+   }, [activeSubTab, refetch]);
+
+   useEffect(() => {
+      console.log('Applications data changed:', applications);
+   }, [applications]);
+
    const handleDeleteClick = (application) => {
+      console.log('Delete clicked for application:', application);
       setApplicationToDelete(application);
       setDeleteDialogOpen(true);
    };
 
    const handleDeleteConfirm = async () => {
+      console.log('Confirming delete for application:', applicationToDelete);
       if (applicationToDelete) {
          try {
             await deletePermit(applicationToDelete.id);
+            console.log('Delete successful');
             toast.success('Draft deleted successfully');
             setDeleteDialogOpen(false);
             setApplicationToDelete(null);
@@ -67,10 +79,6 @@ const UserApplicationsStatusPage = () => {
          }
       }
    };
-
-   useEffect(() => {
-      refetch({ status: activeSubTab });
-   }, [activeSubTab, refetch]);
 
    const handleEdit = async (id, editedData) => {
       try {
@@ -88,7 +96,7 @@ const UserApplicationsStatusPage = () => {
    const renderTable = () => {
       if (loading) return <p className="text-center text-gray-500">Loading...</p>;
       if (error) return <p className="text-center text-red-500">Error: {error.message}</p>;
-      if (filteredApplications.length === 0) {
+      if (applications.length === 0) {
          return <p className="text-center text-gray-500">No applications found.</p>;
       }
 
@@ -115,7 +123,7 @@ const UserApplicationsStatusPage = () => {
                   </tr>
                </thead>
                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredApplications.map((app) => (
+                  {applications.map((app) => (
                      <UserApplicationRow
                         key={app.id}
                         app={app}

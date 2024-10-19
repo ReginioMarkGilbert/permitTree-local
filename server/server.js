@@ -21,6 +21,23 @@ const startServer = async () => {
    const server = new ApolloServer({
       typeDefs: [permitTypes, ...typeDefs],
       resolvers,
+      context: async ({ req }) => {
+         const token = req.headers.authorization || '';
+         console.log('Received token:', token);
+         if (token) {
+            try {
+               const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
+               console.log('Decoded token:', decoded);
+               const user = await User.findById(decoded.id);
+               console.log('User found:', user);
+               return { user };
+            } catch (error) {
+               console.error('Error verifying token:', error);
+            }
+         }
+         console.log('No token or invalid token');
+         return {};
+      },
    });
 
    await server.start();

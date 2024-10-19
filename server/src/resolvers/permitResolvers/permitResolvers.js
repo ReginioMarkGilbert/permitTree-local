@@ -9,7 +9,11 @@ const permitResolvers = {
          return await Permit.findById(id).lean().exec();
       },
       getUserApplications: async (_, { status }, { user }) => {
+         console.log('getUserApplications called with status:', status);
+         console.log('User from context:', user);
+
          if (!user) {
+            console.log('No user found in context');
             throw new Error('You must be logged in to view your applications');
          }
 
@@ -17,21 +21,30 @@ const permitResolvers = {
          if (status) {
             query.status = status;
          }
+         console.log('Query:', query);
 
-         const permits = await Permit.find(query)
-            .sort({ dateOfSubmission: -1 })
-            .lean()
-            .exec();
+         try {
+            const permits = await Permit.find(query)
+               .sort({ dateOfSubmission: -1 })
+               .lean()
+               .exec();
 
-         const formattedPermits = permits.map(permit => ({
-            ...permit,
-            id: permit._id.toString(),
-            dateOfSubmission: permit.dateOfSubmission.getTime()
-         }));
+            console.log('Permits found:', permits.length);
+            console.log('First permit:', permits[0]);
 
-         console.log('Permits fetched:', formattedPermits);
+            const formattedPermits = permits.map(permit => ({
+               ...permit,
+               id: permit._id.toString(),
+               dateOfSubmission: permit.dateOfSubmission.getTime()
+            }));
 
-         return formattedPermits;
+            console.log('Formatted permits:', formattedPermits);
+
+            return formattedPermits;
+         } catch (error) {
+            console.error('Error fetching permits:', error);
+            throw new Error(`Failed to fetch permits: ${error.message}`);
+         }
       },
    },
    Mutation: {

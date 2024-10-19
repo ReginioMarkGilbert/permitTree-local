@@ -96,14 +96,22 @@ const covResolvers = {
             throw new Error('You are not authorized to update this permit');
          }
 
-         // Process file uploads
-         const processedFiles = {};
-         for (const [key, uploads] of Object.entries(input.files)) {
-            processedFiles[key] = await Promise.all(uploads.map(processUpload));
-         }
+         const updatedFields = {
+            name: input.name,
+            address: input.address,
+            cellphone: input.cellphone,
+            purpose: input.purpose,
+            driverName: input.driverName,
+            driverLicenseNumber: input.driverLicenseNumber,
+            vehiclePlateNumber: input.vehiclePlateNumber,
+            originAddress: input.originAddress,
+            destinationAddress: input.destinationAddress,
+         };
 
-         Object.assign(permit, { ...input, files: processedFiles });
-         return await permit.save();
+         Object.assign(permit, updatedFields);
+         await permit.save();
+
+         return permit;
       },
       saveCOVPermitDraft: async (_, { input }, { user }) => {
          if (!user) {

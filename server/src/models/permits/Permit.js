@@ -21,14 +21,4 @@ const PermitSchema = new mongoose.Schema({
    lastUpdated: { type: Date, default: Date.now }
 }, { timestamps: true });
 
-// Add a virtual for 'id'
-PermitSchema.virtual('id').get(function() {
-   return this._id.toHexString();
-});
-
-// Ensure virtual fields are serialized
-PermitSchema.set('toJSON', {
-   virtuals: true
-});
-
 module.exports = mongoose.model('Permit', PermitSchema);
