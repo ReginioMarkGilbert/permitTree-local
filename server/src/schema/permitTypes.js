@@ -372,26 +372,28 @@ const permitTypes = gql`
 `;
 
 const resolvePermitType = (obj) => {
-  switch (obj.applicationType) {
-    case 'COV':
-    case 'Certificate of Verification':
-      return 'COVPermit';
-    case 'CSAW':
-    case 'Chainsaw Registration':
-      return 'CSAWPermit';
-    case 'PLTP':
-      return 'PLTPPermit';
-    case 'PTPR':
-    case 'Private Tree Plantation Registration':
-      return 'PTPRPermit';
-    case 'SPLTP':
-    case 'Special/Private Land Timber Permit':
-      return 'SPLTPPermit';
-    case 'TCEBP':
-      return 'TCEBPPermit';
-    default:
-      throw new Error(`Unknown permit type: ${obj.applicationType}`);
-  }
+   switch (obj.applicationType) {
+      case 'COV':
+      case 'Certificate of Verification':
+         return 'COVPermit';
+      case 'CSAW':
+      case 'Chainsaw Registration':
+         return 'CSAWPermit';
+      case 'PLTP':
+      case 'Public Land Timber Permit':
+         return 'PLTPPermit';
+      case 'PTPR':
+      case 'Private Tree Plantation Registration':
+         return 'PTPRPermit';
+      case 'SPLTP':
+      case 'Special/Private Land Timber Permit':
+         return 'SPLTPPermit';
+      case 'TCEBP':
+      case 'Tree Cutting and/or Earth Balling Permit':
+         return 'TCEBPPermit';
+      default:
+         throw new Error(`Unknown permit type: ${obj.applicationType}`);
+   }
 };
 
 module.exports = { permitTypes, resolvePermitType };

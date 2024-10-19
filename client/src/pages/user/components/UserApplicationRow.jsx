@@ -10,7 +10,8 @@ const UserApplicationRow = ({ app, onView, onEdit, onDelete, getStatusColor }) =
          ? new Date(parseInt(timestamp))
          : new Date(parseInt(timestamp) * 1000);
 
-      return date.toLocaleDateString();
+      // return date.toLocaleDateString(); // format: month/day/year, eg: 6/25/2024
+      return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }); // Format: Month Day, Year, eg: June 25, 2024
    };
 
    return (
