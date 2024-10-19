@@ -118,20 +118,21 @@ export const useUserApplications = (status) => {
     console.log('Updating COV permit:', id);
     console.log('Update input:', input);
     try {
-      // Remove __typename and ensure data field is present
-      const filesWithoutTypename = Object.fromEntries(
-        Object.entries(input.files || {}).map(([key, value]) => [
-          key,
-          Array.isArray(value) ? value.map(file => ({
-            filename: file.filename,
-            contentType: file.contentType,
-            data: file.data || '' // Provide an empty string if data is missing
-          })) : value
-        ])
-      );
-
-      // Remove __typename from the top level of files object
-      delete filesWithoutTypename.__typename;
+      // Process files, including removals
+      const updatedFiles = {};
+      if (input.files) {
+        Object.entries(input.files).forEach(([key, value]) => {
+          if (value === null || value === undefined || (Array.isArray(value) && value.length === 0)) {
+            updatedFiles[key] = []; // Send an empty array to indicate file removal
+          } else if (Array.isArray(value) && value.length > 0) {
+            updatedFiles[key] = value.map(file => ({
+              filename: file.filename,
+              contentType: file.contentType,
+              data: file.data || '' // Only include data if it's present
+            }));
+          }
+        });
+      }
 
       const { data } = await updateCOVPermitMutation({
         variables: {
@@ -146,10 +147,10 @@ export const useUserApplications = (status) => {
             vehiclePlateNumber: input.vehiclePlateNumber,
             originAddress: input.originAddress,
             destinationAddress: input.destinationAddress,
-            files: filesWithoutTypename
+            files: updatedFiles
           }
         },
-        refetchQueries: [{ query: GET_USER_APPLICATIONS, variables: { status } }]
+        refetchQueries: [{ query: GET_USER_APPLICATIONS, variables: { status: input.status } }]
       });
       console.log('Update mutation result:', data);
       if (data.updateCOVPermit) {

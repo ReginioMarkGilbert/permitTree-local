@@ -13,59 +13,50 @@ const COVEditForm = ({ formData, handleInputChange, handleFileChange, removeFile
       'orCr', 'driverLicense', 'specialPowerOfAttorney'
     ];
 
-    return (
-      <div className="grid grid-cols-2 gap-4">
-        {fileTypes.map((type, index) => (
-          <React.Fragment key={type}>
-            <div className="mb-4">
-              <Label htmlFor={type} className="block mb-2">
-                {type.charAt(0).toUpperCase() + type.slice(1).replace(/([A-Z])/g, ' $1')}
-              </Label>
-              <div>
-                {formData.files && formData.files[type] && formData.files[type].length > 0 ? (
-                  formData.files[type].map((file, fileIndex) => (
-                    <div key={fileIndex} className="flex items-center justify-between mb-2 bg-gray-100 p-2 rounded">
-                      <span className="text-sm text-gray-600 truncate">{file.filename}</span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeFile(type, fileIndex)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))
-                ) : (
-                  <div className="mb-2 bg-gray-100 p-2 rounded">
-                    <span className="text-sm text-gray-500">No uploaded file</span>
-                  </div>
-                )}
-                <div className="flex items-center mt-2">
-                  <Input
-                    id={type}
-                    name={type}
-                    type="file"
-                    onChange={(e) => handleFileChange(e, type)}
-                    className="hidden"
-                  />
-                  <Label htmlFor={type} className="cursor-pointer flex items-center justify-center w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-600 transition-colors">
-                    <Upload className="mr-2 h-4 w-4" />
-                    {formData.files && formData.files[type] && formData.files[type].length > 0
-                      ? `Replace ${type.charAt(0).toUpperCase() + type.slice(1).replace(/([A-Z])/g, ' $1')}`
-                      : `Upload ${type.charAt(0).toUpperCase() + type.slice(1).replace(/([A-Z])/g, ' $1')}`
-                    }
-                  </Label>
-                </div>
+    return fileTypes.map(type => (
+      <div key={type} className="mb-4">
+        <Label htmlFor={type} className="block mb-2">
+          {type.charAt(0).toUpperCase() + type.slice(1).replace(/([A-Z])/g, ' $1')}
+        </Label>
+        <div>
+          {formData.files && formData.files[type] && formData.files[type].length > 0 ? (
+            formData.files[type].map((file, index) => (
+              <div key={index} className="flex items-center justify-between mb-2 bg-gray-100 p-2 rounded">
+                <span className="text-sm text-gray-600 truncate">{file.filename}</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeFile(type)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
+            ))
+          ) : (
+            <div className="mb-2 bg-gray-100 p-2 rounded">
+              <span className="text-sm text-gray-500">No uploaded file</span>
             </div>
-            {index % 2 === 1 && index < fileTypes.length - 1 && (
-              <div className="col-span-2 border-b border-gray-200 my-4"></div>
-            )}
-          </React.Fragment>
-        ))}
+          )}
+          <div className="flex items-center mt-2">
+            <Input
+              id={type}
+              name={type}
+              type="file"
+              onChange={(e) => handleFileChange(e, type)}
+              className="hidden"
+            />
+            <Label htmlFor={type} className="cursor-pointer flex items-center justify-center w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+              <Upload className="mr-2 h-4 w-4" />
+              {formData.files && formData.files[type] && formData.files[type].length > 0
+                ? `Replace ${type.charAt(0).toUpperCase() + type.slice(1).replace(/([A-Z])/g, ' $1')}`
+                : `Upload ${type.charAt(0).toUpperCase() + type.slice(1).replace(/([A-Z])/g, ' $1')}`
+              }
+            </Label>
+          </div>
+        </div>
       </div>
-    );
+    ));
   };
 
   console.log('COVEditForm rendered with formData:', formData);

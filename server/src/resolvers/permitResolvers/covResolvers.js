@@ -96,17 +96,34 @@ const covResolvers = {
             throw new Error('You are not authorized to update this permit');
          }
 
-         // Update fields
+         // Update non-file fields
          Object.keys(input).forEach(key => {
-            if (input[key] !== undefined) {
-               if (key === 'files') {
-                  // Handle file updates
-                  permit.files = input.files;
-               } else {
-                  permit[key] = input[key];
-               }
+            if (key !== 'files' && input[key] !== undefined) {
+               permit[key] = input[key];
             }
          });
+
+         // Update files
+         if (input.files) {
+            Object.keys(input.files).forEach(fileType => {
+               if (Array.isArray(input.files[fileType])) {
+                  if (input.files[fileType].length === 0) {
+                     // Remove the file if an empty array is sent
+                     permit.files[fileType] = undefined;
+                  } else {
+                     // Update the file if new data is sent
+                     permit.files[fileType] = input.files[fileType].map(file => ({
+                        filename: file.filename,
+                        contentType: file.contentType,
+                        data: file.data ? Binary.createFromBase64(file.data) : permit.files[fileType]?.[0]?.data
+                     }));
+                  }
+               }
+            });
+         }
+
+         // Remove undefined fields to ensure they're actually deleted in MongoDB
+         permit.markModified('files');
 
          await permit.save();
 
