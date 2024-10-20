@@ -79,24 +79,34 @@ const EditApplicationModal = ({ isOpen, onClose, application, onUpdate }) => {
    const handleSubmit = async (e) => {
       e.preventDefault();
       try {
-         const token = localStorage.getItem('token');
          const dataToSend = {
-            ...formData,
+            registrationType: formData.registrationType,
+            chainsawStore: formData.chainsawStore,
+            ownerName: formData.ownerName,
+            address: formData.address,
+            phone: formData.phone,
+            brand: formData.brand,
+            model: formData.model,
+            serialNumber: formData.serialNumber,
+            dateOfAcquisition: formData.dateOfAcquisition,
+            powerOutput: formData.powerOutput,
+            maxLengthGuidebar: formData.maxLengthGuidebar,
+            countryOfOrigin: formData.countryOfOrigin,
+            purchasePrice: parseFloat(formData.purchasePrice),
+            isOwner: formData.isOwner,
+            isTenureHolder: formData.isTenureHolder,
+            isBusinessOwner: formData.isBusinessOwner,
+            isPLTPRHolder: formData.isPLTPRHolder,
+            isWPPHolder: formData.isWPPHolder,
             files: files
          };
 
-         const response = await axios.put(`http://localhost:3000/api/csaw_updateApplication/${application._id}`, dataToSend, {
-            headers: {
-               Authorization: token,
-               'Content-Type': 'application/json'
-            }
-         });
-         onUpdate(response.data);
+         await onUpdate(application._id, dataToSend);
          onClose();
          toast.success('Application updated successfully');
       } catch (error) {
          console.error('Error updating application:', error);
-         toast.error('Failed to update application');
+         toast.error(`Error updating application: ${error.message || 'Unknown error occurred'}`);
       }
    };
 

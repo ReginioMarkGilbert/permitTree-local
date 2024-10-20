@@ -109,19 +109,82 @@ const GET_COV_PERMIT = gql`
   }
 `;
 
+const UPDATE_CSAW_PERMIT = gql`
+  mutation UpdateCSAWPermit($id: ID!, $input: CSAWPermitInput!) {
+    updateCSAWPermit(id: $id, input: $input) {
+      id
+      registrationType
+      chainsawStore
+      ownerName
+      address
+      phone
+      brand
+      model
+      serialNumber
+      dateOfAcquisition
+      powerOutput
+      maxLengthGuidebar
+      countryOfOrigin
+      purchasePrice
+      isOwner
+      isTenureHolder
+      isBusinessOwner
+      isPLTPRHolder
+      isWPPHolder
+    }
+  }
+`;
+
+const GET_CSAW_PERMIT = gql`
+  query GetCSAWPermit($id: ID!) {
+    getCSAWPermitById(id: $id) {
+      id
+      registrationType
+      chainsawStore
+      ownerName
+      address
+      phone
+      brand
+      model
+      serialNumber
+      dateOfAcquisition
+      powerOutput
+      maxLengthGuidebar
+      countryOfOrigin
+      purchasePrice
+      isOwner
+      isTenureHolder
+      isBusinessOwner
+      isPLTPRHolder
+      isWPPHolder
+      files {
+        officialReceipt { filename contentType }
+        deedOfSale { filename contentType }
+        specialPowerOfAttorney { filename contentType }
+        forestTenureAgreement { filename contentType }
+        businessPermit { filename contentType }
+        certificateOfRegistration { filename contentType }
+        woodProcessingPlantPermit { filename contentType }
+      }
+    }
+  }
+`;
+
 export const useUserApplications = (status) => {
    // console.log('useUserApplications called with status:', status);
 
    const { loading, error, data, refetch } = useQuery(GET_USER_APPLICATIONS, {
       variables: { status },
       fetchPolicy: 'network-only',
-      onCompleted: (data) => console.log('Query completed. Data:', data),
+      // onCompleted: (data) => console.log('Query completed. Data:', data),
       onError: (error) => console.error('Query error:', error),
    });
 
    const [deletePermitMutation] = useMutation(DELETE_PERMIT);
    const [updateCOVPermitMutation] = useMutation(UPDATE_COV_PERMIT);
    const [getCOVPermit] = useLazyQuery(GET_COV_PERMIT);
+   const [updateCSAWPermitMutation] = useMutation(UPDATE_CSAW_PERMIT);
+   const [getCSAWPermit] = useLazyQuery(GET_CSAW_PERMIT);
 
    const deletePermit = async (id) => {
       console.log('Attempting to delete permit with id:', id);
@@ -202,6 +265,77 @@ export const useUserApplications = (status) => {
       }
    };
 
+   const updateCSAWPermit = async (id, input) => {
+      console.log('Updating CSAW permit:', id);
+      console.log('Update input:', input);
+      try {
+         // Create a new object with only the fields allowed in CSAWPermitInput
+         const cleanedInput = {
+            registrationType: input.registrationType,
+            chainsawStore: input.chainsawStore,
+            ownerName: input.ownerName,
+            address: input.address,
+            phone: input.phone,
+            brand: input.brand,
+            model: input.model,
+            serialNumber: input.serialNumber,
+            dateOfAcquisition: new Date(input.dateOfAcquisition).toISOString(), // Convert to ISO string
+            powerOutput: input.powerOutput,
+            maxLengthGuidebar: input.maxLengthGuidebar,
+            countryOfOrigin: input.countryOfOrigin,
+            purchasePrice: parseFloat(input.purchasePrice), // Ensure this is a number
+            isOwner: Boolean(input.isOwner),
+            isTenureHolder: Boolean(input.isTenureHolder),
+            isBusinessOwner: Boolean(input.isBusinessOwner),
+            isPLTPRHolder: Boolean(input.isPLTPRHolder),
+            isWPPHolder: Boolean(input.isWPPHolder),
+         };
+
+         // Handle files separately
+         if (input.files) {
+            cleanedInput.files = {};
+            Object.keys(input.files).forEach(key => {
+               if (Array.isArray(input.files[key])) {
+                  cleanedInput.files[key] = input.files[key].map(file => ({
+                     filename: file.filename,
+                     contentType: file.contentType,
+                     data: file.data
+                  }));
+               }
+            });
+         }
+
+         console.log('Cleaned input:', cleanedInput);
+
+         const { data } = await updateCSAWPermitMutation({
+            variables: {
+               id,
+               input: cleanedInput
+            },
+            refetchQueries: [{ query: GET_USER_APPLICATIONS, variables: { status: input.status } }]
+         });
+         console.log('Update mutation result:', data);
+         if (data.updateCSAWPermit) {
+            return data.updateCSAWPermit;
+         } else {
+            throw new Error('Failed to update permit');
+         }
+      } catch (error) {
+         console.error('Error updating permit:', error);
+         throw error;
+      }
+   };
+
+   const fetchCSAWPermit = async (id) => {
+      try {
+         const { data } = await getCSAWPermit({ variables: { id } });
+         return data.getCSAWPermitById;
+      } catch (error) {
+         console.error('Error fetching CSAW permit:', error);
+         throw error;
+      }
+   };
+
    //   console.log('useUserApplications returning. Applications:', data?.getUserApplications);
 
    return {
@@ -211,6 +345,8 @@ export const useUserApplications = (status) => {
       refetch,
       deletePermit,
       updateCOVPermit,
-      fetchCOVPermit
+      fetchCOVPermit,
+      updateCSAWPermit,
+      fetchCSAWPermit
    };
 };

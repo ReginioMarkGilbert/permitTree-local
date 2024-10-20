@@ -38,7 +38,7 @@ const csawResolvers = {
                ...input,
                applicationNumber,
                applicantId: user.id,
-               applicationType: 'CSAW', // Ensure this is set to 'CSAW'
+               applicationType: 'Chainsaw Registration',
                status: 'Submitted',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
@@ -138,7 +138,8 @@ const csawResolvers = {
                status: 'Draft',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
-               dateOfAcquisition: input.dateOfAcquisition ? new Date(input.dateOfAcquisition).toISOString() : null,
+               dateOfAcquisition: new Date().toISOString(),
+               // dateOfAcquisition: input.dateOfAcquisition ? new Date(input.dateOfAcquisition).toISOString() : null,
             };
 
             const newPermit = new CSAWPermit(permitData);

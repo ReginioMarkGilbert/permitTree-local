@@ -21,7 +21,7 @@ const UserApplicationsStatusPage = () => {
    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
    const [applicationToDelete, setApplicationToDelete] = useState(null);
 
-   const { applications, loading, error, refetch, deletePermit, updateCOVPermit } = useUserApplications(activeSubTab);
+   const { applications, loading, error, refetch, deletePermit, updateCSAWPermit } = useUserApplications(activeSubTab);
 
    const mainTabs = ['Applications', 'Order Of Payments'];
    const subTabs = {
@@ -50,7 +50,7 @@ const UserApplicationsStatusPage = () => {
    };
 
    useEffect(() => {
-      console.log('UserApplicationsStatusPage useEffect triggered. ActiveSubTab:', activeSubTab);
+      // console.log('UserApplicationsStatusPage useEffect triggered. ActiveSubTab:', activeSubTab);
       refetch();
    }, [activeSubTab, refetch]);
 
@@ -80,11 +80,11 @@ const UserApplicationsStatusPage = () => {
       }
    };
 
-   const handleEdit = async (id, editedData) => {
+   const handleEditApplication = async (id, editedData) => {
       try {
          console.log('Attempting to edit application:', id);
          console.log('Edited data:', editedData);
-         await updateCOVPermit(id, editedData);
+         await updateCSAWPermit(id, editedData);
          toast.success('Application updated successfully');
          refetch();
       } catch (error) {
@@ -128,7 +128,7 @@ const UserApplicationsStatusPage = () => {
                         key={app.id}
                         app={app}
                         onView={() => { }} // Implement these functions
-                        onEdit={handleEdit}
+                        onEdit={handleEditApplication}
                         onDelete={handleDeleteClick}
                         getStatusColor={getStatusColor}
                      />

@@ -3,27 +3,38 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Button } from "@/components/ui/button";
 import COVEditForm from './permitForms/COVEditForm';
 import CSAWEditForm from './permitForms/CSAWEditForm';
-import '@/components/ui/styles/customScrollBar.css';
+import '@/components/ui/styles/customScrollbar.css';
 import { useUserApplications } from '../hooks/useUserApplications';
+
+// Utility function to safely format date
+const safeFormatDate = (dateString) => {
+   if (!dateString) return '';
+   const date = new Date(dateString);
+   return isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0];
+};
 
 const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
    const [formData, setFormData] = useState(application);
-   const { fetchCOVPermit } = useUserApplications();
+   const { fetchCOVPermit, fetchCSAWPermit } = useUserApplications();
    const [hasFetched, setHasFetched] = useState(false);
 
    useEffect(() => {
       const fetchPermitData = async () => {
-         if (application.applicationType === 'Certificate of Verification' && !hasFetched) {
+         if (!hasFetched) {
             try {
-               const permitData = await fetchCOVPermit(application.id);
+               let permitData;
+               if (application.applicationType === 'Certificate of Verification') {
+                  permitData = await fetchCOVPermit(application.id);
+               } else if (application.applicationType === 'Chainsaw Registration') {
+                  permitData = await fetchCSAWPermit(application.id);
+               } else {
+                  permitData = application;
+               }
                setFormData(permitData);
                setHasFetched(true);
             } catch (error) {
-               console.error('Error fetching COV permit data:', error);
+               console.error('Error fetching permit data:', error);
             }
-         } else if (!hasFetched) {
-            setFormData(application);
-            setHasFetched(true);
          }
       };
 
@@ -32,12 +43,13 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
       } else {
          setHasFetched(false);
       }
-   }, [isOpen, application, fetchCOVPermit, hasFetched]);
+   }, [isOpen, application, fetchCOVPermit, fetchCSAWPermit, hasFetched]);
 
    const handleInputChange = (e) => {
       const { name, value } = e.target;
       setFormData(prevData => ({
          ...prevData,
+         // [name]: value
          [name]: name === 'dateOfAcquisition' ? new Date(value).toISOString() : value
       }));
    };
