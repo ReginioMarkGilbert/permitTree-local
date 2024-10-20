@@ -2,18 +2,23 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Eye, Edit, Trash2 } from 'lucide-react';
 import EditDraftModal from './EditDraftModal';
+import ViewApplicationModal from './ViewApplicationModal';
 
-const UserApplicationRow = ({ app, onView, onEdit, onDelete, getStatusColor }) => {
+const UserApplicationRow = ({ app, onEdit, onDelete, getStatusColor }) => {
    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
    const formatDate = (timestamp) => {
       const date = new Date(parseInt(timestamp));
-      return date.toLocaleDateString(); // format: month/day/year, eg: 6/25/2024
-      // return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      return date.toLocaleDateString();
    };
 
    const handleEditClick = () => {
       setIsEditModalOpen(true);
+   };
+
+   const handleViewClick = () => {
+      setIsViewModalOpen(true);
    };
 
    const handleEditSave = (editedData) => {
@@ -41,7 +46,7 @@ const UserApplicationRow = ({ app, onView, onEdit, onDelete, getStatusColor }) =
                </span>
             </td>
             <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-               <Button onClick={() => onView(app.id)} className="mr-2" variant="outline" size="sm">
+               <Button onClick={handleViewClick} className="mr-2" variant="outline" size="sm">
                   <Eye className="h-4 w-4 mr-1" /> View
                </Button>
                {app.status === 'Draft' && (
@@ -60,6 +65,11 @@ const UserApplicationRow = ({ app, onView, onEdit, onDelete, getStatusColor }) =
             isOpen={isEditModalOpen}
             onClose={() => setIsEditModalOpen(false)}
             onSave={handleEditSave}
+            application={app}
+         />
+         <ViewApplicationModal
+            isOpen={isViewModalOpen}
+            onClose={() => setIsViewModalOpen(false)}
             application={app}
          />
       </>

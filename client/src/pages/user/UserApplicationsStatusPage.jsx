@@ -128,7 +128,6 @@ const UserApplicationsStatusPage = () => {
                      <UserApplicationRow
                         key={app.id}
                         app={app}
-                        onView={() => { }} // Implement these functions
                         onEdit={handleEditApplication}
                         onDelete={handleDeleteClick}
                         getStatusColor={getStatusColor}
