@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Button } from "@/components/ui/button";
 import COVEditForm from './permitForms/COVEditForm';
 import CSAWEditForm from './permitForms/CSAWEditForm';
+import PLTPEditForm from './permitForms/PLTPEditForm';
 import '@/components/ui/styles/customScrollbar.css';
 import { useUserApplications } from '../hooks/useUserApplications';
 
@@ -17,7 +18,7 @@ const formatDate = (dateString) => {
 
 const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
    const [formData, setFormData] = useState(application);
-   const { fetchCOVPermit, fetchCSAWPermit } = useUserApplications();
+   const { fetchCOVPermit, fetchCSAWPermit, fetchPLTPPermit } = useUserApplications();
    const [hasFetched, setHasFetched] = useState(false);
 
    const fetchPermitData = useCallback(async () => {
@@ -28,6 +29,8 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
                permitData = await fetchCOVPermit(application.id);
             } else if (application.applicationType === 'Chainsaw Registration') {
                permitData = await fetchCSAWPermit(application.id);
+            } else if (application.applicationType === 'Public Land Timber Permit') {
+               permitData = await fetchPLTPPermit(application.id);
             } else {
                permitData = application;
             }
@@ -38,7 +41,7 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
             console.error('Error fetching permit data:', error);
          }
       }
-   }, [application, fetchCOVPermit, fetchCSAWPermit, hasFetched]);
+   }, [application, fetchCOVPermit, fetchCSAWPermit, fetchPLTPPermit, hasFetched]);
 
    useEffect(() => {
       if (isOpen) {
@@ -143,6 +146,14 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
             />;
          case 'Chainsaw Registration':
             return <CSAWEditForm
+               formData={formData}
+               handleInputChange={handleInputChange}
+               handleFileChange={handleFileChange}
+               removeFile={removeFile}
+               handleCheckboxChange={handleCheckboxChange}
+            />;
+         case 'Public Land Timber Permit':
+            return <PLTPEditForm
                formData={formData}
                handleInputChange={handleInputChange}
                handleFileChange={handleFileChange}

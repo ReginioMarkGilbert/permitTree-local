@@ -170,6 +170,56 @@ const GET_CSAW_PERMIT = gql`
   }
 `;
 
+const UPDATE_PLTP_PERMIT = gql`
+  mutation UpdatePLTPPermit($id: ID!, $input: PLTPPermitInput!) {
+    updatePLTPPermit(id: $id, input: $input) {
+      id
+      name
+      address
+      contactNumber
+      treeType
+      treeStatus
+      landType
+      posingDanger
+      forPersonalUse
+      purpose
+      files {
+        applicationLetter { filename contentType }
+        lguEndorsement { filename contentType }
+        homeownersResolution { filename contentType }
+        ptaResolution { filename contentType }
+      }
+    }
+  }
+`;
+
+const GET_PLTP_PERMIT = gql`
+  query GetPLTPPermit($id: ID!) {
+    getPLTPPermitById(id: $id) {
+      id
+      applicationNumber
+      applicationType
+      name
+      address
+      contactNumber
+      treeType
+      treeStatus
+      landType
+      posingDanger
+      forPersonalUse
+      purpose
+      status
+      dateOfSubmission
+      files {
+        applicationLetter { filename contentType }
+        lguEndorsement { filename contentType }
+        homeownersResolution { filename contentType }
+        ptaResolution { filename contentType }
+      }
+    }
+  }
+`;
+
 export const useUserApplications = (status) => {
    // console.log('useUserApplications called with status:', status);
 
@@ -185,6 +235,8 @@ export const useUserApplications = (status) => {
    const [getCOVPermit] = useLazyQuery(GET_COV_PERMIT);
    const [updateCSAWPermitMutation] = useMutation(UPDATE_CSAW_PERMIT);
    const [getCSAWPermit] = useLazyQuery(GET_CSAW_PERMIT);
+   const [updatePLTPPermitMutation] = useMutation(UPDATE_PLTP_PERMIT);
+   const [getPLTPPermit] = useLazyQuery(GET_PLTP_PERMIT);
 
    const deletePermit = async (id) => {
       console.log('Attempting to delete permit with id:', id);
@@ -337,7 +389,65 @@ export const useUserApplications = (status) => {
       }
    };
 
-   //   console.log('useUserApplications returning. Applications:', data?.getUserApplications);
+   const fetchPLTPPermit = async (id) => {
+      try {
+         const { data } = await getPLTPPermit({ variables: { id } });
+         return data.getPLTPPermitById;
+      } catch (error) {
+         console.error('Error fetching PLTP permit:', error);
+         // console.error('id:', id)
+         throw error;
+      }
+   };
+
+   const updatePLTPPermit = async (id, input) => {
+      console.log('Updating PLTP permit:', id);
+      console.log('Update input:', input);
+
+      try {
+         const updatedFiles = {};
+         if (input.files) {
+            Object.entries(input.files).forEach(([key, value]) => {
+               if (Array.isArray(value) && value.length > 0) {
+                  updatedFiles[key] = value.map(file => ({
+                     filename: file.filename,
+                     contentType: file.contentType,
+                     data: file.data
+                  }));
+               }
+            });
+         }
+
+         const { data } = await updatePLTPPermitMutation({
+            variables: {
+               id,
+               input: {
+                  name: input.name,
+                  address: input.address,
+                  contactNumber: input.contactNumber,
+                  treeType: input.treeType,
+                  treeStatus: input.treeStatus,
+                  landType: input.landType,
+                  posingDanger: input.posingDanger,
+                  forPersonalUse: input.forPersonalUse,
+                  purpose: input.purpose,
+                  files: updatedFiles
+               }
+            },
+            refetchQueries: [{ query: GET_USER_APPLICATIONS, variables: { status: input.status } }]
+         });
+         console.log('Update mutation result:', data);
+         if (data.updatePLTPPermit) {
+            return data.updatePLTPPermit;
+         } else {
+            throw new Error('Failed to update permit');
+         }
+      } catch (error) {
+         console.error('Error updating PLTP permit:', error);
+         console.error('Error details:', error.graphQLErrors);
+         throw error;
+      }
+   };
 
    return {
       applications: data?.getUserApplications || [],
@@ -348,6 +458,8 @@ export const useUserApplications = (status) => {
       updateCOVPermit,
       fetchCOVPermit,
       updateCSAWPermit,
-      fetchCSAWPermit
+      fetchCSAWPermit,
+      updatePLTPPermit,
+      fetchPLTPPermit
    };
 };

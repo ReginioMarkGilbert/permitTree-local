@@ -4,7 +4,15 @@ import { Eye, Edit, Trash2 } from 'lucide-react';
 import EditDraftModal from './EditDraftModal';
 import ViewApplicationModal from './ViewApplicationModal';
 
-const UserApplicationRow = ({ app, onEdit, onDelete, getStatusColor }) => {
+const UserApplicationRow = ({
+   app,
+   onEdit,
+   onDelete,
+   getStatusColor,
+   fetchCOVPermit,
+   fetchCSAWPermit,
+   fetchPLTPPermit
+}) => {
    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
@@ -66,6 +74,9 @@ const UserApplicationRow = ({ app, onEdit, onDelete, getStatusColor }) => {
             onClose={() => setIsEditModalOpen(false)}
             onSave={handleEditSave}
             application={app}
+            fetchCOVPermit={fetchCOVPermit}
+            fetchCSAWPermit={fetchCSAWPermit}
+            fetchPLTPPermit={fetchPLTPPermit}
          />
          <ViewApplicationModal
             isOpen={isViewModalOpen}

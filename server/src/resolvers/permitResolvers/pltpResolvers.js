@@ -56,21 +56,42 @@ const pltpResolvers = {
          }
       },
       updatePLTPPermit: async (_, { id, input }, { user }) => {
-         if (!user) {
-            throw new Error('You must be logged in to update a permit');
-         }
+         try {
+            if (!user) {
+               throw new Error('You must be logged in to update a permit');
+            }
 
-         const permit = await PLTPPermit.findById(id);
-         if (!permit) {
-            throw new Error('Permit not found');
-         }
+            const permit = await PLTPPermit.findById(id);
+            if (!permit) {
+               throw new Error('Permit not found');
+            }
 
-         if (permit.applicantId.toString() !== user.id && user.role !== 'admin') {
-            throw new Error('You are not authorized to update this permit');
-         }
+            if (permit.applicantId.toString() !== user.id && user.role !== 'admin') {
+               throw new Error('You are not authorized to update this permit');
+            }
 
-         Object.assign(permit, input);
-         return await permit.save();
+            console.log('Received input:', JSON.stringify(input, null, 2));
+
+            // Update the permit fields
+            Object.assign(permit, input);
+
+            // Handle file updates
+            if (input.files) {
+               for (const [key, files] of Object.entries(input.files)) {
+                  permit.files[key] = files.map(file => ({
+                     filename: file.filename,
+                     contentType: file.contentType,
+                     data: file.data ? Buffer.from(file.data, 'base64') : undefined
+                  }));
+               }
+            }
+
+            await permit.save();
+            return permit;
+         } catch (error) {
+            console.error('Error in updatePLTPPermit:', error);
+            throw new Error(`Failed to update PLTP permit: ${error.message}`);
+         }
       },
       savePLTPPermitDraft: async (_, { input }, { user }) => {
          if (!user) {

@@ -21,7 +21,19 @@ const UserApplicationsStatusPage = () => {
    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
    const [applicationToDelete, setApplicationToDelete] = useState(null);
 
-   const { applications, loading, error, refetch, deletePermit, updateCSAWPermit } = useUserApplications(activeSubTab);
+   const {
+      applications,
+      loading,
+      error,
+      refetch,
+      deletePermit,
+      updateCSAWPermit,
+      updateCOVPermit,
+      updatePLTPPermit,
+      fetchCOVPermit,
+      fetchCSAWPermit,
+      fetchPLTPPermit
+   } = useUserApplications(activeSubTab);
 
    const mainTabs = ['Applications', 'Order Of Payments'];
    const subTabs = {
@@ -85,7 +97,21 @@ const UserApplicationsStatusPage = () => {
       try {
          console.log('Attempting to edit application:', id);
          console.log('Edited data:', editedData);
-         await updateCSAWPermit(id, editedData);
+
+         switch (editedData.applicationType) {
+            case 'Certificate of Verification':
+               await updateCOVPermit(id, editedData);
+               break;
+            case 'Chainsaw Registration':
+               await updateCSAWPermit(id, editedData);
+               break;
+            case 'Public Land Timber Permit':
+               await updatePLTPPermit(id, editedData);
+               break;
+            default:
+               throw new Error('Unsupported application type');
+         }
+
          toast.success('Application updated successfully');
          refetch();
       } catch (error) {
@@ -131,6 +157,9 @@ const UserApplicationsStatusPage = () => {
                         onEdit={handleEditApplication}
                         onDelete={handleDeleteClick}
                         getStatusColor={getStatusColor}
+                        fetchCOVPermit={fetchCOVPermit}
+                        fetchCSAWPermit={fetchCSAWPermit}
+                        fetchPLTPPermit={fetchPLTPPermit}
                      />
                   ))}
                </tbody>
