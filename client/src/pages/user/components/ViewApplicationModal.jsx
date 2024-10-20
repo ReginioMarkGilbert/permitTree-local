@@ -4,6 +4,7 @@ import {
    DialogContent,
    DialogHeader,
    DialogTitle,
+   DialogDescription
 } from "@/components/ui/dialog";
 
 const ViewApplicationModal = ({ isOpen, onClose, application }) => {
@@ -19,6 +20,7 @@ const ViewApplicationModal = ({ isOpen, onClose, application }) => {
          <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
                <DialogTitle>Application Details</DialogTitle>
+               <DialogDescription> View the details of the application. </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
                <div className="grid grid-cols-4 items-center gap-4">

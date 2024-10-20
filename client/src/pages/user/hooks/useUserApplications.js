@@ -80,6 +80,14 @@ const UPDATE_COV_PERMIT = gql`
       vehiclePlateNumber
       originAddress
       destinationAddress
+      files {
+        letterOfIntent { filename contentType }
+        tallySheet { filename contentType }
+        forestCertification { filename contentType }
+        orCr { filename contentType }
+        driverLicense { filename contentType }
+        specialPowerOfAttorney { filename contentType }
+      }
     }
   }
 `;

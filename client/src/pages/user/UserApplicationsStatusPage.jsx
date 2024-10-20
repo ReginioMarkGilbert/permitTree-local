@@ -98,6 +98,11 @@ const UserApplicationsStatusPage = () => {
          console.log('Attempting to edit application:', id);
          console.log('Edited data:', editedData);
 
+         if (!editedData.applicationType) {
+            console.error('Application type is undefined:', editedData);
+            throw new Error('Application type is undefined');
+         }
+
          switch (editedData.applicationType) {
             case 'Certificate of Verification':
                await updateCOVPermit(id, editedData);
@@ -109,7 +114,8 @@ const UserApplicationsStatusPage = () => {
                await updatePLTPPermit(id, editedData);
                break;
             default:
-               throw new Error('Unsupported application type');
+               console.error('Unsupported application type:', editedData.applicationType);
+               throw new Error(`Unsupported application type: ${editedData.applicationType}`);
          }
 
          toast.success('Application updated successfully');

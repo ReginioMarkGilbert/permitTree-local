@@ -131,7 +131,12 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
    const handleSubmit = (e) => {
       e.preventDefault();
       console.log('Submitting updated formData:', formData);
-      onSave(formData);
+      // Ensure applicationType is included in the data being saved
+      const dataToSave = {
+         ...formData,
+         applicationType: application.applicationType // Ensure this is always included
+      };
+      onSave(dataToSave);
       onClose();
    };
 
