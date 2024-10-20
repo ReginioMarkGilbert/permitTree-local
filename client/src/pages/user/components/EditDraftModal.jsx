@@ -4,13 +4,35 @@ import { Button } from "@/components/ui/button";
 import COVEditForm from './permitForms/COVEditForm';
 import CSAWEditForm from './permitForms/CSAWEditForm';
 import '@/components/ui/styles/customScrollBar.css';
+import { useUserApplications } from '../hooks/useUserApplications';
 
 const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
    const [formData, setFormData] = useState(application);
+   const { fetchCOVPermit } = useUserApplications();
+   const [hasFetched, setHasFetched] = useState(false);
 
    useEffect(() => {
-      setFormData(application);
-   }, [application]);
+      const fetchPermitData = async () => {
+         if (application.applicationType === 'Certificate of Verification' && !hasFetched) {
+            try {
+               const permitData = await fetchCOVPermit(application.id);
+               setFormData(permitData);
+               setHasFetched(true);
+            } catch (error) {
+               console.error('Error fetching COV permit data:', error);
+            }
+         } else if (!hasFetched) {
+            setFormData(application);
+            setHasFetched(true);
+         }
+      };
+
+      if (isOpen) {
+         fetchPermitData();
+      } else {
+         setHasFetched(false);
+      }
+   }, [isOpen, application, fetchCOVPermit, hasFetched]);
 
    const handleInputChange = (e) => {
       const { name, value } = e.target;

@@ -55,7 +55,7 @@ const UserApplicationsStatusPage = () => {
    }, [activeSubTab, refetch]);
 
    useEffect(() => {
-      console.log('Applications data changed:', applications);
+      // console.log('Applications data changed:', applications);
    }, [applications]);
 
    const handleDeleteClick = (application) => {
