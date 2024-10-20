@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import COVEditForm from './permitForms/COVEditForm';
@@ -7,10 +7,12 @@ import '@/components/ui/styles/customScrollbar.css';
 import { useUserApplications } from '../hooks/useUserApplications';
 
 // Utility function to safely format date
-const safeFormatDate = (dateString) => {
-   if (!dateString) return '';
-   const date = new Date(dateString);
-   return isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0];
+const formatDate = (dateString) => {
+   return new Date(dateString).toLocaleDateString('en-US', {
+       year: 'numeric',
+       month: '2-digit',
+       day: '2-digit'
+   });
 };
 
 const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
@@ -18,40 +20,46 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
    const { fetchCOVPermit, fetchCSAWPermit } = useUserApplications();
    const [hasFetched, setHasFetched] = useState(false);
 
-   useEffect(() => {
-      const fetchPermitData = async () => {
-         if (!hasFetched) {
-            try {
-               let permitData;
-               if (application.applicationType === 'Certificate of Verification') {
-                  permitData = await fetchCOVPermit(application.id);
-               } else if (application.applicationType === 'Chainsaw Registration') {
-                  permitData = await fetchCSAWPermit(application.id);
-               } else {
-                  permitData = application;
-               }
-               setFormData(permitData);
-               setHasFetched(true);
-            } catch (error) {
-               console.error('Error fetching permit data:', error);
+   const fetchPermitData = useCallback(async () => {
+      if (!hasFetched) {
+         try {
+            let permitData;
+            if (application.applicationType === 'Certificate of Verification') {
+               permitData = await fetchCOVPermit(application.id);
+            } else if (application.applicationType === 'Chainsaw Registration') {
+               permitData = await fetchCSAWPermit(application.id);
+            } else {
+               permitData = application;
             }
+            console.log('Permit data fetched:', permitData);
+            setFormData(permitData);
+            setHasFetched(true);
+         } catch (error) {
+            console.error('Error fetching permit data:', error);
          }
-      };
+      }
+   }, [application, fetchCOVPermit, fetchCSAWPermit, hasFetched]);
 
+   useEffect(() => {
       if (isOpen) {
          fetchPermitData();
+         setHasFetched(true); // stop fetching after first fetch
       } else {
          setHasFetched(false);
       }
-   }, [isOpen, application, fetchCOVPermit, fetchCSAWPermit, hasFetched]);
+   }, [isOpen, fetchPermitData]);
+
+   // const handleInputChange = (e) => {
+   //    const { name, value } = e.target;
+   //    setFormData(prevData => ({
+   //       ...prevData,
+   //       // [name]: value
+   //       [name]: name === 'dateOfAcquisition' ? new Date(value).toISOString() : value
+   //    }));
+   // };
 
    const handleInputChange = (e) => {
-      const { name, value } = e.target;
-      setFormData(prevData => ({
-         ...prevData,
-         // [name]: value
-         [name]: name === 'dateOfAcquisition' ? new Date(value).toISOString() : value
-      }));
+      setFormData({ ...formData, [e.target.name]: e.target.value });
    };
 
    const handleCheckboxChange = (name, checked) => {

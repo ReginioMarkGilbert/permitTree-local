@@ -6,10 +6,11 @@ import { X, Upload } from 'lucide-react';
 import '@/components/ui/styles/customScrollbar.css';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { format, parseISO, isValid } from 'date-fns';
+import { format, parseISO, isValid, parse } from 'date-fns';
 
 
 const CSAWEditForm = ({ formData, handleInputChange, handleFileChange, removeFile, handleCheckboxChange }) => {
+   // console.log('CSAWEditForm formData:', formData);
    const [customStore, setCustomStore] = useState('');
 
    useEffect(() => {
@@ -92,19 +93,23 @@ const CSAWEditForm = ({ formData, handleInputChange, handleFileChange, removeFil
       ));
    };
 
-   const formatDate = (dateString) => {
+   const formatDateForInput = (dateString) => {
       if (!dateString) return '';
-      let date;
-      if (typeof dateString === 'string') {
-         date = new Date(dateString);
-      } else if (dateString instanceof Date) {
-         date = dateString;
-      } else {
-         console.error('Invalid date:', dateString);
-         return '';
-      }
-      return isValid(date) ? format(date, 'yyyy-MM-dd') : '';
+      const date = new Date(parseInt(dateString));
+      return format(date, 'yyyy-MM-dd');
    };
+
+   const handleDateChange = (e) => {
+      const { name, value } = e.target;
+      const date = parse(value, 'yyyy-MM-dd', new Date());
+      handleInputChange({
+         target: {
+            name,
+            value: date.getTime().toString()
+         }
+      });
+   };
+
    //   console.log('CSAWEditForm rendered with formData:', formData);
 
    return (
@@ -214,8 +219,8 @@ const CSAWEditForm = ({ formData, handleInputChange, handleFileChange, removeFil
                id="dateOfAcquisition"
                name="dateOfAcquisition"
                type="date"
-               value={formatDate(formData.dateOfAcquisition)}
-               onChange={handleInputChange}
+               value={formatDateForInput(formData.dateOfAcquisition)}
+               onChange={handleDateChange}
                required
             />
          </div>

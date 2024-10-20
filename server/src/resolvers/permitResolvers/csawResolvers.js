@@ -1,6 +1,7 @@
 const CSAWPermit = require('../../models/permits/CSAWPermit');
 const { CSAW_ApplicationNumber } = require('../../utils/customIdGenerator');
 const { Binary } = require('mongodb');
+const { format } = require('date-fns');
 
 const csawResolvers = {
    Query: {
@@ -70,6 +71,11 @@ const csawResolvers = {
             throw new Error('You are not authorized to update this permit');
          }
 
+         // Convert timestamp to ISO date string
+         if (input.dateOfAcquisition) {
+            input.dateOfAcquisition = format(new Date(parseInt(input.dateOfAcquisition)), 'yyyy-MM-dd');
+         }
+
          // Update non-file fields
          Object.keys(input).forEach(key => {
             if (key !== 'files' && input[key] !== undefined) {
@@ -99,10 +105,6 @@ const csawResolvers = {
 
          // Ensure the files field is marked as modified
          permit.markModified('files');
-
-         if (input.dateOfAcquisition) {
-            input.dateOfAcquisition = new Date(input.dateOfAcquisition).toISOString();
-         }
 
          await permit.save();
 

@@ -279,7 +279,7 @@ export const useUserApplications = (status) => {
             brand: input.brand,
             model: input.model,
             serialNumber: input.serialNumber,
-            dateOfAcquisition: new Date(input.dateOfAcquisition).toISOString(), // Convert to ISO string
+            dateOfAcquisition: input.dateOfAcquisition.split('T')[0],
             powerOutput: input.powerOutput,
             maxLengthGuidebar: input.maxLengthGuidebar,
             countryOfOrigin: input.countryOfOrigin,
@@ -329,6 +329,7 @@ export const useUserApplications = (status) => {
    const fetchCSAWPermit = async (id) => {
       try {
          const { data } = await getCSAWPermit({ variables: { id } });
+         // console.log('Fetched CSAW permit data:', data.getCSAWPermitById); // Add this line
          return data.getCSAWPermitById;
       } catch (error) {
          console.error('Error fetching CSAW permit:', error);

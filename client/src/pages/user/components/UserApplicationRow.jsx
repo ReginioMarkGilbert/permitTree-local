@@ -8,7 +8,8 @@ const UserApplicationRow = ({ app, onView, onEdit, onDelete, getStatusColor }) =
 
    const formatDate = (timestamp) => {
       const date = new Date(parseInt(timestamp));
-      return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      return date.toLocaleDateString(); // format: month/day/year, eg: 6/25/2024
+      // return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
    };
 
    const handleEditClick = () => {

@@ -73,6 +73,7 @@ const UserApplicationsStatusPage = () => {
             toast.success('Draft deleted successfully');
             setDeleteDialogOpen(false);
             setApplicationToDelete(null);
+            refetch();
          } catch (error) {
             console.error('Error deleting draft:', error);
             toast.error(`Error deleting draft: ${error.message || 'Unknown error occurred'}`);
