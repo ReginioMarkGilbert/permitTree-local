@@ -13,14 +13,16 @@ const NGA = () => {
     officeName: '',
     officeAddress: '',
     isProtectedArea: false,
+    lguEndorsement: '',
     barangayCert: '',
     municipalityCert: '',
-    otherAttachment: '',
     sitePlan: '',
     waiver: '',
     ecc: '',
     fpic: '',
-    pambClearance: ''
+    pambClearance: '',
+    otherAttachment: '',
+    declarationAgreement: false
   });
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -226,96 +228,122 @@ const NGA = () => {
         return (
           <div className="section nature-inspired">
             <h2>Upload Requirements</h2>
-            <div className="upload-grid">
-              <div className="upload-column">
-                <div className="form-group">
-                  <label>
-                    Barangay Certification:
-                    <input
-                      type="file"
-                      name="barangayCert"
-                      onChange={handleFileChange}
-                      required
-                    />
-                  </label>
+            <p className="upload-instructions">Please upload the following documents. All files should be in PDF, JPG, or PNG format and must not exceed 5MB each.</p>
+            
+            <div className="requirement-category">
+              <h3>LGU Endorsement/ Certification of No Objection:</h3>
+              <div className="form-group">
+                <label>
+                  Barangay Certification:
+                  <input
+                    type="file"
+                    name="barangayCert"
+                    onChange={handleFileChange}
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    required
+                  />
+                  {!formData.barangayCert && <span className="required-indicator">*Required</span>}
+                </label>
+              </div>
+              <div className="form-group">
+                <label>
+                  Municipality/City Certification:
+                  <input
+                    type="file"
+                    name="municipalityCert"
+                    onChange={handleFileChange}
+                    accept=".pdf,.jpg,.jpeg,.png"
+                  />
+                  <span className="optional-indicator">(Optional)</span>
+                </label>
+              </div>
+            </div>
+
+            <div className="requirement-category">
+              <h3>Additional Requirements:</h3>
+              <div className="upload-grid">
+                <div className="upload-column">
+                  <div className="form-group">
+                    <label>
+                      Approved Site Development Plan/ Infrastructure Plan with Tree Charting:
+                      <input
+                        type="file"
+                        name="sitePlan"
+                        onChange={handleFileChange}
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        required
+                      />
+                      {!formData.sitePlan && <span className="required-indicator">*Required</span>}
+                    </label>
+                  </div>
+                  <div className="form-group">
+                    <label>
+                      Waiver/Consent of Owner/s, if Titled Property:
+                      <input
+                        type="file"
+                        name="waiver"
+                        onChange={handleFileChange}
+                        accept=".pdf,.jpg,.jpeg,.png"
+                      />
+                      <span className="optional-indicator">(If applicable)</span>
+                    </label>
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label>
-                    Municipality Certification:
-                    <input
-                      type="file"
-                      name="municipalityCert"
-                      onChange={handleFileChange}
-                      required
-                    />
-                  </label>
-                </div>
-                <div className="form-group">
-                  <label>
-                    Site Plan:
-                    <input
-                      type="file"
-                      name="sitePlan"
-                      onChange={handleFileChange}
-                      required
-                    />
-                  </label>
-                </div>
-                <div className="form-group">
-                  <label>
-                    Waiver:
-                    <input
-                      type="file"
-                      name="waiver"
-                      onChange={handleFileChange}
-                      required
-                    />
-                  </label>
+                <div className="upload-column">
+                  <div className="form-group">
+                    <label>
+                      Environmental Compliance Certificate (ECC)/ Certificate of Non-Coverage (CNC):
+                      <input
+                        type="file"
+                        name="ecc"
+                        onChange={handleFileChange}
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        required
+                      />
+                      {!formData.ecc && <span className="required-indicator">*Required</span>}
+                    </label>
+                  </div>
+                  <div className="form-group">
+                    <label>
+                      Free, Prior and Informed Consent (FPIC):
+                      <input
+                        type="file"
+                        name="fpic"
+                        onChange={handleFileChange}
+                        accept=".pdf,.jpg,.jpeg,.png"
+                      />
+                      <span className="optional-indicator">(If applicable)</span>
+                    </label>
+                  </div>
+                  <div className="form-group">
+                    <label>
+                      PAMB Clearance/Resolution:
+                      <input
+                        type="file"
+                        name="pambClearance"
+                        onChange={handleFileChange}
+                        accept=".pdf,.jpg,.jpeg,.png"
+                      />
+                      <span className="optional-indicator">(If within Protected Areas)</span>
+                    </label>
+                  </div>
                 </div>
               </div>
-              <div className="upload-column">
-                <div className="form-group">
-                  <label>
-                    ECC:
-                    <input
-                      type="file"
-                      name="ecc"
-                      onChange={handleFileChange}
-                      required
-                    />
-                  </label>
-                </div>
-                <div className="form-group">
-                  <label>
-                    FPIC (if applicable):
-                    <input
-                      type="file"
-                      name="fpic"
-                      onChange={handleFileChange}
-                    />
-                  </label>
-                </div>
-                <div className="form-group">
-                  <label>
-                    PAMB Clearance (if applicable):
-                    <input
-                      type="file"
-                      name="pambClearance"
-                      onChange={handleFileChange}
-                    />
-                  </label>
-                </div>
-                <div className="form-group">
-                  <label>
-                    Other Attachment:
-                    <input
-                      type="file"
-                      name="otherAttachment"
-                      onChange={handleFileChange}
-                    />
-                  </label>
-                </div>
-              </div>
+            </div>
+            
+            <div className="declaration-section">
+              <label className="declaration-checkbox">
+                <input
+                  type="checkbox"
+                  name="declarationAgreement"
+                  checked={formData.declarationAgreement}
+                  onChange={handleChange}
+                  required
+                />
+                <span className="declaration-text">
+                  I understand that any false statement, misrepresentation and/or misdeclaration stated herein shall be a ground for denial and/or revocation of registration without prejudice to the filing of appropriate legal action.
+                </span>
+              </label>
             </div>
           </div>
         );
