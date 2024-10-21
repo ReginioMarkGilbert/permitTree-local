@@ -13,6 +13,7 @@ import {
    DialogHeader,
    DialogTitle,
 } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const UserApplicationsStatusPage = () => {
    const [searchTerm, setSearchTerm] = useState('');
@@ -20,6 +21,8 @@ const UserApplicationsStatusPage = () => {
    const [activeSubTab, setActiveSubTab] = useState('Draft');
    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
    const [applicationToDelete, setApplicationToDelete] = useState(null);
+   const [unsubmitDialogOpen, setUnsubmitDialogOpen] = useState(false);
+   const [applicationToUnsubmit, setApplicationToUnsubmit] = useState(null);
 
    const {
       applications,
@@ -32,7 +35,8 @@ const UserApplicationsStatusPage = () => {
       updatePLTPPermit,
       fetchCOVPermit,
       fetchCSAWPermit,
-      fetchPLTPPermit
+      fetchPLTPPermit,
+      unsubmitPermit,
    } = useUserApplications(activeSubTab);
 
    const mainTabs = ['Applications', 'Order Of Payments'];
@@ -126,6 +130,26 @@ const UserApplicationsStatusPage = () => {
       }
    };
 
+   const handleUnsubmitClick = (application) => {
+      setApplicationToUnsubmit(application);
+      setUnsubmitDialogOpen(true);
+   };
+
+   const handleUnsubmitConfirm = async () => {
+      if (applicationToUnsubmit) {
+         try {
+            await unsubmitPermit(applicationToUnsubmit.id);
+            toast.success('Application unsubmitted successfully');
+            setUnsubmitDialogOpen(false);
+            setApplicationToUnsubmit(null);
+            refetch(); // This should refresh the list and move the application to the Draft tab
+         } catch (error) {
+            console.error('Error unsubmitting application:', error);
+            toast.error(`Error unsubmitting application: ${error.message || 'Unknown error occurred'}`);
+         }
+      }
+   };
+
    const renderTable = () => {
       if (loading) return <p className="text-center text-gray-500">Loading...</p>;
       if (error) return <p className="text-center text-red-500">Error: {error.message}</p>;
@@ -162,6 +186,7 @@ const UserApplicationsStatusPage = () => {
                         app={app}
                         onEdit={handleEditApplication}
                         onDelete={handleDeleteClick}
+                        onUnsubmit={handleUnsubmitClick}
                         getStatusColor={getStatusColor}
                         fetchCOVPermit={fetchCOVPermit}
                         fetchCSAWPermit={fetchCSAWPermit}
@@ -242,6 +267,20 @@ const UserApplicationsStatusPage = () => {
                </DialogFooter>
             </DialogContent>
          </Dialog>
+         <AlertDialog open={unsubmitDialogOpen} onOpenChange={setUnsubmitDialogOpen}>
+            <AlertDialogContent>
+               <AlertDialogHeader>
+                  <AlertDialogTitle>Confirm Unsubmit</AlertDialogTitle>
+                  <AlertDialogDescription>
+                     Are you sure you want to unsubmit this application? It will be moved back to Draft status.
+                  </AlertDialogDescription>
+               </AlertDialogHeader>
+               <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleUnsubmitConfirm}>Unsubmit</AlertDialogAction>
+               </AlertDialogFooter>
+            </AlertDialogContent>
+         </AlertDialog>
       </div>
    );
 };

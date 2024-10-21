@@ -41,6 +41,8 @@ const mutationTypes = gql`
     saveCSAWPermitDraft(input: CSAWPermitInput!): CSAWPermit
 
     deletePermit(id: ID!): Boolean
+
+    unsubmitPermit(id: ID!): Permit
   }
 `;
 

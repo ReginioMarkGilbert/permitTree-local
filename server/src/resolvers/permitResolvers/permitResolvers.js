@@ -76,6 +76,29 @@ const permitResolvers = {
          await Permit.findByIdAndDelete(id);
          return true;
       },
+      unsubmitPermit: async (_, { id }, { user }) => {
+         if (!user) {
+            throw new Error('You must be logged in to unsubmit a permit');
+         }
+
+         const permit = await Permit.findById(id);
+         if (!permit) {
+            throw new Error('Permit not found');
+         }
+
+         if (permit.applicantId.toString() !== user.id) {
+            throw new Error('You are not authorized to unsubmit this permit');
+         }
+
+         if (permit.status !== 'Submitted') {
+            throw new Error('Only submitted permits can be unsubmitted');
+         }
+
+         permit.status = 'Draft';
+         await permit.save();
+
+         return permit;
+      },
    },
 };
 

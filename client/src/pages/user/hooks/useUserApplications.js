@@ -228,6 +228,15 @@ const GET_PLTP_PERMIT = gql`
   }
 `;
 
+const UNSUBMIT_PERMIT = gql`
+  mutation UnsubmitPermit($id: ID!) {
+    unsubmitPermit(id: $id) {
+      id
+      status
+    }
+  }
+`;
+
 export const useUserApplications = (status) => {
    // console.log('useUserApplications called with status:', status);
 
@@ -245,6 +254,7 @@ export const useUserApplications = (status) => {
    const [getCSAWPermit] = useLazyQuery(GET_CSAW_PERMIT);
    const [updatePLTPPermitMutation] = useMutation(UPDATE_PLTP_PERMIT);
    const [getPLTPPermit] = useLazyQuery(GET_PLTP_PERMIT);
+   const [unsubmitPermitMutation] = useMutation(UNSUBMIT_PERMIT);
 
    const deletePermit = async (id) => {
       console.log('Attempting to delete permit with id:', id);
@@ -457,6 +467,33 @@ export const useUserApplications = (status) => {
       }
    };
 
+   const unsubmitPermit = async (id) => {
+      console.log('Attempting to unsubmit permit with id:', id);
+      try {
+         const { data } = await unsubmitPermitMutation({
+            variables: { id },
+            refetchQueries: [{ query: GET_USER_APPLICATIONS, variables: { status } }]
+         });
+         console.log('Unsubmit mutation result:', data);
+         if (data.unsubmitPermit) {
+            return data.unsubmitPermit;
+         } else {
+            throw new Error('Failed to unsubmit permit');
+         }
+      } catch (error) {
+         console.error('Error unsubmitting permit:', error);
+         if (error.graphQLErrors) {
+            error.graphQLErrors.forEach(({ message, locations, path }) => {
+               console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`);
+            });
+         }
+         if (error.networkError) {
+            console.log(`[Network error]: ${error.networkError}`);
+         }
+         throw error;
+      }
+   };
+
    return {
       applications: data?.getUserApplications || [],
       loading,
@@ -468,6 +505,7 @@ export const useUserApplications = (status) => {
       updateCSAWPermit,
       fetchCSAWPermit,
       updatePLTPPermit,
-      fetchPLTPPermit
+      fetchPLTPPermit,
+      unsubmitPermit
    };
 };

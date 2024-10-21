@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Eye, Edit, Trash2 } from 'lucide-react';
+import { Eye, Edit, Trash2, RotateCcw } from 'lucide-react';
 import EditDraftModal from './EditDraftModal';
 import ViewApplicationModal from './ViewApplicationModal';
 
@@ -8,6 +8,7 @@ const UserApplicationRow = ({
    app,
    onEdit,
    onDelete,
+   onUnsubmit,
    getStatusColor,
    fetchCOVPermit,
    fetchCSAWPermit,
@@ -54,19 +55,26 @@ const UserApplicationRow = ({
                </span>
             </td>
             <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-               <Button onClick={handleViewClick} className="mr-2" variant="outline" size="sm">
-                  <Eye className="h-4 w-4 mr-1" /> View
-               </Button>
-               {app.status === 'Draft' && (
-                  <>
-                     <Button onClick={handleEditClick} className="mr-2" variant="outline" size="sm">
-                        <Edit className="h-4 w-4 mr-1" /> Edit
+               <div className="flex items-center space-x-2">
+                  <Button onClick={handleViewClick} variant="outline" size="sm">
+                     <Eye className="h-4 w-4 mr-1" /> View
+                  </Button>
+                  {app.status === 'Draft' && (
+                     <>
+                        <Button onClick={handleEditClick} variant="outline" size="sm">
+                           <Edit className="h-4 w-4 mr-1" /> Edit
+                        </Button>
+                        <Button onClick={() => onDelete(app)} variant="outline" size="sm" className="text-red-600 hover:text-red-800">
+                           <Trash2 className="h-4 w-4 mr-1" /> Delete
+                        </Button>
+                     </>
+                  )}
+                  {app.status === 'Submitted' && (
+                     <Button onClick={() => onUnsubmit(app)} variant="outline" size="sm" className="text-yellow-600 hover:text-yellow-800">
+                        <RotateCcw className="h-4 w-4 mr-1" /> Unsubmit
                      </Button>
-                     <Button onClick={() => onDelete(app)} variant="outline" size="sm" className="text-red-600 hover:text-red-800">
-                        <Trash2 className="h-4 w-4 mr-1" /> Delete
-                     </Button>
-                  </>
-               )}
+                  )}
+               </div>
             </td>
          </tr>
          <EditDraftModal
