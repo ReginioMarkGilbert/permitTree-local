@@ -46,6 +46,28 @@ const permitResolvers = {
             throw new Error(`Failed to fetch permits: ${error.message}`);
          }
       },
+      getRecentApplications: async (_, { limit }, { user }) => {
+         if (!user) {
+            throw new Error('You must be logged in to view your applications');
+         }
+
+         try {
+            const permits = await Permit.find({ applicantId: user.id })
+               .sort({ dateOfSubmission: -1 })
+               .limit(limit)
+               .lean()
+               .exec();
+
+            return permits.map(permit => ({
+               ...permit,
+               id: permit._id.toString(),
+               dateOfSubmission: permit.dateOfSubmission.getTime().toString()
+            }));
+         } catch (error) {
+            console.error('Error fetching recent permits:', error);
+            throw new Error(`Failed to fetch recent permits: ${error.message}`);
+         }
+      },
    },
    Mutation: {
       updatePermitStatus: async (_, { id, status }) => {

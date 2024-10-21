@@ -13,7 +13,8 @@
     "test:watch": "vitest watch",
     "test:permitForms": "vitest src/tests/pages/user/components/permitForms --silent",
     "test:components": "vitest src/tests/pages/user/components --silent",
-    "test:user-pages": "vitest src/tests/pages/user --silent"
+    "test:userpages": "vitest src/tests/pages/user --silent",
+    "test:newfile": "vitest src/tests/pages/user/HomePage.test.jsx --silent"
   },
   "dependencies": {
     "@apollo/client": "^3.11.8",
