@@ -10,7 +10,10 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "vitest",
-    "test:watch": "vitest watch"
+    "test:watch": "vitest watch",
+    "test:permitForms": "vitest src/tests/pages/user/components/permitForms --silent",
+    "test:components": "vitest src/tests/pages/user/components --silent",
+    "test:user-pages": "vitest src/tests/pages/user --silent"
   },
   "dependencies": {
     "@apollo/client": "^3.11.8",

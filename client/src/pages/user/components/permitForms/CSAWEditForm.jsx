@@ -127,10 +127,12 @@ const CSAWEditForm = ({ formData, handleInputChange, handleFileChange, removeFil
          <div>
             <Label htmlFor="chainsawStore">Chainsaw Store</Label>
             <Select
+               id="chainsawStore"
+               name="chainsawStore"
                value={chainsawStores.some(store => store.value === formData.chainsawStore) ? formData.chainsawStore : "other"}
                onValueChange={handleStoreChange}
             >
-               <SelectTrigger className="w-full">
+               <SelectTrigger className="w-full" aria-label="Chainsaw Store">
                   <SelectValue placeholder="Select Chainsaw Store" />
                </SelectTrigger>
                <SelectContent>
@@ -261,7 +263,12 @@ const CSAWEditForm = ({ formData, handleInputChange, handleFileChange, removeFil
                name="purchasePrice"
                type="number"
                value={formData.purchasePrice || ''}
-               onChange={handleInputChange}
+               onChange={(e) => handleInputChange({
+                  target: {
+                     name: e.target.name,
+                     value: e.target.value === '' ? '' : Number(e.target.value)
+                  }
+               })}
                required
             />
          </div>
