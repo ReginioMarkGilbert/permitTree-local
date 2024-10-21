@@ -237,6 +237,15 @@ const UNSUBMIT_PERMIT = gql`
   }
 `;
 
+const SUBMIT_PERMIT = gql`
+  mutation SubmitPermit($id: ID!) {
+    submitPermit(id: $id) {
+      id
+      status
+    }
+  }
+`;
+
 export const useUserApplications = (status) => {
    // console.log('useUserApplications called with status:', status);
 
@@ -255,6 +264,7 @@ export const useUserApplications = (status) => {
    const [updatePLTPPermitMutation] = useMutation(UPDATE_PLTP_PERMIT);
    const [getPLTPPermit] = useLazyQuery(GET_PLTP_PERMIT);
    const [unsubmitPermitMutation] = useMutation(UNSUBMIT_PERMIT);
+   const [submitPermitMutation] = useMutation(SUBMIT_PERMIT);
 
    const deletePermit = async (id) => {
       console.log('Attempting to delete permit with id:', id);
@@ -494,6 +504,33 @@ export const useUserApplications = (status) => {
       }
    };
 
+   const submitPermit = async (id) => {
+      console.log('Attempting to submit permit with id:', id);
+      try {
+         const { data } = await submitPermitMutation({
+            variables: { id },
+            refetchQueries: [{ query: GET_USER_APPLICATIONS, variables: { status } }]
+         });
+         console.log('Submit mutation result:', data);
+         if (data.submitPermit) {
+            return data.submitPermit;
+         } else {
+            throw new Error('Failed to submit permit');
+         }
+      } catch (error) {
+         console.error('Error submitting permit:', error);
+         if (error.graphQLErrors) {
+            error.graphQLErrors.forEach(({ message, locations, path }) => {
+               console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`);
+            });
+         }
+         if (error.networkError) {
+            console.log(`[Network error]: ${error.networkError}`);
+         }
+         throw error;
+      }
+   };
+
    return {
       applications: data?.getUserApplications || [],
       loading,
@@ -506,6 +543,7 @@ export const useUserApplications = (status) => {
       fetchCSAWPermit,
       updatePLTPPermit,
       fetchPLTPPermit,
-      unsubmitPermit
+      unsubmitPermit,
+      submitPermit
    };
 };

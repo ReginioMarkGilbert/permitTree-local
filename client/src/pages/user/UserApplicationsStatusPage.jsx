@@ -23,6 +23,8 @@ const UserApplicationsStatusPage = () => {
    const [applicationToDelete, setApplicationToDelete] = useState(null);
    const [unsubmitDialogOpen, setUnsubmitDialogOpen] = useState(false);
    const [applicationToUnsubmit, setApplicationToUnsubmit] = useState(null);
+   const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
+   const [applicationToSubmit, setApplicationToSubmit] = useState(null);
 
    const {
       applications,
@@ -37,6 +39,7 @@ const UserApplicationsStatusPage = () => {
       fetchCSAWPermit,
       fetchPLTPPermit,
       unsubmitPermit,
+      submitPermit,
    } = useUserApplications(activeSubTab);
 
    const mainTabs = ['Applications', 'Order Of Payments'];
@@ -150,6 +153,26 @@ const UserApplicationsStatusPage = () => {
       }
    };
 
+   const handleSubmitClick = (application) => {
+      setApplicationToSubmit(application);
+      setSubmitDialogOpen(true);
+   };
+
+   const handleSubmitConfirm = async () => {
+      if (applicationToSubmit) {
+         try {
+            await submitPermit(applicationToSubmit.id);
+            toast.success('Application submitted successfully');
+            setSubmitDialogOpen(false);
+            setApplicationToSubmit(null);
+            refetch();
+         } catch (error) {
+            console.error('Error submitting application:', error);
+            toast.error(`Error submitting application: ${error.message || 'Unknown error occurred'}`);
+         }
+      }
+   };
+
    const renderTable = () => {
       if (loading) return <p className="text-center text-gray-500">Loading...</p>;
       if (error) return <p className="text-center text-red-500">Error: {error.message}</p>;
@@ -187,6 +210,7 @@ const UserApplicationsStatusPage = () => {
                         onEdit={handleEditApplication}
                         onDelete={handleDeleteClick}
                         onUnsubmit={handleUnsubmitClick}
+                        onSubmit={handleSubmitClick}
                         getStatusColor={getStatusColor}
                         fetchCOVPermit={fetchCOVPermit}
                         fetchCSAWPermit={fetchCSAWPermit}
@@ -278,6 +302,20 @@ const UserApplicationsStatusPage = () => {
                <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction onClick={handleUnsubmitConfirm}>Unsubmit</AlertDialogAction>
+               </AlertDialogFooter>
+            </AlertDialogContent>
+         </AlertDialog>
+         <AlertDialog open={submitDialogOpen} onOpenChange={setSubmitDialogOpen}>
+            <AlertDialogContent>
+               <AlertDialogHeader>
+                  <AlertDialogTitle>Confirm Submission</AlertDialogTitle>
+                  <AlertDialogDescription>
+                     Are you sure you want to submit this application? You won't be able to edit it after submission.
+                  </AlertDialogDescription>
+               </AlertDialogHeader>
+               <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleSubmitConfirm}>Submit</AlertDialogAction>
                </AlertDialogFooter>
             </AlertDialogContent>
          </AlertDialog>

@@ -43,6 +43,7 @@ const mutationTypes = gql`
     deletePermit(id: ID!): Boolean
 
     unsubmitPermit(id: ID!): Permit
+    submitPermit(id: ID!): Permit
   }
 `;
 

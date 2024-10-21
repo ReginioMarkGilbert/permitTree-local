@@ -26,6 +26,7 @@ describe('UserApplicationRow', () => {
       onEdit: vi.fn(),
       onDelete: vi.fn(),
       onUnsubmit: vi.fn(),
+      onSubmit: vi.fn(),
       getStatusColor: vi.fn(() => 'bg-blue-100 text-blue-800'),
       fetchCOVPermit: vi.fn(),
       fetchCSAWPermit: vi.fn(),
@@ -63,12 +64,23 @@ describe('UserApplicationRow', () => {
       expect(mockFunctions.onUnsubmit).toHaveBeenCalledWith(mockApp);
    });
 
-   it('does not show unsubmit button for draft applications', () => {
+   it('renders correctly for a draft application', () => {
       const draftApp = { ...mockApp, status: 'Draft' };
       renderComponent(draftApp);
 
       expect(screen.queryByRole('button', { name: /unsubmit/i })).not.toBeInTheDocument();
       expect(screen.getByRole('button', { name: /edit/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /submit/i })).toBeInTheDocument();
+   });
+
+   it('calls onSubmit when submit button is clicked', () => {
+      const draftApp = { ...mockApp, status: 'Draft' };
+      renderComponent(draftApp);
+
+      const submitButton = screen.getByRole('button', { name: /submit/i });
+      fireEvent.click(submitButton);
+
+      expect(mockFunctions.onSubmit).toHaveBeenCalledWith(draftApp);
    });
 });

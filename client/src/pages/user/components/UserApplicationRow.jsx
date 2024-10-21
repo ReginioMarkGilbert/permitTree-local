@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Eye, Edit, Trash2, RotateCcw } from 'lucide-react';
+import { Eye, Edit, Trash2, RotateCcw, Send } from 'lucide-react';
 import EditDraftModal from './EditDraftModal';
 import ViewApplicationModal from './ViewApplicationModal';
 
@@ -9,6 +9,7 @@ const UserApplicationRow = ({
    onEdit,
    onDelete,
    onUnsubmit,
+   onSubmit,
    getStatusColor,
    fetchCOVPermit,
    fetchCSAWPermit,
@@ -66,6 +67,9 @@ const UserApplicationRow = ({
                         </Button>
                         <Button onClick={() => onDelete(app)} variant="outline" size="sm" className="text-red-600 hover:text-red-800">
                            <Trash2 className="h-4 w-4 mr-1" /> Delete
+                        </Button>
+                        <Button onClick={() => onSubmit(app)} variant="outline" size="sm" className="text-green-600 hover:text-green-800">
+                           <Send className="h-4 w-4 mr-1" /> Submit
                         </Button>
                      </>
                   )}

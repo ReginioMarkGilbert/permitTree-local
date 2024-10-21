@@ -99,6 +99,29 @@ const permitResolvers = {
 
          return permit;
       },
+      submitPermit: async (_, { id }, { user }) => {
+         if (!user) {
+            throw new Error('You must be logged in to submit a permit');
+         }
+
+         const permit = await Permit.findById(id);
+         if (!permit) {
+            throw new Error('Permit not found');
+         }
+
+         if (permit.applicantId.toString() !== user.id) {
+            throw new Error('You are not authorized to submit this permit');
+         }
+
+         if (permit.status !== 'Draft') {
+            throw new Error('Only draft permits can be submitted');
+         }
+
+         permit.status = 'Submitted';
+         await permit.save();
+
+         return permit;
+      },
    },
 };
 
