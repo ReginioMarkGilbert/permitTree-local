@@ -290,6 +290,90 @@ const UPDATE_PTPR_PERMIT = gql`
   }
 `;
 
+const GET_SPLTP_PERMIT = gql`
+  query GetSPLTPPermit($id: ID!) {
+    getSPLTPPermitById(id: $id) {
+      id
+      name
+      address
+      contactNumber
+      plantedTrees
+      naturallyGrown
+      standing
+      blownDown
+      withinPrivateLand
+      withinTenuredForestLand
+      posingDanger
+      forPersonalUse
+      purpose
+      files {
+        letterOfIntent { filename contentType }
+        lguEndorsement { filename contentType }
+        titleCertificate { filename contentType }
+        darCertificate { filename contentType }
+        specialPowerOfAttorney { filename contentType }
+        ptaResolution { filename contentType }
+      }
+    }
+  }
+`;
+
+const UPDATE_SPLTP_PERMIT = gql`
+  mutation UpdateSPLTPPermit($id: ID!, $input: SPLTPPermitInput!) {
+    updateSPLTPPermit(id: $id, input: $input) {
+      id
+      name
+      address
+      contactNumber
+      plantedTrees
+      naturallyGrown
+      standing
+      blownDown
+      withinPrivateLand
+      withinTenuredForestLand
+      posingDanger
+      forPersonalUse
+      purpose
+      files {
+        letterOfIntent { filename contentType }
+        lguEndorsement { filename contentType }
+        titleCertificate { filename contentType }
+        darCertificate { filename contentType }
+        specialPowerOfAttorney { filename contentType }
+        ptaResolution { filename contentType }
+      }
+    }
+  }
+`;
+
+const SAVE_SPLTP_PERMIT_DRAFT = gql`
+  mutation SaveSPLTPPermitDraft($input: SPLTPPermitDraftInput!) {
+    saveSPLTPPermitDraft(input: $input) {
+      id
+      name
+      address
+      contactNumber
+      plantedTrees
+      naturallyGrown
+      standing
+      blownDown
+      withinPrivateLand
+      withinTenuredForestLand
+      posingDanger
+      forPersonalUse
+      purpose
+      files {
+        letterOfIntent { filename contentType }
+        lguEndorsement { filename contentType }
+        titleCertificate { filename contentType }
+        darCertificate { filename contentType }
+        specialPowerOfAttorney { filename contentType }
+        ptaResolution { filename contentType }
+      }
+    }
+  }
+`;
+
 export const useUserApplications = (status) => {
    // console.log('useUserApplications called with status:', status);
 
@@ -311,6 +395,8 @@ export const useUserApplications = (status) => {
    const [submitPermitMutation] = useMutation(SUBMIT_PERMIT);
    const [updatePTPRPermitMutation] = useMutation(UPDATE_PTPR_PERMIT);
    const [getPTPRPermit] = useLazyQuery(GET_PTPR_PERMIT);
+   const [updateSPLTPPermitMutation] = useMutation(UPDATE_SPLTP_PERMIT);
+   const [getSPLTPPermit] = useLazyQuery(GET_SPLTP_PERMIT);
 
    const deletePermit = async (id) => {
       console.log('Attempting to delete permit with id:', id);
@@ -635,6 +721,69 @@ export const useUserApplications = (status) => {
       }
    };
 
+   const updateSPLTPPermit = async (id, input) => {
+      console.log('Updating SPLTP permit:', id);
+      console.log('Update input:', input);
+      try {
+         // Clean the input data
+         const cleanedInput = {
+            name: input.name,
+            address: input.address,
+            contactNumber: input.contactNumber,
+            plantedTrees: input.plantedTrees,
+            naturallyGrown: input.naturallyGrown,
+            standing: input.standing,
+            blownDown: input.blownDown,
+            withinPrivateLand: input.withinPrivateLand,
+            withinTenuredForestLand: input.withinTenuredForestLand,
+            posingDanger: input.posingDanger,
+            forPersonalUse: input.forPersonalUse,
+            purpose: input.purpose,
+            files: {}
+         };
+
+         // Clean the files data
+         if (input.files) {
+            Object.keys(input.files).forEach(fileType => {
+               if (Array.isArray(input.files[fileType])) {
+                  cleanedInput.files[fileType] = input.files[fileType].map(file => ({
+                     filename: file.filename,
+                     contentType: file.contentType,
+                     data: file.data
+                  }));
+               }
+            });
+         }
+
+         const { data } = await updateSPLTPPermitMutation({
+            variables: {
+               id,
+               input: cleanedInput
+            },
+            refetchQueries: [{ query: GET_USER_APPLICATIONS, variables: { status: input.status } }]
+         });
+         console.log('Update mutation result:', data);
+         if (data.updateSPLTPPermit) {
+            return data.updateSPLTPPermit;
+         } else {
+            throw new Error('Failed to update permit');
+         }
+      } catch (error) {
+         console.error('Error updating SPLTP permit:', error);
+         throw error;
+      }
+   };
+
+   const fetchSPLTPPermit = async (id) => {
+      try {
+         const { data } = await getSPLTPPermit({ variables: { id } });
+         return data.getSPLTPPermitById;
+      } catch (error) {
+         console.error('Error fetching SPLTP permit:', error);
+         throw error;
+      }
+   };
+
    return {
       applications: data?.getUserApplications || [],
       loading,
@@ -650,6 +799,9 @@ export const useUserApplications = (status) => {
       unsubmitPermit,
       submitPermit,
       updatePTPRPermit,
-      fetchPTPRPermit
+
+      fetchPTPRPermit,
+      updateSPLTPPermit,
+      fetchSPLTPPermit
    };
 };

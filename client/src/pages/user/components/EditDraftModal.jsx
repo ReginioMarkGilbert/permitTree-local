@@ -5,6 +5,7 @@ import COVEditForm from './permitForms/COVEditForm';
 import CSAWEditForm from './permitForms/CSAWEditForm';
 import PLTPEditForm from './permitForms/PLTPEditForm';
 import PTPREditForm from './permitForms/PTPREditForm';
+import SPLTPEditForm from './permitForms/SPLTPEditForm'; // Import the new SPLTPEditForm
 import '@/components/ui/styles/customScrollbar.css';
 import { useUserApplications } from '../hooks/useUserApplications';
 
@@ -19,7 +20,7 @@ const formatDate = (dateString) => {
 
 const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
    const [formData, setFormData] = useState(application);
-   const { fetchCOVPermit, fetchCSAWPermit, fetchPLTPPermit, fetchPTPRPermit } = useUserApplications();
+   const { fetchCOVPermit, fetchCSAWPermit, fetchPLTPPermit, fetchPTPRPermit, fetchSPLTPPermit } = useUserApplications();
    const [hasFetched, setHasFetched] = useState(false);
 
    const fetchPermitData = useCallback(async () => {
@@ -39,6 +40,9 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
                case 'Private Tree Plantation Registration':
                   permitData = await fetchPTPRPermit(application.id);
                   break;
+               case 'Special/Private Land Timber Permit':
+                  permitData = await fetchSPLTPPermit(application.id);
+                  break;
                default:
                   permitData = application;
             }
@@ -49,7 +53,7 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
             console.error('Error fetching permit data:', error);
          }
       }
-   }, [application, fetchCOVPermit, fetchCSAWPermit, fetchPLTPPermit, fetchPTPRPermit, hasFetched]);
+   }, [application, fetchCOVPermit, fetchCSAWPermit, fetchPLTPPermit, fetchPTPRPermit, fetchSPLTPPermit, hasFetched]);
 
    useEffect(() => {
       if (isOpen) {
@@ -176,6 +180,14 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
                handleInputChange={handleInputChange}
                handleFileChange={handleFileChange}
                removeFile={removeFile}
+            />;
+         case 'Special/Private Land Timber Permit':
+            return <SPLTPEditForm
+               formData={formData}
+               handleInputChange={handleInputChange}
+               handleFileChange={handleFileChange}
+               removeFile={removeFile}
+               handleCheckboxChange={handleCheckboxChange}
             />;
          default:
             return <p>Unsupported permit type: {application.applicationType}</p>;
