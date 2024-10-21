@@ -88,16 +88,14 @@ const csawResolvers = {
             const updatedFiles = { ...permit.files };  // Start with existing files
             Object.keys(input.files).forEach(fileType => {
                if (Array.isArray(input.files[fileType])) {
-                  if (input.files[fileType].length > 0) {
-                     updatedFiles[fileType] = input.files[fileType].map(file => ({
-                        filename: file.filename,
-                        contentType: file.contentType,
-                        data: file.data ? Binary.createFromBase64(file.data) : undefined
-                     }));
-                  } else {
-                     // If the array is empty, set it to an empty array instead of removing it
-                     updatedFiles[fileType] = [];
-                  }
+                  updatedFiles[fileType] = input.files[fileType].map(file => ({
+                     filename: file.filename,
+                     contentType: file.contentType,
+                     data: file.data ? Binary.createFromBase64(file.data) : undefined
+                  }));
+               } else {
+                  // If the array is not present, set it to an empty array
+                  updatedFiles[fileType] = [];
                }
             });
             permit.files = updatedFiles;

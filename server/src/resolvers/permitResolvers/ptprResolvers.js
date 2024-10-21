@@ -38,7 +38,7 @@ const ptprResolvers = {
                ...input,
                applicationNumber,
                applicantId: user.id,
-               applicationType: 'PTPR',
+               applicationType: 'Private Tree Plantation Registration',
                status: 'Submitted',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
@@ -66,8 +66,39 @@ const ptprResolvers = {
             throw new Error('You are not authorized to update this permit');
          }
 
-         Object.assign(permit, input);
-         return await permit.save();
+         // Update non-file fields
+         Object.keys(input).forEach(key => {
+            if (key !== 'files' && input[key] !== undefined) {
+               permit[key] = input[key];
+            }
+         });
+
+         // Update files
+         if (input.files) {
+            const updatedFiles = { ...permit.files };  // Start with existing files
+            Object.keys(input.files).forEach(fileType => {
+               if (Array.isArray(input.files[fileType])) {
+                  if (input.files[fileType].length > 0) {
+                     updatedFiles[fileType] = input.files[fileType].map(file => ({
+                        filename: file.filename,
+                        contentType: file.contentType,
+                        data: file.data ? Binary.createFromBase64(file.data) : undefined
+                     }));
+                  } else {
+                     // If the array is empty, set it to an empty array instead of removing it
+                     updatedFiles[fileType] = [];
+                  }
+               }
+            });
+            permit.files = updatedFiles;
+         }
+
+         // Ensure the files field is marked as modified
+         permit.markModified('files');
+
+         await permit.save();
+
+         return permit;
       },
       savePTPRPermitDraft: async (_, { input }, { user }) => {
          if (!user) {
@@ -80,11 +111,11 @@ const ptprResolvers = {
             // Process file inputs
             const processedFiles = {};
             for (const [key, files] of Object.entries(input.files)) {
-               if (files && files.length > 0) {
+               if (files && Array.isArray(files) && files.length > 0) {
                   processedFiles[key] = files.map(file => ({
                      filename: file.filename,
                      contentType: file.contentType,
-                     data: Binary.createFromBase64(file.data)
+                     data: file.data ? Binary.createFromBase64(file.data) : null
                   }));
                } else {
                   processedFiles[key] = [];

@@ -130,11 +130,14 @@ const PTPRForm = () => {
 
          // Process files
          for (const [key, files] of Object.entries(formData.files)) {
-            if (files.length > 0) {
-               input.files[key] = files.map(file => ({
+            if (files && files.length > 0) {
+               input.files[key] = await Promise.all(files.map(async file => ({
                   filename: file.name,
-                  contentType: file.type
-               }));
+                  contentType: file.type,
+                  data: await readFileAsBase64(file)
+               })));
+            } else {
+               input.files[key] = []; // Use an empty array if no files
             }
          }
 

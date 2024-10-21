@@ -246,6 +246,50 @@ const SUBMIT_PERMIT = gql`
   }
 `;
 
+const GET_PTPR_PERMIT = gql`
+  query GetPTPRPermit($id: ID!) {
+    getPTPRPermitById(id: $id) {
+      id
+      ownerName
+      address
+      contactNumber
+      lotArea
+      treeSpecies
+      totalTrees
+      treeSpacing
+      yearPlanted
+      files {
+        letterRequest { filename contentType }
+        titleOrTaxDeclaration { filename contentType }
+        darCertification { filename contentType }
+        specialPowerOfAttorney { filename contentType }
+      }
+    }
+  }
+`;
+
+const UPDATE_PTPR_PERMIT = gql`
+  mutation UpdatePTPRPermit($id: ID!, $input: PTPRPermitInput!) {
+    updatePTPRPermit(id: $id, input: $input) {
+      id
+      ownerName
+      address
+      contactNumber
+      lotArea
+      treeSpecies
+      totalTrees
+      treeSpacing
+      yearPlanted
+      files {
+        letterRequest { filename contentType }
+        titleOrTaxDeclaration { filename contentType }
+        darCertification { filename contentType }
+        specialPowerOfAttorney { filename contentType }
+      }
+    }
+  }
+`;
+
 export const useUserApplications = (status) => {
    // console.log('useUserApplications called with status:', status);
 
@@ -265,6 +309,8 @@ export const useUserApplications = (status) => {
    const [getPLTPPermit] = useLazyQuery(GET_PLTP_PERMIT);
    const [unsubmitPermitMutation] = useMutation(UNSUBMIT_PERMIT);
    const [submitPermitMutation] = useMutation(SUBMIT_PERMIT);
+   const [updatePTPRPermitMutation] = useMutation(UPDATE_PTPR_PERMIT);
+   const [getPTPRPermit] = useLazyQuery(GET_PTPR_PERMIT);
 
    const deletePermit = async (id) => {
       console.log('Attempting to delete permit with id:', id);
@@ -531,6 +577,64 @@ export const useUserApplications = (status) => {
       }
    };
 
+   const updatePTPRPermit = async (id, input) => {
+      console.log('Updating PTPR permit:', id);
+      console.log('Update input:', input);
+
+      try {
+         const updatedFiles = {};
+         if (input.files) {
+            Object.entries(input.files).forEach(([key, value]) => {
+               if (Array.isArray(value) && value.length > 0) {
+                  updatedFiles[key] = value.map(file => ({
+                     filename: file.filename,
+                     contentType: file.contentType,
+                     data: file.data
+                  }));
+               }
+            });
+         }
+
+         const { data } = await updatePTPRPermitMutation({
+            variables: {
+               id,
+               input: {
+                  ownerName: input.ownerName,
+                  address: input.address,
+                  contactNumber: input.contactNumber,
+                  lotArea: parseFloat(input.lotArea),
+                  treeSpecies: input.treeSpecies,
+                  totalTrees: parseInt(input.totalTrees),
+                  treeSpacing: input.treeSpacing,
+                  yearPlanted: parseInt(input.yearPlanted),
+                  files: updatedFiles
+               }
+            },
+            refetchQueries: [{ query: GET_USER_APPLICATIONS, variables: { status: input.status } }]
+         });
+         console.log('Update mutation result:', data);
+         if (data.updatePTPRPermit) {
+            return data.updatePTPRPermit;
+         } else {
+            throw new Error('Failed to update permit');
+         }
+      } catch (error) {
+         console.error('Error updating PTPR permit:', error);
+         console.error('Error details:', error.graphQLErrors);
+         throw error;
+      }
+   };
+
+   const fetchPTPRPermit = async (id) => {
+      try {
+         const { data } = await getPTPRPermit({ variables: { id } });
+         return data.getPTPRPermitById;
+      } catch (error) {
+         console.error('Error fetching PTPR permit:', error);
+         throw error;
+      }
+   };
+
    return {
       applications: data?.getUserApplications || [],
       loading,
@@ -544,6 +648,8 @@ export const useUserApplications = (status) => {
       updatePLTPPermit,
       fetchPLTPPermit,
       unsubmitPermit,
-      submitPermit
+      submitPermit,
+      updatePTPRPermit,
+      fetchPTPRPermit
    };
 };

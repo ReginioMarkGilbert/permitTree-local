@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import COVEditForm from './permitForms/COVEditForm';
 import CSAWEditForm from './permitForms/CSAWEditForm';
 import PLTPEditForm from './permitForms/PLTPEditForm';
+import PTPREditForm from './permitForms/PTPREditForm';
 import '@/components/ui/styles/customScrollbar.css';
 import { useUserApplications } from '../hooks/useUserApplications';
 
@@ -18,21 +19,28 @@ const formatDate = (dateString) => {
 
 const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
    const [formData, setFormData] = useState(application);
-   const { fetchCOVPermit, fetchCSAWPermit, fetchPLTPPermit } = useUserApplications();
+   const { fetchCOVPermit, fetchCSAWPermit, fetchPLTPPermit, fetchPTPRPermit } = useUserApplications();
    const [hasFetched, setHasFetched] = useState(false);
 
    const fetchPermitData = useCallback(async () => {
       if (!hasFetched) {
          try {
             let permitData;
-            if (application.applicationType === 'Certificate of Verification') {
-               permitData = await fetchCOVPermit(application.id);
-            } else if (application.applicationType === 'Chainsaw Registration') {
-               permitData = await fetchCSAWPermit(application.id);
-            } else if (application.applicationType === 'Public Land Timber Permit') {
-               permitData = await fetchPLTPPermit(application.id);
-            } else {
-               permitData = application;
+            switch (application.applicationType) {
+               case 'Certificate of Verification':
+                  permitData = await fetchCOVPermit(application.id);
+                  break;
+               case 'Chainsaw Registration':
+                  permitData = await fetchCSAWPermit(application.id);
+                  break;
+               case 'Public Land Timber Permit':
+                  permitData = await fetchPLTPPermit(application.id);
+                  break;
+               case 'Private Tree Plantation Registration':
+                  permitData = await fetchPTPRPermit(application.id);
+                  break;
+               default:
+                  permitData = application;
             }
             console.log('Permit data fetched:', permitData);
             setFormData(permitData);
@@ -41,7 +49,7 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
             console.error('Error fetching permit data:', error);
          }
       }
-   }, [application, fetchCOVPermit, fetchCSAWPermit, fetchPLTPPermit, hasFetched]);
+   }, [application, fetchCOVPermit, fetchCSAWPermit, fetchPLTPPermit, fetchPTPRPermit, hasFetched]);
 
    useEffect(() => {
       if (isOpen) {
@@ -109,12 +117,9 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
 
    const removeFile = (documentType, index) => {
       setFormData(prevData => {
-         const updatedFiles = { ...(prevData.files || {}) };
+         const updatedFiles = { ...prevData.files };
          if (updatedFiles[documentType]) {
             updatedFiles[documentType] = updatedFiles[documentType].filter((_, i) => i !== index);
-            if (updatedFiles[documentType].length === 0) {
-               updatedFiles[documentType] = [];  // Set to empty array instead of deleting
-            }
          }
          return { ...prevData, files: updatedFiles };
       });
@@ -165,7 +170,13 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
                removeFile={removeFile}
                handleCheckboxChange={handleCheckboxChange}
             />;
-         // Add cases for other permit types
+         case 'Private Tree Plantation Registration':
+            return <PTPREditForm
+               formData={formData}
+               handleInputChange={handleInputChange}
+               handleFileChange={handleFileChange}
+               removeFile={removeFile}
+            />;
          default:
             return <p>Unsupported permit type: {application.applicationType}</p>;
       }

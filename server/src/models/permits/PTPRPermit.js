@@ -2,15 +2,15 @@ const mongoose = require('mongoose');
 const Permit = require('./Permit');
 
 const FileSchema = new mongoose.Schema({
-  filename: String,
-  contentType: String,
-  data: Buffer
+   filename: String,
+   contentType: String,
+   data: Buffer
 });
 
 const PTPRPermitSchema = new mongoose.Schema({
    applicationNumber: { type: String, required: true, unique: true },
    applicantId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-   applicationType: { type: String, required: true, enum: ['PTPR'] },
+   applicationType: { type: String, required: true, enum: ['Private Tree Plantation Registration'] },
    ownerName: { type: String, required: true },
    address: { type: String, required: true },
    contactNumber: { type: String, required: true },

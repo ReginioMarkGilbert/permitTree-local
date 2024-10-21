@@ -35,9 +35,11 @@ const UserApplicationsStatusPage = () => {
       updateCSAWPermit,
       updateCOVPermit,
       updatePLTPPermit,
+      updatePTPRPermit,
       fetchCOVPermit,
       fetchCSAWPermit,
       fetchPLTPPermit,
+      fetchPTPRPermit,
       unsubmitPermit,
       submitPermit,
    } = useUserApplications(activeSubTab);
@@ -119,6 +121,9 @@ const UserApplicationsStatusPage = () => {
                break;
             case 'Public Land Timber Permit':
                await updatePLTPPermit(id, editedData);
+               break;
+            case 'Private Tree Plantation Registration':
+               await updatePTPRPermit(id, editedData);
                break;
             default:
                console.error('Unsupported application type:', editedData.applicationType);
@@ -215,6 +220,7 @@ const UserApplicationsStatusPage = () => {
                         fetchCOVPermit={fetchCOVPermit}
                         fetchCSAWPermit={fetchCSAWPermit}
                         fetchPLTPPermit={fetchPLTPPermit}
+                        fetchPTPRPermit={fetchPTPRPermit}
                      />
                   ))}
                </tbody>
