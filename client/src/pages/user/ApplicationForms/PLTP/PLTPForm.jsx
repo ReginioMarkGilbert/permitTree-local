@@ -142,9 +142,21 @@ const PLTPForm = () => {
          // Process files
          for (const [key, files] of Object.entries(formData.files)) {
             if (files.length > 0) {
-               input.files[key] = files.map(file => ({
-                  filename: file.name,
-                  contentType: file.type
+               input.files[key] = await Promise.all(files.map(async (file) => {
+                  if (file instanceof File) {
+                     const content = await readFileAsBase64(file);
+                     return {
+                        filename: file.name,
+                        contentType: file.type,
+                        data: content
+                     };
+                  } else {
+                     return {
+                        filename: file.filename,
+                        contentType: file.contentType,
+                        // Don't include data if it's not a File object
+                     };
+                  }
                }));
             }
          }
