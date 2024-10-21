@@ -17,6 +17,11 @@ const userTypes = gql`
     firstName: String!
     lastName: String!
     role: String!
+    email: String
+    phone: String
+    company: String
+    address: String
+    profilePicture: ProfilePicture
   }
 
   input UpdateUserProfileInput {

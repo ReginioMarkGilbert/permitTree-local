@@ -29,10 +29,21 @@ const userResolvers = {
       if (!user) {
         throw new Error('User not found');
       }
-      if (user.profilePicture && user.profilePicture.data) {
-        user.profilePicture = `data:${user.profilePicture.contentType};base64,${user.profilePicture.data}`;
-      }
-      return user;
+      return {
+        id: user._id,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone,
+        company: user.company,
+        address: user.address,
+        role: user.role,
+        profilePicture: user.profilePicture && user.profilePicture.data ? {
+          data: user.profilePicture.data.toString('base64'),
+          contentType: user.profilePicture.contentType
+        } : null
+      };
     },
   },
   Mutation: {
@@ -48,7 +59,7 @@ const userResolvers = {
           lastName,
           username,
           password,
-          role: 'user' // Explicitly set the role to 'user'
+          role: 'user'
         });
 
         await newUser.save();
@@ -64,13 +75,11 @@ const userResolvers = {
       }
     },
     updateUserProfile: async (_, { input }, context) => {
-      if (!context.token) {
+      if (!context.user) {
         throw new Error('Not authenticated');
       }
       try {
-        const decoded = jwt.verify(context.token.replace('Bearer ', ''), process.env.JWT_SECRET);
-        const userId = decoded.id;
-
+        const userId = context.user.id;
         const { firstName, lastName, email, phone, company, address, removeProfilePicture, profilePicture } = input;
 
         const updateData = {
@@ -86,7 +95,7 @@ const userResolvers = {
           updateData.profilePicture = null;
         } else if (profilePicture) {
           updateData.profilePicture = {
-            data: profilePicture.data,
+            data: Buffer.from(profilePicture.data, 'base64'),
             contentType: profilePicture.contentType
           };
         }
@@ -101,8 +110,23 @@ const userResolvers = {
           throw new Error('User not found');
         }
 
-        return updatedUser;
+        return {
+          id: updatedUser._id,
+          username: updatedUser.username,
+          firstName: updatedUser.firstName,
+          lastName: updatedUser.lastName,
+          email: updatedUser.email,
+          phone: updatedUser.phone,
+          company: updatedUser.company,
+          address: updatedUser.address,
+          role: updatedUser.role,
+          profilePicture: updatedUser.profilePicture && updatedUser.profilePicture.data ? {
+            data: updatedUser.profilePicture.data.toString('base64'),
+            contentType: updatedUser.profilePicture.contentType
+          } : null
+        };
       } catch (error) {
+        console.error('Error updating user profile:', error);
         throw new Error('Error updating user profile: ' + error.message);
       }
     },

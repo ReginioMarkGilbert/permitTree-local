@@ -15,6 +15,10 @@ const userSchema = new mongoose.Schema({
    phone: { type: String, required: false },
    company: { type: String, required: false },
    address: { type: String, required: false },
+   profilePicture: {
+      data: Buffer,
+      contentType: String
+   }
 }, { timestamps: true });
 
 userSchema.pre('save', async function (next) {

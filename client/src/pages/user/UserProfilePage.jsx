@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { gql, useQuery, useMutation } from '@apollo/client';
 
 const GET_USER_DETAILS = gql`
