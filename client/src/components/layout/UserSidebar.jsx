@@ -53,7 +53,7 @@ const Sidebar = React.memo(({ isOpen }) => {
       { to: '/applicationsStatus', icon: <FaClipboardList />, text: 'Application Status' },
       { to: '/notifications', icon: <FaBell />, text: 'Notifications', badge: unreadCount },
       { to: '/profile', icon: <FaUser />, text: 'Profile' },
-      { to: '/logout', icon: <FaSignOutAlt />, text: 'Logout' }
+      { to: '/auth', icon: <FaSignOutAlt />, text: 'Logout' }
    ];
 
    const renderNavItem = (item, index) => (
@@ -63,9 +63,9 @@ const Sidebar = React.memo(({ isOpen }) => {
          className={({ isActive }) => `
             flex items-center py-2.5 px-4 rounded-md mt-2
             ${isOpen ? '' : 'justify-center'}
-            ${isActive && item.to !== '/logout' ? 'bg-green-700 text-white' : 'hover:bg-gray-700 hover:text-white'}
+            ${isActive && item.to !== '/auth' ? 'bg-green-700 text-white' : 'hover:bg-gray-700 hover:text-white'}
          `}
-         onClick={item.to === '/logout' ? handleLogout : undefined}
+         onClick={item.to === '/auth' ? handleLogout : undefined}
       >
          <div className="relative w-6 h-6 flex items-center justify-center">
             {item.badge > 0 && (
