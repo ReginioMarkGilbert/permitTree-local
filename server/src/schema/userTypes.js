@@ -35,27 +35,11 @@ const userTypes = gql`
     profilePicture: ProfilePictureInput
   }
 
-  type Admin {
-    id: ID!
-    adminId: Int!
-    username: String!
-    firstName: String!
-    lastName: String!
-    role: String!
-  }
-
   type AuthPayload {
     token: String!
     user: User!
   }
 
-  input CreateAdminInput {
-    username: String!
-    password: String!
-    role: String!
-    firstName: String
-    lastName: String
-  }
 `;
 
 module.exports = userTypes;

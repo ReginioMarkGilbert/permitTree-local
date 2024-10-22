@@ -1,5 +1,6 @@
 const { gql } = require('graphql-tag');
 const userTypes = require('./userTypes');
+const adminTypes = require('./adminTypes');
 const permitTypes = require('./permitTypes');
 const oopTypes = require('./oopTypes');
 const certificateTypes = require('./certificateTypes');
@@ -23,11 +24,12 @@ const rootTypeDefs = gql`
 `;
 
 module.exports = [
-  rootTypeDefs,
-  userTypes,
-  permitTypes.permitTypes,
-  oopTypes,
-  certificateTypes,
-  queryTypes,
-  mutationTypes
+   rootTypeDefs,
+   userTypes,
+   adminTypes,
+   permitTypes.permitTypes,
+   oopTypes,
+   certificateTypes,
+   queryTypes,
+   mutationTypes
 ];
