@@ -11,6 +11,7 @@ const mutationTypes = gql`
     updatePermitStatus(id: ID!, status: String!): Permit
     createCSAWPermit(input: CSAWPermitInput!): CSAWPermit
     updateCSAWPermit(id: ID!, input: CSAWPermitInput!): CSAWPermit
+    saveCSAWPermitDraft(input: CSAWPermitInput!): CSAWPermit
 
     createCOVPermit(input: COVPermitInput!): COVPermit
     updateCOVPermit(id: ID!, input: COVPermitInput!): COVPermit
@@ -38,10 +39,8 @@ const mutationTypes = gql`
     createCertificate(input: CertificateInput!): Certificate
     updateCertificate(id: ID!, input: CertificateInput!): Certificate
 
-    saveCSAWPermitDraft(input: CSAWPermitInput!): CSAWPermit
 
     deletePermit(id: ID!): Boolean
-
     unsubmitPermit(id: ID!): Permit
     submitPermit(id: ID!): Permit
   }
