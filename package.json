@@ -5,6 +5,20 @@
     "typescript": "^5.5.4"
   },
   "dependencies": {
-    "apollo-upload-client": "^18.0.1"
-  }
+    "apollo-upload-client": "^18.0.1",
+    "concurrently": "^9.0.1"
+  },
+  "name": "permittree-local",
+  "version": "1.0.0",
+  "main": "vite.config.js",
+  "scripts": {
+    "test": "npm run test --prefix client",
+    "server": "npm run watch --prefix server",
+    "client": "npm run dev --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\" \"npm run test\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
 }
