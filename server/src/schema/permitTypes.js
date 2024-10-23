@@ -120,6 +120,7 @@ const permitTypes = gql`
     id: ID!
     applicationNumber: String!
     applicationType: String!
+    requestType: String!
     status: String!
     dateOfSubmission: String!
     applicantId: ID!
@@ -308,6 +309,7 @@ const permitTypes = gql`
     address: String!
     contactNumber: String!
     purpose: String!
+    requestType: String!
     files: TCEBPFilesInput
   }
 

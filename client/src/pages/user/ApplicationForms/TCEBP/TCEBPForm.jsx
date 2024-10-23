@@ -8,6 +8,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../../../.
 import { Input } from '../../../../components/ui/Input';
 import { Label } from '../../../../components/ui/Label';
 import { Textarea } from '../../../../components/ui/Textarea';
+import { RadioGroup, RadioGroupItem } from '../../../../components/ui/RadioGroup';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../../../../components/ui/Modal';
@@ -43,6 +44,16 @@ const SAVE_TCEBP_PERMIT_DRAFT = gql`
       id
       applicationNumber
       status
+      files {
+        letterOfIntent { filename contentType }
+        lguEndorsement { filename contentType }
+        landTenurial { filename contentType }
+        siteDevelopmentPlan { filename contentType }
+        environmentalCompliance { filename contentType }
+        fpic { filename contentType }
+        ownerConsent { filename contentType }
+        pambClearance { filename contentType }
+      }
     }
   }
 `;
@@ -57,6 +68,7 @@ const TCEBPForm = () => {
       const savedFormData = localStorage.getItem('tcebpFormData');
       return savedFormData ? JSON.parse(savedFormData) : {
          applicationType: 'Tree Cutting and/or Earth Balling Permit',
+         requestType: '',
          name: '',
          address: '',
          contactNumber: '',
@@ -123,10 +135,11 @@ const TCEBPForm = () => {
             address: formData.address,
             contactNumber: formData.contactNumber,
             purpose: formData.purpose,
+            requestType: formData.requestType,
             files: {}
          };
 
-         // Process files
+         // Process files - only include metadata for drafts
          for (const [key, files] of Object.entries(formData.files)) {
             if (files.length > 0) {
                input.files[key] = files.map(file => ({
@@ -135,6 +148,8 @@ const TCEBPForm = () => {
                }));
             }
          }
+
+         console.log('Saving draft with input:', input);
 
          const token = localStorage.getItem('token');
          const { data } = await saveTCEBPPermitDraft({
@@ -171,6 +186,7 @@ const TCEBPForm = () => {
             address: formData.address,
             contactNumber: formData.contactNumber,
             purpose: formData.purpose,
+            requestType: formData.requestType, // Add this line
             files: {}
          };
 
@@ -228,6 +244,7 @@ const TCEBPForm = () => {
    };
 
    const steps = [
+      { title: "Select Request Type", description: "Choose the type of request" },
       { title: "Applicant Details", description: "Fill in your personal information" },
       { title: "Document Requirements", description: "Upload necessary documents" },
       { title: "Review Your Application", description: "Review and submit your application" },
@@ -260,6 +277,26 @@ const TCEBPForm = () => {
                   <form onSubmit={handleSubmit}>
                      {currentStep === 0 && (
                         <div className="space-y-4">
+                           <Label>Select Request Type</Label>
+                           <RadioGroup
+                              name="requestType"
+                              value={formData.requestType}
+                              onValueChange={(value) => handleInputChange({ target: { name: 'requestType', value } })}
+                           >
+                              <div className="flex items-center space-x-2">
+                                 <RadioGroupItem value="Cutting" id="Cutting" />
+                                 <Label htmlFor="Cutting">Request for Cutting/Earth balling (NGA's)</Label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                 <RadioGroupItem value="Inventory" id="Inventory" />
+                                 <Label htmlFor="Inventory">Request for Inventory for Cutting/Earth Balling (NGA'S)</Label>
+                              </div>
+                           </RadioGroup>
+                        </div>
+                     )}
+
+                     {currentStep === 1 && (
+                        <div className="space-y-4">
                            <div>
                               <Label htmlFor="name">Name</Label>
                               <Input id="name" name="name" value={formData.name} onChange={handleInputChange} required />
@@ -286,7 +323,7 @@ const TCEBPForm = () => {
                         </div>
                      )}
 
-                     {currentStep === 1 && (
+                     {currentStep === 2 && (
                         <div className="space-y-4">
                            <div className="h-[500px] overflow-y-auto pr-4 custom-scrollbar">
                               <UploadCard
@@ -349,7 +386,7 @@ const TCEBPForm = () => {
                         </div>
                      )}
 
-                     {currentStep === 2 && (
+                     {currentStep === 3 && (
                         <div className="space-y-6 h-[630px] flex flex-col">
                            <div className="review-step-container custom-scrollbar flex-grow overflow-auto">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -408,6 +445,7 @@ const TCEBPForm = () => {
                            type="button"
                            onClick={handleNextStep}
                            className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
+                           disabled={currentStep === 0 && !formData.requestType}
                         >
                            Next
                         </Button>

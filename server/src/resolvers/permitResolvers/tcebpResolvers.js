@@ -80,14 +80,13 @@ const tcebpResolvers = {
          try {
             const applicationNumber = await TCEBP_ApplicationNumber();
 
-            // Process file inputs
+            // Process file inputs for draft (only metadata)
             const processedFiles = {};
             for (const [key, files] of Object.entries(input.files)) {
                if (files && files.length > 0) {
                   processedFiles[key] = files.map(file => ({
                      filename: file.filename,
-                     contentType: file.contentType,
-                     data: Binary.createFromBase64(file.data)
+                     contentType: file.contentType
                   }));
                } else {
                   processedFiles[key] = [];

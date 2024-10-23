@@ -10,6 +10,7 @@ const FileSchema = new mongoose.Schema({
 const TCEBPPermitSchema = new mongoose.Schema({
    applicationNumber: { type: String, required: true, unique: true },
    applicationType: { type: String, required: true, default: 'Tree Cutting and/or Earth Balling Permit' },
+   requestType: { type: String, required: true, enum: ['Cutting', 'Inventory'] },
    name: { type: String, required: true },
    address: { type: String, required: true },
    contactNumber: { type: String, required: true },
