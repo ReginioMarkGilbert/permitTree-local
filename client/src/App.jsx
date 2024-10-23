@@ -22,13 +22,12 @@ import ContactPage from './pages/public/ContactPage';
 
 import PersonnelSidebar from './pages/Personnel/components/PersonnelSidebar';
 import PersonnelHomePage from './pages/Personnel/PersonnelHomePage';
-// import ChiefRPSDashboard from './pages/Personnel/PersonnelDashboard';
 import ChiefRPSReportsPage from './pages/Personnel/ChiefRPSReportsPage';
 import ChiefRPSSettingsPage from './pages/Personnel/ChiefRPSSettingsPage';
 import ChiefRPSApplicationReviewModal from './pages/Personnel/components/ChiefRPSApplicationReviewModal';
 import ChiefRPSApplicationViewModal from './pages/Personnel/components/ChiefRPSApplicationViewModal';
 
-import { isAuthenticated, getUserRole, logout } from './utils/auth';
+import { isAuthenticated, getUserRoles } from './utils/auth';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -55,7 +54,7 @@ const App = () => {
    const { sidebarToggle, toggleSidebar } = useSidebarToggle();
    const navigate = useNavigate();
    const location = useLocation();
-   const userRole = getUserRole();
+   const userRoles = getUserRoles();
    const [showNavbar, setShowNavbar] = useState(false);
 
    useEffect(() => {
@@ -69,13 +68,22 @@ const App = () => {
    useEffect(() => {
       const intervalId = setInterval(() => {
          checkTokenExpiration(navigate);
-         // console.log('checking token expiration');
       }, 60000); // Check every minute
 
       return () => clearInterval(intervalId);
    }, [navigate]);
 
    const PersonnelRoles = ['Chief_RPS', 'Chief_TSD', 'Technical_Staff', 'Receiving_Clerk', 'Releasing_Clerk', 'Accountant', 'Bill_Collector', 'PENR_CENR_Officer'];
+
+   const getSidebar = () => {
+      if (userRoles.includes('superadmin')) {
+         return <SuperAdminSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />;
+      } else if (userRoles.some(role => PersonnelRoles.includes(role))) {
+         return <PersonnelSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />;
+      } else {
+         return <UserSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />;
+      }
+   };
 
    return (
       <ApolloProvider client={client}>
@@ -84,13 +92,7 @@ const App = () => {
                <div className="flex">
                   {isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && (
                      <>
-                        {userRole === 'superadmin' ? (
-                           <SuperAdminSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
-                        ) : PersonnelRoles.includes(userRole) ? ( // check if userRole is in PersonnelRoles
-                           <PersonnelSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
-                        ) : (
-                           <UserSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />
-                        )}
+                        {getSidebar()}
                         {showNavbar && <Navbar sidebarToggle={sidebarToggle} setSidebarToggle={toggleSidebar} />}
                      </>
                   )}
@@ -112,7 +114,6 @@ const App = () => {
                            <Route path="/notifications" element={<ProtectedRoute roles={['user']}><UserNotificationsPage /></ProtectedRoute>} />
 
                            <Route path="/personnel/home" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelHomePage /></ProtectedRoute>} />
-                           {/* <Route path="/chief-rps/dashboard" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSDashboard /></ProtectedRoute>} /> */}
                            <Route path="/personnel/review/:id" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSApplicationReviewModal /></ProtectedRoute>} />
                            <Route path="/personnel/view/:id" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSApplicationViewModal /></ProtectedRoute>} />
                            <Route path="/personnel/settings" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSSettingsPage /></ProtectedRoute>} />

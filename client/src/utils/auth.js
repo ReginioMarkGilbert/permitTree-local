@@ -39,3 +39,8 @@ export const logout = () => {
    console.log('Token has expired. Logging out...');
    window.location.href = '/auth';
 };
+
+export const getUserRoles = () => {
+   const user = JSON.parse(localStorage.getItem('user'));
+   return user ? user.roles : [];
+};

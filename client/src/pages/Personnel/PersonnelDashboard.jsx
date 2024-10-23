@@ -5,28 +5,26 @@ import ChiefDashboard from './components/PersonnelDashboardComponents/ChiefDashb
 import AccountantDashboard from './components/PersonnelDashboardComponents/AccountantDashboard';
 import BillCollectorDashboard from './components/PersonnelDashboardComponents/BillCollectorDashboard';
 import PENRCENROfficerDashboard from './components/PersonnelDashboardComponents/PENRCENROfficerDashboard';
-import { getUserRole } from '../../utils/auth';
+import { getUserRoles } from '../../utils/auth';
 
 const PersonnelDashboard = () => {
-   const userRole = getUserRole();
-   switch (userRole) {
-      case 'Receiving_Clerk':
-      case 'Releasing_Clerk':
-         return <ReceivingReleasingClerkDashboard />;
-      case 'Technical_Staff':
-         return <TechnicalStaffDashboard />;
-      case 'Chief_RPS':
-      case 'Chief_TSD':
-         console.log("Chief Dashboard");
-         return <ChiefDashboard />;
-      case 'Accountant':
-         return <AccountantDashboard />;
-      case 'Bill_Collector':
-         return <BillCollectorDashboard />;
-      case 'PENR_CENR_Officer':
-         return <PENRCENROfficerDashboard />;
-      default:
-         return <div>Invalid role: {userRole}</div>;
+   const userRoles = getUserRoles();
+
+   if (userRoles.includes('Receiving_Clerk') || userRoles.includes('Releasing_Clerk')) {
+      return <ReceivingReleasingClerkDashboard />;
+   } else if (userRoles.includes('Technical_Staff')) {
+      return <TechnicalStaffDashboard />;
+   } else if (userRoles.includes('Chief_RPS') || userRoles.includes('Chief_TSD')) {
+      console.log("Chief Dashboard");
+      return <ChiefDashboard />;
+   } else if (userRoles.includes('Accountant')) {
+      return <AccountantDashboard />;
+   } else if (userRoles.includes('Bill_Collector')) {
+      return <BillCollectorDashboard />;
+   } else if (userRoles.includes('PENR_CENR_Officer')) {
+      return <PENRCENROfficerDashboard />;
+   } else {
+      return <div>Invalid roles: {userRoles.join(', ')}</div>;
    }
 };
 

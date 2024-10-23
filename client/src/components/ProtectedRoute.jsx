@@ -1,16 +1,16 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { isAuthenticated, getUserRole } from '../utils/auth';
+import { isAuthenticated, getUserRoles } from '../utils/auth';
 
 const ProtectedRoute = ({ children, roles }) => {
+    const userRoles = getUserRoles();
+
     if (!isAuthenticated()) {
-        return <Navigate to="/auth" />;
+        return <Navigate to="/auth" replace />;
     }
 
-    const userRole = getUserRole();
-    // console.log('ProtectedRoute - User role:', userRole);
-    if (roles && !roles.includes(userRole)) {
-        return <Navigate to="/unauthorized" />;
+    if (roles && !roles.some(role => userRoles.includes(role))) {
+        return <Navigate to="/unauthorized" replace />;
     }
 
     return children;

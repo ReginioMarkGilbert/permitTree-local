@@ -1,23 +1,40 @@
 const { gql } = require('graphql-tag');
 
 const adminTypes = gql`
-
-type Admin {
+  type Admin {
     id: ID!
     adminId: Int!
     username: String!
     firstName: String!
     lastName: String!
-    role: String!
+    roles: [String!]!
   }
 
-
-input CreateAdminInput {
+  input CreateAdminInput {
     username: String!
     password: String!
-    role: String!
+    roles: [String!]!
     firstName: String
     lastName: String
+  }
+
+  input UpdateAdminInput {
+    username: String
+    password: String
+    roles: [String!]
+    firstName: String
+    lastName: String
+  }
+
+  extend type Query {
+    getAdmin(id: ID!): Admin
+    getAllAdmins: [Admin!]!
+  }
+
+  extend type Mutation {
+    createAdmin(input: CreateAdminInput!): Admin!
+    updateAdmin(id: ID!, input: UpdateAdminInput!): Admin!
+    deleteAdmin(id: ID!): Boolean!
   }
 `;
 

@@ -38,7 +38,7 @@ const userResolvers = {
         phone: user.phone,
         company: user.company,
         address: user.address,
-        role: user.role,
+        roles: user.roles,
         profilePicture: user.profilePicture && user.profilePicture.data ? {
           data: user.profilePicture.data.toString('base64'),
           contentType: user.profilePicture.contentType

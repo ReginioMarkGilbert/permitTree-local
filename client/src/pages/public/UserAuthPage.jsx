@@ -38,7 +38,7 @@ const LOGIN_USER = gql`
         username
         firstName
         lastName
-        role
+        roles
       }
     }
   }
@@ -124,29 +124,18 @@ const UserAuthPage = () => {
             const { token, user } = data.login;
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
-            console.log("User role:", user.role);
-            // Redirect based on user role
-            switch (user.role) {
-               case 'superadmin':
-                  navigate('/superadmin/home', { replace: true });
-                  break;
-               case 'Chief_RPS':
-               case 'Chief_TSD':
-               case 'Technical_Staff':
-               case 'Receiving_Clerk':
-               case 'Releasing_Clerk':
-               case 'Accountant':
-               case 'Bill_Collector':
-               case 'PENR_CENR_Officer':
-                  navigate('/personnel/home', { replace: true });
-                  break;
-               case 'user':
-                  navigate('/home', { replace: true });
-                  break;
-               default:
-                  toast.error('Unknown user role');
-                  localStorage.removeItem('token');
-                  localStorage.removeItem('user');
+            console.log("User roles:", user.roles);
+            // Redirect based on user roles
+            if (user.roles.includes('superadmin')) {
+               navigate('/superadmin/home', { replace: true });
+            } else if (user.roles.some(role => ['Chief_RPS', 'Chief_TSD', 'Technical_Staff', 'Receiving_Clerk', 'Releasing_Clerk', 'Accountant', 'Bill_Collector', 'PENR_CENR_Officer'].includes(role))) {
+               navigate('/personnel/home', { replace: true });
+            } else if (user.roles.includes('user')) {
+               navigate('/home', { replace: true });
+            } else {
+               toast.error('Unknown user role');
+               localStorage.removeItem('token');
+               localStorage.removeItem('user');
             }
          } else {
             toast.error('Login failed');

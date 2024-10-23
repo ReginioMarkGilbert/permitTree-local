@@ -8,9 +8,12 @@ const authResolvers = {
     login: async (_, { username, password }) => {
       console.log('Login attempt for username:', username);
       let user = await User.findOne({ username });
+      let isAdmin = false;
+
       if (!user) {
         console.log('User not found in User model, checking Admin model');
         user = await Admin.findOne({ username });
+        isAdmin = !!user;
       }
 
       if (!user) {
@@ -25,8 +28,15 @@ const authResolvers = {
         throw new Error('Invalid credentials');
       }
 
+      const roles = isAdmin ? user.roles : [user.role];
+
       const token = jwt.sign(
-        { id: user.id, username: user.username, role: user.role },
+        {
+          id: user.id,
+          username: user.username,
+          roles,
+          isAdmin
+        },
         process.env.JWT_SECRET,
         { expiresIn: '2h' }
       );
@@ -38,7 +48,7 @@ const authResolvers = {
           username: user.username,
           firstName: user.firstName,
           lastName: user.lastName,
-          role: user.role
+          roles
         }
       };
     },

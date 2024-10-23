@@ -5,7 +5,7 @@ const AdminSchema = new mongoose.Schema({
    adminId: { type: Number, unique: true },
    username: { type: String, required: true, unique: true },
    password: { type: String, required: true },
-   role: {
+   roles: [{
       type: String,
       required: true,
       enum: [
@@ -19,7 +19,7 @@ const AdminSchema = new mongoose.Schema({
          'Bill_Collector',
          'PENR_CENR_Officer'
       ]
-   },
+   }],
    firstName: { type: String },
    lastName: { type: String }
 });

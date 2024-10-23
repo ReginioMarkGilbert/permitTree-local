@@ -4,7 +4,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import permitTreeLogo from '../../../assets/denr-logo.png';
 import { removeToken } from '../../../utils/tokenManager';
 import { useChiefRPSNotification } from '../contexts/ChiefRPSNotificationContext';
-import { isAuthenticated, getUserRole } from '../../../utils/auth';
+import { isAuthenticated, getUserRoles } from '../../../utils/auth';
 import { gql, useMutation } from '@apollo/client';
 
 const LOGOUT_MUTATION = gql`
@@ -17,7 +17,7 @@ const PersonnelSidebar = React.memo(({ isOpen }) => {
    const navigate = useNavigate();
    const { unreadCount } = useChiefRPSNotification();
    const [logout] = useMutation(LOGOUT_MUTATION);
-   const userRole = getUserRole();
+   const userRoles = getUserRoles();
 
    const handleLogout = useCallback(async () => {
       try {
@@ -38,24 +38,23 @@ const PersonnelSidebar = React.memo(({ isOpen }) => {
       }
    }, [navigate]);
 
-   console.log("user role:", userRole);
+   console.log("user roles:", userRoles);
 
    const getDashboardLink = () => {
-      switch (userRole) {
-         case 'receiving_releasing_clerk':
-            return "/personnel/receiving-releasing";
-         case 'technical_staff':
-            return "/personnel/technical-staff";
-         case 'Chief_RPS' || 'Chief_TSD':
-            return "/personnel/chief";
-         case 'accountant':
-            return "/personnel/accountant";
-         case 'bill_collector':
-            return "/personnel/bill-collector";
-         case 'penr_cenr_officer':
-            return "/personnel/penr-cenr-officer";
-         default:
-            return "/personnel/dashboard";
+      if (userRoles.includes('Receiving_Clerk') || userRoles.includes('Releasing_Clerk')) {
+         return "/personnel/receiving-releasing";
+      } else if (userRoles.includes('Technical_Staff')) {
+         return "/personnel/technical-staff";
+      } else if (userRoles.includes('Chief_RPS') || userRoles.includes('Chief_TSD')) {
+         return "/personnel/chief";
+      } else if (userRoles.includes('Accountant')) {
+         return "/personnel/accountant";
+      } else if (userRoles.includes('Bill_Collector')) {
+         return "/personnel/bill-collector";
+      } else if (userRoles.includes('PENR_CENR_Officer')) {
+         return "/personnel/penr-cenr-officer";
+      } else {
+         return "/personnel/dashboard";
       }
    };
 
@@ -66,7 +65,7 @@ const PersonnelSidebar = React.memo(({ isOpen }) => {
       { to: "/personnel/reports", icon: <FaChartLine />, text: "Reports" },
       { to: "/personnel/settings", icon: <FaCog />, text: "Settings" },
       { to: "/personnel/order-of-payment", icon: <FaFileInvoiceDollar />, text: "Order of Payment" },
-   ], [unreadCount, userRole]);
+   ], [unreadCount, userRoles]);
 
    const sidebarContent = useMemo(() => (
       <>
