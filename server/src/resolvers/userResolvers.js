@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 // Add this function at the top of the file
 const generateToken = (user) => {
   return jwt.sign(
-    { id: user.id, username: user.username, role: user.role },
+    { id: user.id, username: user.username, roles: user.roles },
     process.env.JWT_SECRET || 'default_secret',
     { expiresIn: '1h' }
   );
@@ -59,7 +59,7 @@ const userResolvers = {
           lastName,
           username,
           password,
-          role: 'user'
+          roles: ['user'] // Default role for new users
         });
 
         await newUser.save();
@@ -68,7 +68,13 @@ const userResolvers = {
 
         return {
           token,
-          user: newUser
+          user: {
+            id: newUser.id,
+            username: newUser.username,
+            firstName: newUser.firstName,
+            lastName: newUser.lastName,
+            roles: newUser.roles
+          }
         };
       } catch (error) {
         throw new Error(`Failed to register user: ${error.message}`);

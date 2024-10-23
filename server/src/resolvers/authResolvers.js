@@ -4,60 +4,60 @@ const User = require('../models/User');
 const Admin = require('../models/admin');
 
 const authResolvers = {
-  Mutation: {
-    login: async (_, { username, password }) => {
-      console.log('Login attempt for username:', username);
-      let user = await User.findOne({ username });
-      let isAdmin = false;
+   Mutation: {
+      login: async (_, { username, password }) => {
+         console.log('Login attempt for username:', username);
+         let user = await User.findOne({ username });
+         let isAdmin = false;
 
-      if (!user) {
-        console.log('User not found in User model, checking Admin model');
-        user = await Admin.findOne({ username });
-        isAdmin = !!user;
-      }
+         if (!user) {
+            console.log('User not found in User model, checking Admin model');
+            user = await Admin.findOne({ username });
+            isAdmin = !!user;
+         }
 
-      if (!user) {
-        console.log('User not found in either model');
-        throw new Error('Invalid credentials');
-      }
+         if (!user) {
+            console.log('User not found in either model');
+            throw new Error('Invalid credentials');
+         }
 
-      const isValid = await bcrypt.compare(password, user.password);
-      console.log('Password valid:', isValid);
+         const isValid = await bcrypt.compare(password, user.password);
+         console.log('Password valid:', isValid);
 
-      if (!isValid) {
-        throw new Error('Invalid credentials');
-      }
+         if (!isValid) {
+            throw new Error('Invalid credentials');
+         }
 
-      const roles = isAdmin ? user.roles : [user.role];
+         const roles = isAdmin ? user.roles : [user.role];
 
-      const token = jwt.sign(
-        {
-          id: user.id,
-          username: user.username,
-          roles,
-          isAdmin
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: '2h' }
-      );
+         const token = jwt.sign(
+            {
+               id: user.id,
+               username: user.username,
+               roles,
+               isAdmin
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '2h' }
+         );
 
-      return {
-        token,
-        user: {
-          id: user.id,
-          username: user.username,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          roles
-        }
-      };
-    },
-    logout: async (_, __, context) => {
-      // Here you would typically invalidate the token on the server side
-      // For now, we'll just return true to indicate successful logout
-      return true;
-    },
-  }
+         return {
+            token,
+            user: {
+               id: user.id,
+               username: user.username,
+               firstName: user.firstName,
+               lastName: user.lastName,
+               roles
+            }
+         };
+      },
+      logout: async (_, __, context) => {
+         // Here you would typically invalidate the token on the server side
+         // For now, we'll just return true to indicate successful logout
+         return true;
+      },
+   }
 };
 
 module.exports = authResolvers;

@@ -17,34 +17,40 @@ const userTypes = gql`
     firstName: String
     lastName: String
     roles: [String!]!
+    email: String
+    phone: String
+    company: String
+    address: String
+    profilePicture: ProfilePicture
   }
 
-  input CreateUserInput {
-    username: String!
-    password: String!
+  input UpdateUserProfileInput {
     firstName: String
     lastName: String
-    roles: [String!]!
+    email: String
+    phone: String
+    company: String
+    address: String
+    removeProfilePicture: Boolean
+    profilePicture: ProfilePictureInput
   }
 
-  input UpdateUserInput {
-    username: String
-    password: String
-    firstName: String
-    lastName: String
-    roles: [String!]
-  }
+#   input UpdateUserInput {
+#     firstName: String
+#     lastName: String
+#     roles: [String!]
+#   }
 
-  extend type Query {
-    getUser(id: ID!): User
-    getAllUsers: [User!]!
-  }
+#   extend type Query {
+#     getUser(id: ID!): User
+#     getAllUsers: [User!]!
+#   }
 
-  extend type Mutation {
-    createUser(input: CreateUserInput!): User!
-    updateUser(id: ID!, input: UpdateUserInput!): User!
-    deleteUser(id: ID!): Boolean!
-  }
+#   extend type Mutation {
+#     createUser(input: CreateUserInput!): User!
+#     updateUser(id: ID!, input: UpdateUserInput!): User!
+#     deleteUser(id: ID!): Boolean!
+#   }
 
   type AuthPayload {
     token: String!

@@ -5,7 +5,7 @@ const mutationTypes = gql`
     login(username: String!, password: String!): AuthPayload!
     registerUser(firstName: String!, lastName: String!, username: String!, password: String!): AuthPayload!
     createAdmin(input: CreateAdminInput!): Admin!
-    updateUserProfile(input: UpdateUserInput!): User
+    updateUserProfile(input: UpdateUserProfileInput!): User
     logout: Boolean
 
     updatePermitStatus(id: ID!, status: String!): Permit

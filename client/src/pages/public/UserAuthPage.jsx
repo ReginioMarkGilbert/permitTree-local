@@ -23,7 +23,7 @@ const REGISTER_USER = gql`
         username
         firstName
         lastName
-        role
+        roles
       }
     }
   }
