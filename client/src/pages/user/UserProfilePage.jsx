@@ -110,28 +110,11 @@ export default function UserProfilePage() {
                      contentType: profilePicture.type
                   };
 
-                  try {
-                     const { data } = await updateUserProfile({
-                        variables: { input },
-                     });
-
-                     toast.success('Profile updated successfully!');
-                     setRemoveProfilePicture(false);
-                     refetch();
-                  } catch (err) {
-                     console.error('Error updating profile:', err);
-                     toast.error('Failed to update profile. File might be too large.');
-                  }
+                  await updateProfile(input);
                };
                reader.readAsDataURL(profilePicture);
             } else {
-               const { data } = await updateUserProfile({
-                  variables: { input },
-               });
-
-               toast.success('Profile updated successfully!');
-               setRemoveProfilePicture(false);
-               refetch();
+               await updateProfile(input);
             }
          } catch (err) {
             console.error('Error updating profile:', err);
@@ -139,6 +122,21 @@ export default function UserProfilePage() {
          }
       }
       setIsEditing(!isEditing);
+   };
+
+   const updateProfile = async (input) => {
+      try {
+         const { data } = await updateUserProfile({
+            variables: { input },
+         });
+
+         toast.success('Profile updated successfully!');
+         setRemoveProfilePicture(false);
+         refetch();
+      } catch (err) {
+         console.error('Error updating profile:', err);
+         toast.error('Failed to update profile. File might be too large.');
+      }
    };
 
    const handleCancel = () => {

@@ -125,7 +125,7 @@ const userResolvers = {
           phone: updatedUser.phone,
           company: updatedUser.company,
           address: updatedUser.address,
-          role: updatedUser.role,
+          roles: updatedUser.roles,
           profilePicture: updatedUser.profilePicture && updatedUser.profilePicture.data ? {
             data: updatedUser.profilePicture.data.toString('base64'),
             contentType: updatedUser.profilePicture.contentType
