@@ -56,89 +56,80 @@ const GET_USER_APPLICATIONS = gql`
           woodProcessingPlantPermit { filename contentType }
         }
       }
-      # ... (other permit types)
-    }
-  }
-`;
-
-const DELETE_PERMIT = gql`
-  mutation DeletePermit($id: ID!) {
-    deletePermit(id: $id)
-  }
-`;
-
-const UPDATE_COV_PERMIT = gql`
-  mutation UpdateCOVPermit($id: ID!, $input: COVPermitInput!) {
-    updateCOVPermit(id: $id, input: $input) {
-      id
-      name
-      address
-      cellphone
-      purpose
-      driverName
-      driverLicenseNumber
-      vehiclePlateNumber
-      originAddress
-      destinationAddress
-      files {
-        letterOfIntent { filename contentType }
-        tallySheet { filename contentType }
-        forestCertification { filename contentType }
-        orCr { filename contentType }
-        driverLicense { filename contentType }
-        specialPowerOfAttorney { filename contentType }
+      ... on COVPermit {
+        name
+        address
+        cellphone
+        purpose
+        driverName
+        driverLicenseNumber
+        vehiclePlateNumber
+        originAddress
+        destinationAddress
+        files {
+          letterOfIntent { filename contentType }
+          tallySheet { filename contentType }
+          forestCertification { filename contentType }
+          orCr { filename contentType }
+          driverLicense { filename contentType }
+          specialPowerOfAttorney { filename contentType }
+        }
       }
-    }
-  }
-`;
-
-const GET_COV_PERMIT = gql`
-  query GetCOVPermit($id: ID!) {
-    getCOVPermitById(id: $id) {
-      id
-      name
-      address
-      cellphone
-      purpose
-      driverName
-      driverLicenseNumber
-      vehiclePlateNumber
-      originAddress
-      destinationAddress
-      files {
-        letterOfIntent { filename contentType }
-        tallySheet { filename contentType }
-        forestCertification { filename contentType }
-        orCr { filename contentType }
-        driverLicense { filename contentType }
-        specialPowerOfAttorney { filename contentType }
+      ... on PTPRPermit {
+        ownerName
+        address
+        contactNumber
+        lotArea
+        treeSpecies
+        totalTrees
+        treeSpacing
+        yearPlanted
+        files {
+          letterRequest { filename contentType }
+          titleOrTaxDeclaration { filename contentType }
+          darCertification { filename contentType }
+          specialPowerOfAttorney { filename contentType }
+        }
       }
-    }
-  }
-`;
-
-const UPDATE_CSAW_PERMIT = gql`
-  mutation UpdateCSAWPermit($id: ID!, $input: CSAWPermitInput!) {
-    updateCSAWPermit(id: $id, input: $input) {
-      id
-      registrationType
-      chainsawStore
-      ownerName
-      address
-      phone
-      brand
-      model
-      serialNumber
-      dateOfAcquisition
-      powerOutput
-      maxLengthGuidebar
-      countryOfOrigin
-      purchasePrice
-      isOwner
-      isTenureHolder
-      isBusinessOwner
-      isPLTPRHolder
-      isWPPHolder
+      ... on PLTPPermit {
+        name
+        address
+        contactNumber
+        treeType
+        treeStatus
+        landType
+        posingDanger
+        forPersonalUse
+        purpose
+        files {
+          applicationLetter { filename contentType }
+          lguEndorsement { filename contentType }
+          homeownersResolution { filename contentType }
+          ptaResolution { filename contentType }
+        }
+      }
+      ... on SPLTPPermit {
+        name
+        address
+        contactNumber
+        plantedTrees
+        naturallyGrown
+        standing
+        blownDown
+        withinPrivateLand
+        withinTenuredForestLand
+        posingDanger
+        forPersonalUse
+        purpose
+        files {
+          letterOfIntent { filename contentType }
+          lguEndorsement { filename contentType }
+          titleCertificate { filename contentType }
+          darCertificate { filename contentType }
+          specialPowerOfAttorney { filename contentType }
+          ptaResolution { filename contentType }
+        }
+      }
     }
   }
 `;
@@ -178,70 +169,78 @@ const GET_CSAW_PERMIT = gql`
   }
 `;
 
-const UPDATE_PLTP_PERMIT = gql`
-  mutation UpdatePLTPPermit($id: ID!, $input: PLTPPermitInput!) {
-    updatePLTPPermit(id: $id, input: $input) {
+const UPDATE_CSAW_PERMIT = gql`
+  mutation UpdateCSAWPermit($id: ID!, $input: CSAWPermitInput!) {
+    updateCSAWPermit(id: $id, input: $input) {
+      id
+      registrationType
+      chainsawStore
+      ownerName
+      address
+      phone
+      brand
+      model
+      serialNumber
+      dateOfAcquisition
+      powerOutput
+      maxLengthGuidebar
+      countryOfOrigin
+      purchasePrice
+      isOwner
+      isTenureHolder
+      isBusinessOwner
+      isPLTPRHolder
+      isWPPHolder
+    }
+  }
+`;
+
+const GET_COV_PERMIT = gql`
+  query GetCOVPermit($id: ID!) {
+    getCOVPermitById(id: $id) {
       id
       name
       address
-      contactNumber
-      treeType
-      treeStatus
-      landType
-      posingDanger
-      forPersonalUse
+      cellphone
       purpose
+      driverName
+      driverLicenseNumber
+      vehiclePlateNumber
+      originAddress
+      destinationAddress
       files {
-        applicationLetter { filename contentType }
-        lguEndorsement { filename contentType }
-        homeownersResolution { filename contentType }
-        ptaResolution { filename contentType }
+        letterOfIntent { filename contentType }
+        tallySheet { filename contentType }
+        forestCertification { filename contentType }
+        orCr { filename contentType }
+        driverLicense { filename contentType }
+        specialPowerOfAttorney { filename contentType }
       }
     }
   }
 `;
 
-const GET_PLTP_PERMIT = gql`
-  query GetPLTPPermit($id: ID!) {
-    getPLTPPermitById(id: $id) {
+const UPDATE_COV_PERMIT = gql`
+  mutation UpdateCOVPermit($id: ID!, $input: COVPermitInput!) {
+    updateCOVPermit(id: $id, input: $input) {
       id
-      applicationNumber
-      applicationType
       name
       address
-      contactNumber
-      treeType
-      treeStatus
-      landType
-      posingDanger
-      forPersonalUse
+      cellphone
       purpose
-      status
-      dateOfSubmission
+      driverName
+      driverLicenseNumber
+      vehiclePlateNumber
+      originAddress
+      destinationAddress
       files {
-        applicationLetter { filename contentType }
-        lguEndorsement { filename contentType }
-        homeownersResolution { filename contentType }
-        ptaResolution { filename contentType }
+        letterOfIntent { filename contentType }
+        tallySheet { filename contentType }
+        forestCertification { filename contentType }
+        orCr { filename contentType }
+        driverLicense { filename contentType }
+        specialPowerOfAttorney { filename contentType }
       }
-    }
-  }
-`;
-
-const UNSUBMIT_PERMIT = gql`
-  mutation UnsubmitPermit($id: ID!) {
-    unsubmitPermit(id: $id) {
-      id
-      status
-    }
-  }
-`;
-
-const SUBMIT_PERMIT = gql`
-  mutation SubmitPermit($id: ID!) {
-    submitPermit(id: $id) {
-      id
-      status
     }
   }
 `;
@@ -285,6 +284,56 @@ const UPDATE_PTPR_PERMIT = gql`
         titleOrTaxDeclaration { filename contentType }
         darCertification { filename contentType }
         specialPowerOfAttorney { filename contentType }
+      }
+    }
+  }
+`;
+
+const GET_PLTP_PERMIT = gql`
+  query GetPLTPPermit($id: ID!) {
+    getPLTPPermitById(id: $id) {
+      id
+      applicationNumber
+      applicationType
+      name
+      address
+      contactNumber
+      treeType
+      treeStatus
+      landType
+      posingDanger
+      forPersonalUse
+      purpose
+      status
+      dateOfSubmission
+      files {
+        applicationLetter { filename contentType }
+        lguEndorsement { filename contentType }
+        homeownersResolution { filename contentType }
+        ptaResolution { filename contentType }
+      }
+    }
+  }
+`;
+
+const UPDATE_PLTP_PERMIT = gql`
+  mutation UpdatePLTPPermit($id: ID!, $input: PLTPPermitInput!) {
+    updatePLTPPermit(id: $id, input: $input) {
+      id
+      name
+      address
+      contactNumber
+      treeType
+      treeStatus
+      landType
+      posingDanger
+      forPersonalUse
+      purpose
+      files {
+        applicationLetter { filename contentType }
+        lguEndorsement { filename contentType }
+        homeownersResolution { filename contentType }
+        ptaResolution { filename contentType }
       }
     }
   }
@@ -346,31 +395,27 @@ const UPDATE_SPLTP_PERMIT = gql`
   }
 `;
 
-const SAVE_SPLTP_PERMIT_DRAFT = gql`
-  mutation SaveSPLTPPermitDraft($input: SPLTPPermitDraftInput!) {
-    saveSPLTPPermitDraft(input: $input) {
+const UNSUBMIT_PERMIT = gql`
+  mutation UnsubmitPermit($id: ID!) {
+    unsubmitPermit(id: $id) {
       id
-      name
-      address
-      contactNumber
-      plantedTrees
-      naturallyGrown
-      standing
-      blownDown
-      withinPrivateLand
-      withinTenuredForestLand
-      posingDanger
-      forPersonalUse
-      purpose
-      files {
-        letterOfIntent { filename contentType }
-        lguEndorsement { filename contentType }
-        titleCertificate { filename contentType }
-        darCertificate { filename contentType }
-        specialPowerOfAttorney { filename contentType }
-        ptaResolution { filename contentType }
-      }
+      status
     }
+  }
+`;
+
+const SUBMIT_PERMIT = gql`
+  mutation SubmitPermit($id: ID!) {
+    submitPermit(id: $id) {
+      id
+      status
+    }
+  }
+`;
+
+const DELETE_PERMIT = gql`
+  mutation DeletePermit($id: ID!) {
+    deletePermit(id: $id)
   }
 `;
 

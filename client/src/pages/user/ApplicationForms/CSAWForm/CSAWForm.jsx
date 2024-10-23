@@ -210,12 +210,15 @@ const ChainsawRegistrationForm = () => {
 
          // Process files
          for (const [key, files] of Object.entries(formData.files)) {
-            if (files && files.length > 0) {
-               input.files[key] = await Promise.all(files.map(async file => ({
-                  filename: file.name,
-                  contentType: file.type,
-                  data: await readFileAsBase64(file)
-               })));
+            if (files.length > 0) {
+               input.files[key] = await Promise.all(files.map(async (file) => {
+                  const content = await readFileAsBase64(file);
+                  return {
+                     filename: file.name,
+                     contentType: file.type,
+                     data: content
+                  };
+               }));
             }
          }
 

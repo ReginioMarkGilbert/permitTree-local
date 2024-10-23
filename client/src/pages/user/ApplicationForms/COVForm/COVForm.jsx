@@ -24,6 +24,14 @@ const CREATE_COV_PERMIT = gql`
       applicationNumber
       status
       dateOfSubmission
+      files {
+        letterOfIntent { filename contentType }
+        tallySheet { filename contentType }
+        forestCertification { filename contentType }
+        orCr { filename contentType }
+        driverLicense { filename contentType }
+        specialPowerOfAttorney { filename contentType }
+      }
     }
   }
 `;
@@ -148,7 +156,7 @@ const COVForm = () => {
                }));
             }
          }
-         console.log('save as draft:', input)
+         // console.log('save as draft:', input)
          const token = localStorage.getItem('token');
          const { data } = await saveCOVPermitDraft({
             variables: { input },

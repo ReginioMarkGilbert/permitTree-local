@@ -42,6 +42,14 @@ const SAVE_SPLTP_PERMIT_DRAFT = gql`
       id
       applicationNumber
       status
+      files {
+        letterOfIntent { filename contentType }
+        lguEndorsement { filename contentType }
+        titleCertificate { filename contentType }
+        darCertificate { filename contentType }
+        specialPowerOfAttorney { filename contentType }
+        ptaResolution { filename contentType }
+      }
     }
   }
 `;
@@ -146,12 +154,19 @@ const SPLTPForm = () => {
          // Process files
          for (const [key, files] of Object.entries(formData.files)) {
             if (files.length > 0) {
-               input.files[key] = files.map(file => ({
-                  filename: file.name,
-                  contentType: file.type
+               input.files[key] = await Promise.all(files.map(async (file) => {
+                  const content = await readFileAsBase64(file);
+                  return {
+                     filename: file.name,
+                     contentType: file.type,
+                     data: content
+                  };
                }));
             }
          }
+
+         // Log the form data being saved as draft
+         console.log('Saving draft with input:', input);
 
          const token = localStorage.getItem('token');
          const { data } = await saveSPLTPPermitDraft({

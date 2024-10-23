@@ -36,7 +36,7 @@ const UserApplicationsStatusPage = () => {
       updateCOVPermit,
       updatePLTPPermit,
       updatePTPRPermit,
-      updateSPLTPPermit, // Add this line
+      updateSPLTPPermit,
       fetchCOVPermit,
       fetchCSAWPermit,
       fetchPLTPPermit,
@@ -115,17 +115,17 @@ const UserApplicationsStatusPage = () => {
          }
 
          switch (editedData.applicationType) {
-            case 'Certificate of Verification':
-               await updateCOVPermit(id, editedData);
-               break;
             case 'Chainsaw Registration':
                await updateCSAWPermit(id, editedData);
                break;
-            case 'Public Land Timber Permit':
-               await updatePLTPPermit(id, editedData);
+            case 'Certificate of Verification':
+               await updateCOVPermit(id, editedData);
                break;
             case 'Private Tree Plantation Registration':
                await updatePTPRPermit(id, editedData);
+               break;
+            case 'Public Land Timber Permit':
+               await updatePLTPPermit(id, editedData);
                break;
             case 'Special/Private Land Timber Permit':
                await updateSPLTPPermit(id, editedData);
