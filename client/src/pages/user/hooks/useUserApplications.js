@@ -835,18 +835,23 @@ export const useUserApplications = (status) => {
       error,
       refetch,
       deletePermit,
-      updateCOVPermit,
-      fetchCOVPermit,
-      updateCSAWPermit,
-      fetchCSAWPermit,
-      updatePLTPPermit,
-      fetchPLTPPermit,
       unsubmitPermit,
       submitPermit,
-      updatePTPRPermit,
 
+      updateCSAWPermit,
+      fetchCSAWPermit,
+
+      updateCOVPermit,
+      fetchCOVPermit,
+
+      updatePTPRPermit,
       fetchPTPRPermit,
+
+      updatePLTPPermit,
+      fetchPLTPPermit,
+
       updateSPLTPPermit,
-      fetchSPLTPPermit
+      fetchSPLTPPermit,
+
    };
 };
