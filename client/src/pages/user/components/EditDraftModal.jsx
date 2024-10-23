@@ -5,7 +5,8 @@ import COVEditForm from './permitForms/COVEditForm';
 import CSAWEditForm from './permitForms/CSAWEditForm';
 import PLTPEditForm from './permitForms/PLTPEditForm';
 import PTPREditForm from './permitForms/PTPREditForm';
-import SPLTPEditForm from './permitForms/SPLTPEditForm'; // Import the new SPLTPEditForm
+import SPLTPEditForm from './permitForms/SPLTPEditForm';
+import TCEBPEditForm from './permitForms/TCEBPEditForm';
 import '@/components/ui/styles/customScrollbar.css';
 import { useUserApplications } from '../hooks/useUserApplications';
 
@@ -20,7 +21,7 @@ const formatDate = (dateString) => {
 
 const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
    const [formData, setFormData] = useState(application);
-   const { fetchCOVPermit, fetchCSAWPermit, fetchPLTPPermit, fetchPTPRPermit, fetchSPLTPPermit } = useUserApplications();
+   const { fetchCOVPermit, fetchCSAWPermit, fetchPLTPPermit, fetchPTPRPermit, fetchSPLTPPermit, fetchTCEBPPermit } = useUserApplications();
    const [hasFetched, setHasFetched] = useState(false);
 
    const fetchPermitData = useCallback(async () => {
@@ -43,6 +44,9 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
                case 'Special/Private Land Timber Permit':
                   permitData = await fetchSPLTPPermit(application.id);
                   break;
+               case 'Tree Cutting and/or Earth Balling Permit':
+                  permitData = await fetchTCEBPPermit(application.id);
+                  break;
                default:
                   permitData = application;
             }
@@ -53,7 +57,7 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
             console.error('Error fetching permit data:', error);
          }
       }
-   }, [application, fetchCOVPermit, fetchCSAWPermit, fetchPLTPPermit, fetchPTPRPermit, fetchSPLTPPermit, hasFetched]);
+   }, [application, fetchCOVPermit, fetchCSAWPermit, fetchPLTPPermit, fetchPTPRPermit, fetchSPLTPPermit, fetchTCEBPPermit, hasFetched]);
 
    useEffect(() => {
       if (isOpen) {
@@ -188,6 +192,13 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
                handleFileChange={handleFileChange}
                removeFile={removeFile}
                handleCheckboxChange={handleCheckboxChange}
+            />;
+         case 'Tree Cutting and/or Earth Balling Permit':
+            return <TCEBPEditForm
+               formData={formData}
+               handleInputChange={handleInputChange}
+               handleFileChange={handleFileChange}
+               removeFile={removeFile}
             />;
          default:
             return <p>Unsupported permit type: {application.applicationType}</p>;

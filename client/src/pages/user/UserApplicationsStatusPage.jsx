@@ -44,6 +44,8 @@ const UserApplicationsStatusPage = () => {
       fetchSPLTPPermit,
       unsubmitPermit,
       submitPermit,
+      updateTCEBPPermit,
+      fetchTCEBPPermit,
    } = useUserApplications(activeSubTab);
 
    const mainTabs = ['Applications', 'Order Of Payments'];
@@ -129,6 +131,9 @@ const UserApplicationsStatusPage = () => {
                break;
             case 'Special/Private Land Timber Permit':
                await updateSPLTPPermit(id, editedData);
+               break;
+            case 'Tree Cutting and/or Earth Balling Permit':
+               await updateTCEBPPermit(id, editedData);
                break;
             default:
                console.error('Unsupported application type:', editedData.applicationType);
@@ -227,6 +232,7 @@ const UserApplicationsStatusPage = () => {
                         fetchPLTPPermit={fetchPLTPPermit}
                         fetchPTPRPermit={fetchPTPRPermit}
                         fetchSPLTPPermit={fetchSPLTPPermit}
+                        fetchTCEBPPermit={fetchTCEBPPermit}
                      />
                   ))}
                </tbody>

@@ -69,8 +69,31 @@ const tcebpResolvers = {
             throw new Error('You are not authorized to update this permit');
          }
 
-         Object.assign(permit, input);
-         return await permit.save();
+         // Process file inputs
+         const processedFiles = {};
+         for (const [key, files] of Object.entries(input.files)) {
+            if (files && files.length > 0) {
+               processedFiles[key] = files.map(file => ({
+                  filename: file.filename,
+                  contentType: file.contentType,
+                  data: file.data ? Binary.createFromBase64(file.data) : undefined
+               }));
+            } else {
+               processedFiles[key] = [];
+            }
+         }
+
+         const updatedPermitData = {
+            ...input,
+            files: processedFiles,
+         };
+
+         Object.assign(permit, updatedPermitData);
+         const updatedPermit = await permit.save();
+         return {
+            ...updatedPermit.toObject(),
+            id: updatedPermit._id.toString()
+         };
       },
       saveTCEBPPermitDraft: async (_, { input }, { user }) => {
          if (!user) {
@@ -97,6 +120,7 @@ const tcebpResolvers = {
                ...input,
                applicationNumber,
                applicantId: user.id,
+               applicationType: 'Tree Cutting and/or Earth Balling Permit',
                status: 'Draft',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
@@ -104,7 +128,10 @@ const tcebpResolvers = {
 
             const newPermit = new TCEBPPermit(permitData);
             const savedPermit = await newPermit.save();
-            return savedPermit;
+            return {
+               ...savedPermit.toObject(),
+               id: savedPermit._id.toString()
+            };
          } catch (error) {
             console.error('Error saving TCEBP permit draft:', error);
             throw new Error(`Failed to save TCEBP permit draft: ${error.message}`);

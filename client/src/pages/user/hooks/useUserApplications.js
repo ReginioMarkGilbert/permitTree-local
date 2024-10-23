@@ -419,6 +419,60 @@ const DELETE_PERMIT = gql`
   }
 `;
 
+const GET_TCEBP_PERMIT = gql`
+  query GetTCEBPPermit($id: ID!) {
+    getTCEBPPermitById(id: $id) {
+      id
+      applicationNumber
+      applicationType
+      requestType
+      name
+      address
+      contactNumber
+      purpose
+      status
+      dateOfSubmission
+      files {
+        letterOfIntent { filename contentType }
+        lguEndorsement { filename contentType }
+        landTenurial { filename contentType }
+        siteDevelopmentPlan { filename contentType }
+        environmentalCompliance { filename contentType }
+        fpic { filename contentType }
+        ownerConsent { filename contentType }
+        pambClearance { filename contentType }
+      }
+    }
+  }
+`;
+
+const UPDATE_TCEBP_PERMIT = gql`
+  mutation UpdateTCEBPPermit($id: ID!, $input: TCEBPPermitInput!) {
+    updateTCEBPPermit(id: $id, input: $input) {
+      id
+      applicationNumber
+      applicationType
+      requestType
+      name
+      address
+      contactNumber
+      purpose
+      status
+      dateOfSubmission
+      files {
+        letterOfIntent { filename contentType }
+        lguEndorsement { filename contentType }
+        landTenurial { filename contentType }
+        siteDevelopmentPlan { filename contentType }
+        environmentalCompliance { filename contentType }
+        fpic { filename contentType }
+        ownerConsent { filename contentType }
+        pambClearance { filename contentType }
+      }
+    }
+  }
+`;
+
 export const useUserApplications = (status) => {
    // console.log('useUserApplications called with status:', status);
 
@@ -442,6 +496,8 @@ export const useUserApplications = (status) => {
    const [getPTPRPermit] = useLazyQuery(GET_PTPR_PERMIT);
    const [updateSPLTPPermitMutation] = useMutation(UPDATE_SPLTP_PERMIT);
    const [getSPLTPPermit] = useLazyQuery(GET_SPLTP_PERMIT);
+   const [updateTCEBPPermitMutation] = useMutation(UPDATE_TCEBP_PERMIT);
+   const [getTCEBPPermit] = useLazyQuery(GET_TCEBP_PERMIT);
 
    const deletePermit = async (id) => {
       console.log('Attempting to delete permit with id:', id);
@@ -829,6 +885,69 @@ export const useUserApplications = (status) => {
       }
    };
 
+   const updateTCEBPPermit = async (id, input) => {
+      console.log('Updating TCEBP permit:', id);
+      console.log('Update input:', input);
+      try {
+        // Clean up the input data
+        const cleanedInput = {
+          name: input.name,
+          address: input.address,
+          contactNumber: input.contactNumber,
+          purpose: input.purpose,
+          requestType: input.requestType,
+          files: {}
+        };
+
+        // Process files
+        if (input.files) {
+          Object.keys(input.files).forEach(key => {
+            if (key !== '__typename') {  // Skip the __typename field
+              if (Array.isArray(input.files[key]) && input.files[key].length > 0) {
+                cleanedInput.files[key] = input.files[key].map(file => ({
+                  filename: file.filename,
+                  contentType: file.contentType,
+                  // Only include data if it's present (it might not be for existing files)
+                  ...(file.data && { data: file.data })
+                }));
+              } else {
+                cleanedInput.files[key] = [];
+              }
+            }
+          });
+        }
+
+        console.log('Cleaned input:', cleanedInput);
+
+        const { data } = await updateTCEBPPermitMutation({
+          variables: {
+            id,
+            input: cleanedInput
+          },
+          refetchQueries: [{ query: GET_USER_APPLICATIONS, variables: { status: input.status } }]
+        });
+        console.log('Update mutation result:', data);
+        if (data.updateTCEBPPermit) {
+          return data.updateTCEBPPermit;
+        } else {
+          throw new Error('Failed to update permit');
+        }
+      } catch (error) {
+        console.error('Error updating permit:', error);
+        throw error;
+      }
+   };
+
+   const fetchTCEBPPermit = async (id) => {
+      try {
+        const { data } = await getTCEBPPermit({ variables: { id } });
+        return data.getTCEBPPermitById;
+      } catch (error) {
+        console.error('Error fetching TCEBP permit:', error);
+        throw error;
+      }
+   };
+
    return {
       applications: data?.getUserApplications || [],
       loading,
@@ -852,6 +971,9 @@ export const useUserApplications = (status) => {
 
       updateSPLTPPermit,
       fetchSPLTPPermit,
+
+      updateTCEBPPermit,
+      fetchTCEBPPermit,
 
    };
 };
