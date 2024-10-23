@@ -54,15 +54,17 @@ const App = () => {
    const { sidebarToggle, toggleSidebar } = useSidebarToggle();
    const navigate = useNavigate();
    const location = useLocation();
-   const userRoles = getUserRoles();
+   const [userRoles, setUserRoles] = useState([]);
    const [showNavbar, setShowNavbar] = useState(false);
 
    useEffect(() => {
-      if (!isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/about' && location.pathname !== '/services' && location.pathname !== '/contact' && location.pathname !== '/learnMore') {
+      const authStatus = isAuthenticated();
+      if (authStatus) {
+         setUserRoles(getUserRoles());
+      } else if (location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/about' && location.pathname !== '/services' && location.pathname !== '/contact' && location.pathname !== '/learnMore') {
          navigate('/auth');
       }
-      // Set showNavbar based on authentication and current path
-      setShowNavbar(isAuthenticated() && location.pathname !== '/');
+      setShowNavbar(authStatus && location.pathname !== '/');
    }, [navigate, location.pathname]);
 
    useEffect(() => {
@@ -79,7 +81,7 @@ const App = () => {
       if (userRoles.includes('superadmin')) {
          return <SuperAdminSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />;
       } else if (userRoles.some(role => PersonnelRoles.includes(role))) {
-         return <PersonnelSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />;
+         return <PersonnelSidebar isOpen={sidebarToggle} onToggle={toggleSidebar} />;
       } else {
          return <UserSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />;
       }

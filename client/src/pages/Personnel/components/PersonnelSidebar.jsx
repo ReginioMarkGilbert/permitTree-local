@@ -12,12 +12,13 @@ const LOGOUT_MUTATION = gql`
   }
 `;
 
-const PersonnelSidebar = React.memo(({ isOpen }) => {
+const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
    const navigate = useNavigate();
    const { unreadCount } = useChiefRPSNotification();
    const [logout] = useMutation(LOGOUT_MUTATION);
    const userRoles = getUserRoles();
    const [showText, setShowText] = useState(false);
+   const [isAuth, setIsAuth] = useState(isAuthenticated());
 
    useEffect(() => {
       if (isOpen) {
@@ -33,19 +34,27 @@ const PersonnelSidebar = React.memo(({ isOpen }) => {
          await logout();
          removeToken();
          localStorage.removeItem('user');
+         setIsAuth(false);
+         if (isOpen) {
+            onToggle(); // Close the sidebar if it's open
+         }
          navigate('/auth');
          console.log('Logout successful!');
       } catch (error) {
          console.error('Logout failed:', error);
       }
-   }, [logout, navigate]);
+   }, [logout, navigate, isOpen, onToggle]);
 
-   React.useEffect(() => {
+   useEffect(() => {
       const authStatus = isAuthenticated();
+      setIsAuth(authStatus);
       if (!authStatus) {
+         if (isOpen) {
+            onToggle(); // Close the sidebar if it's open
+         }
          navigate('/auth');
       }
-   }, [navigate]);
+   }, [navigate, isOpen, onToggle]);
 
    const getDashboardLink = () => {
       if (userRoles.includes('Receiving_Clerk') || userRoles.includes('Releasing_Clerk')) {
@@ -102,14 +111,15 @@ const PersonnelSidebar = React.memo(({ isOpen }) => {
       </NavLink>
    );
 
-   if (!isAuthenticated()) {
+   if (!isAuth) {
       return null;
    }
 
    return (
       <div
-         className={`h-full bg-green-800 text-white flex flex-col justify-between fixed top-0 left-0 ${isOpen ? 'w-48 md:w-64' : 'w-16'
-            } z-10 transition-all duration-300 ease-in-out`}
+         className={`h-full bg-green-800 text-white flex flex-col justify-between fixed top-0 left-0 ${
+            isOpen ? 'w-48 md:w-64' : 'w-16'
+         } z-10 transition-all duration-300 ease-in-out`}
       >
          <div className="flex flex-col h-full">
             {/* Add a spacer div to replace the logo */}
