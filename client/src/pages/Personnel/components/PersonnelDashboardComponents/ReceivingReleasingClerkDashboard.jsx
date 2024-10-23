@@ -119,6 +119,7 @@ const ReceivingReleasingClerkDashboard = () => {
                   ))}
                </div>
             </div>
+            {renderTabDescription()}
             <div className="mb-6">
                <Input
                   type="text"
