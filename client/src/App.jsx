@@ -83,7 +83,7 @@ const App = () => {
       } else if (userRoles.some(role => PersonnelRoles.includes(role))) {
          return <PersonnelSidebar isOpen={sidebarToggle} onToggle={toggleSidebar} />;
       } else {
-         return <UserSidebar isOpen={sidebarToggle} toggleSidebar={toggleSidebar} />;
+         return <UserSidebar isOpen={sidebarToggle} onToggle={toggleSidebar} />;
       }
    };
 

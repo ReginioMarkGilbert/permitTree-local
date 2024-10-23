@@ -13,11 +13,12 @@ const LOGOUT_MUTATION = gql`
   }
 `;
 
-const Sidebar = React.memo(({ isOpen }) => {
+const Sidebar = React.memo(({ isOpen, onToggle }) => {
    const navigate = useNavigate();
    const { unreadCount } = useNotification();
    const [logout] = useMutation(LOGOUT_MUTATION);
    const [showText, setShowText] = useState(false);
+   const [isAuth, setIsAuth] = useState(isAuthenticated());
 
    useEffect(() => {
       if (isOpen) {
@@ -33,19 +34,27 @@ const Sidebar = React.memo(({ isOpen }) => {
          await logout();
          removeToken();
          localStorage.removeItem('user');
+         setIsAuth(false);
+         if (isOpen) {
+            onToggle(); // Close the sidebar if it's open
+         }
          navigate('/auth');
          console.log('Logout successful!');
       } catch (error) {
          console.error('Logout failed:', error);
       }
-   }, [logout, navigate]);
+   }, [logout, navigate, isOpen, onToggle]);
 
-   React.useEffect(() => {
+   useEffect(() => {
       const authStatus = isAuthenticated();
+      setIsAuth(authStatus);
       if (!authStatus) {
+         if (isOpen) {
+            onToggle(); // Close the sidebar if it's open
+         }
          navigate('/auth');
       }
-   }, [navigate]);
+   }, [navigate, isOpen, onToggle]);
 
    const navItems = [
       { to: '/home', icon: <FaHome />, text: 'Home' },
@@ -83,7 +92,7 @@ const Sidebar = React.memo(({ isOpen }) => {
       </NavLink>
    );
 
-   if (!isAuthenticated()) {
+   if (!isAuth) {
       return null;
    }
 
@@ -93,7 +102,9 @@ const Sidebar = React.memo(({ isOpen }) => {
             } z-10 transition-all duration-300 ease-in-out`}
       >
          <div className="flex flex-col h-full">
-            <div className={`h-20 flex items-center justify-center ${isOpen ? 'px-4' : ''}`}>
+            {/* Add a spacer div to replace the logo */}
+            <div className="h-20"></div>
+            {/* <div className={`h-20 flex items-center justify-center ${isOpen ? 'px-4' : ''}`}>
                {isOpen ? (
                   <div className="flex items-center">
                      <img src={permitTreeLogo} alt="PermitTree Logo" className="h-12" />
@@ -104,7 +115,7 @@ const Sidebar = React.memo(({ isOpen }) => {
                ) : (
                   <img src={permitTreeLogo} alt="PermitTree Logo" className="h-8 w-8" />
                )}
-            </div>
+            </div> */}
             <nav className="flex-grow mt-6">
                {navItems.slice(0, 4).map(renderNavItem)}
             </nav>
