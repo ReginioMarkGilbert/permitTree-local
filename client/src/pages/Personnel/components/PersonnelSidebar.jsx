@@ -1,7 +1,6 @@
-import React, { useCallback, useMemo } from 'react';
-import { FaBell, FaChartLine, FaCog, FaFileInvoiceDollar, FaHome, FaSignInAlt, FaTachometerAlt } from 'react-icons/fa';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import { FaBell, FaChartLine, FaCog, FaFileInvoiceDollar, FaHome, FaSignOutAlt, FaTachometerAlt } from 'react-icons/fa';
 import { NavLink, useNavigate } from 'react-router-dom';
-import permitTreeLogo from '../../../assets/denr-logo.png';
 import { removeToken } from '../../../utils/tokenManager';
 import { useChiefRPSNotification } from '../contexts/ChiefRPSNotificationContext';
 import { isAuthenticated, getUserRoles } from '../../../utils/auth';
@@ -18,6 +17,16 @@ const PersonnelSidebar = React.memo(({ isOpen }) => {
    const { unreadCount } = useChiefRPSNotification();
    const [logout] = useMutation(LOGOUT_MUTATION);
    const userRoles = getUserRoles();
+   const [showText, setShowText] = useState(false);
+
+   useEffect(() => {
+      if (isOpen) {
+         const timer = setTimeout(() => setShowText(true), 150);
+         return () => clearTimeout(timer);
+      } else {
+         setShowText(false);
+      }
+   }, [isOpen]);
 
    const handleLogout = useCallback(async () => {
       try {
@@ -38,8 +47,6 @@ const PersonnelSidebar = React.memo(({ isOpen }) => {
       }
    }, [navigate]);
 
-   console.log("user roles:", userRoles);
-
    const getDashboardLink = () => {
       if (userRoles.includes('Receiving_Clerk') || userRoles.includes('Releasing_Clerk')) {
          return "/personnel/receiving-releasing";
@@ -58,57 +65,65 @@ const PersonnelSidebar = React.memo(({ isOpen }) => {
       }
    };
 
-   const sidebarLinks = useMemo(() => [
+   const navItems = [
       { to: "/personnel/home", icon: <FaHome />, text: "Home" },
       { to: getDashboardLink(), icon: <FaTachometerAlt />, text: "Dashboard" },
-      { to: "/personnel/notifications", icon: <FaBell />, text: "Notifications", count: unreadCount },
+      { to: "/personnel/notifications", icon: <FaBell />, text: "Notifications", badge: unreadCount },
       { to: "/personnel/reports", icon: <FaChartLine />, text: "Reports" },
       { to: "/personnel/settings", icon: <FaCog />, text: "Settings" },
       { to: "/personnel/order-of-payment", icon: <FaFileInvoiceDollar />, text: "Order of Payment" },
-   ], [unreadCount, userRoles]);
+      { to: "/auth", icon: <FaSignOutAlt />, text: "Logout" }
+   ];
 
-   const sidebarContent = useMemo(() => (
-      <>
-         <div className="mt-6 ml-4">
-            <div className="mt-16">
-               <div className="flex items-center justify-start mt-10 mr-5 pl-2">
-                  <img src={permitTreeLogo} alt="PermitTree Logo" className="h-12" />
-                  <span className="pl-2 text-xl font-semibold">PermitTree</span>
-               </div>
-               <div className="line" style={{ borderBottom: '1px solid #ffffff', marginTop: '20px', width: '190px' }}></div>
-               <nav className="mt-7">
-                  {sidebarLinks.map((link) => (
-                     <NavLink key={link.to} to={link.to} className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2 relative">
-                        <span className="mr-3 relative">
-                           {link.icon}
-                           {link.count > 0 && (
-                              <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
-                                 {link.count}
-                              </span>
-                           )}
-                        </span>
-                        <span>{link.text}</span>
-                     </NavLink>
-                  ))}
-               </nav>
-            </div>
+   const renderNavItem = (item, index) => (
+      <NavLink
+         key={index}
+         to={item.to}
+         className={({ isActive }) => `
+            flex items-center py-2.5 px-4 rounded-md mt-2
+            ${isOpen ? '' : 'justify-center'}
+            ${isActive && item.to !== '/auth' ? 'bg-green-700 text-white' : 'hover:bg-gray-700 hover:text-white'}
+         `}
+         onClick={item.to === '/auth' ? handleLogout : undefined}
+      >
+         <div className="relative w-6 h-6 flex items-center justify-center">
+            {item.badge > 0 && (
+               <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
+                  {item.badge}
+               </span>
+            )}
+            {item.icon}
          </div>
-         <div className="line ml-4" style={{ borderBottom: '1px solid #ffffff', marginTop: '22.5em', width: '190px' }}></div>
-         <div className="mb-10 ml-4">
-            <NavLink to="#" onClick={handleLogout} className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
-               <span className="mr-3"><FaSignInAlt /></span>
-               <span>Logout</span>
-            </NavLink>
-         </div>
-      </>
-   ), [sidebarLinks, handleLogout]);
+         {isOpen && (
+            <span className={`ml-3 transition-opacity duration-450 ease-in-out ${showText ? 'opacity-100' : 'opacity-0'}`}>
+               {item.text}
+            </span>
+         )}
+      </NavLink>
+   );
+
+   if (!isAuthenticated()) {
+      return null;
+   }
 
    return (
       <div
-         className={`h-full bg-green-800 text-white flex flex-col justify-between fixed top-0 left-0 w-56 transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:w-64 z-10`}
-         style={{ willChange: 'transform' }}
+         className={`h-full bg-green-800 text-white flex flex-col justify-between fixed top-0 left-0 ${isOpen ? 'w-48 md:w-64' : 'w-16'
+            } z-10 transition-all duration-300 ease-in-out`}
       >
-         {sidebarContent}
+         <div className="flex flex-col h-full">
+            {/* Add a spacer div to replace the logo */}
+            <div className="h-20"></div>
+            <nav className="flex-grow">
+               {navItems.slice(0, -1).map(renderNavItem)}
+            </nav>
+            <div className="mb-10">
+               {isOpen && (
+                  <div className="line mx-4" style={{ borderBottom: '1px solid #ffffff', marginBottom: '1em' }}></div>
+               )}
+               {renderNavItem(navItems[navItems.length - 1])}
+            </div>
+         </div>
       </div>
    );
 });
