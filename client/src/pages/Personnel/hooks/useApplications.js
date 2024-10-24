@@ -1,54 +1,32 @@
-import { useState, useCallback, useEffect } from 'react';
-import axios from 'axios';
-import { toast } from 'react-toastify';
+import { useQuery, gql } from '@apollo/client';
 
-export const useApplications = (activeTab) => {
-    const [applications, setApplications] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+const GET_APPLICATIONS_BY_STATUS = gql`
+  query GetApplicationsByStatus($status: String!) {
+    getApplicationsByStatus(status: $status) {
+      id
+      applicationNumber
+      applicationType
+      status
+      dateOfSubmission
+    }
+  }
+`;
 
-    const fetchApplications = useCallback(async () => {
-        try {
-            setLoading(true);
-            const token = localStorage.getItem('token');
-            let statusFilter = activeTab;
-            if (activeTab === 'For Review') {
-                statusFilter = ['Submitted', 'For Review'];
-            }
-            const response = await axios.get('http://localhost:3000/api/admin/all-applications', {
-                params: {
-                    status: statusFilter
-                },
-                headers: { Authorization: token }
-            });
+export const useApplications = (status) => {
+  const { data, loading, error, refetch } = useQuery(GET_APPLICATIONS_BY_STATUS, {
+    variables: { status },
+    fetchPolicy: 'network-only',
+  });
 
-            const updatedApplications = response.data.map(app => ({
-                ...app,
-                status: app.status === 'Submitted' ? 'For Review' : app.status
-            }));
-            setApplications(updatedApplications);
-            setLoading(false);
-        } catch (error) {
-            console.error('Error fetching applications:', error);
-            setError('Failed to fetch applications');
-            setLoading(false);
-            toast.error('Failed to fetch applications');
-        }
-    }, [activeTab]);
+  const fetchApplications = async () => {
+    await refetch();
+    return data?.getApplicationsByStatus || [];
+  };
 
-    useEffect(() => {
-        fetchApplications();
-    }, [fetchApplications]);
-
-    const handleStatusUpdate = useCallback((updatedApplication) => {
-        setApplications(prevApplications =>
-            prevApplications.map(app =>
-                app._id === updatedApplication._id ? updatedApplication : app
-            ).filter(app => app.status === activeTab ||
-                (activeTab === 'For Review' && ['Submitted', 'For Review'].includes(app.status)))
-        );
-        fetchApplications();
-    }, [activeTab, fetchApplications]);
-
-    return { applications, loading, error, fetchApplications, handleStatusUpdate };
+  return {
+    applications: data?.getApplicationsByStatus || [],
+    loading,
+    error,
+    fetchApplications
+  };
 };

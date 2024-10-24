@@ -1,34 +1,52 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ApplicationRow from '../ApplicationRow';
+import { useApplications } from '../../hooks/useApplications';
 
 const TechnicalStaffDashboard = () => {
    const [searchTerm, setSearchTerm] = useState('');
    const [activeTab, setActiveTab] = useState('Pending Reviews');
-   const [applications, setApplications] = useState([]); // This should be populated with real data
+
+   const getStatusForTab = (tab) => {
+      switch (tab) {
+         case 'Pending Reviews': return 'Submitted';
+         case 'Returned Applications': return 'Returned';
+         case 'For Inspection and Approval': return 'For Inspection';
+         case 'Accepted Applications': return 'Accepted';
+         default: return 'Submitted';
+      }
+   };
+
+   const { applications, loading, error, fetchApplications } = useApplications(getStatusForTab(activeTab));
 
    const tabs = ['Pending Reviews', 'Returned Applications', 'For Inspection and Approval', 'Accepted Applications'];
 
    const filteredApplications = useMemo(() => {
       return applications.filter(app =>
-         app.customId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         app.ownerName.toLowerCase().includes(searchTerm.toLowerCase())
+         app.applicationNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         app.applicationType.toLowerCase().includes(searchTerm.toLowerCase())
       );
    }, [applications, searchTerm]);
 
+   useEffect(() => {
+      fetchApplications();
+   }, [fetchApplications, activeTab]);
+
    const getStatusColor = (status) => {
       switch (status.toLowerCase()) {
-         case 'pending review': return 'bg-yellow-100 text-yellow-800';
+         case 'submitted': return 'bg-yellow-100 text-yellow-800';
          case 'returned': return 'bg-orange-100 text-orange-800';
          case 'accepted': return 'bg-green-100 text-green-800';
-         case 'inspection scheduled': return 'bg-blue-100 text-blue-800';
+         case 'for inspection': return 'bg-blue-100 text-blue-800';
          default: return 'bg-gray-100 text-gray-800';
       }
    };
 
    const renderTable = () => {
+      if (loading) return <p className="text-center text-gray-500">Loading applications...</p>;
+      if (error) return <p className="text-center text-red-500">Error: {error.message}</p>;
       if (filteredApplications.length === 0) {
          return <p className="text-center text-gray-500">No applications found.</p>;
       }
@@ -48,7 +66,7 @@ const TechnicalStaffDashboard = () => {
                <tbody className="bg-white divide-y divide-gray-200">
                   {filteredApplications.map((app) => (
                      <ApplicationRow
-                        key={app._id}
+                        key={app.id}
                         app={app}
                         onView={() => { }} // Implement these functions
                         onPrint={() => { }}
@@ -91,7 +109,7 @@ const TechnicalStaffDashboard = () => {
          <div className="container mx-auto px-4 sm:px-6 py-8 pt-24">
             <div className="flex justify-between items-center mb-6">
                <h1 className="text-3xl font-bold text-green-800">Technical Staff Dashboard</h1>
-               <Button onClick={() => { }} variant="outline">
+               <Button onClick={fetchApplications} variant="outline">
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Refresh
                </Button>

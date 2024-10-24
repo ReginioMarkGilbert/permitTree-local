@@ -205,6 +205,8 @@ const permitTypes = gql`
     getSPLTPPermitById(id: ID!): SPLTPPermit
     getAllTCEBPPermits: [TCEBPPermit!]!
     getTCEBPPermitById(id: ID!): TCEBPPermit
+    getSubmittedApplications: [Permit!]!
+    getApplicationsByStatus(status: String!): [Permit!]!
   }
 
   type Mutation {

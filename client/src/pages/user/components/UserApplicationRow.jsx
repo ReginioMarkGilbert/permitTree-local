@@ -13,7 +13,10 @@ const UserApplicationRow = ({
    getStatusColor,
    fetchCOVPermit,
    fetchCSAWPermit,
-   fetchPLTPPermit
+   fetchPLTPPermit,
+   fetchPTPRPermit,
+   fetchSPLTPPermit,
+   fetchTCEBPPermit,
 }) => {
    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -89,6 +92,9 @@ const UserApplicationRow = ({
             fetchCOVPermit={fetchCOVPermit}
             fetchCSAWPermit={fetchCSAWPermit}
             fetchPLTPPermit={fetchPLTPPermit}
+            fetchPTPRPermit={fetchPTPRPermit}
+            fetchSPLTPPermit={fetchSPLTPPermit}
+            fetchTCEBPPermit={fetchTCEBPPermit}
          />
          <ViewApplicationModal
             isOpen={isViewModalOpen}

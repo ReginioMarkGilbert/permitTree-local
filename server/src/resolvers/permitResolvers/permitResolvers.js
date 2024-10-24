@@ -68,6 +68,40 @@ const permitResolvers = {
             throw new Error(`Failed to fetch recent permits: ${error.message}`);
          }
       },
+      getSubmittedApplications: async () => {
+         try {
+            const permits = await Permit.find({ status: 'Submitted' })
+               .sort({ dateOfSubmission: -1 })
+               .lean()
+               .exec();
+
+            return permits.map(permit => ({
+               ...permit,
+               id: permit._id.toString(),
+               dateOfSubmission: permit.dateOfSubmission.toISOString()
+            }));
+         } catch (error) {
+            console.error('Error fetching submitted permits:', error);
+            throw new Error(`Failed to fetch submitted permits: ${error.message}`);
+         }
+      },
+      getApplicationsByStatus: async (_, { status }) => {
+         try {
+            const permits = await Permit.find({ status })
+               .sort({ dateOfSubmission: -1 })
+               .lean()
+               .exec();
+
+            return permits.map(permit => ({
+               ...permit,
+               id: permit._id.toString(),
+               dateOfSubmission: permit.dateOfSubmission.toISOString()
+            }));
+         } catch (error) {
+            console.error(`Error fetching ${status} permits:`, error);
+            throw new Error(`Failed to fetch ${status} permits: ${error.message}`);
+         }
+      },
    },
    Mutation: {
       updatePermitStatus: async (_, { id, status }) => {
