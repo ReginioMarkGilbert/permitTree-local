@@ -80,7 +80,7 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
       { to: "/personnel/notifications", icon: <FaBell />, text: "Notifications", badge: unreadCount },
       { to: "/personnel/reports", icon: <FaChartLine />, text: "Reports" },
       { to: "/personnel/settings", icon: <FaCog />, text: "Settings" },
-      { to: "/personnel/order-of-payment", icon: <FaFileInvoiceDollar />, text: "Order of Payment" },
+      { to: "/chief-rps/order-of-payment", icon: <FaFileInvoiceDollar />, text: "Order of Payment" },
       { to: "/auth", icon: <FaSignOutAlt />, text: "Logout" }
    ];
 
@@ -117,9 +117,8 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
 
    return (
       <div
-         className={`h-full bg-green-800 text-white flex flex-col justify-between fixed top-0 left-0 ${
-            isOpen ? 'w-48 md:w-64' : 'w-16'
-         } z-10 transition-all duration-300 ease-in-out`}
+         className={`h-full bg-green-800 text-white flex flex-col justify-between fixed top-0 left-0 ${isOpen ? 'w-48 md:w-64' : 'w-16'
+            } z-10 transition-all duration-300 ease-in-out`}
       >
          <div className="flex flex-col h-full">
             {/* Add a spacer div to replace the logo */}
