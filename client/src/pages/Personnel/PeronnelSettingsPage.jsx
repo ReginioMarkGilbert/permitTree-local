@@ -6,7 +6,7 @@ import { Switch } from "../../components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/Select";
 import { Label } from "../../components/ui/Label";
 
-const ChiefRPSSettingsPage = () => {
+const PersonnelSettingsPage = () => {
     const [settings, setSettings] = useState({
         notificationPreferences: {
             email: true,
@@ -144,4 +144,4 @@ const ChiefRPSSettingsPage = () => {
     );
 };
 
-export default ChiefRPSSettingsPage;
+export default PersonnelSettingsPage;

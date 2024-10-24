@@ -23,7 +23,7 @@ import ContactPage from './pages/public/ContactPage';
 import PersonnelSidebar from './pages/Personnel/components/PersonnelSidebar';
 import PersonnelHomePage from './pages/Personnel/PersonnelHomePage';
 import ChiefRPSReportsPage from './pages/Personnel/ChiefRPSReportsPage';
-import ChiefRPSSettingsPage from './pages/Personnel/ChiefRPSSettingsPage';
+import PersonnelSettingsPage from './pages/Personnel/PersonnelSettingsPage';
 import ChiefRPSApplicationReviewModal from './pages/Personnel/components/ChiefRPSApplicationReviewModal';
 import ChiefRPSApplicationViewModal from './pages/Personnel/components/ChiefRPSApplicationViewModal';
 
@@ -118,7 +118,7 @@ const App = () => {
                            <Route path="/personnel/home" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelHomePage /></ProtectedRoute>} />
                            <Route path="/personnel/review/:id" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSApplicationReviewModal /></ProtectedRoute>} />
                            <Route path="/personnel/view/:id" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSApplicationViewModal /></ProtectedRoute>} />
-                           <Route path="/personnel/settings" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSSettingsPage /></ProtectedRoute>} />
+                           <Route path="/personnel/settings" element={<ProtectedRoute roles={['Chief_RPS']}><PersonnelSettingsPage /></ProtectedRoute>} />
                            <Route path="/personnel/reports" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSReportsPage /></ProtectedRoute>} />
                            <Route path="/personnel/notifications" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSNotificationPage /></ProtectedRoute>} />
                            <Route path="/chief-rps/order-of-payment" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSorderOfPaymentPage /></ProtectedRoute>} />
