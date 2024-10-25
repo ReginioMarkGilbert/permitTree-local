@@ -88,14 +88,14 @@ const permitResolvers = {
       getApplicationsByStatus: async (_, { status }) => {
          try {
             const permits = await Permit.find({ status })
-               .sort({ dateOfSubmission: -1 })
-               .lean()
-               .exec();
+               .sort({ dateOfSubmission: -1 }) // Sort by date of submission in descending order
+               .lean() // Use lean() to return plain JavaScript objects
+               .exec(); // Execute the query
 
-            return permits.map(permit => ({
-               ...permit,
-               id: permit._id.toString(),
-               dateOfSubmission: permit.dateOfSubmission.toISOString()
+            return permits.map(permit => ({ // Map over the permits and return a new array of objects
+               ...permit, // Spread the permit object
+               id: permit._id.toString(), // Convert _id to string
+               dateOfSubmission: permit.dateOfSubmission.toISOString() // Convert date to ISO string
             }));
          } catch (error) {
             console.error(`Error fetching ${status} permits:`, error);
@@ -107,8 +107,8 @@ const permitResolvers = {
       updatePermitStatus: async (_, { id, status }) => {
          const updatedPermit = await Permit.findByIdAndUpdate(id, { status }, { new: true, lean: true });
          return {
-            ...updatedPermit,
-            id: updatedPermit._id.toString()
+            ...updatedPermit, // Spread the updated permit object
+            id: updatedPermit._id.toString() // Convert _id to string
          };
       },
       deletePermit: async (_, { id }, { user }) => {

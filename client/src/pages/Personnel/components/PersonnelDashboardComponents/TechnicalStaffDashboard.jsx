@@ -13,15 +13,16 @@ const TechnicalStaffDashboard = () => {
       switch (tab) {
          case 'Pending Reviews': return 'Submitted';
          case 'Returned Applications': return 'Returned';
-         case 'For Inspection and Approval': return 'For Inspection';
          case 'Accepted Applications': return 'Accepted';
+         case 'For Inspection and Approval': return 'ForInspectionAndApproval';
+         case 'Approved Applications': return 'Approved';
          default: return 'Submitted';
       }
    };
 
    const { applications, loading, error, fetchApplications } = useApplications(getStatusForTab(activeTab));
 
-   const tabs = ['Pending Reviews', 'Returned Applications', 'For Inspection and Approval', 'Accepted Applications'];
+   const tabs = ['Pending Reviews', 'Returned Applications', 'Accepted Applications', 'For Inspection and Approval', 'Approved Applications'];
 
    const filteredApplications = useMemo(() => {
       return applications.filter(app =>
@@ -39,7 +40,8 @@ const TechnicalStaffDashboard = () => {
          case 'submitted': return 'bg-yellow-100 text-yellow-800';
          case 'returned': return 'bg-orange-100 text-orange-800';
          case 'accepted': return 'bg-green-100 text-green-800';
-         case 'for inspection': return 'bg-blue-100 text-blue-800';
+         case 'for inspection and approval': return 'bg-blue-100 text-blue-800';
+         case 'approved': return 'bg-green-100 text-green-800';
          default: return 'bg-gray-100 text-gray-800';
       }
    };
@@ -95,10 +97,24 @@ const TechnicalStaffDashboard = () => {
             </div>
          );
       }
+      if (activeTab === 'Accepted Applications') {
+         return (
+            <div className="mb-4 -mt-4">
+               <h1 className="text-sm text-green-800">This is the list of applications that have been accepted after review.</h1>
+            </div>
+         );
+      }
       if (activeTab === 'For Inspection and Approval') {
          return (
             <div className="mb-4 -mt-4">
                <h1 className="text-sm text-green-800">This is the list of applications (forwarded by the Chief RPS after review) that are pending inspection (e.g., chainsaws, etc.).</h1>
+            </div>
+         );
+      }
+      if (activeTab === 'Approved Applications') {
+         return (
+            <div className="mb-4 -mt-4">
+               <h1 className="text-sm text-green-800">This is the list of applications that have been approved for authenticity after inspection.</h1>
             </div>
          );
       }
