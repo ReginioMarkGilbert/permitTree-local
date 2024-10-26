@@ -68,7 +68,13 @@ const UserApplicationRow = ({
                   <TooltipProvider>
                      <Tooltip delayDuration={200}>
                         <TooltipTrigger asChild>
-                           <Button onClick={handleViewClick} variant="outline" size="icon" className="h-8 w-8">
+                           <Button
+                              onClick={handleViewClick}
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8"
+                              data-testid="view-button"
+                           >
                               <Eye className="h-4 w-4" />
                            </Button>
                         </TooltipTrigger>
@@ -83,7 +89,13 @@ const UserApplicationRow = ({
                         <TooltipProvider>
                            <Tooltip delayDuration={200}>
                               <TooltipTrigger asChild>
-                                 <Button onClick={handleEditClick} variant="outline" size="icon" className="h-8 w-8">
+                                 <Button
+                                    onClick={handleEditClick}
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    data-testid="edit-button"
+                                 >
                                     <Edit className="h-4 w-4" />
                                  </Button>
                               </TooltipTrigger>
@@ -96,7 +108,13 @@ const UserApplicationRow = ({
                         <TooltipProvider>
                            <Tooltip delayDuration={200}>
                               <TooltipTrigger asChild>
-                                 <Button onClick={() => onDelete(app)} variant="outline" size="icon" className="h-8 w-8 text-red-600 hover:text-red-800">
+                                 <Button
+                                    onClick={() => onDelete(app)}
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-8 w-8 text-red-600 hover:text-red-800"
+                                    data-testid="delete-button"
+                                 >
                                     <Trash2 className="h-4 w-4" />
                                  </Button>
                               </TooltipTrigger>
@@ -109,7 +127,13 @@ const UserApplicationRow = ({
                         <TooltipProvider>
                            <Tooltip delayDuration={200}>
                               <TooltipTrigger asChild>
-                                 <Button onClick={() => onSubmit(app)} variant="outline" size="icon" className="h-8 w-8 text-green-600 hover:text-green-800">
+                                 <Button
+                                   onClick={() => onSubmit(app)}
+                                   variant="outline"
+                                   size="icon"
+                                   className="h-8 w-8 text-green-600 hover:text-green-800"
+                                   data-testid="submit-button"
+                                 >
                                     <Send className="h-4 w-4" />
                                  </Button>
                               </TooltipTrigger>
@@ -125,7 +149,13 @@ const UserApplicationRow = ({
                         <TooltipProvider>
                            <Tooltip delayDuration={200}>
                               <TooltipTrigger asChild>
-                                 <Button onClick={handleEditClick} variant="outline" size="icon" className="h-8 w-8">
+                                 <Button
+                                    onClick={handleEditClick}
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    data-testid="edit-button"
+                                 >
                                     <Edit className="h-4 w-4" />
                                  </Button>
                               </TooltipTrigger>
@@ -166,7 +196,13 @@ const UserApplicationRow = ({
                      <TooltipProvider>
                         <Tooltip delayDuration={200}>
                            <TooltipTrigger asChild>
-                              <Button onClick={() => onUnsubmit(app)} variant="outline" size="icon" className="h-8 w-8 text-yellow-600 hover:text-yellow-800">
+                              <Button
+                                 onClick={() => onUnsubmit(app)}
+                                 variant="outline"
+                                 size="icon"
+                                 className="h-8 w-8 text-yellow-600 hover:text-yellow-800"
+                                 data-testid="unsubmit-button"
+                              >
                                  <RotateCcw className="h-4 w-4" />
                               </Button>
                            </TooltipTrigger>

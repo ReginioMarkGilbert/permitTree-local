@@ -13,6 +13,10 @@ vi.mock('../../../../pages/user/components/ViewApplicationModal', () => ({
    default: () => null,
 }));
 
+vi.mock('../../../../pages/user/components/ViewRemarksModal', () => ({
+   default: () => null,
+}));
+
 describe('UserApplicationRow', () => {
    const mockApp = {
       id: '1',
@@ -51,14 +55,14 @@ describe('UserApplicationRow', () => {
       expect(screen.getByText('PMDQ-PTPR-2024-1019-000008')).toBeInTheDocument();
       expect(screen.getByText('Private Tree Plantation Registration')).toBeInTheDocument();
       expect(screen.getByText('Submitted')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /view/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /unsubmit/i })).toBeInTheDocument();
+      expect(screen.getByTestId('view-button')).toBeInTheDocument();
+      expect(screen.getByTestId('unsubmit-button')).toBeInTheDocument();
    });
 
    it('calls onUnsubmit when unsubmit button is clicked', () => {
       renderComponent();
 
-      const unsubmitButton = screen.getByRole('button', { name: /unsubmit/i });
+      const unsubmitButton = screen.getByTestId('unsubmit-button');
       fireEvent.click(unsubmitButton);
 
       expect(mockFunctions.onUnsubmit).toHaveBeenCalledWith(mockApp);
@@ -68,17 +72,17 @@ describe('UserApplicationRow', () => {
       const draftApp = { ...mockApp, status: 'Draft' };
       renderComponent(draftApp);
 
-      expect(screen.queryByRole('button', { name: /unsubmit/i })).not.toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /edit/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /submit/i })).toBeInTheDocument();
+      expect(screen.queryByTestId('unsubmit-button')).not.toBeInTheDocument();
+      expect(screen.getByTestId('edit-button')).toBeInTheDocument();
+      expect(screen.getByTestId('delete-button')).toBeInTheDocument();
+      expect(screen.getByTestId('submit-button')).toBeInTheDocument();
    });
 
    it('calls onSubmit when submit button is clicked', () => {
       const draftApp = { ...mockApp, status: 'Draft' };
       renderComponent(draftApp);
 
-      const submitButton = screen.getByRole('button', { name: /submit/i });
+      const submitButton = screen.getByTestId('submit-button');
       fireEvent.click(submitButton);
 
       expect(mockFunctions.onSubmit).toHaveBeenCalledWith(draftApp);

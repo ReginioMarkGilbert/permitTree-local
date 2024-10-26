@@ -29,6 +29,7 @@ describe('UserApplicationsStatusPage - Submit Functionality', () => {
 
   const mockSubmitPermit = vi.fn();
   const mockRefetch = vi.fn();
+  const mockFetchUserApplications = vi.fn();
 
   beforeEach(() => {
     useUserApplications.mockReturnValue({
@@ -37,6 +38,7 @@ describe('UserApplicationsStatusPage - Submit Functionality', () => {
       error: null,
       refetch: mockRefetch,
       submitPermit: mockSubmitPermit,
+      fetchUserApplications: mockFetchUserApplications,
     });
   });
 
@@ -47,14 +49,14 @@ describe('UserApplicationsStatusPage - Submit Functionality', () => {
   it('renders the submit button for draft applications', () => {
     render(<UserApplicationsStatusPage />);
     const draftRow = screen.getByText('APP-001').closest('tr');
-    const submitButton = within(draftRow).getByRole('button', { name: /submit/i });
+    const submitButton = within(draftRow).getByTestId('submit-button');
     expect(submitButton).toBeInTheDocument();
   });
 
   it('opens the submit confirmation dialog when submit button is clicked', async () => {
     render(<UserApplicationsStatusPage />);
     const draftRow = screen.getByText('APP-001').closest('tr');
-    const submitButton = within(draftRow).getByRole('button', { name: /submit/i });
+    const submitButton = within(draftRow).getByTestId('submit-button');
     fireEvent.click(submitButton);
 
     await waitFor(() => {
@@ -65,7 +67,7 @@ describe('UserApplicationsStatusPage - Submit Functionality', () => {
   it('calls submitPermit when confirmation is accepted', async () => {
     render(<UserApplicationsStatusPage />);
     const draftRow = screen.getByText('APP-001').closest('tr');
-    const submitButton = within(draftRow).getByRole('button', { name: /submit/i });
+    const submitButton = within(draftRow).getByTestId('submit-button');
     fireEvent.click(submitButton);
 
     const confirmButton = await screen.findByRole('button', { name: /submit/i, within: screen.getByRole('alertdialog') });
@@ -81,7 +83,7 @@ describe('UserApplicationsStatusPage - Submit Functionality', () => {
     mockSubmitPermit.mockResolvedValue({});
     render(<UserApplicationsStatusPage />);
     const draftRow = screen.getByText('APP-001').closest('tr');
-    const submitButton = within(draftRow).getByRole('button', { name: /submit/i });
+    const submitButton = within(draftRow).getByTestId('submit-button');
     fireEvent.click(submitButton);
 
     const confirmButton = await screen.findByRole('button', { name: /submit/i, within: screen.getByRole('alertdialog') });
@@ -97,7 +99,7 @@ describe('UserApplicationsStatusPage - Submit Functionality', () => {
     mockSubmitPermit.mockRejectedValue(new Error('Submit failed'));
     render(<UserApplicationsStatusPage />);
     const draftRow = screen.getByText('APP-001').closest('tr');
-    const submitButton = within(draftRow).getByRole('button', { name: /submit/i });
+    const submitButton = within(draftRow).getByTestId('submit-button');
     fireEvent.click(submitButton);
 
     const confirmButton = await screen.findByRole('button', { name: /submit/i, within: screen.getByRole('alertdialog') });

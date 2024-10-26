@@ -39,6 +39,7 @@ describe('UserApplicationsStatusPage', () => {
   const mockUnsubmitPermit = vi.fn();
   const mockSubmitPermit = vi.fn();
   const mockRefetch = vi.fn();
+  const mockFetchUserApplications = vi.fn();
 
   beforeEach(() => {
     useUserApplications.mockReturnValue({
@@ -48,6 +49,7 @@ describe('UserApplicationsStatusPage', () => {
       refetch: mockRefetch,
       unsubmitPermit: mockUnsubmitPermit,
       submitPermit: mockSubmitPermit,
+      fetchUserApplications: mockFetchUserApplications,
     });
   });
 
@@ -57,12 +59,15 @@ describe('UserApplicationsStatusPage', () => {
 
   it('renders the unsubmit button for submitted applications', () => {
     render(<UserApplicationsStatusPage />);
-    expect(screen.getByRole('button', { name: /unsubmit/i })).toBeInTheDocument();
+    const draftRow = screen.getByText('APP-001').closest('tr');
+    const unsubmitButton = within(draftRow).getByTestId('unsubmit-button');
+    expect(unsubmitButton).toBeInTheDocument();
   });
 
   it('opens the unsubmit confirmation dialog when unsubmit button is clicked', async () => {
     render(<UserApplicationsStatusPage />);
-    const unsubmitButton = screen.getByRole('button', { name: /unsubmit/i });
+    const draftRow = screen.getByText('APP-001').closest('tr');
+    const unsubmitButton = within(draftRow).getByTestId('unsubmit-button');
     fireEvent.click(unsubmitButton);
 
     await waitFor(() => {
@@ -72,7 +77,8 @@ describe('UserApplicationsStatusPage', () => {
 
   it('calls unsubmitPermit when confirmation is accepted', async () => {
     render(<UserApplicationsStatusPage />);
-    const unsubmitButton = screen.getByRole('button', { name: /unsubmit/i });
+    const draftRow = screen.getByText('APP-001').closest('tr');
+    const unsubmitButton = within(draftRow).getByTestId('unsubmit-button');
     fireEvent.click(unsubmitButton);
 
     const confirmButton = await screen.findByRole('button', { name: /unsubmit/i, within: screen.getByRole('alertdialog') });
@@ -87,7 +93,8 @@ describe('UserApplicationsStatusPage', () => {
   it('shows success toast when unsubmit is successful', async () => {
     mockUnsubmitPermit.mockResolvedValue({});
     render(<UserApplicationsStatusPage />);
-    const unsubmitButton = screen.getByRole('button', { name: /unsubmit/i });
+    const draftRow = screen.getByText('APP-001').closest('tr');
+    const unsubmitButton = within(draftRow).getByTestId('unsubmit-button');
     fireEvent.click(unsubmitButton);
 
     const confirmButton = await screen.findByRole('button', { name: /unsubmit/i, within: screen.getByRole('alertdialog') });
@@ -102,7 +109,8 @@ describe('UserApplicationsStatusPage', () => {
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockUnsubmitPermit.mockRejectedValue(new Error('Unsubmit failed'));
     render(<UserApplicationsStatusPage />);
-    const unsubmitButton = screen.getByRole('button', { name: /unsubmit/i });
+    const draftRow = screen.getByText('APP-001').closest('tr');
+    const unsubmitButton = within(draftRow).getByTestId('unsubmit-button');
     fireEvent.click(unsubmitButton);
 
     const confirmButton = await screen.findByRole('button', { name: /unsubmit/i, within: screen.getByRole('alertdialog') });
@@ -118,14 +126,14 @@ describe('UserApplicationsStatusPage', () => {
   it('renders the submit button for draft applications', () => {
     render(<UserApplicationsStatusPage />);
     const draftRow = screen.getByText('APP-002').closest('tr');
-    const submitButton = within(draftRow).getByRole('button', { name: /submit/i });
+    const submitButton = within(draftRow).getByTestId('submit-button');
     expect(submitButton).toBeInTheDocument();
   });
 
   it('opens the submit confirmation dialog when submit button is clicked', async () => {
     render(<UserApplicationsStatusPage />);
     const draftRow = screen.getByText('APP-002').closest('tr');
-    const submitButton = within(draftRow).getByRole('button', { name: /submit/i });
+    const submitButton = within(draftRow).getByTestId('submit-button');
     fireEvent.click(submitButton);
 
     await waitFor(() => {
@@ -136,7 +144,7 @@ describe('UserApplicationsStatusPage', () => {
   it('calls submitPermit when confirmation is accepted', async () => {
     render(<UserApplicationsStatusPage />);
     const draftRow = screen.getByText('APP-002').closest('tr');
-    const submitButton = within(draftRow).getByRole('button', { name: /submit/i });
+    const submitButton = within(draftRow).getByTestId('submit-button');
     fireEvent.click(submitButton);
 
     const confirmButton = await screen.findByRole('button', { name: /submit/i, within: screen.getByRole('alertdialog') });
@@ -152,7 +160,7 @@ describe('UserApplicationsStatusPage', () => {
     mockSubmitPermit.mockResolvedValue({});
     render(<UserApplicationsStatusPage />);
     const draftRow = screen.getByText('APP-002').closest('tr');
-    const submitButton = within(draftRow).getByRole('button', { name: /submit/i });
+    const submitButton = within(draftRow).getByTestId('submit-button');
     fireEvent.click(submitButton);
 
     const confirmButton = await screen.findByRole('button', { name: /submit/i, within: screen.getByRole('alertdialog') });
@@ -168,7 +176,7 @@ describe('UserApplicationsStatusPage', () => {
     mockSubmitPermit.mockRejectedValue(new Error('Submit failed'));
     render(<UserApplicationsStatusPage />);
     const draftRow = screen.getByText('APP-002').closest('tr');
-    const submitButton = within(draftRow).getByRole('button', { name: /submit/i });
+    const submitButton = within(draftRow).getByTestId('submit-button');
     fireEvent.click(submitButton);
 
     const confirmButton = await screen.findByRole('button', { name: /submit/i, within: screen.getByRole('alertdialog') });
