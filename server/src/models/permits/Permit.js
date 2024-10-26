@@ -54,7 +54,7 @@ const PermitSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Add a pre-save hook to ensure history is always an array
-PermitSchema.pre('save', function(next) {
+PermitSchema.pre('save', function (next) {
    if (!this.history) {
       this.history = [];
    }

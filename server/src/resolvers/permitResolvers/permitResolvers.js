@@ -33,7 +33,7 @@ const permitResolvers = {
                id: permit._id.toString(),
                dateOfSubmission: permit.dateOfSubmission.toISOString(),
                currentStage: permit.currentStage || 'Submitted',
-               history: permit.history || [], // Ensure history is always an array
+               history: permit.history || [],
                recordedByReceivingClerk: permit.recordedByReceivingClerk || false,
                reviewedByChief: permit.reviewedByChief || false
             }));
@@ -105,7 +105,7 @@ const permitResolvers = {
                currentStage: permit.currentStage || 'Submitted',
                recordedByReceivingClerk: permit.recordedByReceivingClerk || false,
                reviewedByChief: permit.reviewedByChief || false,
-               history: permit.history || [] // Ensure history is always an array
+               history: permit.history || []
             }));
 
             console.log('Server: Fetched applications:', query);
@@ -212,16 +212,9 @@ const permitResolvers = {
          return permit;
       },
       updatePermitStage: async (_, { id, currentStage, status, notes }, context) => {
-         console.log('Context:', context);
-
          const permit = await Permit.findById(id);
          if (!permit) {
             throw new Error('Permit not found');
-         }
-
-         // Validate the status
-         if (!permit.schema.path('status').enumValues.includes(status)) {
-            throw new Error(`Invalid status: ${status}`);
          }
 
          permit.currentStage = currentStage;
@@ -230,8 +223,7 @@ const permitResolvers = {
             stage: currentStage,
             status: status,
             timestamp: new Date(),
-            notes: notes || '',
-            actionBy: context.user ? mongoose.Types.ObjectId(context.user.id) : null
+            notes: notes || ''
          });
 
          try {

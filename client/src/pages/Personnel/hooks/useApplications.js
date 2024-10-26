@@ -20,26 +20,26 @@ const GET_APPLICATIONS = gql`
 `;
 
 export const useApplications = ({ status, currentStage }) => {
-  const { data, loading, error, refetch } = useQuery(GET_APPLICATIONS, {
-    variables: { status, currentStage },
-    fetchPolicy: 'network-only',
-  });
+   const { data, loading, error, refetch } = useQuery(GET_APPLICATIONS, {
+      variables: { status, currentStage },
+      fetchPolicy: 'network-only',
+   });
 
-  const fetchApplications = async () => {
-    try {
-      const result = await refetch();
-      return result.data?.getApplicationsByStatus || [];
-    } catch (refetchError) {
-      console.error('Client: Error refetching applications:', refetchError);
-      // Return an empty array instead of throwing an error
-      return [];
-    }
-  };
+   const fetchApplications = async () => {
+      try {
+         const result = await refetch();
+         return result.data?.getApplicationsByStatus || [];
+      } catch (refetchError) {
+         console.error('Client: Error refetching applications:', refetchError);
+         // Return an empty array instead of throwing an error
+         return [];
+      }
+   };
 
-  return {
-    applications: data?.getApplicationsByStatus || [],
-    loading,
-    error,
-    fetchApplications
-  };
+   return {
+      applications: data?.getApplicationsByStatus || [],
+      loading,
+      error,
+      fetchApplications
+   };
 };

@@ -10,8 +10,10 @@ const GET_USER_APPLICATIONS = gql`
       currentStage
       dateOfSubmission
       history {
-        notes
+        stage
+        status
         timestamp
+        notes
       }
       ... on COVPermit {
         name

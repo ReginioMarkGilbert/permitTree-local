@@ -13,6 +13,10 @@ const UPDATE_PERMIT_STAGE = gql`
       id
       currentStage
       status
+      history {
+        notes
+        timestamp
+      }
     }
   }
 `;
@@ -32,9 +36,11 @@ const TS_ReviewModal = ({ isOpen, onClose, application, onReviewComplete }) => {
                id: application.id,
                currentStage: 'ForRecordByReceivingClerk',
                status: 'In Progress',
-               notes: 'Application accepted by Technical Staff'
+               notes: 'Application accepted by Technical Staff',
+               timestamp: new Date().toISOString()
             }
          });
+         console.log('Result:', result);
          onReviewComplete();
          onClose();
          toast.success('Application accepted successfully');
@@ -58,9 +64,11 @@ const TS_ReviewModal = ({ isOpen, onClose, application, onReviewComplete }) => {
                id: application.id,
                currentStage: 'ReturnedByTechnicalStaff',
                status: 'Returned',
-               notes: remarks  // This is where remarks are sent
+               notes: remarks,
+               timestamp: new Date().toISOString()
             }
          });
+         console.log('Result:', result);
          onReviewComplete();
          onClose();
          toast.success('Application returned successfully');
