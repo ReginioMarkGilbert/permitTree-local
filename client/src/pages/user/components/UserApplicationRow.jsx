@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Eye, Edit, Trash2, RotateCcw, Send } from 'lucide-react';
+import { Eye, Edit, Trash2, RotateCcw, Send, MessageSquare } from 'lucide-react';
 import EditDraftModal from './EditDraftModal';
 import ViewApplicationModal from './ViewApplicationModal';
+import ViewRemarksModal from './ViewRemarksModal'; // New component we'll create
 
 const UserApplicationRow = ({
    app,
@@ -11,7 +12,6 @@ const UserApplicationRow = ({
    onUnsubmit,
    onSubmit,
    getStatusColor,
-   // fetchUserApplications,
    fetchCOVPermit,
    fetchCSAWPermit,
    fetchPLTPPermit,
@@ -21,6 +21,7 @@ const UserApplicationRow = ({
 }) => {
    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+   const [isRemarksModalOpen, setIsRemarksModalOpen] = useState(false);
 
    const formatDate = (timestamp) => {
       const date = new Date(parseInt(timestamp));
@@ -33,6 +34,10 @@ const UserApplicationRow = ({
 
    const handleViewClick = () => {
       setIsViewModalOpen(true);
+   };
+
+   const handleViewRemarks = () => {
+      setIsRemarksModalOpen(true);
    };
 
    const handleEditSave = (editedData) => {
@@ -64,18 +69,26 @@ const UserApplicationRow = ({
                   <Button onClick={handleViewClick} variant="outline" size="sm">
                      <Eye className="h-4 w-4 mr-1" /> View
                   </Button>
-                  {(app.status === 'Draft' || app.status === 'Returned') && (
+                  {app.status === 'Draft' && (
                      <>
                         <Button onClick={handleEditClick} variant="outline" size="sm">
                            <Edit className="h-4 w-4 mr-1" /> Edit
                         </Button>
-                        {app.status === 'Draft' && (
-                           <Button onClick={() => onDelete(app)} variant="outline" size="sm" className="text-red-600 hover:text-red-800">
-                              <Trash2 className="h-4 w-4 mr-1" /> Delete
-                           </Button>
-                        )}
+                        <Button onClick={() => onDelete(app)} variant="outline" size="sm" className="text-red-600 hover:text-red-800">
+                           <Trash2 className="h-4 w-4 mr-1" /> Delete
+                        </Button>
                         <Button onClick={() => onSubmit(app)} variant="outline" size="sm" className="text-green-600 hover:text-green-800">
                            <Send className="h-4 w-4 mr-1" /> Submit
+                        </Button>
+                     </>
+                  )}
+                  {app.status === 'Returned' && (
+                     <>
+                        <Button onClick={handleEditClick} variant="outline" size="sm">
+                           <Edit className="h-4 w-4 mr-1" /> Edit
+                        </Button>
+                        <Button onClick={handleViewRemarks} variant="outline" size="sm">
+                           <MessageSquare className="h-4 w-4 mr-1" /> View Remarks
                         </Button>
                      </>
                   )}
@@ -102,6 +115,11 @@ const UserApplicationRow = ({
          <ViewApplicationModal
             isOpen={isViewModalOpen}
             onClose={() => setIsViewModalOpen(false)}
+            application={app}
+         />
+         <ViewRemarksModal
+            isOpen={isRemarksModalOpen}
+            onClose={() => setIsRemarksModalOpen(false)}
             application={app}
          />
       </>

@@ -9,6 +9,10 @@ const GET_USER_APPLICATIONS = gql`
       status
       currentStage
       dateOfSubmission
+      history {
+        notes
+        timestamp
+      }
       ... on COVPermit {
         name
         address

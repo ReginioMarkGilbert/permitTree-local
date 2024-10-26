@@ -147,7 +147,8 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
       // Ensure applicationType is included in the data being saved
       const dataToSave = {
          ...formData,
-         applicationType: application.applicationType // Ensure this is always included
+         applicationType: application.applicationType,
+         status: application.status === 'Returned' ? 'Submitted' : formData.status // Change status to 'Submitted' if it was 'Returned'
       };
       onSave(dataToSave);
       onClose();

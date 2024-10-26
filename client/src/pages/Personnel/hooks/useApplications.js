@@ -11,6 +11,10 @@ const GET_APPLICATIONS = gql`
       recordedByReceivingClerk
       reviewedByChief
       dateOfSubmission
+      history {
+        notes
+        timestamp
+      }
     }
   }
 `;
@@ -27,6 +31,7 @@ export const useApplications = ({ status, currentStage }) => {
       return result.data?.getApplicationsByStatus || [];
     } catch (refetchError) {
       console.error('Client: Error refetching applications:', refetchError);
+      // Return an empty array instead of throwing an error
       return [];
     }
   };

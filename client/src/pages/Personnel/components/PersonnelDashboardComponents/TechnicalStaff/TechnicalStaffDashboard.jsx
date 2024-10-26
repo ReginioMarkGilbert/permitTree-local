@@ -57,7 +57,10 @@ const TechnicalStaffDashboard = () => {
 
    const renderTable = () => {
       if (loading) return <p className="text-center text-gray-500">Loading applications...</p>;
-      if (error) return <p className="text-center text-red-500">Error: {error.message}</p>;
+      if (error) {
+         console.error('Error fetching applications:', error);
+         return <p className="text-center text-red-500">Error loading applications. Please try again later.</p>;
+      }
       if (filteredApplications.length === 0) {
          return <p className="text-center text-gray-500">No applications found.</p>;
       }

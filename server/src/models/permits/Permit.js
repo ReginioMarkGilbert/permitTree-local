@@ -53,4 +53,12 @@ const PermitSchema = new mongoose.Schema({
    lastUpdated: { type: Date, default: Date.now }
 }, { timestamps: true });
 
+// Add a pre-save hook to ensure history is always an array
+PermitSchema.pre('save', function(next) {
+   if (!this.history) {
+      this.history = [];
+   }
+   next();
+});
+
 module.exports = mongoose.model('Permit', PermitSchema);

@@ -28,12 +28,21 @@ const permitResolvers = {
                .lean()
                .exec();
 
-            return permits.map(permit => ({
+            const formattedPermits = permits.map(permit => ({
                ...permit,
                id: permit._id.toString(),
                dateOfSubmission: permit.dateOfSubmission.toISOString(),
-               currentStage: permit.currentStage || 'Submitted' // Provide a default value if currentStage is not set
+               currentStage: permit.currentStage || 'Submitted',
+               history: permit.history || [], // Ensure history is always an array
+               recordedByReceivingClerk: permit.recordedByReceivingClerk || false,
+               reviewedByChief: permit.reviewedByChief || false
             }));
+
+            console.log('Server: Fetched user applications:', query);
+            console.log('Server: Number of applications:', formattedPermits.length);
+            console.log('Server: First application:', formattedPermits[0]);
+
+            return formattedPermits;
          } catch (error) {
             console.error('Error fetching permits:', error);
             throw new Error(`Failed to fetch permits: ${error.message}`);
@@ -93,9 +102,10 @@ const permitResolvers = {
                ...permit,
                id: permit._id.toString(),
                dateOfSubmission: permit.dateOfSubmission.toISOString(),
-               currentStage: permit.currentStage || 'Submitted', // Provide a default value
+               currentStage: permit.currentStage || 'Submitted',
                recordedByReceivingClerk: permit.recordedByReceivingClerk || false,
-               reviewedByChief: permit.reviewedByChief || false
+               reviewedByChief: permit.reviewedByChief || false,
+               history: permit.history || [] // Ensure history is always an array
             }));
 
             console.log('Server: Fetched applications:', query);

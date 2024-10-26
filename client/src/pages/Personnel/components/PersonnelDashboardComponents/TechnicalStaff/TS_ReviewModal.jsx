@@ -57,8 +57,8 @@ const TS_ReviewModal = ({ isOpen, onClose, application, onReviewComplete }) => {
             variables: {
                id: application.id,
                currentStage: 'ReturnedByTechnicalStaff',
-               status: 'Returned', // Make sure this matches the enum in the Permit model
-               notes: remarks
+               status: 'Returned',
+               notes: remarks  // This is where remarks are sent
             }
          });
          onReviewComplete();

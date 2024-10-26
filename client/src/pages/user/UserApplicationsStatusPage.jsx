@@ -138,30 +138,32 @@ const UserApplicationsStatusPage = () => {
             throw new Error('Application type is undefined');
          }
 
+         let updateFunction;
          switch (editedData.applicationType) {
             case 'Chainsaw Registration':
-               await updateCSAWPermit(id, editedData);
+               updateFunction = updateCSAWPermit;
                break;
             case 'Certificate of Verification':
-               await updateCOVPermit(id, editedData);
+               updateFunction = updateCOVPermit;
                break;
             case 'Private Tree Plantation Registration':
-               await updatePTPRPermit(id, editedData);
+               updateFunction = updatePTPRPermit;
                break;
             case 'Public Land Timber Permit':
-               await updatePLTPPermit(id, editedData);
+               updateFunction = updatePLTPPermit;
                break;
             case 'Special/Private Land Timber Permit':
-               await updateSPLTPPermit(id, editedData);
+               updateFunction = updateSPLTPPermit;
                break;
             case 'Tree Cutting and/or Earth Balling Permit':
-               await updateTCEBPPermit(id, editedData);
+               updateFunction = updateTCEBPPermit;
                break;
             default:
                console.error('Unsupported application type:', editedData.applicationType);
                throw new Error(`Unsupported application type: ${editedData.applicationType}`);
          }
 
+         await updateFunction(id, editedData);
          toast.success('Application updated successfully');
          refetch();
       } catch (error) {
