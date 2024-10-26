@@ -202,11 +202,14 @@ const permitResolvers = {
             throw new Error('You are not authorized to submit this permit');
          }
 
-         if (permit.status !== 'Draft') {
-            throw new Error('Only draft permits can be submitted');
+         // Update this condition to allow both draft and returned permits
+         if (permit.status !== 'Draft' && permit.status !== 'Returned') {
+            throw new Error('Only draft or returned permits can be submitted');
          }
 
          permit.status = 'Submitted';
+         // Reset the currentStage when resubmitting
+         permit.currentStage = 'Submitted';
          await permit.save();
 
          return permit;

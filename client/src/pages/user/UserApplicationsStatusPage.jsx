@@ -25,6 +25,8 @@ const UserApplicationsStatusPage = () => {
    const [applicationToUnsubmit, setApplicationToUnsubmit] = useState(null);
    const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
    const [applicationToSubmit, setApplicationToSubmit] = useState(null);
+   const [resubmitDialogOpen, setResubmitDialogOpen] = useState(false);
+   const [applicationToResubmit, setApplicationToResubmit] = useState(null);
 
    const getQueryParamsForTab = (tab) => {
       switch (tab) {
@@ -60,6 +62,7 @@ const UserApplicationsStatusPage = () => {
       submitPermit,
       updateTCEBPPermit,
       fetchTCEBPPermit,
+      resubmitPermit,
    } = useUserApplications(
       getQueryParamsForTab(activeSubTab).status,
       getQueryParamsForTab(activeSubTab).currentStage
@@ -212,6 +215,26 @@ const UserApplicationsStatusPage = () => {
       }
    };
 
+   const handleResubmitClick = (application) => {
+      setApplicationToResubmit(application);
+      setResubmitDialogOpen(true);
+   };
+
+   const handleResubmitConfirm = async () => {
+      if (applicationToResubmit) {
+         try {
+            await resubmitPermit(applicationToResubmit.id);
+            toast.success('Application resubmitted successfully');
+            setResubmitDialogOpen(false);
+            setApplicationToResubmit(null);
+            refetch();
+         } catch (error) {
+            console.error('Error resubmitting application:', error);
+            toast.error(`Error resubmitting application: ${error.message || 'Unknown error occurred'}`);
+         }
+      }
+   };
+
    const renderTable = () => {
       if (loading) return <p className="text-center text-gray-500">Loading...</p>;
       if (error) return <p className="text-center text-red-500">Error: {error.message}</p>;
@@ -250,6 +273,7 @@ const UserApplicationsStatusPage = () => {
                         onDelete={handleDeleteClick}
                         onUnsubmit={handleUnsubmitClick}
                         onSubmit={handleSubmitClick}
+                        onResubmit={handleResubmitClick}
                         getStatusColor={getStatusColor}
                         fetchCOVPermit={fetchCOVPermit}
                         fetchCSAWPermit={fetchCSAWPermit}
@@ -361,6 +385,24 @@ const UserApplicationsStatusPage = () => {
                </AlertDialogFooter>
             </AlertDialogContent>
          </AlertDialog>
+         <Dialog open={resubmitDialogOpen} onOpenChange={setResubmitDialogOpen}>
+            <DialogContent>
+               <DialogHeader>
+                  <DialogTitle>Confirm Resubmission</DialogTitle>
+                  <DialogDescription>
+                     Are you sure you want to resubmit this application? It will be moved back to Returned status.
+                  </DialogDescription>
+               </DialogHeader>
+               <DialogFooter>
+                  <Button variant="outline" onClick={() => setResubmitDialogOpen(false)}>
+                     Cancel
+                  </Button>
+                  <Button variant="destructive" onClick={handleResubmitConfirm}>
+                     Resubmit
+                  </Button>
+               </DialogFooter>
+            </DialogContent>
+         </Dialog>
       </div>
    );
 };

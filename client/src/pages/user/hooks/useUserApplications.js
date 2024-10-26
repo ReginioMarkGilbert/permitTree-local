@@ -480,6 +480,15 @@ const UPDATE_TCEBP_PERMIT = gql`
   }
 `;
 
+const RESUBMIT_PERMIT = gql`
+  mutation ResubmitPermit($id: ID!) {
+    submitPermit(id: $id) {
+      id
+      status
+    }
+  }
+`;
+
 export const useUserApplications = (status, currentStage) => {
    const { loading, error, data, refetch } = useQuery(GET_USER_APPLICATIONS, {
       variables: { status, currentStage },
@@ -502,6 +511,7 @@ export const useUserApplications = (status, currentStage) => {
    const [getSPLTPPermit] = useLazyQuery(GET_SPLTP_PERMIT);
    const [updateTCEBPPermitMutation] = useMutation(UPDATE_TCEBP_PERMIT);
    const [getTCEBPPermit] = useLazyQuery(GET_TCEBP_PERMIT);
+   const [resubmitPermitMutation] = useMutation(RESUBMIT_PERMIT);
 
    const deletePermit = async (id) => {
       console.log('Attempting to delete permit with id:', id);
@@ -952,6 +962,25 @@ export const useUserApplications = (status, currentStage) => {
       }
    };
 
+   const resubmitPermit = async (id) => {
+      console.log('Attempting to resubmit permit with id:', id);
+      try {
+         const { data } = await resubmitPermitMutation({
+            variables: { id },
+            refetchQueries: [{ query: GET_USER_APPLICATIONS, variables: { status, currentStage } }]
+         });
+         console.log('Resubmit mutation result:', data);
+         if (data.submitPermit) {
+            return data.submitPermit;
+         } else {
+            throw new Error('Failed to resubmit permit');
+         }
+      } catch (error) {
+         console.error('Error resubmitting permit:', error);
+         throw error;
+      }
+   };
+
    const fetchUserApplications = async (status, currentStage) => {
       try {
          const { data } = await refetch({ status, currentStage });
@@ -990,5 +1019,6 @@ export const useUserApplications = (status, currentStage) => {
       updateTCEBPPermit,
       fetchTCEBPPermit,
 
+      resubmitPermit,
    };
 };

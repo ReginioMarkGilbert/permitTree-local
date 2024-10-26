@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Eye, Edit, Trash2, RotateCcw, Send, MessageSquare } from 'lucide-react';
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipProvider,
+   TooltipTrigger,
+} from "@/components/ui/tooltip";
 import EditDraftModal from './EditDraftModal';
 import ViewApplicationModal from './ViewApplicationModal';
-import ViewRemarksModal from './ViewRemarksModal'; // New component we'll create
+import ViewRemarksModal from './ViewRemarksModal';
 
 const UserApplicationRow = ({
    app,
@@ -11,6 +17,7 @@ const UserApplicationRow = ({
    onDelete,
    onUnsubmit,
    onSubmit,
+   onResubmit,
    getStatusColor,
    fetchCOVPermit,
    fetchCSAWPermit,
@@ -28,17 +35,9 @@ const UserApplicationRow = ({
       return date.toLocaleDateString();
    };
 
-   const handleEditClick = () => {
-      setIsEditModalOpen(true);
-   };
-
-   const handleViewClick = () => {
-      setIsViewModalOpen(true);
-   };
-
-   const handleViewRemarks = () => {
-      setIsRemarksModalOpen(true);
-   };
+   const handleEditClick = () => setIsEditModalOpen(true);
+   const handleViewClick = () => setIsViewModalOpen(true);
+   const handleViewRemarks = () => setIsRemarksModalOpen(true);
 
    const handleEditSave = (editedData) => {
       onEdit(app.id, editedData);
@@ -66,40 +65,121 @@ const UserApplicationRow = ({
             </td>
             <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
                <div className="flex items-center space-x-2">
-                  <Button onClick={handleViewClick} variant="outline" size="sm">
-                     <Eye className="h-4 w-4 mr-1" /> View
-                  </Button>
+                  <TooltipProvider>
+                     <Tooltip delayDuration={200}>
+                        <TooltipTrigger asChild>
+                           <Button onClick={handleViewClick} variant="outline" size="icon" className="h-8 w-8">
+                              <Eye className="h-4 w-4" />
+                           </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                           <p>View Application</p>
+                        </TooltipContent>
+                     </Tooltip>
+                  </TooltipProvider>
+
                   {app.status === 'Draft' && (
                      <>
-                        <Button onClick={handleEditClick} variant="outline" size="sm">
-                           <Edit className="h-4 w-4 mr-1" /> Edit
-                        </Button>
-                        <Button onClick={() => onDelete(app)} variant="outline" size="sm" className="text-red-600 hover:text-red-800">
-                           <Trash2 className="h-4 w-4 mr-1" /> Delete
-                        </Button>
-                        <Button onClick={() => onSubmit(app)} variant="outline" size="sm" className="text-green-600 hover:text-green-800">
-                           <Send className="h-4 w-4 mr-1" /> Submit
-                        </Button>
+                        <TooltipProvider>
+                           <Tooltip delayDuration={200}>
+                              <TooltipTrigger asChild>
+                                 <Button onClick={handleEditClick} variant="outline" size="icon" className="h-8 w-8">
+                                    <Edit className="h-4 w-4" />
+                                 </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                 <p>Edit Application</p>
+                              </TooltipContent>
+                           </Tooltip>
+                        </TooltipProvider>
+
+                        <TooltipProvider>
+                           <Tooltip delayDuration={200}>
+                              <TooltipTrigger asChild>
+                                 <Button onClick={() => onDelete(app)} variant="outline" size="icon" className="h-8 w-8 text-red-600 hover:text-red-800">
+                                    <Trash2 className="h-4 w-4" />
+                                 </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                 <p>Delete Draft</p>
+                              </TooltipContent>
+                           </Tooltip>
+                        </TooltipProvider>
+
+                        <TooltipProvider>
+                           <Tooltip delayDuration={200}>
+                              <TooltipTrigger asChild>
+                                 <Button onClick={() => onSubmit(app)} variant="outline" size="icon" className="h-8 w-8 text-green-600 hover:text-green-800">
+                                    <Send className="h-4 w-4" />
+                                 </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                 <p>Submit Application</p>
+                              </TooltipContent>
+                           </Tooltip>
+                        </TooltipProvider>
                      </>
                   )}
                   {app.status === 'Returned' && (
                      <>
-                        <Button onClick={handleEditClick} variant="outline" size="sm">
-                           <Edit className="h-4 w-4 mr-1" /> Edit
-                        </Button>
-                        <Button onClick={handleViewRemarks} variant="outline" size="sm">
-                           <MessageSquare className="h-4 w-4 mr-1" /> View Remarks
-                        </Button>
+                        <TooltipProvider>
+                           <Tooltip delayDuration={200}>
+                              <TooltipTrigger asChild>
+                                 <Button onClick={handleEditClick} variant="outline" size="icon" className="h-8 w-8">
+                                    <Edit className="h-4 w-4" />
+                                 </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                 <p>Edit Application</p>
+                              </TooltipContent>
+                           </Tooltip>
+                        </TooltipProvider>
+
+                        <TooltipProvider>
+                           <Tooltip delayDuration={200}>
+                              <TooltipTrigger asChild>
+                                 <Button onClick={handleViewRemarks} variant="outline" size="icon" className="h-8 w-8">
+                                    <MessageSquare className="h-4 w-4" />
+                                 </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                 <p>View Remarks</p>
+                              </TooltipContent>
+                           </Tooltip>
+                        </TooltipProvider>
+
+                        <TooltipProvider>
+                           <Tooltip delayDuration={200}>
+                              <TooltipTrigger asChild>
+                                 <Button onClick={() => onResubmit(app)} variant="outline" size="icon" className="h-8 w-8 text-green-600 hover:text-green-800">
+                                    <Send className="h-4 w-4" />
+                                 </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                 <p>Resubmit Application</p>
+                              </TooltipContent>
+                           </Tooltip>
+                        </TooltipProvider>
                      </>
                   )}
                   {app.status === 'Submitted' && (
-                     <Button onClick={() => onUnsubmit(app)} variant="outline" size="sm" className="text-yellow-600 hover:text-yellow-800">
-                        <RotateCcw className="h-4 w-4 mr-1" /> Unsubmit
-                     </Button>
+                     <TooltipProvider>
+                        <Tooltip delayDuration={200}>
+                           <TooltipTrigger asChild>
+                              <Button onClick={() => onUnsubmit(app)} variant="outline" size="icon" className="h-8 w-8 text-yellow-600 hover:text-yellow-800">
+                                 <RotateCcw className="h-4 w-4" />
+                              </Button>
+                           </TooltipTrigger>
+                           <TooltipContent>
+                              <p>Unsubmit Application</p>
+                           </TooltipContent>
+                        </Tooltip>
+                     </TooltipProvider>
                   )}
                </div>
             </td>
          </tr>
+
          <EditDraftModal
             isOpen={isEditModalOpen}
             onClose={() => setIsEditModalOpen(false)}
