@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Permit = require('../../models/permits/Permit');
 
 const permitResolvers = {
@@ -8,12 +9,8 @@ const permitResolvers = {
       getPermitById: async (_, { id }) => {
          return await Permit.findById(id).lean().exec();
       },
-      getUserApplications: async (_, { status }, { user }) => {
-         console.log('getUserApplications called with status:', status);
-         console.log('User from context:', user);
-
+      getUserApplications: async (_, { status, currentStage }, { user }) => {
          if (!user) {
-            console.log('No user found in context');
             throw new Error('You must be logged in to view your applications');
          }
 
@@ -21,7 +18,9 @@ const permitResolvers = {
          if (status) {
             query.status = status;
          }
-         console.log('Query:', query);
+         if (currentStage) {
+            query.currentStage = currentStage;
+         }
 
          try {
             const permits = await Permit.find(query)
@@ -29,18 +28,12 @@ const permitResolvers = {
                .lean()
                .exec();
 
-            console.log('Permits found:', permits.length);
-            console.log('First permit:', permits[0]);
-
-            const formattedPermits = permits.map(permit => ({
+            return permits.map(permit => ({
                ...permit,
                id: permit._id.toString(),
-               dateOfSubmission: permit.dateOfSubmission.getTime()
+               dateOfSubmission: permit.dateOfSubmission.toISOString(),
+               currentStage: permit.currentStage || 'Submitted' // Provide a default value if currentStage is not set
             }));
-
-            console.log('Formatted permits:', formattedPermits);
-
-            return formattedPermits;
          } catch (error) {
             console.error('Error fetching permits:', error);
             throw new Error(`Failed to fetch permits: ${error.message}`);
@@ -85,21 +78,51 @@ const permitResolvers = {
             throw new Error(`Failed to fetch submitted permits: ${error.message}`);
          }
       },
-      getApplicationsByStatus: async (_, { status }) => {
+      getApplicationsByStatus: async (_, { status, currentStage }) => {
          try {
-            const permits = await Permit.find({ status })
-               .sort({ dateOfSubmission: -1 }) // Sort by date of submission in descending order
-               .lean() // Use lean() to return plain JavaScript objects
-               .exec(); // Execute the query
+            let query = {};
+            if (status) query.status = status;
+            if (currentStage) query.currentStage = currentStage;
 
-            return permits.map(permit => ({ // Map over the permits and return a new array of objects
-               ...permit, // Spread the permit object
-               id: permit._id.toString(), // Convert _id to string
-               dateOfSubmission: permit.dateOfSubmission.toISOString() // Convert date to ISO string
+            const permits = await Permit.find(query)
+               .sort({ dateOfSubmission: -1 })
+               .lean()
+               .exec();
+
+            const formattedPermits = permits.map(permit => ({
+               ...permit,
+               id: permit._id.toString(),
+               dateOfSubmission: permit.dateOfSubmission.toISOString(),
+               currentStage: permit.currentStage || 'Submitted', // Provide a default value
+               recordedByReceivingClerk: permit.recordedByReceivingClerk || false,
+               reviewedByChief: permit.reviewedByChief || false
+            }));
+
+            console.log('Server: Fetched applications:', query);
+            console.log('Server: Number of applications:', formattedPermits.length);
+            console.log('Server: First application:', formattedPermits[0]);
+
+            return formattedPermits;
+         } catch (error) {
+            console.error(`Error fetching permits:`, error);
+            throw new Error(`Failed to fetch permits: ${error.message}`);
+         }
+      },
+      getApplicationsByCurrentStage: async (_, { currentStage }) => {
+         try {
+            const permits = await Permit.find({ currentStage })
+               .sort({ dateOfSubmission: -1 })
+               .lean()
+               .exec();
+
+            return permits.map(permit => ({
+               ...permit,
+               id: permit._id.toString(),
+               dateOfSubmission: permit.dateOfSubmission.toISOString()
             }));
          } catch (error) {
-            console.error(`Error fetching ${status} permits:`, error);
-            throw new Error(`Failed to fetch ${status} permits: ${error.message}`);
+            console.error(`Error fetching ${currentStage} permits:`, error);
+            throw new Error(`Failed to fetch ${currentStage} permits: ${error.message}`);
          }
       },
    },
@@ -177,6 +200,96 @@ const permitResolvers = {
          await permit.save();
 
          return permit;
+      },
+      updatePermitStage: async (_, { id, currentStage, status, notes }, context) => {
+         console.log('Context:', context);
+
+         const permit = await Permit.findById(id);
+         if (!permit) {
+            throw new Error('Permit not found');
+         }
+
+         // Validate the status
+         if (!permit.schema.path('status').enumValues.includes(status)) {
+            throw new Error(`Invalid status: ${status}`);
+         }
+
+         permit.currentStage = currentStage;
+         permit.status = status;
+         permit.history.push({
+            stage: currentStage,
+            status: status,
+            timestamp: new Date(),
+            notes: notes || '',
+            actionBy: context.user ? mongoose.Types.ObjectId(context.user.id) : null
+         });
+
+         try {
+            await permit.save();
+         } catch (error) {
+            console.error('Error saving permit:', error);
+            throw new Error(`Failed to update permit: ${error.message}`);
+         }
+
+         return {
+            ...permit.toObject(),
+            id: permit._id.toString(),
+            dateOfSubmission: permit.dateOfSubmission.toISOString()
+         };
+      },
+      recordApplication: async (_, { id }, { user }) => {
+         if (!user) {
+            throw new Error('You must be logged in to record an application');
+         }
+
+         const permit = await Permit.findById(id);
+         if (!permit) {
+            throw new Error('Permit not found');
+         }
+
+         permit.recordedByReceivingClerk = true;
+         permit.history.push({
+            stage: 'RecordedByReceivingClerk',
+            status: permit.status,
+            timestamp: new Date(),
+            notes: 'Application recorded by receiving clerk',
+            actionBy: user.id
+         });
+
+         await permit.save();
+
+         return {
+            ...permit.toObject(),
+            id: permit._id.toString(),
+            dateOfSubmission: permit.dateOfSubmission.toISOString()
+         };
+      },
+      reviewApplication: async (_, { id }, { user }) => {
+         if (!user) {
+            throw new Error('You must be logged in to review an application');
+         }
+
+         const permit = await Permit.findById(id);
+         if (!permit) {
+            throw new Error('Permit not found');
+         }
+
+         permit.reviewedByChief = true;
+         permit.history.push({
+            stage: 'ReviewedByChief',
+            status: permit.status,
+            timestamp: new Date(),
+            notes: 'Application reviewed by Chief RPS',
+            actionBy: user.id
+         });
+
+         await permit.save();
+
+         return {
+            ...permit.toObject(),
+            id: permit._id.toString(),
+            dateOfSubmission: permit.dateOfSubmission.toISOString()
+         };
       },
    },
 };

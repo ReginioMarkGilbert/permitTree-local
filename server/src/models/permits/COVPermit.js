@@ -14,6 +14,7 @@ const COVPermitSchema = new mongoose.Schema({
    address: { type: String, required: true },
    cellphone: { type: String, required: true },
    purpose: { type: String, required: true },
+   // status: { type: String, required: true, enum: ['Draft', 'Submitted', 'Returned', 'Accepted', 'Rejected', 'In Progress', 'Approved', 'Completed'] },
    driverName: { type: String, required: true },
    driverLicenseNumber: { type: String, required: true },
    vehiclePlateNumber: { type: String, required: true },

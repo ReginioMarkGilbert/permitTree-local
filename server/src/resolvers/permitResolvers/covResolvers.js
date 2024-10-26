@@ -64,10 +64,13 @@ const covResolvers = {
                ...input,
                applicationNumber,
                applicantId: user.id,
-               applicationType: 'Certificate of Verification', // Set this internally
+               applicationType: 'Certificate of Verification',
                status: 'Submitted',
                dateOfSubmission: new Date(),
                files: processedFiles,
+               currentStage: 'Submitted',
+               recordedByReceivingClerk: false, // Initialize to false
+               reviewedByChief: false // Initialize to false
             };
 
             const newPermit = new COVPermit(permitData);
@@ -121,6 +124,11 @@ const covResolvers = {
                }
             });
             permit.files = updatedFiles;
+         }
+
+         // Ensure currentStage is not overwritten if it's not provided in the input
+         if (input.currentStage) {
+            permit.currentStage = input.currentStage;
          }
 
          // Ensure the files field is marked as modified

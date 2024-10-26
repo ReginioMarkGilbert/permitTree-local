@@ -24,7 +24,7 @@ import PersonnelSidebar from './pages/Personnel/components/PersonnelSidebar';
 import PersonnelHomePage from './pages/Personnel/PersonnelHomePage';
 import ChiefRPSReportsPage from './pages/Personnel/ChiefRPSReportsPage';
 import PersonnelSettingsPage from './pages/Personnel/PersonnelSettingsPage';
-import ChiefRPSApplicationReviewModal from './pages/Personnel/components/ChiefRPSApplicationReviewModal';
+import ChiefRPSApplicationReviewModal from './pages/Personnel/components/TechnicalStaffAppReviewModal';
 import ChiefRPSApplicationViewModal from './pages/Personnel/components/ChiefRPSApplicationViewModal';
 
 import { isAuthenticated, getUserRoles } from './utils/auth';

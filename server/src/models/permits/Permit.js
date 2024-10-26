@@ -15,8 +15,40 @@ const PermitSchema = new mongoose.Schema({
    status: {
       type: String,
       required: true,
-      enum: ['Draft', 'Submitted', 'Under Review', 'Approved', 'Rejected', 'Completed']
+      enum: ['Draft', 'Submitted', 'Returned', 'Accepted', 'Rejected', 'In Progress', 'Approved', 'Completed']
    },
+   currentStage: {
+      type: String,
+      required: true,
+      enum: [
+         'Submitted',
+         'TechnicalStaffReview',
+         'ReturnedByTechnicalStaff',
+         'ForRecordByReceivingClerk',
+         'ChiefRPSReview',
+         'ForInspectionByTechnicalStaff',
+         'ApprovedByTechnicalStaff'
+      ],
+      default: 'Submitted'
+   },
+   recordedByReceivingClerk: {
+      type: Boolean,
+      default: false
+   },
+   reviewedByChief: {
+      type: Boolean,
+      default: false
+   },
+   history: [{
+      stage: String,
+      status: String,
+      timestamp: Date,
+      notes: String,
+      actionBy: {
+         type: mongoose.Schema.Types.ObjectId,
+         ref: 'User'
+      }
+   }],
    dateOfSubmission: { type: Date, default: Date.now },
    lastUpdated: { type: Date, default: Date.now }
 }, { timestamps: true });

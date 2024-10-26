@@ -1,26 +1,34 @@
 import { useQuery, gql } from '@apollo/client';
 
-const GET_APPLICATIONS_BY_STATUS = gql`
-  query GetApplicationsByStatus($status: String!) {
-    getApplicationsByStatus(status: $status) {
+const GET_APPLICATIONS = gql`
+  query GetApplications($status: String, $currentStage: String) {
+    getApplicationsByStatus(status: $status, currentStage: $currentStage) {
       id
       applicationNumber
       applicationType
       status
+      currentStage
+      recordedByReceivingClerk
+      reviewedByChief
       dateOfSubmission
     }
   }
 `;
 
-export const useApplications = (status) => {
-  const { data, loading, error, refetch } = useQuery(GET_APPLICATIONS_BY_STATUS, {
-    variables: { status },
+export const useApplications = ({ status, currentStage }) => {
+  const { data, loading, error, refetch } = useQuery(GET_APPLICATIONS, {
+    variables: { status, currentStage },
     fetchPolicy: 'network-only',
   });
 
   const fetchApplications = async () => {
-    await refetch();
-    return data?.getApplicationsByStatus || [];
+    try {
+      const result = await refetch();
+      return result.data?.getApplicationsByStatus || [];
+    } catch (refetchError) {
+      console.error('Client: Error refetching applications:', refetchError);
+      return [];
+    }
   };
 
   return {

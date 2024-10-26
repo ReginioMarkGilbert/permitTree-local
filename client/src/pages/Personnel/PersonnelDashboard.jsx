@@ -1,6 +1,6 @@
 import React from 'react';
 import ReceivingReleasingClerkDashboard from './components/PersonnelDashboardComponents/ReceivingReleasingClerkDashboard';
-import TechnicalStaffDashboard from './components/PersonnelDashboardComponents/TechnicalStaffDashboard';
+import TechnicalStaffDashboard from './components/PersonnelDashboardComponents/TechnicalStaff/TechnicalStaffDashboard';
 import ChiefDashboard from './components/PersonnelDashboardComponents/ChiefDashboard';
 import AccountantDashboard from './components/PersonnelDashboardComponents/AccountantDashboard';
 import BillCollectorDashboard from './components/PersonnelDashboardComponents/BillCollectorDashboard';

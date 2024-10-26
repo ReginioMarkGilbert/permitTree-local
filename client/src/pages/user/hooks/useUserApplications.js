@@ -1,12 +1,13 @@
 import { useQuery, useMutation, gql, useLazyQuery } from '@apollo/client';
 
 const GET_USER_APPLICATIONS = gql`
-  query GetUserApplications($status: String) {
-    getUserApplications(status: $status) {
+  query GetUserApplications($status: String, $currentStage: String) {
+    getUserApplications(status: $status, currentStage: $currentStage) {
       id
       applicationNumber
       applicationType
       status
+      currentStage
       dateOfSubmission
       ... on COVPermit {
         name
@@ -473,13 +474,10 @@ const UPDATE_TCEBP_PERMIT = gql`
   }
 `;
 
-export const useUserApplications = (status) => {
-   // console.log('useUserApplications called with status:', status);
-
+export const useUserApplications = (status, currentStage) => {
    const { loading, error, data, refetch } = useQuery(GET_USER_APPLICATIONS, {
-      variables: { status },
+      variables: { status, currentStage },
       fetchPolicy: 'network-only',
-      // onCompleted: (data) => console.log('Query completed. Data:', data),
       onError: (error) => console.error('Query error:', error),
    });
 
@@ -889,70 +887,81 @@ export const useUserApplications = (status) => {
       console.log('Updating TCEBP permit:', id);
       console.log('Update input:', input);
       try {
-        // Clean up the input data
-        const cleanedInput = {
-          name: input.name,
-          address: input.address,
-          contactNumber: input.contactNumber,
-          purpose: input.purpose,
-          requestType: input.requestType,
-          files: {}
-        };
+         // Clean up the input data
+         const cleanedInput = {
+            name: input.name,
+            address: input.address,
+            contactNumber: input.contactNumber,
+            purpose: input.purpose,
+            requestType: input.requestType,
+            files: {}
+         };
 
-        // Process files
-        if (input.files) {
-          Object.keys(input.files).forEach(key => {
-            if (key !== '__typename') {  // Skip the __typename field
-              if (Array.isArray(input.files[key]) && input.files[key].length > 0) {
-                cleanedInput.files[key] = input.files[key].map(file => ({
-                  filename: file.filename,
-                  contentType: file.contentType,
-                  // Only include data if it's present (it might not be for existing files)
-                  ...(file.data && { data: file.data })
-                }));
-              } else {
-                cleanedInput.files[key] = [];
-              }
-            }
-          });
-        }
+         // Process files
+         if (input.files) {
+            Object.keys(input.files).forEach(key => {
+               if (key !== '__typename') {  // Skip the __typename field
+                  if (Array.isArray(input.files[key]) && input.files[key].length > 0) {
+                     cleanedInput.files[key] = input.files[key].map(file => ({
+                        filename: file.filename,
+                        contentType: file.contentType,
+                        // Only include data if it's present (it might not be for existing files)
+                        ...(file.data && { data: file.data })
+                     }));
+                  } else {
+                     cleanedInput.files[key] = [];
+                  }
+               }
+            });
+         }
 
-        console.log('Cleaned input:', cleanedInput);
+         console.log('Cleaned input:', cleanedInput);
 
-        const { data } = await updateTCEBPPermitMutation({
-          variables: {
-            id,
-            input: cleanedInput
-          },
-          refetchQueries: [{ query: GET_USER_APPLICATIONS, variables: { status: input.status } }]
-        });
-        console.log('Update mutation result:', data);
-        if (data.updateTCEBPPermit) {
-          return data.updateTCEBPPermit;
-        } else {
-          throw new Error('Failed to update permit');
-        }
+         const { data } = await updateTCEBPPermitMutation({
+            variables: {
+               id,
+               input: cleanedInput
+            },
+            refetchQueries: [{ query: GET_USER_APPLICATIONS, variables: { status: input.status } }]
+         });
+         console.log('Update mutation result:', data);
+         if (data.updateTCEBPPermit) {
+            return data.updateTCEBPPermit;
+         } else {
+            throw new Error('Failed to update permit');
+         }
       } catch (error) {
-        console.error('Error updating permit:', error);
-        throw error;
+         console.error('Error updating permit:', error);
+         throw error;
       }
    };
 
    const fetchTCEBPPermit = async (id) => {
       try {
-        const { data } = await getTCEBPPermit({ variables: { id } });
-        return data.getTCEBPPermitById;
+         const { data } = await getTCEBPPermit({ variables: { id } });
+         return data.getTCEBPPermitById;
       } catch (error) {
-        console.error('Error fetching TCEBP permit:', error);
-        throw error;
+         console.error('Error fetching TCEBP permit:', error);
+         throw error;
       }
    };
 
+   const fetchUserApplications = async (status, currentStage) => {
+      try {
+         const { data } = await refetch({ status, currentStage });
+         return data?.getUserApplications || [];
+      } catch (error) {
+         console.error('User side, Error fetching user applications:', error);
+         throw error;
+      }
+   }
    return {
       applications: data?.getUserApplications || [],
       loading,
       error,
       refetch,
+      fetchUserApplications,
+
       deletePermit,
       unsubmitPermit,
       submitPermit,

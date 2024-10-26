@@ -26,11 +26,25 @@ const UserApplicationsStatusPage = () => {
    const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
    const [applicationToSubmit, setApplicationToSubmit] = useState(null);
 
+   const getQueryParamsForTab = (tab) => {
+      switch (tab) {
+         case 'Draft': return { status: 'Draft' };
+         case 'Submitted': return { status: 'Submitted' };
+         case 'Returned': return { status: 'Returned', currentStage: 'ReturnedByTechnicalStaff' };
+         case 'Accepted': return { status: 'Accepted' };
+         case 'Released': return { status: 'Released' };
+         case 'Expired': return { status: 'Expired' };
+         case 'Rejected': return { status: 'Rejected' };
+         default: return { status: 'Submitted' };
+      }
+   };
+
    const {
       applications,
       loading,
       error,
       refetch,
+      fetchUserApplications,
       deletePermit,
       updateCSAWPermit,
       updateCOVPermit,
@@ -46,7 +60,10 @@ const UserApplicationsStatusPage = () => {
       submitPermit,
       updateTCEBPPermit,
       fetchTCEBPPermit,
-   } = useUserApplications(activeSubTab);
+   } = useUserApplications(
+      getQueryParamsForTab(activeSubTab).status,
+      getQueryParamsForTab(activeSubTab).currentStage
+   );
 
    const mainTabs = ['Applications', 'Order Of Payments'];
    const subTabs = {
@@ -60,6 +77,11 @@ const UserApplicationsStatusPage = () => {
          app.applicationType.toLowerCase().includes(searchTerm.toLowerCase())
       );
    }, [applications, searchTerm]);
+
+   useEffect(() => {
+      const { status, currentStage } = getQueryParamsForTab(activeSubTab);
+      fetchUserApplications(status, currentStage);
+   }, [fetchUserApplications, activeSubTab]);
 
    const getStatusColor = (status) => {
       switch (status.toLowerCase()) {
@@ -79,9 +101,9 @@ const UserApplicationsStatusPage = () => {
       refetch();
    }, [activeSubTab, refetch]);
 
-   useEffect(() => {
-      // console.log('Applications data changed:', applications);
-   }, [applications]);
+   // useEffect(() => {
+   //    console.log('Applications data changed:', applications);
+   // }, [applications]);
 
    const handleDeleteClick = (application) => {
       console.log('Delete clicked for application:', application);
@@ -191,7 +213,7 @@ const UserApplicationsStatusPage = () => {
    const renderTable = () => {
       if (loading) return <p className="text-center text-gray-500">Loading...</p>;
       if (error) return <p className="text-center text-red-500">Error: {error.message}</p>;
-      if (applications.length === 0) {
+      if (filteredApplications.length === 0) {
          return <p className="text-center text-gray-500">No applications found.</p>;
       }
 

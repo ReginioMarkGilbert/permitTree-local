@@ -44,7 +44,7 @@ const HomePage = () => {
             return 'bg-gray-200 text-gray-800';
          case 'submitted':
             return 'bg-blue-200 text-blue-800';
-         case 'under review':
+         case 'in progress':
             return 'bg-yellow-200 text-yellow-800';
          case 'approved':
             return 'bg-green-200 text-green-800';

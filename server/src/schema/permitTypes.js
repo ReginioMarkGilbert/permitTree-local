@@ -6,8 +6,20 @@ const permitTypes = gql`
     applicationNumber: String!
     applicationType: String!
     status: String!
+    currentStage: String!
+    recordedByReceivingClerk: Boolean!
+    reviewedByChief: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
+    history: [HistoryEntry!]!
+  }
+
+  type HistoryEntry {
+    stage: String!
+    status: String!
+    timestamp: String!
+    notes: String
+    actionBy: ID!
   }
 
   type COVPermit implements Permit {
@@ -15,8 +27,12 @@ const permitTypes = gql`
     applicationNumber: String!
     applicationType: String!
     status: String!
+    currentStage: String!
+    recordedByReceivingClerk: Boolean!
+    reviewedByChief: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
+    history: [HistoryEntry!]!
     name: String!
     address: String!
     cellphone: String!
@@ -34,8 +50,12 @@ const permitTypes = gql`
     applicationNumber: String!
     applicationType: String!
     status: String!
+    currentStage: String!
+    recordedByReceivingClerk: Boolean!
+    reviewedByChief: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
+    history: [HistoryEntry!]!
     registrationType: String!
     chainsawStore: String!
     ownerName: String!
@@ -62,8 +82,12 @@ const permitTypes = gql`
     applicationNumber: String!
     applicationType: String!
     status: String!
+    currentStage: String!
+    recordedByReceivingClerk: Boolean!
+    reviewedByChief: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
+    history: [HistoryEntry!]!
     name: String!
     address: String!
     contactNumber: String!
@@ -81,8 +105,12 @@ const permitTypes = gql`
     applicationNumber: String!
     applicationType: String!
     status: String!
+    currentStage: String!
+    recordedByReceivingClerk: Boolean!
+    reviewedByChief: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
+    history: [HistoryEntry!]!
     ownerName: String!
     address: String!
     contactNumber: String!
@@ -99,8 +127,12 @@ const permitTypes = gql`
     applicationNumber: String!
     applicationType: String!
     status: String!
+    currentStage: String!
+    recordedByReceivingClerk: Boolean!
+    reviewedByChief: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
+    history: [HistoryEntry!]!
     name: String!
     address: String!
     contactNumber: String!
@@ -120,14 +152,18 @@ const permitTypes = gql`
     id: ID!
     applicationNumber: String!
     applicationType: String!
-    requestType: String!
     status: String!
+    currentStage: String!
+    recordedByReceivingClerk: Boolean!
+    reviewedByChief: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
+    history: [HistoryEntry!]!
     name: String!
     address: String!
     contactNumber: String!
     purpose: String!
+    requestType: String!
     files: TCEBPFiles
   }
 
@@ -191,7 +227,7 @@ const permitTypes = gql`
   }
 
   type Query {
-    getUserApplications(status: String): [Permit!]!
+    getUserApplications(status: String, currentStage: String): [Permit!]!
     getAllCOVPermits: [COVPermit!]!
     getCOVPermitById(id: ID!): COVPermit
     getCOVPermitWithFiles(id: ID!): COVPermit
@@ -206,7 +242,8 @@ const permitTypes = gql`
     getAllTCEBPPermits: [TCEBPPermit!]!
     getTCEBPPermitById(id: ID!): TCEBPPermit
     getSubmittedApplications: [Permit!]!
-    getApplicationsByStatus(status: String!): [Permit!]!
+    getApplicationsByStatus(status: String, currentStage: String): [Permit!]!
+    getApplicationsByCurrentStage(currentStage: String!): [Permit!]!
   }
 
   type Mutation {
@@ -228,6 +265,9 @@ const permitTypes = gql`
     createTCEBPPermit(input: TCEBPPermitInput!): TCEBPPermit!
     updateTCEBPPermit(id: ID!, input: TCEBPPermitInput!): TCEBPPermit!
     saveTCEBPPermitDraft(input: TCEBPPermitInput!): TCEBPPermit!
+    updatePermitStage(id: ID!, currentStage: String!, status: String!, notes: String): Permit!
+    recordApplication(id: ID!): Permit!
+    reviewApplication(id: ID!): Permit!
   }
 
   input COVPermitInput {

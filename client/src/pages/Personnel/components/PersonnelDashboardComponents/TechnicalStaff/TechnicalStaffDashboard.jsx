@@ -2,25 +2,25 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import ApplicationRow from '../ApplicationRow';
-import { useApplications } from '../../hooks/useApplications';
+import TS_ApplicationRow from './TS_ApplicationRow';
+import { useApplications } from '../../../hooks/useApplications';
 
 const TechnicalStaffDashboard = () => {
    const [searchTerm, setSearchTerm] = useState('');
    const [activeTab, setActiveTab] = useState('Pending Reviews');
 
-   const getStatusForTab = (tab) => {
+   const getQueryParamsForTab = (tab) => {
       switch (tab) {
-         case 'Pending Reviews': return 'Submitted';
-         case 'Returned Applications': return 'Returned';
-         case 'Accepted Applications': return 'Accepted';
-         case 'For Inspection and Approval': return 'ForInspectionAndApproval';
-         case 'Approved Applications': return 'Approved';
-         default: return 'Submitted';
+         case 'Pending Reviews': return { status: 'Submitted' };
+         case 'Returned Applications': return { currentStage: 'ReturnedByTechnicalStaff' };
+         case 'Accepted Applications': return { status: 'Accepted' };
+         case 'For Inspection and Approval': return { currentStage: 'ForInspectionByTechnicalStaff' };
+         case 'Approved Applications': return { status: 'Approved' };
+         default: return { status: 'Submitted' };
       }
    };
 
-   const { applications, loading, error, fetchApplications } = useApplications(getStatusForTab(activeTab));
+   const { applications, loading, error, fetchApplications } = useApplications(getQueryParamsForTab(activeTab));
 
    const tabs = ['Pending Reviews', 'Returned Applications', 'Accepted Applications', 'For Inspection and Approval', 'Approved Applications'];
 
@@ -46,6 +46,15 @@ const TechnicalStaffDashboard = () => {
       }
    };
 
+   const handlePrint = (id) => {
+      // Implement print functionality
+      console.log('Print application:', id);
+   };
+
+   const handleReviewComplete = () => {
+      fetchApplications();
+   };
+
    const renderTable = () => {
       if (loading) return <p className="text-center text-gray-500">Loading applications...</p>;
       if (error) return <p className="text-center text-red-500">Error: {error.message}</p>;
@@ -67,12 +76,11 @@ const TechnicalStaffDashboard = () => {
                </thead>
                <tbody className="bg-white divide-y divide-gray-200">
                   {filteredApplications.map((app) => (
-                     <ApplicationRow
+                     <TS_ApplicationRow
                         key={app.id}
                         app={app}
-                        onView={() => { }} // Implement these functions
-                        onPrint={() => { }}
-                        onReview={() => { }}
+                        onPrint={handlePrint}
+                        onReviewComplete={handleReviewComplete}
                         getStatusColor={getStatusColor}
                      />
                   ))}
@@ -82,7 +90,43 @@ const TechnicalStaffDashboard = () => {
       );
    };
 
-   // ... rest of the component (renderTabDescription, return statement) ...
+   const renderTabDescription = () => {
+      if (activeTab === 'Pending Reviews') {
+         return (
+            <div className="mb-4 -mt-4">
+               <h1 className="text-sm text-green-800">This is the list of applications pending review to check for completeness and supporting documents.</h1>
+            </div>
+         );
+      }
+      if (activeTab === 'Returned Applications') {
+         return (
+            <div className="mb-4 -mt-4">
+               <h1 className="text-sm text-green-800">This is the list of applications that were returned due to incomplete documents or other issues.</h1>
+            </div>
+         );
+      }
+      if (activeTab === 'Accepted Applications') {
+         return (
+            <div className="mb-4 -mt-4">
+               <h1 className="text-sm text-green-800">This is the list of applications that have been accepted after review.</h1>
+            </div>
+         );
+      }
+      if (activeTab === 'For Inspection and Approval') {
+         return (
+            <div className="mb-4 -mt-4">
+               <h1 className="text-sm text-green-800">This is the list of applications (forwarded by the Chief RPS after review) that are pending inspection (e.g., chainsaws, etc.).</h1>
+            </div>
+         );
+      }
+      if (activeTab === 'Approved Applications') {
+         return (
+            <div className="mb-4 -mt-4">
+               <h1 className="text-sm text-green-800">This is the list of applications that have been approved for authenticity after inspection.</h1>
+            </div>
+         );
+      }
+   }
 
    return (
       <div className="min-h-screen bg-green-50">
