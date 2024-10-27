@@ -48,7 +48,7 @@ const RRC_RecordModal = ({ isOpen, onClose, application, onRecordComplete }) => 
       <Dialog open={isOpen} onOpenChange={onClose}>
          <DialogContent className="max-w-md">
             <DialogHeader>
-               <DialogTitle>Record Application</DialogTitle>
+               <DialogTitle data-testid="modal-title">Record Application</DialogTitle>
                <DialogDescription>
                   Application Number: {application?.applicationNumber}
                </DialogDescription>
@@ -59,10 +59,19 @@ const RRC_RecordModal = ({ isOpen, onClose, application, onRecordComplete }) => 
                   This action will mark the application as recorded in the system.
                </p>
                <div className="flex space-x-2">
-                  <Button onClick={handleRecord} className="flex-1">
+                  <Button
+                     onClick={handleRecord}
+                     className="flex-1"
+                     data-testid="record-button"
+                  >
                      Record Application
                   </Button>
-                  <Button onClick={onClose} variant="outline" className="flex-1">
+                  <Button
+                     onClick={onClose}
+                     variant="outline"
+                     className="flex-1"
+                     data-testid="cancel-button"
+                  >
                      Cancel
                   </Button>
                </div>

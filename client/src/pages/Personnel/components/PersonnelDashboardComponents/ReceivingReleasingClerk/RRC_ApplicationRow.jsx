@@ -51,7 +51,13 @@ const RRC_ApplicationRow = ({ app, onRecordComplete, getStatusColor }) => {
                   <TooltipProvider>
                      <Tooltip delayDuration={200}>
                         <TooltipTrigger asChild>
-                           <Button onClick={handleViewClick} variant="outline" size="icon" className="h-8 w-8">
+                           <Button
+                              onClick={handleViewClick}
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8"
+                              data-testid="view-button"
+                           >
                               <Eye className="h-4 w-4" />
                            </Button>
                         </TooltipTrigger>
@@ -64,7 +70,13 @@ const RRC_ApplicationRow = ({ app, onRecordComplete, getStatusColor }) => {
                   <TooltipProvider>
                      <Tooltip delayDuration={200}>
                         <TooltipTrigger asChild>
-                           <Button onClick={handlePrint} variant="outline" size="icon" className="h-8 w-8">
+                           <Button
+                              onClick={handlePrint}
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8"
+                              data-testid="print-button"
+                           >
                               <Printer className="h-4 w-4" />
                            </Button>
                         </TooltipTrigger>
@@ -78,7 +90,13 @@ const RRC_ApplicationRow = ({ app, onRecordComplete, getStatusColor }) => {
                      <TooltipProvider>
                         <Tooltip delayDuration={200}>
                            <TooltipTrigger asChild>
-                              <Button onClick={handleRecordClick} variant="outline" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-800">
+                              <Button
+                                 onClick={handleRecordClick}
+                                 variant="outline"
+                                 size="icon"
+                                 className="h-8 w-8 text-blue-600 hover:text-blue-800"
+                                 data-testid="record-button"
+                              >
                                  <ClipboardCheck className="h-4 w-4" />
                               </Button>
                            </TooltipTrigger>
