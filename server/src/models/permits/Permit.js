@@ -27,7 +27,9 @@ const PermitSchema = new mongoose.Schema({
          'ForRecordByReceivingClerk',
          'ChiefRPSReview',
          'ForInspectionByTechnicalStaff',
-         'ApprovedByTechnicalStaff'
+         'ApprovedByTechnicalStaff',
+         'PendingRelease',
+         'Released'
       ],
       default: 'Submitted'
    },

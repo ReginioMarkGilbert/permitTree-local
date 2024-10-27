@@ -1,11 +1,17 @@
 import { useQuery, gql } from '@apollo/client';
 
 const GET_APPLICATIONS = gql`
-  query GetApplications($status: String, $currentStage: String, $acceptedByTechnicalStaff: Boolean) {
+  query GetApplications(
+    $status: String,
+    $currentStage: String,
+    $acceptedByTechnicalStaff: Boolean,
+    $recordedByReceivingClerk: Boolean
+  ) {
     getApplicationsByStatus(
       status: $status,
       currentStage: $currentStage,
-      acceptedByTechnicalStaff: $acceptedByTechnicalStaff
+      acceptedByTechnicalStaff: $acceptedByTechnicalStaff,
+      recordedByReceivingClerk: $recordedByReceivingClerk
     ) {
       id
       applicationNumber
@@ -24,9 +30,9 @@ const GET_APPLICATIONS = gql`
   }
 `;
 
-export const useApplications = ({ status, currentStage, acceptedByTechnicalStaff }) => {
+export const useApplications = ({ status, currentStage, acceptedByTechnicalStaff, recordedByReceivingClerk }) => {
    const { data, loading, error, refetch } = useQuery(GET_APPLICATIONS, {
-      variables: { status, currentStage, acceptedByTechnicalStaff },
+      variables: { status, currentStage, acceptedByTechnicalStaff, recordedByReceivingClerk },
       fetchPolicy: 'network-only',
    });
 

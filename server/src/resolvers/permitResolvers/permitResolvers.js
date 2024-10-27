@@ -88,13 +88,13 @@ const permitResolvers = {
             throw new Error(`Failed to fetch submitted permits: ${error.message}`);
          }
       },
-      getApplicationsByStatus: async (_, { status, currentStage, acceptedByTechnicalStaff }) => {
+      getApplicationsByStatus: async (_, { status, currentStage, recordedByReceivingClerk }) => {
          try {
             let query = {};
             if (status) query.status = status;
             if (currentStage) query.currentStage = currentStage;
-            if (acceptedByTechnicalStaff !== undefined) {
-               query.acceptedByTechnicalStaff = acceptedByTechnicalStaff;
+            if (recordedByReceivingClerk !== undefined) {
+               query.recordedByReceivingClerk = recordedByReceivingClerk;
             }
 
             const permits = await Permit.find(query)
@@ -115,7 +115,6 @@ const permitResolvers = {
 
             console.log('Server: Fetched applications:', query);
             console.log('Server: Number of applications:', formattedPermits.length);
-            console.log('Server: First application:', formattedPermits[0]);
 
             return formattedPermits;
          } catch (error) {
@@ -236,7 +235,7 @@ const permitResolvers = {
          permit.history.push({
             stage: currentStage,
             status: status,
-            timestamp: new Date(),
+         timestamp: new Date(),
             notes: notes || ''
          });
 
@@ -270,26 +269,30 @@ const permitResolvers = {
          };
       },
 
-      recordApplication: async (_, { id }, { user }) => {
-         if (!user) {
-            throw new Error('You must be logged in to record an application');
-         }
-
+      recordApplication: async (_, { id, currentStage, status }, { user }) => {
          const permit = await Permit.findById(id);
          if (!permit) {
             throw new Error('Permit not found');
          }
 
+         // Update the fields
+         permit.currentStage = currentStage;
+         permit.status = status;
          permit.recordedByReceivingClerk = true;
+
          permit.history.push({
-            stage: 'RecordedByReceivingClerk',
-            status: permit.status,
+            stage: currentStage,
+            status: status,
             timestamp: new Date(),
-            notes: 'Application recorded by receiving clerk',
-            actionBy: user.id
+            notes: 'Application recorded by receiving clerk'
          });
 
-         await permit.save();
+         try {
+            await permit.save();
+         } catch (error) {
+            console.error('Error saving permit:', error);
+            throw new Error(`Failed to record application: ${error.message}`);
+         }
 
          return {
             ...permit.toObject(),

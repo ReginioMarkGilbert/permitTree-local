@@ -1,5 +1,5 @@
 import React from 'react';
-import ReceivingReleasingClerkDashboard from './components/PersonnelDashboardComponents/ReceivingReleasingClerkDashboard';
+import ReceivingReleasingClerkDashboard from './components/PersonnelDashboardComponents/ReceivingReleasingClerk/ReceivingReleasingClerkDashboard';
 import TechnicalStaffDashboard from './components/PersonnelDashboardComponents/TechnicalStaff/TechnicalStaffDashboard';
 import ChiefDashboard from './components/PersonnelDashboardComponents/ChiefDashboard';
 import AccountantDashboard from './components/PersonnelDashboardComponents/AccountantDashboard';

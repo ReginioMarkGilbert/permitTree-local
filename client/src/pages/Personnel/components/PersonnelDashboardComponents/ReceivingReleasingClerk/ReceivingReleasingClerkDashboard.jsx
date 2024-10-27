@@ -1,14 +1,31 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import ApplicationRow from '../ApplicationRow';
+import RRC_ApplicationRow from './RRC_ApplicationRow';
+import { useApplications } from '../../../hooks/useApplications';
 
 const ReceivingReleasingClerkDashboard = () => {
    const [searchTerm, setSearchTerm] = useState('');
    const [activeMainTab, setActiveMainTab] = useState('Applications');
    const [activeSubTab, setActiveSubTab] = useState('Pending Applications');
-   const [applications, setApplications] = useState([]); // This should be populated with real data
+
+   const getQueryParamsForTab = (tab) => {
+      switch (tab) {
+         case 'Pending Applications':
+            return { currentStage: 'ForRecordByReceivingClerk' };
+         case 'Recorded Applications':
+            return { recordedByReceivingClerk: true };
+         case 'Pending Release':
+            return { status: 'Approved', currentStage: 'PendingRelease' };
+         case 'Released Certificates':
+            return { status: 'Released' };
+         default:
+            return { currentStage: 'ForRecordByReceivingClerk' };
+      }
+   };
+
+   const { applications, loading, error, fetchApplications } = useApplications(getQueryParamsForTab(activeSubTab));
 
    const mainTabs = ['Applications', 'Certificates'];
    const subTabs = {
@@ -18,10 +35,14 @@ const ReceivingReleasingClerkDashboard = () => {
 
    const filteredApplications = useMemo(() => {
       return applications.filter(app =>
-         app.customId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         app.ownerName.toLowerCase().includes(searchTerm.toLowerCase())
+         app.applicationNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         app.applicationType.toLowerCase().includes(searchTerm.toLowerCase())
       );
    }, [applications, searchTerm]);
+
+   useEffect(() => {
+      fetchApplications();
+   }, [fetchApplications, activeSubTab]);
 
    const getStatusColor = (status) => {
       switch (status.toLowerCase()) {
@@ -31,6 +52,10 @@ const ReceivingReleasingClerkDashboard = () => {
          case 'released': return 'bg-green-100 text-green-800';
          default: return 'bg-gray-100 text-gray-800';
       }
+   };
+
+   const handleRecordComplete = () => {
+      fetchApplications();
    };
 
    const renderTabDescription = () => {
@@ -47,6 +72,11 @@ const ReceivingReleasingClerkDashboard = () => {
    }
 
    const renderTable = () => {
+      if (loading) return <p className="text-center text-gray-500">Loading applications...</p>;
+      if (error) {
+         console.error('Error fetching applications:', error);
+         return <p className="text-center text-red-500">Error loading applications. Please try again later.</p>;
+      }
       if (filteredApplications.length === 0) {
          return <p className="text-center text-gray-500">No applications found.</p>;
       }
@@ -65,12 +95,10 @@ const ReceivingReleasingClerkDashboard = () => {
                </thead>
                <tbody className="bg-white divide-y divide-gray-200">
                   {filteredApplications.map((app) => (
-                     <ApplicationRow
-                        key={app._id}
+                     <RRC_ApplicationRow
+                        key={app.id}
                         app={app}
-                        onView={() => { }} // Implement these functions
-                        onPrint={() => { }}
-                        onReview={() => { }}
+                        onRecordComplete={handleRecordComplete}
                         getStatusColor={getStatusColor}
                      />
                   ))}
@@ -85,7 +113,7 @@ const ReceivingReleasingClerkDashboard = () => {
          <div className="container mx-auto px-4 sm:px-6 py-8 pt-24">
             <div className="flex justify-between items-center mb-6">
                <h1 className="text-3xl font-bold text-green-800">Receiving/Releasing Clerk Dashboard</h1>
-               <Button onClick={() => { }} variant="outline">
+               <Button onClick={fetchApplications} variant="outline">
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Refresh
                </Button>

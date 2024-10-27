@@ -252,7 +252,8 @@ const permitTypes = gql`
     getApplicationsByStatus(
       status: String,
       currentStage: String,
-      acceptedByTechnicalStaff: Boolean
+      acceptedByTechnicalStaff: Boolean,
+      recordedByReceivingClerk: Boolean
     ): [Permit!]!
     getApplicationsByCurrentStage(currentStage: String!): [Permit!]!
   }
@@ -284,7 +285,7 @@ const permitTypes = gql`
       acceptedByTechnicalStaff: Boolean
     ): Permit!
     acceptApplication(id: ID!): Permit!
-    recordApplication(id: ID!): Permit!
+    recordApplication(id: ID!, currentStage: String!, status: String!): Permit!
     reviewApplication(id: ID!): Permit!
   }
 
