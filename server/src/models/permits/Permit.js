@@ -21,7 +21,7 @@ const PermitSchema = new mongoose.Schema({
       type: String,
       required: true,
       enum: [
-         'Submitted',
+         'Submitted', // Submitted by the applicant
          'TechnicalStaffReview',
          'ReturnedByTechnicalStaff',
          'ForRecordByReceivingClerk',

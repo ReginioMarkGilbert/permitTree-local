@@ -14,8 +14,8 @@
     "test:permitForms": "vitest src/tests/pages/user/components/permitForms --silent",
     "test:components": "vitest src/tests/pages/user/components --silent",
     "test:userpages": "vitest src/tests/pages/user --silent",
-    "test:newfile": "vitest src/tests/pages/user/UserProfilePage.test.jsx --silent",
-    "test:file" : "vitest src/tests/pages/user/components/UserApplicationRow.test.jsx"
+    "test:newfile": "vitest src/tests/pages/public/UserAuthPage.test.jsx --silent",
+    "test:file": "vitest src/tests/pages/user/components/UserApplicationRow.test.jsx"
   },
   "dependencies": {
     "@apollo/client": "^3.11.8",
@@ -86,6 +86,7 @@
     "@typescript-eslint/parser": "^7.2.0",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.19",
+    "babel-plugin-react-remove-properties": "^0.3.0",
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
@@ -116,5 +117,21 @@
     "transformIgnorePatterns": [
       "<rootDir>/node_modules/"
     ]
+  },
+  "babel": {
+    "env": {
+      "production": {
+        "plugins": [
+          [
+            "react-remove-properties",
+            {
+              "properties": [
+                "^data-testid$"
+              ]
+            }
+          ]
+        ]
+      }
+    }
   }
 }
