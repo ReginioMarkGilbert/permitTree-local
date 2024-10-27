@@ -1,14 +1,31 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import ApplicationRow from '../ApplicationRow';
+import ChiefApplicationRow from './ChiefApplicationRow';
+import { useApplications } from '../../../hooks/useApplications';
 
 const ChiefDashboard = () => {
    const [searchTerm, setSearchTerm] = useState('');
    const [activeMainTab, setActiveMainTab] = useState('Applications');
    const [activeSubTab, setActiveSubTab] = useState('Applications for Review');
-   const [applications, setApplications] = useState([]); // This should be populated with real data
+
+   const getQueryParamsForTab = (tab) => {
+      switch (tab) {
+         case 'Applications for Review':
+            return { currentStage: 'ChiefRPSReview' };
+         case 'Completed Reviews':
+            return { reviewedByChief: true };
+         case 'Pending Signature':
+            return { status: 'Approved', currentStage: 'PendingSignature' };
+         case 'Signed Certificates':
+            return { status: 'Signed' };
+         default:
+            return { currentStage: 'ChiefRPSReview' };
+      }
+   };
+
+   const { applications, loading, error, fetchApplications } = useApplications(getQueryParamsForTab(activeSubTab));
 
    const mainTabs = ['Applications', 'Order Of Payment', 'Certificates'];
    const subTabs = {
@@ -19,10 +36,14 @@ const ChiefDashboard = () => {
 
    const filteredApplications = useMemo(() => {
       return applications.filter(app =>
-         app.customId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         app.ownerName.toLowerCase().includes(searchTerm.toLowerCase())
+         app.applicationNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         app.applicationType.toLowerCase().includes(searchTerm.toLowerCase())
       );
    }, [applications, searchTerm]);
+
+   useEffect(() => {
+      fetchApplications();
+   }, [fetchApplications, activeSubTab]);
 
    const getStatusColor = (status) => {
       switch (status.toLowerCase()) {
@@ -36,7 +57,29 @@ const ChiefDashboard = () => {
       }
    };
 
+   const handleReviewComplete = () => {
+      fetchApplications();
+   };
+
+   const renderTabDescription = () => {
+      if (activeSubTab === 'Applications for Review') {
+         return <div className="mb-4 -mt-4">
+            <h1 className="text-sm text-green-800">This is the list of applications pending for your review.</h1>
+         </div>;
+      }
+      if (activeSubTab === 'Completed Reviews') {
+         return <div className="mb-4 -mt-4">
+            <h1 className="text-sm text-green-800">This is the list of applications that you have reviewed.</h1>
+         </div>;
+      }
+   }
+
    const renderTable = () => {
+      if (loading) return <p className="text-center text-gray-500">Loading applications...</p>;
+      if (error) {
+         console.error('Error fetching applications:', error);
+         return <p className="text-center text-red-500">Error loading applications. Please try again later.</p>;
+      }
       if (filteredApplications.length === 0) {
          return <p className="text-center text-gray-500">No applications found.</p>;
       }
@@ -55,12 +98,10 @@ const ChiefDashboard = () => {
                </thead>
                <tbody className="bg-white divide-y divide-gray-200">
                   {filteredApplications.map((app) => (
-                     <ApplicationRow
-                        key={app._id}
+                     <ChiefApplicationRow
+                        key={app.id}
                         app={app}
-                        onView={() => { }} // Implement these functions
-                        onPrint={() => { }}
-                        onReview={() => { }}
+                        onReviewComplete={handleReviewComplete}
                         getStatusColor={getStatusColor}
                      />
                   ))}

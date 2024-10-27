@@ -25,6 +25,7 @@ const PermitSchema = new mongoose.Schema({
          'TechnicalStaffReview',
          'ReturnedByTechnicalStaff',
          'ForRecordByReceivingClerk',
+         'RecordedByReceivingClerk',  // Add this stage
          'ChiefRPSReview',
          'ForInspectionByTechnicalStaff',
          'ApprovedByTechnicalStaff',
