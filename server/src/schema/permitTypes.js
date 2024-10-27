@@ -9,6 +9,7 @@ const permitTypes = gql`
     currentStage: String!
     recordedByReceivingClerk: Boolean!
     reviewedByChief: Boolean!
+    acceptedByTechnicalStaff: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -30,6 +31,7 @@ const permitTypes = gql`
     currentStage: String!
     recordedByReceivingClerk: Boolean!
     reviewedByChief: Boolean!
+    acceptedByTechnicalStaff: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -53,6 +55,7 @@ const permitTypes = gql`
     currentStage: String!
     recordedByReceivingClerk: Boolean!
     reviewedByChief: Boolean!
+    acceptedByTechnicalStaff: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -85,6 +88,7 @@ const permitTypes = gql`
     currentStage: String!
     recordedByReceivingClerk: Boolean!
     reviewedByChief: Boolean!
+    acceptedByTechnicalStaff: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -108,6 +112,7 @@ const permitTypes = gql`
     currentStage: String!
     recordedByReceivingClerk: Boolean!
     reviewedByChief: Boolean!
+    acceptedByTechnicalStaff: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -130,6 +135,7 @@ const permitTypes = gql`
     currentStage: String!
     recordedByReceivingClerk: Boolean!
     reviewedByChief: Boolean!
+    acceptedByTechnicalStaff: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -156,6 +162,7 @@ const permitTypes = gql`
     currentStage: String!
     recordedByReceivingClerk: Boolean!
     reviewedByChief: Boolean!
+    acceptedByTechnicalStaff: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -265,7 +272,14 @@ const permitTypes = gql`
     createTCEBPPermit(input: TCEBPPermitInput!): TCEBPPermit!
     updateTCEBPPermit(id: ID!, input: TCEBPPermitInput!): TCEBPPermit!
     saveTCEBPPermitDraft(input: TCEBPPermitInput!): TCEBPPermit!
-    updatePermitStage(id: ID!, currentStage: String!, status: String!, notes: String): Permit!
+    updatePermitStage(
+      id: ID!,
+      currentStage: String!,
+      status: String!,
+      notes: String,
+      acceptedByTechnicalStaff: Boolean
+    ): Permit!
+    acceptApplication(id: ID!): Permit!
     recordApplication(id: ID!): Permit!
     reviewApplication(id: ID!): Permit!
   }

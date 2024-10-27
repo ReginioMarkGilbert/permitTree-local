@@ -35,7 +35,8 @@ const permitResolvers = {
                currentStage: permit.currentStage || 'Submitted',
                history: permit.history || [],
                recordedByReceivingClerk: permit.recordedByReceivingClerk || false,
-               reviewedByChief: permit.reviewedByChief || false
+               reviewedByChief: permit.reviewedByChief || false,
+               acceptedByTechnicalStaff: permit.acceptedByTechnicalStaff || false
             }));
 
             console.log('Server: Fetched user applications:', query);
@@ -105,6 +106,7 @@ const permitResolvers = {
                currentStage: permit.currentStage || 'Submitted',
                recordedByReceivingClerk: permit.recordedByReceivingClerk || false,
                reviewedByChief: permit.reviewedByChief || false,
+               acceptedByTechnicalStaff: permit.acceptedByTechnicalStaff || false,
                history: permit.history || []
             }));
 
@@ -214,7 +216,7 @@ const permitResolvers = {
 
          return permit;
       },
-      updatePermitStage: async (_, { id, currentStage, status, notes }, context) => {
+      updatePermitStage: async (_, { id, currentStage, status, notes, acceptedByTechnicalStaff }, context) => {
          const permit = await Permit.findById(id);
          if (!permit) {
             throw new Error('Permit not found');
@@ -222,6 +224,12 @@ const permitResolvers = {
 
          permit.currentStage = currentStage;
          permit.status = status;
+
+         // Add this line to update the acceptedByTechnicalStaff field
+         if (acceptedByTechnicalStaff !== undefined) {
+            permit.acceptedByTechnicalStaff = acceptedByTechnicalStaff;
+         }
+
          permit.history.push({
             stage: currentStage,
             status: status,
@@ -242,6 +250,23 @@ const permitResolvers = {
             dateOfSubmission: permit.dateOfSubmission.toISOString()
          };
       },
+      acceptApplication: async (_, { id }, { user }) => {
+         if (!user) {
+            throw new Error('You must be logged in to accept an application');
+         }
+         const permit = await Permit.findById(id);
+         if (!permit) {
+            throw new Error('Permit not found');
+         }
+
+         permit.acceptedByTechnicalStaff = true; // set accepted flag to true
+         await permit.save();
+         return {
+            ...permit.toObject(),
+            id: permit._id.toString()
+         };
+      },
+
       recordApplication: async (_, { id }, { user }) => {
          if (!user) {
             throw new Error('You must be logged in to record an application');
@@ -269,6 +294,7 @@ const permitResolvers = {
             dateOfSubmission: permit.dateOfSubmission.toISOString()
          };
       },
+
       reviewApplication: async (_, { id }, { user }) => {
          if (!user) {
             throw new Error('You must be logged in to review an application');

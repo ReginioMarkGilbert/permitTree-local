@@ -69,8 +69,9 @@ const covResolvers = {
                dateOfSubmission: new Date(),
                files: processedFiles,
                currentStage: 'Submitted',
-               recordedByReceivingClerk: false, // Initialize to false
-               reviewedByChief: false // Initialize to false
+               // recordedByReceivingClerk: false, // Initialize to false
+               // reviewedByChief: false, // Initialize to false
+               // acceptedByTechnicalStaff: false // Initialize to false
             };
 
             const newPermit = new COVPermit(permitData);

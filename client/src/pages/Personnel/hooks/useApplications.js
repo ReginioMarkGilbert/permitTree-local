@@ -10,6 +10,7 @@ const GET_APPLICATIONS = gql`
       currentStage
       recordedByReceivingClerk
       reviewedByChief
+      acceptedByTechnicalStaff
       dateOfSubmission
       history {
         notes

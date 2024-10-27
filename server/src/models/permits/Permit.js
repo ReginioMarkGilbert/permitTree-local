@@ -39,6 +39,10 @@ const PermitSchema = new mongoose.Schema({
       type: Boolean,
       default: false
    },
+   acceptedByTechnicalStaff: {
+      type: Boolean,
+      default: false
+   },
    history: [{
       stage: String,
       status: String,

@@ -14,7 +14,7 @@
     "test:permitForms": "vitest src/tests/pages/user/components/permitForms --silent",
     "test:components": "vitest src/tests/pages/user/components --silent",
     "test:userpages": "vitest src/tests/pages/user --silent",
-    "test:newfile": "vitest src/tests/pages/public/UserAuthPage.test.jsx --silent",
+    "test:newfile": "vitest src/tests/pages/Personnel/components/TechnicalStaff/TS_ReviewModal.test.jsx --silent",
     "test:file": "vitest src/tests/pages/user/components/UserApplicationRow.test.jsx"
   },
   "dependencies": {

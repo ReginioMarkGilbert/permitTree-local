@@ -8,11 +8,24 @@ import { useMutation, gql } from '@apollo/client';
 import { toast } from 'sonner';
 
 const UPDATE_PERMIT_STAGE = gql`
-  mutation UpdatePermitStage($id: ID!, $currentStage: String!, $status: String!, $notes: String) {
-    updatePermitStage(id: $id, currentStage: $currentStage, status: $status, notes: $notes) {
+  mutation UpdatePermitStage(
+    $id: ID!,
+    $currentStage: String!,
+    $status: String!,
+    $notes: String,
+    $acceptedByTechnicalStaff: Boolean
+  ) {
+    updatePermitStage(
+      id: $id,
+      currentStage: $currentStage,
+      status: $status,
+      notes: $notes,
+      acceptedByTechnicalStaff: $acceptedByTechnicalStaff
+    ) {
       id
       currentStage
       status
+      acceptedByTechnicalStaff
       history {
         notes
         timestamp
@@ -37,7 +50,7 @@ const TS_ReviewModal = ({ isOpen, onClose, application, onReviewComplete }) => {
                currentStage: 'ForRecordByReceivingClerk',
                status: 'In Progress',
                notes: 'Application accepted by Technical Staff',
-               timestamp: new Date().toISOString()
+               acceptedByTechnicalStaff: true
             }
          });
          console.log('Result:', result);
@@ -64,8 +77,8 @@ const TS_ReviewModal = ({ isOpen, onClose, application, onReviewComplete }) => {
                id: application.id,
                currentStage: 'ReturnedByTechnicalStaff',
                status: 'Returned',
-               notes: remarks,
-               timestamp: new Date().toISOString()
+               notes: remarks
+               // Remove timestamp from here as it should be handled by the server
             }
          });
          console.log('Result:', result);
@@ -90,18 +103,47 @@ const TS_ReviewModal = ({ isOpen, onClose, application, onReviewComplete }) => {
             <div className="space-y-4">
                {isReturning ? (
                   <>
-                     <Textarea
+                     {/* Use a regular textarea instead of the Textarea component */}
+                     <textarea
+                        data-testid="return-remarks"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent"
                         placeholder="Enter remarks for returning the application"
                         value={remarks}
                         onChange={(e) => setRemarks(e.target.value)}
                      />
-                     <Button onClick={handleReturn} className="w-full">Confirm Return</Button>
-                     <Button onClick={() => setIsReturning(false)} variant="outline" className="w-full">Cancel</Button>
+                     <Button
+                        data-testid="confirm-return"
+                        onClick={handleReturn}
+                        className="w-full"
+                     >
+                        Confirm Return
+                     </Button>
+                     <Button
+                        data-testid="cancel-return"
+                        onClick={() => setIsReturning(false)}
+                        variant="outline"
+                        className="w-full"
+                     >
+                        Cancel
+                     </Button>
                   </>
                ) : (
                   <>
-                     <Button onClick={handleAccept} className="w-full">Accept</Button>
-                     <Button onClick={() => setIsReturning(true)} variant="outline" className="w-full">Return</Button>
+                     <Button
+                        data-testid="accept-button"
+                        onClick={handleAccept}
+                        className="w-full"
+                     >
+                        Accept
+                     </Button>
+                     <Button
+                        data-testid="return-button"
+                        onClick={() => setIsReturning(true)}
+                        variant="outline"
+                        className="w-full"
+                     >
+                        Return
+                     </Button>
                   </>
                )}
             </div>
