@@ -11,12 +11,19 @@ const TechnicalStaffDashboard = () => {
 
    const getQueryParamsForTab = (tab) => {
       switch (tab) {
-         case 'Pending Reviews': return { status: 'Submitted' };
-         case 'Returned Applications': return { currentStage: 'ReturnedByTechnicalStaff', status: 'Returned' };
-         case 'Accepted Applications': return { status: 'Accepted' };
-         case 'For Inspection and Approval': return { currentStage: 'ForInspectionByTechnicalStaff' };
-         case 'Approved Applications': return { status: 'Approved' };
-         default: return { status: 'Submitted' };
+         case 'Pending Reviews':
+            return { status: 'Submitted' };
+         case 'Returned Applications':
+            return { currentStage: 'ReturnedByTechnicalStaff', status: 'Returned' };
+         case 'Accepted Applications':
+            // Update this case to filter by acceptedByTechnicalStaff
+            return { acceptedByTechnicalStaff: true };
+         case 'For Inspection and Approval':
+            return { currentStage: 'ForInspectionByTechnicalStaff' };
+         case 'Approved Applications':
+            return { status: 'Approved' };
+         default:
+            return { status: 'Submitted' };
       }
    };
 

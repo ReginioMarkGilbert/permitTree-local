@@ -88,11 +88,14 @@ const permitResolvers = {
             throw new Error(`Failed to fetch submitted permits: ${error.message}`);
          }
       },
-      getApplicationsByStatus: async (_, { status, currentStage }) => {
+      getApplicationsByStatus: async (_, { status, currentStage, acceptedByTechnicalStaff }) => {
          try {
             let query = {};
             if (status) query.status = status;
             if (currentStage) query.currentStage = currentStage;
+            if (acceptedByTechnicalStaff !== undefined) {
+               query.acceptedByTechnicalStaff = acceptedByTechnicalStaff;
+            }
 
             const permits = await Permit.find(query)
                .sort({ dateOfSubmission: -1 })

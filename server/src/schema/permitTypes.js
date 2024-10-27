@@ -249,7 +249,11 @@ const permitTypes = gql`
     getAllTCEBPPermits: [TCEBPPermit!]!
     getTCEBPPermitById(id: ID!): TCEBPPermit
     getSubmittedApplications: [Permit!]!
-    getApplicationsByStatus(status: String, currentStage: String): [Permit!]!
+    getApplicationsByStatus(
+      status: String,
+      currentStage: String,
+      acceptedByTechnicalStaff: Boolean
+    ): [Permit!]!
     getApplicationsByCurrentStage(currentStage: String!): [Permit!]!
   }
 
