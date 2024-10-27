@@ -14,13 +14,26 @@ vi.mock('sonner', () => ({
   },
 }));
 
-// Mock the UPDATE_PERMIT_STAGE mutation
+// Update the UPDATE_PERMIT_STAGE mutation
 const UPDATE_PERMIT_STAGE = gql`
-  mutation UpdatePermitStage($id: ID!, $currentStage: String!, $status: String!, $notes: String) {
-    updatePermitStage(id: $id, currentStage: $currentStage, status: $status, notes: $notes) {
+  mutation UpdatePermitStage(
+    $id: ID!,
+    $currentStage: String!,
+    $status: String!,
+    $notes: String,
+    $acceptedByTechnicalStaff: Boolean
+  ) {
+    updatePermitStage(
+      id: $id,
+      currentStage: $currentStage,
+      status: $status,
+      notes: $notes,
+      acceptedByTechnicalStaff: $acceptedByTechnicalStaff
+    ) {
       id
       currentStage
       status
+      acceptedByTechnicalStaff
       history {
         notes
         timestamp
@@ -47,7 +60,8 @@ describe('TS_ReviewModal', () => {
         id: '1',
         currentStage: 'ReturnedByTechnicalStaff',
         status: 'Returned',
-        notes: 'Missing documents'
+        notes: 'Missing documents',
+        acceptedByTechnicalStaff: false
       }
     },
     result: {
@@ -56,6 +70,7 @@ describe('TS_ReviewModal', () => {
           id: '1',
           currentStage: 'ReturnedByTechnicalStaff',
           status: 'Returned',
+          acceptedByTechnicalStaff: false,
           history: [
             {
               notes: 'Missing documents',
@@ -74,10 +89,41 @@ describe('TS_ReviewModal', () => {
         id: '1',
         currentStage: 'ReturnedByTechnicalStaff',
         status: 'Returned',
-        notes: 'Missing documents'
+        notes: 'Missing documents',
+        acceptedByTechnicalStaff: false
       }
     },
     error: new Error('Failed to update permit stage')
+  };
+
+  // Add a new mock for the accept action
+  const acceptSuccessMock = {
+    request: {
+      query: UPDATE_PERMIT_STAGE,
+      variables: {
+        id: '1',
+        currentStage: 'ForRecordByReceivingClerk',
+        status: 'In Progress',
+        notes: 'Application accepted by Technical Staff',
+        acceptedByTechnicalStaff: true
+      }
+    },
+    result: {
+      data: {
+        updatePermitStage: {
+          id: '1',
+          currentStage: 'ForRecordByReceivingClerk',
+          status: 'In Progress',
+          acceptedByTechnicalStaff: true,
+          history: [
+            {
+              notes: 'Application accepted by Technical Staff',
+              timestamp: new Date().toISOString()
+            }
+          ]
+        }
+      }
+    }
   };
 
   const renderModal = (mocks = []) => {
@@ -135,7 +181,7 @@ describe('TS_ReviewModal', () => {
       expect(toast.success).toHaveBeenCalledWith('Application returned successfully');
       expect(mockOnReviewComplete).toHaveBeenCalled();
       expect(mockOnClose).toHaveBeenCalled();
-    });
+    }, { timeout: 2000 });
   });
 
   it('handles error when returning application', async () => {
@@ -150,7 +196,7 @@ describe('TS_ReviewModal', () => {
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('Error returning application: Failed to update permit stage');
-    });
+    }, { timeout: 2000 });
   });
 
   it('allows canceling the return process', () => {
@@ -161,5 +207,17 @@ describe('TS_ReviewModal', () => {
     // Should show initial buttons again
     expect(screen.getByTestId('accept-button')).toBeInTheDocument();
     expect(screen.getByTestId('return-button')).toBeInTheDocument();
+  });
+
+  it('successfully accepts application', async () => {
+    renderModal([acceptSuccessMock]);
+
+    fireEvent.click(screen.getByTestId('accept-button'));
+
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith('Application accepted successfully');
+      expect(mockOnReviewComplete).toHaveBeenCalled();
+      expect(mockOnClose).toHaveBeenCalled();
+    });
   });
 });

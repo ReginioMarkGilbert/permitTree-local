@@ -77,8 +77,8 @@ const TS_ReviewModal = ({ isOpen, onClose, application, onReviewComplete }) => {
                id: application.id,
                currentStage: 'ReturnedByTechnicalStaff',
                status: 'Returned',
-               notes: remarks
-               // Remove timestamp from here as it should be handled by the server
+               notes: remarks,
+               acceptedByTechnicalStaff: false
             }
          });
          console.log('Result:', result);
