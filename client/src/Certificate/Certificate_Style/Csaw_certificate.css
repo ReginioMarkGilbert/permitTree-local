@@ -1,0 +1,104 @@
+.certificate {
+    width: 8.5in;
+    height: 11in;
+    padding: 0.5in;
+    border: 2px solid #000;
+    font-family: Arial, sans-serif;
+    position: relative;
+  }
+  
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .logo {
+    width: 100px;
+    height: auto;
+    margin-right: 20px;
+  }
+  
+  .header-text {
+    text-align: center;
+  }
+  
+  .header-text h3 {
+    margin: 5px 0;
+  }
+  
+  .title {
+    text-align: center;
+    border-top: 2px solid #800000;
+    border-bottom: 2px solid #800000;
+    padding: 10px 0;
+    color: #800000;
+  }
+  
+  .certificate-number {
+    text-align: right;
+    margin-bottom: 20px;
+  }
+  
+  .preamble {
+    text-align: justify;
+    margin-bottom: 20px;
+  }
+  
+  .owner-name {
+    text-align: center;
+    margin-bottom: 0;
+  }
+  
+  .owner-label, .address-label {
+    text-align: center;
+    margin-top: 0;
+  }
+  
+  .address {
+    text-align: center;
+    margin-bottom: 0;
+  }
+  
+  .info-label {
+    margin-top: 20px;
+  }
+  
+  .chainsaw-info {
+    margin-left: 20px;
+  }
+  
+  .chainsaw-info p {
+    margin: 5px 0;
+  }
+  
+  .dates {
+    margin-top: 20px;
+  }
+  
+  .note {
+    font-style: italic;
+    margin-top: 20px;
+  }
+  
+  .approval {
+    position: absolute;
+    bottom: 1in;
+    right: 1in;
+    text-align: center;
+  }
+  
+  .signature-line {
+    width: 200px;
+    border-bottom: 1px solid #000;
+    margin: 50px auto 10px;
+  }
+  
+  .approver-name {
+    margin-bottom: 0;
+  }
+  
+  .approver-position {
+    margin-top: 0;
+  }
