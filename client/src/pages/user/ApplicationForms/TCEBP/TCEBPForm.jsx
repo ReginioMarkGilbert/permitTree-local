@@ -1,4 +1,5 @@
 // TCEBP - Tree Cutting and/or Earth Balling Permit for National Government Agencies
+// 
 // ISSUANCE OF TREE CUTTING AND/OR EARTH BALLING PERMIT FOR TREES AFFECTED BY PROJECTS OF NATIONAL GOVERNMENT AGENCIES (DPWH, DOTR, DepEd, DA, DOH, CHED, DOE, and NIA)
 // This Permit serves as proof of authorization for the removal/cutting and/or relocation of trees affected by projects of the National Government Agencies (DPWH, DOTR, DepEd, DA, DOH, CHED, DOE and NIA)
 

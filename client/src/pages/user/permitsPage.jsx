@@ -16,10 +16,17 @@ const PermitsPage = () => {
 
    const permits = [
       { title: 'Chainsaw registration', description: 'Application for Chainsaw registration', formType: 'chainsaw' },
+
       { title: 'Certificate of Verification', description: 'Application for Certificate of Verification', formType: 'cov' },
+
       { title: 'Private  Tree Plantation Registration', description: 'Application for Private Tree Plantation Registration', formType: 'ptpr' },
-      { title: 'Public Land Timber Permit', description: 'Application for Public Land Timber Permit', formType: 'tc_public' },
-      { title: 'Special/Private Land Timber Permit', description: 'Application for Special Private Land Timber Permit', formType: 'tc_private' },
+
+      // { title: 'Public Land Timber Permit', description: 'Application for Public Land Timber Permit', formType: 'tc_public' },
+      { title: 'Public Land Tree Cutting Permit', description: 'Application for Public Land Tree Cutting Permit', formType: 'tc_public' },
+
+      // { title: 'Special/Private Land Timber Permit', description: 'Application for Special Private Land Timber Permit', formType: 'tc_private' },
+      { title: 'PLTP or SPLTP - Special/Private Land Timber Permit', description: 'Application for Special Private Land Timber Permit', formType: 'tc_private' },
+
       { title: 'National Government Agency Tree Cutting Permit', description: 'Application for Public Tree cutting permit', formType: 'tc_nga' },
    ];
 
