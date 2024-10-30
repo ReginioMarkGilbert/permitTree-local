@@ -1,24 +1,24 @@
-const SPLTPPermit = require('../../models/permits/SPLTPPermit');
-const { SPLTP_ApplicationNumber } = require('../../utils/customIdGenerator');
+const PLTPPermit = require('../../models/permits/PLTPPermit');
+const { PLTP_ApplicationNumber } = require('../../utils/customIdGenerator');
 const { Binary } = require('mongodb');
 
-const spltpResolvers = {
+const pltpResolvers = {
    Query: {
-      getAllSPLTPPermits: async () => {
-         return await SPLTPPermit.find();
+      getAllPLTPPermits: async () => {
+         return await PLTPPermit.find();
       },
-      getSPLTPPermitById: async (_, { id }) => {
-         return await SPLTPPermit.findById(id);
+      getPLTPPermitById: async (_, { id }) => {
+         return await PLTPPermit.findById(id);
       },
    },
    Mutation: {
-      createSPLTPPermit: async (_, { input }, { user }) => {
+      createPLTPPermit: async (_, { input }, { user }) => {
          if (!user) {
             throw new Error('You must be logged in to create a permit');
          }
 
          try {
-            const applicationNumber = await SPLTP_ApplicationNumber();
+            const applicationNumber = await PLTP_ApplicationNumber();
 
             // Process file inputs
             const processedFiles = {};
@@ -44,23 +44,23 @@ const spltpResolvers = {
                files: processedFiles,
             };
 
-            const newPermit = new SPLTPPermit(permitData);
+            const newPermit = new PLTPPermit(permitData);
             const savedPermit = await newPermit.save();
             return {
                ...savedPermit.toObject(),
                id: savedPermit._id.toString()
             };
          } catch (error) {
-            console.error('Error creating SPLTP permit:', error);
-            throw new Error(`Failed to create SPLTP permit: ${error.message}`);
+            console.error('Error creating PLTP permit:', error);
+            throw new Error(`Failed to create PLTP permit: ${error.message}`);
          }
       },
-      updateSPLTPPermit: async (_, { id, input }, { user }) => {
+      updatePLTPPermit: async (_, { id, input }, { user }) => {
          if (!user) {
             throw new Error('You must be logged in to update a permit');
          }
 
-         const permit = await SPLTPPermit.findById(id);
+         const permit = await PLTPPermit.findById(id);
          if (!permit) {
             throw new Error('Permit not found');
          }
@@ -72,13 +72,13 @@ const spltpResolvers = {
          Object.assign(permit, input);
          return await permit.save();
       },
-      saveSPLTPPermitDraft: async (_, { input }, { user }) => {
+      savePLTPPermitDraft: async (_, { input }, { user }) => {
          if (!user) {
             throw new Error('You must be logged in to save a draft');
          }
 
          try {
-            const applicationNumber = await SPLTP_ApplicationNumber();
+            const applicationNumber = await PLTP_ApplicationNumber();
             const permitData = {
                ...input,
                applicationNumber,
@@ -88,15 +88,15 @@ const spltpResolvers = {
                dateOfSubmission: new Date().toISOString(),
             };
 
-            const newPermit = new SPLTPPermit(permitData);
+            const newPermit = new PLTPPermit(permitData);
             const savedPermit = await newPermit.save();
             return savedPermit;
          } catch (error) {
-            console.error('Error saving SPLTP permit draft:', error);
-            throw new Error(`Failed to save SPLTP permit draft: ${error.message}`);
+            console.error('Error saving PLTP permit draft:', error);
+            throw new Error(`Failed to save PLTP permit draft: ${error.message}`);
          }
       },
    },
 };
 
-module.exports = spltpResolvers;
+module.exports = pltpResolvers;

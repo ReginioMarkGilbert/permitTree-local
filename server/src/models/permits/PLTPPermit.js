@@ -7,7 +7,7 @@ const FileSchema = new mongoose.Schema({
    data: Buffer
 });
 
-const SPLTPPermitSchema = new mongoose.Schema({
+const PLTPPermitSchema = new mongoose.Schema({
    applicationNumber: { type: String, required: true, unique: true },
    applicationType: { type: String, required: true, default: 'Special/Private Land Timber Permit' },
    name: { type: String, required: true },
@@ -35,6 +35,6 @@ const SPLTPPermitSchema = new mongoose.Schema({
    applicantId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 });
 
-const SPLTPPermit = Permit.discriminator('SPLTPPermit', SPLTPPermitSchema);
+const PLTPPermit = Permit.discriminator('PLTPPermit', PLTPPermitSchema);
 
-module.exports = mongoose.model('SPLTPPermit');
+module.exports = mongoose.model('PLTPPermit');

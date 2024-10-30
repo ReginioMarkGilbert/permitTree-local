@@ -9,7 +9,7 @@ const covResolvers = require('./resolvers/permitResolvers/covResolvers');
 const csawResolvers = require('./resolvers/permitResolvers/csawResolvers');
 const pltcpResolvers = require('./resolvers/permitResolvers/pltcpResolvers');
 const ptprResolvers = require('./resolvers/permitResolvers/ptprResolvers');
-const spltpResolvers = require('./resolvers/permitResolvers/spltpResolvers');
+const pltpResolvers = require('./resolvers/permitResolvers/pltpResolvers');
 const tcebpResolvers = require('./resolvers/permitResolvers/tcebpResolvers');
 const { userTypes } = require('./schema/userTypes');
 const jwt = require('jsonwebtoken');
@@ -43,7 +43,7 @@ const server = new ApolloServer({
       csawResolvers,
       pltcpResolvers,
       ptprResolvers,
-      spltpResolvers,
+      pltpResolvers,
       tcebpResolvers
    ],
    context: ({ req }) => {

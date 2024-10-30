@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { X, Upload } from 'lucide-react';
 import '@/components/ui/styles/customScrollBar.css';
 
-const SPLTPEditForm = ({ formData, handleInputChange, handleCheckboxChange, handleFileChange, removeFile }) => {
+const PLTPEditForm = ({ formData, handleInputChange, handleCheckboxChange, handleFileChange, removeFile }) => {
    const renderFileInputs = () => {
       const fileTypes = [
          { type: 'letterOfIntent', label: 'Letter of Intent', condition: true },
@@ -196,4 +196,4 @@ const SPLTPEditForm = ({ formData, handleInputChange, handleCheckboxChange, hand
    );
 };
 
-export default SPLTPEditForm;
+export default PLTPEditForm;

@@ -22,8 +22,8 @@ const queryTypes = gql`
     getAllPTPRPermits: [PTPRPermit!]!
     getPTPRPermitById(id: ID!): PTPRPermit
 
-    getAllSPLTPPermits: [SPLTPPermit!]!
-    getSPLTPPermitById(id: ID!): SPLTPPermit
+    getAllPLTPPermits: [PLTPPermit!]!
+    getPLTPPermitById(id: ID!): PLTPPermit
 
     getAllTCEBPPermits: [TCEBPPermit!]!
     getTCEBPPermitById(id: ID!): TCEBPPermit

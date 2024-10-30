@@ -8,7 +8,7 @@ const csawResolvers = require('./permitResolvers/csawResolvers');
 const covResolvers = require('./permitResolvers/covResolvers');
 const pltcpResolvers = require('./permitResolvers/pltcpResolvers');
 const ptprResolvers = require('./permitResolvers/ptprResolvers');
-const spltpResolvers = require('./permitResolvers/spltpResolvers');
+const pltpResolvers = require('./permitResolvers/pltpResolvers');
 const tcebpResolvers = require('./permitResolvers/tcebpResolvers');
 const { resolvePermitType } = require('../schema/permitTypes');
 
@@ -27,7 +27,7 @@ const resolvers = mergeResolvers([
    csawResolvers,
    pltcpResolvers,
    ptprResolvers,
-   spltpResolvers,
+   pltpResolvers,
    tcebpResolvers
 ]);
 

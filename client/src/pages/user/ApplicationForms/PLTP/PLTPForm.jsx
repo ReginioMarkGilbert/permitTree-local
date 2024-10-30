@@ -17,9 +17,9 @@ import { gql, useMutation } from '@apollo/client';
 import { formatLabel, formatReviewValue } from '../CSAWForm/CSAWFormUtils';
 import '../../../../components/ui/styles/customScrollBar.css';
 
-const CREATE_SPLTP_PERMIT = gql`
-  mutation CreateSPLTPPermit($input: SPLTPPermitInput!) {
-    createSPLTPPermit(input: $input) {
+const CREATE_PLTP_PERMIT = gql`
+  mutation CreatePLTPPermit($input: PLTPPermitInput!) {
+    createPLTPPermit(input: $input) {
       id
       applicationNumber
       status
@@ -36,9 +36,9 @@ const CREATE_SPLTP_PERMIT = gql`
   }
 `;
 
-const SAVE_SPLTP_PERMIT_DRAFT = gql`
-  mutation SaveSPLTPPermitDraft($input: SPLTPPermitInput!) {
-    saveSPLTPPermitDraft(input: $input) {
+const SAVE_PLTP_PERMIT_DRAFT = gql`
+  mutation SavePLTPPermitDraft($input: PLTPPermitInput!) {
+    savePLTPPermitDraft(input: $input) {
       id
       applicationNumber
       status
@@ -54,14 +54,14 @@ const SAVE_SPLTP_PERMIT_DRAFT = gql`
   }
 `;
 
-const SPLTPForm = () => {
+const PLTPForm = () => {
    const navigate = useNavigate();
    const [currentStep, setCurrentStep] = useState(() => {
-      const savedStep = localStorage.getItem('spltpFormStep');
+      const savedStep = localStorage.getItem('pltpFormStep');
       return savedStep ? parseInt(savedStep, 10) : 0;
    });
    const [formData, setFormData] = useState(() => {
-      const savedFormData = localStorage.getItem('spltpFormData');
+      const savedFormData = localStorage.getItem('pltpFormData');
       return savedFormData ? JSON.parse(savedFormData) : {
          applicationType: 'Special/Private Land Timber Permit',
          name: '',
@@ -90,8 +90,8 @@ const SPLTPForm = () => {
    });
    const [modalOpen, setModalOpen] = useState(false);
    const [modalContent, setModalContent] = useState({ title: '', message: '' });
-   const [createSPLTPPermit] = useMutation(CREATE_SPLTP_PERMIT);
-   const [saveSPLTPPermitDraft] = useMutation(SAVE_SPLTP_PERMIT_DRAFT);
+   const [createPLTPPermit] = useMutation(CREATE_PLTP_PERMIT);
+   const [savePLTPPermitDraft] = useMutation(SAVE_PLTP_PERMIT_DRAFT);
 
    const handleInputChange = (e) => {
       const { name, value } = e.target;
@@ -169,7 +169,7 @@ const SPLTPForm = () => {
          console.log('Saving draft with input:', input);
 
          const token = localStorage.getItem('token');
-         const { data } = await saveSPLTPPermitDraft({
+         const { data } = await savePLTPPermitDraft({
             variables: { input },
             context: {
                headers: {
@@ -179,15 +179,15 @@ const SPLTPForm = () => {
             },
          });
 
-         if (data.saveSPLTPPermitDraft) {
+         if (data.savePLTPPermitDraft) {
             setModalContent({
                title: 'Draft saved successfully!',
                message: 'Do you want to view your applications?'
             });
             setModalOpen(true);
 
-            localStorage.removeItem('spltpFormStep');
-            localStorage.removeItem('spltpFormData');
+            localStorage.removeItem('pltpFormStep');
+            localStorage.removeItem('pltpFormData');
          }
       } catch (error) {
          console.error('Error saving draft:', error);
@@ -231,7 +231,7 @@ const SPLTPForm = () => {
          console.log('Submitting input:', input);
 
          const token = localStorage.getItem('token');
-         const { data } = await createSPLTPPermit({
+         const { data } = await createPLTPPermit({
             variables: { input },
             context: {
                headers: {
@@ -241,15 +241,15 @@ const SPLTPForm = () => {
             },
          });
 
-         if (data.createSPLTPPermit) {
+         if (data.createPLTPPermit) {
             setModalContent({
                title: 'Application submitted successfully!',
                message: 'Do you want to view your application?'
             });
             setModalOpen(true);
 
-            localStorage.removeItem('spltpFormStep');
-            localStorage.removeItem('spltpFormData');
+            localStorage.removeItem('pltpFormStep');
+            localStorage.removeItem('pltpFormData');
          }
       } catch (error) {
          console.error('Error submitting application:', error);
@@ -275,17 +275,17 @@ const SPLTPForm = () => {
    ];
 
    useEffect(() => {
-      localStorage.setItem('spltpFormStep', currentStep.toString());
+      localStorage.setItem('pltpFormStep', currentStep.toString());
    }, [currentStep]);
 
    useEffect(() => {
-      localStorage.setItem('spltpFormData', JSON.stringify(formData));
+      localStorage.setItem('pltpFormData', JSON.stringify(formData));
    }, [formData]);
 
    useEffect(() => {
       return () => {
-         localStorage.removeItem('spltpFormStep');
-         localStorage.removeItem('spltpFormData');
+         localStorage.removeItem('pltpFormStep');
+         localStorage.removeItem('pltpFormData');
       };
    }, []);
 
@@ -564,4 +564,4 @@ const SPLTPForm = () => {
    );
 };
 
-export default SPLTPForm;
+export default PLTPForm;

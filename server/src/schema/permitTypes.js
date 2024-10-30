@@ -127,7 +127,7 @@ const permitTypes = gql`
     files: PTPRFiles
   }
 
-  type SPLTPPermit implements Permit {
+  type PLTPPermit implements Permit {
     id: ID!
     applicationNumber: String!
     applicationType: String!
@@ -151,7 +151,7 @@ const permitTypes = gql`
     posingDanger: Boolean!
     forPersonalUse: Boolean!
     purpose: String!
-    files: SPLTPFiles
+    files: PLTPFiles
   }
 
   type TCEBPPermit implements Permit {
@@ -207,7 +207,7 @@ const permitTypes = gql`
     specialPowerOfAttorney: [File]
   }
 
-  type SPLTPFiles {
+  type PLTPFiles {
     letterOfIntent: [File]
     lguEndorsement: [File]
     titleCertificate: [File]
@@ -244,8 +244,8 @@ const permitTypes = gql`
     getPLTCPPermitById(id: ID!): PLTCPPermit
     getAllPTPRPermits: [PTPRPermit!]!
     getPTPRPermitById(id: ID!): PTPRPermit
-    getAllSPLTPPermits: [SPLTPPermit!]!
-    getSPLTPPermitById(id: ID!): SPLTPPermit
+    getAllPLTPPermits: [PLTPPermit!]!
+    getPLTPPermitById(id: ID!): PLTPPermit
     getAllTCEBPPermits: [TCEBPPermit!]!
     getTCEBPPermitById(id: ID!): TCEBPPermit
     getSubmittedApplications: [Permit!]!
@@ -262,21 +262,27 @@ const permitTypes = gql`
     createCOVPermit(input: COVPermitInput!): COVPermit!
     updateCOVPermit(id: ID!, input: COVPermitInput!): COVPermit!
     saveCOVPermitDraft(input: COVPermitInput!): COVPermit!
+
     createCSAWPermit(input: CSAWPermitInput!): CSAWPermit!
     updateCSAWPermit(id: ID!, input: CSAWPermitInput!): CSAWPermit!
     saveCSAWPermitDraft(input: CSAWPermitInput!): CSAWPermit!
+
     createPLTCPPermit(input: PLTCPPermitInput!): PLTCPPermit!
     updatePLTCPPermit(id: ID!, input: PLTCPPermitInput!): PLTCPPermit!
     savePLTCPPermitDraft(input: PLTCPPermitInput!): PLTCPPermit!
+
     createPTPRPermit(input: PTPRPermitInput!): PTPRPermit!
     updatePTPRPermit(id: ID!, input: PTPRPermitInput!): PTPRPermit!
     savePTPRPermitDraft(input: PTPRPermitInput!): PTPRPermit!
-    createSPLTPPermit(input: SPLTPPermitInput!): SPLTPPermit!
-    updateSPLTPPermit(id: ID!, input: SPLTPPermitInput!): SPLTPPermit!
-    saveSPLTPPermitDraft(input: SPLTPPermitInput!): SPLTPPermit!
+
+    createPLTPPermit(input: PLTPPermitInput!): PLTPPermit!
+    updatePLTPPermit(id: ID!, input: PLTPPermitInput!): PLTPPermit!
+    savePLTPPermitDraft(input: PLTPPermitInput!): PLTPPermit!
+
     createTCEBPPermit(input: TCEBPPermitInput!): TCEBPPermit!
     updateTCEBPPermit(id: ID!, input: TCEBPPermitInput!): TCEBPPermit!
     saveTCEBPPermitDraft(input: TCEBPPermitInput!): TCEBPPermit!
+
     updatePermitStage(
       id: ID!,
       currentStage: String!,
@@ -349,7 +355,7 @@ const permitTypes = gql`
     files: PTPRFilesInput
   }
 
-  input SPLTPPermitInput {
+  input PLTPPermitInput {
     name: String!
     address: String!
     contactNumber: String!
@@ -362,7 +368,7 @@ const permitTypes = gql`
     posingDanger: Boolean!
     forPersonalUse: Boolean!
     purpose: String!
-    files: SPLTPFilesInput
+    files: PLTPFilesInput
   }
 
   input TCEBPPermitInput {
@@ -407,7 +413,7 @@ const permitTypes = gql`
     specialPowerOfAttorney: [FileInput]
   }
 
-  input SPLTPFilesInput {
+  input PLTPFilesInput {
     letterOfIntent: [FileInput]
     lguEndorsement: [FileInput]
     titleCertificate: [FileInput]
@@ -448,9 +454,9 @@ const resolvePermitType = (obj) => {
       case 'PTPR':
       case 'Private Tree Plantation Registration':
          return 'PTPRPermit';
-      case 'SPLTP':
+      case 'PLTP':
       case 'Special/Private Land Timber Permit':
-         return 'SPLTPPermit';
+         return 'PLTPPermit';
       case 'TCEBP':
       case 'Tree Cutting and/or Earth Balling Permit':
          return 'TCEBPPermit';

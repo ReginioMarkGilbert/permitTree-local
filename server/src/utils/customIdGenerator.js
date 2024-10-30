@@ -32,7 +32,7 @@ const CSAW_ApplicationNumber = () => generateApplicationNumber('CSAW');
 const COV_ApplicationNumber = () => generateApplicationNumber('COV');
 const PTPR_ApplicationNumber = () => generateApplicationNumber('PTPR');
 const PLTCP_ApplicationNumber = () => generateApplicationNumber('PLTCP');
-const SPLTP_ApplicationNumber = () => generateApplicationNumber('SPLTP');
+const PLTP_ApplicationNumber = () => generateApplicationNumber('PLTP');
 const TCEBP_ApplicationNumber = () => generateApplicationNumber('TCEBP');
 
 module.exports = {
@@ -40,6 +40,6 @@ module.exports = {
    COV_ApplicationNumber,
    PTPR_ApplicationNumber,
    PLTCP_ApplicationNumber,
-   SPLTP_ApplicationNumber,
+   PLTP_ApplicationNumber,
    TCEBP_ApplicationNumber
 };

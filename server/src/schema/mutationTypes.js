@@ -25,9 +25,9 @@ const mutationTypes = gql`
     updatePTPRPermit(id: ID!, input: PTPRPermitInput!): PTPRPermit
     savePTPRPermitDraft(input: PTPRPermitInput!): PTPRPermit
 
-    createSPLTPPermit(input: SPLTPPermitInput!): SPLTPPermit
-    updateSPLTPPermit(id: ID!, input: SPLTPPermitInput!): SPLTPPermit
-    saveSPLTPPermitDraft(input: SPLTPPermitInput!): SPLTPPermit
+    createPLTPPermit(input: PLTPPermitInput!): PLTPPermit
+    updatePLTPPermit(id: ID!, input: PLTPPermitInput!): PLTPPermit
+    savePLTPPermitDraft(input: PLTPPermitInput!): PLTPPermit
 
     createTCEBPPermit(input: TCEBPPermitInput!): TCEBPPermit
     updateTCEBPPermit(id: ID!, input: TCEBPPermitInput!): TCEBPPermit

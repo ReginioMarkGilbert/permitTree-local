@@ -52,12 +52,12 @@ const UserApplicationsStatusPage = () => {
       updateCOVPermit,
       updatePLTCPPermit,
       updatePTPRPermit,
-      updateSPLTPPermit,
+      updatePLTPPermit,
       fetchCOVPermit,
       fetchCSAWPermit,
       fetchPLTCPPermit,
       fetchPTPRPermit,
-      fetchSPLTPPermit,
+      fetchPLTPPermit,
       unsubmitPermit,
       submitPermit,
       updateTCEBPPermit,
@@ -156,7 +156,7 @@ const UserApplicationsStatusPage = () => {
                updateFunction = updatePLTCPPermit;
                break;
             case 'Special/Private Land Timber Permit':
-               updateFunction = updateSPLTPPermit;
+               updateFunction = updatePLTPPermit;
                break;
             case 'Tree Cutting and/or Earth Balling Permit':
                updateFunction = updateTCEBPPermit;
@@ -279,7 +279,7 @@ const UserApplicationsStatusPage = () => {
                         fetchCSAWPermit={fetchCSAWPermit}
                         fetchPLTCPPermit={fetchPLTCPPermit}
                         fetchPTPRPermit={fetchPTPRPermit}
-                        fetchSPLTPPermit={fetchSPLTPPermit}
+                        fetchPLTPPermit={fetchPLTPPermit}
                         fetchTCEBPPermit={fetchTCEBPPermit}
                      />
                   ))}

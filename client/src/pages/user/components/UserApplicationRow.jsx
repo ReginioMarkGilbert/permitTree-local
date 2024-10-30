@@ -23,7 +23,7 @@ const UserApplicationRow = ({
    fetchCSAWPermit,
    fetchPLTCPPermit,
    fetchPTPRPermit,
-   fetchSPLTPPermit,
+   fetchPLTPPermit,
    fetchTCEBPPermit,
 }) => {
    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -128,11 +128,11 @@ const UserApplicationRow = ({
                            <Tooltip delayDuration={200}>
                               <TooltipTrigger asChild>
                                  <Button
-                                   onClick={() => onSubmit(app)}
-                                   variant="outline"
-                                   size="icon"
-                                   className="h-8 w-8 text-green-600 hover:text-green-800"
-                                   data-testid="submit-button"
+                                    onClick={() => onSubmit(app)}
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-8 w-8 text-green-600 hover:text-green-800"
+                                    data-testid="submit-button"
                                  >
                                     <Send className="h-4 w-4" />
                                  </Button>
@@ -225,7 +225,7 @@ const UserApplicationRow = ({
             fetchCSAWPermit={fetchCSAWPermit}
             fetchPLTCPPermit={fetchPLTCPPermit}
             fetchPTPRPermit={fetchPTPRPermit}
-            fetchSPLTPPermit={fetchSPLTPPermit}
+            fetchPLTPPermit={fetchPLTPPermit}
             fetchTCEBPPermit={fetchTCEBPPermit}
          />
          <ViewApplicationModal

@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
-import SPLTPEditForm from '../../../../../pages/user/components/permitForms/SPLTPEditForm';
+import PLTPEditForm from '../../../../../pages/user/components/permitForms/PLTPEditForm';
 
-describe('SPLTPEditForm', () => {
+describe('PLTPEditForm', () => {
   const mockFormData = {
     name: 'John Doe',
     address: '123 Main St',
@@ -29,7 +29,7 @@ describe('SPLTPEditForm', () => {
 
   const renderComponent = (formData = mockFormData) => {
     return render(
-      <SPLTPEditForm
+      <PLTPEditForm
         formData={formData}
         handleInputChange={mockHandleInputChange}
         handleCheckboxChange={mockHandleCheckboxChange}

@@ -5,7 +5,7 @@ import COVEditForm from './permitForms/COVEditForm';
 import CSAWEditForm from './permitForms/CSAWEditForm';
 import PLTCPEditForm from './permitForms/PLTCPEditForm';
 import PTPREditForm from './permitForms/PTPREditForm';
-import SPLTPEditForm from './permitForms/SPLTPEditForm';
+import PLTPEditForm from './permitForms/PLTPEditForm';
 import TCEBPEditForm from './permitForms/TCEBPEditForm';
 import '@/components/ui/styles/customScrollbar.css';
 import { useUserApplications } from '../hooks/useUserApplications';
@@ -21,7 +21,7 @@ const formatDate = (dateString) => {
 
 const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
    const [formData, setFormData] = useState(application);
-   const { fetchCOVPermit, fetchCSAWPermit, fetchPLTCPPermit, fetchPTPRPermit, fetchSPLTPPermit, fetchTCEBPPermit } = useUserApplications();
+   const { fetchCOVPermit, fetchCSAWPermit, fetchPLTCPPermit, fetchPTPRPermit, fetchPLTPPermit, fetchTCEBPPermit } = useUserApplications();
    const [hasFetched, setHasFetched] = useState(false);
 
    const fetchPermitData = useCallback(async () => {
@@ -42,7 +42,7 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
                   permitData = await fetchPTPRPermit(application.id);
                   break;
                case 'Special/Private Land Timber Permit':
-                  permitData = await fetchSPLTPPermit(application.id);
+                  permitData = await fetchPLTPPermit(application.id);
                   break;
                case 'Tree Cutting and/or Earth Balling Permit':
                   permitData = await fetchTCEBPPermit(application.id);
@@ -57,7 +57,7 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
             console.error('Error fetching permit data:', error);
          }
       }
-   }, [application, fetchCOVPermit, fetchCSAWPermit, fetchPLTCPPermit, fetchPTPRPermit, fetchSPLTPPermit, fetchTCEBPPermit, hasFetched]);
+   }, [application, fetchCOVPermit, fetchCSAWPermit, fetchPLTCPPermit, fetchPTPRPermit, fetchPLTPPermit, fetchTCEBPPermit, hasFetched]);
 
    useEffect(() => {
       if (isOpen) {
@@ -187,7 +187,7 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
                removeFile={removeFile}
             />;
          case 'Special/Private Land Timber Permit':
-            return <SPLTPEditForm
+            return <PLTPEditForm
                formData={formData}
                handleInputChange={handleInputChange}
                handleFileChange={handleFileChange}

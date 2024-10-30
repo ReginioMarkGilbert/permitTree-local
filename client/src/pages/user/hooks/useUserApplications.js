@@ -115,7 +115,7 @@ const GET_USER_APPLICATIONS = gql`
           ptaResolution { filename contentType }
         }
       }
-      ... on SPLTPPermit {
+      ... on PLTPPermit {
         name
         address
         contactNumber
@@ -346,9 +346,9 @@ const UPDATE_PLTCP_PERMIT = gql`
   }
 `;
 
-const GET_SPLTP_PERMIT = gql`
-  query GetSPLTPPermit($id: ID!) {
-    getSPLTPPermitById(id: $id) {
+const GET_PLTP_PERMIT = gql`
+  query GetPLTPPermit($id: ID!) {
+    getPLTPPermitById(id: $id) {
       id
       name
       address
@@ -374,9 +374,9 @@ const GET_SPLTP_PERMIT = gql`
   }
 `;
 
-const UPDATE_SPLTP_PERMIT = gql`
-  mutation UpdateSPLTPPermit($id: ID!, $input: SPLTPPermitInput!) {
-    updateSPLTPPermit(id: $id, input: $input) {
+const UPDATE_PLTP_PERMIT = gql`
+  mutation UpdatePLTPPermit($id: ID!, $input: PLTPPermitInput!) {
+    updatePLTPPermit(id: $id, input: $input) {
       id
       name
       address
@@ -507,8 +507,8 @@ export const useUserApplications = (status, currentStage) => {
    const [submitPermitMutation] = useMutation(SUBMIT_PERMIT);
    const [updatePTPRPermitMutation] = useMutation(UPDATE_PTPR_PERMIT);
    const [getPTPRPermit] = useLazyQuery(GET_PTPR_PERMIT);
-   const [updateSPLTPPermitMutation] = useMutation(UPDATE_SPLTP_PERMIT);
-   const [getSPLTPPermit] = useLazyQuery(GET_SPLTP_PERMIT);
+   const [updatePLTPPermitMutation] = useMutation(UPDATE_PLTP_PERMIT);
+   const [getPLTPPermit] = useLazyQuery(GET_PLTP_PERMIT);
    const [updateTCEBPPermitMutation] = useMutation(UPDATE_TCEBP_PERMIT);
    const [getTCEBPPermit] = useLazyQuery(GET_TCEBP_PERMIT);
    const [resubmitPermitMutation] = useMutation(RESUBMIT_PERMIT);
@@ -836,8 +836,8 @@ export const useUserApplications = (status, currentStage) => {
       }
    };
 
-   const updateSPLTPPermit = async (id, input) => {
-      console.log('Updating SPLTP permit:', id);
+   const updatePLTPPermit = async (id, input) => {
+      console.log('Updating PLTP permit:', id);
       console.log('Update input:', input);
       try {
          // Clean the input data
@@ -870,7 +870,7 @@ export const useUserApplications = (status, currentStage) => {
             });
          }
 
-         const { data } = await updateSPLTPPermitMutation({
+         const { data } = await updatePLTPPermitMutation({
             variables: {
                id,
                input: cleanedInput
@@ -878,23 +878,23 @@ export const useUserApplications = (status, currentStage) => {
             refetchQueries: [{ query: GET_USER_APPLICATIONS, variables: { status: input.status } }]
          });
          console.log('Update mutation result:', data);
-         if (data.updateSPLTPPermit) {
-            return data.updateSPLTPPermit;
+         if (data.updatePLTPPermit) {
+            return data.updatePLTPPermit;
          } else {
             throw new Error('Failed to update permit');
          }
       } catch (error) {
-         console.error('Error updating SPLTP permit:', error);
+         console.error('Error updating PLTP permit:', error);
          throw error;
       }
    };
 
-   const fetchSPLTPPermit = async (id) => {
+   const fetchPLTPPermit = async (id) => {
       try {
-         const { data } = await getSPLTPPermit({ variables: { id } });
-         return data.getSPLTPPermitById;
+         const { data } = await getPLTPPermit({ variables: { id } });
+         return data.getPLTPPermitById;
       } catch (error) {
-         console.error('Error fetching SPLTP permit:', error);
+         console.error('Error fetching PLTP permit:', error);
          throw error;
       }
    };
@@ -1013,8 +1013,8 @@ export const useUserApplications = (status, currentStage) => {
       updatePLTCPPermit,
       fetchPLTCPPermit,
 
-      updateSPLTPPermit,
-      fetchSPLTPPermit,
+      updatePLTPPermit,
+      fetchPLTPPermit,
 
       updateTCEBPPermit,
       fetchTCEBPPermit,
