@@ -75,12 +75,12 @@ const permitTypes = gql`
     isOwner: Boolean!
     isTenureHolder: Boolean!
     isBusinessOwner: Boolean!
-    isPLTPRHolder: Boolean!
+    isPTPRHolder: Boolean!
     isWPPHolder: Boolean!
     files: CSAWFiles
   }
 
-  type PLTPPermit implements Permit {
+  type PLTCPPermit implements Permit {
     id: ID!
     applicationNumber: String!
     applicationType: String!
@@ -101,7 +101,7 @@ const permitTypes = gql`
     posingDanger: Boolean!
     forPersonalUse: Boolean!
     purpose: String!
-    files: PLTPFiles
+    files: PLTCPFiles
   }
 
   type PTPRPermit implements Permit {
@@ -193,7 +193,7 @@ const permitTypes = gql`
     woodProcessingPlantPermit: [File]
   }
 
-  type PLTPFiles {
+  type PLTCPFiles {
     applicationLetter: [File]
     lguEndorsement: [File]
     homeownersResolution: [File]
@@ -240,8 +240,8 @@ const permitTypes = gql`
     getCOVPermitWithFiles(id: ID!): COVPermit
     getAllCSAWPermits: [CSAWPermit!]!
     getCSAWPermitById(id: ID!): CSAWPermit
-    getAllPLTPPermits: [PLTPPermit!]!
-    getPLTPPermitById(id: ID!): PLTPPermit
+    getAllPLTCPPermits: [PLTCPPermit!]!
+    getPLTCPPermitById(id: ID!): PLTCPPermit
     getAllPTPRPermits: [PTPRPermit!]!
     getPTPRPermitById(id: ID!): PTPRPermit
     getAllSPLTPPermits: [SPLTPPermit!]!
@@ -265,9 +265,9 @@ const permitTypes = gql`
     createCSAWPermit(input: CSAWPermitInput!): CSAWPermit!
     updateCSAWPermit(id: ID!, input: CSAWPermitInput!): CSAWPermit!
     saveCSAWPermitDraft(input: CSAWPermitInput!): CSAWPermit!
-    createPLTPPermit(input: PLTPPermitInput!): PLTPPermit!
-    updatePLTPPermit(id: ID!, input: PLTPPermitInput!): PLTPPermit!
-    savePLTPPermitDraft(input: PLTPPermitInput!): PLTPPermit!
+    createPLTCPPermit(input: PLTCPPermitInput!): PLTCPPermit!
+    updatePLTCPPermit(id: ID!, input: PLTCPPermitInput!): PLTCPPermit!
+    savePLTCPPermitDraft(input: PLTCPPermitInput!): PLTCPPermit!
     createPTPRPermit(input: PTPRPermitInput!): PTPRPermit!
     updatePTPRPermit(id: ID!, input: PTPRPermitInput!): PTPRPermit!
     savePTPRPermitDraft(input: PTPRPermitInput!): PTPRPermit!
@@ -319,12 +319,12 @@ const permitTypes = gql`
     isOwner: Boolean!
     isTenureHolder: Boolean!
     isBusinessOwner: Boolean!
-    isPLTPRHolder: Boolean!
+    isPTPRHolder: Boolean!
     isWPPHolder: Boolean!
     files: CSAWFilesInput
   }
 
-  input PLTPPermitInput {
+  input PLTCPPermitInput {
     name: String!
     address: String!
     contactNumber: String!
@@ -334,7 +334,7 @@ const permitTypes = gql`
     posingDanger: Boolean!
     forPersonalUse: Boolean!
     purpose: String!
-    files: PLTPFilesInput
+    files: PLTCPFilesInput
   }
 
   input PTPRPermitInput {
@@ -393,7 +393,7 @@ const permitTypes = gql`
     woodProcessingPlantPermit: [FileInput]
   }
 
-  input PLTPFilesInput {
+  input PLTCPFilesInput {
     applicationLetter: [FileInput]
     lguEndorsement: [FileInput]
     homeownersResolution: [FileInput]
@@ -442,9 +442,9 @@ const resolvePermitType = (obj) => {
       case 'CSAW':
       case 'Chainsaw Registration':
          return 'CSAWPermit';
-      case 'PLTP':
-      case 'Public Land Timber Permit':
-         return 'PLTPPermit';
+      case 'PLTCP':
+      case 'Public Land Tree Cutting Permit':
+         return 'PLTCPPermit';
       case 'PTPR':
       case 'Private Tree Plantation Registration':
          return 'PTPRPermit';

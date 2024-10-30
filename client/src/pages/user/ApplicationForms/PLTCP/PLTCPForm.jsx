@@ -1,5 +1,5 @@
-// PLTP - Public Land Timber Permit
-// ISSUANCE OF TREE CUTTING PERMIT FOR PLANTED TREES AND NATURALLY GROWING TREES FOUND WITHIN PUBLIC PLACES (PLAZA, PUBLIC PARKS, SCHOOL PREMISES OR POLITICAL SUBDIVISIONS) FOR PURPOSES OF PUBLIC SAFETY
+// PLTCP - Public Land Tree Cutting Permit - previously known as PLTP because of confusion XD
+// ISSUANCE OF TREE CUTTING PERMIT FOR PLANTED TREES AND NATURALLY GROWING TREES FOUND WITHIN *PUBLIC PLACES* (PLAZA, PUBLIC PARKS, SCHOOL PREMISES OR POLITICAL SUBDIVISIONS) FOR PURPOSES OF PUBLIC SAFETY
 // This Permit serves as proof of authorization for the removal/cutting of trees in public places (Plaza, Public Parks, School Premises or Political Subdivisions for purposes of public safety).
 
 import React, { useState, useEffect } from 'react';
@@ -17,9 +17,9 @@ import { gql, useMutation } from '@apollo/client';
 import { formatLabel, formatReviewValue } from '../CSAWForm/CSAWFormUtils';
 import '../../../../components/ui/styles/customScrollBar.css';
 
-const CREATE_PLTP_PERMIT = gql`
-  mutation CreatePLTPPermit($input: PLTPPermitInput!) {
-    createPLTPPermit(input: $input) {
+const CREATE_PLTCP_PERMIT = gql`
+  mutation CreatePLTCPPermit($input: PLTCPPermitInput!) {
+    createPLTCPPermit(input: $input) {
       id
       applicationNumber
       status
@@ -34,9 +34,9 @@ const CREATE_PLTP_PERMIT = gql`
   }
 `;
 
-const SAVE_PLTP_PERMIT_DRAFT = gql`
-  mutation SavePLTPPermitDraft($input: PLTPPermitInput!) {
-    savePLTPPermitDraft(input: $input) {
+const SAVE_PLTCP_PERMIT_DRAFT = gql`
+  mutation SavePLTCPPermitDraft($input: PLTCPPermitInput!) {
+    savePLTCPPermitDraft(input: $input) {
       id
       applicationNumber
       status
@@ -50,16 +50,16 @@ const SAVE_PLTP_PERMIT_DRAFT = gql`
   }
 `;
 
-const PLTPForm = () => {
+const PLTCPForm = () => {
    const navigate = useNavigate();
    const [currentStep, setCurrentStep] = useState(() => {
-      const savedStep = localStorage.getItem('pltpFormStep');
+      const savedStep = localStorage.getItem('pltcpFormStep');
       return savedStep ? parseInt(savedStep, 10) : 0;
    });
    const [formData, setFormData] = useState(() => {
-      const savedFormData = localStorage.getItem('pltpFormData');
+      const savedFormData = localStorage.getItem('pltcpFormData');
       return savedFormData ? JSON.parse(savedFormData) : {
-         applicationType: 'Public Land Timber Permit',
+         applicationType: 'Public Land Tree Cutting Permit',
          name: '',
          address: '',
          contactNumber: '',
@@ -81,8 +81,8 @@ const PLTPForm = () => {
    });
    const [modalOpen, setModalOpen] = useState(false);
    const [modalContent, setModalContent] = useState({ title: '', message: '' });
-   const [createPLTPPermit] = useMutation(CREATE_PLTP_PERMIT);
-   const [savePLTPPermitDraft] = useMutation(SAVE_PLTP_PERMIT_DRAFT);
+   const [createPLTCPPermit] = useMutation(CREATE_PLTCP_PERMIT);
+   const [savePLTCPPermitDraft] = useMutation(SAVE_PLTCP_PERMIT_DRAFT);
 
    const handleInputChange = (e) => {
       const { name, value } = e.target;
@@ -174,7 +174,7 @@ const PLTPForm = () => {
          }
 
          const token = localStorage.getItem('token');
-         const { data } = await savePLTPPermitDraft({
+         const { data } = await savePLTCPPermitDraft({
             variables: { input },
             context: {
                headers: {
@@ -184,15 +184,15 @@ const PLTPForm = () => {
             },
          });
 
-         if (data.savePLTPPermitDraft) {
+         if (data.savePLTCPPermitDraft) {
             setModalContent({
                title: 'Draft saved successfully!',
                message: 'Do you want to view your applications?'
             });
             setModalOpen(true);
 
-            localStorage.removeItem('pltpFormStep');
-            localStorage.removeItem('pltpFormData');
+            localStorage.removeItem('pltcpFormStep');
+            localStorage.removeItem('pltcpFormData');
          }
       } catch (error) {
          console.error('Error saving draft:', error);
@@ -233,7 +233,7 @@ const PLTPForm = () => {
          console.log('Submitting input:', input);
 
          const token = localStorage.getItem('token');
-         const { data } = await createPLTPPermit({
+         const { data } = await createPLTCPPermit({
             variables: { input },
             context: {
                headers: {
@@ -243,15 +243,15 @@ const PLTPForm = () => {
             },
          });
 
-         if (data.createPLTPPermit) {
+         if (data.createPLTCPPermit) {
             setModalContent({
                title: 'Application submitted successfully!',
                message: 'Do you want to view your application?'
             });
             setModalOpen(true);
 
-            localStorage.removeItem('pltpFormStep');
-            localStorage.removeItem('pltpFormData');
+            localStorage.removeItem('pltcpFormStep');
+            localStorage.removeItem('pltcpFormData');
          }
       } catch (error) {
          console.error('Error submitting application:', error);
@@ -277,24 +277,24 @@ const PLTPForm = () => {
    ];
 
    useEffect(() => {
-      localStorage.setItem('pltpFormStep', currentStep.toString());
+      localStorage.setItem('pltcpFormStep', currentStep.toString());
    }, [currentStep]);
 
    useEffect(() => {
-      localStorage.setItem('pltpFormData', JSON.stringify(formData));
+      localStorage.setItem('pltcpFormData', JSON.stringify(formData));
    }, [formData]);
 
    useEffect(() => {
       return () => {
-         localStorage.removeItem('pltpFormStep');
-         localStorage.removeItem('pltpFormData');
+         localStorage.removeItem('pltcpFormStep');
+         localStorage.removeItem('pltcpFormData');
       };
    }, []);
 
    return (
       <div className="min-h-screen bg-green-50 flex flex-col justify-between pt-[83px]">
          <div className="container mx-auto px-4 flex-grow">
-            <h1 className="text-3xl font-[700] text-green-800 mb-6 text-center">Public Land Timber Permit Application</h1>
+            <h1 className="text-3xl font-[700] text-green-800 mb-6 text-center">Public Land Tree Cutting Permit Application</h1>
             <Card className="max-w-2xl mx-auto shadow-lg">
                <CardHeader>
                   <CardTitle>{steps[currentStep].title}</CardTitle>
@@ -582,4 +582,4 @@ const PLTPForm = () => {
    );
 };
 
-export default PLTPForm;
+export default PLTCPForm;

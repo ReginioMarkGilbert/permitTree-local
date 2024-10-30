@@ -7,7 +7,7 @@ const adminResolvers = require('./resolvers/adminResolvers');
 const permitResolvers = require('./resolvers/permitResolvers/permitResolvers');
 const covResolvers = require('./resolvers/permitResolvers/covResolvers');
 const csawResolvers = require('./resolvers/permitResolvers/csawResolvers');
-const pltpResolvers = require('./resolvers/permitResolvers/pltpResolvers');
+const pltcpResolvers = require('./resolvers/permitResolvers/pltcpResolvers');
 const ptprResolvers = require('./resolvers/permitResolvers/ptprResolvers');
 const spltpResolvers = require('./resolvers/permitResolvers/spltpResolvers');
 const tcebpResolvers = require('./resolvers/permitResolvers/tcebpResolvers');
@@ -41,7 +41,7 @@ const server = new ApolloServer({
       permitResolvers,
       covResolvers,
       csawResolvers,
-      pltpResolvers,
+      pltcpResolvers,
       ptprResolvers,
       spltpResolvers,
       tcebpResolvers

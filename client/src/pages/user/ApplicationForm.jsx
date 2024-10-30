@@ -6,7 +6,7 @@ import CSAWForm from './ApplicationForms/CSAWForm/CSAWForm';
 import COVForm from './ApplicationForms/COVForm/COVForm';
 import PTPRForm from './ApplicationForms/PTPRForm/PTPRForm';
 import TC_PrivateForm from './ApplicationForms/SPLTP/SPLTPForm';
-import TC_PublicForm from './ApplicationForms/PLTP/PLTPForm';
+import TC_PublicForm from './ApplicationForms/PLTCP/PLTCPForm';
 import TC_NGAForm from './ApplicationForms/TCEBP/TCEBPForm';
 // import './styles/ApplicationForm.css';
 // import uploadIcon from '../assets/upload_icn.svg';

@@ -51,7 +51,7 @@ const GET_USER_APPLICATIONS = gql`
         isOwner
         isTenureHolder
         isBusinessOwner
-        isPLTPRHolder
+        isPTPRHolder
         isWPPHolder
         files {
           officialReceipt { filename contentType }
@@ -98,7 +98,7 @@ const GET_USER_APPLICATIONS = gql`
           specialPowerOfAttorney { filename contentType }
         }
       }
-      ... on PLTPPermit {
+      ... on PLTCPPermit {
         name
         address
         contactNumber
@@ -161,7 +161,7 @@ const GET_CSAW_PERMIT = gql`
       isOwner
       isTenureHolder
       isBusinessOwner
-      isPLTPRHolder
+      isPTPRHolder
       isWPPHolder
       files {
         officialReceipt { filename contentType }
@@ -196,7 +196,7 @@ const UPDATE_CSAW_PERMIT = gql`
       isOwner
       isTenureHolder
       isBusinessOwner
-      isPLTPRHolder
+      isPTPRHolder
       isWPPHolder
     }
   }
@@ -296,9 +296,9 @@ const UPDATE_PTPR_PERMIT = gql`
   }
 `;
 
-const GET_PLTP_PERMIT = gql`
-  query GetPLTPPermit($id: ID!) {
-    getPLTPPermitById(id: $id) {
+const GET_PLTCP_PERMIT = gql`
+  query GetPLTCPPermit($id: ID!) {
+    getPLTCPPermitById(id: $id) {
       id
       applicationNumber
       applicationType
@@ -323,9 +323,9 @@ const GET_PLTP_PERMIT = gql`
   }
 `;
 
-const UPDATE_PLTP_PERMIT = gql`
-  mutation UpdatePLTPPermit($id: ID!, $input: PLTPPermitInput!) {
-    updatePLTPPermit(id: $id, input: $input) {
+const UPDATE_PLTCP_PERMIT = gql`
+  mutation UpdatePLTCPPermit($id: ID!, $input: PLTCPPermitInput!) {
+    updatePLTCPPermit(id: $id, input: $input) {
       id
       name
       address
@@ -501,8 +501,8 @@ export const useUserApplications = (status, currentStage) => {
    const [getCOVPermit] = useLazyQuery(GET_COV_PERMIT);
    const [updateCSAWPermitMutation] = useMutation(UPDATE_CSAW_PERMIT);
    const [getCSAWPermit] = useLazyQuery(GET_CSAW_PERMIT);
-   const [updatePLTPPermitMutation] = useMutation(UPDATE_PLTP_PERMIT);
-   const [getPLTPPermit] = useLazyQuery(GET_PLTP_PERMIT);
+   const [updatePLTCPPermitMutation] = useMutation(UPDATE_PLTCP_PERMIT);
+   const [getPLTCPPermit] = useLazyQuery(GET_PLTCP_PERMIT);
    const [unsubmitPermitMutation] = useMutation(UNSUBMIT_PERMIT);
    const [submitPermitMutation] = useMutation(SUBMIT_PERMIT);
    const [updatePTPRPermitMutation] = useMutation(UPDATE_PTPR_PERMIT);
@@ -614,7 +614,7 @@ export const useUserApplications = (status, currentStage) => {
             isOwner: Boolean(input.isOwner),
             isTenureHolder: Boolean(input.isTenureHolder),
             isBusinessOwner: Boolean(input.isBusinessOwner),
-            isPLTPRHolder: Boolean(input.isPLTPRHolder),
+            isPTPRHolder: Boolean(input.isPTPRHolder),
             isWPPHolder: Boolean(input.isWPPHolder),
          };
 
@@ -664,19 +664,19 @@ export const useUserApplications = (status, currentStage) => {
       }
    };
 
-   const fetchPLTPPermit = async (id) => {
+   const fetchPLTCPPermit = async (id) => {
       try {
-         const { data } = await getPLTPPermit({ variables: { id } });
-         return data.getPLTPPermitById;
+         const { data } = await getPLTCPPermit({ variables: { id } });
+         return data.getPLTCPPermitById;
       } catch (error) {
-         console.error('Error fetching PLTP permit:', error);
+         console.error('Error fetching PLTCP permit:', error);
          // console.error('id:', id)
          throw error;
       }
    };
 
-   const updatePLTPPermit = async (id, input) => {
-      console.log('Updating PLTP permit:', id);
+   const updatePLTCPPermit = async (id, input) => {
+      console.log('Updating PLTCP permit:', id);
       console.log('Update input:', input);
 
       try {
@@ -693,7 +693,7 @@ export const useUserApplications = (status, currentStage) => {
             });
          }
 
-         const { data } = await updatePLTPPermitMutation({
+         const { data } = await updatePLTCPPermitMutation({
             variables: {
                id,
                input: {
@@ -712,13 +712,13 @@ export const useUserApplications = (status, currentStage) => {
             refetchQueries: [{ query: GET_USER_APPLICATIONS, variables: { status: input.status } }]
          });
          console.log('Update mutation result:', data);
-         if (data.updatePLTPPermit) {
-            return data.updatePLTPPermit;
+         if (data.updatePLTCPPermit) {
+            return data.updatePLTCPPermit;
          } else {
             throw new Error('Failed to update permit');
          }
       } catch (error) {
-         console.error('Error updating PLTP permit:', error);
+         console.error('Error updating PLTCP permit:', error);
          console.error('Error details:', error.graphQLErrors);
          throw error;
       }
@@ -1010,8 +1010,8 @@ export const useUserApplications = (status, currentStage) => {
       updatePTPRPermit,
       fetchPTPRPermit,
 
-      updatePLTPPermit,
-      fetchPLTPPermit,
+      updatePLTCPPermit,
+      fetchPLTCPPermit,
 
       updateSPLTPPermit,
       fetchSPLTPPermit,

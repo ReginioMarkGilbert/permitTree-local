@@ -89,7 +89,7 @@ const ChainsawRegistrationForm = () => {
          isOwner: false,
          isTenureHolder: false,
          isBusinessOwner: false,
-         isPLTPRHolder: false,
+         isPTPRHolder: false,
          isWPPHolder: false,
       };
    });
@@ -203,7 +203,7 @@ const ChainsawRegistrationForm = () => {
             isOwner: Boolean(formData.isOwner),
             isTenureHolder: Boolean(formData.isTenureHolder),
             isBusinessOwner: Boolean(formData.isBusinessOwner),
-            isPLTPRHolder: Boolean(formData.isPLTPRHolder),
+            isPTPRHolder: Boolean(formData.isPTPRHolder),
             isWPPHolder: Boolean(formData.isWPPHolder),
             files: {}
          };
@@ -271,7 +271,7 @@ const ChainsawRegistrationForm = () => {
             isOwner: Boolean(formData.isOwner),
             isTenureHolder: Boolean(formData.isTenureHolder),
             isBusinessOwner: Boolean(formData.isBusinessOwner),
-            isPLTPRHolder: Boolean(formData.isPLTPRHolder),
+            isPTPRHolder: Boolean(formData.isPTPRHolder),
             isWPPHolder: Boolean(formData.isWPPHolder),
             files: {}
          };
@@ -453,9 +453,9 @@ const ChainsawRegistrationForm = () => {
                                  checked={formData.isBusinessOwner}
                                  onChange={handleCheckboxChange}
                               />
-                              <CheckboxItem id="isPLTPRHolder"
-                                 label="Are you a Private Land Tree Plantation Registration (PLTPR) holder?"
-                                 checked={formData.isPLTPRHolder}
+                              <CheckboxItem id="isPTPRHolder"
+                                 label="Are you a Private Land Tree Plantation Registration (PTPR) holder?"
+                                 checked={formData.isPTPRHolder}
                                  onChange={handleCheckboxChange}
                               />
                               <CheckboxItem id="isWPPHolder"
@@ -514,10 +514,10 @@ const ChainsawRegistrationForm = () => {
                                     onRemoveFile={(file) => removeFile('businessPermit', file)}
                                  />
                               )}
-                              {formData.isPLTPRHolder && (
+                              {formData.isPTPRHolder && (
                                  <UploadCard
                                     label="Certificate of Registration"
-                                    documentLabel="Upload Certificate of Registration for Private Land Tree Plantation Registration (PLTPR)"
+                                    documentLabel="Upload Certificate of Registration for Private Land Tree Plantation Registration (PTPR)"
                                     files={formData.files.certificateOfRegistration}
                                     onFileChange={(e) => handleFileChange(e, 'certificateOfRegistration')}
                                     onRemoveFile={(file) => removeFile('certificateOfRegistration', file)}

@@ -50,12 +50,12 @@ const UserApplicationsStatusPage = () => {
       deletePermit,
       updateCSAWPermit,
       updateCOVPermit,
-      updatePLTPPermit,
+      updatePLTCPPermit,
       updatePTPRPermit,
       updateSPLTPPermit,
       fetchCOVPermit,
       fetchCSAWPermit,
-      fetchPLTPPermit,
+      fetchPLTCPPermit,
       fetchPTPRPermit,
       fetchSPLTPPermit,
       unsubmitPermit,
@@ -152,8 +152,8 @@ const UserApplicationsStatusPage = () => {
             case 'Private Tree Plantation Registration':
                updateFunction = updatePTPRPermit;
                break;
-            case 'Public Land Timber Permit':
-               updateFunction = updatePLTPPermit;
+            case 'Public Land Tree Cutting Permit':
+               updateFunction = updatePLTCPPermit;
                break;
             case 'Special/Private Land Timber Permit':
                updateFunction = updateSPLTPPermit;
@@ -277,7 +277,7 @@ const UserApplicationsStatusPage = () => {
                         getStatusColor={getStatusColor}
                         fetchCOVPermit={fetchCOVPermit}
                         fetchCSAWPermit={fetchCSAWPermit}
-                        fetchPLTPPermit={fetchPLTPPermit}
+                        fetchPLTCPPermit={fetchPLTCPPermit}
                         fetchPTPRPermit={fetchPTPRPermit}
                         fetchSPLTPPermit={fetchSPLTPPermit}
                         fetchTCEBPPermit={fetchTCEBPPermit}

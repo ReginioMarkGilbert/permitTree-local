@@ -7,9 +7,9 @@ const FileSchema = new mongoose.Schema({
    data: Buffer
 });
 
-const PLTPPermitSchema = new mongoose.Schema({
+const PLTCPPermitSchema = new mongoose.Schema({
    applicationNumber: { type: String, required: true, unique: true },
-   applicationType: { type: String, required: true, enum: ['Public Land Timber Permit'] },
+   applicationType: { type: String, required: true, enum: ['Public Land Tree Cutting Permit'] },
    name: { type: String, required: true },
    address: { type: String, required: true },
    contactNumber: { type: String, required: true },
@@ -30,6 +30,6 @@ const PLTPPermitSchema = new mongoose.Schema({
    applicantId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 });
 
-const PLTPPermit = Permit.discriminator('PLTPPermit', PLTPPermitSchema);
+const PLTCPPermit = Permit.discriminator('PLTCPPermit', PLTCPPermitSchema);
 
-module.exports = mongoose.model('PLTPPermit');
+module.exports = mongoose.model('PLTCPPermit');

@@ -7,7 +7,7 @@ import '@/components/ui/styles/customScrollbar.css';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 
-const PLTPEditForm = ({ formData, handleInputChange, handleFileChange, removeFile, handleCheckboxChange }) => {
+const PLTCPEditForm = ({ formData, handleInputChange, handleFileChange, removeFile, handleCheckboxChange }) => {
    const renderFileInputs = () => {
       const fileTypes = [
          { type: 'applicationLetter', label: 'Application Letter', condition: true },
@@ -227,4 +227,4 @@ const PLTPEditForm = ({ formData, handleInputChange, handleFileChange, removeFil
    );
 };
 
-export default PLTPEditForm;
+export default PLTCPEditForm;

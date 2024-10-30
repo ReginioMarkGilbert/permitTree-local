@@ -34,7 +34,7 @@ describe('UserApplicationRow', () => {
       getStatusColor: vi.fn(() => 'bg-blue-100 text-blue-800'),
       fetchCOVPermit: vi.fn(),
       fetchCSAWPermit: vi.fn(),
-      fetchPLTPPermit: vi.fn(),
+      fetchPLTCPPermit: vi.fn(),
    };
 
    const renderComponent = (app = mockApp) => {

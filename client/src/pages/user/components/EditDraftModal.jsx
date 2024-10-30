@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Button } from "@/components/ui/button";
 import COVEditForm from './permitForms/COVEditForm';
 import CSAWEditForm from './permitForms/CSAWEditForm';
-import PLTPEditForm from './permitForms/PLTPEditForm';
+import PLTCPEditForm from './permitForms/PLTCPEditForm';
 import PTPREditForm from './permitForms/PTPREditForm';
 import SPLTPEditForm from './permitForms/SPLTPEditForm';
 import TCEBPEditForm from './permitForms/TCEBPEditForm';
@@ -13,15 +13,15 @@ import { useUserApplications } from '../hooks/useUserApplications';
 // Utility function to safely format date
 const formatDate = (dateString) => {
    return new Date(dateString).toLocaleDateString('en-US', {
-       year: 'numeric',
-       month: '2-digit',
-       day: '2-digit'
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
    });
 };
 
 const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
    const [formData, setFormData] = useState(application);
-   const { fetchCOVPermit, fetchCSAWPermit, fetchPLTPPermit, fetchPTPRPermit, fetchSPLTPPermit, fetchTCEBPPermit } = useUserApplications();
+   const { fetchCOVPermit, fetchCSAWPermit, fetchPLTCPPermit, fetchPTPRPermit, fetchSPLTPPermit, fetchTCEBPPermit } = useUserApplications();
    const [hasFetched, setHasFetched] = useState(false);
 
    const fetchPermitData = useCallback(async () => {
@@ -35,8 +35,8 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
                case 'Chainsaw Registration':
                   permitData = await fetchCSAWPermit(application.id);
                   break;
-               case 'Public Land Timber Permit':
-                  permitData = await fetchPLTPPermit(application.id);
+               case 'Public Land Tree Cutting Permit':
+                  permitData = await fetchPLTCPPermit(application.id);
                   break;
                case 'Private Tree Plantation Registration':
                   permitData = await fetchPTPRPermit(application.id);
@@ -57,7 +57,7 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
             console.error('Error fetching permit data:', error);
          }
       }
-   }, [application, fetchCOVPermit, fetchCSAWPermit, fetchPLTPPermit, fetchPTPRPermit, fetchSPLTPPermit, fetchTCEBPPermit, hasFetched]);
+   }, [application, fetchCOVPermit, fetchCSAWPermit, fetchPLTCPPermit, fetchPTPRPermit, fetchSPLTPPermit, fetchTCEBPPermit, hasFetched]);
 
    useEffect(() => {
       if (isOpen) {
@@ -171,8 +171,8 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
                removeFile={removeFile}
                handleCheckboxChange={handleCheckboxChange}
             />;
-         case 'Public Land Timber Permit':
-            return <PLTPEditForm
+         case 'Public Land Tree Cutting Permit':
+            return <PLTCPEditForm
                formData={formData}
                handleInputChange={handleInputChange}
                handleFileChange={handleFileChange}

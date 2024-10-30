@@ -21,7 +21,7 @@ const UserApplicationRow = ({
    getStatusColor,
    fetchCOVPermit,
    fetchCSAWPermit,
-   fetchPLTPPermit,
+   fetchPLTCPPermit,
    fetchPTPRPermit,
    fetchSPLTPPermit,
    fetchTCEBPPermit,
@@ -223,7 +223,7 @@ const UserApplicationRow = ({
             application={app}
             fetchCOVPermit={fetchCOVPermit}
             fetchCSAWPermit={fetchCSAWPermit}
-            fetchPLTPPermit={fetchPLTPPermit}
+            fetchPLTCPPermit={fetchPLTCPPermit}
             fetchPTPRPermit={fetchPTPRPermit}
             fetchSPLTPPermit={fetchSPLTPPermit}
             fetchTCEBPPermit={fetchTCEBPPermit}

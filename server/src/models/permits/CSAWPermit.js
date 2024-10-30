@@ -26,7 +26,7 @@ const CSAWPermitSchema = new mongoose.Schema({
    isOwner: { type: Boolean, required: true },
    isTenureHolder: { type: Boolean, required: true },
    isBusinessOwner: { type: Boolean, required: true },
-   isPLTPRHolder: { type: Boolean, required: true },
+   isPTPRHolder: { type: Boolean, required: true },
    isWPPHolder: { type: Boolean, required: true },
    files: {
       officialReceipt: [FileSchema],

@@ -96,7 +96,7 @@ const EditApplicationModal = ({ isOpen, onClose, application, onUpdate }) => {
             isOwner: formData.isOwner,
             isTenureHolder: formData.isTenureHolder,
             isBusinessOwner: formData.isBusinessOwner,
-            isPLTPRHolder: formData.isPLTPRHolder,
+            isPTPRHolder: formData.isPTPRHolder,
             isWPPHolder: formData.isWPPHolder,
             files: files
          };
@@ -128,7 +128,7 @@ const EditApplicationModal = ({ isOpen, onClose, application, onUpdate }) => {
       if (formData.isOwner) documents.push('specialPowerOfAttorney');
       if (formData.isTenureHolder) documents.push('forestTenureAgreement');
       if (formData.isBusinessOwner) documents.push('businessPermit');
-      if (formData.isPLTPRHolder) documents.push('certificateOfRegistration');
+      if (formData.isPTPRHolder) documents.push('certificateOfRegistration');
       if (formData.isWPPHolder) documents.push('woodProcessingPlantPermit');
       return documents;
    };

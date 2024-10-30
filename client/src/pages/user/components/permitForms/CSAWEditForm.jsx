@@ -43,7 +43,7 @@ const CSAWEditForm = ({ formData, handleInputChange, handleFileChange, removeFil
          { type: 'specialPowerOfAttorney', label: 'Special Power of Attorney', condition: !formData.isOwner },
          { type: 'forestTenureAgreement', label: 'Forest Tenure Agreement', condition: formData.isTenureHolder },
          { type: 'businessPermit', label: 'Business Permit', condition: formData.isBusinessOwner },
-         { type: 'certificateOfRegistration', label: 'Certificate of Registration', condition: formData.isPLTPRHolder },
+         { type: 'certificateOfRegistration', label: 'Certificate of Registration', condition: formData.isPTPRHolder },
          { type: 'woodProcessingPlantPermit', label: 'Wood Processing Plant Permit', condition: formData.isWPPHolder }
       ];
 
@@ -299,11 +299,11 @@ const CSAWEditForm = ({ formData, handleInputChange, handleFileChange, removeFil
             </div>
             <div className="flex items-center space-x-2">
                <Checkbox
-                  id="isPLTPRHolder"
-                  checked={formData.isPLTPRHolder}
-                  onCheckedChange={(checked) => handleCheckboxChange('isPLTPRHolder', checked)}
+                  id="isPTPRHolder"
+                  checked={formData.isPTPRHolder}
+                  onCheckedChange={(checked) => handleCheckboxChange('isPTPRHolder', checked)}
                />
-               <Label htmlFor="isPLTPRHolder">Is PLTPR Holder</Label>
+               <Label htmlFor="isPTPRHolder">Is PTPR Holder</Label>
             </div>
             <div className="flex items-center space-x-2">
                <Checkbox

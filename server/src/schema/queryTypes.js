@@ -16,8 +16,8 @@ const queryTypes = gql`
     getAllCOVPermits: [COVPermit!]!
     getCOVPermitById(id: ID!): COVPermit
 
-    getAllPLTPPermits: [PLTPPermit!]!
-    getPLTPPermitById(id: ID!): PLTPPermit
+    getAllPLTCPPermits: [PLTCPPermit!]!
+    getPLTCPPermitById(id: ID!): PLTCPPermit
 
     getAllPTPRPermits: [PTPRPermit!]!
     getPTPRPermitById(id: ID!): PTPRPermit

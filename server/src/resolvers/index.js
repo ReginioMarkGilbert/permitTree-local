@@ -6,7 +6,7 @@ const adminResolvers = require('./adminResolvers');
 const permitResolvers = require('./permitResolvers/permitResolvers');
 const csawResolvers = require('./permitResolvers/csawResolvers');
 const covResolvers = require('./permitResolvers/covResolvers');
-const pltpResolvers = require('./permitResolvers/pltpResolvers');
+const pltcpResolvers = require('./permitResolvers/pltcpResolvers');
 const ptprResolvers = require('./permitResolvers/ptprResolvers');
 const spltpResolvers = require('./permitResolvers/spltpResolvers');
 const tcebpResolvers = require('./permitResolvers/tcebpResolvers');
@@ -25,7 +25,7 @@ const resolvers = mergeResolvers([
    permitResolvers,
    covResolvers,
    csawResolvers,
-   pltpResolvers,
+   pltcpResolvers,
    ptprResolvers,
    spltpResolvers,
    tcebpResolvers

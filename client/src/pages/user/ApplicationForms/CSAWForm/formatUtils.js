@@ -5,7 +5,7 @@ const formatLabel = (key) => {
         .replace(/([A-Z])/g, ' $1') // Insert space before capital letters
         .replace(/^./, str => str.toUpperCase()) // Capitalize the first letter
         .replace(/([a-z])([A-Z])/g, '$1 $2') // Insert space between lower and upper case letters
-        .replace(/\b(P L T P R|W P P)\b/g, match => match.replace(/ /g, '')); // Remove spaces in PLTPR and WPP
+        .replace(/\b(P L T P R|W P P)\b/g, match => match.replace(/ /g, '')); // Remove spaces in PTPR and WPP
 };
 
 const formatReviewValue = (key, value) => {

@@ -1,24 +1,24 @@
-const PLTPPermit = require('../../models/permits/PLTPPermit');
-const { PLTP_ApplicationNumber } = require('../../utils/customIdGenerator');
+const PLTCPPermit = require('../../models/permits/PLTCPPermit');
+const { PLTCP_ApplicationNumber } = require('../../utils/customIdGenerator');
 const { Binary } = require('mongodb');
 
-const pltpResolvers = {
+const pltcpResolvers = {
    Query: {
-      getAllPLTPPermits: async () => {
-         return await PLTPPermit.find();
+      getAllPLTCPPermits: async () => {
+         return await PLTCPPermit.find();
       },
-      getPLTPPermitById: async (_, { id }) => {
-         return await PLTPPermit.findById(id);
+      getPLTCPPermitById: async (_, { id }) => {
+         return await PLTCPPermit.findById(id);
       },
    },
    Mutation: {
-      createPLTPPermit: async (_, { input }, { user }) => {
+      createPLTCPPermit: async (_, { input }, { user }) => {
          if (!user) {
             throw new Error('You must be logged in to create a permit');
          }
 
          try {
-            const applicationNumber = await PLTP_ApplicationNumber();
+            const applicationNumber = await PLTCP_ApplicationNumber();
 
             // Process file inputs
             const processedFiles = {};
@@ -38,30 +38,30 @@ const pltpResolvers = {
                ...input,
                applicationNumber,
                applicantId: user.id,
-               applicationType: 'Public Land Timber Permit',
+               applicationType: 'Public Land Tree Cutting Permit',
                status: 'Submitted',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
             };
 
-            const newPermit = new PLTPPermit(permitData);
+            const newPermit = new PLTCPPermit(permitData);
             const savedPermit = await newPermit.save();
             return {
                ...savedPermit.toObject(),
                id: savedPermit._id.toString()
             };
          } catch (error) {
-            console.error('Error creating PLTP permit:', error);
-            throw new Error(`Failed to create PLTP permit: ${error.message}`);
+            console.error('Error creating PLTCP permit:', error);
+            throw new Error(`Failed to create PLTCP permit: ${error.message}`);
          }
       },
-      updatePLTPPermit: async (_, { id, input }, { user }) => {
+      updatePLTCPPermit: async (_, { id, input }, { user }) => {
          try {
             if (!user) {
                throw new Error('You must be logged in to update a permit');
             }
 
-            const permit = await PLTPPermit.findById(id);
+            const permit = await PLTCPPermit.findById(id);
             if (!permit) {
                throw new Error('Permit not found');
             }
@@ -89,17 +89,17 @@ const pltpResolvers = {
             await permit.save();
             return permit;
          } catch (error) {
-            console.error('Error in updatePLTPPermit:', error);
-            throw new Error(`Failed to update PLTP permit: ${error.message}`);
+            console.error('Error in updatePLTCPPermit:', error);
+            throw new Error(`Failed to update PLTCP permit: ${error.message}`);
          }
       },
-      savePLTPPermitDraft: async (_, { input }, { user }) => {
+      savePLTCPPermitDraft: async (_, { input }, { user }) => {
          if (!user) {
             throw new Error('You must be logged in to save a draft');
          }
 
          try {
-            const applicationNumber = await PLTP_ApplicationNumber();
+            const applicationNumber = await PLTCP_ApplicationNumber();
 
             // Process file inputs
             const processedFiles = {};
@@ -119,21 +119,21 @@ const pltpResolvers = {
                ...input,
                applicationNumber,
                applicantId: user.id,
-               applicationType: 'Public Land Timber Permit',
+               applicationType: 'Public Land Tree Cutting Permit',
                status: 'Draft',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
             };
 
-            const newPermit = new PLTPPermit(permitData);
+            const newPermit = new PLTCPPermit(permitData);
             const savedPermit = await newPermit.save();
             return savedPermit;
          } catch (error) {
-            console.error('Error saving PLTP permit draft:', error);
-            throw new Error(`Failed to save PLTP permit draft: ${error.message}`);
+            console.error('Error saving PLTCP permit draft:', error);
+            throw new Error(`Failed to save PLTCP permit draft: ${error.message}`);
          }
       },
    },
 };
 
-module.exports = pltpResolvers;
+module.exports = pltcpResolvers;
