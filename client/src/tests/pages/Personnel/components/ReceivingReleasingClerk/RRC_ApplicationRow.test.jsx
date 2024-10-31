@@ -5,11 +5,23 @@ import RRC_ApplicationRow from '../../../../../pages/Personnel/components/Person
 
 // Mock the child components
 vi.mock('../../../../../pages/Personnel/components/PersonnelDashboardComponents/TechnicalStaff/TS_ViewModal', () => ({
-  default: ({ isOpen, onClose }) => isOpen ? <div>Mock View Modal<button onClick={onClose}>Close</button></div> : null
+  default: ({ isOpen, onClose }) => isOpen ? (
+    <tr>
+      <td colSpan="6">
+        <div>Mock View Modal<button onClick={onClose}>Close</button></div>
+      </td>
+    </tr>
+  ) : null
 }));
 
 vi.mock('../../../../../pages/Personnel/components/PersonnelDashboardComponents/ReceivingReleasingClerk/RRC_RecordModal', () => ({
-  default: ({ isOpen, onClose }) => isOpen ? <div>Mock Record Modal<button onClick={onClose}>Close</button></div> : null
+  default: ({ isOpen, onClose }) => isOpen ? (
+    <tr>
+      <td colSpan="6">
+        <div>Mock Record Modal<button onClick={onClose}>Close</button></div>
+      </td>
+    </tr>
+  ) : null
 }));
 
 describe('RRC_ApplicationRow', () => {
