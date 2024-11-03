@@ -12,7 +12,10 @@ const TechnicalStaffDashboard = () => {
    const getQueryParamsForTab = (tab) => {
       switch (tab) {
          case 'Pending Reviews':
-            return { status: 'Submitted' };
+            return {
+               status: 'Submitted',
+               currentStage: 'TechnicalStaffReview'
+            };
          case 'Returned Applications':
             return { currentStage: 'ReturnedByTechnicalStaff', status: 'Returned' };
          case 'Accepted Applications':
@@ -22,7 +25,10 @@ const TechnicalStaffDashboard = () => {
          case 'Approved Applications':
             return { currentStage: 'AuthenticityApprovedByTechnicalStaff' };
          default:
-            return { status: 'Submitted' };
+            return {
+               status: 'Submitted',
+               currentStage: 'TechnicalStaffReview'
+            };
       }
    };
 

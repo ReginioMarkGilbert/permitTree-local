@@ -222,8 +222,7 @@ const permitResolvers = {
          }
 
          permit.status = 'Submitted';
-         // Reset the currentStage when resubmitting
-         permit.currentStage = 'Submitted';
+         permit.currentStage = 'TechnicalStaffReview';
          await permit.save();
 
          return permit;

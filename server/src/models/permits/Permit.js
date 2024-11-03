@@ -21,7 +21,7 @@ const PermitSchema = new mongoose.Schema({
       type: String,
       required: true,
       enum: [
-         'Submitted', // Submitted by the applicant
+         'Submitted',
          'TechnicalStaffReview',
          'ReturnedByTechnicalStaff',
          'AuthenticityApprovedByTechnicalStaff',
@@ -35,7 +35,6 @@ const PermitSchema = new mongoose.Schema({
          'PendingRelease',
          'Released'
       ]
-      // default: 'Submitted'
    },
    acceptedByTechnicalStaff: {
       type: Boolean,
