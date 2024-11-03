@@ -299,7 +299,10 @@ const permitTypes = gql`
       currentStage: String!,
       status: String!,
       notes: String,
-      acceptedByTechnicalStaff: Boolean
+      acceptedByTechnicalStaff: Boolean,
+      reviewedByChief: Boolean,
+      recordedByReceivingClerk: Boolean,
+      acceptedByReceivingClerk: Boolean
     ): Permit!
     acceptApplication(id: ID!): Permit!
     recordApplication(id: ID!, currentStage: String!, status: String!): Permit!

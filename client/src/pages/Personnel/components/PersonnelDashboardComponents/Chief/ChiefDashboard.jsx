@@ -13,7 +13,7 @@ const ChiefDashboard = () => {
    const getQueryParamsForTab = (tab) => {
       switch (tab) {
          case 'Applications for Review':
-            return { currentStage: 'ChiefRPSReview' };
+            return { currentStage: 'ChiefRPSReview', reviewedByChief: false };
          case 'Completed Reviews':
             return { reviewedByChief: true };
          case 'Pending Signature':

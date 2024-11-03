@@ -228,7 +228,16 @@ const permitResolvers = {
 
          return permit;
       },
-      updatePermitStage: async (_, { id, currentStage, status, notes, acceptedByTechnicalStaff }, context) => {
+      updatePermitStage: async (_, {
+         id,
+         currentStage,
+         status,
+         notes,
+         acceptedByTechnicalStaff,
+         reviewedByChief,
+         recordedByReceivingClerk,
+         acceptedByReceivingClerk
+      }, context) => {
          const permit = await Permit.findById(id);
          if (!permit) {
             throw new Error('Permit not found');
@@ -237,7 +246,6 @@ const permitResolvers = {
          permit.currentStage = currentStage;
          permit.status = status;
 
-         // Add this line to update the acceptedByTechnicalStaff field
          if (acceptedByTechnicalStaff !== undefined) {
             permit.acceptedByTechnicalStaff = acceptedByTechnicalStaff;
          }
@@ -269,55 +277,6 @@ const permitResolvers = {
             ...permit.toObject(),
             id: permit._id.toString(),
             dateOfSubmission: permit.dateOfSubmission.toISOString()
-         };
-      },
-      acceptApplication: async (_, { id, currentStage, status, notes, acceptedBy }, { user }) => {
-         // if (!user) {
-         //    throw new Error('You must be logged in to accept an application');
-         // }
-
-         const permit = await Permit.findById(id);
-         if (!permit) {
-            throw new Error('Permit not found');
-         }
-
-         permit.currentStage = currentStage;
-         permit.status = status;
-
-         // Dynamically set the accepted flag based on who is accepting
-         switch (acceptedBy) {
-            case 'technicalStaff':
-               permit.acceptedByTechnicalStaff = true;
-               break;
-            case 'receivingClerk':
-               permit.acceptedByReceivingClerk = true;
-               break;
-            case 'chief':
-               permit.reviewedByChief = true;
-               break;
-            default:
-               throw new Error('Invalid acceptedBy value');
-         }
-
-         permit.history.push({
-            stage: currentStage,
-            status: status,
-            timestamp: new Date(),
-            notes: notes || `Application accepted by ${acceptedBy}`,
-            actionBy: user.id
-         });
-
-         try {
-            await permit.save();
-         } catch (error) {
-            console.error('Error saving permit:', error);
-            throw new Error(`Failed to accept application: ${error.message}`);
-         }
-
-         return {
-            ...permit.toObject(),
-            id: permit._id.toString()
-            // dateOfSubmission: permit.dateOfSubmission.toISOString()
          };
       },
 
