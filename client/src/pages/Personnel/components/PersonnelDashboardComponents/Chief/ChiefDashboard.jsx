@@ -16,6 +16,10 @@ const ChiefDashboard = () => {
             return { currentStage: 'ChiefRPSReview', reviewedByChief: false };
          case 'Completed Reviews':
             return { reviewedByChief: true };
+         case 'Awaiting OOP':
+            return { awaitingOOP: true };
+         case 'Created OOP':
+            return { awaitingOOP: false, OOPCreated: true };
          case 'Pending Signature':
             return { status: 'Approved', currentStage: 'PendingSignature' };
          case 'Signed Certificates':

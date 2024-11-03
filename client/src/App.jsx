@@ -41,7 +41,6 @@ import ChiefRPSNotificationPage from './pages/Personnel/ChiefRPSNotificationPage
 import ChiefRPSNotificationProvider from './pages/Personnel/contexts/ChiefRPSNotificationContext';
 
 import { checkTokenExpiration } from './utils/tokenManager';
-import ChiefRPSorderOfPaymentPage from './pages/Personnel/ChiefRPSorderOfPaymentPage';
 
 import { ApolloProvider } from '@apollo/client';
 import client from './apolloClient';
@@ -135,8 +134,6 @@ const App = () => {
                            <Route path="/personnel/settings" element={<ProtectedRoute roles={['Chief_RPS']}><PersonnelSettingsPage /></ProtectedRoute>} />
                            <Route path="/personnel/reports" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSReportsPage /></ProtectedRoute>} />
                            <Route path="/personnel/notifications" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSNotificationPage /></ProtectedRoute>} />
-                           <Route path="/chief-rps/order-of-payment" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSorderOfPaymentPage /></ProtectedRoute>} />
-                           <Route path="/chief-rps/order-of-payment/:action" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSorderOfPaymentPage /></ProtectedRoute>} />
 
                            {/* Dashboard Routes for Personnels */}
                            <Route path="/personnel/dashboard" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelDashboard /></ProtectedRoute>} />

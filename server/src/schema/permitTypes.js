@@ -11,6 +11,7 @@ const permitTypes = gql`
     acceptedByTechnicalStaff: Boolean
     acceptedByReceivingClerk: Boolean
     reviewedByChief: Boolean
+    awaitingOOP: Boolean
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -34,6 +35,7 @@ const permitTypes = gql`
     acceptedByTechnicalStaff: Boolean
     acceptedByReceivingClerk: Boolean
     reviewedByChief: Boolean
+    awaitingOOP: Boolean
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -59,6 +61,7 @@ const permitTypes = gql`
     acceptedByTechnicalStaff: Boolean
     acceptedByReceivingClerk: Boolean
     reviewedByChief: Boolean
+    awaitingOOP: Boolean
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -93,6 +96,7 @@ const permitTypes = gql`
     acceptedByTechnicalStaff: Boolean
     acceptedByReceivingClerk: Boolean
     reviewedByChief: Boolean
+    awaitingOOP: Boolean
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -118,6 +122,7 @@ const permitTypes = gql`
     acceptedByTechnicalStaff: Boolean
     acceptedByReceivingClerk: Boolean
     reviewedByChief: Boolean
+    awaitingOOP: Boolean
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -142,6 +147,7 @@ const permitTypes = gql`
     acceptedByTechnicalStaff: Boolean
     acceptedByReceivingClerk: Boolean
     reviewedByChief: Boolean
+    awaitingOOP: Boolean
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -170,6 +176,7 @@ const permitTypes = gql`
     acceptedByTechnicalStaff: Boolean
     acceptedByReceivingClerk: Boolean
     reviewedByChief: Boolean
+    awaitingOOP: Boolean
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -264,7 +271,8 @@ const permitTypes = gql`
       reviewedByChief: Boolean,
       acceptedByReceivingClerk: Boolean,
       returnedByReceivingClerk: Boolean,
-      recordedByReceivingClerk: Boolean
+      recordedByReceivingClerk: Boolean,
+      awaitingOOP: Boolean
     ): [Permit!]!
     getApplicationsByCurrentStage(currentStage: String!): [Permit!]!
   }
@@ -299,10 +307,11 @@ const permitTypes = gql`
       currentStage: String!,
       status: String!,
       notes: String,
-      acceptedByTechnicalStaff: Boolean,
       reviewedByChief: Boolean,
-      recordedByReceivingClerk: Boolean,
-      acceptedByReceivingClerk: Boolean
+      awaitingOOP: Boolean,
+      acceptedByTechnicalStaff: Boolean,
+      acceptedByReceivingClerk: Boolean,
+      recordedByReceivingClerk: Boolean
     ): Permit!
     acceptApplication(id: ID!): Permit!
     recordApplication(id: ID!, currentStage: String!, status: String!): Permit!

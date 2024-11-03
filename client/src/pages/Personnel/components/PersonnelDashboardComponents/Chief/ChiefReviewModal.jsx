@@ -10,19 +10,22 @@ const REVIEW_APPLICATION = gql`
     $currentStage: String!,
     $status: String!,
     $notes: String,
-    $reviewedByChief: Boolean
+    $reviewedByChief: Boolean,
+    $awaitingOOP: Boolean
   ) {
     updatePermitStage(
       id: $id,
       currentStage: $currentStage,
       status: $status,
       notes: $notes,
-      reviewedByChief: $reviewedByChief
+      reviewedByChief: $reviewedByChief,
+      awaitingOOP: $awaitingOOP
     ) {
       id
       currentStage
       status
       reviewedByChief
+      awaitingOOP
       history {
         notes
         timestamp
@@ -47,7 +50,8 @@ const ChiefReviewModal = ({ isOpen, onClose, application, onReviewComplete }) =>
                currentStage: 'ForInspectionByTechnicalStaff',
                status: 'In Progress',
                notes: 'Application approved by Chief RPS',
-               reviewedByChief: true
+               reviewedByChief: true,
+               awaitingOOP: true
             }
          });
          console.log('Result:', result);
@@ -75,7 +79,8 @@ const ChiefReviewModal = ({ isOpen, onClose, application, onReviewComplete }) =>
                currentStage: 'ReturnedByChief',
                status: 'Returned',
                notes: remarks,
-               reviewedByChief: false
+               reviewedByChief: false,
+               awaitingOOP: false
             }
          });
          console.log('Result:', result);

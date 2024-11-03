@@ -2,7 +2,7 @@ import { useQuery, gql } from '@apollo/client';
 
 // to add a new query param, add it first to the type, then to the query, then to the variables, then to the fetchApplications function
 // files: server/src/schema/permitTypes.js : type Query,
-// server/src/resolvers/permitResolvers/permitResolvers.js: getApplicationsByStatus,
+// server/src/resolvers/permitResolvers/permitResolvers.js: getApplicationsByStatus & updatePermitStage,
 // client/src/pages/Personnel/hooks/useApplications.js: GET_APPLICATIONS
 
 const GET_APPLICATIONS = gql`
@@ -12,7 +12,8 @@ const GET_APPLICATIONS = gql`
     $acceptedByTechnicalStaff: Boolean,
     $acceptedByReceivingClerk: Boolean,
     $recordedByReceivingClerk: Boolean,
-    $reviewedByChief: Boolean
+    $reviewedByChief: Boolean,
+    $awaitingOOP: Boolean
   ) {
     getApplicationsByStatus(
       status: $status,
@@ -20,7 +21,8 @@ const GET_APPLICATIONS = gql`
       acceptedByTechnicalStaff: $acceptedByTechnicalStaff,
       acceptedByReceivingClerk: $acceptedByReceivingClerk,
       recordedByReceivingClerk: $recordedByReceivingClerk,
-      reviewedByChief: $reviewedByChief
+      reviewedByChief: $reviewedByChief,
+      awaitingOOP: $awaitingOOP
     ) {
       id
       applicationNumber
@@ -31,6 +33,7 @@ const GET_APPLICATIONS = gql`
       acceptedByReceivingClerk
       recordedByReceivingClerk
       reviewedByChief
+      awaitingOOP
       dateOfSubmission
       history {
         notes
@@ -40,7 +43,7 @@ const GET_APPLICATIONS = gql`
   }
 `;
 
-export const useApplications = ({ status, currentStage, acceptedByTechnicalStaff, acceptedByReceivingClerk, recordedByReceivingClerk, reviewedByChief }) => {
+export const useApplications = ({ status, currentStage, acceptedByTechnicalStaff, acceptedByReceivingClerk, recordedByReceivingClerk, reviewedByChief, awaitingOOP }) => {
    const { data, loading, error, refetch } = useQuery(GET_APPLICATIONS, {
       variables: {
          status,
@@ -48,7 +51,8 @@ export const useApplications = ({ status, currentStage, acceptedByTechnicalStaff
          acceptedByTechnicalStaff,
          acceptedByReceivingClerk,
          recordedByReceivingClerk,
-         reviewedByChief
+         reviewedByChief,
+         awaitingOOP
       },
       fetchPolicy: 'network-only',
    });

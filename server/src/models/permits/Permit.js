@@ -52,6 +52,10 @@ const PermitSchema = new mongoose.Schema({
       type: Boolean,
       default: false
    },
+   awaitingOOP: {
+      type: Boolean,
+      default: false
+   },
    OOPCreated: { // for Created OOP tab in Chief/PENRCENROfficer/Accountant Dashboards
       type: Boolean,
       default: false

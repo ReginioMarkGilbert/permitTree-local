@@ -94,7 +94,8 @@ const permitResolvers = {
          acceptedByTechnicalStaff,
          acceptedByReceivingClerk,
          recordedByReceivingClerk,
-         reviewedByChief
+         reviewedByChief,
+         awaitingOOP
       }) => {
          try {
             let query = {};
@@ -112,6 +113,9 @@ const permitResolvers = {
             if (reviewedByChief !== undefined) {
                query.reviewedByChief = reviewedByChief;
             }
+            if (awaitingOOP !== undefined) {
+               query.awaitingOOP = awaitingOOP;
+            }
 
             const permits = await Permit.find(query)
                .sort({ dateOfSubmission: -1 })
@@ -125,7 +129,8 @@ const permitResolvers = {
                acceptedByTechnicalStaff: permit.acceptedByTechnicalStaff || false,
                acceptedByReceivingClerk: permit.acceptedByReceivingClerk || false,
                recordedByReceivingClerk: permit.recordedByReceivingClerk || false,
-               reviewedByChief: permit.reviewedByChief || false
+               reviewedByChief: permit.reviewedByChief || false,
+               awaitingOOP: permit.awaitingOOP || false
             }));
          } catch (error) {
             console.error(`Error fetching permits:`, error);
@@ -232,51 +237,55 @@ const permitResolvers = {
          currentStage,
          status,
          notes,
-         acceptedByTechnicalStaff,
          reviewedByChief,
-         recordedByReceivingClerk,
-         acceptedByReceivingClerk
+         awaitingOOP,
+         acceptedByTechnicalStaff,
+         acceptedByReceivingClerk,
+         recordedByReceivingClerk
       }, context) => {
-         const permit = await Permit.findById(id);
-         if (!permit) {
-            throw new Error('Permit not found');
-         }
-
-         permit.currentStage = currentStage;
-         permit.status = status;
-
-         if (acceptedByTechnicalStaff !== undefined) {
-            permit.acceptedByTechnicalStaff = acceptedByTechnicalStaff;
-         }
-         if (reviewedByChief !== undefined) {
-            permit.reviewedByChief = reviewedByChief;
-         }
-         if (recordedByReceivingClerk !== undefined) {
-            permit.recordedByReceivingClerk = recordedByReceivingClerk;
-         }
-         if (acceptedByReceivingClerk !== undefined) {
-            permit.acceptedByReceivingClerk = acceptedByReceivingClerk;
-         }
-
-         permit.history.push({
-            stage: currentStage,
-            status: status,
-            timestamp: new Date(),
-            notes: notes || ''
-         });
-
          try {
+            const permit = await Permit.findById(id);
+            if (!permit) {
+               throw new Error('Permit not found');
+            }
+
+            permit.currentStage = currentStage;
+            permit.status = status;
+
+            if (reviewedByChief !== undefined) {
+               permit.reviewedByChief = reviewedByChief;
+            }
+            if (awaitingOOP !== undefined) {
+               permit.awaitingOOP = awaitingOOP;
+            }
+            if (acceptedByTechnicalStaff !== undefined) {
+               permit.acceptedByTechnicalStaff = acceptedByTechnicalStaff;
+            }
+            if (acceptedByReceivingClerk !== undefined) {
+               permit.acceptedByReceivingClerk = acceptedByReceivingClerk;
+            }
+            if (recordedByReceivingClerk !== undefined) {
+               permit.recordedByReceivingClerk = recordedByReceivingClerk;
+            }
+
+            permit.history.push({
+               stage: currentStage,
+               status: status,
+               timestamp: new Date(),
+               notes: notes || ''
+            });
+
             await permit.save();
+
+            return {
+               ...permit.toObject(),
+               id: permit._id.toString(),
+               dateOfSubmission: permit.dateOfSubmission.toISOString()
+            };
          } catch (error) {
-            console.error('Error saving permit:', error);
+            console.error('Error updating permit:', error);
             throw new Error(`Failed to update permit: ${error.message}`);
          }
-
-         return {
-            ...permit.toObject(),
-            id: permit._id.toString(),
-            dateOfSubmission: permit.dateOfSubmission.toISOString()
-         };
       },
 
       recordApplication: async (_, { id, currentStage, status }, { user }) => {
