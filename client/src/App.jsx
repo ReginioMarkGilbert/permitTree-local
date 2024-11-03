@@ -75,7 +75,20 @@ const App = () => {
       return () => clearInterval(intervalId);
    }, [navigate]);
 
-   const PersonnelRoles = ['Chief_RPS', 'Chief_TSD', 'Technical_Staff', 'Receiving_Clerk', 'Releasing_Clerk', 'Accountant', 'Bill_Collector', 'PENR_CENR_Officer'];
+   const PersonnelRoles = [
+      'Chief_RPS',
+      'Chief_TSD',
+      'Technical_Staff',
+      'Receiving_Clerk',
+      'Releasing_Clerk',
+      'Accountant',
+      'OOP_Staff_Incharge',
+      'Bill_Collector',
+      'Credit_Officer',
+      'PENR_CENR_Officer',
+      'Deputy_CENR_Officer',
+      'Inspection_Team'
+   ];
 
    const getSidebar = () => {
       if (userRoles.includes('superadmin')) {

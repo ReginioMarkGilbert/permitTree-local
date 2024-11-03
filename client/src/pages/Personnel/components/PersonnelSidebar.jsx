@@ -63,12 +63,14 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
          return "/personnel/technical-staff";
       } else if (userRoles.includes('Chief_RPS') || userRoles.includes('Chief_TSD')) {
          return "/personnel/chief";
-      } else if (userRoles.includes('Accountant')) {
+      } else if (userRoles.includes('Accountant') || userRoles.includes('OOP_Staff_Incharge')) {
          return "/personnel/accountant";
-      } else if (userRoles.includes('Bill_Collector')) {
+      } else if (userRoles.includes('Bill_Collector') || userRoles.includes('Credit_Officer')) {
          return "/personnel/bill-collector";
-      } else if (userRoles.includes('PENR_CENR_Officer')) {
+      } else if (userRoles.includes('PENR_CENR_Officer') || userRoles.includes('Deputy_CENR_Officer')) {
          return "/personnel/penr-cenr-officer";
+      } else if (userRoles.includes('Inspection_Team')) {
+         return "/personnel/inspection-team";
       } else {
          return "/personnel/dashboard";
       }

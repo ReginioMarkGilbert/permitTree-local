@@ -4,13 +4,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import 'react-toastify/dist/ReactToastify.css';
 import { setToken } from '../../utils/tokenManager';
-import { isAuthenticated, getUserRole } from '../../utils/auth';
-import { request } from 'graphql-request';
+// import { isAuthenticated, getUserRole } from '../../utils/auth';
+// import { request } from 'graphql-request';
 import { FaLeaf } from 'react-icons/fa';
-import AuthButton from '../../components/ui/AuthButton';
+// import AuthButton from '../../components/ui/AuthButton';
 import { Input } from '../../components/ui/Input';
 import { Label } from '../../components/ui/Label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/Tabs';
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/Tabs';
 import './styles/UserAuthPage.css';
 import { gql, useMutation } from '@apollo/client';
 
@@ -127,14 +127,26 @@ const UserAuthPage = () => {
          });
          if (data.login) {
             const { token, user } = data.login;
-            setToken(token); // Use the setToken utility
+            setToken(token);
             localStorage.setItem('user', JSON.stringify(user));
             toast.success('Login successful!');
 
-            // Redirect based on user roles
             if (user.roles.includes('superadmin')) {
                navigate('/superadmin/home', { replace: true });
-            } else if (user.roles.some(role => ['Chief_RPS', 'Chief_TSD', 'Technical_Staff', 'Receiving_Clerk', 'Releasing_Clerk', 'Accountant', 'Bill_Collector', 'PENR_CENR_Officer'].includes(role))) {
+            } else if (user.roles.some(role => [
+               'Chief_RPS',
+               'Chief_TSD',
+               'Technical_Staff',
+               'Receiving_Clerk',
+               'Releasing_Clerk',
+               'Accountant',
+               'OOP_Staff_Incharge',
+               'Bill_Collector',
+               'Credit_Officer',
+               'PENR_CENR_Officer',
+               'Deputy_CENR_Officer',
+               'Inspection_Team'
+            ].includes(role))) {
                navigate('/personnel/home', { replace: true });
             } else if (user.roles.includes('user')) {
                navigate('/home', { replace: true });

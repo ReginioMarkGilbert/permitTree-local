@@ -24,15 +24,17 @@ const PermitSchema = new mongoose.Schema({
          'Submitted', // Submitted by the applicant
          'TechnicalStaffReview',
          'ReturnedByTechnicalStaff',
+         'ReturnedByReleasingClerk',
          'ForRecordByReceivingClerk',
-         'RecordedByReceivingClerk',  // Add this stage
+         'RecordedByReceivingClerk',
          'ChiefRPSReview',
+         'AwaitingOOP',
          'ForInspectionByTechnicalStaff',
          'ApprovedByTechnicalStaff',
          'PendingRelease',
          'Released'
-      ],
-      default: 'Submitted'
+      ]
+      // default: 'Submitted'
    },
    recordedByReceivingClerk: {
       type: Boolean,
@@ -43,6 +45,14 @@ const PermitSchema = new mongoose.Schema({
       default: false
    },
    acceptedByTechnicalStaff: {
+      type: Boolean,
+      default: false
+   },
+   acceptedByReceivingClerk: {
+      type: Boolean,
+      default: false
+   },
+   OOPCreated: { // for Created OOP tab in Chief/PENRCENROfficer/Accountant Dashboards
       type: Boolean,
       default: false
    },

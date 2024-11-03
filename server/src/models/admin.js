@@ -16,8 +16,12 @@ const AdminSchema = new mongoose.Schema({
          'Receiving_Clerk',
          'Releasing_Clerk',
          'Accountant',
+         'OOP_Staff_Incharge',
          'Bill_Collector',
-         'PENR_CENR_Officer'
+         'Credit_Officer',
+         'PENR_CENR_Officer',
+         'Deputy_CENR_Officer',
+         'Inspection_Team'
       ]
    }],
    firstName: { type: String },

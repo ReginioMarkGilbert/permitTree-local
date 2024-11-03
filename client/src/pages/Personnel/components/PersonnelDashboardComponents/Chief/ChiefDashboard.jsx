@@ -27,10 +27,11 @@ const ChiefDashboard = () => {
 
    const { applications, loading, error, fetchApplications } = useApplications(getQueryParamsForTab(activeSubTab));
 
-   const mainTabs = ['Applications', 'Order Of Payment', 'Certificates'];
+   const mainTabs = ['Applications', 'Applications Awaiting OOP', 'Order Of Payment', 'Certificates'];
    const subTabs = {
       'Applications': ['Applications for Review', 'Completed Reviews'],
-      'Order Of Payment': ['Pending Signature', 'Awaiting Payment', 'Payment Proof Submitted', 'Completed'],
+      'Applications Awaiting OOP': ['Awaiting OOP', 'Created OOP'],
+      'Order Of Payment': ['Pending Signature', 'Signed Order Of Payment'],
       'Certificates': ['Pending Signature', 'Signed Certificates']
    };
 
@@ -121,6 +122,7 @@ const ChiefDashboard = () => {
                   Refresh
                </Button>
             </div>
+            {/* Main Tabs */}
             <div className="mb-6 overflow-x-auto">
                <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
                   {mainTabs.map((tab) => (
@@ -137,6 +139,7 @@ const ChiefDashboard = () => {
                   ))}
                </div>
             </div>
+            {/* Subtabs */}
             <div className="mb-6 overflow-x-auto">
                <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
                   {subTabs[activeMainTab].map((tab) => (
@@ -150,6 +153,7 @@ const ChiefDashboard = () => {
                   ))}
                </div>
             </div>
+            {renderTabDescription()}
             <div className="mb-6">
                <Input
                   type="text"

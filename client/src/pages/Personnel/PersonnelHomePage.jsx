@@ -8,6 +8,7 @@ import { FaChartLine } from 'react-icons/fa';
 import '../../components/ui/styles/customScrollBar.css';
 import { useChiefRPSNotification } from './contexts/ChiefRPSNotificationContext';
 import useDebounce from '../../hooks/useDebounce';
+import { getUserRoles } from '../../utils/auth';
 
 const PersonnelHomePage = () => {
    const [recentApplications, setRecentApplications] = useState([]);
@@ -110,9 +111,57 @@ const PersonnelHomePage = () => {
       setRefreshTrigger(prev => prev + 1);
    };
 
+   const userRoles = getUserRoles();
+
+   const renderRole = () => {
+      if (userRoles.includes('Technical_Staff')) {
+         return (
+            <div className="">
+               <h1>Technical Staff</h1>
+            </div>
+         )
+      }
+      if (userRoles.includes('Chief_RPS') || userRoles.includes('Chief_TSD')) {
+         return (
+            <div className="">
+               <h1>Chief RPS/TSD</h1>
+            </div>
+         )
+      }
+      if (userRoles.includes('Bill_Collector') || userRoles.includes('Credit_Officer')) {
+         return (
+            <div className="">
+               <h1>Bill Collector/Credit Officer</h1>
+            </div>
+         )
+      }
+      if (userRoles.includes('Accountant') || userRoles.includes('OOP_Staff_Incharge')) {
+         return (
+            <div className="">
+               <h1>Accountant/OOP Staff Incharge</h1>
+            </div>
+         )
+      }
+      if (userRoles.includes('PENR_CENR_Officer') || userRoles.includes('Deputy_CENR_Officer')) {
+         return (
+            <div className="">
+               <h1>PENR/CENR Officer</h1>
+            </div>
+         )
+      }
+      if (userRoles.includes('Inspection_Team')) {
+         return (
+            <div className="">
+               <h1>Inspection Team</h1>
+            </div>
+         )
+      }
+   }
+
    return (
       <div className="min-h-screen bg-green-50 flex flex-col pt-16">
          <main className="container mx-auto py-8 flex-grow mt-4">
+            {renderRole()}
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                {quickActions.map((action, index) => (
