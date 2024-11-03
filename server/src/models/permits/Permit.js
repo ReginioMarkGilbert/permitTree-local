@@ -24,9 +24,9 @@ const PermitSchema = new mongoose.Schema({
          'Submitted', // Submitted by the applicant
          'TechnicalStaffReview',
          'ReturnedByTechnicalStaff',
-         'ReturnedByReleasingClerk',
+         'ReceivingClerkReview',
+         'ReturnedByReceivingClerk',
          'ForRecordByReceivingClerk',
-         'RecordedByReceivingClerk',
          'ChiefRPSReview',
          'AwaitingOOP',
          'ForInspectionByTechnicalStaff',
@@ -36,19 +36,19 @@ const PermitSchema = new mongoose.Schema({
       ]
       // default: 'Submitted'
    },
-   recordedByReceivingClerk: {
-      type: Boolean,
-      default: false
-   },
-   reviewedByChief: {
-      type: Boolean,
-      default: false
-   },
    acceptedByTechnicalStaff: {
       type: Boolean,
       default: false
    },
    acceptedByReceivingClerk: {
+      type: Boolean,
+      default: false
+   },
+   recordedByReceivingClerk: {
+      type: Boolean,
+      default: false
+   },
+   reviewedByChief: {
       type: Boolean,
       default: false
    },

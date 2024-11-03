@@ -88,13 +88,29 @@ const permitResolvers = {
             throw new Error(`Failed to fetch submitted permits: ${error.message}`);
          }
       },
-      getApplicationsByStatus: async (_, { status, currentStage, recordedByReceivingClerk }) => {
+      getApplicationsByStatus: async (_, {
+         status,
+         currentStage,
+         acceptedByTechnicalStaff,
+         acceptedByReceivingClerk,
+         recordedByReceivingClerk,
+         reviewedByChief
+      }) => {
          try {
             let query = {};
             if (status) query.status = status;
             if (currentStage) query.currentStage = currentStage;
+            if (acceptedByTechnicalStaff !== undefined) {
+               query.acceptedByTechnicalStaff = acceptedByTechnicalStaff;
+            }
+            if (acceptedByReceivingClerk !== undefined) {
+               query.acceptedByReceivingClerk = acceptedByReceivingClerk;
+            }
             if (recordedByReceivingClerk !== undefined) {
                query.recordedByReceivingClerk = recordedByReceivingClerk;
+            }
+            if (reviewedByChief !== undefined) {
+               query.reviewedByChief = reviewedByChief;
             }
 
             const permits = await Permit.find(query)
@@ -102,21 +118,15 @@ const permitResolvers = {
                .lean()
                .exec();
 
-            const formattedPermits = permits.map(permit => ({
+            return permits.map(permit => ({
                ...permit,
                id: permit._id.toString(),
                dateOfSubmission: permit.dateOfSubmission.toISOString(),
-               currentStage: permit.currentStage || 'Submitted',
-               recordedByReceivingClerk: permit.recordedByReceivingClerk || false,
-               reviewedByChief: permit.reviewedByChief || false,
                acceptedByTechnicalStaff: permit.acceptedByTechnicalStaff || false,
-               history: permit.history || []
+               acceptedByReceivingClerk: permit.acceptedByReceivingClerk || false,
+               recordedByReceivingClerk: permit.recordedByReceivingClerk || false,
+               reviewedByChief: permit.reviewedByChief || false
             }));
-
-            console.log('Server: Fetched applications:', query);
-            console.log('Server: Number of applications:', formattedPermits.length);
-
-            return formattedPermits;
          } catch (error) {
             console.error(`Error fetching permits:`, error);
             throw new Error(`Failed to fetch permits: ${error.message}`);
@@ -231,11 +241,20 @@ const permitResolvers = {
          if (acceptedByTechnicalStaff !== undefined) {
             permit.acceptedByTechnicalStaff = acceptedByTechnicalStaff;
          }
+         if (reviewedByChief !== undefined) {
+            permit.reviewedByChief = reviewedByChief;
+         }
+         if (recordedByReceivingClerk !== undefined) {
+            permit.recordedByReceivingClerk = recordedByReceivingClerk;
+         }
+         if (acceptedByReceivingClerk !== undefined) {
+            permit.acceptedByReceivingClerk = acceptedByReceivingClerk;
+         }
 
          permit.history.push({
             stage: currentStage,
             status: status,
-         timestamp: new Date(),
+            timestamp: new Date(),
             notes: notes || ''
          });
 
@@ -252,20 +271,53 @@ const permitResolvers = {
             dateOfSubmission: permit.dateOfSubmission.toISOString()
          };
       },
-      acceptApplication: async (_, { id }, { user }) => {
-         if (!user) {
-            throw new Error('You must be logged in to accept an application');
-         }
+      acceptApplication: async (_, { id, currentStage, status, notes, acceptedBy }, { user }) => {
+         // if (!user) {
+         //    throw new Error('You must be logged in to accept an application');
+         // }
+
          const permit = await Permit.findById(id);
          if (!permit) {
             throw new Error('Permit not found');
          }
 
-         permit.acceptedByTechnicalStaff = true; // set accepted flag to true
-         await permit.save();
+         permit.currentStage = currentStage;
+         permit.status = status;
+
+         // Dynamically set the accepted flag based on who is accepting
+         switch (acceptedBy) {
+            case 'technicalStaff':
+               permit.acceptedByTechnicalStaff = true;
+               break;
+            case 'receivingClerk':
+               permit.acceptedByReceivingClerk = true;
+               break;
+            case 'chief':
+               permit.reviewedByChief = true;
+               break;
+            default:
+               throw new Error('Invalid acceptedBy value');
+         }
+
+         permit.history.push({
+            stage: currentStage,
+            status: status,
+            timestamp: new Date(),
+            notes: notes || `Application accepted by ${acceptedBy}`,
+            actionBy: user.id
+         });
+
+         try {
+            await permit.save();
+         } catch (error) {
+            console.error('Error saving permit:', error);
+            throw new Error(`Failed to accept application: ${error.message}`);
+         }
+
          return {
             ...permit.toObject(),
             id: permit._id.toString()
+            // dateOfSubmission: permit.dateOfSubmission.toISOString()
          };
       },
 

@@ -12,9 +12,15 @@ const ReceivingReleasingClerkDashboard = () => {
 
    const getQueryParamsForTab = (tab) => {
       switch (tab) {
-         case 'Pending Applications':
+         case 'Applications For Review':
+            return { currentStage: 'ReceivingClerkReview' };
+         case 'Returned Applications':
+            return { currentStage: 'ReturnedByReceivingClerk' };
+         case 'Accepted Applications':
+            return { acceptedByReceivingClerk: true };
+         case 'Applications For Recording':
             return { currentStage: 'ForRecordByReceivingClerk' };
-         case 'Recorded Applications':
+         case 'Reviewed/Recorded Applications':
             return { recordedByReceivingClerk: true };
          case 'Pending Release':
             return { status: 'Approved', currentStage: 'PendingRelease' };
