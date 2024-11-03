@@ -24,6 +24,7 @@ const PermitSchema = new mongoose.Schema({
          'Submitted', // Submitted by the applicant
          'TechnicalStaffReview',
          'ReturnedByTechnicalStaff',
+         'AuthenticityApprovedByTechnicalStaff',
          'ReceivingClerkReview',
          'ReturnedByReceivingClerk',
          'ForRecordByReceivingClerk',

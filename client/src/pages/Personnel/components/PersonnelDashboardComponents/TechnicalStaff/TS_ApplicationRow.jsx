@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Eye, Printer, ClipboardCheck } from 'lucide-react';
+import { Eye, Printer, ClipboardCheck, FileCheck } from 'lucide-react';
 import {
    Tooltip,
    TooltipContent,
@@ -11,13 +11,16 @@ import {
 } from "@/components/ui/tooltip";
 import TS_ViewModal from './TS_ViewModal';
 import TS_ReviewModal from './TS_ReviewModal';
+import TS_AuthenticityReviewModal from './TS_AuthenticityReviewModal';
 
 const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor }) => {
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+   const [isAuthenticityModalOpen, setIsAuthenticityModalOpen] = useState(false);
 
    const handleViewClick = () => setIsViewModalOpen(true);
    const handleReviewClick = () => setIsReviewModalOpen(true);
+   const handleAuthenticityClick = () => setIsAuthenticityModalOpen(true);
 
    const handleReviewComplete = () => {
       setIsReviewModalOpen(false);
@@ -85,6 +88,26 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor }) =
                         </Tooltip>
                      </TooltipProvider>
                   )}
+
+                  {app.currentStage === 'ForInspectionByTechnicalStaff' && (
+                     <TooltipProvider>
+                        <Tooltip delayDuration={200}>
+                           <TooltipTrigger asChild>
+                              <Button
+                                 onClick={handleAuthenticityClick}
+                                 variant="outline"
+                                 size="icon"
+                                 className="h-8 w-8 text-green-600 hover:text-green-800"
+                              >
+                                 <FileCheck className="h-4 w-4" />
+                              </Button>
+                           </TooltipTrigger>
+                           <TooltipContent>
+                              <p>Approve Application Authenticity</p>
+                           </TooltipContent>
+                        </Tooltip>
+                     </TooltipProvider>
+                  )}
                </div>
             </td>
          </tr>
@@ -97,6 +120,12 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor }) =
          <TS_ReviewModal
             isOpen={isReviewModalOpen}
             onClose={() => setIsReviewModalOpen(false)}
+            application={app}
+            onReviewComplete={handleReviewComplete}
+         />
+         <TS_AuthenticityReviewModal
+            isOpen={isAuthenticityModalOpen}
+            onClose={() => setIsAuthenticityModalOpen(false)}
             application={app}
             onReviewComplete={handleReviewComplete}
          />

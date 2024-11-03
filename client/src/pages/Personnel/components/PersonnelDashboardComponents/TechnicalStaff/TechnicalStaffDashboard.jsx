@@ -16,12 +16,11 @@ const TechnicalStaffDashboard = () => {
          case 'Returned Applications':
             return { currentStage: 'ReturnedByTechnicalStaff', status: 'Returned' };
          case 'Accepted Applications':
-            // Update this case to filter by acceptedByTechnicalStaff
             return { acceptedByTechnicalStaff: true };
          case 'For Inspection and Approval':
             return { currentStage: 'ForInspectionByTechnicalStaff' };
          case 'Approved Applications':
-            return { status: 'Approved' };
+            return { currentStage: 'AuthenticityApprovedByTechnicalStaff' };
          default:
             return { status: 'Submitted' };
       }

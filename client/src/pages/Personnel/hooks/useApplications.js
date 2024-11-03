@@ -40,12 +40,13 @@ const GET_APPLICATIONS = gql`
   }
 `;
 
-export const useApplications = ({ status, currentStage, acceptedByTechnicalStaff, recordedByReceivingClerk, reviewedByChief }) => {
+export const useApplications = ({ status, currentStage, acceptedByTechnicalStaff, acceptedByReceivingClerk, recordedByReceivingClerk, reviewedByChief }) => {
    const { data, loading, error, refetch } = useQuery(GET_APPLICATIONS, {
       variables: {
          status,
          currentStage,
          acceptedByTechnicalStaff,
+         acceptedByReceivingClerk,
          recordedByReceivingClerk,
          reviewedByChief
       },
