@@ -1,3 +1,4 @@
+// form for creating order of payment - multi step form
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -12,9 +13,69 @@ import { format } from "date-fns";
 import { CalendarIcon, PlusIcon, MinusIcon, UploadIcon, ArrowLeft } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import "@/components/ui/styles/customScrollbar.css";
+import { useOrderOfPayments } from '../hooks/useOrderOfPayments';
+import { cn } from "@/lib/utils";
+import { ChevronDown } from 'lucide-react';
+
+const CustomSelect = ({ options, onSelect, placeholder }) => {
+   const [isOpen, setIsOpen] = useState(false);
+   const [selected, setSelected] = useState(null);
+
+   const handleSelect = (option) => {
+      setSelected(option);
+      onSelect(option.id);
+      setIsOpen(false);
+   };
+
+   return (
+      <div className="relative">
+         <button
+            type="button"
+            onClick={() => setIsOpen(!isOpen)}
+            className={cn(
+               "flex h-10 w-full items-center justify-between rounded-md border border-input",
+               "bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground",
+               "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+               "disabled:cursor-not-allowed disabled:opacity-50"
+            )}
+         >
+            <span>{selected ? `${selected.applicationNumber} - ${selected.ownerName || selected.name}` : placeholder}</span>
+            <ChevronDown className="h-4 w-4 opacity-50" />
+         </button>
+
+         {isOpen && (
+            <div className="absolute z-50 w-full mt-1 bg-white rounded-md shadow-lg border border-gray-200">
+               <div className="py-1 max-h-60 overflow-auto">
+                  {options.map((option) => (
+                     <button
+                        key={option.id}
+                        type="button"
+                        className={cn(
+                           "w-full px-3 py-2 text-left text-sm hover:bg-gray-100",
+                           selected?.id === option.id && "bg-gray-100"
+                        )}
+                        onClick={() => handleSelect(option)}
+                     >
+                        {option.applicationNumber} - {option.ownerName || option.name}
+                     </button>
+                  ))}
+               </div>
+            </div>
+         )}
+      </div>
+   );
+};
 
 const OrderOfPaymentForm = ({ onClose }) => {
    const navigate = useNavigate();
+   const {
+      applications,
+      applicationsLoading,
+      applicationsError,
+      createOOP,
+      updateSignature
+   } = useOrderOfPayments();
+
    const [step, setStep] = useState(1);
    const [formData, setFormData] = useState({
       applicationId: '',
@@ -26,52 +87,22 @@ const OrderOfPaymentForm = ({ onClose }) => {
       natureOfApplication: '',
       fees: [{ id: 1, legalBasis: '', description: '', amount: '' }],
       rpsSignature: null,
-      tsdSignature: null,
-      paymentDate: null,
-      paymentTime: null,
-      receiptDate: null,
-      receiptTime: null
+      tsdSignature: null
    });
-   const [acceptedApplications, setAcceptedApplications] = useState([]);
-   const [existingOOPs, setExistingOOPs] = useState([]);
-   const [loading, setLoading] = useState(true);
-   const [error, setError] = useState(null);
 
    const rpsFileInputRef = useRef(null);
    const tsdFileInputRef = useRef(null);
 
-   const fetchAcceptedApplications = useCallback(async () => {
-      try {
-         setLoading(true);
-         const token = localStorage.getItem('token');
-         const response = await axios.get('http://localhost:3000/api/admin/all-applications', {
-            params: { status: 'Accepted' },
-            headers: { Authorization: token }
-         });
-         setAcceptedApplications(response.data);
-         setLoading(false);
-      } catch (error) {
-         console.error('Error fetching accepted applications:', error);
-         setError('Failed to fetch accepted applications');
-         setLoading(false);
-         toast.error('Failed to fetch accepted applications');
-      }
-   }, []);
-
-   useEffect(() => {
-      fetchAcceptedApplications();
-   }, [fetchAcceptedApplications]);
-
    const handleApplicationSelect = (applicationId) => {
-      const selectedApp = acceptedApplications.find(app => app._id === applicationId);
+      const selectedApp = applications.find(app => app.id === applicationId);
       if (selectedApp) {
          setFormData({
             ...formData,
-            applicationId: selectedApp.customId || selectedApp._id,
-            applicantName: selectedApp.ownerName || '',
-            namePayee: selectedApp.ownerName || '',
-            address: selectedApp.address || '',
-            natureOfApplication: selectedApp.permitType || ''
+            applicationId: selectedApp.applicationNumber,
+            applicantName: selectedApp.ownerName || selectedApp.name,
+            namePayee: selectedApp.ownerName || selectedApp.name,
+            address: selectedApp.address,
+            natureOfApplication: selectedApp.applicationType
          });
       }
    };
@@ -147,49 +178,22 @@ const OrderOfPaymentForm = ({ onClose }) => {
    const handleSubmit = async (e) => {
       e.preventDefault();
       try {
-         const token = localStorage.getItem('token');
-
-         // Calculate total amount
-         const totalAmount = formData.fees.reduce((sum, fee) => sum + Number(fee.amount || 0), 0);
-
-         // Prepare the data for submission
-         const submissionData = {
-            applicationId: formData.applicationId,
-            billNo: formData.billNo,
-            date: formData.date,
-            address: formData.address,
-            natureOfApplication: formData.natureOfApplication,
-            items: formData.fees.map(fee => ({
-               legalBasis: fee.legalBasis,
-               description: fee.description,
-               amount: Number(fee.amount)
-            })),
-            totalAmount: totalAmount,
-            status: 'Pending Signature',
-            signatures: {
-               chiefRPS: formData.rpsSignature ? new Date() : null,
-               technicalServices: null
-            },
-            rpsSignatureImage: formData.rpsSignature // Add this line to include the signature image
-         };
-
-         console.log('Submitting data:', submissionData);
-
-         const response = await axios.post('http://localhost:3000/api/admin/order-of-payments', submissionData, {
-            headers: { Authorization: token }
-         });
-         console.log('Response:', response.data);
+         await createOOP(formData);
          toast.success('Order of Payment created successfully');
          onClose();
       } catch (error) {
-         console.error('Error creating Order of Payment:', error.response?.data || error.message);
-         toast.error(`Failed to create Order of Payment: ${error.response?.data?.message || error.message}`);
+         console.error('Error creating Order of Payment:', error);
+         toast.error(`Failed to create Order of Payment: ${error.message}`);
       }
    };
 
    const handleBack = () => {
-      navigate('/chief-rps/order-of-payment');
+      navigate('/personnel/order-of-payment');
    };
+
+   useEffect(() => {
+      console.log('Applications in form:', applications);
+   }, [applications]);
 
    const renderStep = () => {
       switch (step) {
@@ -197,20 +201,22 @@ const OrderOfPaymentForm = ({ onClose }) => {
             return (
                <div className="space-y-4">
                   <Label htmlFor="applicationSelect">Select Application</Label>
-                  <Select onValueChange={handleApplicationSelect}>
-                     <SelectTrigger>
-                        <SelectValue placeholder="Select an application" />
-                     </SelectTrigger>
-                     <SelectContent>
-                        {acceptedApplications
-                           .filter(app => !existingOOPs.some(oop => oop.applicationId === app.customId))
-                           .map((app) => (
-                              <SelectItem key={app._id} value={app._id}>
-                                 {app.customId || app._id} - {app.ownerName}
-                              </SelectItem>
-                           ))}
-                     </SelectContent>
-                  </Select>
+                  <div className="text-sm text-gray-500 mb-2">
+                     Available applications: {applications?.length || 0}
+                  </div>
+
+                  {applicationsLoading ? (
+                     <div className="h-10 flex items-center px-3 border rounded-md bg-gray-50">
+                        Loading...
+                     </div>
+                  ) : (
+                     <CustomSelect
+                        options={applications}
+                        onSelect={handleApplicationSelect}
+                        placeholder="Select an application"
+                     />
+                  )}
+
                   <Label htmlFor="applicationId">Application ID</Label>
                   <Input
                      id="applicationId"
@@ -430,6 +436,14 @@ const OrderOfPaymentForm = ({ onClose }) => {
             return null;
       }
    };
+
+   if (applicationsError) {
+      return (
+         <div className="p-4 text-red-600 bg-red-50 rounded-md">
+            Error loading applications: {applicationsError.message}
+         </div>
+      );
+   }
 
    return (
       <div className="container mx-auto px-4 py-8 mt-16">

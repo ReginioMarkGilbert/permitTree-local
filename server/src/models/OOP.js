@@ -1,24 +1,64 @@
 const mongoose = require('mongoose');
+const { generateBillNo } = require('../utils/billNumberGenerator');
 
-const OOPSchema = new mongoose.Schema({
-   oopNumber: { type: String, required: true, unique: true },
-   permitId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Permit',
-      required: true
-   },
-   amount: { type: Number, required: true },
-   status: {
-      type: String,
-      required: true,
-      enum: ['Pending', 'Approved', 'Paid', 'Cancelled']
-   },
-   dateIssued: {
-      type: Date,
-      default: Date.now
-   },
-   datePaid: Date,
-   paymentProof: String
-}, { timestamps: true });
+const oopSchema = new mongoose.Schema({
+  billNo: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  applicationId: {
+    type: String,
+    required: true,
+    ref: 'Permit'
+  },
+  date: {
+    type: Date,
+    default: Date.now
+  },
+  namePayee: {
+    type: String,
+    required: true
+  },
+  address: {
+    type: String,
+    required: true
+  },
+  natureOfApplication: {
+    type: String,
+    required: true
+  },
+  items: [{
+    legalBasis: String,
+    description: String,
+    amount: Number
+  }],
+  totalAmount: {
+    type: Number,
+    required: true
+  },
+  status: {
+    type: String,
+    enum: ['Pending', 'Approved', 'Rejected'],
+    default: 'Pending'
+  },
+  signatures: {
+    chiefRPS: Date,
+    technicalServices: Date
+  },
+  rpsSignatureImage: String,
+  tsdSignatureImage: String
+}, {
+  timestamps: true
+});
 
-module.exports = mongoose.model('OOP', OOPSchema);
+// Pre-save middleware to generate bill number
+oopSchema.pre('save', async function(next) {
+  if (!this.billNo) {
+    this.billNo = await generateBillNo();
+  }
+  next();
+});
+
+const OOP = mongoose.model('OOP', oopSchema);
+module.exports = OOP;

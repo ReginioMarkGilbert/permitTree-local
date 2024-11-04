@@ -4,7 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import ApplicationRow from '../ApplicationRow';
+import ApplicationRow from '../../ApplicationRow';
 
 const AccountantDashboard = () => {
    const [searchTerm, setSearchTerm] = useState('');

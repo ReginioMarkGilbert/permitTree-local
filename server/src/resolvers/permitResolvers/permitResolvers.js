@@ -99,6 +99,7 @@ const permitResolvers = {
       }) => {
          try {
             let query = {};
+
             if (status) query.status = status;
             if (currentStage) query.currentStage = currentStage;
             if (acceptedByTechnicalStaff !== undefined) {
@@ -117,23 +118,28 @@ const permitResolvers = {
                query.awaitingOOP = awaitingOOP;
             }
 
+            console.log('Query parameters:', query);
+
             const permits = await Permit.find(query)
                .sort({ dateOfSubmission: -1 })
                .lean()
                .exec();
 
+            console.log('Found permits:', permits.length);
+            console.log('Permit details:', permits.map(p => ({
+               id: p._id,
+               applicationNumber: p.applicationNumber,
+               awaitingOOP: p.awaitingOOP,
+               status: p.status
+            })));
+
             return permits.map(permit => ({
                ...permit,
                id: permit._id.toString(),
-               dateOfSubmission: permit.dateOfSubmission.toISOString(),
-               acceptedByTechnicalStaff: permit.acceptedByTechnicalStaff || false,
-               acceptedByReceivingClerk: permit.acceptedByReceivingClerk || false,
-               recordedByReceivingClerk: permit.recordedByReceivingClerk || false,
-               reviewedByChief: permit.reviewedByChief || false,
-               awaitingOOP: permit.awaitingOOP || false
+               dateOfSubmission: permit.dateOfSubmission.toISOString()
             }));
          } catch (error) {
-            console.error(`Error fetching permits:`, error);
+            console.error('Error fetching permits:', error);
             throw new Error(`Failed to fetch permits: ${error.message}`);
          }
       },
@@ -153,6 +159,20 @@ const permitResolvers = {
             console.error(`Error fetching ${currentStage} permits:`, error);
             throw new Error(`Failed to fetch ${currentStage} permits: ${error.message}`);
          }
+      },
+      getApplicationsAwaitingOOP: async (_, __, { user }) => {
+         if (!user) throw new AuthenticationError('Not authenticated');
+
+         const permits = await Permit.find({
+           status: 'Accepted',
+           awaitingOOP: true
+         }).lean();
+
+         return permits.map(permit => ({
+           ...permit,
+           id: permit._id.toString(),
+           dateOfSubmission: permit.dateOfSubmission.toISOString()
+         }));
       },
    },
    Mutation: {
@@ -348,6 +368,19 @@ const permitResolvers = {
          };
       },
    },
+   Permit: {
+      __resolveType(permit) {
+         switch (permit.applicationType) {
+            case 'Chainsaw Registration':
+               return 'CSAWPermit';
+            case 'Certificate of Verification':
+               return 'COVPermit';
+            // Add other cases
+            default:
+               return null;
+         }
+      }
+   }
 };
 
 module.exports = permitResolvers;
