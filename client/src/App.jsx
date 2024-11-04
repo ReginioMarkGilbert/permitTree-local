@@ -41,6 +41,7 @@ import ChiefRPSNotificationPage from './pages/Personnel/ChiefRPSNotificationPage
 import ChiefRPSNotificationProvider from './pages/Personnel/contexts/ChiefRPSNotificationContext';
 
 import { checkTokenExpiration } from './utils/tokenManager';
+import ChiefRPSorderOfPaymentPage from './pages/Personnel/ChiefRPSorderOfPaymentPage';
 
 import { ApolloProvider } from '@apollo/client';
 import client from './apolloClient';
@@ -48,6 +49,7 @@ import client from './apolloClient';
 import { Toaster } from 'sonner';
 
 import PersonnelDashboard from './pages/Personnel/PersonnelDashboard';
+import OOPFormCreationPage from './pages/Personnel/OOPFormCreationPage';
 
 const App = () => {
    const { sidebarToggle, toggleSidebar } = useSidebarToggle();
@@ -134,10 +136,21 @@ const App = () => {
                            <Route path="/personnel/settings" element={<ProtectedRoute roles={['Chief_RPS']}><PersonnelSettingsPage /></ProtectedRoute>} />
                            <Route path="/personnel/reports" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSReportsPage /></ProtectedRoute>} />
                            <Route path="/personnel/notifications" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSNotificationPage /></ProtectedRoute>} />
+                           <Route path="/chief-rps/order-of-payment" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSorderOfPaymentPage /></ProtectedRoute>} />
+                           <Route path="/chief-rps/order-of-payment/:action" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSorderOfPaymentPage /></ProtectedRoute>} />
 
                            {/* Dashboard Routes for Personnels */}
                            <Route path="/personnel/dashboard" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelDashboard /></ProtectedRoute>} />
                            <Route path="/personnel/:role" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelDashboard /></ProtectedRoute>} />
+
+                           <Route
+                              path="/personnel/create-oop"
+                              element={
+                                 <ProtectedRoute roles={['Chief_RPS', 'PENR_CENR_Officer', 'Accountant']}>
+                                    <OOPFormCreationPage />
+                                 </ProtectedRoute>
+                              }
+                           />
 
                            <Route path="/superadmin/home" element={<ProtectedRoute roles={['superadmin']}><SuperAdminHomePage /></ProtectedRoute>} />
                            <Route path="/superadmin/dashboard" element={<ProtectedRoute roles={['superadmin']}><SuperAdminDashboard /></ProtectedRoute>} />

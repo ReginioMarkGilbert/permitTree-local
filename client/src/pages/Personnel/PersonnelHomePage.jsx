@@ -114,6 +114,7 @@ const PersonnelHomePage = () => {
    const userRoles = getUserRoles();
 
    const renderRole = () => {
+      console.log(userRoles);
       if (userRoles.includes('Technical_Staff')) {
          return (
             <div className="">
@@ -125,6 +126,13 @@ const PersonnelHomePage = () => {
          return (
             <div className="">
                <h1>Chief RPS/TSD</h1>
+            </div>
+         )
+      }
+      if (userRoles.includes('Receiving_Clerk') || userRoles.includes('Releasing_Clerk')) {
+         return (
+            <div className="">
+               <h1>Receiving/Releasing Clerk</h1>
             </div>
          )
       }
@@ -160,7 +168,7 @@ const PersonnelHomePage = () => {
 
    return (
       <div className="min-h-screen bg-green-50 flex flex-col pt-16">
-         <main className="container mx-auto py-8 flex-grow mt-4">
+            <main className="container mx-auto py-8 flex-grow mt-4">
             {renderRole()}
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
