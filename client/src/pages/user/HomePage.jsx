@@ -108,8 +108,8 @@ const HomePage = () => {
                      ) : applicationsError ? (
                         <p className="text-center text-red-500">{applicationsError.message}</p>
                      ) : recentApplications.length === 0 ? (
-                        <div className="flex-grow flex items-center justify-center">
-                           <p className="text-gray-500 pt-12">No recent applications</p>
+                        <div className="h-[365px] flex items-center justify-center">
+                           <p className="text-gray-500">No recent applications</p>
                         </div>
                      ) : (
                         <div className="space-y-4 h-[365px] overflow-y-auto custom-scrollbar applications-container group-hover:scrollbar-visible">
