@@ -25,6 +25,10 @@ const AccountantDashboard = () => {
       refetch: refetchOOPs
    } = useOrderOfPayments();
 
+   const handleReviewComplete = () => {
+      refetchOOPs();
+   };
+
    const renderOrderOfPaymentTable = () => {
       if (oopsLoading) return <p className="text-center text-gray-500">Loading order of payments...</p>;
       if (oopsError) {
@@ -78,6 +82,7 @@ const AccountantDashboard = () => {
                      <AccountantOOPRow
                         key={oop._id}
                         oop={oop}
+                        onReviewComplete={handleReviewComplete}
                      />
                   ))}
                </tbody>
