@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
@@ -68,6 +68,7 @@ const CustomSelect = ({ options, onSelect, placeholder }) => {
 
 const OrderOfPaymentForm = ({ onClose }) => {
    const navigate = useNavigate();
+
    const {
       applications,
       applicationsLoading,
@@ -96,14 +97,14 @@ const OrderOfPaymentForm = ({ onClose }) => {
    const handleApplicationSelect = (applicationId) => {
       const selectedApp = applications.find(app => app.id === applicationId);
       if (selectedApp) {
-         setFormData({
-            ...formData,
+         setFormData(prev => ({
+            ...prev,
             applicationId: selectedApp.applicationNumber,
             applicantName: selectedApp.ownerName || selectedApp.name,
             namePayee: selectedApp.ownerName || selectedApp.name,
             address: selectedApp.address,
             natureOfApplication: selectedApp.applicationType
-         });
+         }));
       }
    };
 
@@ -214,7 +215,7 @@ const OrderOfPaymentForm = ({ onClose }) => {
             tsdSignatureImage: formData.tsdSignature || null
          };
 
-         console.log('Submitting OOP data:', transformedData); // Debug log
+         console.log('Submitting OOP data:', transformedData);
 
          await createOOP(transformedData);
          toast.success('Order of Payment created successfully');

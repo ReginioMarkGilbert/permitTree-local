@@ -38,7 +38,7 @@ const AccountantReviewModal = ({ isOpen, onClose, oop, onReviewComplete }) => {
             variables: {
                id: oop._id,
                notes: 'Order of Payment approved by Accountant',
-               status: 'Awaiting Payment'
+               status: 'Awaiting Payment' // will be sent to client for payment
             },
             refetchQueries: [{ query: GET_ALL_OOPS }]
          });

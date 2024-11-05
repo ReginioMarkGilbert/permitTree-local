@@ -83,10 +83,10 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
    const navItems = [
       { to: "/personnel/home", icon: <FaHome />, text: "Home" },
       { to: getDashboardLink(), icon: <FaTachometerAlt />, text: "Dashboard" },
+      ...(shouldShowOrderOfPayment() ? [{ to: "/personnel/order-of-payment", icon: <FaFileInvoiceDollar />, text: "Order of Payment" }] : []),
       { to: "/personnel/notifications", icon: <FaBell />, text: "Notifications", badge: unreadCount },
       { to: "/personnel/reports", icon: <FaChartLine />, text: "Reports" },
       { to: "/personnel/settings", icon: <FaCog />, text: "Settings" },
-      ...(shouldShowOrderOfPayment() ? [{ to: "/personnel/order-of-payment", icon: <FaFileInvoiceDollar />, text: "Order of Payment" }] : []),
       { to: "/auth", icon: <FaSignOutAlt />, text: "Logout" }
    ];
 

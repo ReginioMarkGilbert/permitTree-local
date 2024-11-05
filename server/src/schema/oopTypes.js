@@ -3,6 +3,7 @@ const { gql } = require('graphql-tag');
 const oopTypes = gql`
   type OOP {
     _id: ID!
+    userId: ID!
     billNo: String!
     applicationId: String!
     date: String!
@@ -53,6 +54,7 @@ const oopTypes = gql`
     getOOPById(id: ID!): OOP
     getOOPsByApplicationId(applicationId: String!): [OOP!]!
     getApplicationsAwaitingOOP: [Permit!]!
+    getOOPsByUserId(userId: ID!): [OOP!]!
   }
 
   extend type Mutation {

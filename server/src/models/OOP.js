@@ -55,7 +55,12 @@ const oopSchema = new mongoose.Schema({
     technicalServices: Date
   },
   rpsSignatureImage: String,
-  tsdSignatureImage: String
+  tsdSignatureImage: String,
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'User'
+  }
 }, {
   timestamps: true
 });
