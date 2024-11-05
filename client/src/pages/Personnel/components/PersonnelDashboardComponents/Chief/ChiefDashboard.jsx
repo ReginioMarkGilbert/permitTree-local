@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ChiefApplicationRow from './ChiefApplicationRow';
 import { useApplications } from '../../../hooks/useApplications';
-import { format } from 'date-fns';
 import { useOrderOfPayments } from '../../../hooks/useOrderOfPayments';
+import ChiefOOPRow from './ChiefOOPRow';
 
 const ChiefDashboard = () => {
    const [searchTerm, setSearchTerm] = useState('');
@@ -81,11 +81,6 @@ const ChiefDashboard = () => {
       }
    }
 
-   const formatDate = (timestamp) => {
-      const date = new Date(parseInt(timestamp));
-      return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-   };
-
    const {
       oops,
       oopsLoading,
@@ -140,41 +135,10 @@ const ChiefDashboard = () => {
                </thead>
                <tbody className="bg-white divide-y divide-gray-200">
                   {filteredOOPs.map((oop) => (
-                     <tr key={oop._id}>
-                        <td className="px-4 py-4 whitespace-nowrap">
-                           {oop.applicationId}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap">
-                           {oop.billNo}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap">
-                           {formatDate(oop.createdAt)}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap">
-                           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              oop.OOPstatus === 'PendingSignature' ? 'bg-yellow-100 text-yellow-800' :
-                              oop.OOPstatus === 'Approved' ? 'bg-green-100 text-green-800' :
-                              'bg-red-100 text-red-800'
-                           }`}>
-                              {oop.OOPstatus}
-                           </span>
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                           <div className="flex space-x-2">
-                              <Button variant="outline" size="sm">
-                                 View
-                              </Button>
-                              <Button variant="outline" size="sm">
-                                 Print
-                              </Button>
-                              {oop.OOPstatus === 'PendingSignature' && (
-                                 <Button variant="outline" size="sm">
-                                    Affix E-Sign
-                                 </Button>
-                              )}
-                           </div>
-                        </td>
-                     </tr>
+                     <ChiefOOPRow
+                        key={oop._id}
+                        oop={oop}
+                     />
                   ))}
                </tbody>
             </table>
