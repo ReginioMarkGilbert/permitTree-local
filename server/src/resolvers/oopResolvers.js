@@ -35,7 +35,7 @@ const oopResolvers = {
           ...input,
           billNo,
           totalAmount,
-          status: 'PendingSignature'
+          OOPstatus: 'PendingSignature'
         });
 
         await oop.save();
@@ -45,7 +45,7 @@ const oopResolvers = {
           { applicationNumber: input.applicationId },
           {
             $set: {
-              status: 'OOPCreated',
+              // status: 'OOPCreated',
               OOPCreated: true,
               awaitingOOP: false
             }
@@ -83,7 +83,7 @@ const oopResolvers = {
         throw new UserInputError('Both signatures are required for approval');
       }
 
-      oop.status = 'Approved';
+      oop.OOPstatus = 'Approved';
       await oop.save();
 
       return oop;

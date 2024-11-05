@@ -67,6 +67,21 @@ export const GET_OOP = gql`
   }
 `;
 
+// Add query to get all OOPs
+export const GET_ALL_OOPS = gql`
+  query GetOOPs {
+    getOOPs {
+      _id
+      billNo
+      applicationId
+      date
+      OOPstatus
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
 // Mutations
 const CREATE_OOP = gql`
   mutation CreateOOP($input: OOPInput!) {
@@ -95,32 +110,25 @@ const UPDATE_OOP_SIGNATURE = gql`
 `;
 
 export const useOrderOfPayments = () => {
-  // Query with variable
+  // Query for applications awaiting OOP
   const {
     data: applicationsData,
     loading: applicationsLoading,
     error: applicationsError,
-    refetch
+    refetch: refetchApplications
   } = useQuery(GET_APPLICATIONS_AWAITING_OOP, {
     variables: { awaitingOOP: true },
-    fetchPolicy: 'network-only',
-    onCompleted: (data) => {
-      console.log('Received applications data:', data);
-      if (data?.getApplicationsByStatus) {
-        console.log('Number of applications:', data.getApplicationsByStatus.length);
-        data.getApplicationsByStatus.forEach(app => {
-          console.log('Application:', {
-            id: app.id,
-            number: app.applicationNumber,
-            type: app.applicationType,
-            name: app.ownerName || app.name
-          });
-        });
-      }
-    },
-    onError: (error) => {
-      console.error('Query error:', error);
-    }
+    fetchPolicy: 'network-only'
+  });
+
+  // Add query for all OOPs
+  const {
+    data: oopsData,
+    loading: oopsLoading,
+    error: oopsError,
+    refetch: refetchOOPs
+  } = useQuery(GET_ALL_OOPS, {
+    fetchPolicy: 'network-only'
   });
 
   // Log whenever applications change
@@ -185,12 +193,24 @@ export const useOrderOfPayments = () => {
     }
   };
 
+  const refetchAll = async () => {
+    await Promise.all([refetchApplications(), refetchOOPs()]);
+  };
+
   return {
+    // Applications data
     applications: applicationsData?.getApplicationsByStatus || [],
     applicationsLoading,
     applicationsError,
-    refetch,
+
+    // OOPs data
+    oops: oopsData?.getOOPs || [],
+    oopsLoading,
+    oopsError,
+
+    // Mutations and refetch
     createOOP: handleCreateOOP,
-    updateSignature: handleUpdateSignature
+    updateSignature: handleUpdateSignature,
+    refetch: refetchAll
   };
 };

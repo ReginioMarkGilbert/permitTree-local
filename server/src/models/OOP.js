@@ -37,7 +37,7 @@ const oopSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  status: {
+  OOPstatus: {
     type: String,
     enum: ['PendingSignature', 'Approved', 'Rejected'],
     default: 'PendingSignature'

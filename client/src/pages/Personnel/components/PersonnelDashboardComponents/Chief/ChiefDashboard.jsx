@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ChiefApplicationRow from './ChiefApplicationRow';
 import { useApplications } from '../../../hooks/useApplications';
+import { format } from 'date-fns';
+import { useOrderOfPayments } from '../../../hooks/useOrderOfPayments';
 
 const ChiefDashboard = () => {
    const [searchTerm, setSearchTerm] = useState('');
@@ -79,7 +81,111 @@ const ChiefDashboard = () => {
       }
    }
 
+   const formatDate = (timestamp) => {
+      const date = new Date(parseInt(timestamp));
+      return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+   };
+
+   const {
+      oops,
+      oopsLoading,
+      oopsError,
+      refetch: refetchOOPs
+   } = useOrderOfPayments();
+
+   const renderOrderOfPaymentTable = () => {
+      if (oopsLoading) return <p className="text-center text-gray-500">Loading order of payments...</p>;
+      if (oopsError) {
+         console.error('Error fetching OOPs:', oopsError);
+         return <p className="text-center text-red-500">Error loading order of payments. Please try again later.</p>;
+      }
+
+      const filteredOOPs = oops.filter(oop => {
+         if (activeSubTab === 'Pending Signature') {
+            return oop.OOPstatus === 'PendingSignature';
+         } else if (activeSubTab === 'Signed Order Of Payment') {
+            return oop.OOPstatus === 'Approved';
+         }
+         return true;
+      }).filter(oop =>
+         oop.applicationId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         oop.billNo.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
+      if (filteredOOPs.length === 0) {
+         return <p className="text-center text-gray-500">No order of payments found.</p>;
+      }
+
+      return (
+         <div className="bg-white rounded-lg shadow overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+               <thead className="bg-gray-50">
+                  <tr>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Application Number
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Bill Number
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                     </th>
+                  </tr>
+               </thead>
+               <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredOOPs.map((oop) => (
+                     <tr key={oop._id}>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                           {oop.applicationId}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                           {oop.billNo}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                           {formatDate(oop.createdAt)}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              oop.OOPstatus === 'PendingSignature' ? 'bg-yellow-100 text-yellow-800' :
+                              oop.OOPstatus === 'Approved' ? 'bg-green-100 text-green-800' :
+                              'bg-red-100 text-red-800'
+                           }`}>
+                              {oop.OOPstatus}
+                           </span>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                           <div className="flex space-x-2">
+                              <Button variant="outline" size="sm">
+                                 View
+                              </Button>
+                              <Button variant="outline" size="sm">
+                                 Print
+                              </Button>
+                              {oop.OOPstatus === 'PendingSignature' && (
+                                 <Button variant="outline" size="sm">
+                                    Affix E-Sign
+                                 </Button>
+                              )}
+                           </div>
+                        </td>
+                     </tr>
+                  ))}
+               </tbody>
+            </table>
+         </div>
+      );
+   };
+
    const renderTable = () => {
+      if (activeMainTab === 'Order Of Payment') {
+         return renderOrderOfPaymentTable();
+      }
       if (loading) return <p className="text-center text-gray-500">Loading applications...</p>;
       if (error) {
          console.error('Error fetching applications:', error);

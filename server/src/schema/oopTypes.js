@@ -11,7 +11,7 @@ const oopTypes = gql`
     natureOfApplication: String!
     items: [OOPItem!]!
     totalAmount: Float!
-    status: String!
+    OOPstatus: String!
     signatures: OOPSignatures
     rpsSignatureImage: String
     tsdSignatureImage: String

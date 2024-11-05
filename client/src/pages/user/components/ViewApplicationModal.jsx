@@ -13,7 +13,7 @@ const ViewApplicationModal = ({ isOpen, onClose, application }) => {
    const formatDate = (timestamp) => {
       const date = new Date(parseInt(timestamp));
       return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-   };
+   };W
 
    return (
       <Dialog open={isOpen} onOpenChange={onClose}>
