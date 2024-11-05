@@ -50,7 +50,7 @@ import { Toaster } from 'sonner';
 
 import PersonnelDashboard from './pages/Personnel/PersonnelDashboard';
 
-import { AuthProvider } from '@/context/AuthContext';
+// import { AuthProvider } from '@/context/AuthContext';
 
 const App = () => {
    const { sidebarToggle, toggleSidebar } = useSidebarToggle();
@@ -103,72 +103,70 @@ const App = () => {
    };
 
    return (
-      <AuthProvider>
-         <ApolloProvider client={client}>
-            <NotificationProvider>
-               <ChiefRPSNotificationProvider>
-                  <div className="flex">
-                     {isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && (
-                        <>
-                           {getSidebar()}
-                           {showNavbar && <Navbar sidebarToggle={sidebarToggle} setSidebarToggle={toggleSidebar} />}
-                        </>
-                     )}
-                     <div className={`flex-1 transition-all duration-300 ${sidebarToggle && showNavbar ? 'ml-64' : 'ml-0'}`}>
-                        <div className="p-0">
-                           <Routes>
-                              <Route path="/" element={<LandingPage />} />
-                              <Route path="/auth" element={<UserAuthPage />} />
-                              <Route path="/home" element={<ProtectedRoute roles={['user']}><HomePage /></ProtectedRoute>} />
-                              <Route path="/permits" element={<ProtectedRoute roles={['user']}><PermitsPage /></ProtectedRoute>} />
-                              <Route path="/applicationsStatus" element={<ProtectedRoute roles={['user']}><UserApplicationsPage /></ProtectedRoute>} />
-                              <Route path="/apply/:formType" element={<ProtectedRoute roles={['user']}><ApplicationForm /></ProtectedRoute>} />
-                              {/* <Route path="/unauthorized" element={<div className="flex items-center justify-center min-h-screen text-center">Unauthorized Access</div>} /> */}
+      <ApolloProvider client={client}>
+         <NotificationProvider>
+            <ChiefRPSNotificationProvider>
+               <div className="flex">
+                  {isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && (
+                     <>
+                        {getSidebar()}
+                        {showNavbar && <Navbar sidebarToggle={sidebarToggle} setSidebarToggle={toggleSidebar} />}
+                     </>
+                  )}
+                  <div className={`flex-1 transition-all duration-300 ${sidebarToggle && showNavbar ? 'ml-64' : 'ml-0'}`}>
+                     <div className="p-0">
+                        <Routes>
+                           <Route path="/" element={<LandingPage />} />
+                           <Route path="/auth" element={<UserAuthPage />} />
+                           <Route path="/home" element={<ProtectedRoute roles={['user']}><HomePage /></ProtectedRoute>} />
+                           <Route path="/permits" element={<ProtectedRoute roles={['user']}><PermitsPage /></ProtectedRoute>} />
+                           <Route path="/applicationsStatus" element={<ProtectedRoute roles={['user']}><UserApplicationsPage /></ProtectedRoute>} />
+                           <Route path="/apply/:formType" element={<ProtectedRoute roles={['user']}><ApplicationForm /></ProtectedRoute>} />
+                           {/* <Route path="/unauthorized" element={<div className="flex items-center justify-center min-h-screen text-center">Unauthorized Access</div>} /> */}
 
-                              <Route path="/about" element={<AboutPage />} />
-                              <Route path="/services" element={<ServicesPage />} />
-                              <Route path="/contact" element={<ContactPage />} />
-                              <Route path="/learnMore" element={<LearnMorePage />} />
-                              <Route path="/profile" element={<UserProfilePage />} />
-                              <Route path="/notifications" element={<ProtectedRoute roles={['user']}><UserNotificationsPage /></ProtectedRoute>} />
+                           <Route path="/about" element={<AboutPage />} />
+                           <Route path="/services" element={<ServicesPage />} />
+                           <Route path="/contact" element={<ContactPage />} />
+                           <Route path="/learnMore" element={<LearnMorePage />} />
+                           <Route path="/profile" element={<UserProfilePage />} />
+                           <Route path="/notifications" element={<ProtectedRoute roles={['user']}><UserNotificationsPage /></ProtectedRoute>} />
 
-                              <Route path="/personnel/home" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelHomePage /></ProtectedRoute>} />
-                              <Route path="/personnel/review/:id" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSApplicationReviewModal /></ProtectedRoute>} />
-                              <Route path="/personnel/view/:id" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSApplicationViewModal /></ProtectedRoute>} />
-                              <Route path="/personnel/settings" element={<ProtectedRoute roles={['Chief_RPS']}><PersonnelSettingsPage /></ProtectedRoute>} />
-                              <Route path="/personnel/reports" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSReportsPage /></ProtectedRoute>} />
-                              <Route path="/personnel/notifications" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSNotificationPage /></ProtectedRoute>} />
-                              <Route path="/personnel/order-of-payment" element={<ProtectedRoute roles={['Chief_RPS', 'Accountant', 'PENR_CENR_Officer']}><OOPFormCreationPage /></ProtectedRoute>} />
-                              <Route path="/personnel/order-of-payment/:action" element={<ProtectedRoute roles={['Chief_RPS', 'Accountant', 'PENR_CENR_Officer']}><OOPFormCreationPage /></ProtectedRoute>} />
+                           <Route path="/personnel/home" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelHomePage /></ProtectedRoute>} />
+                           <Route path="/personnel/review/:id" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSApplicationReviewModal /></ProtectedRoute>} />
+                           <Route path="/personnel/view/:id" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSApplicationViewModal /></ProtectedRoute>} />
+                           <Route path="/personnel/settings" element={<ProtectedRoute roles={['Chief_RPS']}><PersonnelSettingsPage /></ProtectedRoute>} />
+                           <Route path="/personnel/reports" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSReportsPage /></ProtectedRoute>} />
+                           <Route path="/personnel/notifications" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSNotificationPage /></ProtectedRoute>} />
+                           <Route path="/personnel/order-of-payment" element={<ProtectedRoute roles={['Chief_RPS', 'Accountant', 'PENR_CENR_Officer']}><OOPFormCreationPage /></ProtectedRoute>} />
+                           <Route path="/personnel/order-of-payment/:action" element={<ProtectedRoute roles={['Chief_RPS', 'Accountant', 'PENR_CENR_Officer']}><OOPFormCreationPage /></ProtectedRoute>} />
 
-                              {/* Dashboard Routes for Personnels */}
-                              <Route path="/personnel/dashboard" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelDashboard /></ProtectedRoute>} />
-                              <Route path="/personnel/:role" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelDashboard /></ProtectedRoute>} />
+                           {/* Dashboard Routes for Personnels */}
+                           <Route path="/personnel/dashboard" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelDashboard /></ProtectedRoute>} />
+                           <Route path="/personnel/:role" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelDashboard /></ProtectedRoute>} />
 
-                              <Route
-                                 path="/personnel/create-oop"
-                                 element={
-                                    <ProtectedRoute roles={['Chief_RPS', 'PENR_CENR_Officer', 'Accountant']}>
-                                       <OOPFormCreationPage />
-                                    </ProtectedRoute>
-                                 }
-                              />
+                           <Route
+                              path="/personnel/create-oop"
+                              element={
+                                 <ProtectedRoute roles={['Chief_RPS', 'PENR_CENR_Officer', 'Accountant']}>
+                                    <OOPFormCreationPage />
+                                 </ProtectedRoute>
+                              }
+                           />
 
-                              <Route path="/superadmin/home" element={<ProtectedRoute roles={['superadmin']}><SuperAdminHomePage /></ProtectedRoute>} />
-                              <Route path="/superadmin/dashboard" element={<ProtectedRoute roles={['superadmin']}><SuperAdminDashboard /></ProtectedRoute>} />
-                              <Route path="/superadmin/manage-users" element={<ProtectedRoute roles={['superadmin']}><SuperAdminManageUsersPage /></ProtectedRoute>} />
-                              <Route path="/superadmin/reports" element={<ProtectedRoute roles={['superadmin']}><SuperAdminReportsPage /></ProtectedRoute>} />
-                              <Route path="/superadmin/settings" element={<ProtectedRoute roles={['superadmin']}><SuperAdminSettingsPage /></ProtectedRoute>} />
-                           </Routes>
-                        </div>
+                           <Route path="/superadmin/home" element={<ProtectedRoute roles={['superadmin']}><SuperAdminHomePage /></ProtectedRoute>} />
+                           <Route path="/superadmin/dashboard" element={<ProtectedRoute roles={['superadmin']}><SuperAdminDashboard /></ProtectedRoute>} />
+                           <Route path="/superadmin/manage-users" element={<ProtectedRoute roles={['superadmin']}><SuperAdminManageUsersPage /></ProtectedRoute>} />
+                           <Route path="/superadmin/reports" element={<ProtectedRoute roles={['superadmin']}><SuperAdminReportsPage /></ProtectedRoute>} />
+                           <Route path="/superadmin/settings" element={<ProtectedRoute roles={['superadmin']}><SuperAdminSettingsPage /></ProtectedRoute>} />
+                        </Routes>
                      </div>
-                     <ToastContainer />
-                     <Toaster position="top-right" duration={3000} />
                   </div>
-               </ChiefRPSNotificationProvider>
-            </NotificationProvider>
-         </ApolloProvider>
-      </AuthProvider>
+                  <ToastContainer />
+                  <Toaster position="top-right" duration={3000} />
+               </div>
+            </ChiefRPSNotificationProvider>
+         </NotificationProvider>
+      </ApolloProvider>
    );
 };
 
