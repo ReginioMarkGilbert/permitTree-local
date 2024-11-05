@@ -5,98 +5,155 @@ import { Input } from "@/components/ui/input";
 import ApplicationRow from '../ApplicationRow';
 
 const PENRCENROfficerDashboard = () => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [activeTab, setActiveTab] = useState('Pending Certifications for review');
-    const [applications, setApplications] = useState([]); // This should be populated with real data
+   const [searchTerm, setSearchTerm] = useState('');
+   const [activeMainTab, setActiveMainTab] = useState('Applications');
+   const [activeSubTab, setActiveSubTab] = useState('Applications for review');
+   const [applications, setApplications] = useState([]); // This should be populated with real data
 
-    const tabs = ['Pending Certifications for review', 'Approved Certifications'];
+   const mainTabs = ['Applications', 'Applications Awaiting OOP', 'Order of Payment', 'Certificates'];
+   const subTabs = {
+      'Applications': ['Applications for review', 'Accepted Applications'],
+      'Applications Awaiting OOP': ['Awaiting OOP', 'Created OOP'],
+      'Order of Payment': ['Pending Approval', 'Approved OOP'],
+      'Certificates': ['Pending Certification', 'Certified Certificates']
+   };
 
-    const filteredApplications = useMemo(() => {
-        return applications.filter(app =>
-            app.customId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            app.ownerName.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    }, [applications, searchTerm]);
+   const filteredApplications = useMemo(() => {
+      return applications.filter(app =>
+         app.customId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         app.ownerName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+   }, [applications, searchTerm]);
 
-    const getStatusColor = (status) => {
-        switch (status.toLowerCase()) {
-            case 'pending review': return 'bg-yellow-100 text-yellow-800';
-            case 'approved': return 'bg-green-100 text-green-800';
-            default: return 'bg-gray-100 text-gray-800';
-        }
-    };
+   const getStatusColor = (status) => {
+      switch (status.toLowerCase()) {
+         case 'pending review': return 'bg-yellow-100 text-yellow-800';
+         case 'approved': return 'bg-green-100 text-green-800';
+         default: return 'bg-gray-100 text-gray-800';
+      }
+   };
 
-    const renderTable = () => {
-        if (filteredApplications.length === 0) {
-            return <p className="text-center text-gray-500">No certifications found.</p>;
-        }
-
-        return (
-            <div className="bg-white rounded-lg shadow overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                        <tr>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CERTIFICATION NUMBER</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">APPLICANT NAME</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DATE</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TYPE</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTIONS</th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                        {filteredApplications.map((app) => (
-                            <ApplicationRow
-                                key={app._id}
-                                app={app}
-                                onView={() => {}} // Implement these functions
-                                onPrint={() => {}}
-                                onReview={() => {}}
-                                getStatusColor={getStatusColor}
-                            />
-                        ))}
-                    </tbody>
-                </table>
+   const renderTabDescription = () => {
+      if (activeSubTab === 'Applications for review') {
+         return (
+            <div className="mb-4 -mt-4">
+               <h1 className="text-[12px] text-green-800">This is the list of applications pending review to check for completeness and supporting documents.<br /><strong>After reviewing, the application will be forwarded to the Chief RPS/TSD for approval.</strong></h1>
             </div>
-        );
-    };
-
-    return (
-        <div className="min-h-screen bg-green-50">
-            <div className="container mx-auto px-4 sm:px-6 py-8 pt-24">
-                <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-3xl font-bold text-green-800">PENR/CENR Officer Dashboard</h1>
-                    <Button onClick={() => {}} variant="outline">
-                        <RefreshCw className="mr-2 h-4 w-4" />
-                        Refresh
-                    </Button>
-                </div>
-                <div className="mb-6 overflow-x-auto">
-                    <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-                        {tabs.map((tab) => (
-                            <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
-                            >
-                                {tab}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-                <div className="mb-6">
-                    <Input
-                        type="text"
-                        placeholder="Search certifications..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="border rounded-md p-2 w-full"
-                    />
-                </div>
-                {renderTable()}
+         );
+      }
+      if (activeSubTab === 'Accepted Applications') {
+         return (
+            <div className="mb-4 -mt-4">
+               <h1 className="text-[12px] text-green-800">This is the list of applications that have been accepted after review.</h1>
             </div>
-        </div>
-    );
+         );
+      }
+      if (activeSubTab === 'Pending Certification') {
+         return (
+            <div className="mb-4 -mt-4">
+               <h1 className="text-[12px] text-green-800">This is the list of applications pending certification.</h1>
+            </div>
+         );
+      }
+      if (activeSubTab === 'Certified Certificates') {
+         return (
+            <div className="mb-4 -mt-4">
+               <h1 className="text-[12px] text-green-800">This is the list of certificates that have been certified.</h1>
+            </div>
+         );
+      }
+   };
+
+   const renderTable = () => {
+      if (filteredApplications.length === 0) {
+         return <p className="text-center text-gray-500">No applications found.</p>;
+      }
+
+      return (
+         <div className="bg-white rounded-lg shadow overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+               <thead className="bg-gray-50">
+                  <tr>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CERTIFICATION NUMBER</th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">APPLICANT NAME</th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DATE</th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TYPE</th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTIONS</th>
+                  </tr>
+               </thead>
+               <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredApplications.map((app) => (
+                     <ApplicationRow
+                        key={app._id}
+                        app={app}
+                        onView={() => { }} // Implement these functions
+                        onPrint={() => { }}
+                        onReview={() => { }}
+                        getStatusColor={getStatusColor}
+                     />
+                  ))}
+               </tbody>
+            </table>
+         </div>
+      );
+   };
+
+   return (
+      <div className="min-h-screen bg-green-50">
+         <div className="container mx-auto px-4 sm:px-6 py-8 pt-24">
+            <div className="flex justify-between items-center mb-6">
+               <h1 className="text-3xl font-bold text-green-800">PENR/CENR Officer Dashboard</h1>
+               <Button onClick={() => { }} variant="outline">
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Refresh
+               </Button>
+            </div>
+            {/* Main Tabs */}
+            <div className="mb-6 overflow-x-auto">
+               <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
+                  {mainTabs.map((tab) => (
+                     <button
+                        key={tab}
+                        onClick={() => {
+                           setActiveMainTab(tab);
+                           setActiveSubTab(subTabs[tab][0]);
+                        }}
+                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeMainTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
+                     >
+                        {tab}
+                     </button>
+                  ))}
+               </div>
+            </div>
+            {/* Subtabs */}
+            <div className="mb-6 overflow-x-auto">
+               <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
+                  {subTabs[activeMainTab].map((tab) => (
+                     <button
+                        key={tab}
+                        onClick={() => setActiveSubTab(tab)}
+                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeSubTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
+                     >
+                        {tab}
+                     </button>
+                  ))}
+               </div>
+            </div>
+            {renderTabDescription()}
+            <div className="mb-6">
+               <Input
+                  type="text"
+                  placeholder="Search applications..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="border rounded-md p-2 w-full"
+               />
+            </div>
+            {renderTable()}
+         </div>
+      </div>
+   );
 };
 
 export default PENRCENROfficerDashboard;

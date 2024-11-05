@@ -41,6 +41,7 @@ const csawResolvers = {
                applicantId: user.id,
                applicationType: 'Chainsaw Registration',
                status: 'Submitted',
+               currentStage: 'TechnicalStaffReview',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
                dateOfAcquisition: new Date(input.dateOfAcquisition).toISOString(),
@@ -136,10 +137,10 @@ const csawResolvers = {
                applicantId: user.id,
                applicationType: 'Chainsaw Registration',
                status: 'Draft',
+               currentStage: 'Submitted',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
-               dateOfAcquisition: new Date().toISOString(),
-               // dateOfAcquisition: input.dateOfAcquisition ? new Date(input.dateOfAcquisition).toISOString() : null,
+               dateOfAcquisition: new Date(input.dateOfAcquisition).toISOString(),
             };
 
             const newPermit = new CSAWPermit(permitData);

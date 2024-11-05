@@ -7,9 +7,11 @@ const permitTypes = gql`
     applicationType: String!
     status: String!
     currentStage: String!
-    recordedByReceivingClerk: Boolean!
-    reviewedByChief: Boolean!
-    acceptedByTechnicalStaff: Boolean!
+    recordedByReceivingClerk: Boolean
+    acceptedByTechnicalStaff: Boolean
+    acceptedByReceivingClerk: Boolean
+    reviewedByChief: Boolean
+    awaitingOOP: Boolean
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -29,9 +31,11 @@ const permitTypes = gql`
     applicationType: String!
     status: String!
     currentStage: String!
-    recordedByReceivingClerk: Boolean!
-    reviewedByChief: Boolean!
-    acceptedByTechnicalStaff: Boolean!
+    recordedByReceivingClerk: Boolean
+    acceptedByTechnicalStaff: Boolean
+    acceptedByReceivingClerk: Boolean
+    reviewedByChief: Boolean
+    awaitingOOP: Boolean
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -53,9 +57,11 @@ const permitTypes = gql`
     applicationType: String!
     status: String!
     currentStage: String!
-    recordedByReceivingClerk: Boolean!
-    reviewedByChief: Boolean!
-    acceptedByTechnicalStaff: Boolean!
+    recordedByReceivingClerk: Boolean
+    acceptedByTechnicalStaff: Boolean
+    acceptedByReceivingClerk: Boolean
+    reviewedByChief: Boolean
+    awaitingOOP: Boolean
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -86,9 +92,11 @@ const permitTypes = gql`
     applicationType: String!
     status: String!
     currentStage: String!
-    recordedByReceivingClerk: Boolean!
-    reviewedByChief: Boolean!
-    acceptedByTechnicalStaff: Boolean!
+    recordedByReceivingClerk: Boolean
+    acceptedByTechnicalStaff: Boolean
+    acceptedByReceivingClerk: Boolean
+    reviewedByChief: Boolean
+    awaitingOOP: Boolean
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -110,9 +118,11 @@ const permitTypes = gql`
     applicationType: String!
     status: String!
     currentStage: String!
-    recordedByReceivingClerk: Boolean!
-    reviewedByChief: Boolean!
-    acceptedByTechnicalStaff: Boolean!
+    recordedByReceivingClerk: Boolean
+    acceptedByTechnicalStaff: Boolean
+    acceptedByReceivingClerk: Boolean
+    reviewedByChief: Boolean
+    awaitingOOP: Boolean
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -133,9 +143,11 @@ const permitTypes = gql`
     applicationType: String!
     status: String!
     currentStage: String!
-    recordedByReceivingClerk: Boolean!
-    reviewedByChief: Boolean!
-    acceptedByTechnicalStaff: Boolean!
+    recordedByReceivingClerk: Boolean
+    acceptedByTechnicalStaff: Boolean
+    acceptedByReceivingClerk: Boolean
+    reviewedByChief: Boolean
+    awaitingOOP: Boolean
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -160,9 +172,11 @@ const permitTypes = gql`
     applicationType: String!
     status: String!
     currentStage: String!
-    recordedByReceivingClerk: Boolean!
-    reviewedByChief: Boolean!
-    acceptedByTechnicalStaff: Boolean!
+    recordedByReceivingClerk: Boolean
+    acceptedByTechnicalStaff: Boolean
+    acceptedByReceivingClerk: Boolean
+    reviewedByChief: Boolean
+    awaitingOOP: Boolean
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -253,7 +267,12 @@ const permitTypes = gql`
       status: String,
       currentStage: String,
       acceptedByTechnicalStaff: Boolean,
-      recordedByReceivingClerk: Boolean
+      returnedByTechnicalStaff: Boolean,
+      reviewedByChief: Boolean,
+      acceptedByReceivingClerk: Boolean,
+      returnedByReceivingClerk: Boolean,
+      recordedByReceivingClerk: Boolean,
+      awaitingOOP: Boolean
     ): [Permit!]!
     getApplicationsByCurrentStage(currentStage: String!): [Permit!]!
   }
@@ -288,7 +307,11 @@ const permitTypes = gql`
       currentStage: String!,
       status: String!,
       notes: String,
-      acceptedByTechnicalStaff: Boolean
+      reviewedByChief: Boolean,
+      awaitingOOP: Boolean,
+      acceptedByTechnicalStaff: Boolean,
+      acceptedByReceivingClerk: Boolean,
+      recordedByReceivingClerk: Boolean
     ): Permit!
     acceptApplication(id: ID!): Permit!
     recordApplication(id: ID!, currentStage: String!, status: String!): Permit!

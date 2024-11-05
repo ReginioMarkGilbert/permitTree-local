@@ -46,7 +46,6 @@ client.defaultOptions.watchQuery.onError = (error) => {
 };
 
 export default client;
-
 // Function to handle file uploads
 // export const uploadFile = async (file) => {
 //   const formData = new FormData();

@@ -71,7 +71,7 @@ const UserApplicationsStatusPage = () => {
    const mainTabs = ['Applications', 'Order Of Payments'];
    const subTabs = {
       'Applications': ['Draft', 'Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected'],
-      'Order Of Payments': ['Awaiting Payment', 'Payment Proof Submitted', 'Returned', 'Approved', 'Completed']
+      'Order Of Payments': ['Awaiting Payment', 'Payment Proof Submitted', 'Payment Proof Rejected', 'Payment Proof Approved', 'Issued OR', 'Completed']
    };
 
    const filteredApplications = useMemo(() => {

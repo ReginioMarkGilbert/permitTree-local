@@ -1,24 +1,81 @@
 const mongoose = require('mongoose');
+const { generateBillNo } = require('../utils/billNumberGenerator');
 
-const OOPSchema = new mongoose.Schema({
-   oopNumber: { type: String, required: true, unique: true },
-   permitId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Permit',
-      required: true
-   },
-   amount: { type: Number, required: true },
-   status: {
-      type: String,
-      required: true,
-      enum: ['Pending', 'Approved', 'Paid', 'Cancelled']
-   },
-   dateIssued: {
-      type: Date,
-      default: Date.now
-   },
-   datePaid: Date,
-   paymentProof: String
-}, { timestamps: true });
+const oopSchema = new mongoose.Schema({
+  billNo: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  applicationId: {
+    type: String,
+    required: true,
+    ref: 'Permit'
+  },
+  date: {
+    type: Date,
+    default: Date.now
+  },
+  namePayee: {
+    type: String,
+    required: true
+  },
+  address: {
+    type: String,
+    required: true
+  },
+  natureOfApplication: {
+    type: String,
+    required: true
+  },
+  items: [{
+    legalBasis: String,
+    description: String,
+    amount: Number
+  }],
+  totalAmount: {
+    type: Number,
+    required: true
+  },
+  OOPstatus: {
+    type: String,
+    enum: ['PendingSignature', 'For Approval', 'Awaiting Payment', 'Rejected'],
+    default: 'PendingSignature'
+  },
+  OOPSignedByTwoSignatories: {
+    type: Boolean,
+    default: false
+  },
+  OOPApproved: {
+    type: Boolean,
+    default: false
+  },
+  signatures: {
+    chiefRPS: Date,
+    technicalServices: Date
+  },
+  rpsSignatureImage: String,
+  tsdSignatureImage: String,
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'User'
+  }
+}, {
+  timestamps: true
+});
 
-module.exports = mongoose.model('OOP', OOPSchema);
+// Change to pre-validate hook
+oopSchema.pre('validate', async function(next) {
+  try {
+    if (!this.billNo) {
+      this.billNo = await generateBillNo();
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+const OOP = mongoose.model('OOP', oopSchema);
+module.exports = OOP;

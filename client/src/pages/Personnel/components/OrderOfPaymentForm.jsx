@@ -1,3 +1,4 @@
+// form for creating order of payment - multi step form
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -5,16 +6,77 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon, PlusIcon, MinusIcon, UploadIcon, ArrowLeft } from "lucide-react";
+import { CalendarIcon, PlusIcon, MinusIcon, UploadIcon, ArrowLeft, X } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import "@/components/ui/styles/customScrollbar.css";
+import { useOrderOfPayments } from '../hooks/useOrderOfPayments';
+import { cn } from "@/lib/utils";
+import { ChevronDown } from 'lucide-react';
+
+const CustomSelect = ({ options, onSelect, placeholder }) => {
+   const [isOpen, setIsOpen] = useState(false);
+   const [selected, setSelected] = useState(null);
+
+   const handleSelect = (option) => {
+      setSelected(option);
+      onSelect(option.id);
+      setIsOpen(false);
+   };
+
+   return (
+      <div className="relative">
+         <button
+            type="button"
+            onClick={() => setIsOpen(!isOpen)}
+            className={cn(
+               "flex h-10 w-full items-center justify-between rounded-md border border-input",
+               "bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground",
+               "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+               "disabled:cursor-not-allowed disabled:opacity-50"
+            )}
+         >
+            <span>{selected ? `${selected.applicationNumber} - ${selected.ownerName || selected.name}` : placeholder}</span>
+            <ChevronDown className="h-4 w-4 opacity-50" />
+         </button>
+
+         {isOpen && (
+            <div className="absolute z-50 w-full mt-1 bg-white rounded-md shadow-lg border border-gray-200">
+               <div className="py-1 max-h-60 overflow-auto">
+                  {options.map((option) => (
+                     <button
+                        key={option.id}
+                        type="button"
+                        className={cn(
+                           "w-full px-3 py-2 text-left text-sm hover:bg-gray-100",
+                           selected?.id === option.id && "bg-gray-100"
+                        )}
+                        onClick={() => handleSelect(option)}
+                     >
+                        {option.applicationNumber} - {option.ownerName || option.name}
+                     </button>
+                  ))}
+               </div>
+            </div>
+         )}
+      </div>
+   );
+};
 
 const OrderOfPaymentForm = ({ onClose }) => {
    const navigate = useNavigate();
+
+   const {
+      applications,
+      applicationsLoading,
+      applicationsError,
+      createOOP,
+      updateSignature
+   } = useOrderOfPayments();
+
    const [step, setStep] = useState(1);
    const [formData, setFormData] = useState({
       applicationId: '',
@@ -26,53 +88,23 @@ const OrderOfPaymentForm = ({ onClose }) => {
       natureOfApplication: '',
       fees: [{ id: 1, legalBasis: '', description: '', amount: '' }],
       rpsSignature: null,
-      tsdSignature: null,
-      paymentDate: null,
-      paymentTime: null,
-      receiptDate: null,
-      receiptTime: null
+      tsdSignature: null
    });
-   const [acceptedApplications, setAcceptedApplications] = useState([]);
-   const [existingOOPs, setExistingOOPs] = useState([]);
-   const [loading, setLoading] = useState(true);
-   const [error, setError] = useState(null);
 
    const rpsFileInputRef = useRef(null);
    const tsdFileInputRef = useRef(null);
 
-   const fetchAcceptedApplications = useCallback(async () => {
-      try {
-         setLoading(true);
-         const token = localStorage.getItem('token');
-         const response = await axios.get('http://localhost:3000/api/admin/all-applications', {
-            params: { status: 'Accepted' },
-            headers: { Authorization: token }
-         });
-         setAcceptedApplications(response.data);
-         setLoading(false);
-      } catch (error) {
-         console.error('Error fetching accepted applications:', error);
-         setError('Failed to fetch accepted applications');
-         setLoading(false);
-         toast.error('Failed to fetch accepted applications');
-      }
-   }, []);
-
-   useEffect(() => {
-      fetchAcceptedApplications();
-   }, [fetchAcceptedApplications]);
-
    const handleApplicationSelect = (applicationId) => {
-      const selectedApp = acceptedApplications.find(app => app._id === applicationId);
+      const selectedApp = applications.find(app => app.id === applicationId);
       if (selectedApp) {
-         setFormData({
-            ...formData,
-            applicationId: selectedApp.customId || selectedApp._id,
-            applicantName: selectedApp.ownerName || '',
-            namePayee: selectedApp.ownerName || '',
-            address: selectedApp.address || '',
-            natureOfApplication: selectedApp.permitType || ''
-         });
+         setFormData(prev => ({
+            ...prev,
+            applicationId: selectedApp.applicationNumber,
+            applicantName: selectedApp.ownerName || selectedApp.name,
+            namePayee: selectedApp.ownerName || selectedApp.name,
+            address: selectedApp.address,
+            natureOfApplication: selectedApp.applicationType
+         }));
       }
    };
 
@@ -147,48 +179,69 @@ const OrderOfPaymentForm = ({ onClose }) => {
    const handleSubmit = async (e) => {
       e.preventDefault();
       try {
-         const token = localStorage.getItem('token');
+         // Validate fees before submission
+         if (!formData.fees || formData.fees.length === 0) {
+            toast.error('Please add at least one fee');
+            return;
+         }
 
-         // Calculate total amount
-         const totalAmount = formData.fees.reduce((sum, fee) => sum + Number(fee.amount || 0), 0);
+         // Validate required fields
+         if (!formData.namePayee || !formData.address || !formData.natureOfApplication) {
+            toast.error('Please fill in all required fields');
+            return;
+         }
 
-         // Prepare the data for submission
-         const submissionData = {
+         // Transform and validate fees
+         const validFees = formData.fees.filter(fee =>
+            fee.legalBasis && fee.description && fee.amount && !isNaN(parseFloat(fee.amount))
+         );
+
+         if (validFees.length === 0) {
+            toast.error('Please add valid fee details');
+            return;
+         }
+
+         const transformedData = {
             applicationId: formData.applicationId,
-            billNo: formData.billNo,
-            date: formData.date,
+            namePayee: formData.namePayee,
             address: formData.address,
             natureOfApplication: formData.natureOfApplication,
-            items: formData.fees.map(fee => ({
+            items: validFees.map(fee => ({
                legalBasis: fee.legalBasis,
                description: fee.description,
-               amount: Number(fee.amount)
+               amount: parseFloat(fee.amount)
             })),
-            totalAmount: totalAmount,
-            status: 'Pending Signature',
-            signatures: {
-               chiefRPS: formData.rpsSignature ? new Date() : null,
-               technicalServices: null
-            },
-            rpsSignatureImage: formData.rpsSignature // Add this line to include the signature image
+            rpsSignatureImage: formData.rpsSignature || null,
+            tsdSignatureImage: formData.tsdSignature || null
          };
 
-         console.log('Submitting data:', submissionData);
+         console.log('Submitting OOP data:', transformedData);
 
-         const response = await axios.post('http://localhost:3000/api/admin/order-of-payments', submissionData, {
-            headers: { Authorization: token }
-         });
-         console.log('Response:', response.data);
+         await createOOP(transformedData);
          toast.success('Order of Payment created successfully');
          onClose();
       } catch (error) {
-         console.error('Error creating Order of Payment:', error.response?.data || error.message);
-         toast.error(`Failed to create Order of Payment: ${error.response?.data?.message || error.message}`);
+         console.error('Error creating Order of Payment:', error);
+         toast.error(`Failed to create Order of Payment: ${error.message}`);
       }
    };
 
    const handleBack = () => {
-      navigate('/chief-rps/order-of-payment');
+      navigate('/personnel/order-of-payment');
+   };
+
+   useEffect(() => {
+      console.log('Applications in form:', applications);
+   }, [applications]);
+
+   const handleRemoveSignature = (signatureType, inputRef) => {
+      // Clear the signature from formData
+      setFormData(prev => ({ ...prev, [signatureType]: null }));
+
+      // Reset the file input
+      if (inputRef.current) {
+         inputRef.current.value = '';
+      }
    };
 
    const renderStep = () => {
@@ -197,20 +250,22 @@ const OrderOfPaymentForm = ({ onClose }) => {
             return (
                <div className="space-y-4">
                   <Label htmlFor="applicationSelect">Select Application</Label>
-                  <Select onValueChange={handleApplicationSelect}>
-                     <SelectTrigger>
-                        <SelectValue placeholder="Select an application" />
-                     </SelectTrigger>
-                     <SelectContent>
-                        {acceptedApplications
-                           .filter(app => !existingOOPs.some(oop => oop.applicationId === app.customId))
-                           .map((app) => (
-                              <SelectItem key={app._id} value={app._id}>
-                                 {app.customId || app._id} - {app.ownerName}
-                              </SelectItem>
-                           ))}
-                     </SelectContent>
-                  </Select>
+                  <div className="text-sm text-gray-500 mb-2">
+                     Available applications: {applications?.length || 0}
+                  </div>
+
+                  {applicationsLoading ? (
+                     <div className="h-10 flex items-center px-3 border rounded-md bg-gray-50">
+                        Loading...
+                     </div>
+                  ) : (
+                     <CustomSelect
+                        options={applications}
+                        onSelect={handleApplicationSelect}
+                        placeholder="Select an application"
+                     />
+                  )}
+
                   <Label htmlFor="applicationId">Application ID</Label>
                   <Input
                      id="applicationId"
@@ -237,12 +292,9 @@ const OrderOfPaymentForm = ({ onClose }) => {
                         <div className="grid grid-cols-2 gap-4">
                            <div>
                               <Label htmlFor="billNo">Bill No.</Label>
-                              <Input
-                                 id="billNo"
-                                 name="billNo"
-                                 value={formData.billNo}
-                                 onChange={handleInputChange}
-                              />
+                              <div className="h-10 flex items-center px-3 border rounded-md bg-gray-50">
+                                 Auto-generated
+                              </div>
                            </div>
                            <div>
                               <Label>Date</Label>
@@ -264,8 +316,9 @@ const OrderOfPaymentForm = ({ onClose }) => {
                               </Popover>
                            </div>
                         </div>
+
                         <div>
-                           <Label htmlFor="namePayee">Name/Payee:</Label>
+                           <Label htmlFor="namePayee">Name/Payee</Label>
                            <Input
                               id="namePayee"
                               name="namePayee"
@@ -273,8 +326,9 @@ const OrderOfPaymentForm = ({ onClose }) => {
                               onChange={handleInputChange}
                            />
                         </div>
+
                         <div>
-                           <Label htmlFor="address">Address:</Label>
+                           <Label htmlFor="address">Address</Label>
                            <Input
                               id="address"
                               name="address"
@@ -282,8 +336,9 @@ const OrderOfPaymentForm = ({ onClose }) => {
                               onChange={handleInputChange}
                            />
                         </div>
+
                         <div>
-                           <Label htmlFor="natureOfApplication">Nature of Application/Permit/Documents being secured:</Label>
+                           <Label htmlFor="natureOfApplication">Nature of Application</Label>
                            <Input
                               id="natureOfApplication"
                               name="natureOfApplication"
@@ -291,75 +346,99 @@ const OrderOfPaymentForm = ({ onClose }) => {
                               onChange={handleInputChange}
                            />
                         </div>
-                        <Table>
-                           <TableHeader>
-                              <TableRow>
-                                 <TableHead>Legal Basis (DAO/SEC)</TableHead>
-                                 <TableHead>Description and Computation of Fees and Charges Assessed</TableHead>
-                                 <TableHead>Amount</TableHead>
-                                 <TableHead></TableHead>
-                              </TableRow>
-                           </TableHeader>
-                           <TableBody>
-                              {formData.fees.map((fee, index) => (
-                                 <TableRow key={fee.id}>
-                                    <TableCell>
-                                       <Input
-                                          value={fee.legalBasis}
-                                          onChange={(e) => handleFeeChange(fee.id, 'legalBasis', e.target.value)}
-                                       />
-                                    </TableCell>
-                                    <TableCell>
-                                       <Input
-                                          value={fee.description}
-                                          onChange={(e) => handleFeeChange(fee.id, 'description', e.target.value)}
-                                       />
-                                    </TableCell>
-                                    <TableCell>
-                                       <Input
-                                          type="number"
-                                          value={fee.amount}
-                                          onChange={(e) => handleFeeChange(fee.id, 'amount', e.target.value)}
-                                       />
-                                    </TableCell>
-                                    <TableCell>
-                                       {index > 0 && (
-                                          <Button variant="ghost" size="icon" onClick={() => removeFeeRow(fee.id)}>
-                                             <MinusIcon className="h-4 w-4" />
-                                          </Button>
-                                       )}
-                                    </TableCell>
+
+                        <div>
+                           <Label>Fees and Charges</Label>
+                           <Table>
+                              <TableHeader>
+                                 <TableRow>
+                                    <TableHead>Legal Basis (DAO/SEC)</TableHead>
+                                    <TableHead>Description</TableHead>
+                                    <TableHead>Amount</TableHead>
+                                    <TableHead></TableHead>
                                  </TableRow>
-                              ))}
-                           </TableBody>
-                        </Table>
-                        <div className="flex justify-between items-center">
-                           <Button variant="outline" onClick={addFeeRow} type="button">
-                              <PlusIcon className="h-4 w-4 mr-2" /> Add Row
-                           </Button>
-                           <div className="flex items-center">
-                              <Label className="mr-2">Total:</Label>
-                              <Input
-                                 className="w-32"
-                                 value={`₱ ${formData.fees.reduce((sum, fee) => sum + Number(fee.amount || 0), 0).toFixed(2)}`}
-                                 readOnly
-                              />
+                              </TableHeader>
+                              <TableBody>
+                                 {formData.fees.map((fee, index) => (
+                                    <TableRow key={fee.id}>
+                                       <TableCell>
+                                          <Input
+                                             value={fee.legalBasis}
+                                             onChange={(e) => handleFeeChange(fee.id, 'legalBasis', e.target.value)}
+                                             placeholder="e.g., DAO 2000-21"
+                                          />
+                                       </TableCell>
+                                       <TableCell>
+                                          <Input
+                                             value={fee.description}
+                                             onChange={(e) => handleFeeChange(fee.id, 'description', e.target.value)}
+                                             placeholder="Description of fee"
+                                          />
+                                       </TableCell>
+                                       <TableCell>
+                                          <Input
+                                             type="number"
+                                             value={fee.amount}
+                                             onChange={(e) => handleFeeChange(fee.id, 'amount', e.target.value)}
+                                             placeholder="0.00"
+                                          />
+                                       </TableCell>
+                                       <TableCell>
+                                          {index > 0 && (
+                                             <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => removeFeeRow(fee.id)}
+                                                className="text-red-500 hover:text-red-700"
+                                             >
+                                                <MinusIcon className="h-4 w-4" />
+                                             </Button>
+                                          )}
+                                       </TableCell>
+                                    </TableRow>
+                                 ))}
+                              </TableBody>
+                           </Table>
+
+                           <div className="flex justify-between items-center mt-4">
+                              <Button variant="outline" onClick={addFeeRow} type="button">
+                                 <PlusIcon className="h-4 w-4 mr-2" /> Add Fee
+                              </Button>
+                              <div className="flex items-center">
+                                 <Label className="mr-2">Total:</Label>
+                                 <div className="w-32 px-3 py-2 border rounded-md bg-gray-50">
+                                    ₱ {formData.fees.reduce((sum, fee) => sum + Number(fee.amount || 0), 0).toFixed(2)}
+                                 </div>
+                              </div>
                            </div>
                         </div>
-                        {/* Signature upload section */}
+
+                        {/* Signature section */}
                         <div className="grid grid-cols-2 gap-8 mt-8">
-                           <div className="text-center relative">
-                              <div className="h-24 mb-4">
-                                 {formData.rpsSignature && (
-                                    <img
-                                       src={formData.rpsSignature}
-                                       alt="RPS E-Signature"
-                                       className="max-w-full max-h-full mx-auto object-contain"
-                                    />
+                           <div className="text-center">
+                              <div className="relative h-24 mb-4 border-2 border-dashed rounded-md flex items-center justify-center">
+                                 {formData.rpsSignature ? (
+                                    <>
+                                       <img
+                                          src={formData.rpsSignature}
+                                          alt="RPS Signature"
+                                          className="max-w-full max-h-full object-contain"
+                                       />
+                                       <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-red-100 hover:bg-red-200"
+                                          onClick={() => handleRemoveSignature('rpsSignature', rpsFileInputRef)}
+                                       >
+                                          <X className="h-4 w-4 text-red-600" />
+                                       </Button>
+                                    </>
+                                 ) : (
+                                    <p className="text-gray-400">RPS Signature</p>
                                  )}
                               </div>
-                              <Input className="text-center font-semibold" defaultValue="SIMEON R. DIAZ" readOnly />
-                              <p className="text-xs mt-1">SVEMS/Chief, RPS</p>
+                              <p className="font-semibold">SIMEON R. DIAZ</p>
+                              <p className="text-xs text-gray-600">SVEMS/Chief, RPS</p>
                               <input
                                  type="file"
                                  ref={rpsFileInputRef}
@@ -374,21 +453,34 @@ const OrderOfPaymentForm = ({ onClose }) => {
                                  onClick={(e) => triggerFileInput(e, rpsFileInputRef)}
                               >
                                  <UploadIcon className="h-4 w-4 mr-2" />
-                                 Upload E-Signature
+                                 Upload Signature
                               </Button>
                            </div>
-                           <div className="text-center relative">
-                              <div className="h-24 mb-4">
-                                 {formData.tsdSignature && (
-                                    <img
-                                       src={formData.tsdSignature}
-                                       alt="TSD E-Signature"
-                                       className="max-w-full max-h-full mx-auto object-contain"
-                                    />
+
+                           <div className="text-center">
+                              <div className="relative h-24 mb-4 border-2 border-dashed rounded-md flex items-center justify-center">
+                                 {formData.tsdSignature ? (
+                                    <>
+                                       <img
+                                          src={formData.tsdSignature}
+                                          alt="TSD Signature"
+                                          className="max-w-full max-h-full object-contain"
+                                       />
+                                       <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-red-100 hover:bg-red-200"
+                                          onClick={() => handleRemoveSignature('tsdSignature', tsdFileInputRef)}
+                                       >
+                                          <X className="h-4 w-4 text-red-600" />
+                                       </Button>
+                                    </>
+                                 ) : (
+                                    <p className="text-gray-400">TSD Signature</p>
                                  )}
                               </div>
-                              <Input className="text-center font-semibold" defaultValue="Engr. CYNTHIA U. LOZANO" readOnly />
-                              <p className="text-xs mt-1">Chief, Technical Services Division</p>
+                              <p className="font-semibold">Engr. CYNTHIA U. LOZANO</p>
+                              <p className="text-xs text-gray-600">Chief, Technical Services Division</p>
                               <input
                                  type="file"
                                  ref={tsdFileInputRef}
@@ -403,23 +495,8 @@ const OrderOfPaymentForm = ({ onClose }) => {
                                  onClick={(e) => triggerFileInput(e, tsdFileInputRef)}
                               >
                                  <UploadIcon className="h-4 w-4 mr-2" />
-                                 Upload E-Signature
+                                 Upload Signature
                               </Button>
-                           </div>
-                        </div>
-                        {/* Date fields */}
-                        <div className="grid grid-cols-2 gap-4 mt-6">
-                           <div>
-                              <Label>Date of payment of applicant:</Label>
-                              <div className="mt-1 p-2 bg-gray-100 rounded-md text-gray-600">
-                                 -- -- --
-                              </div>
-                           </div>
-                           <div>
-                              <Label>Date for statutory receipt by applicant:</Label>
-                              <div className="mt-1 p-2 bg-gray-100 rounded-md text-gray-600">
-                                 -- -- --
-                              </div>
                            </div>
                         </div>
                      </div>
@@ -430,6 +507,14 @@ const OrderOfPaymentForm = ({ onClose }) => {
             return null;
       }
    };
+
+   if (applicationsError) {
+      return (
+         <div className="p-4 text-red-600 bg-red-50 rounded-md">
+            Error loading applications: {applicationsError.message}
+         </div>
+      );
+   }
 
    return (
       <div className="container mx-auto px-4 py-8 mt-16">

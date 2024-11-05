@@ -45,6 +45,12 @@ const userResolvers = {
         } : null
       };
     },
+    getCurrentUser: async (_, __, { req }) => {
+      if (!req.user) {
+        throw new Error('Not authenticated');
+      }
+      return await User.findById(req.user._id);
+    },
   },
   Mutation: {
     registerUser: async (_, { firstName, lastName, username, password }) => {

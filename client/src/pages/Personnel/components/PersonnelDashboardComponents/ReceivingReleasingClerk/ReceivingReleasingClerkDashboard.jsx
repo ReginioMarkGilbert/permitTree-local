@@ -8,13 +8,19 @@ import { useApplications } from '../../../hooks/useApplications';
 const ReceivingReleasingClerkDashboard = () => {
    const [searchTerm, setSearchTerm] = useState('');
    const [activeMainTab, setActiveMainTab] = useState('Applications');
-   const [activeSubTab, setActiveSubTab] = useState('Pending Applications');
+   const [activeSubTab, setActiveSubTab] = useState('Applications For Review'); // setdefault tab
 
    const getQueryParamsForTab = (tab) => {
       switch (tab) {
-         case 'Pending Applications':
+         case 'Applications For Review':
+            return { currentStage: 'ReceivingClerkReview' };
+         case 'Returned Applications':
+            return { currentStage: 'ReturnedByReceivingClerk' };
+         case 'Accepted Applications':
+            return { acceptedByReceivingClerk: true };
+         case 'Applications For Recording':
             return { currentStage: 'ForRecordByReceivingClerk' };
-         case 'Recorded Applications':
+         case 'Reviewed/Recorded Applications':
             return { recordedByReceivingClerk: true };
          case 'Pending Release':
             return { status: 'Approved', currentStage: 'PendingRelease' };
@@ -29,7 +35,7 @@ const ReceivingReleasingClerkDashboard = () => {
 
    const mainTabs = ['Applications', 'Certificates'];
    const subTabs = {
-      'Applications': ['Pending Applications', 'Recorded Applications'],
+      'Applications': ['Applications For Review', 'Returned Applications', 'Accepted Applications', 'Applications For Recording', 'Reviewed/Recorded Applications'],
       'Certificates': ['Pending Release', 'Released Certificates']
    };
 
@@ -52,6 +58,7 @@ const ReceivingReleasingClerkDashboard = () => {
          case 'released': return 'bg-green-100 text-green-800';
          default: return 'bg-gray-100 text-gray-800';
       }
+
    };
 
    const handleRecordComplete = () => {
@@ -80,7 +87,6 @@ const ReceivingReleasingClerkDashboard = () => {
       if (filteredApplications.length === 0) {
          return <p className="text-center text-gray-500">No applications found.</p>;
       }
-
       return (
          <div className="bg-white rounded-lg shadow overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">

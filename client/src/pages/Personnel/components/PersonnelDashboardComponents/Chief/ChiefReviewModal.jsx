@@ -5,12 +5,27 @@ import { useMutation, gql } from '@apollo/client';
 import { toast } from 'sonner';
 
 const REVIEW_APPLICATION = gql`
-  mutation ReviewApplication($id: ID!, $currentStage: String!, $status: String!, $notes: String) {
-    updatePermitStage(id: $id, currentStage: $currentStage, status: $status, notes: $notes) {
+  mutation ReviewApplication(
+    $id: ID!,
+    $currentStage: String!,
+    $status: String!,
+    $notes: String,
+    $reviewedByChief: Boolean,
+    $awaitingOOP: Boolean
+  ) {
+    updatePermitStage(
+      id: $id,
+      currentStage: $currentStage,
+      status: $status,
+      notes: $notes,
+      reviewedByChief: $reviewedByChief,
+      awaitingOOP: $awaitingOOP
+    ) {
       id
       currentStage
       status
       reviewedByChief
+      awaitingOOP
       history {
         notes
         timestamp
@@ -34,7 +49,9 @@ const ChiefReviewModal = ({ isOpen, onClose, application, onReviewComplete }) =>
                id: application.id,
                currentStage: 'ForInspectionByTechnicalStaff',
                status: 'In Progress',
-               notes: 'Application approved by Chief RPS'
+               notes: 'Application approved by Chief RPS',
+               reviewedByChief: true,
+               awaitingOOP: true
             }
          });
          console.log('Result:', result);
@@ -61,7 +78,9 @@ const ChiefReviewModal = ({ isOpen, onClose, application, onReviewComplete }) =>
                id: application.id,
                currentStage: 'ReturnedByChief',
                status: 'Returned',
-               notes: remarks
+               notes: remarks,
+               reviewedByChief: false,
+               awaitingOOP: false
             }
          });
          console.log('Result:', result);

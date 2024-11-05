@@ -12,6 +12,7 @@ const ptprResolvers = require('./resolvers/permitResolvers/ptprResolvers');
 const pltpResolvers = require('./resolvers/permitResolvers/pltpResolvers');
 const tcebpResolvers = require('./resolvers/permitResolvers/tcebpResolvers');
 const { userTypes } = require('./schema/userTypes');
+const orderOfPaymentsResolvers = require('./resolvers/oopResolvers');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
@@ -44,7 +45,8 @@ const server = new ApolloServer({
       pltcpResolvers,
       ptprResolvers,
       pltpResolvers,
-      tcebpResolvers
+      tcebpResolvers,
+      orderOfPaymentsResolvers
    ],
    context: ({ req }) => {
       const token = req.headers.authorization || '';

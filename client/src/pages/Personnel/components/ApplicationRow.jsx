@@ -45,7 +45,7 @@ const ApplicationRow = React.memo(({ app, onView, onPrint, onReview, onOrderOfPa
             )}
             {app.status === 'Accepted' && (
                <>
-                  <Button
+                  {/* <Button
                      variant="outline"
                      size="icon"
                      className="h-6 w-6 text-indigo-600 hover:text-indigo-700 border-indigo-200 hover:bg-indigo-50"
@@ -53,7 +53,7 @@ const ApplicationRow = React.memo(({ app, onView, onPrint, onReview, onOrderOfPa
                      title="Create Order of Payment"
                   >
                      <FileText className="h-3 w-3" />
-                  </Button>
+                  </Button> */}
                   <Button
                      variant="outline"
                      size="icon"

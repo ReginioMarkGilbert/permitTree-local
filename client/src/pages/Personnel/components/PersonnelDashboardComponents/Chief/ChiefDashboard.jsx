@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ChiefApplicationRow from './ChiefApplicationRow';
 import { useApplications } from '../../../hooks/useApplications';
+import { useOrderOfPayments } from '../../../hooks/useOrderOfPayments';
+import ChiefOOPRow from './ChiefOOPRow';
 
 const ChiefDashboard = () => {
    const [searchTerm, setSearchTerm] = useState('');
@@ -13,13 +15,19 @@ const ChiefDashboard = () => {
    const getQueryParamsForTab = (tab) => {
       switch (tab) {
          case 'Applications for Review':
-            return { currentStage: 'ChiefRPSReview' };
+            return { currentStage: 'ChiefRPSReview', reviewedByChief: false };
          case 'Completed Reviews':
             return { reviewedByChief: true };
+         case 'Awaiting OOP':
+            return { awaitingOOP: true };
+         case 'Created OOP':
+            return { awaitingOOP: false, OOPCreated: true };
          case 'Pending Signature':
-            return { status: 'Approved', currentStage: 'PendingSignature' };
+            return { OOPstatus: 'PendingSignature' };
+         case 'Signed Order Of Payment':
+            return { CertificateStatus: 'PendingSignature' };
          case 'Signed Certificates':
-            return { status: 'Signed' };
+            return { CertificateStatus: 'Approved' };
          default:
             return { currentStage: 'ChiefRPSReview' };
       }
@@ -27,11 +35,12 @@ const ChiefDashboard = () => {
 
    const { applications, loading, error, fetchApplications } = useApplications(getQueryParamsForTab(activeSubTab));
 
-   const mainTabs = ['Applications', 'Order Of Payment', 'Certificates'];
+   const mainTabs = ['Applications', 'Applications Awaiting OOP', 'Order Of Payment', 'Certificates'];
    const subTabs = {
       'Applications': ['Applications for Review', 'Completed Reviews'],
-      'Order Of Payment': ['Pending Signature', 'Awaiting Payment', 'Payment Proof Submitted', 'Completed'],
-      'Certificates': ['Pending Signature', 'Signed Certificates']
+      'Applications Awaiting OOP': ['Awaiting OOP', 'Created OOP'],
+      'Order Of Payment': ['Pending Signature', 'Signed Order Of Payment'],
+      'Certificates': ['Permit Pending Signature', 'Signed Permits']
    };
 
    const filteredApplications = useMemo(() => {
@@ -74,7 +83,75 @@ const ChiefDashboard = () => {
       }
    }
 
+   const {
+      oops,
+      oopsLoading,
+      oopsError,
+      refetch: refetchOOPs
+   } = useOrderOfPayments();
+
+   const renderOrderOfPaymentTable = () => {
+      if (oopsLoading) return <p className="text-center text-gray-500">Loading order of payments...</p>;
+      if (oopsError) {
+         console.error('Error fetching OOPs:', oopsError);
+         return <p className="text-center text-red-500">Error loading order of payments. Please try again later.</p>;
+      }
+
+      const filteredOOPs = oops.filter(oop => {
+         if (activeSubTab === 'Pending Signature') {
+            return oop.OOPstatus === 'PendingSignature';
+         } else if (activeSubTab === 'Signed Order Of Payment') {
+            return oop.OOPSignedByTwoSignatories === true && oop.OOPstatus === 'For Approval';
+         }
+         return true;
+      }).filter(oop =>
+         oop.applicationId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         oop.billNo.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
+      if (filteredOOPs.length === 0) {
+         return <p className="text-center text-gray-500">No order of payments found.</p>;
+      }
+
+      return (
+         <div className="bg-white rounded-lg shadow overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+               <thead className="bg-gray-50">
+                  <tr>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Application Number
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Bill Number
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                     </th>
+                  </tr>
+               </thead>
+               <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredOOPs.map((oop) => (
+                     <ChiefOOPRow
+                        key={oop._id}
+                        oop={oop}
+                     />
+                  ))}
+               </tbody>
+            </table>
+         </div>
+      );
+   };
+
    const renderTable = () => {
+      if (activeMainTab === 'Order Of Payment') {
+         return renderOrderOfPaymentTable();
+      }
       if (loading) return <p className="text-center text-gray-500">Loading applications...</p>;
       if (error) {
          console.error('Error fetching applications:', error);
@@ -121,6 +198,7 @@ const ChiefDashboard = () => {
                   Refresh
                </Button>
             </div>
+            {/* Main Tabs */}
             <div className="mb-6 overflow-x-auto">
                <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
                   {mainTabs.map((tab) => (
@@ -137,6 +215,7 @@ const ChiefDashboard = () => {
                   ))}
                </div>
             </div>
+            {/* Subtabs */}
             <div className="mb-6 overflow-x-auto">
                <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
                   {subTabs[activeMainTab].map((tab) => (
@@ -150,6 +229,7 @@ const ChiefDashboard = () => {
                   ))}
                </div>
             </div>
+            {renderTabDescription()}
             <div className="mb-6">
                <Input
                   type="text"
