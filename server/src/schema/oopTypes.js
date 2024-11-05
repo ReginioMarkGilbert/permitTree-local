@@ -12,6 +12,7 @@ const oopTypes = gql`
     items: [OOPItem!]!
     totalAmount: Float!
     OOPstatus: String!
+    OOPSignedByTwoSignatories: Boolean
     signatures: OOPSignatures
     rpsSignatureImage: String
     tsdSignatureImage: String
@@ -57,6 +58,7 @@ const oopTypes = gql`
     createOOP(input: OOPInput!): OOP!
     updateOOPSignature(id: ID!, signatureType: String!, signatureImage: String!): OOP!
     approveOOP(id: ID!): OOP!
+    forwardOOPToAccountant(id: ID!): OOP!
   }
 `;
 

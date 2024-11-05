@@ -85,6 +85,7 @@ export const GET_ALL_OOPS = gql`
       }
       totalAmount
       OOPstatus
+      OOPSignedByTwoSignatories
       createdAt
       updatedAt
       rpsSignatureImage
@@ -120,6 +121,21 @@ const UPDATE_OOP_SIGNATURE = gql`
   }
 `;
 
+// Add the mutation
+const FORWARD_OOP_TO_ACCOUNTANT = gql`
+  mutation ForwardOOPToAccountant($id: ID!) {
+    forwardOOPToAccountant(id: $id) {
+      _id
+      OOPstatus
+      OOPSignedByTwoSignatories
+      signatures {
+        chiefRPS
+        technicalServices
+      }
+    }
+  }
+`;
+
 export const useOrderOfPayments = () => {
   // Query for applications awaiting OOP
   const {
@@ -150,6 +166,7 @@ export const useOrderOfPayments = () => {
   // Mutations
   const [createOOP] = useMutation(CREATE_OOP);
   const [updateSignature] = useMutation(UPDATE_OOP_SIGNATURE);
+  const [forwardToAccountant] = useMutation(FORWARD_OOP_TO_ACCOUNTANT);
 
   const handleCreateOOP = async (oopData) => {
     try {
@@ -206,6 +223,19 @@ export const useOrderOfPayments = () => {
     }
   };
 
+  const handleForwardToAccountant = async (oopId) => {
+    try {
+      const { data } = await forwardToAccountant({
+        variables: { id: oopId },
+        refetchQueries: [{ query: GET_ALL_OOPS }]
+      });
+      return data.forwardOOPToAccountant;
+    } catch (error) {
+      console.error('Error forwarding OOP:', error);
+      throw new Error(error.message);
+    }
+  };
+
   const refetchAll = async () => {
     await Promise.all([refetchApplications(), refetchOOPs()]);
   };
@@ -224,6 +254,7 @@ export const useOrderOfPayments = () => {
     // Mutations and refetch
     createOOP: handleCreateOOP,
     updateSignature: handleUpdateSignature,
+    forwardOOPToAccountant: handleForwardToAccountant,
     refetch: refetchAll
   };
 };

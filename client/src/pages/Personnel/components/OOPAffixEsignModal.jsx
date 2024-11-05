@@ -17,7 +17,7 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
    const rpsFileInputRef = useRef(null);
    const tsdFileInputRef = useRef(null);
 
-   const { updateSignature } = useOrderOfPayments();
+   const { updateSignature, forwardOOPToAccountant } = useOrderOfPayments();
 
    const handleSignatureUpload = (event, signatureType) => {
       const file = event.target.files[0];
@@ -60,7 +60,7 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
 
    const handleForwardToAccountant = async () => {
       try {
-         // TODO: Implement forwarding to accountant logic
+         await forwardOOPToAccountant(oop._id);
          toast.success('OOP forwarded to accountant for approval');
          onClose();
       } catch (error) {

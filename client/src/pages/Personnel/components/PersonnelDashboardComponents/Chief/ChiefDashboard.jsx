@@ -101,7 +101,7 @@ const ChiefDashboard = () => {
          if (activeSubTab === 'Pending Signature') {
             return oop.OOPstatus === 'PendingSignature';
          } else if (activeSubTab === 'Signed Order Of Payment') {
-            return oop.OOPstatus === 'Approved';
+            return oop.OOPSignedByTwoSignatories === true && oop.OOPstatus === 'For Approval';
          }
          return true;
       }).filter(oop =>

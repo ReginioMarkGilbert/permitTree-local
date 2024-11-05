@@ -107,7 +107,37 @@ const oopResolvers = {
       await oop.save();
 
       return oop;
-    }
+    },
+
+    forwardOOPToAccountant: async (_, { id }) => {
+      try {
+        const oop = await OOP.findById(id);
+        if (!oop) throw new UserInputError('OOP not found');
+
+        // Check for signature images instead of dates
+        if (!oop.rpsSignatureImage || !oop.tsdSignatureImage) {
+          throw new UserInputError('Both signatures are required');
+        }
+
+        const updatedOOP = await OOP.findByIdAndUpdate(
+          id,
+          {
+            $set: {
+              OOPstatus: 'For Approval',
+              OOPSignedByTwoSignatories: true,
+              'signatures.chiefRPS': new Date(),      // Set signature dates when forwarding
+              'signatures.technicalServices': new Date()
+            }
+          },
+          { new: true }
+        );
+
+        return updatedOOP;
+      } catch (error) {
+        console.error('Error forwarding OOP:', error);
+        throw new Error(`Failed to forward OOP: ${error.message}`);
+      }
+    },
   }
 };
 
