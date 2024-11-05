@@ -40,7 +40,7 @@ const AccountantDashboard = () => {
          if (activeSubTab === 'Pending Approval') {
             return oop.OOPstatus === 'For Approval' && oop.OOPSignedByTwoSignatories === true;
          } else if (activeSubTab === 'Approved OOP') {
-            return oop.OOPstatus === 'Approved';
+            return oop.OOPstatus === 'Awaiting Payment';
          }
          return true;
       }).filter(oop =>
