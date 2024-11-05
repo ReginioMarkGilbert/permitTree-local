@@ -75,9 +75,20 @@ export const GET_ALL_OOPS = gql`
       billNo
       applicationId
       date
+      namePayee
+      address
+      natureOfApplication
+      items {
+        legalBasis
+        description
+        amount
+      }
+      totalAmount
       OOPstatus
       createdAt
       updatedAt
+      rpsSignatureImage
+      tsdSignatureImage
     }
   }
 `;
@@ -98,7 +109,7 @@ const UPDATE_OOP_SIGNATURE = gql`
   mutation UpdateOOPSignature($id: ID!, $signatureType: String!, $signatureImage: String!) {
     updateOOPSignature(id: $id, signatureType: $signatureType, signatureImage: $signatureImage) {
       _id
-      status
+      OOPstatus
       signatures {
         chiefRPS
         technicalServices
@@ -185,10 +196,12 @@ export const useOrderOfPayments = () => {
           id: oopId,
           signatureType,
           signatureImage
-        }
+        },
+        refetchQueries: [{ query: GET_ALL_OOPS }]
       });
       return data.updateOOPSignature;
     } catch (error) {
+      console.error('Error in handleUpdateSignature:', error);
       throw new Error(error.message);
     }
   };

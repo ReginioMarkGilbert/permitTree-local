@@ -6,7 +6,16 @@ const { generateBillNo } = require('../utils/billNumberGenerator');
 const oopResolvers = {
   Query: {
     getOOPs: async () => {
-      return await OOP.find();
+      try {
+        const oops = await OOP.find().sort({ createdAt: -1 });
+        return oops.map(oop => ({
+          ...oop._doc,
+          totalAmount: oop.items.reduce((sum, item) => sum + item.amount, 0)
+        }));
+      } catch (error) {
+        console.error('Error fetching OOPs:', error);
+        throw new Error('Failed to fetch OOPs');
+      }
     },
 
     getOOPById: async (_, { id }) => {
@@ -60,18 +69,29 @@ const oopResolvers = {
     },
 
     updateOOPSignature: async (_, { id, signatureType, signatureImage }) => {
-      const oop = await OOP.findById(id);
-      if (!oop) throw new UserInputError('OOP not found');
+      try {
+        const oop = await OOP.findById(id);
+        if (!oop) throw new UserInputError('OOP not found');
 
-      const updateField = signatureType === 'rps' ? 'rpsSignatureImage' : 'tsdSignatureImage';
-      const signatureDate = signatureType === 'rps' ? 'signatures.chiefRPS' : 'signatures.technicalServices';
+        const updateField = signatureType === 'rps' ? 'rpsSignatureImage' : 'tsdSignatureImage';
+        const signatureDate = signatureType === 'rps' ? 'signatures.chiefRPS' : 'signatures.technicalServices';
 
-      const update = {
-        [updateField]: signatureImage,
-        [signatureDate]: new Date()
-      };
+        const update = {
+          [updateField]: signatureImage,
+          [signatureDate]: new Date()
+        };
 
-      return await OOP.findByIdAndUpdate(id, { $set: update }, { new: true });
+        const updatedOOP = await OOP.findByIdAndUpdate(
+          id,
+          { $set: update },
+          { new: true }
+        );
+
+        return updatedOOP;
+      } catch (error) {
+        console.error('Error updating OOP signature:', error);
+        throw new Error(`Failed to update signature: ${error.message}`);
+      }
     },
 
     approveOOP: async (_, { id }) => {

@@ -23,9 +23,11 @@ const ChiefDashboard = () => {
          case 'Created OOP':
             return { awaitingOOP: false, OOPCreated: true };
          case 'Pending Signature':
-            return { status: 'Approved', currentStage: 'PendingSignature' };
+            return { OOPstatus: 'PendingSignature' };
+         case 'Signed Order Of Payment':
+            return { CertificateStatus: 'PendingSignature' };
          case 'Signed Certificates':
-            return { status: 'Signed' };
+            return { CertificateStatus: 'Approved' };
          default:
             return { currentStage: 'ChiefRPSReview' };
       }
@@ -38,7 +40,7 @@ const ChiefDashboard = () => {
       'Applications': ['Applications for Review', 'Completed Reviews'],
       'Applications Awaiting OOP': ['Awaiting OOP', 'Created OOP'],
       'Order Of Payment': ['Pending Signature', 'Signed Order Of Payment'],
-      'Certificates': ['Pending Signature', 'Signed Certificates']
+      'Certificates': ['Permit Pending Signature', 'Signed Permits']
    };
 
    const filteredApplications = useMemo(() => {

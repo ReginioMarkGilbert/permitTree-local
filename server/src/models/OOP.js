@@ -42,6 +42,10 @@ const oopSchema = new mongoose.Schema({
     enum: ['PendingSignature', 'Approved', 'Rejected'],
     default: 'PendingSignature'
   },
+  OOPSignedByTwoSignatories: {
+    type: Boolean,
+    default: false
+  },
   signatures: {
     chiefRPS: Date,
     technicalServices: Date
