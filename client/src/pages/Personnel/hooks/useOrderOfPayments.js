@@ -134,31 +134,40 @@ export const useOrderOfPayments = () => {
 
   const handleCreateOOP = async (oopData) => {
     try {
+      console.log('Creating OOP with data:', oopData); // Debug log
+
+      if (!oopData.items || !Array.isArray(oopData.items)) {
+         throw new Error('Invalid items data');
+      }
+
       const { data } = await createOOP({
-        variables: {
-          input: {
-            applicationId: oopData.applicationId,
-            namePayee: oopData.namePayee,
-            address: oopData.address,
-            natureOfApplication: oopData.natureOfApplication,
-            items: oopData.fees.map(fee => ({
-              legalBasis: fee.legalBasis,
-              description: fee.description,
-              amount: parseFloat(fee.amount)
-            })),
-            rpsSignatureImage: oopData.rpsSignature || null,
-            tsdSignatureImage: oopData.tsdSignature || null
-          }
-        },
-        refetchQueries: [{
-          query: GET_APPLICATIONS_AWAITING_OOP,
-          variables: { awaitingOOP: true }
-        }]
+         variables: {
+            input: {
+               applicationId: oopData.applicationId,
+               namePayee: oopData.namePayee,
+               address: oopData.address,
+               natureOfApplication: oopData.natureOfApplication,
+               items: oopData.items.map(item => ({
+                  legalBasis: item.legalBasis,
+                  description: item.description,
+                  amount: parseFloat(item.amount)
+               })),
+               rpsSignatureImage: oopData.rpsSignatureImage,
+               tsdSignatureImage: oopData.tsdSignatureImage
+            }
+         },
+         refetchQueries: [{
+            query: GET_APPLICATIONS_AWAITING_OOP,
+            variables: { awaitingOOP: true }
+         }]
       });
+
+      console.log('CreateOOP response:', data); // Debug log
       return data.createOOP;
-    } catch (error) {
+   } catch (error) {
+      console.error('Error in handleCreateOOP:', error);
       throw new Error(error.message);
-    }
+   }
   };
 
   const handleUpdateSignature = async (oopId, signatureType, signatureImage) => {

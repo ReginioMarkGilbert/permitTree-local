@@ -1,72 +1,67 @@
 const OOP = require('../models/OOP');
 const Permit = require('../models/permits/Permit');
-const { AuthenticationError, UserInputError } = require('apollo-server-express');
+const { UserInputError } = require('apollo-server-express');
+const { generateBillNo } = require('../utils/billNumberGenerator');
 
 const oopResolvers = {
   Query: {
-    getOOPs: async (_, __, { user }) => {
-      if (!user) throw new AuthenticationError('Not authenticated');
+    getOOPs: async () => {
       return await OOP.find();
     },
 
-    getOOPById: async (_, { id }, { user }) => {
-      if (!user) throw new AuthenticationError('Not authenticated');
+    getOOPById: async (_, { id }) => {
       return await OOP.findById(id);
     },
 
-    getOOPsByApplicationId: async (_, { applicationId }, { user }) => {
-      if (!user) throw new AuthenticationError('Not authenticated');
+    getOOPsByApplicationId: async (_, { applicationId }) => {
       return await OOP.find({ applicationId });
     },
 
-    getApplicationsAwaitingOOP: async (_, __, { user }) => {
-      if (!user) throw new AuthenticationError('Not authenticated');
+    getApplicationsAwaitingOOP: async () => {
       return await Permit.find({ status: 'AwaitingOOP' });
     }
   },
 
   Mutation: {
-    createOOP: async (_, { input }, { user }) => {
-      if (!user) throw new AuthenticationError('Not authenticated');
+    createOOP: async (_, { input }) => {
+      try {
+        // Generate billNo first
+        const billNo = await generateBillNo();
 
-      const allowedRoles = ['Chief_RPS', 'Accountant', 'PENR_CENR_Officer'];
-      if (!user.roles.some(role => allowedRoles.includes(role))) {
-        throw new AuthenticationError('Not authorized to create OOP');
+        // Calculate total amount
+        const totalAmount = input.items.reduce((sum, item) => sum + item.amount, 0);
+
+        const oop = new OOP({
+          ...input,
+          billNo,
+          totalAmount,
+          status: 'PendingSignature'
+        });
+
+        await oop.save();
+
+        // Update permit status
+        await Permit.findOneAndUpdate(
+          { applicationNumber: input.applicationId },
+          {
+            $set: {
+              status: 'OOPCreated',
+              OOPCreated: true,
+              awaitingOOP: false
+            }
+          }
+        );
+
+        return oop;
+      } catch (error) {
+        console.error('Error creating OOP:', error);
+        throw new Error(`Failed to create OOP: ${error.message}`);
       }
-
-      // Calculate total amount
-      const totalAmount = input.items.reduce((sum, item) => sum + item.amount, 0);
-
-      const oop = new OOP({
-        ...input,
-        totalAmount,
-        status: 'Pending'
-      });
-
-      await oop.save();
-
-      // Update permit status
-      await Permit.findOneAndUpdate(
-        { customId: input.applicationId },
-        { $set: { status: 'OOPCreated' }}
-      );
-
-      return oop;
     },
 
-    updateOOPSignature: async (_, { id, signatureType, signatureImage }, { user }) => {
-      if (!user) throw new AuthenticationError('Not authenticated');
-
+    updateOOPSignature: async (_, { id, signatureType, signatureImage }) => {
       const oop = await OOP.findById(id);
       if (!oop) throw new UserInputError('OOP not found');
-
-      if (signatureType === 'rps' && !user.roles.includes('Chief_RPS')) {
-        throw new AuthenticationError('Not authorized to add RPS signature');
-      }
-
-      if (signatureType === 'tsd' && !user.roles.includes('Chief_TSD')) {
-        throw new AuthenticationError('Not authorized to add TSD signature');
-      }
 
       const updateField = signatureType === 'rps' ? 'rpsSignatureImage' : 'tsdSignatureImage';
       const signatureDate = signatureType === 'rps' ? 'signatures.chiefRPS' : 'signatures.technicalServices';
@@ -79,9 +74,7 @@ const oopResolvers = {
       return await OOP.findByIdAndUpdate(id, { $set: update }, { new: true });
     },
 
-    approveOOP: async (_, { id }, { user }) => {
-      if (!user) throw new AuthenticationError('Not authenticated');
-
+    approveOOP: async (_, { id }) => {
       const oop = await OOP.findById(id);
       if (!oop) throw new UserInputError('OOP not found');
 

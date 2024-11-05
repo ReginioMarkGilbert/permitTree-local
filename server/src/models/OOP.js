@@ -39,8 +39,8 @@ const oopSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Pending', 'Approved', 'Rejected'],
-    default: 'Pending'
+    enum: ['PendingSignature', 'Approved', 'Rejected'],
+    default: 'PendingSignature'
   },
   signatures: {
     chiefRPS: Date,
@@ -52,12 +52,16 @@ const oopSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Pre-save middleware to generate bill number
-oopSchema.pre('save', async function(next) {
-  if (!this.billNo) {
-    this.billNo = await generateBillNo();
+// Change to pre-validate hook
+oopSchema.pre('validate', async function(next) {
+  try {
+    if (!this.billNo) {
+      this.billNo = await generateBillNo();
+    }
+    next();
+  } catch (error) {
+    next(error);
   }
-  next();
 });
 
 const OOP = mongoose.model('OOP', oopSchema);

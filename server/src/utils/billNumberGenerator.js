@@ -1,8 +1,11 @@
-const OOP = require('../models/OOP');
+const mongoose = require('mongoose');
 
 async function generateBillNo() {
   const today = new Date();
   const dateString = today.toISOString().slice(0, 10).replace(/-/g, '');
+
+  // Use mongoose model directly
+  const OOP = mongoose.model('OOP');
 
   // Find the latest bill number for today
   const latestOOP = await OOP.findOne({

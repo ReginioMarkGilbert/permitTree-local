@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon, PlusIcon, MinusIcon, UploadIcon, ArrowLeft } from "lucide-react";
+import { CalendarIcon, PlusIcon, MinusIcon, UploadIcon, ArrowLeft, X } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import "@/components/ui/styles/customScrollbar.css";
 import { useOrderOfPayments } from '../hooks/useOrderOfPayments';
@@ -178,7 +178,45 @@ const OrderOfPaymentForm = ({ onClose }) => {
    const handleSubmit = async (e) => {
       e.preventDefault();
       try {
-         await createOOP(formData);
+         // Validate fees before submission
+         if (!formData.fees || formData.fees.length === 0) {
+            toast.error('Please add at least one fee');
+            return;
+         }
+
+         // Validate required fields
+         if (!formData.namePayee || !formData.address || !formData.natureOfApplication) {
+            toast.error('Please fill in all required fields');
+            return;
+         }
+
+         // Transform and validate fees
+         const validFees = formData.fees.filter(fee =>
+            fee.legalBasis && fee.description && fee.amount && !isNaN(parseFloat(fee.amount))
+         );
+
+         if (validFees.length === 0) {
+            toast.error('Please add valid fee details');
+            return;
+         }
+
+         const transformedData = {
+            applicationId: formData.applicationId,
+            namePayee: formData.namePayee,
+            address: formData.address,
+            natureOfApplication: formData.natureOfApplication,
+            items: validFees.map(fee => ({
+               legalBasis: fee.legalBasis,
+               description: fee.description,
+               amount: parseFloat(fee.amount)
+            })),
+            rpsSignatureImage: formData.rpsSignature || null,
+            tsdSignatureImage: formData.tsdSignature || null
+         };
+
+         console.log('Submitting OOP data:', transformedData); // Debug log
+
+         await createOOP(transformedData);
          toast.success('Order of Payment created successfully');
          onClose();
       } catch (error) {
@@ -194,6 +232,16 @@ const OrderOfPaymentForm = ({ onClose }) => {
    useEffect(() => {
       console.log('Applications in form:', applications);
    }, [applications]);
+
+   const handleRemoveSignature = (signatureType, inputRef) => {
+      // Clear the signature from formData
+      setFormData(prev => ({ ...prev, [signatureType]: null }));
+
+      // Reset the file input
+      if (inputRef.current) {
+         inputRef.current.value = '';
+      }
+   };
 
    const renderStep = () => {
       switch (step) {
@@ -243,12 +291,9 @@ const OrderOfPaymentForm = ({ onClose }) => {
                         <div className="grid grid-cols-2 gap-4">
                            <div>
                               <Label htmlFor="billNo">Bill No.</Label>
-                              <Input
-                                 id="billNo"
-                                 name="billNo"
-                                 value={formData.billNo}
-                                 onChange={handleInputChange}
-                              />
+                              <div className="h-10 flex items-center px-3 border rounded-md bg-gray-50">
+                                 Auto-generated
+                              </div>
                            </div>
                            <div>
                               <Label>Date</Label>
@@ -270,8 +315,9 @@ const OrderOfPaymentForm = ({ onClose }) => {
                               </Popover>
                            </div>
                         </div>
+
                         <div>
-                           <Label htmlFor="namePayee">Name/Payee:</Label>
+                           <Label htmlFor="namePayee">Name/Payee</Label>
                            <Input
                               id="namePayee"
                               name="namePayee"
@@ -279,8 +325,9 @@ const OrderOfPaymentForm = ({ onClose }) => {
                               onChange={handleInputChange}
                            />
                         </div>
+
                         <div>
-                           <Label htmlFor="address">Address:</Label>
+                           <Label htmlFor="address">Address</Label>
                            <Input
                               id="address"
                               name="address"
@@ -288,8 +335,9 @@ const OrderOfPaymentForm = ({ onClose }) => {
                               onChange={handleInputChange}
                            />
                         </div>
+
                         <div>
-                           <Label htmlFor="natureOfApplication">Nature of Application/Permit/Documents being secured:</Label>
+                           <Label htmlFor="natureOfApplication">Nature of Application</Label>
                            <Input
                               id="natureOfApplication"
                               name="natureOfApplication"
@@ -297,75 +345,99 @@ const OrderOfPaymentForm = ({ onClose }) => {
                               onChange={handleInputChange}
                            />
                         </div>
-                        <Table>
-                           <TableHeader>
-                              <TableRow>
-                                 <TableHead>Legal Basis (DAO/SEC)</TableHead>
-                                 <TableHead>Description and Computation of Fees and Charges Assessed</TableHead>
-                                 <TableHead>Amount</TableHead>
-                                 <TableHead></TableHead>
-                              </TableRow>
-                           </TableHeader>
-                           <TableBody>
-                              {formData.fees.map((fee, index) => (
-                                 <TableRow key={fee.id}>
-                                    <TableCell>
-                                       <Input
-                                          value={fee.legalBasis}
-                                          onChange={(e) => handleFeeChange(fee.id, 'legalBasis', e.target.value)}
-                                       />
-                                    </TableCell>
-                                    <TableCell>
-                                       <Input
-                                          value={fee.description}
-                                          onChange={(e) => handleFeeChange(fee.id, 'description', e.target.value)}
-                                       />
-                                    </TableCell>
-                                    <TableCell>
-                                       <Input
-                                          type="number"
-                                          value={fee.amount}
-                                          onChange={(e) => handleFeeChange(fee.id, 'amount', e.target.value)}
-                                       />
-                                    </TableCell>
-                                    <TableCell>
-                                       {index > 0 && (
-                                          <Button variant="ghost" size="icon" onClick={() => removeFeeRow(fee.id)}>
-                                             <MinusIcon className="h-4 w-4" />
-                                          </Button>
-                                       )}
-                                    </TableCell>
+
+                        <div>
+                           <Label>Fees and Charges</Label>
+                           <Table>
+                              <TableHeader>
+                                 <TableRow>
+                                    <TableHead>Legal Basis (DAO/SEC)</TableHead>
+                                    <TableHead>Description</TableHead>
+                                    <TableHead>Amount</TableHead>
+                                    <TableHead></TableHead>
                                  </TableRow>
-                              ))}
-                           </TableBody>
-                        </Table>
-                        <div className="flex justify-between items-center">
-                           <Button variant="outline" onClick={addFeeRow} type="button">
-                              <PlusIcon className="h-4 w-4 mr-2" /> Add Row
-                           </Button>
-                           <div className="flex items-center">
-                              <Label className="mr-2">Total:</Label>
-                              <Input
-                                 className="w-32"
-                                 value={`₱ ${formData.fees.reduce((sum, fee) => sum + Number(fee.amount || 0), 0).toFixed(2)}`}
-                                 readOnly
-                              />
+                              </TableHeader>
+                              <TableBody>
+                                 {formData.fees.map((fee, index) => (
+                                    <TableRow key={fee.id}>
+                                       <TableCell>
+                                          <Input
+                                             value={fee.legalBasis}
+                                             onChange={(e) => handleFeeChange(fee.id, 'legalBasis', e.target.value)}
+                                             placeholder="e.g., DAO 2000-21"
+                                          />
+                                       </TableCell>
+                                       <TableCell>
+                                          <Input
+                                             value={fee.description}
+                                             onChange={(e) => handleFeeChange(fee.id, 'description', e.target.value)}
+                                             placeholder="Description of fee"
+                                          />
+                                       </TableCell>
+                                       <TableCell>
+                                          <Input
+                                             type="number"
+                                             value={fee.amount}
+                                             onChange={(e) => handleFeeChange(fee.id, 'amount', e.target.value)}
+                                             placeholder="0.00"
+                                          />
+                                       </TableCell>
+                                       <TableCell>
+                                          {index > 0 && (
+                                             <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => removeFeeRow(fee.id)}
+                                                className="text-red-500 hover:text-red-700"
+                                             >
+                                                <MinusIcon className="h-4 w-4" />
+                                             </Button>
+                                          )}
+                                       </TableCell>
+                                    </TableRow>
+                                 ))}
+                              </TableBody>
+                           </Table>
+
+                           <div className="flex justify-between items-center mt-4">
+                              <Button variant="outline" onClick={addFeeRow} type="button">
+                                 <PlusIcon className="h-4 w-4 mr-2" /> Add Fee
+                              </Button>
+                              <div className="flex items-center">
+                                 <Label className="mr-2">Total:</Label>
+                                 <div className="w-32 px-3 py-2 border rounded-md bg-gray-50">
+                                    ₱ {formData.fees.reduce((sum, fee) => sum + Number(fee.amount || 0), 0).toFixed(2)}
+                                 </div>
+                              </div>
                            </div>
                         </div>
-                        {/* Signature upload section */}
+
+                        {/* Signature section */}
                         <div className="grid grid-cols-2 gap-8 mt-8">
-                           <div className="text-center relative">
-                              <div className="h-24 mb-4">
-                                 {formData.rpsSignature && (
-                                    <img
-                                       src={formData.rpsSignature}
-                                       alt="RPS E-Signature"
-                                       className="max-w-full max-h-full mx-auto object-contain"
-                                    />
+                           <div className="text-center">
+                              <div className="relative h-24 mb-4 border-2 border-dashed rounded-md flex items-center justify-center">
+                                 {formData.rpsSignature ? (
+                                    <>
+                                       <img
+                                          src={formData.rpsSignature}
+                                          alt="RPS Signature"
+                                          className="max-w-full max-h-full object-contain"
+                                       />
+                                       <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-red-100 hover:bg-red-200"
+                                          onClick={() => handleRemoveSignature('rpsSignature', rpsFileInputRef)}
+                                       >
+                                          <X className="h-4 w-4 text-red-600" />
+                                       </Button>
+                                    </>
+                                 ) : (
+                                    <p className="text-gray-400">RPS Signature</p>
                                  )}
                               </div>
-                              <Input className="text-center font-semibold" defaultValue="SIMEON R. DIAZ" readOnly />
-                              <p className="text-xs mt-1">SVEMS/Chief, RPS</p>
+                              <p className="font-semibold">SIMEON R. DIAZ</p>
+                              <p className="text-xs text-gray-600">SVEMS/Chief, RPS</p>
                               <input
                                  type="file"
                                  ref={rpsFileInputRef}
@@ -380,21 +452,34 @@ const OrderOfPaymentForm = ({ onClose }) => {
                                  onClick={(e) => triggerFileInput(e, rpsFileInputRef)}
                               >
                                  <UploadIcon className="h-4 w-4 mr-2" />
-                                 Upload E-Signature
+                                 Upload Signature
                               </Button>
                            </div>
-                           <div className="text-center relative">
-                              <div className="h-24 mb-4">
-                                 {formData.tsdSignature && (
-                                    <img
-                                       src={formData.tsdSignature}
-                                       alt="TSD E-Signature"
-                                       className="max-w-full max-h-full mx-auto object-contain"
-                                    />
+
+                           <div className="text-center">
+                              <div className="relative h-24 mb-4 border-2 border-dashed rounded-md flex items-center justify-center">
+                                 {formData.tsdSignature ? (
+                                    <>
+                                       <img
+                                          src={formData.tsdSignature}
+                                          alt="TSD Signature"
+                                          className="max-w-full max-h-full object-contain"
+                                       />
+                                       <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-red-100 hover:bg-red-200"
+                                          onClick={() => handleRemoveSignature('tsdSignature', tsdFileInputRef)}
+                                       >
+                                          <X className="h-4 w-4 text-red-600" />
+                                       </Button>
+                                    </>
+                                 ) : (
+                                    <p className="text-gray-400">TSD Signature</p>
                                  )}
                               </div>
-                              <Input className="text-center font-semibold" defaultValue="Engr. CYNTHIA U. LOZANO" readOnly />
-                              <p className="text-xs mt-1">Chief, Technical Services Division</p>
+                              <p className="font-semibold">Engr. CYNTHIA U. LOZANO</p>
+                              <p className="text-xs text-gray-600">Chief, Technical Services Division</p>
                               <input
                                  type="file"
                                  ref={tsdFileInputRef}
@@ -409,23 +494,8 @@ const OrderOfPaymentForm = ({ onClose }) => {
                                  onClick={(e) => triggerFileInput(e, tsdFileInputRef)}
                               >
                                  <UploadIcon className="h-4 w-4 mr-2" />
-                                 Upload E-Signature
+                                 Upload Signature
                               </Button>
-                           </div>
-                        </div>
-                        {/* Date fields */}
-                        <div className="grid grid-cols-2 gap-4 mt-6">
-                           <div>
-                              <Label>Date of payment of applicant:</Label>
-                              <div className="mt-1 p-2 bg-gray-100 rounded-md text-gray-600">
-                                 -- -- --
-                              </div>
-                           </div>
-                           <div>
-                              <Label>Date for statutory receipt by applicant:</Label>
-                              <div className="mt-1 p-2 bg-gray-100 rounded-md text-gray-600">
-                                 -- -- --
-                              </div>
                            </div>
                         </div>
                      </div>
