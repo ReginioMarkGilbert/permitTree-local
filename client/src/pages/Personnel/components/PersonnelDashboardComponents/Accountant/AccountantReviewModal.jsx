@@ -3,18 +3,22 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { useMutation, gql } from '@apollo/client';
 import { toast } from 'sonner';
+import { GET_ALL_OOPS } from '../../../hooks/useOrderOfPayments';
 
 const APPROVE_OOP = gql`
   mutation ApproveOOP(
     $id: ID!,
-    $notes: String
+    $notes: String!,
+    $status: String!
   ) {
     approveOOP(
       id: $id,
-      notes: $notes
+      notes: $notes,
+      status: $status
     ) {
       _id
       OOPstatus
+      OOPSignedByTwoSignatories
       OOPApproved
     }
   }
@@ -33,8 +37,10 @@ const AccountantReviewModal = ({ isOpen, onClose, oop, onReviewComplete }) => {
          const result = await approveOOP({
             variables: {
                id: oop._id,
-               notes: 'Order of Payment approved by Accountant'
-            }
+               notes: 'Order of Payment approved by Accountant',
+               status: 'Approved'
+            },
+            refetchQueries: [{ query: GET_ALL_OOPS }]
          });
          console.log('Result:', result);
          onReviewComplete();
@@ -60,7 +66,8 @@ const AccountantReviewModal = ({ isOpen, onClose, oop, onReviewComplete }) => {
                id: oop._id,
                notes: remarks,
                status: 'Rejected'
-            }
+            },
+            refetchQueries: [{ query: GET_ALL_OOPS }]
          });
          console.log('Result:', result);
          onReviewComplete();

@@ -13,6 +13,7 @@ const oopTypes = gql`
     totalAmount: Float!
     OOPstatus: String!
     OOPSignedByTwoSignatories: Boolean
+    OOPApproved: Boolean
     signatures: OOPSignatures
     rpsSignatureImage: String
     tsdSignatureImage: String
@@ -57,7 +58,7 @@ const oopTypes = gql`
   extend type Mutation {
     createOOP(input: OOPInput!): OOP!
     updateOOPSignature(id: ID!, signatureType: String!, signatureImage: String!): OOP!
-    approveOOP(id: ID!): OOP!
+    approveOOP(id: ID!, notes: String, status: String!): OOP!
     forwardOOPToAccountant(id: ID!): OOP!
   }
 `;

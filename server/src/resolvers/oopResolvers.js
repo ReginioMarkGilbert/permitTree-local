@@ -94,7 +94,7 @@ const oopResolvers = {
       }
     },
 
-    approveOOP: async (_, { id, notes }) => {
+    approveOOP: async (_, { id, notes, status }) => {
       try {
         const oop = await OOP.findById(id);
         if (!oop) throw new UserInputError('OOP not found');
@@ -107,8 +107,8 @@ const oopResolvers = {
           id,
           {
             $set: {
-              OOPstatus: 'Approved',
-              OOPApproved: true,
+              OOPstatus: status,
+              OOPApproved: status === 'Approved',
               notes: notes
             }
           },
