@@ -46,6 +46,10 @@ const oopSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  OOPApproved: {
+    type: Boolean,
+    default: false
+  },
   signatures: {
     chiefRPS: Date,
     technicalServices: Date

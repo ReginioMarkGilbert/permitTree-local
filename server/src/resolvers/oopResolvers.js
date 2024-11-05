@@ -94,19 +94,32 @@ const oopResolvers = {
       }
     },
 
-    approveOOP: async (_, { id }) => {
-      const oop = await OOP.findById(id);
-      if (!oop) throw new UserInputError('OOP not found');
+    approveOOP: async (_, { id, notes }) => {
+      try {
+        const oop = await OOP.findById(id);
+        if (!oop) throw new UserInputError('OOP not found');
 
-      // Check if both signatures are present
-      if (!oop.signatures.chiefRPS || !oop.signatures.technicalServices) {
-        throw new UserInputError('Both signatures are required for approval');
+        if (!oop.OOPSignedByTwoSignatories) {
+          throw new UserInputError('OOP must be signed by both signatories before approval');
+        }
+
+        const updatedOOP = await OOP.findByIdAndUpdate(
+          id,
+          {
+            $set: {
+              OOPstatus: 'Approved',
+              OOPApproved: true,
+              notes: notes
+            }
+          },
+          { new: true }
+        );
+
+        return updatedOOP;
+      } catch (error) {
+        console.error('Error approving OOP:', error);
+        throw new Error(`Failed to approve OOP: ${error.message}`);
       }
-
-      oop.OOPstatus = 'Approved';
-      await oop.save();
-
-      return oop;
     },
 
     forwardOOPToAccountant: async (_, { id }) => {
