@@ -66,12 +66,9 @@ const covResolvers = {
                applicantId: user.id,
                applicationType: 'Certificate of Verification',
                status: 'Submitted',
+               currentStage: 'TechnicalStaffReview',
                dateOfSubmission: new Date(),
                files: processedFiles,
-               currentStage: 'Submitted',
-               // recordedByReceivingClerk: false, // Initialize to false
-               // reviewedByChief: false, // Initialize to false
-               // acceptedByTechnicalStaff: false // Initialize to false
             };
 
             const newPermit = new COVPermit(permitData);
@@ -153,7 +150,7 @@ const covResolvers = {
                if (files && files.length > 0) {
                   processedFiles[key] = files.map(file => ({
                      filename: file.filename,
-                     contentType: file.contentType || 'application/octet-stream', // Provide a default value if null
+                     contentType: file.contentType || 'application/octet-stream',
                      data: Binary.createFromBase64(file.data)
                   }));
                } else {
@@ -167,6 +164,7 @@ const covResolvers = {
                applicantId: user.id,
                applicationType: 'Certificate of Verification',
                status: 'Draft',
+               currentStage: 'Submitted',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
             };
