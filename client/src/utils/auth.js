@@ -8,6 +8,11 @@ export const isAuthenticated = () => {
    return token && !isTokenExpired(token);
 };
 
+export const getUserId = () => {
+   const user = JSON.parse(localStorage.getItem('user'));
+   return user ? user.id : null;
+};
+
 // export const getUserRole = () => {
 //    const token = getToken();
 //    if (!token) return null;

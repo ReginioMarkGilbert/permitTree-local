@@ -14,6 +14,9 @@ import {
    DialogTitle,
 } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useUserOrderOfPayments } from './hooks/useUserOrderOfPayments';
+import { getUserId } from '@/utils/auth';
+import UserOOPRow from './components/UserOOPRow';
 
 const UserApplicationsStatusPage = () => {
    const [searchTerm, setSearchTerm] = useState('');
@@ -30,6 +33,7 @@ const UserApplicationsStatusPage = () => {
 
    const getQueryParamsForTab = (tab) => {
       switch (tab) {
+         // Applications
          case 'Draft': return { status: 'Draft' };
          case 'Submitted': return { status: 'Submitted' };
          case 'Returned': return { status: 'Returned', currentStage: 'ReturnedByTechnicalStaff' };
@@ -37,6 +41,13 @@ const UserApplicationsStatusPage = () => {
          case 'Released': return { status: 'Released' };
          case 'Expired': return { status: 'Expired' };
          case 'Rejected': return { status: 'Rejected' };
+         // Order of Payments
+         case 'Awaiting Payment': return { status: 'Awaiting Payment' };
+         case 'Payment Proof Submitted': return { status: 'Payment Proof Submitted' };
+         case 'Payment Proof Rejected': return { status: 'Payment Proof Rejected' };
+         case 'Payment Proof Approved': return { status: 'Payment Proof Approved' };
+         case 'Issued OR': return { status: 'Issued OR' };
+         case 'Completed': return { status: 'Completed OOP' };
          default: return { status: 'Submitted' };
       }
    };
@@ -235,7 +246,74 @@ const UserApplicationsStatusPage = () => {
       }
    };
 
+   const userId = getUserId();
+
+   // Add OOPs data fetching
+   const {
+      oops,
+      loading: oopsLoading,
+      error: oopsError,
+      refetch: refetchOOPs
+   } = useUserOrderOfPayments(
+      userId,
+      activeMainTab === 'Order Of Payments' ? getQueryParamsForTab(activeSubTab).status : null
+   );
+
+   const renderOrderOfPaymentsTable = () => {
+      if (oopsLoading) return <p className="text-center text-gray-500">Loading order of payments...</p>;
+      if (oopsError) return <p className="text-center text-red-500">Error loading order of payments</p>;
+
+      const filteredOOPs = oops.filter(oop =>
+         oop.billNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         oop.applicationId.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
+      if (filteredOOPs.length === 0) {
+         return <p className="text-center text-gray-500">No order of payments found</p>;
+      }
+
+      return (
+         <div className="bg-white rounded-lg shadow overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+               <thead className="bg-gray-50">
+                  <tr>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Bill Number
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Application Number
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Total Amount
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                     </th>
+                  </tr>
+               </thead>
+               <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredOOPs.map((oop) => (
+                     <UserOOPRow
+                        key={oop._id}
+                        oop={oop}
+                     />
+                  ))}
+               </tbody>
+            </table>
+         </div>
+      );
+   };
+
    const renderTable = () => {
+      if (activeMainTab === 'Order Of Payments') {
+         return renderOrderOfPaymentsTable();
+      }
       if (loading) return <p className="text-center text-gray-500">Loading...</p>;
       if (error) return <p className="text-center text-red-500">Error: {error.message}</p>;
       if (filteredApplications.length === 0) {
