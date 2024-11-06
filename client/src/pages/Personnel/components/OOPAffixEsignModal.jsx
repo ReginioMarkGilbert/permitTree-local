@@ -60,12 +60,21 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
 
    const handleForwardToAccountant = async () => {
       try {
+         // First, save any new signatures
+         if (signatures.rpsSignature !== oop.rpsSignatureImage) {
+            await updateSignature(oop._id, 'rps', signatures.rpsSignature);
+         }
+         if (signatures.tsdSignature !== oop.tsdSignatureImage) {
+            await updateSignature(oop._id, 'tsd', signatures.tsdSignature);
+         }
+
+         // Then forward to accountant
          await forwardOOPToAccountant(oop._id);
          toast.success('OOP forwarded to accountant for approval');
          onClose();
       } catch (error) {
-         toast.error('Failed to forward OOP');
-         console.error('Error forwarding OOP:', error);
+         console.error('Error in forward process:', error);
+         toast.error(error.message || 'Failed to forward OOP');
       }
    };
 
