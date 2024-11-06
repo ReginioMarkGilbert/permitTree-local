@@ -278,10 +278,10 @@ const UserApplicationsStatusPage = () => {
                <thead className="bg-gray-50">
                   <tr>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Bill Number
+                        Application Number
                      </th>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Application Number
+                        Bill Number
                      </th>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Date

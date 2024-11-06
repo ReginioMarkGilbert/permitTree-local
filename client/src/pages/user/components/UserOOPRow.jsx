@@ -1,51 +1,81 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { format } from 'date-fns';
-import { Eye } from 'lucide-react';
+import { Eye, Printer, PenLine } from 'lucide-react';
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipProvider,
+   TooltipTrigger
+} from "@/components/ui/tooltip";
+import UserOOPviewModal from './UserOOPviewModal';
 
 const UserOOPRow = ({ oop }) => {
+   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+
    const formatDate = (timestamp) => {
       const date = new Date(parseInt(timestamp));
       return format(date, 'M/d/yyyy');
    };
 
+   const getStatusColor = (status) => {
+      switch (status.toLowerCase()) {
+         case 'awaiting payment': return 'bg-yellow-100 text-yellow-800';
+         case 'payment proof submitted': return 'bg-blue-100 text-blue-800';
+         case 'payment proof rejected': return 'bg-red-100 text-red-800';
+         case 'payment proof approved': return 'bg-green-100 text-green-800';
+         case 'issued or': return 'bg-purple-100 text-purple-800';
+         case 'completed oop': return 'bg-gray-100 text-gray-800';
+         default: return 'bg-gray-100 text-gray-800';
+      }
+   };
+
    return (
-      <tr>
-         <td className="px-4 py-3 whitespace-nowrap">
-            {oop.applicationId}
-         </td>
-         <td className="px-4 py-3 whitespace-nowrap">
-            {oop.billNo}
-         </td>
-         <td className="px-4 py-3 whitespace-nowrap">
-            {formatDate(oop.createdAt)}
-         </td>
-         <td className="px-4 py-3 whitespace-nowrap">
-            ₱{oop.totalAmount.toFixed(2)}
-         </td>
-         <td className="px-4 py-3 whitespace-nowrap">
-            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-               ${oop.OOPstatus === 'Awaiting Payment' ? 'bg-yellow-100 text-yellow-800' :
-                  oop.OOPstatus === 'Payment Proof Submitted' ? 'bg-blue-100 text-blue-800' :
-                     oop.OOPstatus === 'Payment Proof Rejected' ? 'bg-red-100 text-red-800' :
-                        oop.OOPstatus === 'Payment Proof Approved' ? 'bg-green-100 text-green-800' :
-                           oop.OOPstatus === 'Issued OR' ? 'bg-purple-100 text-purple-800' :
-                              oop.OOPstatus === 'Completed OOP' ? 'bg-gray-100 text-gray-800' :
-                                 'bg-gray-100 text-gray-800'}`}>
-               {oop.OOPstatus}
-            </span>
-         </td>
-         <td className="px-4 py-3 whitespace-nowrap">
-            <Button
-               variant="ghost"
-               size="icon"
-               className="h-8 w-8"
-               onClick={() => {/* Add view action */ }}
-            >
-               <Eye className="h-4 w-4" />
-            </Button>
-         </td>
-      </tr>
+      <>
+         <tr>
+            <td className="px-4 py-3 whitespace-nowrap">
+               {oop.applicationId}
+            </td>
+            <td className="px-4 py-3 whitespace-nowrap">
+               {oop.billNo}
+            </td>
+            <td className="px-4 py-3 whitespace-nowrap">
+               {formatDate(oop.createdAt)}
+            </td>
+            <td className="px-4 py-3 whitespace-nowrap">
+               ₱{oop.totalAmount.toFixed(2)}
+            </td>
+            <td className="px-4 py-3 whitespace-nowrap">
+               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                  ${getStatusColor(oop.OOPstatus)}`}>
+                  {oop.OOPstatus}
+               </span>
+            </td>
+            <td className="px-4 py-3 whitespace-nowrap">
+               <TooltipProvider>
+                  <Tooltip>
+                     <TooltipTrigger asChild>
+                        <Button
+                           variant="outline"
+                           size="icon"
+                           className="h-8 w-8"
+                           onClick={() => setIsViewModalOpen(true)}
+                        >
+                           <Eye className="h-4 w-4" />
+                        </Button>
+                     </TooltipTrigger>
+                     <TooltipContent>View</TooltipContent>
+                  </Tooltip>
+               </TooltipProvider>
+            </td>
+         </tr>
+
+         <UserOOPviewModal
+            oop={oop}
+            isOpen={isViewModalOpen}
+            onClose={() => setIsViewModalOpen(false)}
+         />
+      </>
    );
 };
 
