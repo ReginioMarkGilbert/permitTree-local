@@ -53,7 +53,7 @@ const UserOOPRow = ({ oop }) => {
             </td>
             <td className="px-4 py-3 whitespace-nowrap">
                <TooltipProvider>
-                  <Tooltip>
+                  <Tooltip delayDuration={250}>
                      <TooltipTrigger asChild>
                         <Button
                            variant="outline"

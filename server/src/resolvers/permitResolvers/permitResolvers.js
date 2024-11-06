@@ -39,9 +39,9 @@ const permitResolvers = {
                acceptedByTechnicalStaff: permit.acceptedByTechnicalStaff || false
             }));
 
-            console.log('Server: Fetched user applications:', query);
-            console.log('Server: Number of applications:', formattedPermits.length);
-            console.log('Server: First application:', formattedPermits[0]);
+            // console.log('Server: Fetched user applications:', query);
+            // console.log('Server: Number of applications:', formattedPermits.length);
+            // console.log('Server: First application:', formattedPermits[0]);
 
             return formattedPermits;
          } catch (error) {
