@@ -1,6 +1,6 @@
 import React from 'react';
 import { format } from "date-fns";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -15,6 +15,7 @@ const UserOOPviewModal = ({ oop, isOpen, onClose }) => {
          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
                <DialogTitle>Order of Payment Details</DialogTitle>
+               <DialogDescription>View the details of the order of payment.</DialogDescription>
             </DialogHeader>
 
             <div className="space-y-6 py-4">
