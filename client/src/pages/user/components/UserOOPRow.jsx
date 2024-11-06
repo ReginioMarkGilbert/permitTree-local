@@ -9,7 +9,6 @@ import {
    TooltipTrigger
 } from "@/components/ui/tooltip";
 import UserOOPviewModal from './UserOOPviewModal';
-import UserOOPPrintModal from './UserOOPPrintModal';
 import { Printer } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 
@@ -69,7 +68,7 @@ const UserOOPRow = ({ oop }) => {
             </td>
             <td className="px-4 py-3 whitespace-nowrap">
                <div className="flex items-center space-x-2">
-                  <TooltipProvider>
+                  <TooltipProvider> {/* View Button */}
                      <Tooltip delayDuration={250}>
                         <TooltipTrigger asChild>
                            <Button
@@ -85,7 +84,7 @@ const UserOOPRow = ({ oop }) => {
                      </Tooltip>
                   </TooltipProvider>
 
-                  <TooltipProvider>
+                  <TooltipProvider> {/* Print Button */}
                      <Tooltip delayDuration={250}>
                         <TooltipTrigger asChild>
                            <Button
@@ -108,12 +107,6 @@ const UserOOPRow = ({ oop }) => {
             oop={oop}
             isOpen={isViewModalOpen}
             onClose={() => setIsViewModalOpen(false)}
-         />
-
-         <UserOOPPrintModal
-            oop={oop}
-            isOpen={isPrintModalOpen}
-            onClose={() => setIsPrintModalOpen(false)}
          />
       </>
    );

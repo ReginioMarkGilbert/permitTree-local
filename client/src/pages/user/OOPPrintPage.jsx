@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { format } from "date-fns";
 import denrLogo from "@/assets/denr-logo.png";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 import { toast } from 'sonner';
 
 const OOPPrintPage = () => {
@@ -39,10 +41,26 @@ const OOPPrintPage = () => {
       return format(date, 'M/d/yyyy');
    };
 
+   const handleBack = () => {
+      navigate('/applicationsStatus');
+   };
+
    if (!oop) return null;
 
    return (
       <div className="print-page bg-white min-h-screen">
+         {/* Back Button - will be hidden during print */}
+         <div className="fixed top-4 left-4 no-print">
+            <Button
+               variant="outline"
+               onClick={handleBack}
+               className="flex items-center gap-2"
+            >
+               <ArrowLeft className="h-4 w-4" />
+               Back
+            </Button>
+         </div>
+
          <div className="print-content max-w-4xl mx-auto p-8">
             {/* Header */}
             <div className="text-center mb-6">
@@ -171,6 +189,10 @@ const OOPPrintPage = () => {
                }
 
                nav, footer, button {
+                  display: none !important;
+               }
+
+               .no-print {
                   display: none !important;
                }
             }
