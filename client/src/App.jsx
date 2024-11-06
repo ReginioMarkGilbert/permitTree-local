@@ -52,6 +52,8 @@ import PersonnelDashboard from './pages/Personnel/PersonnelDashboard';
 
 // import { AuthProvider } from '@/context/AuthContext';
 
+import OOPPrintPage from './pages/user/OOPPrintPage';
+
 const App = () => {
    const { sidebarToggle, toggleSidebar } = useSidebarToggle();
    const navigate = useNavigate();
@@ -66,7 +68,7 @@ const App = () => {
       } else if (location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/about' && location.pathname !== '/services' && location.pathname !== '/contact' && location.pathname !== '/learnMore') {
          navigate('/auth');
       }
-      setShowNavbar(authStatus && location.pathname !== '/');
+      setShowNavbar(authStatus && location.pathname !== '/' && location.pathname !== '/user/oop-print');
    }, [navigate, location.pathname]);
 
    useEffect(() => {
@@ -107,7 +109,7 @@ const App = () => {
          <NotificationProvider>
             <ChiefRPSNotificationProvider>
                <div className="flex">
-                  {isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && (
+                  {isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/user/oop-print' && (
                      <>
                         {getSidebar()}
                         {showNavbar && <Navbar sidebarToggle={sidebarToggle} setSidebarToggle={toggleSidebar} />}
@@ -158,6 +160,7 @@ const App = () => {
                            <Route path="/superadmin/manage-users" element={<ProtectedRoute roles={['superadmin']}><SuperAdminManageUsersPage /></ProtectedRoute>} />
                            <Route path="/superadmin/reports" element={<ProtectedRoute roles={['superadmin']}><SuperAdminReportsPage /></ProtectedRoute>} />
                            <Route path="/superadmin/settings" element={<ProtectedRoute roles={['superadmin']}><SuperAdminSettingsPage /></ProtectedRoute>} />
+                           <Route path="/user/oop-print" element={<OOPPrintPage />} />
                         </Routes>
                      </div>
                   </div>

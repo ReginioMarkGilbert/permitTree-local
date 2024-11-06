@@ -2,20 +2,31 @@ import React from 'react';
 import { format } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Printer } from "lucide-react";
 
 const UserOOPviewModal = ({ oop, isOpen, onClose }) => {
    const formatDate = (timestamp) => {
       const date = new Date(parseInt(timestamp));
       return format(date, 'M/d/yyyy');
    };
-
+   const handlePrint = () => {
+      window.print();
+   };
    return (
       <Dialog open={isOpen} onOpenChange={onClose}>
          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
                <DialogTitle>Order of Payment Details</DialogTitle>
                <DialogDescription>View the details of the order of payment.</DialogDescription>
+               <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handlePrint}
+               >
+                  <Printer className="h-4 w-4" />
+               </Button>
             </DialogHeader>
 
             <div className="space-y-6 py-4">
