@@ -5,15 +5,22 @@ import denrLogo from "@/assets/denr-logo.png";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { toast } from 'sonner';
+import { getUserRoles } from '@/utils/auth';
 
 const OOPPrintPage = () => {
    const location = useLocation();
    const navigate = useNavigate();
    const oop = location.state?.oop;
 
+   const userRoles = getUserRoles();
    useEffect(() => {
-      if (!oop) {
+      if (!oop && !userRoles.includes('user')) {
          navigate('/applicationsStatus');
+      } else if (!oop && !userRoles.includes('accountant')) {
+         navigate('/personnel/accountant');
+      } else if (!oop && !userRoles.includes('Chief_RPS') && !userRoles.includes('Chief_TSD')) {
+         navigate('/personnel/chief');
+      } else {
          return;
       }
    }, [oop, navigate]);

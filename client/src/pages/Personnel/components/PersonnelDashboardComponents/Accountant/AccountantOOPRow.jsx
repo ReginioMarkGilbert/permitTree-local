@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Eye, Printer, CheckCircle2 } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 import {
    Tooltip,
    TooltipContent,
@@ -11,6 +12,9 @@ import { format } from "date-fns";
 import AccountantReviewModal from './AccountantReviewModal';
 
 const AccountantOOPRow = ({ oop, onReviewComplete }) => {
+   const navigate = useNavigate();
+   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+
    const formatDate = (timestamp) => {
       const date = new Date(parseInt(timestamp));
       return format(date, 'M/d/yyyy');
@@ -22,11 +26,8 @@ const AccountantOOPRow = ({ oop, onReviewComplete }) => {
    };
 
    const handlePrint = () => {
-      // TODO: Implement print functionality
-      console.log('Print OOP:', oop._id);
+      navigate('/user/oop-print', { state: { oop } });
    };
-
-   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
    const handleApprove = () => {
       setIsReviewModalOpen(true);
