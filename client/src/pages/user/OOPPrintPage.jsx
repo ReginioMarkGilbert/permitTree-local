@@ -12,15 +12,9 @@ const OOPPrintPage = () => {
    const navigate = useNavigate();
    const oop = location.state?.oop;
 
-   const userRoles = getUserRoles();
    useEffect(() => {
-      if (!oop && !userRoles.includes('user')) {
+      if (!oop) {
          navigate('/applicationsStatus');
-      } else if (!oop && !userRoles.includes('accountant')) {
-         navigate('/personnel/accountant');
-      } else if (!oop && !userRoles.includes('Chief_RPS') && !userRoles.includes('Chief_TSD')) {
-         navigate('/personnel/chief');
-      } else {
          return;
       }
    }, [oop, navigate]);
@@ -49,7 +43,25 @@ const OOPPrintPage = () => {
    };
 
    const handleBack = () => {
-      navigate('/applicationsStatus');
+      const userRoles = getUserRoles();
+      if (userRoles.includes('Receiving_Clerk') || userRoles.includes('Releasing_Clerk')) {
+         navigate("/personnel/receiving-releasing");
+      } else if (userRoles.includes('Technical_Staff') || userRoles.includes('Receiving_Clerk') || userRoles.includes('Releasing_Clerk')) {
+         navigate("/personnel/technical-staff");
+      } else if (userRoles.includes('Chief_RPS') || userRoles.includes('Chief_TSD')) {
+         navigate("/personnel/chief");
+      } else if (userRoles.includes('Accountant') || userRoles.includes('OOP_Staff_Incharge')) {
+         navigate("/personnel/accountant");
+      } else if (userRoles.includes('Bill_Collector') || userRoles.includes('Credit_Officer')) {
+         navigate("/personnel/bill-collector");
+      } else if (userRoles.includes('PENR_CENR_Officer') || userRoles.includes('Deputy_CENR_Officer')) {
+         navigate("/personnel/penr-cenr-officer");
+      } else if (userRoles.includes('Inspection_Team')) {
+         navigate("/personnel/inspection-team");
+      } else {
+         console.log('No role found');
+         navigate("/personnel/dashboard");
+      }
    };
 
    if (!oop) return null;

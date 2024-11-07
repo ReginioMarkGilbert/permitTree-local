@@ -99,7 +99,25 @@ const PersonnelHomePage = () => {
    //  }, [debouncedRefreshTrigger, fetchData]);
 
    const handleViewAllApplications = () => {
-      navigate('/personnel/dashboard');
+      const userRoles = getUserRoles();
+      if (userRoles.includes('Receiving_Clerk') || userRoles.includes('Releasing_Clerk')) {
+         navigate("/personnel/receiving-releasing");
+      } else if (userRoles.includes('Technical_Staff') || userRoles.includes('Receiving_Clerk') || userRoles.includes('Releasing_Clerk')) {
+         navigate("/personnel/technical-staff");
+      } else if (userRoles.includes('Chief_RPS') || userRoles.includes('Chief_TSD')) {
+         navigate("/personnel/chief");
+      } else if (userRoles.includes('Accountant') || userRoles.includes('OOP_Staff_Incharge')) {
+         navigate("/personnel/accountant");
+      } else if (userRoles.includes('Bill_Collector') || userRoles.includes('Credit_Officer')) {
+         navigate("/personnel/bill-collector");
+      } else if (userRoles.includes('PENR_CENR_Officer') || userRoles.includes('Deputy_CENR_Officer')) {
+         navigate("/personnel/penr-cenr-officer");
+      } else if (userRoles.includes('Inspection_Team')) {
+         navigate("/personnel/inspection-team");
+      } else {
+         console.log('No role found');
+         navigate("/personnel/dashboard");
+      }
    };
 
    const handleViewDetailedAnalytics = () => {
@@ -168,7 +186,7 @@ const PersonnelHomePage = () => {
 
    return (
       <div className="min-h-screen bg-green-50 flex flex-col pt-16">
-            <main className="container mx-auto py-8 flex-grow mt-4">
+         <main className="container mx-auto py-8 flex-grow mt-4">
             {renderRole()}
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -222,7 +240,7 @@ const PersonnelHomePage = () => {
                                                          app.status === "Returned" ? "bg-orange-200 text-orange-800" :
                                                             app.status === "Payment Proof Submitted" ? "bg-purple-200 text-purple-800" :
                                                                "bg-gray-200 text-gray-800"
-                                    }`}>
+                                       }`}>
                                        {app.status === "Submitted" ? "For Review" : app.status}
                                     </span>
                                  </div>

@@ -25,7 +25,7 @@ const ChiefDashboard = () => {
          case 'Pending Signature':
             return { OOPstatus: 'Pending Signature' };
          case 'Signed Order Of Payment':
-            return { CertificateStatus: 'Pending Signature' };
+            return { OOPSignedByTwoSignatories: true, OOPstatus: 'For Approval' };
          case 'Signed Certificates':
             return { CertificateStatus: 'Approved' };
          default:
@@ -56,12 +56,8 @@ const ChiefDashboard = () => {
 
    const getStatusColor = (status) => {
       switch (status.toLowerCase()) {
-         case 'for review': return 'bg-yellow-100 text-yellow-800';
-         case 'completed': return 'bg-green-100 text-green-800';
          case 'pending signature': return 'bg-orange-100 text-orange-800';
-         case 'signed': return 'bg-blue-100 text-blue-800';
-         case 'pending payment': return 'bg-purple-100 text-purple-800';
-         case 'payment submitted': return 'bg-indigo-100 text-indigo-800';
+         case 'For Approval': return 'bg-purple-100 text-purple-800';
          default: return 'bg-gray-100 text-gray-800';
       }
    };

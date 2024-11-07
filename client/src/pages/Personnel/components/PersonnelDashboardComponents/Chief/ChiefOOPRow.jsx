@@ -17,6 +17,17 @@ const ChiefOOPRow = ({ oop }) => {
       return format(date, 'M/d/yyyy');
    };
 
+   const getStatusColor = (status) => {
+      switch (status) {
+         case 'Pending Signature':
+            return 'bg-yellow-100 text-yellow-800';
+         case 'For Approval':
+            return 'bg-purple-100 text-purple-800';
+         default:
+            return 'bg-gray-100 text-gray-800';
+      }
+   };
+
    const handleView = () => {
       // TODO: Implement view functionality
       console.log('View OOP:', oop._id);
@@ -46,10 +57,7 @@ const ChiefOOPRow = ({ oop }) => {
                {formatDate(oop.createdAt)}
             </td>
             <td className="px-4 py-4 whitespace-nowrap">
-               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${oop.OOPstatus === 'Pending Signature' ? 'bg-yellow-100 text-yellow-800' :
-                     oop.OOPstatus === 'Approved' ? 'bg-green-100 text-green-800' :
-                        'bg-red-100 text-red-800'
-                  }`}>
+               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(oop.OOPstatus)}`}>
                   {oop.OOPstatus}
                </span>
             </td>

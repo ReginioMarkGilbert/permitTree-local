@@ -62,6 +62,13 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
          if (signatures.tsdSignature !== oop.tsdSignatureImage) {
             await updateSignature(oop._id, 'tsd', signatures.tsdSignature);
          }
+
+         // Check if both signatures are present after saving
+         const hasBothSignatures = signatures.rpsSignature && signatures.tsdSignature;
+         if (hasBothSignatures) {
+            await forwardOOPToAccountant(oop._id);
+         }
+
          toast.success('Signatures saved successfully');
          onClose();
       } catch (error) {
@@ -72,6 +79,12 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
 
    const handleForwardToAccountant = async () => {
       try {
+         // Check if both signatures are present
+         if (!signatures.rpsSignature || !signatures.tsdSignature) {
+            toast.error('Both signatures are required before forwarding');
+            return;
+         }
+
          // First, save any new signatures
          if (signatures.rpsSignature !== oop.rpsSignatureImage) {
             await updateSignature(oop._id, 'rps', signatures.rpsSignature);
