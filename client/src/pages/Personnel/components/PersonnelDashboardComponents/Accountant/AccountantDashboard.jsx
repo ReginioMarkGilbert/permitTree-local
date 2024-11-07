@@ -18,12 +18,27 @@ const AccountantDashboard = () => {
       'Applications awaiting OOP': ['Awaiting OOP', 'Created OOP']
    };
 
+   const getQueryParamsForTab = (tab) => {
+      switch (tab) {
+         case 'Pending Approval':
+            return { status: 'For Approval', signedByTwo: true };
+         case 'Approved OOP':
+            return { status: 'Awaiting Payment' };
+         case 'Awaiting OOP':
+            return { awaitingOOP: true, OOPCreated: false };
+         case 'Created OOP':
+            return { OOPCreated: true, awaitingOOP: false };
+         default:
+            return {};
+      }
+   };
+
    const {
       oops,
       oopsLoading,
       oopsError,
       refetch: refetchOOPs
-   } = useOrderOfPayments();
+   } = useOrderOfPayments(getQueryParamsForTab(activeSubTab));
 
    const handleReviewComplete = () => {
       refetchOOPs();
@@ -36,14 +51,7 @@ const AccountantDashboard = () => {
          return <p className="text-center text-red-500">Error loading order of payments. Please try again later.</p>;
       }
 
-      const filteredOOPs = oops.filter(oop => {
-         if (activeSubTab === 'Pending Approval') {
-            return oop.OOPstatus === 'For Approval' && oop.OOPSignedByTwoSignatories === true;
-         } else if (activeSubTab === 'Approved OOP') {
-            return oop.OOPstatus === 'Awaiting Payment';
-         }
-         return true;
-      }).filter(oop =>
+      const filteredOOPs = oops.filter(oop =>
          oop.applicationId.toLowerCase().includes(searchTerm.toLowerCase()) ||
          oop.billNo.toLowerCase().includes(searchTerm.toLowerCase())
       );
@@ -112,9 +120,8 @@ const AccountantDashboard = () => {
                            setActiveMainTab(tab);
                            setActiveSubTab(subTabs[tab][0]);
                         }}
-                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${
-                           activeMainTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'
-                        }`}
+                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeMainTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'
+                           }`}
                      >
                         {tab}
                      </button>
@@ -129,9 +136,8 @@ const AccountantDashboard = () => {
                      <button
                         key={tab}
                         onClick={() => setActiveSubTab(tab)}
-                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${
-                           activeSubTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'
-                        }`}
+                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeSubTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'
+                           }`}
                      >
                         {tab}
                      </button>
