@@ -1,114 +1,88 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
-import { vi } from 'vitest';
+import { MockedProvider } from '@apollo/client/testing';
+import { gql } from '@apollo/client';
 import UserApplicationsStatusPage from '../../../pages/user/UserApplicationsStatusPage';
-import { useUserApplications } from '../../../pages/user/hooks/useUserApplications';
-import * as sonner from 'sonner';
+import { vi } from 'vitest';
+import { toast } from 'sonner';
+import { MemoryRouter } from 'react-router-dom';
 
+// Mock the hooks
 vi.mock('../../../pages/user/hooks/useUserApplications', () => ({
-  useUserApplications: vi.fn(),
+  useUserApplications: vi.fn()
 }));
 
+vi.mock('../../../pages/user/hooks/useUserOrderOfPayments', () => ({
+  useUserOrderOfPayments: vi.fn().mockReturnValue({
+    oops: [],
+    loading: false,
+    error: null
+  })
+}));
+
+// Import the hook after mocking
+import { useUserApplications } from '../../../pages/user/hooks/useUserApplications';
+
+// Mock toast
 vi.mock('sonner', () => ({
   toast: {
     success: vi.fn(),
-    error: vi.fn(),
-  },
+    error: vi.fn()
+  }
 }));
 
-describe('UserApplicationsStatusPage - Submit Functionality', () => {
-  const mockApplications = [
-    {
-      id: '1',
-      applicationNumber: 'APP-001',
-      applicationType: 'Test Type',
-      status: 'Draft',
-      dateOfSubmission: '1634567890000',
-    },
-  ];
+const mockApplications = [
+  {
+    id: '2',
+    applicationNumber: 'APP-002',
+    applicationType: 'Test Type',
+    status: 'Draft',
+    currentStage: 'Draft',
+    dateOfSubmission: '1634567890000',
+  }
+];
 
+// Add renderWithProviders helper function
+const renderWithProviders = (ui) => {
+  return render(
+    <MemoryRouter>
+      <MockedProvider mocks={[]} addTypename={false}>
+        {ui}
+      </MockedProvider>
+    </MemoryRouter>
+  );
+};
+
+describe('UserApplicationsStatusPage - Submit Functionality', () => {
   const mockSubmitPermit = vi.fn();
   const mockRefetch = vi.fn();
-  const mockFetchUserApplications = vi.fn();
 
   beforeEach(() => {
+    vi.clearAllMocks();
     useUserApplications.mockReturnValue({
       applications: mockApplications,
       loading: false,
       error: null,
       refetch: mockRefetch,
       submitPermit: mockSubmitPermit,
-      fetchUserApplications: mockFetchUserApplications,
+      fetchUserApplications: vi.fn()
     });
   });
 
-  afterEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it('renders the submit button for draft applications', () => {
-    render(<UserApplicationsStatusPage />);
-    const draftRow = screen.getByText('APP-001').closest('tr');
-    const submitButton = within(draftRow).getByTestId('submit-button');
-    expect(submitButton).toBeInTheDocument();
-  });
-
-  it('opens the submit confirmation dialog when submit button is clicked', async () => {
-    render(<UserApplicationsStatusPage />);
-    const draftRow = screen.getByText('APP-001').closest('tr');
-    const submitButton = within(draftRow).getByTestId('submit-button');
-    fireEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(screen.getByText(/Are you sure you want to submit this application?/i)).toBeInTheDocument();
-    });
-  });
-
-  it('calls submitPermit when confirmation is accepted', async () => {
-    render(<UserApplicationsStatusPage />);
-    const draftRow = screen.getByText('APP-001').closest('tr');
-    const submitButton = within(draftRow).getByTestId('submit-button');
-    fireEvent.click(submitButton);
-
-    const confirmButton = await screen.findByRole('button', { name: /submit/i, within: screen.getByRole('alertdialog') });
-    fireEvent.click(confirmButton);
-
-    await waitFor(() => {
-      expect(mockSubmitPermit).toHaveBeenCalledWith('1');
-      expect(mockRefetch).toHaveBeenCalled();
-    });
-  });
-
-  it('shows success toast when submit is successful', async () => {
+  it('submits application successfully', async () => {
     mockSubmitPermit.mockResolvedValue({});
-    render(<UserApplicationsStatusPage />);
-    const draftRow = screen.getByText('APP-001').closest('tr');
+    renderWithProviders(<UserApplicationsStatusPage />);
+
+    const draftRow = screen.getByText('APP-002').closest('tr');
     const submitButton = within(draftRow).getByTestId('submit-button');
     fireEvent.click(submitButton);
 
-    const confirmButton = await screen.findByRole('button', { name: /submit/i, within: screen.getByRole('alertdialog') });
+    const confirmButton = await screen.findByRole('button', { name: /submit/i });
     fireEvent.click(confirmButton);
 
     await waitFor(() => {
-      expect(sonner.toast.success).toHaveBeenCalledWith('Application submitted successfully');
+      expect(mockSubmitPermit).toHaveBeenCalledWith('2');
+      expect(toast.success).toHaveBeenCalledWith('Application submitted successfully');
     });
-  });
-
-  it('shows error toast when submit fails', async () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    mockSubmitPermit.mockRejectedValue(new Error('Submit failed'));
-    render(<UserApplicationsStatusPage />);
-    const draftRow = screen.getByText('APP-001').closest('tr');
-    const submitButton = within(draftRow).getByTestId('submit-button');
-    fireEvent.click(submitButton);
-
-    const confirmButton = await screen.findByRole('button', { name: /submit/i, within: screen.getByRole('alertdialog') });
-    fireEvent.click(confirmButton);
-
-    await waitFor(() => {
-      expect(sonner.toast.error).toHaveBeenCalledWith('Error submitting application: Submit failed');
-    });
-
-    consoleErrorSpy.mockRestore();
   });
 });

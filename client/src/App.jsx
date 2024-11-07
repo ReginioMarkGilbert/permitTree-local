@@ -24,8 +24,6 @@ import PersonnelSidebar from './pages/Personnel/components/PersonnelSidebar';
 import PersonnelHomePage from './pages/Personnel/PersonnelHomePage';
 import ChiefRPSReportsPage from './pages/Personnel/ChiefRPSReportsPage';
 import PersonnelSettingsPage from './pages/Personnel/PersonnelSettingsPage';
-import ChiefRPSApplicationReviewModal from './pages/Personnel/components/TechnicalStaffAppReviewModal';
-import ChiefRPSApplicationViewModal from './pages/Personnel/components/ChiefRPSApplicationViewModal';
 
 import { isAuthenticated, getUserRoles } from './utils/auth';
 import { ToastContainer } from 'react-toastify';
@@ -134,8 +132,6 @@ const App = () => {
                            <Route path="/notifications" element={<ProtectedRoute roles={['user']}><UserNotificationsPage /></ProtectedRoute>} />
 
                            <Route path="/personnel/home" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelHomePage /></ProtectedRoute>} />
-                           <Route path="/personnel/review/:id" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSApplicationReviewModal /></ProtectedRoute>} />
-                           <Route path="/personnel/view/:id" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSApplicationViewModal /></ProtectedRoute>} />
                            <Route path="/personnel/settings" element={<ProtectedRoute roles={['Chief_RPS']}><PersonnelSettingsPage /></ProtectedRoute>} />
                            <Route path="/personnel/reports" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSReportsPage /></ProtectedRoute>} />
                            <Route path="/personnel/notifications" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSNotificationPage /></ProtectedRoute>} />
@@ -146,7 +142,7 @@ const App = () => {
                            <Route path="/personnel/dashboard" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelDashboard /></ProtectedRoute>} />
                            <Route path="/personnel/:role" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelDashboard /></ProtectedRoute>} />
 
-                           <Route
+                           <Route // oop creation page only accessible to Chief_RPS, PENR_CENR_Officer, and Accountant
                               path="/personnel/create-oop"
                               element={
                                  <ProtectedRoute roles={['Chief_RPS', 'PENR_CENR_Officer', 'Accountant']}>

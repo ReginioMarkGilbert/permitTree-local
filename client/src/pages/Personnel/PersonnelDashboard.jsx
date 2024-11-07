@@ -11,9 +11,9 @@ import { getUserRoles } from '../../utils/auth';
 const PersonnelDashboard = () => {
    const userRoles = getUserRoles();
 
-   if (userRoles.includes('Receiving_Clerk') || userRoles.includes('Releasing_Clerk')) {
-      return <ReceivingReleasingClerkDashboard />;
-   } else if (userRoles.includes('Technical_Staff')) {
+   // if (userRoles.includes('Receiving_Clerk') || userRoles.includes('Releasing_Clerk')) {
+   //    return <ReceivingReleasingClerkDashboard />;
+   if (userRoles.includes('Technical_Staff') || userRoles.includes('Receiving_Clerk') || userRoles.includes('Releasing_Clerk')) {
       return <TechnicalStaffDashboard />;
    } else if (userRoles.includes('Chief_RPS') || userRoles.includes('Chief_TSD')) {
       console.log("Chief Dashboard");

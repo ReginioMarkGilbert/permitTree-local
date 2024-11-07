@@ -40,7 +40,10 @@ const TechnicalStaffDashboard = () => {
             return { currentStage: 'AuthenticityApprovedByTechnicalStaff' };
          // certificates
          case 'Pending Release':
-            return { status: 'Approved', currentStage: 'PendingRelease' };
+            return {
+               status: 'Approved',
+               currentStage: 'PendingRelease'
+            };
          case 'Released Certificates':
             return { status: 'Released' };
 
