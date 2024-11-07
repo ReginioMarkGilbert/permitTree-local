@@ -33,7 +33,15 @@ const oopResolvers = {
 
       getOOPsByUserId: async (_, { userId }) => {
          try {
+            if (!userId) {
+               return []; // Return empty array if no userId provided
+            }
+
             const oops = await OOP.find({ userId }).sort({ createdAt: -1 });
+            if (!oops) {
+               return []; // Return empty array if no OOPs found
+            }
+
             return oops.map(oop => ({
                ...oop._doc,
                totalAmount: oop.items.reduce((sum, item) => sum + item.amount, 0)

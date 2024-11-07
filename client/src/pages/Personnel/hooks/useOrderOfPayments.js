@@ -163,7 +163,7 @@ const FORWARD_OOP_TO_ACCOUNTANT = gql`
   }
 `;
 
-export const useOrderOfPayments = () => {
+export const useOrderOfPayments = (userId = null) => {
    // Query for applications awaiting OOP
    const {
       data: applicationsData,
@@ -185,14 +185,15 @@ export const useOrderOfPayments = () => {
       fetchPolicy: 'network-only'
    });
 
-   // Add query for user's OOPs if userId is provided
+   // Only fetch user OOPs if userId is provided
    const {
       data: userOopsData,
       loading: userOopsLoading,
       error: userOopsError,
       refetch: refetchUserOOPs
    } = useQuery(GET_USER_OOPS, {
-      variables: { userId: 1 },
+      variables: { userId },
+      skip: !userId, // Skip this query if no userId is provided
       fetchPolicy: 'network-only'
    });
 
@@ -290,7 +291,7 @@ export const useOrderOfPayments = () => {
       oopsLoading,
       oopsError,
 
-      // User's OOPs data
+      // User's OOPs data - return empty array if no data
       userOops: userOopsData?.getOOPsByUserId || [],
       userOopsLoading,
       userOopsError,
