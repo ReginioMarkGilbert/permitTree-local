@@ -41,7 +41,7 @@ const UserApplicationsStatusPage = () => {
          case 'Released': return { status: 'Released' };
          case 'Expired': return { status: 'Expired' };
          case 'Rejected': return { status: 'Rejected' };
-         // Order of Payments
+         // Order of Payments - Map to backend statuses
          case 'Awaiting Payment': return { status: 'Awaiting Payment' };
          case 'Payment Proof Submitted': return { status: 'Payment Proof Submitted' };
          case 'Payment Proof Rejected': return { status: 'Payment Proof Rejected' };
@@ -259,7 +259,7 @@ const UserApplicationsStatusPage = () => {
       refetch: refetchOOPs
    } = useUserOrderOfPayments(
       userId,
-      activeMainTab === 'Order Of Payments' ? getQueryParamsForTab(activeSubTab).status : null
+      activeMainTab === 'Order Of Payments' ? activeSubTab : null
    );
 
    const renderOrderOfPaymentsTable = () => {

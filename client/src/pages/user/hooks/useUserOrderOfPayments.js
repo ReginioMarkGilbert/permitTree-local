@@ -13,10 +13,32 @@ export const useUserOrderOfPayments = (userId, status) => {
       fetchPolicy: 'network-only'
    });
 
-   // Filter OOPs based on status if provided
+   // Map frontend status to backend status if needed
+   const mapStatus = (frontendStatus) => {
+      switch (frontendStatus) {
+         case 'Awaiting Payment':
+            return 'Awaiting Payment';
+         case 'Payment Proof Submitted':
+            return 'Payment Proof Submitted';
+         case 'Payment Proof Approved':
+            return 'Payment Proof Approved';
+         case 'Payment Proof Rejected':
+            return 'Payment Proof Rejected';
+         case 'Issued OR':
+            return 'Issued OR';
+         case 'Completed':
+            return 'Completed OOP';
+         default:
+            return frontendStatus;
+      }
+   };
+
+   // Get all OOPs first
    const oops = data?.getOOPsByUserId || [];
-   const filteredOOPs = status && oops.length > 0
-      ? oops.filter(oop => oop.OOPstatus === status)
+
+   // Filter OOPs based on status if provided
+   const filteredOOPs = status
+      ? oops.filter(oop => oop.OOPstatus === mapStatus(status))
       : oops;
 
    return {

@@ -58,6 +58,8 @@ const OOPPrintPage = () => {
          navigate("/personnel/penr-cenr-officer");
       } else if (userRoles.includes('Inspection_Team')) {
          navigate("/personnel/inspection-team");
+      } else if (userRoles.includes('user')) {
+         navigate("/applicationsStatus");
       } else {
          console.log('No role found');
          navigate("/personnel/dashboard");

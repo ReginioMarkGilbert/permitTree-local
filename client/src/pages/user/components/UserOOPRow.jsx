@@ -24,7 +24,20 @@ const UserOOPRow = ({ oop }) => {
    };
 
    const getStatusColor = (status) => {
-      switch (status) {
+      const displayStatus = (() => {
+         switch (status) {
+            case 'Pending Signature':
+               return 'Awaiting Payment';
+            case 'For Approval':
+               return 'Payment Proof Submitted';
+            case 'Approved':
+               return 'Payment Proof Approved';
+            default:
+               return status;
+         }
+      })();
+
+      switch (displayStatus) {
          case 'Awaiting Payment':
             return 'bg-yellow-100 text-yellow-800';
          case 'Payment Proof Submitted':
@@ -68,7 +81,10 @@ const UserOOPRow = ({ oop }) => {
             <td className="px-4 py-3 whitespace-nowrap">
                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
                   ${getStatusColor(oop.OOPstatus)}`}>
-                  {oop.OOPstatus}
+                  {oop.OOPstatus === 'Pending Signature' ? 'Awaiting Payment' :
+                     oop.OOPstatus === 'For Approval' ? 'Payment Proof Submitted' :
+                        oop.OOPstatus === 'Approved' ? 'Payment Proof Approved' :
+                           oop.OOPstatus}
                </span>
             </td>
             <td className="px-4 py-3 whitespace-nowrap">
