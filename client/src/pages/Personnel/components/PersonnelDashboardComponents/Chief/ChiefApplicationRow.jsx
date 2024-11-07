@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Eye, Printer, ClipboardCheck } from 'lucide-react';
+import { Eye, Printer, ClipboardCheck, RotateCcw } from 'lucide-react';
+import { useMutation, gql } from '@apollo/client';
+import { toast } from 'sonner';
 import {
    Tooltip,
    TooltipContent,
@@ -10,9 +12,20 @@ import {
 import TS_ViewModal from '../TechnicalStaff/TS_ViewModal';
 import ChiefReviewModal from './ChiefReviewModal';
 
+const UNDO_OOP_CREATION = gql`
+  mutation UndoOOPCreation($id: ID!) {
+    undoOOPCreation(id: $id) {
+      id
+      awaitingOOP
+      OOPCreated
+    }
+  }
+`;
+
 const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor }) => {
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+   const [undoOOPCreation] = useMutation(UNDO_OOP_CREATION);
 
    const handleViewClick = () => setIsViewModalOpen(true);
    const handleReviewClick = () => setIsReviewModalOpen(true);
@@ -25,6 +38,21 @@ const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor }) => {
    const handlePrint = () => {
       // Implement print functionality
       console.log('Print application:', app.id);
+   };
+
+   const handleUndoOOP = async () => {
+      try {
+         await undoOOPCreation({
+            variables: {
+               id: app.id
+            }
+         });
+         toast.success('OOP creation undone successfully');
+         onReviewComplete(); // Refresh the list
+      } catch (error) {
+         console.error('Error undoing OOP creation:', error);
+         toast.error('Failed to undo OOP creation');
+      }
    };
 
    return (
@@ -102,6 +130,27 @@ const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor }) => {
                            </TooltipTrigger>
                            <TooltipContent>
                               <p>Review Application</p>
+                           </TooltipContent>
+                        </Tooltip>
+                     </TooltipProvider>
+                  )}
+
+                  {!app.awaitingOOP && ( // if awaitingOOP is false, means OOP is created
+                     <TooltipProvider>
+                        <Tooltip delayDuration={200}>
+                           <TooltipTrigger asChild>
+                              <Button
+                                 onClick={handleUndoOOP}
+                                 variant="outline"
+                                 size="icon"
+                                 className="h-8 w-8 text-yellow-600 hover:text-yellow-800"
+                                 data-testid="undo-oop-button"
+                              >
+                                 <RotateCcw className="h-4 w-4" />
+                              </Button>
+                           </TooltipTrigger>
+                           <TooltipContent>
+                              <p>Undo OOP Creation</p>
                            </TooltipContent>
                         </Tooltip>
                      </TooltipProvider>

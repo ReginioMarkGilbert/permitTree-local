@@ -35,7 +35,7 @@ module.exports = /* GraphQL */ `
 
     createOOP(input: OOPInput!): OOP
     updateOOP(id: ID!, input: OOPInput!): OOP
-    updateOOPSignature(id: ID!, signatureType: String!, signatureData: String!): OOP
+    updateOOPSignature(id: ID!, signatureType: String!, signatureImage: String!): OOP
     approveOOP(id: ID!, notes: String, status: String!): OOP
     forwardOOPToAccountant(id: ID!): OOP
 
@@ -48,5 +48,6 @@ module.exports = /* GraphQL */ `
     deletePermit(id: ID!): Boolean
     unsubmitPermit(id: ID!): Permit
     submitPermit(id: ID!): Permit
+    undoOOPCreation(id: ID!): Permit
   }
 `;

@@ -5,7 +5,7 @@ const OrderOfPaymentSchema = new mongoose.Schema({
       type: String,
       required: true,
       enum: [
-         'PendingSignature',
+         'Pending Signature',
          'PendingApproval',
          'OOPApproved',
          'Rejected',

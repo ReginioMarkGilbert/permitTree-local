@@ -7,6 +7,18 @@ import { UploadIcon, X } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useOrderOfPayments } from '../hooks/useOrderOfPayments';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { gql } from 'graphql-tag';
+
+const UPDATE_OOP_SIGNATURE = gql`
+  mutation UpdateOOPSignature($id: ID!, $signatureType: String!, $signatureImage: String!) {
+    updateOOPSignature(id: $id, signatureType: $signatureType, signatureImage: $signatureImage) {
+      _id
+      OOPstatus
+      rpsSignatureImage
+      tsdSignatureImage
+    }
+  }
+`;
 
 const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
    const [signatures, setSignatures] = useState({

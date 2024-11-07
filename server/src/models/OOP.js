@@ -39,7 +39,7 @@ const oopSchema = new mongoose.Schema({
    },
    OOPstatus: {
       type: String,
-      enum: ['PendingSignature',
+      enum: ['Pending Signature',
          'For Approval',
          'Awaiting Payment',
          'Payment Proof Submitted',
@@ -48,7 +48,7 @@ const oopSchema = new mongoose.Schema({
          'Issued OR',
          'Completed OOP'
       ],
-      default: 'PendingSignature'
+      default: 'Pending Signature'
    },
    OOPSignedByTwoSignatories: {
       type: Boolean,

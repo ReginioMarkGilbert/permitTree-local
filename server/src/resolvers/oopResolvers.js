@@ -65,7 +65,7 @@ const oopResolvers = {
                userId: permit.applicantId, // Use the applicantId from the permit
                billNo,
                totalAmount,
-               OOPstatus: 'PendingSignature'
+               OOPstatus: 'Pending Signature'
             });
 
             await oop.save();
@@ -171,6 +171,36 @@ const oopResolvers = {
             throw new Error(`Failed to forward OOP: ${error.message}`);
          }
       },
+
+      undoOOPCreation: async (_, { id }, { user }) => {
+         try {
+            // Find the permit by applicationId
+            const permit = await Permit.findById(id);
+            if (!permit) {
+               throw new Error('Permit not found');
+            }
+
+            // Update permit flags
+            permit.awaitingOOP = true;
+            permit.OOPCreated = false;
+
+            // Add to history
+            // permit.history.push({
+            //    stage: permit.currentStage,
+            //    status: permit.status,
+            //    timestamp: new Date(),
+            //    notes: 'OOP creation undone by Chief RPS',
+            //    actionBy: user.id
+            // });
+
+            await permit.save();
+
+            return permit;
+         } catch (error) {
+            console.error('Error undoing OOP creation:', error);
+            throw error;
+         }
+      }
    }
 };
 

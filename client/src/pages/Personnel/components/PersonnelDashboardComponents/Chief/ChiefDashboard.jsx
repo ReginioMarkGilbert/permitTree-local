@@ -21,11 +21,11 @@ const ChiefDashboard = () => {
          case 'Awaiting OOP':
             return { awaitingOOP: true };
          case 'Created OOP':
-            return { awaitingOOP: false, OOPCreated: true };
+            return { awaitingOOP: false, OOPCreated: true, currentStage: 'ForInspectionByTechnicalStaff', status: 'In Progress' };
          case 'Pending Signature':
-            return { OOPstatus: 'PendingSignature' };
+            return { OOPstatus: 'Pending Signature' };
          case 'Signed Order Of Payment':
-            return { CertificateStatus: 'PendingSignature' };
+            return { CertificateStatus: 'Pending Signature' };
          case 'Signed Certificates':
             return { CertificateStatus: 'Approved' };
          default:
@@ -99,7 +99,7 @@ const ChiefDashboard = () => {
 
       const filteredOOPs = oops.filter(oop => {
          if (activeSubTab === 'Pending Signature') {
-            return oop.OOPstatus === 'PendingSignature';
+            return oop.OOPstatus === 'Pending Signature';
          } else if (activeSubTab === 'Signed Order Of Payment') {
             return oop.OOPSignedByTwoSignatories === true && oop.OOPstatus === 'For Approval';
          }
