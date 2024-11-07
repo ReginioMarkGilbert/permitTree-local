@@ -2,6 +2,7 @@ const OOP = require('../models/OOP');
 const Permit = require('../models/permits/Permit');
 const { UserInputError } = require('apollo-server-express');
 const { generateBillNo } = require('../utils/billNumberGenerator');
+const mongoose = require('mongoose');
 
 const oopResolvers = {
    Query: {

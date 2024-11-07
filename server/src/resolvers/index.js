@@ -10,6 +10,7 @@ const pltcpResolvers = require('./permitResolvers/pltcpResolvers');
 const ptprResolvers = require('./permitResolvers/ptprResolvers');
 const pltpResolvers = require('./permitResolvers/pltpResolvers');
 const tcebpResolvers = require('./permitResolvers/tcebpResolvers');
+const paymentResolvers = require('./paymentResolvers');
 const { resolvePermitType } = require('../schema/permitTypes');
 const oopResolvers = require('./oopResolvers');
 
@@ -30,7 +31,8 @@ const resolvers = mergeResolvers([
    ptprResolvers,
    pltpResolvers,
    tcebpResolvers,
-   oopResolvers
+   oopResolvers,
+   paymentResolvers
 ]);
 
 module.exports = resolvers;

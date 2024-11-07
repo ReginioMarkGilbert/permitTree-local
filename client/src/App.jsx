@@ -51,6 +51,7 @@ import PersonnelDashboard from './pages/Personnel/PersonnelDashboard';
 // import { AuthProvider } from '@/context/AuthContext';
 
 import OOPPrintPage from './pages/user/OOPPrintPage';
+import PaymentPage from './pages/user/PaymentPage';
 
 const App = () => {
    const { sidebarToggle, toggleSidebar } = useSidebarToggle();
@@ -157,6 +158,14 @@ const App = () => {
                            <Route path="/superadmin/reports" element={<ProtectedRoute roles={['superadmin']}><SuperAdminReportsPage /></ProtectedRoute>} />
                            <Route path="/superadmin/settings" element={<ProtectedRoute roles={['superadmin']}><SuperAdminSettingsPage /></ProtectedRoute>} />
                            <Route path="/user/oop-print" element={<OOPPrintPage />} />
+                           <Route
+                             path="/payment/:oopId"
+                             element={
+                               <ProtectedRoute roles={['user']}>
+                                 <PaymentPage />
+                               </ProtectedRoute>
+                             }
+                           />
                         </Routes>
                      </div>
                   </div>

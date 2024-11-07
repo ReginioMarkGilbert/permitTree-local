@@ -1,6 +1,6 @@
 const { gql } = require('graphql-tag');
 
-const mutationTypes = gql`
+module.exports = /* GraphQL */ `
   type Mutation {
     login(username: String!, password: String!): AuthPayload!
     registerUser(firstName: String!, lastName: String!, username: String!, password: String!): AuthPayload!
@@ -35,15 +35,18 @@ const mutationTypes = gql`
 
     createOOP(input: OOPInput!): OOP
     updateOOP(id: ID!, input: OOPInput!): OOP
+    updateOOPSignature(id: ID!, signatureType: String!, signatureData: String!): OOP
+    approveOOP(id: ID!, notes: String, status: String!): OOP
+    forwardOOPToAccountant(id: ID!): OOP
 
     createCertificate(input: CertificateInput!): Certificate
     updateCertificate(id: ID!, input: CertificateInput!): Certificate
 
+    initiatePayment(oopId: ID!, method: String!): PaymentSession
+    confirmPayment(oopId: ID!, reference: String!): PaymentResult
 
     deletePermit(id: ID!): Boolean
     unsubmitPermit(id: ID!): Permit
     submitPermit(id: ID!): Permit
   }
 `;
-
-module.exports = mutationTypes;

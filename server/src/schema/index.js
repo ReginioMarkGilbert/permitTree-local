@@ -5,6 +5,7 @@ const permitTypes = require('./permitTypes');
 const oopTypes = require('./oopTypes');
 const certificateTypes = require('./certificateTypes');
 const queryTypes = require('./queryTypes');
+const paymentTypes = require('./paymentTypes');
 const mutationTypes = require('./mutationTypes');
 
 const rootTypeDefs = gql`
@@ -31,5 +32,6 @@ module.exports = [
    oopTypes,
    certificateTypes,
    queryTypes,
-   mutationTypes
+   mutationTypes,
+   paymentTypes
 ];

@@ -30,6 +30,9 @@ const queryTypes = gql`
 
     getAllOOPs: [OOP!]!
     getOOPById(id: ID!): OOP
+    getOOPsByApplicationId(applicationId: String!): [OOP!]!
+    getApplicationsAwaitingOOP: [Permit!]!
+    getOOPsByUserId(userId: ID!): [OOP!]!
 
     getAllCertificates: [Certificate!]!
     getCertificateById(id: ID!): Certificate
