@@ -48,6 +48,8 @@ const UserApplicationsStatusPage = () => {
          case 'Payment Proof Approved': return { status: 'Payment Proof Approved' };
          case 'Issued OR': return { status: 'Issued OR' };
          case 'Completed': return { status: 'Completed OOP' };
+         // Renewals
+         case 'Renewed': return { status: 'Renewed', isRenewal: true };
          default: return { status: 'Submitted' };
       }
    };
@@ -79,10 +81,11 @@ const UserApplicationsStatusPage = () => {
       getQueryParamsForTab(activeSubTab).currentStage
    );
 
-   const mainTabs = ['Applications', 'Order Of Payments'];
+   const mainTabs = ['Applications', 'Order Of Payments', 'Renewals'];
    const subTabs = {
       'Applications': ['Draft', 'Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected'],
-      'Order Of Payments': ['Awaiting Payment', 'Payment Proof Submitted', 'Payment Proof Rejected', 'Payment Proof Approved', 'Issued OR', 'Completed']
+      'Order Of Payments': ['Awaiting Payment', 'Payment Proof Submitted', 'Payment Proof Rejected', 'Payment Proof Approved', 'Issued OR', 'Completed'],
+      'Renewals': ['Draft', 'Submitted', 'Returned', 'Renewed', 'Rejected']
    };
 
    const filteredApplications = useMemo(() => {

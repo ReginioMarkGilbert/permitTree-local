@@ -37,6 +37,10 @@ const CSAWPermitSchema = new mongoose.Schema({
       certificateOfRegistration: [FileSchema],
       woodProcessingPlantPermit: [FileSchema]
    },
+   isRenewal: { type: Boolean, default: false },
+   previousPermitNumber: { type: String },
+   renewalDate: { type: Date },
+   renewalExpiryDate: { type: Date },
 });
 
 const CSAWPermit = Permit.discriminator('CSAWPermit', CSAWPermitSchema);
