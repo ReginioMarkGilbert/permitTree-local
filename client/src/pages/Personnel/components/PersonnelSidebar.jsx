@@ -57,9 +57,9 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
    }, [navigate, isOpen, onToggle]);
 
    const getDashboardLink = () => {
-      // if (userRoles.includes('Receiving_Clerk') || userRoles.includes('Releasing_Clerk')) {
-      //    return "/personnel/receiving-releasing";
-      if (userRoles.includes('Technical_Staff') || userRoles.includes('Receiving_Clerk') || userRoles.includes('Releasing_Clerk')) {
+      if (userRoles.includes('Receiving_Clerk') || userRoles.includes('Releasing_Clerk')) {
+         return "/personnel/receiving-releasing";
+      } else if (userRoles.includes('Technical_Staff') || userRoles.includes('Receiving_Clerk') || userRoles.includes('Releasing_Clerk')) {
          return "/personnel/technical-staff";
       } else if (userRoles.includes('Chief_RPS') || userRoles.includes('Chief_TSD')) {
          return "/personnel/chief";
