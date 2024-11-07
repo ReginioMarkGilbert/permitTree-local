@@ -8,6 +8,8 @@ import BillingDetailsStep from './components/PaymentPageComponents/BillingDetail
 import PaymentSummaryStep from './components/PaymentPageComponents/PaymentSummaryStep';
 import GCashPaymentStep from './components/PaymentPageComponents/GCashPaymentStep';
 import { toast } from 'sonner';
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 const GET_OOP_DETAILS = gql`
   query GetOOPDetails($id: ID!) {
@@ -112,6 +114,16 @@ const PaymentPage = () => {
    return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center">
          <div className="w-full max-w-4xl pt-24 px-4 sm:px-6 lg:px-8">
+            <div className="mb-4">
+               <Button
+                  variant="outline"
+                  onClick={() => navigate('/applicationsStatus')}
+                  className="flex items-center gap-2"
+               >
+                  <ArrowLeft className="h-4 w-4" />
+                  Back
+               </Button>
+            </div>
             <div className="rounded-lg shadow-sm p-6 mb-8">
                <PaymentStepIndicator currentStep={currentStep} />
             </div>
