@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Eye, Printer, ClipboardCheck, FileCheck } from 'lucide-react';
+import { Eye, Printer, ClipboardCheck, FileCheck, RotateCcw } from 'lucide-react';
 import {
    Tooltip,
    TooltipContent,
@@ -13,12 +13,15 @@ import TS_ViewModal from './TS_ViewModal';
 import TS_ReviewModal from './TS_ReviewModal';
 import TS_AuthenticityReviewModal from './TS_AuthenticityReviewModal';
 import { getUserRoles } from '../../../../../utils/auth';
+import { useUndoApplicationApproval } from '../../../hooks/useApplications';
+import { toast } from 'sonner';
 
 
 const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, currentTab }) => {
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
    const [isAuthenticityModalOpen, setIsAuthenticityModalOpen] = useState(false);
+   const { handleUndoApproval } = useUndoApplicationApproval();
 
    const handleViewClick = () => setIsViewModalOpen(true);
    const handleReviewClick = () => setIsReviewModalOpen(true);
@@ -104,7 +107,39 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
             </TooltipProvider>
          );
       }
+      // Add undo button only in Approved Applications tab
+      if (currentTab === 'Approved Applications' && app.approvedByTechnicalStaff) {
+         actions.push(
+            <TooltipProvider key="undo">
+               <Tooltip>
+                  <TooltipTrigger asChild>
+                     <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 text-yellow-600"
+                        onClick={handleUndo}
+                     >
+                        <RotateCcw className="h-4 w-4" />
+                     </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                     <p>Undo Approval</p>
+                  </TooltipContent>
+               </Tooltip>
+            </TooltipProvider>
+         );
+      }
       return actions;
+   };
+
+   const handleUndo = async () => {
+      try {
+         await handleUndoApproval(app.id);
+         toast.success('Application approval undone successfully');
+         onReviewComplete();
+      } catch (error) {
+         toast.error('Failed to undo approval');
+      }
    };
 
    return (

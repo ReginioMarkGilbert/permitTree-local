@@ -13,19 +13,22 @@ const UPDATE_PERMIT_STAGE = gql`
     $currentStage: String!,
     $status: String!,
     $notes: String,
-    $acceptedByTechnicalStaff: Boolean
+    $acceptedByTechnicalStaff: Boolean,
+    $approvedByTechnicalStaff: Boolean
   ) {
     updatePermitStage(
       id: $id,
       currentStage: $currentStage,
       status: $status,
       notes: $notes,
-      acceptedByTechnicalStaff: $acceptedByTechnicalStaff
+      acceptedByTechnicalStaff: $acceptedByTechnicalStaff,
+      approvedByTechnicalStaff: $approvedByTechnicalStaff
     ) {
       id
       currentStage
       status
       acceptedByTechnicalStaff
+      approvedByTechnicalStaff
       history {
         notes
         timestamp

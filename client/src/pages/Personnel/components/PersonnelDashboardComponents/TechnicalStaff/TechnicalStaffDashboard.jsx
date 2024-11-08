@@ -28,7 +28,7 @@ const TechnicalStaffDashboard = () => {
             return { approvedByTechnicalStaff: true };
          // Certificates/Permits
          case 'Awaiting Permit Creation':
-            return { awaitingPermitCreation: true };
+            return { awaitingPermitCreation: true, approvedByTechnicalStaff: true };
          case 'Created Permits':
             return { PermitCreated: true };
          default:

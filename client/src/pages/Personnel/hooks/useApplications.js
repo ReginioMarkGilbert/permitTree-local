@@ -1,4 +1,4 @@
-import { useQuery, gql } from '@apollo/client';
+import { useQuery, gql, useMutation } from '@apollo/client';
 
 // to add a new query param, add it first to the type, then to the query, then to the variables, then to the fetchApplications function
 // files: server/src/schema/permitTypes.js : type Query,
@@ -10,19 +10,25 @@ const GET_APPLICATIONS = gql`
     $status: String,
     $currentStage: String,
     $acceptedByTechnicalStaff: Boolean,
+    $approvedByTechnicalStaff: Boolean,
     $acceptedByReceivingClerk: Boolean,
     $recordedByReceivingClerk: Boolean,
     $reviewedByChief: Boolean,
-    $awaitingOOP: Boolean
+    $awaitingOOP: Boolean,
+    $awaitingPermitCreation: Boolean,
+    $PermitCreated: Boolean
   ) {
     getApplicationsByStatus(
       status: $status,
       currentStage: $currentStage,
       acceptedByTechnicalStaff: $acceptedByTechnicalStaff,
+      approvedByTechnicalStaff: $approvedByTechnicalStaff,
       acceptedByReceivingClerk: $acceptedByReceivingClerk,
       recordedByReceivingClerk: $recordedByReceivingClerk,
       reviewedByChief: $reviewedByChief,
-      awaitingOOP: $awaitingOOP
+      awaitingOOP: $awaitingOOP,
+      awaitingPermitCreation: $awaitingPermitCreation,
+      PermitCreated: $PermitCreated
     ) {
       id
       applicationNumber
@@ -30,10 +36,13 @@ const GET_APPLICATIONS = gql`
       status
       currentStage
       acceptedByTechnicalStaff
+      approvedByTechnicalStaff
       acceptedByReceivingClerk
       recordedByReceivingClerk
       reviewedByChief
       awaitingOOP
+      awaitingPermitCreation
+      PermitCreated
       dateOfSubmission
       history {
         notes
@@ -43,16 +52,35 @@ const GET_APPLICATIONS = gql`
   }
 `;
 
-export const useApplications = ({ status, currentStage, acceptedByTechnicalStaff, acceptedByReceivingClerk, recordedByReceivingClerk, reviewedByChief, awaitingOOP }) => {
+const UNDO_APPROVAL_MUTATION = gql`
+  mutation UndoApplicationApproval($id: ID!) {
+    updatePermitStage(
+      id: $id
+      currentStage: "ForInspectionByTechnicalStaff"
+      status: "In Progress"
+      approvedByTechnicalStaff: false
+    ) {
+      id
+      status
+      currentStage
+      approvedByTechnicalStaff
+    }
+  }
+`;
+
+export const useApplications = ({ status, currentStage, acceptedByTechnicalStaff, approvedByTechnicalStaff, acceptedByReceivingClerk, recordedByReceivingClerk, reviewedByChief, awaitingOOP, awaitingPermitCreation, PermitCreated }) => {
    const { data, loading, error, refetch } = useQuery(GET_APPLICATIONS, {
       variables: {
          status,
          currentStage,
          acceptedByTechnicalStaff,
+         approvedByTechnicalStaff,
          acceptedByReceivingClerk,
          recordedByReceivingClerk,
          reviewedByChief,
-         awaitingOOP
+         awaitingOOP,
+         awaitingPermitCreation,
+         PermitCreated
       },
       fetchPolicy: 'network-only',
    });
@@ -73,4 +101,22 @@ export const useApplications = ({ status, currentStage, acceptedByTechnicalStaff
       error,
       fetchApplications
    };
+};
+
+export const useUndoApplicationApproval = () => {
+  const [undoApproval] = useMutation(UNDO_APPROVAL_MUTATION);
+
+  const handleUndoApproval = async (id) => {
+    try {
+      await undoApproval({
+        variables: { id }
+      });
+      return true;
+    } catch (error) {
+      console.error('Error undoing approval:', error);
+      throw error;
+    }
+  };
+
+  return { handleUndoApproval };
 };

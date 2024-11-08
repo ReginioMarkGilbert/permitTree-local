@@ -10,19 +10,25 @@ const UPDATE_PERMIT_STAGE = gql`
     $currentStage: String!,
     $status: String!,
     $notes: String,
-    $acceptedByTechnicalStaff: Boolean
+    $acceptedByTechnicalStaff: Boolean,
+    $approvedByTechnicalStaff: Boolean,
+    $awaitingPermitCreation: Boolean
   ) {
     updatePermitStage(
       id: $id,
       currentStage: $currentStage,
       status: $status,
       notes: $notes,
-      acceptedByTechnicalStaff: $acceptedByTechnicalStaff
+      acceptedByTechnicalStaff: $acceptedByTechnicalStaff,
+      approvedByTechnicalStaff: $approvedByTechnicalStaff,
+      awaitingPermitCreation: $awaitingPermitCreation
     ) {
       id
       currentStage
       status
       acceptedByTechnicalStaff
+      approvedByTechnicalStaff
+      awaitingPermitCreation
       history {
         notes
         timestamp
@@ -45,7 +51,8 @@ const TS_AuthenticityReviewModal = ({ isOpen, onClose, application, onReviewComp
                currentStage: 'AuthenticityApprovedByTechnicalStaff',
                status: 'In Progress',
                notes: 'Application authenticity approved by Technical Staff',
-               acceptedByTechnicalStaff: true
+               approvedByTechnicalStaff: true,
+               awaitingPermitCreation: true
             }
          });
          console.log('Result:', result);
@@ -68,14 +75,14 @@ const TS_AuthenticityReviewModal = ({ isOpen, onClose, application, onReviewComp
                </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-               <p className="text-sm text-gray-600">
-                  By approving authenticity, you confirm that:
-                  <ul className="list-disc pl-5 mt-2">
+               <div className="text-sm text-gray-600">
+                  <p className="mb-2">By approving authenticity, you confirm that:</p>
+                  <ul className="list-disc pl-5">
                      <li>All original documents have been verified</li>
                      <li>Physical inspection of the chainsaw has been completed</li>
                      <li>All details match the submitted application</li>
                   </ul>
-               </p>
+               </div>
                <div className="flex space-x-2">
                   <Button
                      onClick={handleApproveAuthenticity}
