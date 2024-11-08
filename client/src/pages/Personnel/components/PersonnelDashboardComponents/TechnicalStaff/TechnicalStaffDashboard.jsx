@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import TS_ApplicationRow from './TS_ApplicationRow';
 import { useApplications } from '../../../hooks/useApplications';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
 const TechnicalStaffDashboard = () => {
    const [searchTerm, setSearchTerm] = useState('');
@@ -25,10 +25,14 @@ const TechnicalStaffDashboard = () => {
          case 'For Inspection and Approval':
             return { currentStage: 'ForInspectionByTechnicalStaff' };
          case 'Approved Applications':
-            return { approvedByTechnicalStaff: true };
+            return { currentStage: 'AuthenticityApprovedByTechnicalStaff' };
          // Certificates/Permits
          case 'Awaiting Permit Creation':
-            return { awaitingPermitCreation: true, approvedByTechnicalStaff: true };
+            return {
+               currentStage: 'AuthenticityApprovedByTechnicalStaff',
+               awaitingPermitCreation: true,
+               PermitCreated: false
+            };
          case 'Created Permits':
             return { PermitCreated: true };
          default:
@@ -37,12 +41,23 @@ const TechnicalStaffDashboard = () => {
       }
    };
 
-   const { applications, loading, error, fetchApplications } = useApplications(getQueryParamsForTab(activeSubTab));
+   const { applications, loading, error, refetch } = useApplications(getQueryParamsForTab(activeSubTab));
 
    const mainTabs = ['Applications', 'Certificates/Permits'];
    const subTabs = {
       'Applications': ['Pending Reviews', 'Returned Applications', 'Accepted Applications', 'For Inspection and Approval', 'Approved Applications'],
       'Certificates/Permits': ['Awaiting Permit Creation', 'Created Permits']
+   };
+
+   const getDefaultSubTab = (mainTab) => {
+      switch (mainTab) {
+         case 'Applications':
+            return 'Pending Reviews';
+         case 'Certificates/Permits':
+            return 'Awaiting Permit Creation';
+         default:
+            return subTabs[mainTab][0];
+      }
    };
 
    const filteredApplications = useMemo(() => {
@@ -53,30 +68,22 @@ const TechnicalStaffDashboard = () => {
    }, [applications, searchTerm]);
 
    useEffect(() => {
-      fetchApplications();
-   }, [fetchApplications, activeSubTab]);
+      refetch();
+   }, [refetch, activeSubTab]);
+
+   const handleReviewComplete = () => {
+      refetch();
+   };
 
    const getStatusColor = (status) => {
       switch (status.toLowerCase()) {
-         case 'submitted': return 'bg-yellow-100 text-yellow-800';
-         case 'returned': return 'bg-orange-100 text-orange-800';
+         case 'draft': return 'bg-gray-100 text-gray-800';
+         case 'submitted': return 'bg-blue-100 text-blue-800';
+         case 'returned': return 'bg-yellow-100 text-yellow-800';
          case 'accepted': return 'bg-green-100 text-green-800';
-         case 'for inspection and approval': return 'bg-blue-100 text-blue-800';
          case 'approved': return 'bg-green-100 text-green-800';
-
-         case 'awaiting permit creation': return 'bg-yellow-100 text-yellow-800';
-         case 'created permits': return 'bg-green-100 text-green-800';
          default: return 'bg-gray-100 text-gray-800';
       }
-   };
-
-   const handlePrint = (id) => {
-      // Implement print functionality
-      console.log('Print application:', id);
-   };
-
-   const handleReviewComplete = () => {
-      fetchApplications();
    };
 
    const renderTable = () => {
@@ -106,7 +113,6 @@ const TechnicalStaffDashboard = () => {
                      <TS_ApplicationRow
                         key={app.id}
                         app={app}
-                        onPrint={handlePrint}
                         onReviewComplete={handleReviewComplete}
                         getStatusColor={getStatusColor}
                         currentTab={activeSubTab}
@@ -118,61 +124,26 @@ const TechnicalStaffDashboard = () => {
       );
    };
 
-   const renderTabDescription = () => {
-      if (activeSubTab === 'Pending Reviews') {
-         return (
-            <div className="mb-4 -mt-4">
-               <h1 className="text-sm text-green-800">This is the list of applications pending review to check for completeness and supporting documents.</h1>
-            </div>
-         );
-      }
-      if (activeSubTab === 'Returned Applications') {
-         return (
-            <div className="mb-4 -mt-4">
-               <h1 className="text-sm text-green-800">This is the list of applications that were returned due to incomplete documents or other issues.</h1>
-            </div>
-         );
-      }
-      if (activeSubTab === 'Accepted Applications') {
-         return (
-            <div className="mb-4 -mt-4">
-               <h1 className="text-sm text-green-800">This is the list of applications that have been accepted after review.</h1>
-            </div>
-         );
-      }
-      if (activeSubTab === 'For Inspection and Approval') {
-         return (
-            <div className="mb-4 -mt-4">
-               <h1 className="text-sm text-green-800">This is the list of applications (forwarded by the Chief RPS after review) that are pending inspection (e.g., chainsaws, etc.).</h1>
-            </div>
-         );
-      }
-      if (activeSubTab === 'Approved Applications') {
-         return (
-            <div className="mb-4 -mt-4">
-               <h1 className="text-sm text-green-800">This is the list of applications that have been approved for authenticity after inspection.</h1>
-            </div>
-         );
-      }
-   }
-
    return (
       <div className="min-h-screen bg-green-50">
          <div className="container mx-auto px-4 sm:px-6 py-8 pt-24">
             <div className="flex justify-between items-center mb-6">
                <h1 className="text-3xl font-bold text-green-800">Technical Staff Dashboard</h1>
-               <Button onClick={fetchApplications} variant="outline">
+               <Button onClick={refetch} variant="outline">
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Refresh
                </Button>
             </div>
-            {/* Main Tabs */}
+            {/* Main Tabs - Simplified */}
             <div className="mb-6 overflow-x-auto">
                <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
                   {mainTabs.map((tab) => (
                      <button
                         key={tab}
-                        onClick={() => setActiveMainTab(tab)}
+                        onClick={() => {
+                           setActiveMainTab(tab);
+                           setActiveSubTab(subTabs[tab][0]); // Set first subtab as default for each main tab
+                        }}
                         className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeMainTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
                      >
                         {tab}
@@ -194,7 +165,6 @@ const TechnicalStaffDashboard = () => {
                   ))}
                </div>
             </div>
-            {renderTabDescription()}
             <div className="mb-6">
                <Input
                   type="text"

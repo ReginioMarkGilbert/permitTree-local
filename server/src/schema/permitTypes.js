@@ -9,6 +9,7 @@ const permitTypes = gql`
     currentStage: String!
     recordedByReceivingClerk: Boolean
     acceptedByTechnicalStaff: Boolean
+    approvedByTechnicalStaff: Boolean
     acceptedByReceivingClerk: Boolean
     reviewedByChief: Boolean
     awaitingOOP: Boolean
@@ -18,6 +19,7 @@ const permitTypes = gql`
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
+    certificate: Certificate
   }
 
   type HistoryEntry {
@@ -36,6 +38,7 @@ const permitTypes = gql`
     currentStage: String!
     recordedByReceivingClerk: Boolean
     acceptedByTechnicalStaff: Boolean
+    approvedByTechnicalStaff: Boolean
     acceptedByReceivingClerk: Boolean
     reviewedByChief: Boolean
     awaitingOOP: Boolean
@@ -55,6 +58,7 @@ const permitTypes = gql`
     originAddress: String!
     destinationAddress: String!
     files: COVFiles
+    certificate: Certificate
   }
 
   type CSAWPermit implements Permit {
@@ -65,6 +69,7 @@ const permitTypes = gql`
     currentStage: String!
     recordedByReceivingClerk: Boolean
     acceptedByTechnicalStaff: Boolean
+    approvedByTechnicalStaff: Boolean
     acceptedByReceivingClerk: Boolean
     reviewedByChief: Boolean
     awaitingOOP: Boolean
@@ -93,6 +98,7 @@ const permitTypes = gql`
     isPTPRHolder: Boolean!
     isWPPHolder: Boolean!
     files: CSAWFiles
+    certificate: Certificate
   }
 
   type PLTCPPermit implements Permit {
@@ -103,6 +109,7 @@ const permitTypes = gql`
     currentStage: String!
     recordedByReceivingClerk: Boolean
     acceptedByTechnicalStaff: Boolean
+    approvedByTechnicalStaff: Boolean
     acceptedByReceivingClerk: Boolean
     reviewedByChief: Boolean
     awaitingOOP: Boolean
@@ -122,6 +129,7 @@ const permitTypes = gql`
     forPersonalUse: Boolean!
     purpose: String!
     files: PLTCPFiles
+    certificate: Certificate
   }
 
   type PTPRPermit implements Permit {
@@ -132,6 +140,7 @@ const permitTypes = gql`
     currentStage: String!
     recordedByReceivingClerk: Boolean
     acceptedByTechnicalStaff: Boolean
+    approvedByTechnicalStaff: Boolean
     acceptedByReceivingClerk: Boolean
     reviewedByChief: Boolean
     awaitingOOP: Boolean
@@ -150,6 +159,7 @@ const permitTypes = gql`
     treeSpacing: String!
     yearPlanted: Int!
     files: PTPRFiles
+    certificate: Certificate
   }
 
   type PLTPPermit implements Permit {
@@ -160,6 +170,7 @@ const permitTypes = gql`
     currentStage: String!
     recordedByReceivingClerk: Boolean
     acceptedByTechnicalStaff: Boolean
+    approvedByTechnicalStaff: Boolean
     acceptedByReceivingClerk: Boolean
     reviewedByChief: Boolean
     awaitingOOP: Boolean
@@ -182,6 +193,7 @@ const permitTypes = gql`
     forPersonalUse: Boolean!
     purpose: String!
     files: PLTPFiles
+    certificate: Certificate
   }
 
   type TCEBPPermit implements Permit {
@@ -192,6 +204,7 @@ const permitTypes = gql`
     currentStage: String!
     recordedByReceivingClerk: Boolean
     acceptedByTechnicalStaff: Boolean
+    approvedByTechnicalStaff: Boolean
     acceptedByReceivingClerk: Boolean
     reviewedByChief: Boolean
     awaitingOOP: Boolean
@@ -207,6 +220,7 @@ const permitTypes = gql`
     purpose: String!
     requestType: String!
     files: TCEBPFiles
+    certificate: Certificate
   }
 
   type COVFiles {
@@ -288,12 +302,15 @@ const permitTypes = gql`
       status: String,
       currentStage: String,
       acceptedByTechnicalStaff: Boolean,
+      approvedByTechnicalStaff: Boolean,
       returnedByTechnicalStaff: Boolean,
       reviewedByChief: Boolean,
       acceptedByReceivingClerk: Boolean,
       returnedByReceivingClerk: Boolean,
       recordedByReceivingClerk: Boolean,
-      awaitingOOP: Boolean
+      awaitingOOP: Boolean,
+      awaitingPermitCreation: Boolean,
+      PermitCreated: Boolean
     ): [Permit!]!
     getApplicationsByCurrentStage(currentStage: String!): [Permit!]!
   }
@@ -331,8 +348,11 @@ const permitTypes = gql`
       reviewedByChief: Boolean,
       awaitingOOP: Boolean,
       acceptedByTechnicalStaff: Boolean,
+      approvedByTechnicalStaff: Boolean,
       acceptedByReceivingClerk: Boolean,
-      recordedByReceivingClerk: Boolean
+      recordedByReceivingClerk: Boolean,
+      awaitingPermitCreation: Boolean,
+      PermitCreated: Boolean
     ): Permit!
     acceptApplication(id: ID!): Permit!
     recordApplication(id: ID!, currentStage: String!, status: String!): Permit!

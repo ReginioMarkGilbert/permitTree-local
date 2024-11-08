@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Eye, Printer, ClipboardCheck, FileCheck, RotateCcw } from 'lucide-react';
+import { Eye, Printer, ClipboardCheck, FileCheck, RotateCcw, FileText, CheckCircle, XCircle, FileCheck2 } from 'lucide-react';
 import {
    Tooltip,
    TooltipContent,
@@ -12,15 +12,41 @@ import {
 import TS_ViewModal from './TS_ViewModal';
 import TS_ReviewModal from './TS_ReviewModal';
 import TS_AuthenticityReviewModal from './TS_AuthenticityReviewModal';
+import GenerateCertificateModal from './GenerateCertificateModal';
 import { getUserRoles } from '../../../../../utils/auth';
 import { useUndoApplicationApproval } from '../../../hooks/useApplications';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
+import { gql } from 'graphql-tag';
 
+const GET_APPLICATION_DETAILS = gql`
+  query GetApplication($id: ID!) {
+    getCSAWPermitById(id: $id) {
+      id
+      applicationNumber
+      applicationType
+      registrationType
+      ownerName
+      address
+      brand
+      model
+      serialNumber
+      dateOfAcquisition
+      powerOutput
+      maxLengthGuidebar
+      countryOfOrigin
+      purchasePrice
+      status
+      currentStage
+    }
+  }
+`;
 
 const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, currentTab }) => {
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
    const [isAuthenticityModalOpen, setIsAuthenticityModalOpen] = useState(false);
+   const [isGenerateCertificateModalOpen, setIsGenerateCertificateModalOpen] = useState(false);
    const { handleUndoApproval } = useUndoApplicationApproval();
 
    const handleViewClick = () => setIsViewModalOpen(true);
@@ -142,6 +168,17 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
       }
    };
 
+   const formatDate = (timestamp) => {
+      const date = new Date(parseInt(timestamp));
+      return format(date, 'M/d/yyyy');
+   };
+
+   const showGenerateCertificateButton =
+      currentTab === 'Awaiting Permit Creation' &&
+      app.currentStage === 'AuthenticityApprovedByTechnicalStaff' &&
+      app.applicationType === 'Chainsaw Registration' &&
+      !app.PermitCreated;
+
    return (
       <>
          <tr>
@@ -164,6 +201,45 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
             <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
                <div className="flex items-center space-x-2">
                   {renderActionButtons()}
+                  {app.currentStage === 'ForInspectionByTechnicalStaff' && (
+                     <TooltipProvider>
+                        <Tooltip>
+                           <TooltipTrigger asChild>
+                              <Button
+                                 variant="outline"
+                                 size="icon"
+                                 className="h-8 w-8"
+                                 onClick={() => setIsAuthenticityModalOpen(true)}
+                              >
+                                 <CheckCircle className="h-4 w-4" />
+                              </Button>
+                           </TooltipTrigger>
+                           <TooltipContent>
+                              <p>Review Authenticity</p>
+                           </TooltipContent>
+                        </Tooltip>
+                     </TooltipProvider>
+                  )}
+
+                  {showGenerateCertificateButton && (
+                     <TooltipProvider>
+                        <Tooltip>
+                           <TooltipTrigger asChild>
+                              <Button
+                                 variant="outline"
+                                 size="icon"
+                                 className="h-8 w-8 text-green-600"
+                                 onClick={() => setIsGenerateCertificateModalOpen(true)}
+                              >
+                                 <FileCheck2 className="h-4 w-4" />
+                              </Button>
+                           </TooltipTrigger>
+                           <TooltipContent>
+                              <p>Generate Certificate</p>
+                           </TooltipContent>
+                        </Tooltip>
+                     </TooltipProvider>
+                  )}
                </div>
             </td>
          </tr>
@@ -185,6 +261,14 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
             application={app}
             onReviewComplete={handleReviewComplete}
          />
+         {isGenerateCertificateModalOpen && (
+            <GenerateCertificateModal
+               isOpen={isGenerateCertificateModalOpen}
+               onClose={() => setIsGenerateCertificateModalOpen(false)}
+               application={app}
+               onComplete={onReviewComplete}
+            />
+         )}
       </>
    );
 };

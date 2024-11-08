@@ -38,6 +38,10 @@ const queryTypes = gql`
     getCertificateById(id: ID!): Certificate
 
     getRecentApplications(limit: Int!): [Permit!]!
+
+    # Certificate queries
+    getCertificates(status: String): [Certificate!]!
+    getCertificatesByApplicationId(applicationId: ID!): [Certificate!]!
   }
 `;
 

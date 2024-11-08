@@ -40,9 +40,6 @@ module.exports = /* GraphQL */ `
     forwardOOPToAccountant(id: ID!): OOP
     undoApproval(paymentId: ID!): OOP
 
-    createCertificate(input: CertificateInput!): Certificate
-    updateCertificate(id: ID!, input: CertificateInput!): Certificate
-
     initiatePayment(oopId: ID!, method: String!): PaymentSession
     confirmPayment(oopId: ID!, reference: String!): PaymentResult
 
@@ -53,5 +50,10 @@ module.exports = /* GraphQL */ `
     unsubmitPermit(id: ID!): Permit
     submitPermit(id: ID!): Permit
     undoOOPCreation(id: ID!): Permit
+
+    # Certificate mutations
+    generateCertificate(input: GenerateCertificateInput!): Certificate!
+    forwardCertificateForSignature(id: ID!): Certificate!
+    signCertificate(id: ID!, signature: String!): Certificate!
   }
 `;

@@ -33,7 +33,7 @@ const ChiefDashboard = () => {
       }
    };
 
-   const { applications, loading, error, fetchApplications } = useApplications(getQueryParamsForTab(activeSubTab));
+   const { applications, loading, error, refetch } = useApplications(getQueryParamsForTab(activeSubTab));
 
    const mainTabs = ['Applications', 'Applications Awaiting OOP', 'Order Of Payment', 'Certificates'];
    const subTabs = {
@@ -51,8 +51,8 @@ const ChiefDashboard = () => {
    }, [applications, searchTerm]);
 
    useEffect(() => {
-      fetchApplications();
-   }, [fetchApplications, activeSubTab]);
+      refetch();
+   }, [refetch, activeSubTab]);
 
    const getStatusColor = (status) => {
       switch (status.toLowerCase()) {
@@ -63,7 +63,7 @@ const ChiefDashboard = () => {
    };
 
    const handleReviewComplete = () => {
-      fetchApplications();
+      refetch();
    };
 
    const renderTabDescription = () => {
@@ -189,7 +189,7 @@ const ChiefDashboard = () => {
          <div className="container mx-auto px-4 sm:px-6 py-8 pt-24">
             <div className="flex justify-between items-center mb-6">
                <h1 className="text-3xl font-bold text-green-800">Chief RPS/TSD Dashboard</h1>
-               <Button onClick={() => { }} variant="outline">
+               <Button onClick={refetch} variant="outline">
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Refresh
                </Button>

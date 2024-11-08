@@ -40,6 +40,10 @@ const PermitSchema = new mongoose.Schema({
       type: Boolean,
       default: false
    },
+   approvedByTechnicalStaff: {
+      type: Boolean,
+      default: false
+   },
    acceptedByReceivingClerk: {
       type: Boolean,
       default: false

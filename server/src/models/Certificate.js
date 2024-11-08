@@ -1,15 +1,70 @@
 const mongoose = require('mongoose');
 
 const CertificateSchema = new mongoose.Schema({
-   certificateNumber: { type: String, required: true, unique: true },
-   permitId: { type: mongoose.Schema.Types.ObjectId, ref: 'Permit', required: true },
-   status: { type: String, required: true, enum: ['Pending', 'Approved', 'Issued'] },
+   certificateNumber: {
+      type: String,
+      required: true,
+      unique: true
+   },
+   applicationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Permit',
+      required: true
+   },
+   applicationType: {
+      type: String,
+      required: true,
+      enum: ['Chainsaw Registration', 'Certificate of Verification', 'Private Tree Plantation Registration',
+             'Public Land Tree Cutting Permit', 'Special/Private Land Timber Permit', 'Tree Cutting and/or Earth Balling Permit']
+   },
+   status: {
+      type: String,
+      enum: ['Pending Signature', 'Signed', 'Released'],
+      default: 'Pending Signature'
+   },
+   dateCreated: {
+      type: Date,
+      default: Date.now
+   },
    dateIssued: Date,
    expiryDate: Date,
-   signedBy: {
+   createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Admin'
-   }
-}, { timestamps: true });
+      ref: 'User'
+   },
+   signedBy: {
+      PENRO: {
+         userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+         signature: String,
+         dateSigned: Date
+      }
+   },
+   certificateData: {
+      // For Chainsaw Registration
+      registrationType: String,
+      ownerName: String,
+      address: String,
+      chainsawDetails: {
+         brand: String,
+         model: String,
+         serialNumber: String,
+         dateOfAcquisition: Date,
+         powerOutput: String,
+         maxLengthGuidebar: String,
+         countryOfOrigin: String,
+         purchasePrice: Number
+      },
+      purpose: String,
+      otherDetails: mongoose.Schema.Types.Mixed
+   },
+   history: [{
+      action: String,
+      timestamp: Date,
+      userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      notes: String
+   }]
+}, {
+   timestamps: true
+});
 
 module.exports = mongoose.model('Certificate', CertificateSchema);

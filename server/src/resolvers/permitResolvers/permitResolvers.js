@@ -36,7 +36,10 @@ const permitResolvers = {
                history: permit.history || [],
                recordedByReceivingClerk: permit.recordedByReceivingClerk || false,
                reviewedByChief: permit.reviewedByChief || false,
-               acceptedByTechnicalStaff: permit.acceptedByTechnicalStaff || false
+               acceptedByTechnicalStaff: permit.acceptedByTechnicalStaff || false,
+               approvedByTechnicalStaff: permit.approvedByTechnicalStaff || false,
+               awaitingPermitCreation: permit.awaitingPermitCreation || false,
+               PermitCreated: permit.PermitCreated || false
             }));
 
             // console.log('Server: Fetched user applications:', query);
@@ -95,7 +98,10 @@ const permitResolvers = {
          acceptedByReceivingClerk,
          recordedByReceivingClerk,
          reviewedByChief,
-         awaitingOOP
+         awaitingOOP,
+         approvedByTechnicalStaff,
+         awaitingPermitCreation,
+         PermitCreated
       }) => {
          try {
             let query = {};
@@ -104,6 +110,9 @@ const permitResolvers = {
             if (currentStage) query.currentStage = currentStage;
             if (acceptedByTechnicalStaff !== undefined) {
                query.acceptedByTechnicalStaff = acceptedByTechnicalStaff;
+            }
+            if (approvedByTechnicalStaff !== undefined) {
+               query.approvedByTechnicalStaff = approvedByTechnicalStaff;
             }
             if (acceptedByReceivingClerk !== undefined) {
                query.acceptedByReceivingClerk = acceptedByReceivingClerk;
@@ -116,6 +125,12 @@ const permitResolvers = {
             }
             if (awaitingOOP !== undefined) {
                query.awaitingOOP = awaitingOOP;
+            }
+            if (awaitingPermitCreation !== undefined) {
+               query.awaitingPermitCreation = awaitingPermitCreation;
+            }
+            if (PermitCreated !== undefined) {
+               query.PermitCreated = PermitCreated;
             }
 
             console.log('Query parameters:', query);
@@ -261,7 +276,10 @@ const permitResolvers = {
          awaitingOOP,
          acceptedByTechnicalStaff,
          acceptedByReceivingClerk,
-         recordedByReceivingClerk
+         recordedByReceivingClerk,
+         approvedByTechnicalStaff,
+         awaitingPermitCreation,
+         PermitCreated
       }, context) => {
          try {
             const permit = await Permit.findById(id);
@@ -286,6 +304,15 @@ const permitResolvers = {
             }
             if (recordedByReceivingClerk !== undefined) {
                permit.recordedByReceivingClerk = recordedByReceivingClerk;
+            }
+            if (approvedByTechnicalStaff !== undefined) {
+               permit.approvedByTechnicalStaff = approvedByTechnicalStaff;
+            }
+            if (awaitingPermitCreation !== undefined) {
+               permit.awaitingPermitCreation = awaitingPermitCreation;
+            }
+            if (PermitCreated !== undefined) {
+               permit.PermitCreated = PermitCreated;
             }
 
             permit.history.push({

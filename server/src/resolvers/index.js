@@ -1,5 +1,6 @@
 const { mergeResolvers } = require('@graphql-tools/merge');
 const { GraphQLUpload } = require('graphql-upload-minimal');
+const { GraphQLJSON } = require('graphql-type-json');
 const authResolvers = require('./authResolvers');
 const userResolvers = require('./userResolvers');
 const adminResolvers = require('./adminResolvers');
@@ -11,11 +12,15 @@ const ptprResolvers = require('./permitResolvers/ptprResolvers');
 const pltpResolvers = require('./permitResolvers/pltpResolvers');
 const tcebpResolvers = require('./permitResolvers/tcebpResolvers');
 const paymentResolvers = require('./paymentResolvers');
+const certificateResolvers = require('./certificateResolvers');
 const { resolvePermitType } = require('../schema/permitTypes');
 const oopResolvers = require('./oopResolvers');
 
 const resolvers = mergeResolvers([
-   { Upload: GraphQLUpload },
+   {
+      Upload: GraphQLUpload,
+      JSON: GraphQLJSON
+   },
    {
       Permit: {
          __resolveType: resolvePermitType
@@ -32,7 +37,8 @@ const resolvers = mergeResolvers([
    pltpResolvers,
    tcebpResolvers,
    oopResolvers,
-   paymentResolvers
+   paymentResolvers,
+   certificateResolvers
 ]);
 
 module.exports = resolvers;
