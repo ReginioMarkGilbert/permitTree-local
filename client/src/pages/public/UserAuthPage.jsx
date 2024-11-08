@@ -238,12 +238,12 @@ const UserAuthPage = () => {
                                  <div className="flex items-center pt-2">
                                     <input
                                        type="checkbox"
-                                       id="showPassword"
+                                       id="showPasswordLogin"
                                        checked={showPassword}
                                        onChange={() => setShowPassword(!showPassword)}
                                        className="mr-2"
                                     />
-                                    <label htmlFor="showPassword" className="text-sm text-gray-600">
+                                    <label htmlFor="showPasswordLogin" className="text-sm text-gray-600">
                                        Show password
                                     </label>
                                  </div>
@@ -325,12 +325,14 @@ const UserAuthPage = () => {
                               <div className="flex items-center">
                                  <input
                                     type="checkbox"
-                                    id="showPassword"
+                                    id="showPasswordSignup"
                                     checked={showPassword}
                                     onChange={() => setShowPassword(!showPassword)}
                                     className="mr-2"
                                  />
-                                 <label htmlFor="showPassword" className="text-sm text-gray-600">Show password</label>
+                                 <label htmlFor="showPasswordSignup" className="text-sm text-gray-600">
+                                    Show password
+                                 </label>
                               </div>
                            </div>
                            <button
