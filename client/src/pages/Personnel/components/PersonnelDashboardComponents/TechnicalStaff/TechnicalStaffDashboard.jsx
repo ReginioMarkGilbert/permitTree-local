@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import TS_ApplicationRow from './TS_ApplicationRow';
 import { useApplications } from '../../../hooks/useApplications';
+import { toast } from 'react-toastify';
 
 const TechnicalStaffDashboard = () => {
    const [searchTerm, setSearchTerm] = useState('');
-   const [activeTab, setActiveTab] = useState('Pending Reviews');
+   const [activeMainTab, setActiveMainTab] = useState('Applications');
+   const [activeSubTab, setActiveSubTab] = useState('Pending Reviews');
 
    const getQueryParamsForTab = (tab) => {
       switch (tab) {
@@ -24,17 +26,24 @@ const TechnicalStaffDashboard = () => {
             return { currentStage: 'ForInspectionByTechnicalStaff' };
          case 'Approved Applications':
             return { currentStage: 'AuthenticityApprovedByTechnicalStaff' };
+         // Certificates/Permits
+         case 'Awaiting Permit Creation':
+            return { AwaitingPermitCreation: true };
+         case 'Created Permits':
+            return { PermitCreated: true };
          default:
-            return {
-               status: 'Submitted',
-               currentStage: 'TechnicalStaffReview'
-            };
+            toast.error('Invalid subtab selected');
+            return {};
       }
    };
 
-   const { applications, loading, error, fetchApplications } = useApplications(getQueryParamsForTab(activeTab));
+   const { applications, loading, error, fetchApplications } = useApplications(getQueryParamsForTab(activeSubTab));
 
-   const tabs = ['Pending Reviews', 'Returned Applications', 'Accepted Applications', 'For Inspection and Approval', 'Approved Applications'];
+   const mainTabs = ['Applications', 'Certificates/Permits'];
+   const subTabs = {
+      'Applications': ['Pending Reviews', 'Returned Applications', 'Accepted Applications', 'For Inspection and Approval', 'Approved Applications'],
+      'Certificates/Permits': ['Awaiting Permit Creation', 'Created Permits']
+   };
 
    const filteredApplications = useMemo(() => {
       return applications.filter(app =>
@@ -45,7 +54,7 @@ const TechnicalStaffDashboard = () => {
 
    useEffect(() => {
       fetchApplications();
-   }, [fetchApplications, activeTab]);
+   }, [fetchApplications, activeSubTab]);
 
    const getStatusColor = (status) => {
       switch (status.toLowerCase()) {
@@ -54,6 +63,9 @@ const TechnicalStaffDashboard = () => {
          case 'accepted': return 'bg-green-100 text-green-800';
          case 'for inspection and approval': return 'bg-blue-100 text-blue-800';
          case 'approved': return 'bg-green-100 text-green-800';
+
+         case 'awaiting permit creation': return 'bg-yellow-100 text-yellow-800';
+         case 'created permits': return 'bg-green-100 text-green-800';
          default: return 'bg-gray-100 text-gray-800';
       }
    };
@@ -106,35 +118,35 @@ const TechnicalStaffDashboard = () => {
    };
 
    const renderTabDescription = () => {
-      if (activeTab === 'Pending Reviews') {
+      if (activeSubTab === 'Pending Reviews') {
          return (
             <div className="mb-4 -mt-4">
                <h1 className="text-sm text-green-800">This is the list of applications pending review to check for completeness and supporting documents.</h1>
             </div>
          );
       }
-      if (activeTab === 'Returned Applications') {
+      if (activeSubTab === 'Returned Applications') {
          return (
             <div className="mb-4 -mt-4">
                <h1 className="text-sm text-green-800">This is the list of applications that were returned due to incomplete documents or other issues.</h1>
             </div>
          );
       }
-      if (activeTab === 'Accepted Applications') {
+      if (activeSubTab === 'Accepted Applications') {
          return (
             <div className="mb-4 -mt-4">
                <h1 className="text-sm text-green-800">This is the list of applications that have been accepted after review.</h1>
             </div>
          );
       }
-      if (activeTab === 'For Inspection and Approval') {
+      if (activeSubTab === 'For Inspection and Approval') {
          return (
             <div className="mb-4 -mt-4">
                <h1 className="text-sm text-green-800">This is the list of applications (forwarded by the Chief RPS after review) that are pending inspection (e.g., chainsaws, etc.).</h1>
             </div>
          );
       }
-      if (activeTab === 'Approved Applications') {
+      if (activeSubTab === 'Approved Applications') {
          return (
             <div className="mb-4 -mt-4">
                <h1 className="text-sm text-green-800">This is the list of applications that have been approved for authenticity after inspection.</h1>
@@ -153,13 +165,28 @@ const TechnicalStaffDashboard = () => {
                   Refresh
                </Button>
             </div>
+            {/* Main Tabs */}
             <div className="mb-6 overflow-x-auto">
                <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-                  {tabs.map((tab) => (
+                  {mainTabs.map((tab) => (
                      <button
                         key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
+                        onClick={() => setActiveMainTab(tab)}
+                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeMainTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
+                     >
+                        {tab}
+                     </button>
+                  ))}
+               </div>
+            </div>
+            {/* Sub Tabs */}
+            <div className="mb-6 overflow-x-auto">
+               <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
+                  {subTabs[activeMainTab].map((tab) => (
+                     <button
+                        key={tab}
+                        onClick={() => setActiveSubTab(tab)}
+                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeSubTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
                      >
                         {tab}
                      </button>

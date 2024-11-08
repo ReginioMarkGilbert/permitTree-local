@@ -10,10 +10,12 @@ import {
 } from "@/components/ui/tooltip";
 import { format } from "date-fns";
 import AccountantReviewModal from './AccountantReviewModal';
+import ViewOOPModal from '@/pages/user/components/ViewOOPModal';
 
 const AccountantOOPRow = ({ oop, onReviewComplete }) => {
    const navigate = useNavigate();
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+   const [isViewOOPModalOpen, setIsViewOOPModalOpen] = useState(false);
 
    const formatDate = (timestamp) => {
       const date = new Date(parseInt(timestamp));
@@ -21,8 +23,7 @@ const AccountantOOPRow = ({ oop, onReviewComplete }) => {
    };
 
    const handleView = () => {
-      // TODO: Implement view functionality
-      console.log('View OOP:', oop._id);
+      setIsViewOOPModalOpen(true);
    };
 
    const handlePrint = () => {
@@ -118,6 +119,12 @@ const AccountantOOPRow = ({ oop, onReviewComplete }) => {
                </div>
             </td>
          </tr>
+
+         <ViewOOPModal
+            isOpen={isViewOOPModalOpen}
+            onClose={() => setIsViewOOPModalOpen(false)}
+            oop={oop}
+         />
 
          <AccountantReviewModal
             oop={oop}

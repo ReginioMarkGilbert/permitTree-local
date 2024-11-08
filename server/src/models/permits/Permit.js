@@ -60,6 +60,14 @@ const PermitSchema = new mongoose.Schema({
       type: Boolean,
       default: false
    },
+   awaitingPermitCreation: {
+      type: Boolean,
+      default: false
+   },
+   PermitCreated: {
+      type: Boolean,
+      default: false
+   },
    history: [{
       stage: String,
       status: String,

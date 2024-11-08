@@ -8,7 +8,7 @@ import { useApplications } from '../../../hooks/useApplications';
 const ReceivingReleasingClerkDashboard = () => {
    const [searchTerm, setSearchTerm] = useState('');
    const [activeMainTab, setActiveMainTab] = useState('Applications');
-   const [activeSubTab, setActiveSubTab] = useState('Applications For Review'); // setdefault tab
+   const [activeSubTab, setActiveSubTab] = useState('Applications For Review'); // set default tab
 
    const getQueryParamsForTab = (tab) => {
       switch (tab) {

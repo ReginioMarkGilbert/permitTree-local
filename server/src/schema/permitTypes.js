@@ -13,6 +13,8 @@ const permitTypes = gql`
     reviewedByChief: Boolean
     awaitingOOP: Boolean
     OOPCreated: Boolean
+    awaitingPermitCreation: Boolean
+    PermitCreated: Boolean
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -38,6 +40,8 @@ const permitTypes = gql`
     reviewedByChief: Boolean
     awaitingOOP: Boolean
     OOPCreated: Boolean
+    awaitingPermitCreation: Boolean
+    PermitCreated: Boolean
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -65,6 +69,8 @@ const permitTypes = gql`
     reviewedByChief: Boolean
     awaitingOOP: Boolean
     OOPCreated: Boolean
+    awaitingPermitCreation: Boolean
+    PermitCreated: Boolean
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -101,6 +107,8 @@ const permitTypes = gql`
     reviewedByChief: Boolean
     awaitingOOP: Boolean
     OOPCreated: Boolean
+    awaitingPermitCreation: Boolean
+    PermitCreated: Boolean
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -128,6 +136,8 @@ const permitTypes = gql`
     reviewedByChief: Boolean
     awaitingOOP: Boolean
     OOPCreated: Boolean
+    awaitingPermitCreation: Boolean
+    PermitCreated: Boolean
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -154,6 +164,8 @@ const permitTypes = gql`
     reviewedByChief: Boolean
     awaitingOOP: Boolean
     OOPCreated: Boolean
+    awaitingPermitCreation: Boolean
+    PermitCreated: Boolean
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -184,6 +196,8 @@ const permitTypes = gql`
     reviewedByChief: Boolean
     awaitingOOP: Boolean
     OOPCreated: Boolean
+    awaitingPermitCreation: Boolean
+    PermitCreated: Boolean
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
