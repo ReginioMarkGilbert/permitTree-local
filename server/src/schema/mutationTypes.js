@@ -38,12 +38,14 @@ module.exports = /* GraphQL */ `
     updateOOPSignature(id: ID!, signatureType: String!, signatureImage: String!): OOP
     approveOOP(id: ID!, notes: String, status: String!): OOP
     forwardOOPToAccountant(id: ID!): OOP
+    undoApproval(paymentId: ID!): OOP
 
     createCertificate(input: CertificateInput!): Certificate
     updateCertificate(id: ID!, input: CertificateInput!): Certificate
 
     initiatePayment(oopId: ID!, method: String!): PaymentSession
     confirmPayment(oopId: ID!, reference: String!): PaymentResult
+
 
     deletePermit(id: ID!): Boolean
     unsubmitPermit(id: ID!): Permit

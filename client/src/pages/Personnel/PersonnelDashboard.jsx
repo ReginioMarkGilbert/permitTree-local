@@ -3,7 +3,7 @@ import ReceivingReleasingClerkDashboard from './components/PersonnelDashboardCom
 import TechnicalStaffDashboard from './components/PersonnelDashboardComponents/TechnicalStaff/TechnicalStaffDashboard';
 import ChiefDashboard from './components/PersonnelDashboardComponents/Chief/ChiefDashboard';
 import AccountantDashboard from './components/PersonnelDashboardComponents/Accountant/AccountantDashboard';
-import BillCollectorDashboard from './components/PersonnelDashboardComponents/BillCollectorDashboard';
+import BillCollectorDashboard from './components/PersonnelDashboardComponents/BillCollector/BillCollectorDashboard';
 import PENRCENROfficerDashboard from './components/PersonnelDashboardComponents/PENRCENROfficerDashboard';
 import InspectionTeamDashboard from './components/PersonnelDashboardComponents/InspectionTeamDashboard';
 import { getUserRoles } from '../../utils/auth';

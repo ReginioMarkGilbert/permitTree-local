@@ -208,6 +208,25 @@ const oopResolvers = {
             console.error('Error undoing OOP creation:', error);
             throw error;
          }
+      },
+      undoApproval: async (_, { paymentId }) => {
+         try {
+            const oop = await OOP.findById(paymentId);
+            if (!oop) {
+               throw new Error('OOP not found');
+            }
+
+            const updatedOOP = await OOP.findByIdAndUpdate(
+               paymentId,
+               { OOPstatus: 'Payment Proof Submitted' },
+               { new: true } // This ensures we get the updated document
+            );
+
+            return updatedOOP;
+         } catch (error) {
+            console.error('Error undoing approval:', error);
+            throw error;
+         }
       }
    }
 };

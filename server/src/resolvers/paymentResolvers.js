@@ -1,56 +1,52 @@
+const Payment = require('../models/Payment');
 const OOP = require('../models/OOP');
-const mongoose = require('mongoose');
 
 const paymentResolvers = {
-   Mutation: {
-      initiatePayment: async (_, { oopId, method }, { user }) => {
+   Query: {
+      getPayments: async (_, { status }) => {
          try {
-            const oop = await OOP.findById(oopId);
-            if (!oop) {
-               throw new Error('OOP not found');
-            }
-
-            // Create a payment session
-            return {
-               id: new mongoose.Types.ObjectId().toString(),
-               oopId: oop._id,
-               status: 'PENDING',
-               amount: oop.totalAmount,
-               paymentMethod: method,
-               createdAt: new Date().toISOString(),
-               expiresAt: new Date(Date.now() + 3600000).toISOString() // 1 hour expiry
-            };
+            const query = status ? { status } : {};
+            return await Payment.find(query).sort({ createdAt: -1 });
          } catch (error) {
-            console.error('Error initiating payment:', error);
-            throw error;
+            throw new Error(`Failed to fetch payments: ${error.message}`);
          }
-      },
+      }
+   },
 
-      confirmPayment: async (_, { oopId, reference }, { user }) => {
+   Mutation: {
+      verifyPayment: async (_, { paymentId, status }) => {
          try {
-            const oop = await OOP.findById(oopId);
-            if (!oop) {
-               throw new Error('OOP not found');
+            const payment = await Payment.findById(paymentId);
+            if (!payment) {
+               throw new Error('Payment not found');
             }
 
-            // Update OOP status and payment details
-            oop.OOPstatus = 'Payment Proof Submitted';
-            oop.paymentStatus = 'PAID';
-            oop.paymentReference = reference;
-            oop.paymentDate = new Date();
-            await oop.save();
+            // Update payment status
+            payment.status = status;
+            await payment.save();
+
+            // Update OOP status if payment is verified
+            if (status === 'VERIFIED') {
+               await OOP.findByIdAndUpdate(payment.oopId, {
+                  // OOPstatus: 'Payment Proof Approved'
+                  OOPstatus: 'Completed OOP'
+               });
+            }
+            if (status === 'REJECTED') {
+               await OOP.findByIdAndUpdate(payment.oopId, {
+                  OOPstatus: 'Payment Proof Rejected'
+               });
+            }
 
             return {
                success: true,
-               message: 'Payment confirmed successfully',
-               transactionId: reference,
-               paymentStatus: 'COMPLETED'
+               message: 'Payment verification updated successfully',
+               payment
             };
          } catch (error) {
-            console.error('Error confirming payment:', error);
-            throw error;
+            throw new Error(`Failed to verify payment: ${error.message}`);
          }
-      }
+      },
    }
 };
 

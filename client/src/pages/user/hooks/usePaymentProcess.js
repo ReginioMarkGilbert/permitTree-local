@@ -55,7 +55,7 @@ export const usePaymentProcess = (oopId) => {
                   reference: `PAY-${Date.now()}`
                }
             });
-
+            console.log('confirmData', confirmData);
             return confirmData.confirmPayment;
          }
       } catch (error) {

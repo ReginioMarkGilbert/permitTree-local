@@ -62,6 +62,7 @@ const oopTypes = gql`
     updateOOPSignature(id: ID!, signatureType: String!, signatureImage: String!): OOP!
     approveOOP(id: ID!, notes: String, status: String!): OOP!
     forwardOOPToAccountant(id: ID!): OOP!
+    undoApproval(paymentId: ID!): OOP!
   }
 `;
 
