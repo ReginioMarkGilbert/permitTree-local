@@ -1,50 +1,46 @@
-import { useQuery } from '@apollo/client';
-import { GET_USER_OOPS } from '../../Personnel/hooks/useOrderOfPayments';
+import { useQuery, gql } from '@apollo/client';
+
+const GET_USER_OOPS = gql`
+  query GetOOPsByUserId($userId: ID!, $status: String) {
+    getOOPsByUserId(userId: $userId, status: $status) {
+      _id
+      billNo
+      applicationId
+      namePayee
+      address
+      natureOfApplication
+      totalAmount
+      OOPstatus
+      createdAt
+      items {
+        legalBasis
+        description
+        amount
+      }
+      rpsSignatureImage
+      tsdSignatureImage
+      officialReceipt {
+        orNumber
+        dateIssued
+        amount
+        paymentMethod
+        remarks
+      }
+    }
+  }
+`;
 
 export const useUserOrderOfPayments = (userId, status) => {
-   const {
-      data,
-      loading,
-      error,
-      refetch
-   } = useQuery(GET_USER_OOPS, {
-      variables: { userId },
-      skip: !userId,
-      fetchPolicy: 'network-only'
-   });
+  const { data, loading, error, refetch } = useQuery(GET_USER_OOPS, {
+    variables: { userId, status },
+    skip: !userId,
+    fetchPolicy: 'network-only'
+  });
 
-   // Map frontend status to backend status if needed
-   const mapStatus = (frontendStatus) => {
-      switch (frontendStatus) {
-         case 'Awaiting Payment':
-            return 'Awaiting Payment';
-         case 'Payment Proof Submitted':
-            return 'Payment Proof Submitted';
-         case 'Payment Proof Approved':
-            return 'Payment Proof Approved';
-         case 'Payment Proof Rejected':
-            return 'Payment Proof Rejected';
-         case 'Issued OR':
-            return 'Issued OR';
-         case 'Completed':
-            return 'Completed OOP';
-         default:
-            return frontendStatus;
-      }
-   };
-
-   // Get all OOPs first
-   const oops = data?.getOOPsByUserId || [];
-
-   // Filter OOPs based on status if provided
-   const filteredOOPs = status
-      ? oops.filter(oop => oop.OOPstatus === mapStatus(status))
-      : oops;
-
-   return {
-      oops: filteredOOPs,
-      loading,
-      error,
-      refetch
-   };
+  return {
+    oops: data?.getOOPsByUserId || [],
+    loading,
+    error,
+    refetch
+  };
 };

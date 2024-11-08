@@ -1,22 +1,21 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { format } from 'date-fns';
-import { Eye } from 'lucide-react';
+import { Eye, Receipt, Printer } from "lucide-react";
 import {
    Tooltip,
    TooltipContent,
    TooltipProvider,
-   TooltipTrigger
+   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import UserOOPviewModal from './UserOOPviewModal';
-import { Printer } from "lucide-react";
+import { format } from "date-fns";
+import ViewORModal from './ViewORModal';
+import ViewOOPModal from './ViewOOPModal';
 import { useNavigate } from 'react-router-dom';
-import { CreditCard } from "lucide-react";
 
 const UserOOPRow = ({ oop }) => {
    const navigate = useNavigate();
-   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+   const [isViewORModalOpen, setIsViewORModalOpen] = useState(false);
+   const [isViewOOPModalOpen, setIsViewOOPModalOpen] = useState(false);
 
    const formatDate = (timestamp) => {
       const date = new Date(parseInt(timestamp));
@@ -24,89 +23,76 @@ const UserOOPRow = ({ oop }) => {
    };
 
    const getStatusColor = (status) => {
-      const displayStatus = (() => {
-         switch (status) {
-            case 'Pending Signature':
-               return 'Awaiting Payment';
-            case 'For Approval':
-               return 'Payment Proof Submitted';
-            case 'Approved':
-               return 'Payment Proof Approved';
-            default:
-               return status;
-         }
-      })();
-
-      switch (displayStatus) {
-         case 'Awaiting Payment':
-            return 'bg-yellow-100 text-yellow-800';
+      switch (status) {
          case 'Payment Proof Submitted':
-            return 'bg-blue-100 text-blue-800';
-         case 'Payment Proof Rejected':
-            return 'bg-red-100 text-red-800';
+            return 'bg-yellow-100 text-yellow-800';
          case 'Payment Proof Approved':
             return 'bg-green-100 text-green-800';
+         case 'Payment Proof Rejected':
+            return 'bg-red-100 text-red-800';
+         case 'Awaiting Payment':
+            return 'bg-blue-100 text-blue-800';
          case 'Issued OR':
             return 'bg-purple-100 text-purple-800';
-         case 'Completed':
-            return 'bg-gray-100 text-gray-800';
+         case 'Completed OOP':
+            return 'bg-green-100 text-green-800';
          default:
             return 'bg-gray-100 text-gray-800';
       }
+   };
+
+   const handleViewOR = () => {
+      console.log('Opening OR modal for:', oop);
+      console.log('Official Receipt:', oop.officialReceipt);
+      setIsViewORModalOpen(true);
    };
 
    const handlePrint = () => {
       navigate('/user/oop-print', { state: { oop } });
    };
 
-   const handlePayClick = () => {
-      navigate(`/payment/${oop._id}`);
-   };
-
    return (
       <>
          <tr>
-            <td className="px-4 py-3 whitespace-nowrap">
+            <td className="px-4 py-4 whitespace-nowrap">
                {oop.applicationId}
             </td>
-            <td className="px-4 py-3 whitespace-nowrap">
+            <td className="px-4 py-4 whitespace-nowrap">
                {oop.billNo}
             </td>
-            <td className="px-4 py-3 whitespace-nowrap">
+            <td className="px-4 py-4 whitespace-nowrap">
                {formatDate(oop.createdAt)}
             </td>
-            <td className="px-4 py-3 whitespace-nowrap">
-               ₱{oop.totalAmount.toFixed(2)}
+            <td className="px-4 py-4 whitespace-nowrap">
+               ₱{oop.totalAmount?.toFixed(2)}
             </td>
-            <td className="px-4 py-3 whitespace-nowrap">
-               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                  ${getStatusColor(oop.OOPstatus)}`}>
-                  {oop.OOPstatus === 'Pending Signature' ? 'Awaiting Payment' :
-                     oop.OOPstatus === 'For Approval' ? 'Payment Proof Submitted' :
-                        oop.OOPstatus === 'Approved' ? 'Payment Proof Approved' :
-                           oop.OOPstatus}
+            <td className="px-4 py-4 whitespace-nowrap">
+               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(oop.OOPstatus)}`}>
+                  {oop.OOPstatus}
                </span>
             </td>
-            <td className="px-4 py-3 whitespace-nowrap">
+            <td className="px-4 py-4 whitespace-nowrap text-sm">
                <div className="flex items-center space-x-2">
-                  <TooltipProvider> {/* View Button */}
-                     <Tooltip delayDuration={250}>
+                  <TooltipProvider>
+                     <Tooltip>
                         <TooltipTrigger asChild>
                            <Button
                               variant="outline"
                               size="icon"
                               className="h-8 w-8"
-                              onClick={() => setIsViewModalOpen(true)}
+                              onClick={() => setIsViewOOPModalOpen(true)}
                            >
                               <Eye className="h-4 w-4" />
                            </Button>
                         </TooltipTrigger>
-                        <TooltipContent>View</TooltipContent>
+                        <TooltipContent>
+                           <p>View OOP</p>
+                        </TooltipContent>
                      </Tooltip>
                   </TooltipProvider>
 
-                  <TooltipProvider> {/* Print Button */}
-                     <Tooltip delayDuration={250}>
+                  <TooltipProvider>
+                     <Tooltip>
                         <TooltipTrigger asChild>
                            <Button
                               variant="outline"
@@ -117,24 +103,28 @@ const UserOOPRow = ({ oop }) => {
                               <Printer className="h-4 w-4" />
                            </Button>
                         </TooltipTrigger>
-                        <TooltipContent>Print</TooltipContent>
+                        <TooltipContent>
+                           <p>Print OOP</p>
+                        </TooltipContent>
                      </Tooltip>
                   </TooltipProvider>
 
-                  {oop.OOPstatus === 'Awaiting Payment' && (
+                  {oop.OOPstatus === 'Issued OR' && (
                      <TooltipProvider>
-                        <Tooltip delayDuration={250}>
+                        <Tooltip>
                            <TooltipTrigger asChild>
                               <Button
                                  variant="outline"
                                  size="icon"
-                                 className="h-8 w-8"
-                                 onClick={handlePayClick}
+                                 className="h-8 w-8 text-purple-600"
+                                 onClick={handleViewOR}
                               >
-                                 <CreditCard className="h-4 w-4" />
+                                 <Receipt className="h-4 w-4" />
                               </Button>
                            </TooltipTrigger>
-                           <TooltipContent>Pay</TooltipContent>
+                           <TooltipContent>
+                              <p>View Official Receipt</p>
+                           </TooltipContent>
                         </Tooltip>
                      </TooltipProvider>
                   )}
@@ -142,10 +132,18 @@ const UserOOPRow = ({ oop }) => {
             </td>
          </tr>
 
-         <UserOOPviewModal
+         {isViewORModalOpen && (
+            <ViewORModal
+               isOpen={isViewORModalOpen}
+               onClose={() => setIsViewORModalOpen(false)}
+               oop={oop}
+            />
+         )}
+
+         <ViewOOPModal
+            isOpen={isViewOOPModalOpen}
+            onClose={() => setIsViewOOPModalOpen(false)}
             oop={oop}
-            isOpen={isViewModalOpen}
-            onClose={() => setIsViewModalOpen(false)}
          />
       </>
    );

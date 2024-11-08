@@ -31,15 +31,21 @@ const oopResolvers = {
          return await Permit.find({ status: 'AwaitingOOP' });
       },
 
-      getOOPsByUserId: async (_, { userId }) => {
+      getOOPsByUserId: async (_, { userId, status }) => {
          try {
             if (!userId) {
-               return []; // Return empty array if no userId provided
+               return [];
             }
 
-            const oops = await OOP.find({ userId }).sort({ createdAt: -1 });
+            // Build query object
+            const query = { userId };
+            if (status) {
+               query.OOPstatus = status;
+            }
+
+            const oops = await OOP.find(query).sort({ createdAt: -1 });
             if (!oops) {
-               return []; // Return empty array if no OOPs found
+               return [];
             }
 
             return oops.map(oop => ({
