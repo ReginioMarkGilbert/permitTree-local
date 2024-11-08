@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Eye, Printer, FileText, RotateCcw } from "lucide-react";
+import { Eye, Printer, FileText, RotateCcw, Receipt } from "lucide-react";
 import {
    Tooltip,
    TooltipContent,
@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/tooltip";
 import { format } from "date-fns";
 import ReviewPaymentModal from './ReviewPaymentModal';
+import GenerateORModal from './GenerateORModal';
 import { gql, useMutation } from '@apollo/client';
 import { toast } from 'sonner';
 
@@ -23,6 +24,7 @@ const UNDO_APPROVAL = gql`
 
 const BillCollectorOOPRow = ({ oop, onReviewComplete }) => {
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+   const [isGenerateORModalOpen, setIsGenerateORModalOpen] = useState(false);
    const [undoApproval] = useMutation(UNDO_APPROVAL);
    const formatDate = (timestamp) => {
       const date = new Date(parseInt(timestamp));
@@ -99,26 +101,6 @@ const BillCollectorOOPRow = ({ oop, onReviewComplete }) => {
                      </Tooltip>
                   </TooltipProvider>
 
-                  {oop.OOPstatus === 'Payment Proof Submitted' && (
-                     <TooltipProvider>
-                        <Tooltip>
-                           <TooltipTrigger asChild>
-                              <Button
-                                 variant="outline"
-                                 size="icon"
-                                 className="h-8 w-8"
-                                 onClick={() => setIsReviewModalOpen(true)}
-                              >
-                                 <FileText className="h-4 w-4" />
-                              </Button>
-                           </TooltipTrigger>
-                           <TooltipContent>
-                              <p>Review Payment</p>
-                           </TooltipContent>
-                        </Tooltip>
-                     </TooltipProvider>
-                  )}
-
                   <TooltipProvider>
                      <Tooltip>
                         <TooltipTrigger asChild>
@@ -136,24 +118,65 @@ const BillCollectorOOPRow = ({ oop, onReviewComplete }) => {
                         </TooltipContent>
                      </Tooltip>
                   </TooltipProvider>
-                  {oop.OOPstatus === 'Completed OOP' && (
+
+                  {oop.OOPstatus === 'Payment Proof Submitted' && (
                      <TooltipProvider>
                         <Tooltip>
                            <TooltipTrigger asChild>
                               <Button
                                  variant="outline"
                                  size="icon"
-                                 className="h-8 w-8"
-                                 onClick={handleUndoApproval}
+                                 className="h-8 w-8 text-green-500"
+                                 onClick={() => setIsReviewModalOpen(true)}
                               >
-                                 <RotateCcw className="h-4 w-4" />
+                                 <FileText className="h-4 w-4" />
                               </Button>
                            </TooltipTrigger>
                            <TooltipContent>
-                              <p>Undo Approval</p>
+                              <p>Review Payment</p>
                            </TooltipContent>
                         </Tooltip>
                      </TooltipProvider>
+                  )}
+
+                  {oop.OOPstatus === 'Completed OOP' && (
+                     <>
+                        <TooltipProvider>
+                           <Tooltip>
+                              <TooltipTrigger asChild>
+                                 <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-8 w-8 text-green-600"
+                                    onClick={() => setIsGenerateORModalOpen(true)}
+                                 >
+                                    <Receipt className="h-4 w-4" />
+                                 </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                 <p>Generate OR</p>
+                              </TooltipContent>
+                           </Tooltip>
+                        </TooltipProvider>
+
+                        <TooltipProvider>
+                           <Tooltip>
+                              <TooltipTrigger asChild>
+                                 <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-8 w-8 text-yellow-600"
+                                    onClick={handleUndoApproval}
+                                 >
+                                    <RotateCcw className="h-4 w-4" />
+                                 </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                 <p>Undo Approval</p>
+                              </TooltipContent>
+                           </Tooltip>
+                        </TooltipProvider>
+                     </>
                   )}
                </div>
             </td>
@@ -165,6 +188,15 @@ const BillCollectorOOPRow = ({ oop, onReviewComplete }) => {
                isOpen={isReviewModalOpen}
                onClose={() => setIsReviewModalOpen(false)}
                onReviewComplete={onReviewComplete}
+            />
+         )}
+
+         {isGenerateORModalOpen && (
+            <GenerateORModal
+               oop={oop}
+               isOpen={isGenerateORModalOpen}
+               onClose={() => setIsGenerateORModalOpen(false)}
+               onComplete={onReviewComplete}
             />
          )}
       </>

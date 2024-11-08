@@ -46,6 +46,8 @@ module.exports = /* GraphQL */ `
     initiatePayment(oopId: ID!, method: String!): PaymentSession
     confirmPayment(oopId: ID!, reference: String!): PaymentResult
 
+    generateOR(Id: ID!, input: GenerateORInput!): OOP
+    sendORToApplicant(Id: ID!): OOP
 
     deletePermit(id: ID!): Boolean
     unsubmitPermit(id: ID!): Permit

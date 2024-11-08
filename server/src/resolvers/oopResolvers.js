@@ -1,4 +1,4 @@
-const OOP = require('../models/OOP');
+const { OOP } = require('../models/OOP');
 const Permit = require('../models/permits/Permit');
 const { UserInputError } = require('apollo-server-express');
 const { generateBillNo } = require('../utils/billNumberGenerator');
@@ -225,6 +225,76 @@ const oopResolvers = {
             return updatedOOP;
          } catch (error) {
             console.error('Error undoing approval:', error);
+            throw error;
+         }
+      },
+
+      generateOR: async (_, { Id, input }, context) => {
+         try {
+            const oop = await OOP.findById(Id);
+            if (!oop) {
+               throw new UserInputError('OOP not found');
+            }
+
+            if (oop.OOPstatus !== 'Completed OOP') {
+               throw new Error('Cannot generate OR: Payment not yet completed');
+            }
+
+            // Create receipt data with or without issuedBy
+            const receiptData = {
+               ...input,
+               dateIssued: new Date(),
+            };
+
+            // Only add issuedBy if user context exists
+            if (context && context.user && context.user._id) {
+               receiptData.issuedBy = context.user._id;
+            }
+
+            // Update OOP with official receipt details
+            const updatedOOP = await OOP.findByIdAndUpdate(
+               Id,
+               {
+                  $set: {
+                     officialReceipt: receiptData,
+                     OOPstatus: 'Issued OR'
+                  }
+               },
+               { new: true }
+            );
+
+            if (!updatedOOP) {
+               throw new UserInputError('Failed to update OOP');
+            }
+
+            return updatedOOP;
+         } catch (error) {
+            console.error('Error generating OR:', error);
+            throw error;
+         }
+      },
+
+      sendORToApplicant: async (_, { oopId }) => {
+         try {
+            const oop = await OOP.findById(oopId);
+            if (!oop) {
+               throw new Error('OOP not found');
+            }
+
+            if (!oop.officialReceipt) {
+               throw new Error('No official receipt generated for this OOP');
+            }
+
+            // Update OOP status to indicate OR has been sent
+            const updatedOOP = await OOP.findByIdAndUpdate(
+               oopId,
+               { OOPstatus: 'Issued OR' },
+               { new: true }
+            );
+
+            return updatedOOP;
+         } catch (error) {
+            console.error('Error sending OR to applicant:', error);
             throw error;
          }
       }

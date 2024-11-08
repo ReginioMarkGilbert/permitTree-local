@@ -84,7 +84,7 @@ const UserApplicationsStatusPage = () => {
    const mainTabs = ['Applications', 'Order Of Payments', 'Renewals'];
    const subTabs = {
       'Applications': ['Draft', 'Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected'],
-      'Order Of Payments': ['Awaiting Payment', 'Payment Proof Submitted', 'Payment Proof Rejected', 'Payment Proof Approved', 'Issued OR', 'Completed'],
+      'Order Of Payments': ['Awaiting Payment', 'Payment Proof Submitted', 'Payment Proof Rejected', 'Payment Proof Approved', 'Completed', 'Issued OR'],
       'Renewals': ['Draft', 'Submitted', 'Returned', 'Renewed', 'Rejected']
    };
 

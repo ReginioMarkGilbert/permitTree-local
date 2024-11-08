@@ -20,6 +20,7 @@ const oopTypes = gql`
     tsdSignatureImage: String
     createdAt: String!
     updatedAt: String!
+    officialReceipt: OfficialReceipt
   }
 
   type OOPItem {
@@ -31,6 +32,15 @@ const oopTypes = gql`
   type OOPSignatures {
     chiefRPS: String
     technicalServices: String
+  }
+
+  type OfficialReceipt {
+    orNumber: String!
+    dateIssued: String!
+    issuedBy: ID!
+    amount: Float!
+    paymentMethod: String!
+    remarks: String
   }
 
   input OOPInput {
@@ -49,6 +59,13 @@ const oopTypes = gql`
     amount: Float!
   }
 
+  input GenerateORInput {
+    orNumber: String!
+    remarks: String
+    amount: Float!
+    paymentMethod: String!
+  }
+
   extend type Query {
     getOOPs: [OOP!]!
     getOOPById(id: ID!): OOP
@@ -63,6 +80,8 @@ const oopTypes = gql`
     approveOOP(id: ID!, notes: String, status: String!): OOP!
     forwardOOPToAccountant(id: ID!): OOP!
     undoApproval(paymentId: ID!): OOP!
+    generateOR(Id: ID!, input: GenerateORInput!): OOP!
+    sendORToApplicant(Id: ID!): OOP!
   }
 `;
 

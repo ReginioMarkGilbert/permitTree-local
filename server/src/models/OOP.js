@@ -1,6 +1,34 @@
 const mongoose = require('mongoose');
 const { generateBillNo } = require('../utils/billNumberGenerator');
 
+const officialReceiptSchema = new mongoose.Schema({
+   orNumber: {
+      type: String,
+      required: true,
+      unique: true
+   },
+   dateIssued: {
+      type: Date,
+      default: Date.now
+   },
+   issuedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+   },
+   amount: {
+      type: Number,
+      required: true
+   },
+   paymentMethod: {
+      type: String,
+      required: true,
+      enum: ['GCASH', 'CASH', 'CHECK']
+   },
+   remarks: String
+});
+
+const OR = mongoose.model('OfficialReceipt', officialReceiptSchema);
+
 const oopSchema = new mongoose.Schema({
    billNo: {
       type: String,
@@ -68,7 +96,8 @@ const oopSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: 'User'
-   }
+   },
+   officialReceipt: officialReceiptSchema
 }, {
    timestamps: true
 });
@@ -86,4 +115,4 @@ oopSchema.pre('validate', async function (next) {
 });
 
 const OOP = mongoose.model('OOP', oopSchema);
-module.exports = OOP;
+module.exports = { OOP, OR };
