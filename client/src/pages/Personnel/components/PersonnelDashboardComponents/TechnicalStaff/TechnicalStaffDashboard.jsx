@@ -25,10 +25,10 @@ const TechnicalStaffDashboard = () => {
          case 'For Inspection and Approval':
             return { currentStage: 'ForInspectionByTechnicalStaff' };
          case 'Approved Applications':
-            return { currentStage: 'AuthenticityApprovedByTechnicalStaff' };
+            return { approvedByTechnicalStaff: true };
          // Certificates/Permits
          case 'Awaiting Permit Creation':
-            return { AwaitingPermitCreation: true };
+            return { awaitingPermitCreation: true };
          case 'Created Permits':
             return { PermitCreated: true };
          default:
@@ -109,6 +109,7 @@ const TechnicalStaffDashboard = () => {
                         onPrint={handlePrint}
                         onReviewComplete={handleReviewComplete}
                         getStatusColor={getStatusColor}
+                        currentTab={activeSubTab}
                      />
                   ))}
                </tbody>

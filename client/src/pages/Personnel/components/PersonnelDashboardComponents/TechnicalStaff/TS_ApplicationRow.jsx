@@ -15,7 +15,7 @@ import TS_AuthenticityReviewModal from './TS_AuthenticityReviewModal';
 import { getUserRoles } from '../../../../../utils/auth';
 
 
-const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor }) => {
+const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, currentTab }) => {
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
    const [isAuthenticityModalOpen, setIsAuthenticityModalOpen] = useState(false);
@@ -82,8 +82,8 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor }) =
             </TooltipProvider>
          );
       }
-      // Authenticity approval action - only for specific stage
-      if (app.currentStage === 'ForInspectionByTechnicalStaff') {
+      // Authenticity approval action - only for For Inspection and Approval tab
+      if (currentTab === 'For Inspection and Approval') {
          actions.push(
             <TooltipProvider key="authenticity">
                <Tooltip delayDuration={200}>
