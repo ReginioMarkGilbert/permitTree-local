@@ -1,17 +1,21 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { format } from 'date-fns';
 import QRCode from 'react-qr-code';
 import { Printer } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 const ViewORModal = ({ isOpen, onClose, oop }) => {
-   const receiptRef = React.useRef();
+   const receiptRef = useRef();
+   const navigate = useNavigate();
 
-   const handlePrint = useReactToPrint({
-      content: () => receiptRef.current,
-   });
+   const handlePrint = () => {
+      navigate('/user/or-print', { state: { oop } });
+      onClose();
+   };
 
    React.useEffect(() => {
       console.log('ViewORModal rendered with oop:', oop);
@@ -58,9 +62,11 @@ const ViewORModal = ({ isOpen, onClose, oop }) => {
          <DialogContent className="max-w-3xl">
             <DialogHeader>
                <DialogTitle>Official Receipt Details</DialogTitle>
+               <DialogDescription>View and print the official receipt.</DialogDescription>
             </DialogHeader>
             <div className="overflow-auto max-h-[70vh]">
-               <div ref={receiptRef} className="p-6 bg-white">
+               {/* Print Template */}
+               <div ref={receiptRef} className="p-6 bg-white print:p-0">
                   <div className="text-center mb-6">
                      <h2 className="text-xl font-bold">OFFICIAL RECEIPT</h2>
                      <p className="text-sm text-gray-600">Department of Environment and Natural Resources</p>
@@ -104,13 +110,13 @@ const ViewORModal = ({ isOpen, onClose, oop }) => {
                      </div>
                   </div>
 
-                  <div className="text-center text-sm text-gray-500">
+                  <div className="text-center text-sm text-gray-500 print:mt-8">
                      <p>This is a system-generated official receipt.</p>
                      <p>Verify authenticity by scanning the QR code.</p>
                   </div>
                </div>
             </div>
-            <div className="flex justify-end gap-2 mt-4">
+            <div className="flex justify-end gap-2 mt-4 print:hidden">
                <Button variant="outline" onClick={onClose}>
                   Close
                </Button>

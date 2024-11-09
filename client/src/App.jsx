@@ -52,6 +52,7 @@ import PersonnelDashboard from './pages/Personnel/PersonnelDashboard';
 
 import OOPPrintPage from './pages/user/OOPPrintPage';
 import PaymentPage from './pages/user/PaymentPage';
+import ORPrintPage from './pages/user/ORPrintPage';
 
 const App = () => {
    const { sidebarToggle, toggleSidebar } = useSidebarToggle();
@@ -108,7 +109,7 @@ const App = () => {
          <NotificationProvider>
             <ChiefRPSNotificationProvider>
                <div className="flex">
-                  {isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/user/oop-print' && (
+                  {isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/user/oop-print' && location.pathname !== '/user/or-print' && (
                      <>
                         {getSidebar()}
                         {showNavbar && <Navbar sidebarToggle={sidebarToggle} setSidebarToggle={toggleSidebar} />}
@@ -158,6 +159,7 @@ const App = () => {
                            <Route path="/superadmin/reports" element={<ProtectedRoute roles={['superadmin']}><SuperAdminReportsPage /></ProtectedRoute>} />
                            <Route path="/superadmin/settings" element={<ProtectedRoute roles={['superadmin']}><SuperAdminSettingsPage /></ProtectedRoute>} />
                            <Route path="/user/oop-print" element={<OOPPrintPage />} />
+                           <Route path="/user/or-print" element={<ORPrintPage />} />
                            <Route
                               path="/payment/:oopId"
                               element={

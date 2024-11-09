@@ -92,6 +92,14 @@ const UserOOPRow = ({ oop, onRefetch }) => {
       }
    };
 
+   const handlePrintOR = () => {
+      if (oop.officialReceipt) {
+         setIsViewORModalOpen(true); // Open the modal which has print functionality
+      } else {
+         toast.error('No official receipt available for printing');
+      }
+   };
+
    return (
       <>
          <tr>
@@ -169,23 +177,43 @@ const UserOOPRow = ({ oop, onRefetch }) => {
                   )}
 
                   {oop.OOPstatus === 'Issued OR' && (
-                     <TooltipProvider>
-                        <Tooltip>
-                           <TooltipTrigger asChild>
-                              <Button
-                                 variant="outline"
-                                 size="icon"
-                                 className="h-8 w-8 text-purple-600"
-                                 onClick={handleViewOR}
-                              >
-                                 <Receipt className="h-4 w-4" />
-                              </Button>
-                           </TooltipTrigger>
-                           <TooltipContent>
-                              <p>View Official Receipt</p>
-                           </TooltipContent>
-                        </Tooltip>
-                     </TooltipProvider>
+                     <>
+                        <TooltipProvider>
+                           <Tooltip>
+                              <TooltipTrigger asChild>
+                                 <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-8 w-8 text-purple-600"
+                                    onClick={handleViewOR}
+                                 >
+                                    <Receipt className="h-4 w-4" />
+                                 </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                 <p>View Official Receipt</p>
+                              </TooltipContent>
+                           </Tooltip>
+                        </TooltipProvider>
+
+                        <TooltipProvider>
+                           <Tooltip>
+                              <TooltipTrigger asChild>
+                                 <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    onClick={handlePrintOR}
+                                 >
+                                    <Printer className="h-4 w-4" />
+                                 </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                 <p>Print Official Receipt</p>
+                              </TooltipContent>
+                           </Tooltip>
+                        </TooltipProvider>
+                     </>
                   )}
 
                   {showPaymentProof && (
