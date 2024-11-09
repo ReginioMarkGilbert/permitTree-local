@@ -82,6 +82,7 @@ const oopTypes = gql`
     undoApproval(paymentId: ID!): OOP!
     generateOR(Id: ID!, input: GenerateORInput!): OOP!
     sendORToApplicant(Id: ID!): OOP!
+    deleteOOP(applicationId: String!): OOP!
   }
 `;
 

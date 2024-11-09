@@ -189,6 +189,17 @@ const permitResolvers = {
            dateOfSubmission: permit.dateOfSubmission.toISOString()
          }));
       },
+      getPermitByApplicationNumber: async (_, { applicationNumber }) => {
+         try {
+            const permit = await Permit.findOne({ applicationNumber });
+            if (!permit) {
+               throw new Error('Permit not found');
+            }
+            return permit;
+         } catch (error) {
+            throw new Error(`Failed to fetch permit: ${error.message}`);
+         }
+      },
    },
    Mutation: {
       updatePermitStatus: async (_, { id, status }) => {

@@ -7,15 +7,18 @@ async function generateBillNo() {
   // Use mongoose model directly
   const OOP = mongoose.model('OOP');
 
-  // Find the latest bill number for today
+  // Find the latest bill number for today with regex that matches the date part exactly
   const latestOOP = await OOP.findOne({
-    billNo: new RegExp(`^${dateString}`)
+    billNo: new RegExp(`^${dateString}-\\d{3}$`) // Ensure exact match for date and 3 digits
   }).sort({ billNo: -1 });
 
   let sequence = 1;
   if (latestOOP) {
-    const lastSequence = parseInt(latestOOP.billNo.split('-')[1]);
-    sequence = lastSequence + 1;
+    // Extract the sequence number from the end of the bill number
+    const match = latestOOP.billNo.match(/-(\d{3})$/);
+    if (match) {
+      sequence = parseInt(match[1]) + 1;
+    }
   }
 
   // Format sequence to 3 digits

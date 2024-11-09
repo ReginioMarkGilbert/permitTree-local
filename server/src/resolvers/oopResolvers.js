@@ -303,6 +303,32 @@ const oopResolvers = {
             console.error('Error sending OR to applicant:', error);
             throw error;
          }
+      },
+
+      deleteOOP: async (_, { applicationId }) => {
+         try {
+            // First, find and delete the OOP
+            const deletedOOP = await OOP.findOneAndDelete({ applicationId });
+            if (!deletedOOP) {
+               throw new Error('OOP not found');
+            }
+
+            // Then, update the permit to reset OOP-related flags
+            await Permit.findOneAndUpdate(
+               { applicationNumber: applicationId },
+               {
+                  $set: {
+                     OOPCreated: false,
+                     awaitingOOP: true // Reset to awaiting OOP state
+                  }
+               }
+            );
+
+            return deletedOOP;
+         } catch (error) {
+            console.error('Error deleting OOP:', error);
+            throw new Error(`Failed to delete OOP: ${error.message}`);
+         }
       }
    }
 };

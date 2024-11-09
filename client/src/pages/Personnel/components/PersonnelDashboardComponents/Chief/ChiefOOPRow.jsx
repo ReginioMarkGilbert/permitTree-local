@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Eye, Printer, PenLine } from "lucide-react";
+import { Eye, Printer, PenLine, RotateCcw } from "lucide-react";
 import {
    Tooltip,
    TooltipContent,
@@ -9,9 +9,49 @@ import {
 } from "@/components/ui/tooltip";
 import { format } from "date-fns";
 import OOPAffixEsignModal from '../../OOPAffixEsignModal';
+import { useMutation, gql, useQuery } from '@apollo/client';
+import { toast } from 'sonner';
 
-const ChiefOOPRow = ({ oop }) => {
-   // right way to format date - M/d/yyyy
+const GET_PERMIT_BY_APPLICATION_NUMBER = gql`
+  query GetPermitByApplicationNumber($applicationNumber: String!) {
+    getPermitByApplicationNumber(applicationNumber: $applicationNumber) {
+      id
+      applicationNumber
+    }
+  }
+`;
+
+const DELETE_OOP = gql`
+  mutation DeleteOOP($applicationId: String!) {
+    deleteOOP(applicationId: $applicationId) {
+      _id
+      applicationId
+    }
+  }
+`;
+
+const UNDO_OOP_CREATION = gql`
+  mutation UndoOOPCreation($id: ID!) {
+    undoOOPCreation(id: $id) {
+      id
+      status
+      currentStage
+      OOPCreated
+      awaitingOOP
+    }
+  }
+`;
+
+const ChiefOOPRow = ({ oop, onRefetch }) => {
+   const [isModalOpen, setIsModalOpen] = useState(false);
+   const [deleteOOP] = useMutation(DELETE_OOP);
+   const [undoOOPCreation] = useMutation(UNDO_OOP_CREATION);
+
+   const { data: permitData } = useQuery(GET_PERMIT_BY_APPLICATION_NUMBER, {
+      variables: { applicationNumber: oop.applicationId },
+      fetchPolicy: 'network-only'
+   });
+
    const formatDate = (timestamp) => {
       const date = new Date(parseInt(timestamp));
       return format(date, 'M/d/yyyy');
@@ -29,19 +69,43 @@ const ChiefOOPRow = ({ oop }) => {
    };
 
    const handleView = () => {
-      // TODO: Implement view functionality
       console.log('View OOP:', oop._id);
    };
 
    const handlePrint = () => {
-      // TODO: Implement print functionality
       console.log('Print OOP:', oop._id);
    };
 
-   const [isModalOpen, setIsModalOpen] = useState(false);
-
    const handleAffixSign = () => {
       setIsModalOpen(true);
+   };
+
+   const handleUndoOOP = async () => {
+      try {
+         if (!permitData?.getPermitByApplicationNumber?.id) {
+            throw new Error('Could not find permit ID');
+         }
+
+         // First, delete the OOP document
+         await deleteOOP({
+            variables: {
+               applicationId: oop.applicationId
+            }
+         });
+
+         // Then, update the permit status using the actual permit ID
+         await undoOOPCreation({
+            variables: {
+               id: permitData.getPermitByApplicationNumber.id
+            }
+         });
+
+         toast.success('OOP creation undone successfully');
+         if (onRefetch) onRefetch(); // Refresh the list
+      } catch (error) {
+         console.error('Error undoing OOP creation:', error);
+         toast.error('Failed to undo OOP creation');
+      }
    };
 
    return (
@@ -100,23 +164,43 @@ const ChiefOOPRow = ({ oop }) => {
                   </TooltipProvider>
 
                   {oop.OOPstatus === 'Pending Signature' && (
-                     <TooltipProvider>
-                        <Tooltip delayDuration={200}>
-                           <TooltipTrigger asChild>
-                              <Button
-                                 onClick={handleAffixSign}
-                                 variant="outline"
-                                 size="icon"
-                                 className="h-8 w-8 text-blue-600 hover:text-blue-800"
-                              >
-                                 <PenLine className="h-4 w-4" />
-                              </Button>
-                           </TooltipTrigger>
-                           <TooltipContent>
-                              <p>Affix E-Sign</p>
-                           </TooltipContent>
-                        </Tooltip>
-                     </TooltipProvider>
+                     <>
+                        <TooltipProvider>
+                           <Tooltip delayDuration={200}>
+                              <TooltipTrigger asChild>
+                                 <Button
+                                    onClick={handleAffixSign}
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-8 w-8 text-blue-600 hover:text-blue-800"
+                                 >
+                                    <PenLine className="h-4 w-4" />
+                                 </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                 <p>Affix E-Sign</p>
+                              </TooltipContent>
+                           </Tooltip>
+                        </TooltipProvider>
+
+                        <TooltipProvider>
+                           <Tooltip delayDuration={200}>
+                              <TooltipTrigger asChild>
+                                 <Button
+                                    onClick={handleUndoOOP}
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-8 w-8 text-yellow-600 hover:text-yellow-800"
+                                 >
+                                    <RotateCcw className="h-4 w-4" />
+                                 </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                 <p>Undo OOP Creation</p>
+                              </TooltipContent>
+                           </Tooltip>
+                        </TooltipProvider>
+                     </>
                   )}
                </div>
             </td>

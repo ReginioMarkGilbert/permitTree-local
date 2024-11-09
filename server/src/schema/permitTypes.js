@@ -313,6 +313,7 @@ const permitTypes = gql`
       PermitCreated: Boolean
     ): [Permit!]!
     getApplicationsByCurrentStage(currentStage: String!): [Permit!]!
+    getPermitByApplicationNumber(applicationNumber: String!): Permit
   }
 
   type Mutation {

@@ -21,7 +21,7 @@ const ChiefDashboard = () => {
          case 'Awaiting OOP':
             return { awaitingOOP: true };
          case 'Created OOP':
-            return { awaitingOOP: false, OOPCreated: true, currentStage: 'ForInspectionByTechnicalStaff', status: 'In Progress' };
+            return { awaitingOOP: false, OOPCreated: true, status: 'In Progress' };
          case 'Pending Signature':
             return { OOPstatus: 'Pending Signature' };
          case 'Signed Order Of Payment':
@@ -136,12 +136,29 @@ const ChiefDashboard = () => {
                      <ChiefOOPRow
                         key={oop._id}
                         oop={oop}
+                        onRefetch={refetchOOPs}
                      />
                   ))}
                </tbody>
             </table>
          </div>
       );
+   };
+
+   useEffect(() => {
+      if (activeMainTab === 'Order Of Payment') {
+         refetchOOPs();
+      } else {
+         refetch();
+      }
+   }, [activeMainTab, activeSubTab, refetch, refetchOOPs]);
+
+   const handleRefresh = () => {
+      if (activeMainTab === 'Order Of Payment') {
+         refetchOOPs();
+      } else {
+         refetch();
+      }
    };
 
    const renderTable = () => {
@@ -189,7 +206,7 @@ const ChiefDashboard = () => {
          <div className="container mx-auto px-4 sm:px-6 py-8 pt-24">
             <div className="flex justify-between items-center mb-6">
                <h1 className="text-3xl font-bold text-green-800">Chief RPS/TSD Dashboard</h1>
-               <Button onClick={refetch} variant="outline">
+               <Button onClick={handleRefresh} variant="outline">
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Refresh
                </Button>

@@ -219,7 +219,7 @@ const OrderOfPaymentForm = ({ onClose }) => {
 
          await createOOP(transformedData);
          toast.success('Order of Payment created successfully');
-         onClose();
+         navigate('/personnel/dashboard');
       } catch (error) {
          console.error('Error creating Order of Payment:', error);
          toast.error(`Failed to create Order of Payment: ${error.message}`);
@@ -227,7 +227,7 @@ const OrderOfPaymentForm = ({ onClose }) => {
    };
 
    const handleBack = () => {
-      navigate('/personnel/order-of-payment');
+      navigate('/personnel/dashboard');
    };
 
    useEffect(() => {
