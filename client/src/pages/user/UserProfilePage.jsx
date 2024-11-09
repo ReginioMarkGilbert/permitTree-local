@@ -2,6 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 import { gql, useQuery, useMutation } from '@apollo/client';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Pencil, Camera, Trash2, Loader2 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 const GET_USER_DETAILS = gql`
   query GetUserDetails {
@@ -55,13 +60,14 @@ export default function UserProfilePage() {
    const fileInputRef = useRef(null);
    const [removeProfilePicture, setRemoveProfilePicture] = useState(false);
    const [isEditing, setIsEditing] = useState(false);
+   const [isLoading, setIsLoading] = useState(false);
    const location = useLocation();
 
    const { loading, error, data, refetch } = useQuery(GET_USER_DETAILS);
    const [updateUserProfile] = useMutation(UPDATE_USER_PROFILE);
 
    useEffect(() => {
-      if (data && data.getUserDetails) {
+      if (data?.getUserDetails) {
          const { firstName, lastName, email, phone, address, company, profilePicture } = data.getUserDetails;
          const fetchedData = {
             fullName: `${firstName} ${lastName}`,
@@ -177,137 +183,233 @@ export default function UserProfilePage() {
       }`;
 
    if (loading) {
-      console.log('Loading user data...');
-      return <p>Loading...</p>;
-   }
-   if (error) {
-      console.error('Error fetching user data:', error);
-      // You might want to redirect to login page here
-      return <p>Error: {error.message}</p>;
+      return (
+         <div className="flex items-center justify-center h-[calc(100vh-6rem)]">
+            <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+         </div>
+      );
    }
 
    return (
-      <div className="min-h-screen bg-green-50 flex items-center justify-center p-4">
-         <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full overflow-hidden">
-            <div className="bg-green-100 p-6 flex flex-col items-center space-y-4">
-               <div className="relative">
-                  <div
-                     className={`bg-gray-300 rounded-full w-32 h-32 flex items-center justify-center text-5xl text-gray-600 overflow-hidden ${isEditing ? 'cursor-pointer' : ''}`}
-                     onClick={handleProfilePictureClick}
+      <div className="bg-green-50 pt-20 pb-8 px-4 sm:px-6 lg:px-8">
+         <div className="max-w-4xl mx-auto space-y-8">
+            {/* Header Section */}
+            <div className="bg-white rounded-lg shadow-sm p-8">
+               <div className="flex items-center justify-between mb-8">
+                  <h1 className="text-2xl font-semibold text-gray-900">Profile Settings</h1>
+                  <Button
+                     onClick={() => setIsEditing(!isEditing)}
+                     variant={isEditing ? "destructive" : "outline"}
                   >
-                     {userInfo.profilePicture ? (
-                        <img src={userInfo.profilePicture} alt="Profile" className="w-full h-full object-cover" />
+                     {isEditing ? (
+                        "Cancel"
                      ) : (
-                        <span>{userInfo.fullName.split(' ').map(n => n[0]).join('')}</span>
+                        <>
+                           <Pencil className="h-4 w-4 mr-2" />
+                           Edit Profile
+                        </>
+                     )}
+                  </Button>
+               </div>
+
+               {/* Profile Picture Section */}
+               <div className="flex items-center space-x-6">
+                  <div className="relative">
+                     <div
+                        className={`h-24 w-24 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center text-2xl text-gray-600 border-2 ${isEditing ? 'border-green-500 cursor-pointer' : 'border-transparent'}`}
+                        onClick={() => isEditing && setShowPhotoOptions(true)}
+                     >
+                        {userInfo.profilePicture ? (
+                           <img
+                              src={userInfo.profilePicture}
+                              alt="Profile"
+                              className="h-full w-full object-cover"
+                           />
+                        ) : (
+                           <span>{userInfo.fullName.split(' ').map(n => n[0]).join('')}</span>
+                        )}
+                     </div>
+                     {isEditing && (
+                        <div className="absolute bottom-0 right-0">
+                           <Button
+                              size="icon"
+                              variant="secondary"
+                              className="h-8 w-8 rounded-full shadow-lg"
+                              onClick={() => fileInputRef.current?.click()}
+                           >
+                              <Camera className="h-4 w-4" />
+                           </Button>
+                        </div>
                      )}
                   </div>
-                  {isEditing && showPhotoOptions && (
-                     <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white rounded-lg shadow-lg p-2 z-10">
-                        <button
-                           className="block w-full text-left px-4 py-2 hover:bg-gray-100 rounded"
-                           onClick={() => fileInputRef.current.click()}
-                        >
-                           Upload/change photo
-                        </button>
-                        <button
-                           className="block w-full text-left px-4 py-2 hover:bg-gray-100 rounded"
-                           onClick={handleRemovePhoto}
-                        >
-                           Remove photo
-                        </button>
-                     </div>
-                  )}
-                  <input
-                     type="file"
-                     ref={fileInputRef}
-                     className="hidden"
-                     accept="image/*"
-                     onChange={handleFileChange}
-                     disabled={!isEditing}
-                  />
-               </div>
-               <div className="text-center">
-                  <h2 className="text-2xl font-bold text-green-800">{userInfo.fullName}</h2>
-                  <p className="text-green-600">Permit Applicant</p>
+                  <div>
+                     <h2 className="text-xl font-semibold">{userInfo.fullName}</h2>
+                     <p className="text-sm text-gray-500">Permit Applicant</p>
+                  </div>
                </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                     <label htmlFor="fullName" className="block text-sm font-medium text-green-700 mb-1">Full Name</label>
-                     <input
-                        id="fullName"
-                        type="text"
-                        value={userInfo.fullName}
-                        onChange={handleInputChange}
-                        disabled={!isEditing}
-                        className={inputClasses}
-                     />
+            {/* Account Overview Section */}
+            <div className="bg-white rounded-lg shadow-sm p-8">
+               <h3 className="text-lg font-medium mb-4">Account Overview</h3>
+               <Separator className="mb-4" />
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                     <h4 className="text-sm font-medium text-gray-500">Total Applications</h4>
+                     <p className="text-2xl font-semibold mt-1">12</p>
                   </div>
-                  <div>
-                     <label htmlFor="email" className="block text-sm font-medium text-green-700 mb-1">Email</label>
-                     <input
-                        id="email"
-                        type="email"
-                        value={userInfo.email}
-                        onChange={handleInputChange}
-                        disabled={!isEditing}
-                        className={inputClasses}
-                     />
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                     <h4 className="text-sm font-medium text-gray-500">Active Permits</h4>
+                     <p className="text-2xl font-semibold mt-1">3</p>
                   </div>
-                  <div>
-                     <label htmlFor="phone" className="block text-sm font-medium text-green-700 mb-1">Phone</label>
-                     <input
-                        id="phone"
-                        type="text"
-                        value={userInfo.phone}
-                        onChange={handleInputChange}
-                        disabled={!isEditing}
-                        className={inputClasses}
-                     />
-                  </div>
-                  <div>
-                     <label htmlFor="company" className="block text-sm font-medium text-green-700 mb-1">Company</label>
-                     <input
-                        id="company"
-                        type="text"
-                        value={userInfo.company}
-                        onChange={handleInputChange}
-                        disabled={!isEditing}
-                        className={inputClasses}
-                     />
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                     <h4 className="text-sm font-medium text-gray-500">Pending Payments</h4>
+                     <p className="text-2xl font-semibold mt-1">2</p>
                   </div>
                </div>
-               <div>
-                  <label htmlFor="address" className="block text-sm font-medium text-green-700 mb-1">Address</label>
-                  <input
-                     id="address"
-                     type="text"
-                     value={userInfo.address}
-                     onChange={handleInputChange}
-                     disabled={!isEditing}
-                     className={inputClasses}
-                  />
-               </div>
-               <div className="flex justify-end">
+            </div>
+
+            {/* Personal Information Form */}
+            <div className="bg-white rounded-lg shadow-sm p-8">
+               <form onSubmit={handleSubmit} className="space-y-6">
+                  <div>
+                     <h3 className="text-lg font-medium mb-4">Personal Information</h3>
+                     <Separator className="mb-4" />
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                           <Label htmlFor="fullName">Full Name</Label>
+                           <Input
+                              id="fullName"
+                              value={userInfo.fullName}
+                              onChange={handleInputChange}
+                              disabled={!isEditing}
+                              className={!isEditing ? 'bg-gray-50' : ''}
+                           />
+                        </div>
+                        <div className="space-y-2">
+                           <Label htmlFor="email">Email</Label>
+                           <Input
+                              id="email"
+                              type="email"
+                              value={userInfo.email}
+                              onChange={handleInputChange}
+                              disabled={!isEditing}
+                              className={!isEditing ? 'bg-gray-50' : ''}
+                           />
+                        </div>
+                        <div className="space-y-2">
+                           <Label htmlFor="phone">Phone</Label>
+                           <Input
+                              id="phone"
+                              value={userInfo.phone}
+                              onChange={handleInputChange}
+                              disabled={!isEditing}
+                              className={!isEditing ? 'bg-gray-50' : ''}
+                           />
+                        </div>
+                        <div className="space-y-2">
+                           <Label htmlFor="company">Company</Label>
+                           <Input
+                              id="company"
+                              value={userInfo.company}
+                              onChange={handleInputChange}
+                              disabled={!isEditing}
+                              className={!isEditing ? 'bg-gray-50' : ''}
+                           />
+                        </div>
+                     </div>
+                  </div>
+
+                  <div>
+                     <h3 className="text-lg font-medium mb-4">Address</h3>
+                     <Separator className="mb-4" />
+                     <div className="space-y-2">
+                        <Label htmlFor="address">Complete Address</Label>
+                        <Input
+                           id="address"
+                           value={userInfo.address}
+                           onChange={handleInputChange}
+                           disabled={!isEditing}
+                           className={!isEditing ? 'bg-gray-50' : ''}
+                        />
+                     </div>
+                  </div>
+
+                  {/* Account Security Section */}
+                  <div>
+                     <h3 className="text-lg font-medium mb-4">Account Security</h3>
+                     <Separator className="mb-4" />
+                     <div className="bg-gray-50 p-4 rounded-lg">
+                        <div className="flex items-center justify-between">
+                           <div>
+                              <h4 className="font-medium">Password</h4>
+                              <p className="text-sm text-gray-500">Last changed 3 months ago</p>
+                           </div>
+                           <Button variant="outline" size="sm">
+                              Change Password
+                           </Button>
+                        </div>
+                     </div>
+                  </div>
+
+                  {/* Account Activity Section */}
+                  <div>
+                     <h3 className="text-lg font-medium mb-4">Recent Activity</h3>
+                     <Separator className="mb-4" />
+                     <div className="space-y-4">
+                        <div className="flex items-center justify-between text-sm">
+                           <div className="flex items-center space-x-2">
+                              <div className="w-2 h-2 bg-green-500 rounded-full" />
+                              <span>Last login</span>
+                           </div>
+                           <span className="text-gray-500">Today, 9:42 AM</span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                           <div className="flex items-center space-x-2">
+                              <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                              <span>Profile updated</span>
+                           </div>
+                           <span className="text-gray-500">Yesterday, 3:15 PM</span>
+                        </div>
+                     </div>
+                  </div>
+
                   {isEditing && (
-                     <button
-                        type="button"
-                        onClick={handleCancel} // Discard changes
-                        className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-md transition duration-300 ease-in-out mr-2"
-                     >
-                        Cancel
-                     </button>
+                     <div className="flex justify-end space-x-4">
+                        <Button
+                           type="button"
+                           variant="outline"
+                           onClick={handleCancel}
+                        >
+                           Cancel
+                        </Button>
+                        <Button
+                           type="submit"
+                           className="bg-green-600 hover:bg-green-700"
+                           disabled={isLoading}
+                        >
+                           {isLoading ? (
+                              <>
+                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                 Saving...
+                              </>
+                           ) : (
+                              'Save Changes'
+                           )}
+                        </Button>
+                     </div>
                   )}
-                  <button
-                     type="submit"
-                     className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md transition duration-300 ease-in-out"
-                  >
-                     {isEditing ? 'Save Changes' : 'Edit Profile'}
-                  </button>
-               </div>
-            </form>
+               </form>
+
+               <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  disabled={!isEditing}
+               />
+            </div>
          </div>
       </div>
    );
