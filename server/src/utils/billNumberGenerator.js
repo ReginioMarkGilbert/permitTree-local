@@ -1,29 +1,24 @@
-const mongoose = require('mongoose');
+const Counter = require('../models/Counter');
 
 async function generateBillNo() {
-  const today = new Date();
-  const dateString = today.toISOString().slice(0, 10).replace(/-/g, '');
+   try {
+      const date = new Date();
+      const dateString = date.toISOString().slice(0, 10).replace(/-/g, '');
 
-  // Use mongoose model directly
-  const OOP = mongoose.model('OOP');
+      // Find and update counter for specific date
+      const counter = await Counter.findOneAndUpdate(
+         { _id: `billNo_${dateString}` },  // Counter specific to this date
+         { $inc: { seq: 1 } },
+         { new: true, upsert: true }
+      );
 
-  // Find the latest bill number for today with regex that matches the date part exactly
-  const latestOOP = await OOP.findOne({
-    billNo: new RegExp(`^${dateString}-\\d{3}$`) // Ensure exact match for date and 3 digits
-  }).sort({ billNo: -1 });
-
-  let sequence = 1;
-  if (latestOOP) {
-    // Extract the sequence number from the end of the bill number
-    const match = latestOOP.billNo.match(/-(\d{3})$/);
-    if (match) {
-      sequence = parseInt(match[1]) + 1;
-    }
-  }
-
-  // Format sequence to 3 digits
-  const sequenceStr = sequence.toString().padStart(3, '0');
-  return `${dateString}-${sequenceStr}`;
+      // Format: YYYYMMDD-XXX where XXX resets daily
+      const sequenceStr = counter.seq.toString().padStart(3, '0');
+      return `${dateString}-${sequenceStr}`;
+   } catch (error) {
+      console.error('Error generating bill number:', error);
+      throw error;
+   }
 }
 
 module.exports = { generateBillNo };
