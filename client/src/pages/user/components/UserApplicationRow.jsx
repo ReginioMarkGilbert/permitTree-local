@@ -12,7 +12,7 @@ import ViewApplicationModal from './ViewApplicationModal';
 import ViewRemarksModal from './ViewRemarksModal';
 
 const UserApplicationRow = ({
-   app,
+   application,
    onEdit,
    onDelete,
    onUnsubmit,
@@ -30,6 +30,11 @@ const UserApplicationRow = ({
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isRemarksModalOpen, setIsRemarksModalOpen] = useState(false);
 
+   if (!application) {
+      console.error('Application data is undefined');
+      return null;
+   }
+
    const formatDate = (timestamp) => {
       const date = new Date(parseInt(timestamp));
       return date.toLocaleDateString();
@@ -40,27 +45,35 @@ const UserApplicationRow = ({
    const handleViewRemarks = () => setIsRemarksModalOpen(true);
 
    const handleEditSave = (editedData) => {
-      onEdit(app.id, editedData);
+      onEdit(application.id, editedData);
       setIsEditModalOpen(false);
    };
+
+   const {
+      applicationNumber = 'N/A',
+      applicationType = 'Unknown',
+      dateOfSubmission,
+      status = 'Unknown',
+      id = 'unknown'
+   } = application;
 
    return (
       <>
          <tr>
             <td className="px-4 py-3 whitespace-nowrap">
-               <div className="text-sm text-gray-900">{app.applicationNumber}</div>
+               <div className="text-sm text-gray-900">{applicationNumber}</div>
             </td>
             <td className="px-4 py-3 whitespace-nowrap">
-               <div className="text-sm text-gray-900">{app.applicationType}</div>
+               <div className="text-sm text-gray-900">{applicationType}</div>
             </td>
             <td className="px-4 py-3 whitespace-nowrap">
                <div className="text-sm text-gray-900">
-                  {new Date(app.dateOfSubmission).toLocaleDateString()}
+                  {new Date(application.dateOfSubmission).toLocaleDateString()}
                </div>
             </td>
             <td className="px-4 py-3 whitespace-nowrap">
-               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(app.status)}`}>
-                  {app.status}
+               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(status)}`}>
+                  {status}
                </span>
             </td>
             <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
@@ -84,7 +97,7 @@ const UserApplicationRow = ({
                      </Tooltip>
                   </TooltipProvider>
 
-                  {app.status === 'Draft' && (
+                  {status === 'Draft' && (
                      <>
                         <TooltipProvider>
                            <Tooltip delayDuration={200}>
@@ -109,7 +122,7 @@ const UserApplicationRow = ({
                            <Tooltip delayDuration={200}>
                               <TooltipTrigger asChild>
                                  <Button
-                                    onClick={() => onDelete(app)}
+                                    onClick={() => onDelete(application)}
                                     variant="outline"
                                     size="icon"
                                     className="h-8 w-8 text-red-600 hover:text-red-800"
@@ -128,7 +141,7 @@ const UserApplicationRow = ({
                            <Tooltip delayDuration={200}>
                               <TooltipTrigger asChild>
                                  <Button
-                                    onClick={() => onSubmit(app)}
+                                    onClick={() => onSubmit(application)}
                                     variant="outline"
                                     size="icon"
                                     className="h-8 w-8 text-green-600 hover:text-green-800"
@@ -144,7 +157,8 @@ const UserApplicationRow = ({
                         </TooltipProvider>
                      </>
                   )}
-                  {app.status === 'Returned' && (
+
+                  {status === 'Returned' && (
                      <>
                         <TooltipProvider>
                            <Tooltip delayDuration={200}>
@@ -181,7 +195,7 @@ const UserApplicationRow = ({
                         <TooltipProvider>
                            <Tooltip delayDuration={200}>
                               <TooltipTrigger asChild>
-                                 <Button onClick={() => onResubmit(app)} variant="outline" size="icon" className="h-8 w-8 text-green-600 hover:text-green-800">
+                                 <Button onClick={() => onResubmit(application)} variant="outline" size="icon" className="h-8 w-8 text-green-600 hover:text-green-800">
                                     <Send className="h-4 w-4" />
                                  </Button>
                               </TooltipTrigger>
@@ -192,12 +206,13 @@ const UserApplicationRow = ({
                         </TooltipProvider>
                      </>
                   )}
-                  {app.status === 'Submitted' && (
+
+                  {status === 'Submitted' && (
                      <TooltipProvider>
                         <Tooltip delayDuration={200}>
                            <TooltipTrigger asChild>
                               <Button
-                                 onClick={() => onUnsubmit(app)}
+                                 onClick={() => onUnsubmit(application)}
                                  variant="outline"
                                  size="icon"
                                  className="h-8 w-8 text-yellow-600 hover:text-yellow-800"
@@ -220,7 +235,7 @@ const UserApplicationRow = ({
             isOpen={isEditModalOpen}
             onClose={() => setIsEditModalOpen(false)}
             onSave={handleEditSave}
-            application={app}
+            application={application}
             fetchCOVPermit={fetchCOVPermit}
             fetchCSAWPermit={fetchCSAWPermit}
             fetchPLTCPPermit={fetchPLTCPPermit}
@@ -231,12 +246,12 @@ const UserApplicationRow = ({
          <ViewApplicationModal
             isOpen={isViewModalOpen}
             onClose={() => setIsViewModalOpen(false)}
-            application={app}
+            application={application}
          />
          <ViewRemarksModal
             isOpen={isRemarksModalOpen}
             onClose={() => setIsRemarksModalOpen(false)}
-            application={app}
+            application={application}
          />
       </>
    );

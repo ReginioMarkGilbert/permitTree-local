@@ -4,7 +4,7 @@ const PermitSchema = new mongoose.Schema({
    applicationType: {
       type: String,
       required: true,
-      enum: ['Chainsaw Registration', 'Certificate of Verification', 'Private Tree Plantation Registration', 'Public Land Tree Cutting Permit', 'Special/Private Land Timber Permit', 'National Government Agency Tree Cutting Permit']
+      enum: ['Chainsaw Registration', 'Certificate of Verification', 'Private Tree Plantation Registration', 'Public Land Tree Cutting Permit', 'Special/Private Land Timber Permit', 'Tree Cutting and/or Earth Balling Permit']
    },
    applicationNumber: { type: String, required: true, unique: true },
    applicantId: {

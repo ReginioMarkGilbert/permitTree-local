@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Search, FileX, Loader2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import UserApplicationRow from './components/UserApplicationRow';
@@ -18,6 +18,12 @@ import { useUserOrderOfPayments } from './hooks/useUserOrderOfPayments';
 import { getUserId } from '@/utils/auth';
 import UserOOPRow from './components/UserOOPRow';
 import { gql } from 'graphql-tag';
+import {
+   DeleteConfirmationDialog,
+   UnsubmitConfirmationDialog,
+   SubmitConfirmationDialog,
+   ResubmitConfirmationDialog
+} from './components/ConfirmationDialogs';
 
 const GET_OOP_DETAILS = gql`
   query GetOOPDetails($id: ID!) {
@@ -388,32 +394,31 @@ const UserApplicationsStatusPage = () => {
                <thead className="bg-gray-50">
                   <tr>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        APPLICATION NUMBER
+                        Application Number
                      </th>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        APPLICATION TYPE
+                        Application Type
                      </th>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        DATE SUBMITTED
+                        Date Submitted
                      </th>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        STATUS
+                        Status
                      </th>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        ACTIONS
+                        Actions
                      </th>
                   </tr>
                </thead>
                <tbody className="bg-white divide-y divide-gray-200">
-                  {applications.map((app) => (
+                  {filteredApplications.map((application) => (
                      <UserApplicationRow
-                        key={app.id}
-                        app={app}
-                        onEdit={handleEditApplication}
-                        onDelete={handleDeleteClick}
-                        onUnsubmit={handleUnsubmitClick}
-                        onSubmit={handleSubmitClick}
-                        onResubmit={handleResubmitClick}
+                        key={application.id}
+                        application={application}
+                        onDelete={() => handleDeleteClick(application)}
+                        onUnsubmit={() => handleUnsubmitClick(application)}
+                        onSubmit={() => handleSubmitClick(application)}
+                        onResubmit={() => handleResubmitClick(application)}
                         getStatusColor={getStatusColor}
                         fetchCOVPermit={fetchCOVPermit}
                         fetchCSAWPermit={fetchCSAWPermit}
@@ -430,116 +435,157 @@ const UserApplicationsStatusPage = () => {
    };
 
    return (
-      <div className="min-h-screen bg-green-50">
-         <div className="container mx-auto px-4 sm:px-6 py-8 pt-24">
-            <div className="flex justify-between items-center mb-6">
-               <h1 className="text-3xl font-bold text-green-800">My Applications</h1>
-               <Button onClick={() => refetch()} variant="outline">
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Refresh
-               </Button>
-            </div>
-            <div className="mb-6 overflow-x-auto">
-               <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-                  {mainTabs.map((tab) => (
-                     <button
-                        key={tab}
-                        onClick={() => handleTabChange(tab)}
-                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeMainTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
-                     >
-                        {tab}
-                     </button>
-                  ))}
+      <div className="bg-green-50 min-h-screen pt-20 pb-8 px-4 sm:px-6 lg:px-8">
+         <div className="max-w-7xl mx-auto space-y-6">
+            {/* Header Section */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+               <div className="flex items-center justify-between mb-4">
+                  <h1 className="text-2xl font-semibold text-gray-900">My Applications</h1>
+                  <Button onClick={handleRefetch} variant="outline">
+                     <RefreshCw className="mr-2 h-4 w-4" />
+                     Refresh
+                  </Button>
+               </div>
+
+               {/* Main Tabs */}
+               <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
+                     {mainTabs.map((tab) => (
+                        <button
+                           key={tab}
+                           onClick={() => handleTabChange(tab)}
+                           className={`px-4 py-2 rounded-md text-sm font-medium transition-colors
+                              ${activeMainTab === tab
+                                 ? 'bg-white text-green-800 shadow'
+                                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
+                        >
+                           {tab}
+                        </button>
+                     ))}
+                  </div>
                </div>
             </div>
-            <div className="mb-6 overflow-x-auto">
-               <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-                  {subTabs[activeMainTab].map((tab) => (
-                     <button
-                        key={tab}
-                        onClick={() => handleSubTabChange(tab)}
-                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeSubTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
-                     >
-                        {tab}
-                     </button>
-                  ))}
+
+            {/* Sub Tabs and Search Section */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+               <div className="space-y-4">
+                  {/* Sub Tabs */}
+                  <div className="bg-gray-100 p-1 rounded-md inline-flex flex-wrap gap-1">
+                     {subTabs[activeMainTab].map((tab) => (
+                        <button
+                           key={tab}
+                           onClick={() => handleSubTabChange(tab)}
+                           className={`px-3 py-2 rounded-md text-sm font-medium transition-colors
+                              ${activeSubTab === tab
+                                 ? 'bg-white text-green-800 shadow'
+                                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
+                        >
+                           {tab}
+                        </button>
+                     ))}
+                  </div>
+
+                  {/* Search Bar */}
+                  <div className="relative">
+                     <Input
+                        type="text"
+                        placeholder={`Search ${activeMainTab.toLowerCase()}...`}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10"
+                     />
+                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  </div>
                </div>
             </div>
-            <div className="mb-6">
-               <Input
-                  type="text"
-                  placeholder={`Search ${activeMainTab.toLowerCase()}...`}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="border rounded-md p-2 w-full"
-               />
+
+            {/* Table Section */}
+            <div className="bg-white rounded-lg shadow-sm flex-grow">
+               {activeMainTab === 'Applications' ? (
+                  loading ? (
+                     <div className="p-8 text-center">
+                        <Loader2 className="h-8 w-8 animate-spin mx-auto text-green-600" />
+                        <p className="mt-2 text-gray-500">Loading applications...</p>
+                     </div>
+                  ) : error ? (
+                     <div className="p-8 text-center text-red-500">
+                        Error loading applications. Please try again.
+                     </div>
+                  ) : filteredApplications.length === 0 ? (
+                     <div className="p-8 text-center">
+                        <div className="mx-auto h-12 w-12 text-gray-400">
+                           <FileX className="h-12 w-12" />
+                        </div>
+                        <h3 className="mt-2 text-sm font-medium text-gray-900">No applications found</h3>
+                        <p className="mt-1 text-sm text-gray-500">
+                           Get started by creating a new application.
+                        </p>
+                     </div>
+                  ) : (
+                     <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                           <thead className="bg-gray-50">
+                              <tr>
+                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Application Number
+                                 </th>
+                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Application Type
+                                 </th>
+                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Date Submitted
+                                 </th>
+                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
+                                 </th>
+                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                 </th>
+                              </tr>
+                           </thead>
+                           <tbody className="bg-white divide-y divide-gray-200">
+                              {filteredApplications.map((application) => (
+                                 <UserApplicationRow
+                                    key={application.id}
+                                    application={application}
+                                    onDelete={() => handleDeleteClick(application)}
+                                    onUnsubmit={() => handleUnsubmitClick(application)}
+                                    onSubmit={() => handleSubmitClick(application)}
+                                    onResubmit={() => handleResubmitClick(application)}
+                                    getStatusColor={getStatusColor}
+                                 />
+                              ))}
+                           </tbody>
+                        </table>
+                     </div>
+                  )
+               ) : (
+                  renderOrderOfPaymentsTable()
+               )}
             </div>
-            {renderTable()}
+
+            {/* Confirmation Dialogs */}
+            <DeleteConfirmationDialog
+               isOpen={deleteDialogOpen}
+               onClose={() => setDeleteDialogOpen(false)}
+               onConfirm={handleDeleteConfirm}
+            />
+            <UnsubmitConfirmationDialog
+               isOpen={unsubmitDialogOpen}
+               onClose={() => setUnsubmitDialogOpen(false)}
+               onConfirm={handleUnsubmitConfirm}
+            />
+            <SubmitConfirmationDialog
+               isOpen={submitDialogOpen}
+               onClose={() => setSubmitDialogOpen(false)}
+               onConfirm={handleSubmitConfirm}
+            />
+            <ResubmitConfirmationDialog
+               isOpen={resubmitDialogOpen}
+               onClose={() => setResubmitDialogOpen(false)}
+               onConfirm={handleResubmitConfirm}
+            />
          </div>
-         <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-            <DialogContent>
-               <DialogHeader>
-                  <DialogTitle>Confirm Deletion</DialogTitle>
-                  <DialogDescription>
-                     Are you sure you want to delete this draft application? This action cannot be undone.
-                  </DialogDescription>
-               </DialogHeader>
-               <DialogFooter>
-                  <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
-                     Cancel
-                  </Button>
-                  <Button variant="destructive" onClick={handleDeleteConfirm}>
-                     Delete
-                  </Button>
-               </DialogFooter>
-            </DialogContent>
-         </Dialog>
-         <AlertDialog open={unsubmitDialogOpen} onOpenChange={setUnsubmitDialogOpen}>
-            <AlertDialogContent>
-               <AlertDialogHeader>
-                  <AlertDialogTitle>Confirm Unsubmit</AlertDialogTitle>
-                  <AlertDialogDescription>
-                     Are you sure you want to unsubmit this application? It will be moved back to Draft status.
-                  </AlertDialogDescription>
-               </AlertDialogHeader>
-               <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleUnsubmitConfirm}>Unsubmit</AlertDialogAction>
-               </AlertDialogFooter>
-            </AlertDialogContent>
-         </AlertDialog>
-         <AlertDialog open={submitDialogOpen} onOpenChange={setSubmitDialogOpen}>
-            <AlertDialogContent>
-               <AlertDialogHeader>
-                  <AlertDialogTitle>Confirm Submission</AlertDialogTitle>
-                  <AlertDialogDescription>
-                     Are you sure you want to submit this application? You won't be able to edit it after submission.
-                  </AlertDialogDescription>
-               </AlertDialogHeader>
-               <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleSubmitConfirm}>Submit</AlertDialogAction>
-               </AlertDialogFooter>
-            </AlertDialogContent>
-         </AlertDialog>
-         <Dialog open={resubmitDialogOpen} onOpenChange={setResubmitDialogOpen}>
-            <DialogContent>
-               <DialogHeader>
-                  <DialogTitle>Confirm Resubmission</DialogTitle>
-                  <DialogDescription>
-                     Are you sure you want to resubmit this application? It will be moved back to Returned status.
-                  </DialogDescription>
-               </DialogHeader>
-               <DialogFooter>
-                  <Button variant="outline" onClick={() => setResubmitDialogOpen(false)}>
-                     Cancel
-                  </Button>
-                  <Button variant="destructive" onClick={handleResubmitConfirm}>
-                     Resubmit
-                  </Button>
-               </DialogFooter>
-            </DialogContent>
-         </Dialog>
       </div>
    );
 };
