@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Eye, Receipt, Printer, CreditCard } from "lucide-react";
+import { Eye, Receipt, Printer, CreditCard, RotateCcw } from "lucide-react";
 import {
    Tooltip,
    TooltipContent,
@@ -10,12 +10,27 @@ import {
 import { format } from "date-fns";
 import ViewORModal from './ViewORModal';
 import ViewOOPModal from './ViewOOPModal';
+import ViewPaymentProofModal from './PaymentProofComponents/ViewPaymentProofModal';
 import { useNavigate } from 'react-router-dom';
+import { gql, useMutation } from '@apollo/client';
+import { toast } from 'sonner';
 
-const UserOOPRow = ({ oop }) => {
+// Add the mutation
+const UNDO_PAYMENT_PROOF = gql`
+  mutation UndoPaymentProof($oopId: ID!) {
+    undoPaymentProof(oopId: $oopId) {
+      _id
+      OOPstatus
+    }
+  }
+`;
+
+const UserOOPRow = ({ oop, onRefetch }) => {
    const navigate = useNavigate();
    const [isViewORModalOpen, setIsViewORModalOpen] = useState(false);
    const [isViewOOPModalOpen, setIsViewOOPModalOpen] = useState(false);
+   const [isViewPaymentProofModalOpen, setIsViewPaymentProofModalOpen] = useState(false);
+   const [undoPaymentProof] = useMutation(UNDO_PAYMENT_PROOF);
 
    const formatDate = (timestamp) => {
       const date = new Date(parseInt(timestamp));
@@ -53,6 +68,28 @@ const UserOOPRow = ({ oop }) => {
 
    const handlePayClick = () => {
       navigate(`/payment/${oop._id}`);
+      if (onRefetch) {
+         onRefetch();
+      }
+   };
+
+   const showPaymentProof = ['Payment Proof Submitted', 'Payment Proof Approved', 'Payment Proof Rejected'].includes(oop.OOPstatus);
+
+   const handleUndoPaymentProof = async () => {
+      try {
+         await undoPaymentProof({
+            variables: {
+               oopId: oop._id
+            }
+         });
+         toast.success('Payment proof undone successfully');
+         if (onRefetch) {
+            await onRefetch();
+         }
+      } catch (error) {
+         console.error('Error undoing payment proof:', error);
+         toast.error('Failed to undo payment proof');
+      }
    };
 
    return (
@@ -150,6 +187,46 @@ const UserOOPRow = ({ oop }) => {
                         </Tooltip>
                      </TooltipProvider>
                   )}
+
+                  {showPaymentProof && (
+                     <TooltipProvider>
+                        <Tooltip>
+                           <TooltipTrigger asChild>
+                              <Button
+                                 variant="outline"
+                                 size="icon"
+                                 className="h-8 w-8"
+                                 onClick={() => setIsViewPaymentProofModalOpen(true)}
+                              >
+                                 <Receipt className="h-4 w-4" />
+                              </Button>
+                           </TooltipTrigger>
+                           <TooltipContent>
+                              <p>View Payment Proof</p>
+                           </TooltipContent>
+                        </Tooltip>
+                     </TooltipProvider>
+                  )}
+
+                  {oop.OOPstatus === 'Payment Proof Submitted' && (
+                     <TooltipProvider>
+                        <Tooltip>
+                           <TooltipTrigger asChild>
+                              <Button
+                                 variant="outline"
+                                 size="icon"
+                                 className="h-8 w-8 text-yellow-600"
+                                 onClick={handleUndoPaymentProof}
+                              >
+                                 <RotateCcw className="h-4 w-4" />
+                              </Button>
+                           </TooltipTrigger>
+                           <TooltipContent>
+                              <p>Undo Payment Proof</p>
+                           </TooltipContent>
+                        </Tooltip>
+                     </TooltipProvider>
+                  )}
                </div>
             </td>
          </tr>
@@ -166,6 +243,12 @@ const UserOOPRow = ({ oop }) => {
             isOpen={isViewOOPModalOpen}
             onClose={() => setIsViewOOPModalOpen(false)}
             oop={oop}
+         />
+
+         <ViewPaymentProofModal
+            isOpen={isViewPaymentProofModalOpen}
+            onClose={() => setIsViewPaymentProofModalOpen(false)}
+            paymentProof={oop.paymentProof}
          />
       </>
    );

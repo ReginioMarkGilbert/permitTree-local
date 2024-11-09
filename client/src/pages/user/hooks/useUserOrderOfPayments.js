@@ -24,6 +24,19 @@ const GET_USER_OOPS = gql`
       trackingNo
       releasedDate
       releasedTime
+      paymentProof {
+        transactionId
+        paymentMethod
+        amount
+        timestamp
+        referenceNumber
+        payerDetails {
+          name
+          email
+          phoneNumber
+        }
+        status
+      }
       officialReceipt {
         orNumber
         dateIssued
@@ -39,7 +52,8 @@ export const useUserOrderOfPayments = (userId, status) => {
   const { data, loading, error, refetch } = useQuery(GET_USER_OOPS, {
     variables: { userId, status },
     skip: !userId,
-    fetchPolicy: 'network-only'
+    fetchPolicy: 'network-only',
+    pollInterval: 5000 // Poll every 5 seconds
   });
 
   return {

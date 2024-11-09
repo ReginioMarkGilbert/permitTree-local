@@ -103,6 +103,7 @@ const PaymentPage = () => {
             return (
                <GCashPaymentStep
                   oop={oop}
+                  formData={formData}
                   onBack={prevStep}
                />
             );

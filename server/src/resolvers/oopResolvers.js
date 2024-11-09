@@ -386,6 +386,85 @@ const oopResolvers = {
             console.error('Error updating OOP tracking:', error);
             throw error;
          }
+      },
+
+      reviewPaymentProof: async (_, { oopId, status, notes }) => {
+         try {
+            const oop = await OOP.findById(oopId);
+            if (!oop) {
+               throw new Error('OOP not found');
+            }
+
+            // Update payment proof status and OOP status
+            const updatedOOP = await OOP.findByIdAndUpdate(
+               oopId,
+               {
+                  $set: {
+                     'paymentProof.status': status,
+                     OOPstatus: status === 'APPROVED' ? 'Completed OOP' : 'Payment Proof Rejected',
+                     notes: notes
+                  }
+               },
+               { new: true }
+            );
+
+            return updatedOOP;
+         } catch (error) {
+            throw new Error(`Failed to review payment proof: ${error.message}`);
+         }
+      },
+
+      submitPaymentProof: async (_, { oopId, paymentProof }) => {
+         try {
+            const oop = await OOP.findById(oopId);
+            if (!oop) {
+               throw new Error('OOP not found');
+            }
+
+            const updatedOOP = await OOP.findByIdAndUpdate(
+               oopId,
+               {
+                  $set: {
+                     paymentProof: {
+                        ...paymentProof,
+                        timestamp: new Date(),
+                        status: 'SUBMITTED'
+                     },
+                     OOPstatus: 'Payment Proof Submitted'
+                  }
+               },
+               { new: true }
+            );
+
+            return updatedOOP;
+         } catch (error) {
+            throw new Error(`Failed to submit payment proof: ${error.message}`);
+         }
+      },
+
+      undoPaymentProof: async (_, { oopId }) => {
+         try {
+            const oop = await OOP.findById(oopId);
+            if (!oop) {
+               throw new Error('OOP not found');
+            }
+
+            // Reset the payment proof and status
+            const updatedOOP = await OOP.findByIdAndUpdate(
+               oopId,
+               {
+                  $set: {
+                     OOPstatus: 'Awaiting Payment',
+                     paymentProof: null
+                  }
+               },
+               { new: true }
+            );
+
+            return updatedOOP;
+         } catch (error) {
+            throw new Error(`Failed to undo payment proof: ${error.message}`);
+         }
       }
    }
 };

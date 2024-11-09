@@ -123,6 +123,32 @@ export const GET_USER_OOPS = gql`
   }
 `;
 
+// Add payment proof related queries
+const GET_OOP_WITH_PAYMENT_PROOF = gql`
+  query GetOOPWithPaymentProof($id: ID!) {
+    getOOPById(id: $id) {
+      _id
+      billNo
+      applicationId
+      totalAmount
+      OOPstatus
+      paymentProof {
+        transactionId
+        paymentMethod
+        amount
+        timestamp
+        referenceNumber
+        payerDetails {
+          name
+          email
+          phoneNumber
+        }
+        status
+      }
+    }
+  }
+`;
+
 // Mutations
 const CREATE_OOP = gql`
   mutation CreateOOP($input: OOPInput!) {
@@ -307,6 +333,21 @@ export const useOrderOfPayments = (userId = null) => {
       createOOP: handleCreateOOP,
       updateSignature: handleUpdateSignature,
       forwardOOPToAccountant: handleForwardToAccountant,
-      refetch: refetchAll
+      refetch: refetchAll,
+
+      // Add these new fields
+      getOOPWithPaymentProof: async (id) => {
+         try {
+            const { data } = await client.query({
+               query: GET_OOP_WITH_PAYMENT_PROOF,
+               variables: { id },
+               fetchPolicy: 'network-only'
+            });
+            return data.getOOPById;
+         } catch (error) {
+            console.error('Error fetching OOP with payment proof:', error);
+            throw error;
+         }
+      }
    };
 };

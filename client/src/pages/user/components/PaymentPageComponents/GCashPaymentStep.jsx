@@ -3,20 +3,67 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
+import { gql, useMutation } from '@apollo/client';
+import { toast } from 'sonner';
 
-const GCashPaymentStep = ({ oop, onBack }) => {
+const SUBMIT_PAYMENT_PROOF = gql`
+  mutation SubmitPaymentProof($oopId: ID!, $paymentProof: PaymentProofInput!) {
+    submitPaymentProof(oopId: $oopId, paymentProof: $paymentProof) {
+      _id
+      OOPstatus
+      paymentProof {
+        transactionId
+        status
+      }
+    }
+  }
+`;
+
+const GCashPaymentStep = ({ oop, formData = {}, onBack }) => {
    const navigate = useNavigate();
-   const [paymentStatus, setPaymentStatus] = useState('processing'); // processing, success, failed
+   const [paymentStatus, setPaymentStatus] = useState('processing');
    const [countdown, setCountdown] = useState(5);
+   const [submitPaymentProof] = useMutation(SUBMIT_PAYMENT_PROOF);
 
    useEffect(() => {
-      // Simulate payment processing
-      const timer = setTimeout(() => {
-         setPaymentStatus('success');
+      // Simulate payment processing and generate payment proof
+      const timer = setTimeout(async () => {
+         try {
+            const transactionId = `GCASH-${Date.now()}`;
+            const referenceNumber = `REF-${Math.random().toString(36).substr(2, 9)}`;
+
+            // Add validation for required fields
+            if (!formData.fullName || !formData.email || !formData.phoneNumber) {
+               throw new Error('Missing required payment details');
+            }
+
+            await submitPaymentProof({
+               variables: {
+                  oopId: oop._id,
+                  paymentProof: {
+                     transactionId,
+                     paymentMethod: 'GCASH',
+                     amount: oop.totalAmount,
+                     referenceNumber,
+                     payerDetails: {
+                        name: formData.fullName,
+                        email: formData.email,
+                        phoneNumber: formData.phoneNumber
+                     }
+                  }
+               }
+            });
+
+            setPaymentStatus('success');
+         } catch (error) {
+            console.error('Error submitting payment proof:', error);
+            toast.error(error.message || 'Failed to process payment');
+            setPaymentStatus('failed');
+         }
       }, 3000);
 
       return () => clearTimeout(timer);
-   }, []);
+   }, [oop, formData, submitPaymentProof]);
 
    useEffect(() => {
       if (paymentStatus === 'success') {
@@ -78,16 +125,32 @@ const GCashPaymentStep = ({ oop, onBack }) => {
                   </div>
                )}
 
-               <div className="mt-8">
-                  <Button
-                     type="button"
-                     variant="outline"
-                     onClick={onBack}
-                     disabled={paymentStatus === 'success'}
-                  >
-                     Back
-                  </Button>
-               </div>
+               {paymentStatus === 'failed' && (
+                  <div className="space-y-4">
+                     <div className="h-12 w-12 rounded-full bg-red-100 mx-auto flex items-center justify-center">
+                        <svg
+                           className="h-6 w-6 text-red-600"
+                           fill="none"
+                           stroke="currentColor"
+                           viewBox="0 0 24 24"
+                        >
+                           <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M6 18L18 6M6 6l12 12"
+                           />
+                        </svg>
+                     </div>
+                     <p className="text-lg font-medium text-red-600">Payment Failed</p>
+                     <Button
+                        variant="outline"
+                        onClick={onBack}
+                     >
+                        Try Again
+                     </Button>
+                  </div>
+               )}
             </div>
          </CardContent>
       </Card>

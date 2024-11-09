@@ -26,6 +26,7 @@ const oopTypes = gql`
     createdAt: String!
     updatedAt: String!
     officialReceipt: OfficialReceipt
+    paymentProof: PaymentProof
   }
 
   type OOPItem {
@@ -46,6 +47,22 @@ const oopTypes = gql`
     amount: Float!
     paymentMethod: String!
     remarks: String
+  }
+
+  type PaymentProof {
+    transactionId: String!
+    paymentMethod: String!
+    amount: Float!
+    timestamp: String!
+    referenceNumber: String!
+    payerDetails: PayerDetails!
+    status: String!
+  }
+
+  type PayerDetails {
+    name: String!
+    email: String!
+    phoneNumber: String!
   }
 
   input OOPInput {
@@ -79,6 +96,20 @@ const oopTypes = gql`
     releasedTime: String
   }
 
+  input PaymentProofInput {
+    transactionId: String!
+    paymentMethod: String!
+    amount: Float!
+    referenceNumber: String!
+    payerDetails: PayerDetailsInput!
+  }
+
+  input PayerDetailsInput {
+    name: String!
+    email: String!
+    phoneNumber: String!
+  }
+
   extend type Query {
     getOOPs: [OOP!]!
     getOOPById(id: ID!): OOP
@@ -97,6 +128,9 @@ const oopTypes = gql`
     sendORToApplicant(Id: ID!): OOP!
     deleteOOP(applicationId: String!): OOP!
     updateOOPTracking(id: ID!, tracking: OOPTrackingInput!): OOP!
+    submitPaymentProof(oopId: ID!, paymentProof: PaymentProofInput!): OOP!
+    reviewPaymentProof(oopId: ID!, status: String!, notes: String): OOP!
+    undoPaymentProof(oopId: ID!): OOP!
   }
 `;
 

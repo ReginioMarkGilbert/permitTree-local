@@ -4,21 +4,68 @@ import { Input } from "@/components/ui/input";
 import { useOrderOfPayments } from '../../../hooks/useOrderOfPayments';
 import BillCollectorOOPRow from './BC_OOPRow';
 import { RefreshCw } from 'lucide-react';
+import { gql, useQuery } from '@apollo/client';
+
+const GET_OOPS = gql`
+  query GetOOPs {
+    getOOPs {
+      _id
+      billNo
+      applicationId
+      namePayee
+      address
+      natureOfApplication
+      totalAmount
+      OOPstatus
+      createdAt
+      items {
+        legalBasis
+        description
+        amount
+      }
+      paymentProof {
+        transactionId
+        paymentMethod
+        amount
+        timestamp
+        referenceNumber
+        payerDetails {
+          name
+          email
+          phoneNumber
+        }
+        status
+      }
+      officialReceipt {
+        orNumber
+        dateIssued
+        amount
+        paymentMethod
+        remarks
+      }
+    }
+  }
+`;
 
 const BillCollectorDashboard = () => {
    const [searchTerm, setSearchTerm] = useState('');
    const [activeTab, setActiveTab] = useState('Payment Proof');
 
+   // Use direct query instead of hook
    const {
-      oops,
+      data: oopsData,
       loading: oopsLoading,
       error: oopsError,
       refetch: refetchOOPs
-   } = useOrderOfPayments();
+   } = useQuery(GET_OOPS, {
+      fetchPolicy: 'network-only',
+      pollInterval: 5000 // Poll every 5 seconds
+   });
 
    const tabs = ['Awaiting Payment', 'Payment Proof', 'Completed Payments', 'Issued OR'];
 
    const filteredOOPs = useMemo(() => {
+      const oops = oopsData?.getOOPs || [];
       return oops.filter(oop => {
          // Filter based on active tab
          if (activeTab === 'Payment Proof') {
@@ -35,7 +82,7 @@ const BillCollectorDashboard = () => {
          oop.applicationId.toLowerCase().includes(searchTerm.toLowerCase()) ||
          oop.billNo.toLowerCase().includes(searchTerm.toLowerCase())
       );
-   }, [oops, activeTab, searchTerm]);
+   }, [oopsData, activeTab, searchTerm]);
 
    const renderTable = () => {
       if (oopsLoading) return <div className="text-center">Loading...</div>;

@@ -73,12 +73,12 @@ const UserApplicationsStatusPage = () => {
          case 'Expired': return { status: 'Expired' };
          case 'Rejected': return { status: 'Rejected' };
          // Order of Payments - Map to backend statuses
-         case 'Awaiting Payment': return { status: 'Awaiting Payment' };
-         case 'Payment Proof Submitted': return { status: 'Payment Proof Submitted' };
-         case 'Payment Proof Rejected': return { status: 'Payment Proof Rejected' };
-         case 'Payment Proof Approved': return { status: 'Payment Proof Approved' };
-         case 'Issued OR': return { status: 'Issued OR' };
-         case 'Completed': return { status: 'Completed OOP' };
+         case 'Awaiting Payment': return { OOPstatus: 'Awaiting Payment' };
+         case 'Payment Proof Submitted': return { OOPstatus: 'Payment Proof Submitted' };
+         case 'Payment Proof Rejected': return { OOPstatus: 'Payment Proof Rejected' };
+         case 'Payment Proof Approved': return { OOPstatus: 'Payment Proof Approved' };
+         case 'Issued OR': return { OOPstatus: 'Issued OR' };
+         case 'Completed': return { OOPstatus: 'Completed OOP' };
          // Renewals
          case 'Renewed': return { status: 'Renewed', isRenewal: true };
          default: return { status: 'Submitted' };
@@ -293,6 +293,33 @@ const UserApplicationsStatusPage = () => {
       activeMainTab === 'Order Of Payments' ? activeSubTab : null
    );
 
+   // Combined refetch function
+   const handleRefetch = async () => {
+      if (activeMainTab === 'Order Of Payments') {
+         await refetchOOPs();
+      } else {
+         await refetch();
+      }
+   };
+
+   // Add polling for automatic updates
+   useEffect(() => {
+      const pollInterval = setInterval(handleRefetch, 5000); // Poll every 5 seconds
+      return () => clearInterval(pollInterval);
+   }, [activeMainTab]);
+
+   // Update tab change handler to trigger refetch
+   const handleTabChange = (tab) => {
+      setActiveMainTab(tab);
+      setActiveSubTab(subTabs[tab][0]);
+      handleRefetch();
+   };
+
+   const handleSubTabChange = (tab) => {
+      setActiveSubTab(tab);
+      handleRefetch();
+   };
+
    const renderOrderOfPaymentsTable = () => {
       if (oopsLoading) return <p className="text-center text-gray-500">Loading order of payments...</p>;
       if (oopsError) return <p className="text-center text-red-500">Error loading order of payments</p>;
@@ -336,6 +363,7 @@ const UserApplicationsStatusPage = () => {
                      <UserOOPRow
                         key={oop._id}
                         oop={oop}
+                        onRefetch={handleRefetch}
                      />
                   ))}
                </tbody>
@@ -416,10 +444,7 @@ const UserApplicationsStatusPage = () => {
                   {mainTabs.map((tab) => (
                      <button
                         key={tab}
-                        onClick={() => {
-                           setActiveMainTab(tab);
-                           setActiveSubTab(subTabs[tab][0]);
-                        }}
+                        onClick={() => handleTabChange(tab)}
                         className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeMainTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
                      >
                         {tab}
@@ -432,7 +457,7 @@ const UserApplicationsStatusPage = () => {
                   {subTabs[activeMainTab].map((tab) => (
                      <button
                         key={tab}
-                        onClick={() => setActiveSubTab(tab)}
+                        onClick={() => handleSubTabChange(tab)}
                         className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeSubTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
                      >
                         {tab}

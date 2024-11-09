@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Eye, Printer, FileText, RotateCcw, Receipt } from "lucide-react";
 import {
@@ -23,9 +23,45 @@ const UNDO_APPROVAL = gql`
    }
 `;
 
+// Add query for OOP details with payment proof
+const GET_OOP_DETAILS = gql`
+  query GetOOPDetails($id: ID!) {
+    getOOPById(id: $id) {
+      _id
+      billNo
+      applicationId
+      namePayee
+      address
+      natureOfApplication
+      totalAmount
+      OOPstatus
+      createdAt
+      items {
+        legalBasis
+        description
+        amount
+      }
+      paymentProof {
+        transactionId
+        paymentMethod
+        amount
+        timestamp
+        referenceNumber
+        payerDetails {
+          name
+          email
+          phoneNumber
+        }
+        status
+      }
+    }
+  }
+`;
+
 const BillCollectorOOPRow = ({ oop, onReviewComplete }) => {
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
    const [isGenerateORModalOpen, setIsGenerateORModalOpen] = useState(false);
+   const [isViewOOPModalOpen, setIsViewOOPModalOpen] = useState(false);
    const [undoApproval] = useMutation(UNDO_APPROVAL);
    const formatDate = (timestamp) => {
       const date = new Date(parseInt(timestamp));
@@ -64,6 +100,17 @@ const BillCollectorOOPRow = ({ oop, onReviewComplete }) => {
 
    const handleViewOOP = () => {
       setIsViewOOPModalOpen(true);
+   };
+
+   useEffect(() => {
+      console.log('OOP data in BC_OOPRow:', oop);
+      console.log('Payment Proof:', oop?.paymentProof);
+   }, [oop]);
+
+   const handleReviewClick = () => {
+      console.log('Opening review modal for OOP:', oop);
+      console.log('Payment proof data:', oop.paymentProof);
+      setIsReviewModalOpen(true);
    };
 
    return (
@@ -132,7 +179,7 @@ const BillCollectorOOPRow = ({ oop, onReviewComplete }) => {
                                  variant="outline"
                                  size="icon"
                                  className="h-8 w-8 text-green-500"
-                                 onClick={() => setIsReviewModalOpen(true)}
+                                 onClick={handleReviewClick}
                               >
                                  <FileText className="h-4 w-4" />
                               </Button>

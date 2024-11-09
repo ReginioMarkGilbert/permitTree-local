@@ -68,14 +68,26 @@ const paymentResolvers = {
                { new: true }
             );
 
-            // Update the OOP status
+            // Generate payment proof
+            const paymentProof = {
+               transactionId: reference,
+               paymentMethod: 'GCASH',
+               amount: oop.totalAmount,
+               referenceNumber: `GCASH-${Date.now()}`,
+               timestamp: new Date(),
+               payerDetails: payment.paymentDetails,
+               status: 'SUBMITTED'
+            };
+
+            // Update the OOP with payment proof and status
             await OOP.findByIdAndUpdate(oopId, {
-               OOPstatus: 'Payment Proof Submitted'
+               OOPstatus: 'Payment Proof Submitted',
+               paymentProof: paymentProof
             });
 
             return {
                success: true,
-               message: 'Payment confirmed successfully',
+               message: 'Payment confirmed and proof generated successfully',
                transactionId: reference,
                paymentStatus: 'COMPLETED'
             };

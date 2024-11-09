@@ -30,6 +30,50 @@ const officialReceiptSchema = new mongoose.Schema({
 
 const OR = mongoose.model('OfficialReceipt', officialReceiptSchema);
 
+const paymentProofSchema = new mongoose.Schema({
+   transactionId: {
+      type: String,
+      required: true,
+      unique: true
+   },
+   paymentMethod: {
+      type: String,
+      enum: ['GCASH'],
+      required: true
+   },
+   amount: {
+      type: Number,
+      required: true
+   },
+   timestamp: {
+      type: Date,
+      default: Date.now
+   },
+   referenceNumber: {
+      type: String,
+      required: true
+   },
+   payerDetails: {
+      name: {
+         type: String,
+         required: true
+      },
+      email: {
+         type: String,
+         required: true
+      },
+      phoneNumber: {
+         type: String,
+         required: true
+      }
+   },
+   status: {
+      type: String,
+      enum: ['SUBMITTED', 'APPROVED', 'REJECTED'],
+      default: 'SUBMITTED'
+   }
+});
+
 const oopSchema = new mongoose.Schema({
    billNo: {
       type: String,
@@ -109,7 +153,8 @@ const oopSchema = new mongoose.Schema({
       unique: true
    },
    releasedDate: Date,
-   releasedTime: String
+   releasedTime: String,
+   paymentProof: paymentProofSchema
 }, {
    timestamps: true
 });
