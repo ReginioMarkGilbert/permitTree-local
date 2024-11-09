@@ -10,6 +10,7 @@ import {
 import { format } from "date-fns";
 import ReviewPaymentModal from './ReviewPaymentModal';
 import GenerateORModal from './GenerateORModal';
+import ViewOOPModal from '@/pages/user/components/ViewOOPModal';
 import { gql, useMutation } from '@apollo/client';
 import { toast } from 'sonner';
 
@@ -61,6 +62,10 @@ const BillCollectorOOPRow = ({ oop, onReviewComplete }) => {
       }
    };
 
+   const handleViewOOP = () => {
+      setIsViewOOPModalOpen(true);
+   };
+
    return (
       <>
          <tr key={oop._id}>
@@ -84,13 +89,13 @@ const BillCollectorOOPRow = ({ oop, onReviewComplete }) => {
             <td className="px-4 py-4 whitespace-nowrap text-sm">
                <div className="flex items-center space-x-2">
                   <TooltipProvider>
-                     <Tooltip>
+                     <Tooltip delayDuration={250}>
                         <TooltipTrigger asChild>
                            <Button
                               variant="outline"
                               size="icon"
                               className="h-8 w-8"
-                              onClick={() => console.log('View OOP:', oop._id)}
+                              onClick={handleViewOOP}
                            >
                               <Eye className="h-4 w-4" />
                            </Button>
@@ -181,6 +186,12 @@ const BillCollectorOOPRow = ({ oop, onReviewComplete }) => {
                </div>
             </td>
          </tr>
+
+         <ViewOOPModal
+            isOpen={isViewOOPModalOpen}
+            onClose={() => setIsViewOOPModalOpen(false)}
+            oop={oop}
+         />
 
          {isReviewModalOpen && (
             <ReviewPaymentModal

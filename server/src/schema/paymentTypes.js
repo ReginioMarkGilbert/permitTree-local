@@ -21,6 +21,13 @@ const paymentTypes = gql`
     address: String!
   }
 
+  input PaymentDetailsInput {
+    fullName: String!
+    email: String!
+    phoneNumber: String!
+    address: String!
+  }
+
   type PaymentSession {
     id: ID!
     oopId: ID!
@@ -44,18 +51,13 @@ const paymentTypes = gql`
     payment: Payment
   }
 
-  input PaymentDetailsInput {
-    fullName: String!
-    email: String!
-    phoneNumber: String!
-    address: String!
-  }
-
   extend type Query {
     getPayments(status: String): [Payment!]!
   }
 
   extend type Mutation {
+    initiatePayment(oopId: ID!, method: String!, paymentDetails: PaymentDetailsInput!): PaymentSession!
+    confirmPayment(oopId: ID!, reference: String!): PaymentResult!
     verifyPayment(paymentId: ID!, status: String!): VerifyPaymentResponse!
   }
 `;

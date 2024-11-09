@@ -136,10 +136,11 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
    const userRoles = getUserRoles();
    console.log(userRoles);
    const renderActionButtons = () => {
-      const actions = []; // initialize actions array
-      // View action - available for all roles and stages
+      const actions = [];
+
+      // View action
       actions.push(
-         <TooltipProvider key="view">
+         <TooltipProvider key="view-action">
             <Tooltip delayDuration={200}>
                <TooltipTrigger asChild>
                   <Button onClick={handleViewClick} variant="outline" size="icon" className="h-8 w-8">
@@ -152,10 +153,11 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
             </Tooltip>
          </TooltipProvider>
       );
-      // Print action - available for all roles and stages
+
+      // Print action
       if (userRoles.includes('Technical_Staff') && !userRoles.includes('Receiving_Clerk')) {
          actions.push(
-            <TooltipProvider key="print">
+            <TooltipProvider key="print-action">
                <Tooltip delayDuration={200}>
                   <TooltipTrigger asChild>
                      <Button onClick={() => onPrint(app.id)} variant="outline" size="icon" className="h-8 w-8">
@@ -167,12 +169,13 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
                   </TooltipContent>
                </Tooltip>
             </TooltipProvider>
-         )
-      };
-      // Review action - only when status is Submitted
+         );
+      }
+
+      // Review action
       if (app.status === 'Submitted' && userRoles.includes('Technical_Staff') && !userRoles.includes('Receiving_Clerk')) {
          actions.push(
-            <TooltipProvider key="review">
+            <TooltipProvider key="review-action">
                <Tooltip delayDuration={200}>
                   <TooltipTrigger asChild>
                      <Button onClick={handleReviewClick} variant="outline" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-800">
@@ -186,10 +189,11 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
             </TooltipProvider>
          );
       }
-      // Authenticity approval action - only for For Inspection and Approval tab
+
+      // Authenticity approval action
       if (currentTab === 'For Inspection and Approval') {
          actions.push(
-            <TooltipProvider key="authenticity">
+            <TooltipProvider key="authenticity-action">
                <Tooltip delayDuration={200}>
                   <TooltipTrigger asChild>
                      <Button
@@ -208,11 +212,12 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
             </TooltipProvider>
          );
       }
-      // Add undo button for both Accepted and Approved Applications tabs
+
+      // Undo button
       if ((currentTab === 'Approved Applications' && app.approvedByTechnicalStaff) ||
          (currentTab === 'Accepted Applications' && app.acceptedByTechnicalStaff)) {
          actions.push(
-            <TooltipProvider key="undo">
+            <TooltipProvider key="undo-action">
                <Tooltip>
                   <TooltipTrigger asChild>
                      <Button
@@ -231,10 +236,11 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
             </TooltipProvider>
          );
       }
-      // Generate certificate button - only for Approved Applications tab
+
+      // Generate certificate button
       if ((currentTab === 'Awaiting Permit Creation') && app.awaitingPermitCreation) {
          actions.push(
-            <TooltipProvider>
+            <TooltipProvider key="generate-certificate-action">
                <Tooltip>
                   <TooltipTrigger asChild>
                      <Button
@@ -251,8 +257,9 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
                   </TooltipContent>
                </Tooltip>
             </TooltipProvider>
-         )
+         );
       }
+
       return actions;
    };
 

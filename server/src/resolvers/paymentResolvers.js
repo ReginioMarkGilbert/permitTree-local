@@ -1,5 +1,5 @@
 const Payment = require('../models/Payment');
-const OOP = require('../models/OOP');
+const { OOP } = require('../models/OOP');
 
 const paymentResolvers = {
    Query: {
@@ -14,6 +14,76 @@ const paymentResolvers = {
    },
 
    Mutation: {
+      initiatePayment: async (_, { oopId, method, paymentDetails }) => {
+         try {
+            const oop = await OOP.findById(oopId);
+            if (!oop) {
+               throw new Error('OOP not found');
+            }
+
+            const payment = new Payment({
+               oopId,
+               status: 'PENDING',
+               amount: oop.totalAmount,
+               paymentMethod: method,
+               paymentDetails: {
+                  fullName: paymentDetails.fullName,
+                  email: paymentDetails.email,
+                  phoneNumber: paymentDetails.phoneNumber,
+                  address: paymentDetails.address
+               }
+            });
+
+            await payment.save();
+
+            // Return PaymentSession type
+            return {
+               id: payment._id,
+               oopId: payment.oopId,
+               status: payment.status,
+               amount: payment.amount,
+               paymentMethod: payment.paymentMethod,
+               createdAt: payment.createdAt.toISOString(),
+               expiresAt: payment.expiresAt.toISOString()
+            };
+         } catch (error) {
+            throw new Error(`Failed to initiate payment: ${error.message}`);
+         }
+      },
+
+      confirmPayment: async (_, { oopId, reference }) => {
+         try {
+            const oop = await OOP.findById(oopId);
+            if (!oop) {
+               throw new Error('OOP not found');
+            }
+
+            // Update the payment status
+            const payment = await Payment.findOneAndUpdate(
+               { oopId },
+               {
+                  status: 'COMPLETED',
+                  transactionId: reference
+               },
+               { new: true }
+            );
+
+            // Update the OOP status
+            await OOP.findByIdAndUpdate(oopId, {
+               OOPstatus: 'Payment Proof Submitted'
+            });
+
+            return {
+               success: true,
+               message: 'Payment confirmed successfully',
+               transactionId: reference,
+               paymentStatus: 'COMPLETED'
+            };
+         } catch (error) {
+            throw new Error(`Failed to confirm payment: ${error.message}`);
+         }
+      },
+
       verifyPayment: async (_, { paymentId, status }) => {
          try {
             const payment = await Payment.findById(paymentId);

@@ -24,7 +24,12 @@ const GCashPaymentStep = ({ oop, onBack }) => {
             setCountdown((prev) => {
                if (prev <= 1) {
                   clearInterval(interval);
-                  navigate('/applicationsStatus');
+                  navigate('/applicationsStatus', {
+                     state: {
+                        paymentSuccess: true,
+                        message: 'Payment completed successfully'
+                     }
+                  });
                }
                return prev - 1;
             });

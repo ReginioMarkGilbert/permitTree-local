@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { gql, useMutation } from '@apollo/client';
 
 const INITIATE_PAYMENT = gql`
-  mutation InitiatePayment($oopId: ID!, $method: String!) {
-    initiatePayment(oopId: $oopId, method: $method) {
+  mutation InitiatePayment($oopId: ID!, $method: String!, $paymentDetails: PaymentDetailsInput!) {
+    initiatePayment(oopId: $oopId, method: $method, paymentDetails: $paymentDetails) {
       id
       status
       amount
@@ -39,24 +39,34 @@ export const usePaymentProcess = (oopId) => {
 
    const handlePayment = async () => {
       try {
-         // First initiate the payment
+         // First initiate the payment with payment details
          const { data: initiateData } = await initiatePayment({
             variables: {
                oopId,
-               method: 'GCASH'
+               method: 'GCASH',
+               paymentDetails: {
+                  fullName: formData.fullName,
+                  email: formData.email,
+                  phoneNumber: formData.phoneNumber,
+                  address: formData.address
+               }
             }
          });
 
          if (initiateData?.initiatePayment) {
-            // Then simulate payment completion
+            // Then confirm the payment
             const { data: confirmData } = await confirmPayment({
                variables: {
                   oopId,
                   reference: `PAY-${Date.now()}`
                }
             });
-            console.log('confirmData', confirmData);
-            return confirmData.confirmPayment;
+
+            if (confirmData?.confirmPayment?.success) {
+               return confirmData.confirmPayment;
+            } else {
+               throw new Error(confirmData?.confirmPayment?.message || 'Payment failed');
+            }
          }
       } catch (error) {
          console.error('Payment processing error:', error);

@@ -128,9 +128,9 @@ const AccountantOOPRow = ({ oop, onReviewComplete }) => {
             </td>
             <td className="px-4 py-4 whitespace-nowrap">
                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${oop.OOPstatus === 'For Approval' ? 'bg-yellow-100 text-yellow-800' :
-                     oop.OOPstatus === 'Awaiting Payment' ? 'bg-green-100 text-green-800' :
-                        oop.OOPstatus === 'Rejected' ? 'bg-red-100 text-red-800' :
-                           'bg-gray-100 text-gray-800'
+                  oop.OOPstatus === 'Awaiting Payment' ? 'bg-green-100 text-green-800' :
+                     oop.OOPstatus === 'Rejected' ? 'bg-red-100 text-red-800' :
+                        'bg-gray-100 text-gray-800'
                   }`}>
                   {oop.OOPstatus}
                </span>
@@ -138,7 +138,7 @@ const AccountantOOPRow = ({ oop, onReviewComplete }) => {
             <td className="px-4 py-4 whitespace-nowrap text-sm">
                <div className="flex items-center space-x-2">
                   <TooltipProvider>
-                     <Tooltip delayDuration={200}>
+                     <Tooltip delayDuration={250}>
                         <TooltipTrigger asChild>
                            <Button
                               onClick={handleView}

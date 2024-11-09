@@ -135,7 +135,7 @@ const App = () => {
                            <Route path="/personnel/home" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelHomePage /></ProtectedRoute>} />
                            <Route path="/personnel/settings" element={<ProtectedRoute roles={['Chief_RPS']}><PersonnelSettingsPage /></ProtectedRoute>} />
                            <Route path="/personnel/reports" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSReportsPage /></ProtectedRoute>} />
-                           <Route path="/personnel/notifications" element={<ProtectedRoute roles={['Chief_RPS']}><ChiefRPSNotificationPage /></ProtectedRoute>} />
+                           <Route path="/personnel/notifications" element={<ProtectedRoute roles={PersonnelRoles}><ChiefRPSNotificationPage /></ProtectedRoute>} />
                            <Route path="/personnel/order-of-payment" element={<ProtectedRoute roles={['Chief_RPS', 'Accountant', 'PENR_CENR_Officer']}><OOPFormCreationPage /></ProtectedRoute>} />
                            <Route path="/personnel/order-of-payment/:action" element={<ProtectedRoute roles={['Chief_RPS', 'Accountant', 'PENR_CENR_Officer']}><OOPFormCreationPage /></ProtectedRoute>} />
 
@@ -159,12 +159,12 @@ const App = () => {
                            <Route path="/superadmin/settings" element={<ProtectedRoute roles={['superadmin']}><SuperAdminSettingsPage /></ProtectedRoute>} />
                            <Route path="/user/oop-print" element={<OOPPrintPage />} />
                            <Route
-                             path="/payment/:oopId"
-                             element={
-                               <ProtectedRoute roles={['user']}>
-                                 <PaymentPage />
-                               </ProtectedRoute>
-                             }
+                              path="/payment/:oopId"
+                              element={
+                                 <ProtectedRoute roles={['user']}>
+                                    <PaymentPage />
+                                 </ProtectedRoute>
+                              }
                            />
                         </Routes>
                      </div>

@@ -22,10 +22,22 @@ const PaymentSchema = new mongoose.Schema({
    },
    transactionId: String,
    paymentDetails: {
-      fullName: String,
-      email: String,
-      phoneNumber: String,
-      address: String
+      fullName: {
+         type: String,
+         required: true
+      },
+      email: {
+         type: String,
+         required: true
+      },
+      phoneNumber: {
+         type: String,
+         required: true
+      },
+      address: {
+         type: String,
+         required: true
+      }
    },
    expiresAt: {
       type: Date,
