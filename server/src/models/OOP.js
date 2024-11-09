@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { generateBillNo } = require('../utils/billNumberGenerator');
+const { generateTrackingNumber } = require('../utils/trackingNumberGenerator');
 
 const officialReceiptSchema = new mongoose.Schema({
    orNumber: {
@@ -97,7 +98,18 @@ const oopSchema = new mongoose.Schema({
       required: true,
       ref: 'User'
    },
-   officialReceipt: officialReceiptSchema
+   officialReceipt: officialReceiptSchema,
+   receivedDate: {
+      type: Date,
+      default: Date.now
+   },
+   receivedTime: String,
+   trackingNo: {
+      type: String,
+      unique: true
+   },
+   releasedDate: Date,
+   releasedTime: String
 }, {
    timestamps: true
 });
@@ -108,8 +120,12 @@ oopSchema.pre('validate', async function (next) {
       if (!this.billNo) {
          this.billNo = await generateBillNo();
       }
+      if (!this.trackingNo) {
+         this.trackingNo = await generateTrackingNumber();
+      }
       next();
    } catch (error) {
+      console.error('Error in pre-validate hook:', error);
       next(error);
    }
 });

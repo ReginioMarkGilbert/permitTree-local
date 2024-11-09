@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Eye, Printer, CheckCircle2 } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
@@ -11,11 +11,60 @@ import {
 import { format } from "date-fns";
 import AccountantReviewModal from './AccountantReviewModal';
 import ViewOOPModal from '@/pages/user/components/ViewOOPModal';
+import { gql } from 'graphql-tag';
+
+const UPDATE_OOP_TRACKING = gql`
+  mutation UpdateOOPTracking($id: ID!, $tracking: OOPTrackingInput!) {
+    updateOOPTracking(id: $id, tracking: $tracking) {
+      _id
+      receivedDate
+      receivedTime
+      trackingNo
+      releasedDate
+      releasedTime
+    }
+  }
+`;
+
+const GET_OOP = gql`
+  query GetOOP($id: ID!) {
+    getOOPById(id: $id) {
+      _id
+      billNo
+      applicationId
+      date
+      namePayee
+      address
+      natureOfApplication
+      items {
+        legalBasis
+        description
+        amount
+      }
+      totalAmount
+      OOPstatus
+      OOPSignedByTwoSignatories
+      rpsSignatureImage
+      tsdSignatureImage
+      receivedDate
+      receivedTime
+      trackingNo
+      releasedDate
+      releasedTime
+      createdAt
+      updatedAt
+    }
+  }
+`;
 
 const AccountantOOPRow = ({ oop, onReviewComplete }) => {
    const navigate = useNavigate();
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
    const [isViewOOPModalOpen, setIsViewOOPModalOpen] = useState(false);
+
+   useEffect(() => {
+      console.log('OOP data in AccountantOOPRow:', oop);
+   }, [oop]);
 
    const formatDate = (timestamp) => {
       const date = new Date(parseInt(timestamp));
@@ -34,6 +83,34 @@ const AccountantOOPRow = ({ oop, onReviewComplete }) => {
       setIsReviewModalOpen(true);
    };
 
+   const handleSendToApplicant = async () => {
+      try {
+         // Update tracking info when sending to applicant
+         await updateOOPTracking({
+            variables: {
+               id: oop._id,
+               tracking: {
+                  releasedTime: format(new Date(), 'HH:mm:ss'),
+                  // Other tracking fields if needed
+               }
+            }
+         });
+         console.log('Tracking updated successfully', tracking);
+         console.log('Released time:', tracking.releasedTime);
+
+         await sendORToApplicant({
+            variables: { Id: oop._id }
+         });
+
+         toast.success('Official Receipt sent to applicant');
+         onComplete();
+      } catch (error) {
+         console.error('Error sending OR:', error);
+         toast.error('Failed to send Official Receipt');
+
+      }
+   };
+
    return (
       <>
          <tr key={oop._id}>
@@ -50,12 +127,11 @@ const AccountantOOPRow = ({ oop, onReviewComplete }) => {
                ₱ {oop.totalAmount.toFixed(2)}
             </td>
             <td className="px-4 py-4 whitespace-nowrap">
-               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                  oop.OOPstatus === 'For Approval' ? 'bg-yellow-100 text-yellow-800' :
-                  oop.OOPstatus === 'Awaiting Payment' ? 'bg-green-100 text-green-800' :
-                  oop.OOPstatus === 'Rejected' ? 'bg-red-100 text-red-800' :
-                  'bg-gray-100 text-gray-800'
-               }`}>
+               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${oop.OOPstatus === 'For Approval' ? 'bg-yellow-100 text-yellow-800' :
+                     oop.OOPstatus === 'Awaiting Payment' ? 'bg-green-100 text-green-800' :
+                        oop.OOPstatus === 'Rejected' ? 'bg-red-100 text-red-800' :
+                           'bg-gray-100 text-gray-800'
+                  }`}>
                   {oop.OOPstatus}
                </span>
             </td>

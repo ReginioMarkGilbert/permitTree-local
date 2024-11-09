@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/tooltip";
 import { format } from "date-fns";
 import OOPAffixEsignModal from '../../OOPAffixEsignModal';
+import ViewOOPModal from '@/pages/user/components/ViewOOPModal';
 import { useMutation, gql, useQuery } from '@apollo/client';
 import { toast } from 'sonner';
 
@@ -42,16 +43,50 @@ const UNDO_OOP_CREATION = gql`
   }
 `;
 
+const GET_OOP = gql`
+  query GetOOP($id: ID!) {
+    getOOPById(id: $id) {
+      _id
+      billNo
+      applicationId
+      date
+      namePayee
+      address
+      natureOfApplication
+      items {
+        legalBasis
+        description
+        amount
+      }
+      totalAmount
+      OOPstatus
+      OOPSignedByTwoSignatories
+      rpsSignatureImage
+      tsdSignatureImage
+      tracking {
+        receivedDate
+        receivedTime
+        trackingNo
+        releasedDate
+        releasedTime
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
 const ChiefOOPRow = ({ oop, onRefetch }) => {
    const [isModalOpen, setIsModalOpen] = useState(false);
    const [deleteOOP] = useMutation(DELETE_OOP);
    const [undoOOPCreation] = useMutation(UNDO_OOP_CREATION);
+   const [isViewOOPModalOpen, setIsViewOOPModalOpen] = useState(false);
 
    const { data: permitData } = useQuery(GET_PERMIT_BY_APPLICATION_NUMBER, {
       variables: { applicationNumber: oop.applicationId },
       fetchPolicy: 'network-only'
    });
-
+   // the right way to format date
    const formatDate = (timestamp) => {
       const date = new Date(parseInt(timestamp));
       return format(date, 'M/d/yyyy');
@@ -69,7 +104,7 @@ const ChiefOOPRow = ({ oop, onRefetch }) => {
    };
 
    const handleView = () => {
-      console.log('View OOP:', oop._id);
+      setIsViewOOPModalOpen(true);
    };
 
    const handlePrint = () => {
@@ -210,6 +245,12 @@ const ChiefOOPRow = ({ oop, onRefetch }) => {
             oop={oop}
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
+         />
+
+         <ViewOOPModal
+            isOpen={isViewOOPModalOpen}
+            onClose={() => setIsViewOOPModalOpen(false)}
+            oop={oop}
          />
       </>
    );

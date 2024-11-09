@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from 'sonner';
@@ -7,7 +7,7 @@ import { UploadIcon, X } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useOrderOfPayments } from '../hooks/useOrderOfPayments';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { gql } from 'graphql-tag';
+import { gql, useMutation } from '@apollo/client';
 
 const UPDATE_OOP_SIGNATURE = gql`
   mutation UpdateOOPSignature($id: ID!, $signatureType: String!, $signatureImage: String!) {
@@ -16,6 +16,26 @@ const UPDATE_OOP_SIGNATURE = gql`
       OOPstatus
       rpsSignatureImage
       tsdSignatureImage
+      tracking {
+        receivedDate
+        receivedTime
+        trackingNo
+        releasedDate
+        releasedTime
+      }
+    }
+  }
+`;
+
+const UPDATE_OOP_TRACKING = gql`
+  mutation UpdateOOPTracking($id: ID!, $tracking: OOPTrackingInput!) {
+    updateOOPTracking(id: $id, tracking: $tracking) {
+      _id
+      receivedDate
+      receivedTime
+      trackingNo
+      releasedDate
+      releasedTime
     }
   }
 `;
@@ -30,6 +50,13 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
    const tsdFileInputRef = useRef(null);
 
    const { updateSignature, forwardOOPToAccountant } = useOrderOfPayments();
+
+   const [updateOOPTracking] = useMutation(UPDATE_OOP_TRACKING);
+
+   useEffect(() => {
+      console.log('Full OOP data:', oop);
+      console.log('Tracking data:', oop?.tracking);
+   }, [oop]);
 
    const handleSignatureUpload = (event, signatureType) => {
       const file = event.target.files[0];
@@ -63,6 +90,24 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
             await updateSignature(oop._id, 'tsd', signatures.tsdSignature);
          }
 
+         // Update tracking information
+         const now = new Date();
+         const trackingData = {
+            receivedDate: now.getTime().toString(),
+            receivedTime: format(now, 'HH:mm:ss'),
+            releasedDate: now.getTime().toString(),
+            releasedTime: format(now, 'HH:mm:ss')
+         };
+
+         console.log('Sending tracking update:', trackingData);
+
+         await updateOOPTracking({
+            variables: {
+               id: oop._id,
+               tracking: trackingData
+            }
+         });
+
          // Check if both signatures are present after saving
          const hasBothSignatures = signatures.rpsSignature && signatures.tsdSignature;
          if (hasBothSignatures) {
@@ -72,8 +117,8 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
          toast.success('Signatures saved successfully');
          onClose();
       } catch (error) {
-         toast.error('Failed to save signatures');
-         console.error('Error saving signatures:', error);
+         console.error('Error in handleSaveChanges:', error);
+         toast.error('Failed to save changes');
       }
    };
 
@@ -92,6 +137,20 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
          if (signatures.tsdSignature !== oop.tsdSignatureImage) {
             await updateSignature(oop._id, 'tsd', signatures.tsdSignature);
          }
+
+         // Generate tracking number and update tracking info
+         const now = new Date();
+         await updateOOPTracking({
+            variables: {
+               id: oop._id,
+               tracking: {
+                  receivedDate: now.getTime().toString(),
+                  receivedTime: format(now, 'HH:mm:ss'),
+                  releasedDate: now.getTime().toString(),
+                  releasedTime: format(now, 'HH:mm:ss')
+               }
+            }
+         });
 
          // Then forward to accountant
          await forwardOOPToAccountant(oop._id);
@@ -269,6 +328,23 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
                         <UploadIcon className="h-4 w-4 mr-2" />
                         Upload Signature
                      </Button>
+                  </div>
+               </div>
+
+               {/* Add tracking information display */}
+               <div className="grid grid-cols-2 gap-4 text-sm mt-6">
+                  <div>
+                     <p><span className="font-semibold">Received:</span> {
+                        oop.tracking?.receivedDate ? format(new Date(parseInt(oop.tracking.receivedDate)), 'MM/dd/yyyy') : 'Not yet received'
+                     }</p>
+                     <p><span className="font-semibold">Released Date:</span> {
+                        oop.tracking?.releasedDate ? format(new Date(parseInt(oop.tracking.releasedDate)), 'MM/dd/yyyy') : 'Not yet released'
+                     }</p>
+                     <p><span className="font-semibold">Tracking No.:</span> {oop.tracking?.trackingNo || 'Not assigned'}</p>
+                  </div>
+                  <div>
+                     <p><span className="font-semibold">Time:</span> {oop.tracking?.receivedTime || 'Not recorded'}</p>
+                     <p><span className="font-semibold">Released Time:</span> {oop.tracking?.releasedTime || 'Not recorded'}</p>
                   </div>
                </div>
 

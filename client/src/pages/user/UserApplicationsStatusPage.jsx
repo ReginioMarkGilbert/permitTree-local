@@ -17,6 +17,37 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useUserOrderOfPayments } from './hooks/useUserOrderOfPayments';
 import { getUserId } from '@/utils/auth';
 import UserOOPRow from './components/UserOOPRow';
+import { gql } from 'graphql-tag';
+
+const GET_OOP_DETAILS = gql`
+  query GetOOPDetails($id: ID!) {
+    getOOPById(id: $id) {
+      _id
+      billNo
+      applicationId
+      namePayee
+      address
+      natureOfApplication
+      items {
+        legalBasis
+        description
+        amount
+      }
+      totalAmount
+      OOPstatus
+      OOPSignedByTwoSignatories
+      rpsSignatureImage
+      tsdSignatureImage
+      receivedDate
+      receivedTime
+      trackingNo
+      releasedDate
+      releasedTime
+      createdAt
+      updatedAt
+    }
+  }
+`;
 
 const UserApplicationsStatusPage = () => {
    const [searchTerm, setSearchTerm] = useState('');

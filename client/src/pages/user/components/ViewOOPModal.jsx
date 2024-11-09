@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { format } from 'date-fns';
@@ -8,9 +8,26 @@ import { useNavigate } from 'react-router-dom';
 const ViewOOPModal = ({ isOpen, onClose, oop }) => {
    const navigate = useNavigate();
 
+   useEffect(() => {
+      console.log('OOP data in ViewOOPModal:', oop);
+      console.log('Tracking info:', {
+         receivedDate: oop?.receivedDate,
+         receivedTime: oop?.receivedTime,
+         trackingNo: oop?.trackingNo,
+         releasedDate: oop?.releasedDate,
+         releasedTime: oop?.releasedTime
+      });
+   }, [oop]);
+
    const handlePrint = () => {
       navigate('/user/oop-print', { state: { oop } });
       onClose();
+   };
+
+   const formatDate = (timestamp) => {
+      if (!timestamp) return '_____________';
+      const date = new Date(parseInt(timestamp));
+      return format(date, 'MM/dd/yyyy');
    };
 
    return (
@@ -83,6 +100,22 @@ const ViewOOPModal = ({ isOpen, onClose, oop }) => {
                         </div>
                      </div>
                   )}
+
+                  <div className="grid grid-cols-2 gap-4 text-sm mt-6">
+                     <div>
+                        <p><span className="font-semibold">Received:</span> {
+                           oop.receivedDate ? formatDate(oop.receivedDate) : '_____________'
+                        }</p>
+                        <p><span className="font-semibold">Released Date:</span> {
+                           oop.releasedDate ? formatDate(oop.releasedDate) : '_____________'
+                        }</p>
+                        <p><span className="font-semibold">Tracking No.:</span> {oop.trackingNo || '_____________'}</p>
+                     </div>
+                     <div>
+                        <p><span className="font-semibold">Time:</span> {oop.receivedTime || '_____________'}</p>
+                        <p><span className="font-semibold">Released Time:</span> {oop.releasedTime || '_____________'}</p>
+                     </div>
+                  </div>
                </div>
             </div>
             <div className="flex justify-end gap-2 mt-4">

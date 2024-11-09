@@ -19,6 +19,11 @@ const GET_USER_OOPS = gql`
       }
       rpsSignatureImage
       tsdSignatureImage
+      receivedDate
+      receivedTime
+      trackingNo
+      releasedDate
+      releasedTime
       officialReceipt {
         orNumber
         dateIssued

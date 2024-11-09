@@ -63,6 +63,11 @@ export const GET_OOP = gql`
       }
       rpsSignatureImage
       tsdSignatureImage
+      receivedDate
+      receivedTime
+      trackingNo
+      releasedDate
+      releasedTime
     }
   }
 `;
@@ -90,33 +95,30 @@ export const GET_ALL_OOPS = gql`
       updatedAt
       rpsSignatureImage
       tsdSignatureImage
+      receivedDate
+      receivedTime
+      trackingNo
+      releasedDate
+      releasedTime
     }
   }
 `;
 
 // Add query for user's OOPs
 export const GET_USER_OOPS = gql`
-  query GetUserOOPs($userId: ID!) {
-    getOOPsByUserId(userId: $userId) {
+  query GetUserOOPs($OOPstatus: String) {
+    getUserOOPs(OOPstatus: $OOPstatus) {
       _id
       billNo
       applicationId
-      date
-      namePayee
-      address
-      natureOfApplication
-      items {
-        legalBasis
-        description
-        amount
-      }
       totalAmount
       OOPstatus
-      OOPSignedByTwoSignatories
       createdAt
-      updatedAt
-      rpsSignatureImage
-      tsdSignatureImage
+      receivedDate
+      receivedTime
+      trackingNo
+      releasedDate
+      releasedTime
     }
   }
 `;
@@ -159,6 +161,11 @@ const FORWARD_OOP_TO_ACCOUNTANT = gql`
         chiefRPS
         technicalServices
       }
+      receivedDate
+      receivedTime
+      trackingNo
+      releasedDate
+      releasedTime
     }
   }
 `;
@@ -292,7 +299,7 @@ export const useOrderOfPayments = (userId = null) => {
       oopsError,
 
       // User's OOPs data - return empty array if no data
-      userOops: userOopsData?.getOOPsByUserId || [],
+      userOops: userOopsData?.getUserOOPs || [],
       userOopsLoading,
       userOopsError,
 

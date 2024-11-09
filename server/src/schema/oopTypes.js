@@ -18,6 +18,11 @@ const oopTypes = gql`
     signatures: OOPSignatures
     rpsSignatureImage: String
     tsdSignatureImage: String
+    receivedDate: String
+    receivedTime: String
+    trackingNo: String
+    releasedDate: String
+    releasedTime: String
     createdAt: String!
     updatedAt: String!
     officialReceipt: OfficialReceipt
@@ -66,6 +71,14 @@ const oopTypes = gql`
     paymentMethod: String!
   }
 
+  input OOPTrackingInput {
+    receivedDate: String
+    receivedTime: String
+    trackingNo: String
+    releasedDate: String
+    releasedTime: String
+  }
+
   extend type Query {
     getOOPs: [OOP!]!
     getOOPById(id: ID!): OOP
@@ -83,6 +96,7 @@ const oopTypes = gql`
     generateOR(Id: ID!, input: GenerateORInput!): OOP!
     sendORToApplicant(Id: ID!): OOP!
     deleteOOP(applicationId: String!): OOP!
+    updateOOPTracking(id: ID!, tracking: OOPTrackingInput!): OOP!
   }
 `;
 

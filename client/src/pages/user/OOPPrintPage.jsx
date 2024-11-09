@@ -168,14 +168,14 @@ const OOPPrintPage = () => {
             {/* Footer */}
             <div className="grid grid-cols-2 gap-4 text-sm">
                <div>
-                  <p>Received: _____________</p>
-                  <p>Date: _____________</p>
-                  <p>Released Date: _____________</p>
+                  <p>Received: {oop.receivedDate ? formatDate(oop.receivedDate) : '_____________'}</p>
+                  <p>Date: {oop.receivedDate ? formatDate(oop.receivedDate) : '_____________'}</p>
+                  <p>Released Date: {oop.releasedDate ? formatDate(oop.releasedDate) : '_____________'}</p>
                </div>
                <div>
-                  <p>Tracking No.: _____________</p>
-                  <p>Time: _____________</p>
-                  <p>Time: _____________</p>
+                  <p>Tracking No.: {oop.trackingNo || '_____________'}</p>
+                  <p>Time: {oop.receivedTime || '_____________'}</p>
+                  <p>Released Time: {oop.releasedTime || '_____________'}</p>
                </div>
             </div>
          </div>

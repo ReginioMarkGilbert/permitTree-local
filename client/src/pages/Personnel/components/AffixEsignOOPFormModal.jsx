@@ -122,6 +122,22 @@ const AffixEsignOOPFormModal = ({ isOpen, onClose, orderOfPayment, refreshOrderO
                      </div>
                   )}
                </div>
+               <div>
+                  <Label>Tracking Information</Label>
+                  <div className="text-sm mt-2">
+                     <p><span className="font-medium">Received:</span> {
+                        orderOfPayment.tracking?.receivedDate ?
+                        new Date(parseInt(orderOfPayment.tracking.receivedDate)).toLocaleDateString() :
+                        'Not yet received'
+                     }</p>
+                     <p><span className="font-medium">Time:</span> {
+                        orderOfPayment.tracking?.receivedTime || 'Not recorded'
+                     }</p>
+                     <p><span className="font-medium">Tracking No.:</span> {
+                        orderOfPayment.tracking?.trackingNo || 'Not assigned'
+                     }</p>
+                  </div>
+               </div>
             </div>
             <DialogFooter>
                <Button onClick={onClose}>Cancel</Button>

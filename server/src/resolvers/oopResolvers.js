@@ -2,7 +2,7 @@ const { OOP } = require('../models/OOP');
 const Permit = require('../models/permits/Permit');
 const { UserInputError } = require('apollo-server-express');
 const { generateBillNo } = require('../utils/billNumberGenerator');
-const mongoose = require('mongoose');
+const { generateTrackingNumber } = require('../utils/trackingNumberGenerator');
 
 const oopResolvers = {
    Query: {
@@ -74,15 +74,26 @@ const oopResolvers = {
             // Calculate total amount
             const totalAmount = input.items.reduce((sum, item) => sum + item.amount, 0);
 
+            // Generate tracking number
+            const trackingNo = await generateTrackingNumber();
+            console.log('Generated tracking number:', trackingNo); // Debug log
+
             const oop = new OOP({
                ...input,
                userId: permit.applicantId, // Use the applicantId from the permit
                billNo,
                totalAmount,
-               OOPstatus: 'Pending Signature'
+               OOPstatus: 'Pending Signature',
+               tracking: {
+                  trackingNo,
+                  receivedDate: new Date(),
+                  receivedTime: new Date().toLocaleTimeString()
+               }
             });
 
+            console.log('OOP before save:', oop); // Debug log
             await oop.save();
+            console.log('OOP after save:', oop); // Debug log
 
             // Update permit status
             await Permit.findOneAndUpdate(
@@ -159,13 +170,25 @@ const oopResolvers = {
       forwardOOPToAccountant: async (_, { id }) => {
          try {
             const oop = await OOP.findById(id);
-            if (!oop) throw new UserInputError('OOP not found');
+            if (!oop) {
+               throw new Error('OOP not found');
+            }
 
             // Check for signature images instead of dates
             if (!oop.rpsSignatureImage || !oop.tsdSignatureImage) {
                throw new UserInputError('Both signatures are required');
             }
 
+            // Generate tracking number if not exists
+            if (!oop.tracking?.trackingNo) {
+               const trackingNo = await generateTrackingNumber();
+               oop.tracking = {
+                  ...oop.tracking,
+                  trackingNo
+               };
+            }
+
+            // Update OOP status and signatures
             const updatedOOP = await OOP.findByIdAndUpdate(
                id,
                {
@@ -173,7 +196,8 @@ const oopResolvers = {
                      OOPstatus: 'For Approval',
                      OOPSignedByTwoSignatories: true,
                      'signatures.chiefRPS': new Date(),      // Set signature dates when forwarding
-                     'signatures.technicalServices': new Date()
+                     'signatures.technicalServices': new Date(),
+                     tracking: oop.tracking  // Include the tracking info in the update
                   }
                },
                { new: true }
@@ -182,7 +206,7 @@ const oopResolvers = {
             return updatedOOP;
          } catch (error) {
             console.error('Error forwarding OOP:', error);
-            throw new Error(`Failed to forward OOP: ${error.message}`);
+            throw error;
          }
       },
 
@@ -328,6 +352,39 @@ const oopResolvers = {
          } catch (error) {
             console.error('Error deleting OOP:', error);
             throw new Error(`Failed to delete OOP: ${error.message}`);
+         }
+      },
+
+      updateOOPTracking: async (_, { id, tracking }) => {
+         try {
+            const oop = await OOP.findById(id);
+            if (!oop) {
+               throw new Error('OOP not found');
+            }
+
+            // Generate tracking number if not exists
+            if (!oop.trackingNo) {
+               tracking.trackingNo = await generateTrackingNumber();
+            }
+
+            const updatedOOP = await OOP.findByIdAndUpdate(
+               id,
+               {
+                  $set: {
+                     receivedDate: tracking.receivedDate,
+                     receivedTime: tracking.receivedTime,
+                     trackingNo: tracking.trackingNo,
+                     releasedDate: tracking.releasedDate,
+                     releasedTime: tracking.releasedTime
+                  }
+               },
+               { new: true }
+            );
+
+            return updatedOOP;
+         } catch (error) {
+            console.error('Error updating OOP tracking:', error);
+            throw error;
          }
       }
    }

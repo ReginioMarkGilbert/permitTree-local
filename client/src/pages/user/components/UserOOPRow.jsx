@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Eye, Receipt, Printer } from "lucide-react";
+import { Eye, Receipt, Printer, CreditCard } from "lucide-react";
 import {
    Tooltip,
    TooltipContent,
@@ -49,6 +49,10 @@ const UserOOPRow = ({ oop }) => {
 
    const handlePrint = () => {
       navigate('/user/oop-print', { state: { oop } });
+   };
+
+   const handlePayClick = () => {
+      navigate(`/payment/${oop._id}`);
    };
 
    return (
@@ -108,6 +112,24 @@ const UserOOPRow = ({ oop }) => {
                         </TooltipContent>
                      </Tooltip>
                   </TooltipProvider>
+
+                  {oop.OOPstatus === 'Awaiting Payment' && (
+                     <TooltipProvider>
+                        <Tooltip delayDuration={250}>
+                           <TooltipTrigger asChild>
+                              <Button
+                                 variant="outline"
+                                 size="icon"
+                                 className="h-8 w-8"
+                                 onClick={handlePayClick}
+                              >
+                                 <CreditCard className="h-4 w-4" />
+                              </Button>
+                           </TooltipTrigger>
+                           <TooltipContent>Pay</TooltipContent>
+                        </Tooltip>
+                     </TooltipProvider>
+                  )}
 
                   {oop.OOPstatus === 'Issued OR' && (
                      <TooltipProvider>
