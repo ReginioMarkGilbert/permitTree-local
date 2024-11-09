@@ -22,7 +22,7 @@ const UNDO_OOP_CREATION = gql`
   }
 `;
 
-const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor }) => {
+const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab }) => {
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
    const [undoOOPCreation] = useMutation(UNDO_OOP_CREATION);
@@ -135,7 +135,7 @@ const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor }) => {
                      </TooltipProvider>
                   )}
 
-                  {!app.awaitingOOP && ( // if awaitingOOP is false, means OOP is created
+                  {!app.awaitingOOP && currentTab === 'Created OOP' && ( // if awaitingOOP is false, means OOP is created
                      <TooltipProvider>
                         <Tooltip delayDuration={200}>
                            <TooltipTrigger asChild>

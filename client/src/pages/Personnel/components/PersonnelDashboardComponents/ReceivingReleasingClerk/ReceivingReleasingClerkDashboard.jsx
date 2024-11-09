@@ -19,7 +19,7 @@ const ReceivingReleasingClerkDashboard = () => {
          case 'Accepted Applications':
             return { acceptedByReceivingClerk: true };
          case 'Applications For Recording':
-            return { currentStage: 'ForRecordByReceivingClerk' };
+            return { currentStage: 'ForRecordByReceivingClerk', recordedByReceivingClerk: false };
          case 'Reviewed/Recorded Applications':
             return { recordedByReceivingClerk: true };
          case 'Pending Release':
@@ -31,7 +31,7 @@ const ReceivingReleasingClerkDashboard = () => {
       }
    };
 
-   const { applications, loading, error, fetchApplications } = useApplications(getQueryParamsForTab(activeSubTab));
+   const { applications, loading, error, refetch } = useApplications(getQueryParamsForTab(activeSubTab));
 
    const mainTabs = ['Applications', 'Certificates'];
    const subTabs = {
@@ -47,8 +47,8 @@ const ReceivingReleasingClerkDashboard = () => {
    }, [applications, searchTerm]);
 
    useEffect(() => {
-      fetchApplications();
-   }, [fetchApplications, activeSubTab]);
+      refetch();
+   }, [refetch, activeSubTab]);
 
    const getStatusColor = (status) => {
       switch (status.toLowerCase()) {
@@ -58,11 +58,10 @@ const ReceivingReleasingClerkDashboard = () => {
          case 'released': return 'bg-green-100 text-green-800';
          default: return 'bg-gray-100 text-gray-800';
       }
-
    };
 
    const handleRecordComplete = () => {
-      fetchApplications();
+      refetch();
    };
 
    const renderTabDescription = () => {
@@ -87,6 +86,7 @@ const ReceivingReleasingClerkDashboard = () => {
       if (filteredApplications.length === 0) {
          return <p className="text-center text-gray-500">No applications found.</p>;
       }
+
       return (
          <div className="bg-white rounded-lg shadow overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -119,7 +119,7 @@ const ReceivingReleasingClerkDashboard = () => {
          <div className="container mx-auto px-4 sm:px-6 py-8 pt-24">
             <div className="flex justify-between items-center mb-6">
                <h1 className="text-3xl font-bold text-green-800">Receiving/Releasing Clerk Dashboard</h1>
-               <Button onClick={fetchApplications} variant="outline">
+               <Button onClick={refetch} variant="outline">
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Refresh
                </Button>

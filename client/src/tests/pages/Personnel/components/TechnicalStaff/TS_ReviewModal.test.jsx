@@ -21,19 +21,22 @@ const UPDATE_PERMIT_STAGE = gql`
     $currentStage: String!,
     $status: String!,
     $notes: String,
-    $acceptedByTechnicalStaff: Boolean
+    $acceptedByTechnicalStaff: Boolean,
+    $approvedByTechnicalStaff: Boolean
   ) {
     updatePermitStage(
       id: $id,
       currentStage: $currentStage,
       status: $status,
       notes: $notes,
-      acceptedByTechnicalStaff: $acceptedByTechnicalStaff
+      acceptedByTechnicalStaff: $acceptedByTechnicalStaff,
+      approvedByTechnicalStaff: $approvedByTechnicalStaff
     ) {
       id
       currentStage
       status
       acceptedByTechnicalStaff
+      approvedByTechnicalStaff
       history {
         notes
         timestamp
@@ -42,123 +45,137 @@ const UPDATE_PERMIT_STAGE = gql`
   }
 `;
 
+// Define defaultProps before renderModal
+const mockApplication = {
+  id: '1',
+  applicationNumber: 'APP-001',
+  status: 'Submitted',
+  currentStage: 'Submitted'
+};
+
+const defaultProps = {
+  isOpen: true,
+  onClose: vi.fn(),
+  application: mockApplication,
+  onReviewComplete: vi.fn()
+};
+
+// Define renderModal function
+const renderModal = (mocks = []) => {
+  render(
+    <MockedProvider mocks={mocks} addTypename={false}>
+      <TS_ReviewModal {...defaultProps} />
+    </MockedProvider>
+  );
+};
+
 describe('TS_ReviewModal', () => {
-  const mockApplication = {
-    id: '1',
-    applicationNumber: 'APP-001',
-    status: 'Submitted',
-    currentStage: 'Submitted'
-  };
-
-  const mockOnClose = vi.fn();
-  const mockOnReviewComplete = vi.fn();
-
-  const successMock = {
+  const mockSuccessfulReturn = {
     request: {
       query: UPDATE_PERMIT_STAGE,
       variables: {
-        id: '1',
-        currentStage: 'ReturnedByTechnicalStaff',
-        status: 'Returned',
-        notes: 'Missing documents',
+        id: "1",
+        currentStage: "ReturnedByTechnicalStaff",
+        status: "Returned",
+        notes: "Missing documents",
         acceptedByTechnicalStaff: false
       }
     },
     result: {
       data: {
         updatePermitStage: {
-          id: '1',
-          currentStage: 'ReturnedByTechnicalStaff',
-          status: 'Returned',
+          id: "1",
+          currentStage: "ReturnedByTechnicalStaff",
+          status: "Returned",
           acceptedByTechnicalStaff: false,
+          approvedByTechnicalStaff: false,
           history: [
             {
-              notes: 'Missing documents',
-              timestamp: new Date().toISOString()
+              notes: "Missing documents",
+              timestamp: "2023-01-01T00:00:00Z"
             }
           ]
         }
       }
     }
-  };
+  }
 
-  const errorMock = {
+  const mockErrorReturn = {
     request: {
       query: UPDATE_PERMIT_STAGE,
       variables: {
-        id: '1',
-        currentStage: 'ReturnedByTechnicalStaff',
-        status: 'Returned',
-        notes: 'Missing documents',
+        id: "1",
+        currentStage: "ReturnedByTechnicalStaff",
+        status: "Returned",
+        notes: "Missing documents",
         acceptedByTechnicalStaff: false
       }
     },
     error: new Error('Failed to update permit stage')
-  };
+  }
 
-  // Add a new mock for the accept action
-  const acceptSuccessMock = {
+  const mockSuccessfulAccept = {
     request: {
       query: UPDATE_PERMIT_STAGE,
       variables: {
-        id: '1',
-        currentStage: 'ForRecordByReceivingClerk',
-        status: 'In Progress',
-        notes: 'Application accepted by Technical Staff',
+        id: "1",
+        currentStage: "ForRecordByReceivingClerk",
+        status: "In Progress",
+        notes: "Application accepted by Technical Staff",
         acceptedByTechnicalStaff: true
       }
     },
     result: {
       data: {
         updatePermitStage: {
-          id: '1',
-          currentStage: 'ForRecordByReceivingClerk',
-          status: 'In Progress',
+          id: "1",
+          currentStage: "ForRecordByReceivingClerk",
+          status: "In Progress",
           acceptedByTechnicalStaff: true,
+          approvedByTechnicalStaff: false,
           history: [
             {
-              notes: 'Application accepted by Technical Staff',
-              timestamp: new Date().toISOString()
+              notes: "Application accepted by Technical Staff",
+              timestamp: "2023-01-01T00:00:00Z"
             }
           ]
         }
       }
     }
-  };
-
-  const renderModal = (mocks = []) => {
-    return render(
-      <MockedProvider mocks={mocks} addTypename={false}>
-        <TS_ReviewModal
-          isOpen={true}
-          onClose={mockOnClose}
-          application={mockApplication}
-          onReviewComplete={mockOnReviewComplete}
-        />
-      </MockedProvider>
-    );
-  };
+  }
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('renders the modal with application details', () => {
-    renderModal();
+    render(
+      <MockedProvider mocks={[]} addTypename={false}>
+        <TS_ReviewModal {...defaultProps} />
+      </MockedProvider>
+    );
     expect(screen.getByText(`Application Number: ${mockApplication.applicationNumber}`)).toBeInTheDocument();
     expect(screen.getByTestId('accept-button')).toBeInTheDocument();
     expect(screen.getByTestId('return-button')).toBeInTheDocument();
   });
 
   it('shows remarks textarea when clicking Return button', () => {
-    renderModal();
+    render(
+      <MockedProvider mocks={[]} addTypename={false}>
+        <TS_ReviewModal {...defaultProps} />
+      </MockedProvider>
+    );
     fireEvent.click(screen.getByTestId('return-button'));
     expect(screen.getByTestId('return-remarks')).toBeInTheDocument();
     expect(screen.getByTestId('confirm-return')).toBeInTheDocument();
   });
 
   it('requires remarks when returning application', async () => {
-    renderModal();
+    render(
+      <MockedProvider mocks={[]} addTypename={false}>
+        <TS_ReviewModal {...defaultProps} />
+      </MockedProvider>
+    );
     fireEvent.click(screen.getByTestId('return-button'));
     fireEvent.click(screen.getByTestId('confirm-return'));
 
@@ -168,7 +185,7 @@ describe('TS_ReviewModal', () => {
   });
 
   it('successfully returns application with remarks', async () => {
-    renderModal([successMock]);
+    renderModal([mockSuccessfulReturn]);
 
     fireEvent.click(screen.getByTestId('return-button'));
     fireEvent.change(screen.getByTestId('return-remarks'), {
@@ -179,13 +196,26 @@ describe('TS_ReviewModal', () => {
 
     await waitFor(() => {
       expect(toast.success).toHaveBeenCalledWith('Application returned successfully');
-      expect(mockOnReviewComplete).toHaveBeenCalled();
-      expect(mockOnClose).toHaveBeenCalled();
+      expect(defaultProps.onReviewComplete).toHaveBeenCalled();
+      expect(defaultProps.onClose).toHaveBeenCalled();
     }, { timeout: 2000 });
   });
 
   it('handles error when returning application', async () => {
-    renderModal([errorMock]);
+    // Fix the syntax of the mock object
+    renderModal([{
+      request: {
+        query: UPDATE_PERMIT_STAGE,
+        variables: {
+          id: "1",
+          currentStage: "ReturnedByTechnicalStaff",
+          status: "Returned",
+          notes: "Missing documents",
+          acceptedByTechnicalStaff: false
+        }
+      },
+      error: new Error('Failed to update permit stage')
+    }]);
 
     fireEvent.click(screen.getByTestId('return-button'));
     fireEvent.change(screen.getByTestId('return-remarks'), {
@@ -210,14 +240,14 @@ describe('TS_ReviewModal', () => {
   });
 
   it('successfully accepts application', async () => {
-    renderModal([acceptSuccessMock]);
+    renderModal([mockSuccessfulAccept]);
 
     fireEvent.click(screen.getByTestId('accept-button'));
 
     await waitFor(() => {
       expect(toast.success).toHaveBeenCalledWith('Application accepted successfully');
-      expect(mockOnReviewComplete).toHaveBeenCalled();
-      expect(mockOnClose).toHaveBeenCalled();
+      expect(defaultProps.onReviewComplete).toHaveBeenCalled();
+      expect(defaultProps.onClose).toHaveBeenCalled();
     });
   });
 });

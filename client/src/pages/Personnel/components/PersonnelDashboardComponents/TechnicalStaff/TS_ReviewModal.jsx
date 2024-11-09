@@ -44,19 +44,20 @@ const TS_ReviewModal = ({ isOpen, onClose, application, onReviewComplete }) => {
 
    const handleAccept = async () => {
       try {
-         if (!application || !application.id) {
-            throw new Error('Invalid application data');
-         }
-         const result = await updatePermitStage({
+         if (!application?.id) throw new Error('Invalid application data');
+
+      await updatePermitStage({
             variables: {
                id: application.id,
                currentStage: 'ForRecordByReceivingClerk',
                status: 'In Progress',
                notes: 'Application accepted by Technical Staff',
                acceptedByTechnicalStaff: true
+               // approvedByTechnicalStaff will be undefined
             }
          });
-         console.log('Result:', result);
+         console.log('data sent:', application)
+
          onReviewComplete();
          onClose();
          toast.success('Application accepted successfully');
@@ -72,19 +73,19 @@ const TS_ReviewModal = ({ isOpen, onClose, application, onReviewComplete }) => {
          return;
       }
       try {
-         if (!application || !application.id) {
-            throw new Error('Invalid application data');
-         }
-         const result = await updatePermitStage({
+         if (!application?.id) throw new Error('Invalid application data');
+
+         await updatePermitStage({
             variables: {
                id: application.id,
                currentStage: 'ReturnedByTechnicalStaff',
                status: 'Returned',
                notes: remarks,
                acceptedByTechnicalStaff: false
+               // approvedByTechnicalStaff will be undefined
             }
          });
-         console.log('Result:', result);
+
          onReviewComplete();
          onClose();
          toast.success('Application returned successfully');

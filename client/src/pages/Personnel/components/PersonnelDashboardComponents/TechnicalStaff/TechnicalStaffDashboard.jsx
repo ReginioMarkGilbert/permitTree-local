@@ -25,7 +25,7 @@ const TechnicalStaffDashboard = () => {
          case 'For Inspection and Approval':
             return { currentStage: 'ForInspectionByTechnicalStaff' };
          case 'Approved Applications':
-            return { currentStage: 'AuthenticityApprovedByTechnicalStaff' };
+            return { currentStage: 'AuthenticityApprovedByTechnicalStaff', approvedByTechnicalStaff: true };
          // Certificates/Permits
          case 'Awaiting Permit Creation':
             return {

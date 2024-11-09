@@ -4,6 +4,7 @@ const GET_APPLICATIONS = gql`
   query GetApplicationsByStatus(
     $status: String
     $currentStage: String
+    $approvedByTechnicalStaff: Boolean
     $acceptedByTechnicalStaff: Boolean
     $acceptedByReceivingClerk: Boolean
     $recordedByReceivingClerk: Boolean
@@ -15,6 +16,7 @@ const GET_APPLICATIONS = gql`
     getApplicationsByStatus(
       status: $status
       currentStage: $currentStage
+      approvedByTechnicalStaff: $approvedByTechnicalStaff
       acceptedByTechnicalStaff: $acceptedByTechnicalStaff
       acceptedByReceivingClerk: $acceptedByReceivingClerk
       recordedByReceivingClerk: $recordedByReceivingClerk
@@ -42,6 +44,7 @@ const GET_APPLICATIONS = gql`
         currentStage
         dateOfSubmission
         acceptedByTechnicalStaff
+        approvedByTechnicalStaff
         acceptedByReceivingClerk
         recordedByReceivingClerk
         reviewedByChief
@@ -58,6 +61,7 @@ const GET_APPLICATIONS = gql`
         currentStage
         dateOfSubmission
         acceptedByTechnicalStaff
+        approvedByTechnicalStaff
         acceptedByReceivingClerk
         recordedByReceivingClerk
         reviewedByChief

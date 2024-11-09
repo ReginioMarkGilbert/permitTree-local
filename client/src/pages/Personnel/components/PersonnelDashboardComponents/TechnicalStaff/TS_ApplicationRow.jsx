@@ -17,7 +17,7 @@ import { getUserRoles } from '../../../../../utils/auth';
 import { useUndoApplicationApproval } from '../../../hooks/useApplications';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { gql } from 'graphql-tag';
+import { gql, useMutation } from '@apollo/client';
 
 const GET_APPLICATION_DETAILS = gql`
   query GetApplication($id: ID!) {
@@ -42,12 +42,42 @@ const GET_APPLICATION_DETAILS = gql`
   }
 `;
 
+const UPDATE_PERMIT_STAGE = gql`
+  mutation UpdatePermitStage(
+    $id: ID!,
+    $currentStage: String!,
+    $status: String!,
+    $notes: String,
+    $approvedByTechnicalStaff: Boolean,
+    $awaitingPermitCreation: Boolean,
+    $acceptedByTechnicalStaff: Boolean
+  ) {
+    updatePermitStage(
+      id: $id,
+      currentStage: $currentStage,
+      status: $status,
+      notes: $notes,
+      approvedByTechnicalStaff: $approvedByTechnicalStaff,
+      awaitingPermitCreation: $awaitingPermitCreation,
+      acceptedByTechnicalStaff: $acceptedByTechnicalStaff
+    ) {
+      id
+      currentStage
+      status
+      acceptedByTechnicalStaff
+      awaitingPermitCreation
+      approvedByTechnicalStaff
+    }
+  }
+`;
+
 const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, currentTab }) => {
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
    const [isAuthenticityModalOpen, setIsAuthenticityModalOpen] = useState(false);
    const [isGenerateCertificateModalOpen, setIsGenerateCertificateModalOpen] = useState(false);
-   const { handleUndoApproval } = useUndoApplicationApproval();
+   // const { handleUndoApproval, handleUndoAcceptance } = useUndoApplicationApproval();
+   const [updatePermitStage] = useMutation(UPDATE_PERMIT_STAGE);
 
    const handleViewClick = () => setIsViewModalOpen(true);
    const handleReviewClick = () => setIsReviewModalOpen(true);
@@ -57,6 +87,51 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
       setIsReviewModalOpen(false);
       onReviewComplete();
    };
+   // Approved Applications tab, search handleApproveAuthenticity for reference - TS_AuthenticityReviewModal.jsx
+   // Accepted Applications tab, search handleUndoAcceptance for reference - TS_ReviewModal.jsx
+   const handleUndo = async () => {
+      try {
+         let variables;
+
+         if (currentTab === 'Approved Applications') {
+            variables = {
+               id: app.id,
+               currentStage: 'ForInspectionByTechnicalStaff',
+               status: 'In Progress',
+               notes: 'Approval undone by Technical Staff',
+               approvedByTechnicalStaff: false,
+               awaitingPermitCreation: false
+            };
+         } else if (currentTab === 'Accepted Applications') {
+            // Existing undo logic for approved applications
+            variables = {
+               id: app.id,
+               currentStage: 'TechnicalStaffReview',
+               status: 'Submitted',
+               notes: 'Acceptance undone by Technical Staff',
+               acceptedByTechnicalStaff: false
+            };
+         }
+
+         await updatePermitStage({ variables });
+         toast.success('Application status undone successfully');
+         onReviewComplete();
+      } catch (error) {
+         console.error('Error undoing application status:', error);
+         toast.error('Failed to undo application status');
+      }
+   };
+
+   const formatDate = (timestamp) => {
+      const date = new Date(parseInt(timestamp));
+      return format(date, 'M/d/yyyy');
+   };
+
+   const showGenerateCertificateButton =
+      currentTab === 'Awaiting Permit Creation' &&
+      app.currentStage === 'AuthenticityApprovedByTechnicalStaff' &&
+      app.applicationType === 'Chainsaw Registration' &&
+      !app.PermitCreated;
 
    const userRoles = getUserRoles();
    console.log(userRoles);
@@ -133,8 +208,9 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
             </TooltipProvider>
          );
       }
-      // Add undo button only in Approved Applications tab
-      if (currentTab === 'Approved Applications' && app.approvedByTechnicalStaff) {
+      // Add undo button for both Accepted and Approved Applications tabs
+      if ((currentTab === 'Approved Applications' && app.approvedByTechnicalStaff) ||
+         (currentTab === 'Accepted Applications' && app.acceptedByTechnicalStaff)) {
          actions.push(
             <TooltipProvider key="undo">
                <Tooltip>
@@ -149,35 +225,36 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
                      </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                     <p>Undo Approval</p>
+                     <p>Undo {currentTab === 'Accepted Applications' ? 'Acceptance' : 'Approval'}</p>
                   </TooltipContent>
                </Tooltip>
             </TooltipProvider>
          );
       }
+      // Generate certificate button - only for Approved Applications tab
+      if ((currentTab === 'Awaiting Permit Creation') && app.awaitingPermitCreation) {
+         actions.push(
+            <TooltipProvider>
+               <Tooltip>
+                  <TooltipTrigger asChild>
+                     <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 text-green-600"
+                        onClick={() => setIsGenerateCertificateModalOpen(true)}
+                     >
+                        <FileCheck2 className="h-4 w-4" />
+                     </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                     <p>Generate Certificate</p>
+                  </TooltipContent>
+               </Tooltip>
+            </TooltipProvider>
+         )
+      }
       return actions;
    };
-
-   const handleUndo = async () => {
-      try {
-         await handleUndoApproval(app.id);
-         toast.success('Application approval undone successfully');
-         onReviewComplete();
-      } catch (error) {
-         toast.error('Failed to undo approval');
-      }
-   };
-
-   const formatDate = (timestamp) => {
-      const date = new Date(parseInt(timestamp));
-      return format(date, 'M/d/yyyy');
-   };
-
-   const showGenerateCertificateButton =
-      currentTab === 'Awaiting Permit Creation' &&
-      app.currentStage === 'AuthenticityApprovedByTechnicalStaff' &&
-      app.applicationType === 'Chainsaw Registration' &&
-      !app.PermitCreated;
 
    return (
       <>
@@ -201,45 +278,6 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
             <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
                <div className="flex items-center space-x-2">
                   {renderActionButtons()}
-                  {app.currentStage === 'ForInspectionByTechnicalStaff' && (
-                     <TooltipProvider>
-                        <Tooltip>
-                           <TooltipTrigger asChild>
-                              <Button
-                                 variant="outline"
-                                 size="icon"
-                                 className="h-8 w-8"
-                                 onClick={() => setIsAuthenticityModalOpen(true)}
-                              >
-                                 <CheckCircle className="h-4 w-4" />
-                              </Button>
-                           </TooltipTrigger>
-                           <TooltipContent>
-                              <p>Review Authenticity</p>
-                           </TooltipContent>
-                        </Tooltip>
-                     </TooltipProvider>
-                  )}
-
-                  {showGenerateCertificateButton && (
-                     <TooltipProvider>
-                        <Tooltip>
-                           <TooltipTrigger asChild>
-                              <Button
-                                 variant="outline"
-                                 size="icon"
-                                 className="h-8 w-8 text-green-600"
-                                 onClick={() => setIsGenerateCertificateModalOpen(true)}
-                              >
-                                 <FileCheck2 className="h-4 w-4" />
-                              </Button>
-                           </TooltipTrigger>
-                           <TooltipContent>
-                              <p>Generate Certificate</p>
-                           </TooltipContent>
-                        </Tooltip>
-                     </TooltipProvider>
-                  )}
                </div>
             </td>
          </tr>
