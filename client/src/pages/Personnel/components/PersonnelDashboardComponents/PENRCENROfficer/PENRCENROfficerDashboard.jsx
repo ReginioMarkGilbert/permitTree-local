@@ -14,8 +14,15 @@ const PENRCENROfficerDashboard = () => {
 
    const getQueryParamsForTab = (tab) => {
       switch (tab) {
-         case 'Applications for Review': return { currentStage: 'CENRPENRReview' };
-         case 'Accepted Applications': return { acceptedByPENRCENROfficer: true };
+         case 'Applications for Review':
+            return { currentStage: 'CENRPENRReview' };
+         case 'Accepted Applications':
+            return { acceptedByPENRCENROfficer: true };
+         case 'Awaiting OOP':
+            return { awaitingOOP: true };
+         case 'Created OOP':
+            return { awaitingOOP: false, OOPCreated: true, status: 'In Progress' };
+
          case 'Pending Certification': return { currentStage: 'PENRCENRCertification' };
          case 'Certified Certificates': return { currentStage: 'PENRCENRCertified' };
          default: return {};
@@ -24,12 +31,12 @@ const PENRCENROfficerDashboard = () => {
 
    const { applications, loading, error, refetch } = useApplications(getQueryParamsForTab(activeSubTab));
 
-   const mainTabs = ['Applications', 'Applications Awaiting OOP', 'Order of Payment', 'Certificates'];
+   const mainTabs = ['Applications', 'Applications Awaiting OOP', 'Certificates/Permits'];
    const subTabs = {
       'Applications': ['Applications for Review', 'Accepted Applications'],
       'Applications Awaiting OOP': ['Awaiting OOP', 'Created OOP'],
-      'Order of Payment': ['Pending Approval', 'Approved OOP'],
-      'Certificates': ['Pending Certification', 'Certified Certificates']
+      // 'Order of Payment': ['Pending Approval', 'Approved OOP'],
+      'Certificates/Permits': ['Pending Certification', 'Certified Certificates']
    };
 
    const filteredApplications = useMemo(() => {
@@ -138,12 +145,16 @@ const PENRCENROfficerDashboard = () => {
       );
    };
 
+   const handleRefresh = () => {
+      refetch();
+   };
+
    return (
       <div className="min-h-screen bg-green-50">
          <div className="container mx-auto px-4 sm:px-6 py-8 pt-24">
             <div className="flex justify-between items-center mb-6">
                <h1 className="text-3xl font-bold text-green-800">PENR/CENR Officer Dashboard</h1>
-               <Button onClick={() => { }} variant="outline">
+               <Button onClick={handleRefresh} variant="outline">
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Refresh
                </Button>
