@@ -65,7 +65,7 @@ const authResolvers = {
       },
       logout: async (_, __, context) => {
          // Here you would typically invalidate the token on the server side
-         // For now, we'll just return true to indicate successful logout
+         // For now, we'll just return true to indicate successful
          return true;
       },
    }
