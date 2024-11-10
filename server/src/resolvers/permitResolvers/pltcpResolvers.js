@@ -40,6 +40,7 @@ const pltcpResolvers = {
                applicantId: user.id,
                applicationType: 'Public Land Tree Cutting Permit',
                status: 'Submitted',
+               currentStage: 'TechnicalStaffReview',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
             };
@@ -121,6 +122,7 @@ const pltcpResolvers = {
                applicantId: user.id,
                applicationType: 'Public Land Tree Cutting Permit',
                status: 'Draft',
+               currentStage: 'Draft',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
             };

@@ -3,6 +3,9 @@ const Permit = require('../../models/permits/Permit');
 const CSAWPermit = require('../../models/permits/CSAWPermit');
 const COVPermit = require('../../models/permits/COVPermit');
 const PTPRPermit = require('../../models/permits/PTPRPermit');
+const PLTCPPermit = require('../../models/permits/PLTCPPermit');
+const PLTPPermit = require('../../models/permits/PLTPPermit');
+const TCEBPPermit = require('../../models/permits/TCEBPPermit');
 // ... import other permit types
 
 const permitResolvers = {
@@ -71,7 +74,7 @@ const permitResolvers = {
             return permits.map(permit => ({
                ...permit,
                id: permit._id.toString(),
-               dateOfSubmission: permit.dateOfSubmission.getTime().toString()
+               dateOfSubmission: permit.dateOfSubmission.toISOString()
             }));
          } catch (error) {
             console.error('Error fetching recent permits:', error);
@@ -419,7 +422,12 @@ const permitResolvers = {
                return 'COVPermit';
             case 'Private Tree Plantation Registration':
                return 'PTPRPermit';
-            // ... add other cases
+            case 'Public Land Tree Cutting Permit':
+               return 'PLTCPPermit';
+            case 'Special/Private Land Timber Permit':
+               return 'PLTPPermit';
+            case 'Tree Cutting and/or Earth Balling Permit':
+               return 'TCEBPPermit';
             default:
                return null;
          }
@@ -438,6 +446,21 @@ const permitResolvers = {
    PTPRPermit: {
       __isTypeOf(obj) {
          return obj.applicationType === 'Private Tree Plantation Registration';
+      }
+   },
+   PLTCPPermit: {
+      __isTypeOf(obj) {
+         return obj.applicationType === 'Public Land Tree Cutting Permit';
+      }
+   },
+   PLTPPermit: {
+      __isTypeOf(obj) {
+         return obj.applicationType === 'Special/Private Land Timber Permit';
+      }
+   },
+   TCEBPPermit: {
+      __isTypeOf(obj) {
+         return obj.applicationType === 'Tree Cutting and/or Earth Balling Permit';
       }
    },
    // ... add other permit type resolvers

@@ -25,7 +25,7 @@ const PermitsPage = () => {
       { title: 'Public Land Tree Cutting Permit', description: 'Application for Public Land Tree Cutting Permit', formType: 'tc_public' },
 
       // { title: 'Special/Private Land Timber Permit', description: 'Application for Special Private Land Timber Permit', formType: 'tc_private' },
-      { title: 'PLTP or SPLTP - Special/Private Land Timber Permit', description: 'Application for Private Land Timber Permit or Special Private Land Timber Permit', formType: 'tc_private' },
+      { title: 'Private Land Timber Permit', description: 'Application for Private Land Timber Permit', formType: 'tc_private' },
 
       { title: 'National Government Agency Tree Cutting Permit', description: 'Application for Public Tree cutting permit', formType: 'tc_nga' },
    ];

@@ -292,7 +292,7 @@ const PLTPForm = () => {
    return (
       <div className="min-h-screen bg-green-50 flex flex-col justify-between pt-[83px]">
          <div className="container mx-auto px-4 flex-grow">
-            <h1 className="text-3xl font-[700] text-green-800 mb-6 text-center">Special/Private Land Timber Permit Application</h1>
+            <h1 className="text-3xl font-[700] text-green-800 mb-6 text-center">Private Land Timber Permit Application</h1>
             <Card className="max-w-2xl mx-auto shadow-lg">
                <CardHeader>
                   <CardTitle>{steps[currentStep].title}</CardTitle>

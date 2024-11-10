@@ -40,6 +40,7 @@ const pltpResolvers = {
                applicantId: user.id,
                applicationType: 'Special/Private Land Timber Permit',
                status: 'Submitted',
+               currentStage: 'TechnicalStaffReview',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
             };
@@ -79,13 +80,30 @@ const pltpResolvers = {
 
          try {
             const applicationNumber = await PLTP_ApplicationNumber();
+
+            // Process file inputs
+            const processedFiles = {};
+            for (const [key, files] of Object.entries(input.files)) {
+               if (files && files.length > 0) {
+                  processedFiles[key] = files.map(file => ({
+                     filename: file.filename,
+                     contentType: file.contentType || 'application/octet-stream',
+                     data: file.data ? Binary.createFromBase64(file.data) : undefined
+                  }));
+               } else {
+                  processedFiles[key] = [];
+               }
+            }
+
             const permitData = {
                ...input,
                applicationNumber,
                applicantId: user.id,
                applicationType: 'Special/Private Land Timber Permit',
                status: 'Draft',
+               currentStage: 'Draft',
                dateOfSubmission: new Date().toISOString(),
+               files: processedFiles,
             };
 
             const newPermit = new PLTPPermit(permitData);
