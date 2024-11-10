@@ -13,6 +13,7 @@ import TS_ViewModal from './TS_ViewModal';
 import TS_ReviewModal from './TS_ReviewModal';
 import TS_AuthenticityReviewModal from './TS_AuthenticityReviewModal';
 import GenerateCertificateModal from './GenerateCertificateModal';
+import CertificateActionHandler from './CertificateActionHandler';
 import { getUserRoles } from '../../../../../utils/auth';
 import { useUndoApplicationApproval } from '../../../hooks/useApplications';
 import { toast } from 'sonner';
@@ -75,7 +76,7 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
    const [isAuthenticityModalOpen, setIsAuthenticityModalOpen] = useState(false);
-   const [isGenerateCertificateModalOpen, setIsGenerateCertificateModalOpen] = useState(false);
+   const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(false);
    // const { handleUndoApproval, handleUndoAcceptance } = useUndoApplicationApproval();
    const [updatePermitStage] = useMutation(UPDATE_PERMIT_STAGE);
 
@@ -135,6 +136,11 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
 
    const userRoles = getUserRoles();
    console.log(userRoles);
+   const handleCertificateComplete = () => {
+      setIsCertificateModalOpen(false);
+      onReviewComplete();
+   };
+
    const renderActionButtons = () => {
       const actions = [];
 
@@ -237,7 +243,7 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
          );
       }
 
-      // Generate certificate button
+      // Certificate generation/upload button
       if ((currentTab === 'Awaiting Permit Creation') && app.awaitingPermitCreation) {
          actions.push(
             <TooltipProvider key="generate-certificate-action">
@@ -247,13 +253,13 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
                         variant="outline"
                         size="icon"
                         className="h-8 w-8 text-green-600"
-                        onClick={() => setIsGenerateCertificateModalOpen(true)}
+                        onClick={() => setIsCertificateModalOpen(true)}
                      >
                         <FileCheck2 className="h-4 w-4" />
                      </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                     <p>Generate Certificate</p>
+                     <p>{app.applicationType === 'Chainsaw Registration' ? 'Generate Certificate' : 'Upload Certificate'}</p>
                   </TooltipContent>
                </Tooltip>
             </TooltipProvider>
@@ -306,14 +312,12 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
             application={app}
             onReviewComplete={handleReviewComplete}
          />
-         {isGenerateCertificateModalOpen && (
-            <GenerateCertificateModal
-               isOpen={isGenerateCertificateModalOpen}
-               onClose={() => setIsGenerateCertificateModalOpen(false)}
-               application={app}
-               onComplete={onReviewComplete}
-            />
-         )}
+         <CertificateActionHandler
+            isOpen={isCertificateModalOpen}
+            onClose={() => setIsCertificateModalOpen(false)}
+            application={app}
+            onComplete={handleCertificateComplete}
+         />
       </>
    );
 };

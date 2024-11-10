@@ -5,6 +5,45 @@ import { Input } from "@/components/ui/input";
 import TS_ApplicationRow from './TS_ApplicationRow';
 import { useApplications } from '../../../hooks/useApplications';
 import { toast } from 'sonner';
+import { gql } from '@apollo/client';
+
+const GET_CERTIFICATES = gql`
+  query GetCertificates($status: String) {
+    getCertificates(status: $status) {
+      id
+      certificateNumber
+      applicationId
+      applicationType
+      status
+      dateCreated
+      certificateData {
+        registrationType
+        ownerName
+        address
+        chainsawDetails {
+          brand
+          model
+          serialNumber
+          dateOfAcquisition
+          powerOutput
+          maxLengthGuidebar
+          countryOfOrigin
+          purchasePrice
+        }
+      }
+      uploadedCertificate {
+        fileUrl
+        uploadDate
+        metadata {
+          certificateType
+          issueDate
+          expiryDate
+          remarks
+        }
+      }
+    }
+  }
+`;
 
 const TechnicalStaffDashboard = () => {
    const [searchTerm, setSearchTerm] = useState('');
@@ -34,7 +73,10 @@ const TechnicalStaffDashboard = () => {
                PermitCreated: false
             };
          case 'Created Permits':
-            return { PermitCreated: true };
+            return {
+               PermitCreated: true,
+               status: 'Pending Signature'  // Only show permits awaiting signature
+            };
          default:
             toast.error('Invalid subtab selected');
             return {};
@@ -49,22 +91,23 @@ const TechnicalStaffDashboard = () => {
       'Certificates/Permits': ['Awaiting Permit Creation', 'Created Permits']
    };
 
-   const getDefaultSubTab = (mainTab) => {
-      switch (mainTab) {
-         case 'Applications':
-            return 'Pending Reviews';
-         case 'Certificates/Permits':
-            return 'Awaiting Permit Creation';
-         default:
-            return subTabs[mainTab][0];
-      }
-   };
-
    const filteredApplications = useMemo(() => {
-      return applications.filter(app =>
-         app.applicationNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         app.applicationType.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      if (!applications || !Array.isArray(applications)) {
+         return [];
+      }
+
+      return applications.filter(app => {
+         if (!app) return false;
+
+         const searchableFields = [
+            app.applicationNumber,
+            app.applicationType
+         ].filter(Boolean); // Remove any undefined values
+
+         return searchableFields.some(field =>
+            field.toLowerCase().includes(searchTerm.toLowerCase())
+         );
+      });
    }, [applications, searchTerm]);
 
    useEffect(() => {
@@ -84,6 +127,20 @@ const TechnicalStaffDashboard = () => {
          case 'approved': return 'bg-green-100 text-green-800';
          default: return 'bg-gray-100 text-gray-800';
       }
+   };
+
+   const renderTabDescription = () => {
+      if (activeSubTab === 'Awaiting Permit Creation') {
+         return (
+            <div className="mb-4 -mt-4">
+               <h1 className="text-sm text-green-800">
+                  Applications ready for certificate generation or upload. Chainsaw registrations will be auto-generated,
+                  other types require manual certificate upload.
+               </h1>
+            </div>
+         );
+      }
+      // ... other tab descriptions
    };
 
    const renderTable = () => {
@@ -174,6 +231,7 @@ const TechnicalStaffDashboard = () => {
                   className="border rounded-md p-2 w-full"
                />
             </div>
+            {renderTabDescription()}
             {renderTable()}
          </div>
       </div>

@@ -46,6 +46,7 @@ const userTypes = gql`
     getCurrentUser: User
     getUserDetails: User
     me: User
+    getUserApplications(status: String, currentStage: String): [Permit!]!
   }
 
   extend type Mutation {
@@ -56,6 +57,8 @@ const userTypes = gql`
       password: String!
     ): AuthPayload!
     updateUserProfile(input: UpdateUserProfileInput!): User!
+    login(username: String!, password: String!): AuthPayload!
+    logout: Boolean!
   }
 `;
 

@@ -2,8 +2,46 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Admin = require('../models/admin');
+const CSAWPermit = require('../models/permits/CSAWPermit');
+const COVPermit = require('../models/permits/COVPermit');
+const PTPRPermit = require('../models/permits/PTPRPermit');
 
 const authResolvers = {
+   Query: {
+      getUserApplications: async (_, { status, currentStage }, { user }) => {
+         if (!user) {
+            throw new Error('You must be logged in to view applications');
+         }
+
+         try {
+            const query = {
+               applicantId: user.id,
+               ...(status && { status }),
+               ...(currentStage && { currentStage })
+            };
+
+            // Get applications from all permit types
+            const [csawPermits, covPermits, ptprPermits] = await Promise.all([
+               CSAWPermit.find(query),
+               COVPermit.find(query),
+               PTPRPermit.find(query)
+            ]);
+
+            // Combine all permits
+            const allPermits = [
+               ...csawPermits,
+               ...covPermits,
+               ...ptprPermits
+            ];
+
+            return allPermits;
+         } catch (error) {
+            console.error('Error fetching user applications:', error);
+            throw new Error('Failed to fetch applications');
+         }
+      }
+   },
+
    Mutation: {
       login: async (_, { username, password }) => {
          console.log('Login attempt for username:', username);
@@ -67,7 +105,7 @@ const authResolvers = {
          // Here you would typically invalidate the token on the server side
          // For now, we'll just return true to indicate successful
          return true;
-      },
+      }
    }
 };
 

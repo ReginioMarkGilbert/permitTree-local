@@ -1,5 +1,9 @@
 const mongoose = require('mongoose');
 const Permit = require('../../models/permits/Permit');
+const CSAWPermit = require('../../models/permits/CSAWPermit');
+const COVPermit = require('../../models/permits/COVPermit');
+const PTPRPermit = require('../../models/permits/PTPRPermit');
+// ... import other permit types
 
 const permitResolvers = {
    Query: {
@@ -407,18 +411,36 @@ const permitResolvers = {
       },
    },
    Permit: {
-      __resolveType(permit) {
-         switch (permit.applicationType) {
+      __resolveType(obj) {
+         switch (obj.applicationType) {
             case 'Chainsaw Registration':
                return 'CSAWPermit';
             case 'Certificate of Verification':
                return 'COVPermit';
-            // Add other cases
+            case 'Private Tree Plantation Registration':
+               return 'PTPRPermit';
+            // ... add other cases
             default:
                return null;
          }
       }
-   }
+   },
+   CSAWPermit: {
+      __isTypeOf(obj) {
+         return obj.applicationType === 'Chainsaw Registration';
+      }
+   },
+   COVPermit: {
+      __isTypeOf(obj) {
+         return obj.applicationType === 'Certificate of Verification';
+      }
+   },
+   PTPRPermit: {
+      __isTypeOf(obj) {
+         return obj.applicationType === 'Private Tree Plantation Registration';
+      }
+   },
+   // ... add other permit type resolvers
 };
 
 module.exports = permitResolvers;

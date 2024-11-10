@@ -80,6 +80,37 @@ const certificateTypes = gql`
     countryOfOrigin: String!
     purchasePrice: Float!
   }
+
+  input UploadCertificateInput {
+    applicationId: ID!
+    applicationType: String!
+    fileUrl: String!
+    metadata: CertificateMetadataInput!
+  }
+
+  input CertificateMetadataInput {
+    certificateType: String!
+    issueDate: String!
+    expiryDate: String!
+    remarks: String
+  }
+
+  type UploadedCertificate {
+    fileUrl: String!
+    uploadDate: String!
+    metadata: CertificateMetadata!
+  }
+
+  type CertificateMetadata {
+    certificateType: String!
+    issueDate: String!
+    expiryDate: String!
+    remarks: String
+  }
+
+  extend type Mutation {
+    uploadCertificate(input: UploadCertificateInput!): Certificate!
+  }
 `;
 
 module.exports = certificateTypes;

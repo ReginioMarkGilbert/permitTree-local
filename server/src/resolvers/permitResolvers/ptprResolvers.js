@@ -40,6 +40,7 @@ const ptprResolvers = {
                applicantId: user.id,
                applicationType: 'Private Tree Plantation Registration',
                status: 'Submitted',
+               currentStage: 'TechnicalStaffReview',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
             };
@@ -128,6 +129,7 @@ const ptprResolvers = {
                applicantId: user.id,
                applicationType: 'Private Tree Plantation Registration',
                status: 'Draft',
+               currentStage: 'Draft',
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
             };

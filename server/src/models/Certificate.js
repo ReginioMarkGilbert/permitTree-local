@@ -40,7 +40,6 @@ const CertificateSchema = new mongoose.Schema({
       }
    },
    certificateData: {
-      // For Chainsaw Registration
       registrationType: String,
       ownerName: String,
       address: String,
@@ -56,6 +55,16 @@ const CertificateSchema = new mongoose.Schema({
       },
       purpose: String,
       otherDetails: mongoose.Schema.Types.Mixed
+   },
+   uploadedCertificate: {
+      fileUrl: String,
+      uploadDate: Date,
+      metadata: {
+         certificateType: String,
+         issueDate: Date,
+         expiryDate: Date,
+         remarks: String
+      }
    },
    history: [{
       action: String,

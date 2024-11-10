@@ -1,33 +1,31 @@
-const { gql } = require('apollo-server-express');
+const { gql } = require('graphql-tag');
 
 const permitTypes = gql`
+  type HistoryEntry {
+    stage: String!
+    status: String!
+    timestamp: String!
+    notes: String
+    actionBy: ID
+  }
+
   interface Permit {
     id: ID!
     applicationNumber: String!
     applicationType: String!
     status: String!
     currentStage: String!
-    recordedByReceivingClerk: Boolean
-    acceptedByTechnicalStaff: Boolean
-    approvedByTechnicalStaff: Boolean
-    acceptedByReceivingClerk: Boolean
-    reviewedByChief: Boolean
-    awaitingOOP: Boolean
-    OOPCreated: Boolean
-    awaitingPermitCreation: Boolean
-    PermitCreated: Boolean
     dateOfSubmission: String!
-    applicantId: ID!
-    history: [HistoryEntry!]!
-    certificate: Certificate
-  }
-
-  type HistoryEntry {
-    stage: String!
-    status: String!
-    timestamp: String!
-    notes: String
-    actionBy: ID!
+    acceptedByTechnicalStaff: Boolean!
+    approvedByTechnicalStaff: Boolean!
+    acceptedByReceivingClerk: Boolean!
+    recordedByReceivingClerk: Boolean!
+    reviewedByChief: Boolean!
+    awaitingOOP: Boolean!
+    OOPCreated: Boolean!
+    awaitingPermitCreation: Boolean!
+    PermitCreated: Boolean!
+    history: [HistoryEntry]
   }
 
   type COVPermit implements Permit {
@@ -36,15 +34,15 @@ const permitTypes = gql`
     applicationType: String!
     status: String!
     currentStage: String!
-    recordedByReceivingClerk: Boolean
-    acceptedByTechnicalStaff: Boolean
-    approvedByTechnicalStaff: Boolean
-    acceptedByReceivingClerk: Boolean
-    reviewedByChief: Boolean
-    awaitingOOP: Boolean
-    OOPCreated: Boolean
-    awaitingPermitCreation: Boolean
-    PermitCreated: Boolean
+    recordedByReceivingClerk: Boolean!
+    acceptedByTechnicalStaff: Boolean!
+    approvedByTechnicalStaff: Boolean!
+    acceptedByReceivingClerk: Boolean!
+    reviewedByChief: Boolean!
+    awaitingOOP: Boolean!
+    OOPCreated: Boolean!
+    awaitingPermitCreation: Boolean!
+    PermitCreated: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -67,15 +65,15 @@ const permitTypes = gql`
     applicationType: String!
     status: String!
     currentStage: String!
-    recordedByReceivingClerk: Boolean
-    acceptedByTechnicalStaff: Boolean
-    approvedByTechnicalStaff: Boolean
-    acceptedByReceivingClerk: Boolean
-    reviewedByChief: Boolean
-    awaitingOOP: Boolean
-    OOPCreated: Boolean
-    awaitingPermitCreation: Boolean
-    PermitCreated: Boolean
+    recordedByReceivingClerk: Boolean!
+    acceptedByTechnicalStaff: Boolean!
+    approvedByTechnicalStaff: Boolean!
+    acceptedByReceivingClerk: Boolean!
+    reviewedByChief: Boolean!
+    awaitingOOP: Boolean!
+    OOPCreated: Boolean!
+    awaitingPermitCreation: Boolean!
+    PermitCreated: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -107,15 +105,15 @@ const permitTypes = gql`
     applicationType: String!
     status: String!
     currentStage: String!
-    recordedByReceivingClerk: Boolean
-    acceptedByTechnicalStaff: Boolean
-    approvedByTechnicalStaff: Boolean
-    acceptedByReceivingClerk: Boolean
-    reviewedByChief: Boolean
-    awaitingOOP: Boolean
-    OOPCreated: Boolean
-    awaitingPermitCreation: Boolean
-    PermitCreated: Boolean
+    recordedByReceivingClerk: Boolean!
+    acceptedByTechnicalStaff: Boolean!
+    approvedByTechnicalStaff: Boolean!
+    acceptedByReceivingClerk: Boolean!
+    reviewedByChief: Boolean!
+    awaitingOOP: Boolean!
+    OOPCreated: Boolean!
+    awaitingPermitCreation: Boolean!
+    PermitCreated: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -138,15 +136,15 @@ const permitTypes = gql`
     applicationType: String!
     status: String!
     currentStage: String!
-    recordedByReceivingClerk: Boolean
-    acceptedByTechnicalStaff: Boolean
-    approvedByTechnicalStaff: Boolean
-    acceptedByReceivingClerk: Boolean
-    reviewedByChief: Boolean
-    awaitingOOP: Boolean
-    OOPCreated: Boolean
-    awaitingPermitCreation: Boolean
-    PermitCreated: Boolean
+    recordedByReceivingClerk: Boolean!
+    acceptedByTechnicalStaff: Boolean!
+    approvedByTechnicalStaff: Boolean!
+    acceptedByReceivingClerk: Boolean!
+    reviewedByChief: Boolean!
+    awaitingOOP: Boolean!
+    OOPCreated: Boolean!
+    awaitingPermitCreation: Boolean!
+    PermitCreated: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -168,15 +166,15 @@ const permitTypes = gql`
     applicationType: String!
     status: String!
     currentStage: String!
-    recordedByReceivingClerk: Boolean
-    acceptedByTechnicalStaff: Boolean
-    approvedByTechnicalStaff: Boolean
-    acceptedByReceivingClerk: Boolean
-    reviewedByChief: Boolean
-    awaitingOOP: Boolean
-    OOPCreated: Boolean
-    awaitingPermitCreation: Boolean
-    PermitCreated: Boolean
+    recordedByReceivingClerk: Boolean!
+    acceptedByTechnicalStaff: Boolean!
+    approvedByTechnicalStaff: Boolean!
+    acceptedByReceivingClerk: Boolean!
+    reviewedByChief: Boolean!
+    awaitingOOP: Boolean!
+    OOPCreated: Boolean!
+    awaitingPermitCreation: Boolean!
+    PermitCreated: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -202,15 +200,15 @@ const permitTypes = gql`
     applicationType: String!
     status: String!
     currentStage: String!
-    recordedByReceivingClerk: Boolean
-    acceptedByTechnicalStaff: Boolean
-    approvedByTechnicalStaff: Boolean
-    acceptedByReceivingClerk: Boolean
-    reviewedByChief: Boolean
-    awaitingOOP: Boolean
-    OOPCreated: Boolean
-    awaitingPermitCreation: Boolean
-    PermitCreated: Boolean
+    recordedByReceivingClerk: Boolean!
+    acceptedByTechnicalStaff: Boolean!
+    approvedByTechnicalStaff: Boolean!
+    acceptedByReceivingClerk: Boolean!
+    reviewedByChief: Boolean!
+    awaitingOOP: Boolean!
+    OOPCreated: Boolean!
+    awaitingPermitCreation: Boolean!
+    PermitCreated: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
