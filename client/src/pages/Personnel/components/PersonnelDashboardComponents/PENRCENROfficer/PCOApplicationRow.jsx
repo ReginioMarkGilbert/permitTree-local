@@ -67,7 +67,9 @@ const UPDATE_PERMIT_STAGE = gql`
     $notes: String,
     $approvedByTechnicalStaff: Boolean,
     $awaitingPermitCreation: Boolean,
-    $acceptedByTechnicalStaff: Boolean
+    $acceptedByTechnicalStaff: Boolean,
+    $acceptedByPENRCENROfficer: Boolean,
+    $approvedByPENRCENROfficer: Boolean
   ) {
     updatePermitStage(
       id: $id,
@@ -76,7 +78,9 @@ const UPDATE_PERMIT_STAGE = gql`
       notes: $notes,
       approvedByTechnicalStaff: $approvedByTechnicalStaff,
       awaitingPermitCreation: $awaitingPermitCreation,
-      acceptedByTechnicalStaff: $acceptedByTechnicalStaff
+      acceptedByTechnicalStaff: $acceptedByTechnicalStaff,
+      acceptedByPENRCENROfficer: $acceptedByPENRCENROfficer,
+      approvedByPENRCENROfficer: $approvedByPENRCENROfficer
     ) {
       id
       currentStage
@@ -84,6 +88,8 @@ const UPDATE_PERMIT_STAGE = gql`
       acceptedByTechnicalStaff
       awaitingPermitCreation
       approvedByTechnicalStaff
+      acceptedByPENRCENROfficer
+      approvedByPENRCENROfficer
     }
   }
 `;
