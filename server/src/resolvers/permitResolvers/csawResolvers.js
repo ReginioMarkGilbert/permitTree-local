@@ -9,7 +9,19 @@ const csawResolvers = {
          return await CSAWPermit.find();
       },
       getCSAWPermitById: async (_, { id }) => {
-         return await CSAWPermit.findById(id);
+         try {
+            const permit = await CSAWPermit.findById(id);
+            if (!permit) {
+               throw new Error('Permit not found');
+            }
+            return {
+               ...permit.toObject(),
+               id: permit._id.toString()
+            };
+         } catch (error) {
+            console.error('Error fetching CSAW permit:', error);
+            throw new Error(`Failed to fetch CSAW permit: ${error.message}`);
+         }
       },
    },
    Mutation: {

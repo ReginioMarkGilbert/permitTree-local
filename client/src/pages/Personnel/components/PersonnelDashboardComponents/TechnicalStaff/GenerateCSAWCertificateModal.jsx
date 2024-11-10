@@ -1,13 +1,35 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { useMutation, gql } from '@apollo/client';
+import { useMutation, useQuery, gql } from '@apollo/client';
 import { toast } from 'sonner';
 import { useReactToPrint } from 'react-to-print';
 import CSAWCertificateTemplate from './CSAWCertificateTemplate';
 import { format } from 'date-fns';
+
+const GET_CSAW_PERMIT = gql`
+  query GetCSAWPermit($id: ID!) {
+    getCSAWPermitById(id: $id) {
+      id
+      applicationNumber
+      applicationType
+      registrationType
+      ownerName
+      address
+      phone
+      brand
+      model
+      serialNumber
+      dateOfAcquisition
+      powerOutput
+      maxLengthGuidebar
+      countryOfOrigin
+      purchasePrice
+    }
+  }
+`;
 
 const GENERATE_CERTIFICATE = gql`
   mutation GenerateCertificate($input: GenerateCertificateInput!) {
@@ -48,65 +70,105 @@ const GenerateCSAWCertificateModal = ({ isOpen, onClose, application, onComplete
    const [showPreview, setShowPreview] = useState(false);
    const [isGenerating, setIsGenerating] = useState(false);
    const [certificate, setCertificate] = useState(null);
+   const [permitDetails, setPermitDetails] = useState(null);
    const certificateRef = useRef();
+
+   const { loading: permitLoading, error: permitError, data: permitData } = useQuery(GET_CSAW_PERMIT, {
+      variables: { id: application?.id },
+      skip: !application?.id
+   });
 
    const [generateCertificate] = useMutation(GENERATE_CERTIFICATE);
    const [forwardCertificate] = useMutation(FORWARD_CERTIFICATE);
+
+   useEffect(() => {
+      if (permitData?.getCSAWPermitById) {
+         console.log('Permit details received:', permitData.getCSAWPermitById);
+         setPermitDetails(permitData.getCSAWPermitById);
+      }
+   }, [permitData]);
 
    const handlePrint = useReactToPrint({
       content: () => certificateRef.current,
    });
 
    const formatDate = (timestamp) => {
-      const date = new Date(parseInt(timestamp));
-      return format(date, 'M/d/yyyy');
+      try {
+         const date = typeof timestamp === 'string' ?
+            new Date(timestamp.includes('T') ? timestamp : parseInt(timestamp)) :
+            new Date(timestamp);
+
+         return format(date, 'yyyy-MM-dd');
+      } catch (error) {
+         console.error('Error formatting date:', error);
+         return null;
+      }
    };
 
    const handleGenerate = async () => {
+      if (!permitDetails) {
+         toast.error('Permit details not available');
+         return;
+      }
+
+      console.log('Generating certificate with permit details:', {
+         id: permitDetails._id || permitDetails.id,
+         applicationType: permitDetails.applicationType,
+         registrationType: permitDetails.registrationType,
+         ownerName: permitDetails.ownerName,
+         address: permitDetails.address,
+         chainsawDetails: {
+            brand: permitDetails.brand,
+            model: permitDetails.model,
+            serialNumber: permitDetails.serialNumber,
+            dateOfAcquisition: permitDetails.dateOfAcquisition,
+            powerOutput: permitDetails.powerOutput,
+            maxLengthGuidebar: permitDetails.maxLengthGuidebar,
+            countryOfOrigin: permitDetails.countryOfOrigin,
+            purchasePrice: permitDetails.purchasePrice
+         }
+      });
+
       setIsGenerating(true);
       try {
-         console.log('Application data:', {
-            id: application.id,
-            applicationType: application.applicationType,
-            registrationType: application.registrationType,
-            ownerName: application.ownerName,
-            address: application.address,
-            brand: application.brand,
-            model: application.model,
-            serialNumber: application.serialNumber,
-            dateOfAcquisition: application.dateOfAcquisition,
-            powerOutput: application.powerOutput,
-            maxLengthGuidebar: application.maxLengthGuidebar,
-            countryOfOrigin: application.countryOfOrigin,
-            purchasePrice: application.purchasePrice
-         });
+         const acquisitionDate = formatDate(permitDetails.dateOfAcquisition);
+         if (!acquisitionDate) {
+            throw new Error('Invalid acquisition date');
+         }
 
+         const token = localStorage.getItem('token');
          const { data } = await generateCertificate({
             variables: {
                input: {
-                  applicationId: application.id,
-                  applicationType: application.applicationType,
+                  applicationId: permitDetails._id || permitDetails.id,
+                  applicationType: permitDetails.applicationType,
                   certificateData: {
-                     registrationType: application.registrationType,
-                     ownerName: application.ownerName,
-                     address: application.address,
+                     registrationType: permitDetails.registrationType,
+                     ownerName: permitDetails.ownerName,
+                     address: permitDetails.address,
                      chainsawDetails: {
-                        brand: application.brand,
-                        model: application.model,
-                        serialNumber: application.serialNumber,
-                        dateOfAcquisition: new Date(parseInt(application.dateOfAcquisition)).toISOString(),
-                        powerOutput: application.powerOutput,
-                        maxLengthGuidebar: application.maxLengthGuidebar,
-                        countryOfOrigin: application.countryOfOrigin,
-                        purchasePrice: parseFloat(application.purchasePrice)
+                        brand: permitDetails.brand,
+                        model: permitDetails.model,
+                        serialNumber: permitDetails.serialNumber,
+                        dateOfAcquisition: acquisitionDate,
+                        powerOutput: permitDetails.powerOutput,
+                        maxLengthGuidebar: permitDetails.maxLengthGuidebar,
+                        countryOfOrigin: permitDetails.countryOfOrigin,
+                        purchasePrice: parseFloat(permitDetails.purchasePrice)
                      },
                      purpose: "For Cutting/Slicing of Planted trees with cutting permits and coconut within Private Land"
                   }
                }
+            },
+            context: {
+               headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Apollo-Require-Preflight': 'true'
+               }
             }
          });
 
-         console.log('Generate certificate response:', data);
+         console.log('Certificate generation response:', data);
 
          if (data.generateCertificate) {
             setCertificate(data.generateCertificate);
@@ -136,6 +198,22 @@ const GenerateCSAWCertificateModal = ({ isOpen, onClose, application, onComplete
          toast.error(`Failed to forward certificate: ${error.message}`);
       }
    };
+
+   if (permitLoading) return (
+      <tr>
+         <td colSpan="5" className="text-center py-4">
+            Loading permit details...
+         </td>
+      </tr>
+   );
+
+   if (permitError) return (
+      <tr>
+         <td colSpan="5" className="text-center py-4 text-red-500">
+            Error loading permit details
+         </td>
+      </tr>
+   );
 
    if (showPreview) {
       return (
@@ -192,7 +270,7 @@ const GenerateCSAWCertificateModal = ({ isOpen, onClose, application, onComplete
                   <div className="text-sm">
                      <p><span className="font-medium">Application No:</span> {application.applicationNumber}</p>
                      <p><span className="font-medium">Owner:</span> {application.ownerName}</p>
-                     <p><span className="font-medium">Chainsaw:</span> {application.brand} {application.model}</p>
+                     <p><span className="font-medium">Chainsaw:</span> {application.chainsbrand} {application.model}</p>
                   </div>
                </div>
             </div>

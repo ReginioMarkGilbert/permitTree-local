@@ -236,8 +236,7 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
       }
 
       // Undo button
-      if ((currentTab === 'Approved Applications' && app.approvedByTechnicalStaff) ||
-         (currentTab === 'Accepted Applications')) {
+      if (currentTab === 'Approved Applications' || currentTab === 'Accepted Applications') {
          actions.push(
             <TooltipProvider key="undo-action">
                <Tooltip>
@@ -260,7 +259,7 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
       }
 
       // Certificate generation/upload button
-      if ((currentTab === 'Awaiting Permit Creation') && app.awaitingPermitCreation) {
+      if (currentTab === 'Awaiting Permit Creation') {
          actions.push(
             <TooltipProvider key="generate-certificate-action">
                <Tooltip>

@@ -1,8 +1,6 @@
 const { gql } = require('graphql-tag');
 
 const certificateTypes = gql`
-  scalar JSON
-
   type Certificate {
     id: ID!
     certificateNumber: String!
@@ -12,10 +10,9 @@ const certificateTypes = gql`
     dateCreated: String!
     dateIssued: String
     expiryDate: String
-    createdBy: User!
     signedBy: CertificateSignatures
-    certificateData: CertificateData!
-    history: [CertificateHistory!]!
+    certificateData: CertificateData
+    uploadedCertificate: UploadedCertificate
   }
 
   type CertificateSignatures {
@@ -48,11 +45,17 @@ const certificateTypes = gql`
     purchasePrice: Float
   }
 
-  type CertificateHistory {
-    action: String!
-    timestamp: String!
-    userId: ID!
-    notes: String
+  type UploadedCertificate {
+    fileUrl: String
+    uploadDate: String
+    metadata: CertificateMetadata
+  }
+
+  type CertificateMetadata {
+    certificateType: String
+    issueDate: String
+    expiryDate: String
+    remarks: String
   }
 
   input GenerateCertificateInput {
@@ -95,21 +98,17 @@ const certificateTypes = gql`
     remarks: String
   }
 
-  type UploadedCertificate {
-    fileUrl: String!
-    uploadDate: String!
-    metadata: CertificateMetadata!
-  }
-
-  type CertificateMetadata {
-    certificateType: String!
-    issueDate: String!
-    expiryDate: String!
-    remarks: String
+  extend type Query {
+    getCertificates(status: String): [Certificate!]!
+    getCertificateById(id: ID!): Certificate
+    getCertificatesByApplicationId(applicationId: ID!): [Certificate!]!
   }
 
   extend type Mutation {
+    generateCertificate(input: GenerateCertificateInput!): Certificate!
     uploadCertificate(input: UploadCertificateInput!): Certificate!
+    forwardCertificateForSignature(id: ID!): Certificate!
+    signCertificate(id: ID!, signature: String!): Certificate!
   }
 `;
 

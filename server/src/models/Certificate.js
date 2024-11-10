@@ -28,10 +28,6 @@ const CertificateSchema = new mongoose.Schema({
    },
    dateIssued: Date,
    expiryDate: Date,
-   createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-   },
    signedBy: {
       PENRO: {
          userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -65,13 +61,7 @@ const CertificateSchema = new mongoose.Schema({
          expiryDate: Date,
          remarks: String
       }
-   },
-   history: [{
-      action: String,
-      timestamp: Date,
-      userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-      notes: String
-   }]
+   }
 }, {
    timestamps: true
 });
