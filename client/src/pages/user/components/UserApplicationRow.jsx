@@ -76,7 +76,7 @@ const UserApplicationRow = ({
             </td>
             <td className="px-4 py-3 whitespace-nowrap">
                <div className="text-sm text-gray-900">
-                  {new Date(application.dateOfSubmission).toLocaleDateString()}
+                  {new Date(app.dateOfSubmission).toLocaleDateString()}
                </div>
             </td>
             <td className="px-4 py-3 whitespace-nowrap">
