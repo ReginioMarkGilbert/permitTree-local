@@ -72,7 +72,7 @@ const UserApplicationsStatusPage = () => {
       switch (tab) {
          // Applications
          case 'Draft': return { status: 'Draft' };
-         case 'Submitted': return { status: 'Submitted' };
+         case 'Submitted': return { status: 'Submitted' || 'In Progress' };
          case 'Returned': return { status: 'Returned', currentStage: 'ReturnedByTechnicalStaff' };
          case 'Accepted': return { status: 'Accepted' };
          case 'Released': return { status: 'Released' };
@@ -389,7 +389,7 @@ const UserApplicationsStatusPage = () => {
       }
 
       return (
-         <div className="bg-white rounded-lg shadow overflow-x-auto">
+         <div className="bg-white rounded-lg shadow-sm">
             <table className="min-w-full divide-y divide-gray-200">
                <thead className="bg-gray-50">
                   <tr>
@@ -411,14 +411,14 @@ const UserApplicationsStatusPage = () => {
                   </tr>
                </thead>
                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredApplications.map((application) => (
+                  {filteredApplications.map((app) => (
                      <UserApplicationRow
-                        key={application.id}
-                        application={application}
-                        onDelete={() => handleDeleteClick(application)}
-                        onUnsubmit={() => handleUnsubmitClick(application)}
-                        onSubmit={() => handleSubmitClick(application)}
-                        onResubmit={() => handleResubmitClick(application)}
+                        key={app.id}
+                        app={app}
+                        onDelete={() => handleDeleteClick(app)}
+                        onUnsubmit={() => handleUnsubmitClick(app)}
+                        onSubmit={() => handleSubmitClick(app)}
+                        onResubmit={() => handleResubmitClick(app)}
                         getStatusColor={getStatusColor}
                         fetchCOVPermit={fetchCOVPermit}
                         fetchCSAWPermit={fetchCSAWPermit}
@@ -500,68 +500,47 @@ const UserApplicationsStatusPage = () => {
             </div>
 
             {/* Table Section */}
-            <div className="bg-white rounded-lg shadow-sm flex-grow">
-               {activeMainTab === 'Applications' ? (
-                  loading ? (
-                     <div className="p-8 text-center">
-                        <Loader2 className="h-8 w-8 animate-spin mx-auto text-green-600" />
-                        <p className="mt-2 text-gray-500">Loading applications...</p>
-                     </div>
-                  ) : error ? (
-                     <div className="p-8 text-center text-red-500">
-                        Error loading applications. Please try again.
-                     </div>
-                  ) : filteredApplications.length === 0 ? (
-                     <div className="p-8 text-center">
-                        <div className="mx-auto h-12 w-12 text-gray-400">
-                           <FileX className="h-12 w-12" />
-                        </div>
-                        <h3 className="mt-2 text-sm font-medium text-gray-900">No applications found</h3>
-                        <p className="mt-1 text-sm text-gray-500">
-                           Get started by creating a new application.
-                        </p>
-                     </div>
-                  ) : (
-                     <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                           <thead className="bg-gray-50">
-                              <tr>
-                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Application Number
-                                 </th>
-                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Application Type
-                                 </th>
-                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Date Submitted
-                                 </th>
-                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Status
-                                 </th>
-                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Actions
-                                 </th>
-                              </tr>
-                           </thead>
-                           <tbody className="bg-white divide-y divide-gray-200">
-                              {filteredApplications.map((application) => (
-                                 <UserApplicationRow
-                                    key={application.id}
-                                    application={application}
-                                    onDelete={() => handleDeleteClick(application)}
-                                    onUnsubmit={() => handleUnsubmitClick(application)}
-                                    onSubmit={() => handleSubmitClick(application)}
-                                    onResubmit={() => handleResubmitClick(application)}
-                                    getStatusColor={getStatusColor}
-                                 />
-                              ))}
-                           </tbody>
-                        </table>
-                     </div>
-                  )
-               ) : (
-                  renderOrderOfPaymentsTable()
-               )}
+            <div className="bg-white rounded-lg shadow-sm">
+               <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                     <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                           Application Number
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                           Application Type
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                           Date Submitted
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                           Status
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                           Actions
+                        </th>
+                     </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                     {filteredApplications.map((app) => (
+                        <UserApplicationRow
+                           key={app.id}
+                           app={app}
+                           onDelete={() => handleDeleteClick(app)}
+                           onUnsubmit={() => handleUnsubmitClick(app)}
+                           onSubmit={() => handleSubmitClick(app)}
+                           onResubmit={() => handleResubmitClick(app)}
+                           getStatusColor={getStatusColor}
+                           fetchCOVPermit={fetchCOVPermit}
+                           fetchCSAWPermit={fetchCSAWPermit}
+                           fetchPLTCPPermit={fetchPLTCPPermit}
+                           fetchPTPRPermit={fetchPTPRPermit}
+                           fetchPLTPPermit={fetchPLTPPermit}
+                           fetchTCEBPPermit={fetchTCEBPPermit}
+                        />
+                     ))}
+                  </tbody>
+               </table>
             </div>
 
             {/* Confirmation Dialogs */}

@@ -12,7 +12,7 @@ import ViewApplicationModal from './ViewApplicationModal';
 import ViewRemarksModal from './ViewRemarksModal';
 
 const UserApplicationRow = ({
-   application,
+   app,
    onEdit,
    onDelete,
    onUnsubmit,
@@ -30,7 +30,7 @@ const UserApplicationRow = ({
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isRemarksModalOpen, setIsRemarksModalOpen] = useState(false);
 
-   if (!application) {
+   if (!app) {
       console.error('Application data is undefined');
       return null;
    }
@@ -38,6 +38,14 @@ const UserApplicationRow = ({
    const formatDate = (timestamp) => {
       const date = new Date(parseInt(timestamp));
       return date.toLocaleDateString();
+      // if (!timestamp) return 'N/A';
+      // try {
+      //    const date = new Date(parseInt(timestamp));
+      //    return date.toLocaleDateString();
+      // } catch (error) {
+      //    console.error('Error formatting date:', error);
+      //    return 'Invalid date';
+      // }
    };
 
    const handleEditClick = () => setIsEditModalOpen(true);
@@ -45,7 +53,7 @@ const UserApplicationRow = ({
    const handleViewRemarks = () => setIsRemarksModalOpen(true);
 
    const handleEditSave = (editedData) => {
-      onEdit(application.id, editedData);
+      onEdit(app.id, editedData);
       setIsEditModalOpen(false);
    };
 
@@ -55,7 +63,7 @@ const UserApplicationRow = ({
       dateOfSubmission,
       status = 'Unknown',
       id = 'unknown'
-   } = application;
+   } = app;
 
    return (
       <>
@@ -122,7 +130,7 @@ const UserApplicationRow = ({
                            <Tooltip delayDuration={200}>
                               <TooltipTrigger asChild>
                                  <Button
-                                    onClick={() => onDelete(application)}
+                                    onClick={() => onDelete(app)}
                                     variant="outline"
                                     size="icon"
                                     className="h-8 w-8 text-red-600 hover:text-red-800"
@@ -141,7 +149,7 @@ const UserApplicationRow = ({
                            <Tooltip delayDuration={200}>
                               <TooltipTrigger asChild>
                                  <Button
-                                    onClick={() => onSubmit(application)}
+                                    onClick={() => onSubmit(app)}
                                     variant="outline"
                                     size="icon"
                                     className="h-8 w-8 text-green-600 hover:text-green-800"
@@ -195,7 +203,7 @@ const UserApplicationRow = ({
                         <TooltipProvider>
                            <Tooltip delayDuration={200}>
                               <TooltipTrigger asChild>
-                                 <Button onClick={() => onResubmit(application)} variant="outline" size="icon" className="h-8 w-8 text-green-600 hover:text-green-800">
+                                 <Button onClick={() => onResubmit(app)} variant="outline" size="icon" className="h-8 w-8 text-green-600 hover:text-green-800">
                                     <Send className="h-4 w-4" />
                                  </Button>
                               </TooltipTrigger>
@@ -212,7 +220,7 @@ const UserApplicationRow = ({
                         <Tooltip delayDuration={200}>
                            <TooltipTrigger asChild>
                               <Button
-                                 onClick={() => onUnsubmit(application)}
+                                 onClick={() => onUnsubmit(app)}
                                  variant="outline"
                                  size="icon"
                                  className="h-8 w-8 text-yellow-600 hover:text-yellow-800"
@@ -235,7 +243,7 @@ const UserApplicationRow = ({
             isOpen={isEditModalOpen}
             onClose={() => setIsEditModalOpen(false)}
             onSave={handleEditSave}
-            application={application}
+            application={app}
             fetchCOVPermit={fetchCOVPermit}
             fetchCSAWPermit={fetchCSAWPermit}
             fetchPLTCPPermit={fetchPLTCPPermit}
@@ -246,12 +254,12 @@ const UserApplicationRow = ({
          <ViewApplicationModal
             isOpen={isViewModalOpen}
             onClose={() => setIsViewModalOpen(false)}
-            application={application}
+            application={app}
          />
          <ViewRemarksModal
             isOpen={isRemarksModalOpen}
             onClose={() => setIsRemarksModalOpen(false)}
-            application={application}
+            application={app}
          />
       </>
    );
