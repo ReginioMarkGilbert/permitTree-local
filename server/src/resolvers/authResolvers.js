@@ -49,7 +49,7 @@ const authResolvers = {
                roles: user.roles
             },
             process.env.JWT_SECRET,
-            { expiresIn: '2h' }
+            { expiresIn: '12h' }
          );
 
          return {

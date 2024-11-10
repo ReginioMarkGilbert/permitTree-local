@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { RefreshCw, Search, FileX, Loader2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -72,7 +73,8 @@ const UserApplicationsStatusPage = () => {
       switch (tab) {
          // Applications
          case 'Draft': return { status: 'Draft' };
-         case 'Submitted': return { status: 'Submitted' || 'In Progress' };
+         case 'Submitted': return { status: 'Submitted' };
+         case 'In Progress': return { status: 'In Progress' };
          case 'Returned': return { status: 'Returned', currentStage: 'ReturnedByTechnicalStaff' };
          case 'Accepted': return { status: 'Accepted' };
          case 'Released': return { status: 'Released' };
@@ -120,7 +122,7 @@ const UserApplicationsStatusPage = () => {
 
    const mainTabs = ['Applications', 'Order Of Payments', 'Renewals'];
    const subTabs = {
-      'Applications': ['Draft', 'Submitted', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected'],
+      'Applications': ['Draft', 'Submitted', 'In Progress', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected'],
       'Order Of Payments': ['Awaiting Payment', 'Payment Proof Submitted', 'Payment Proof Rejected', 'Payment Proof Approved', 'Completed', 'Issued OR'],
       'Renewals': ['Draft', 'Submitted', 'Returned', 'Renewed', 'Rejected']
    };
@@ -394,31 +396,32 @@ const UserApplicationsStatusPage = () => {
                <thead className="bg-gray-50">
                   <tr>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Application Number
+                        APPLICATION NUMBER
                      </th>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Application Type
+                        APPLICATION TYPE
                      </th>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Date Submitted
+                        DATE SUBMITTED
                      </th>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
+                        STATUS
                      </th>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
+                        ACTIONS
                      </th>
                   </tr>
                </thead>
                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredApplications.map((app) => (
+                  {applications.map((app) => (
                      <UserApplicationRow
                         key={app.id}
                         app={app}
-                        onDelete={() => handleDeleteClick(app)}
-                        onUnsubmit={() => handleUnsubmitClick(app)}
-                        onSubmit={() => handleSubmitClick(app)}
-                        onResubmit={() => handleResubmitClick(app)}
+                        onEdit={handleEditApplication}
+                        onDelete={handleDeleteClick}
+                        onUnsubmit={handleUnsubmitClick}
+                        onSubmit={handleSubmitClick}
+                        onResubmit={handleResubmitClick}
                         getStatusColor={getStatusColor}
                         fetchCOVPermit={fetchCOVPermit}
                         fetchCSAWPermit={fetchCSAWPermit}
@@ -426,6 +429,7 @@ const UserApplicationsStatusPage = () => {
                         fetchPTPRPermit={fetchPTPRPermit}
                         fetchPLTPPermit={fetchPLTPPermit}
                         fetchTCEBPPermit={fetchTCEBPPermit}
+                        currentTab={activeSubTab}
                      />
                   ))}
                </tbody>
@@ -499,72 +503,72 @@ const UserApplicationsStatusPage = () => {
                </div>
             </div>
 
-            {/* Table Section */}
-            <div className="bg-white rounded-lg shadow-sm">
-               <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                     <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                           Application Number
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                           Application Type
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                           Date Submitted
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                           Status
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                           Actions
-                        </th>
-                     </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                     {filteredApplications.map((app) => (
-                        <UserApplicationRow
-                           key={app.id}
-                           app={app}
-                           onDelete={() => handleDeleteClick(app)}
-                           onUnsubmit={() => handleUnsubmitClick(app)}
-                           onSubmit={() => handleSubmitClick(app)}
-                           onResubmit={() => handleResubmitClick(app)}
-                           getStatusColor={getStatusColor}
-                           fetchCOVPermit={fetchCOVPermit}
-                           fetchCSAWPermit={fetchCSAWPermit}
-                           fetchPLTCPPermit={fetchPLTCPPermit}
-                           fetchPTPRPermit={fetchPTPRPermit}
-                           fetchPLTPPermit={fetchPLTPPermit}
-                           fetchTCEBPPermit={fetchTCEBPPermit}
-                        />
-                     ))}
-                  </tbody>
-               </table>
-            </div>
-
-            {/* Confirmation Dialogs */}
-            <DeleteConfirmationDialog
-               isOpen={deleteDialogOpen}
-               onClose={() => setDeleteDialogOpen(false)}
-               onConfirm={handleDeleteConfirm}
-            />
-            <UnsubmitConfirmationDialog
-               isOpen={unsubmitDialogOpen}
-               onClose={() => setUnsubmitDialogOpen(false)}
-               onConfirm={handleUnsubmitConfirm}
-            />
-            <SubmitConfirmationDialog
-               isOpen={submitDialogOpen}
-               onClose={() => setSubmitDialogOpen(false)}
-               onConfirm={handleSubmitConfirm}
-            />
-            <ResubmitConfirmationDialog
-               isOpen={resubmitDialogOpen}
-               onClose={() => setResubmitDialogOpen(false)}
-               onConfirm={handleResubmitConfirm}
-            />
+            {renderTable()}
          </div>
+         <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <DialogContent>
+               <DialogHeader>
+                  <DialogTitle>Confirm Deletion</DialogTitle>
+                  <DialogDescription>
+                     Are you sure you want to delete this draft application? This action cannot be undone.
+                  </DialogDescription>
+               </DialogHeader>
+               <DialogFooter>
+                  <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+                     Cancel
+                  </Button>
+                  <Button variant="destructive" onClick={handleDeleteConfirm}>
+                     Delete
+                  </Button>
+               </DialogFooter>
+            </DialogContent>
+         </Dialog>
+         <AlertDialog open={unsubmitDialogOpen} onOpenChange={setUnsubmitDialogOpen}>
+            <AlertDialogContent>
+               <AlertDialogHeader>
+                  <AlertDialogTitle>Confirm Unsubmit</AlertDialogTitle>
+                  <AlertDialogDescription>
+                     Are you sure you want to unsubmit this application? It will be moved back to Draft status.
+                  </AlertDialogDescription>
+               </AlertDialogHeader>
+               <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleUnsubmitConfirm}>Unsubmit</AlertDialogAction>
+               </AlertDialogFooter>
+            </AlertDialogContent>
+         </AlertDialog>
+         <AlertDialog open={submitDialogOpen} onOpenChange={setSubmitDialogOpen}>
+            <AlertDialogContent>
+               <AlertDialogHeader>
+                  <AlertDialogTitle>Confirm Submission</AlertDialogTitle>
+                  <AlertDialogDescription>
+                     Are you sure you want to submit this application? You won't be able to edit it after submission.
+                  </AlertDialogDescription>
+               </AlertDialogHeader>
+               <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleSubmitConfirm}>Submit</AlertDialogAction>
+               </AlertDialogFooter>
+            </AlertDialogContent>
+         </AlertDialog>
+         <Dialog open={resubmitDialogOpen} onOpenChange={setResubmitDialogOpen}>
+            <DialogContent>
+               <DialogHeader>
+                  <DialogTitle>Confirm Resubmission</DialogTitle>
+                  <DialogDescription>
+                     Are you sure you want to resubmit this application? It will be moved back to Returned status.
+                  </DialogDescription>
+               </DialogHeader>
+               <DialogFooter>
+                  <Button variant="outline" onClick={() => setResubmitDialogOpen(false)}>
+                     Cancel
+                  </Button>
+                  <Button variant="destructive" onClick={handleResubmitConfirm}>
+                     Resubmit
+                  </Button>
+               </DialogFooter>
+            </DialogContent>
+         </Dialog>
       </div>
    );
 };

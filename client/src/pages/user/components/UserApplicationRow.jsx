@@ -25,15 +25,11 @@ const UserApplicationRow = ({
    fetchPTPRPermit,
    fetchPLTPPermit,
    fetchTCEBPPermit,
+   currentTab
 }) => {
    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isRemarksModalOpen, setIsRemarksModalOpen] = useState(false);
-
-   if (!app) {
-      console.error('Application data is undefined');
-      return null;
-   }
 
    const formatDate = (timestamp) => {
       const date = new Date(parseInt(timestamp));
@@ -57,22 +53,14 @@ const UserApplicationRow = ({
       setIsEditModalOpen(false);
    };
 
-   const {
-      applicationNumber = 'N/A',
-      applicationType = 'Unknown',
-      dateOfSubmission,
-      status = 'Unknown',
-      id = 'unknown'
-   } = app;
-
    return (
       <>
          <tr>
             <td className="px-4 py-3 whitespace-nowrap">
-               <div className="text-sm text-gray-900">{applicationNumber}</div>
+               <div className="text-sm text-gray-900">{app.applicationNumber}</div>
             </td>
             <td className="px-4 py-3 whitespace-nowrap">
-               <div className="text-sm text-gray-900">{applicationType}</div>
+               <div className="text-sm text-gray-900">{app.applicationType}</div>
             </td>
             <td className="px-4 py-3 whitespace-nowrap">
                <div className="text-sm text-gray-900">
@@ -80,8 +68,8 @@ const UserApplicationRow = ({
                </div>
             </td>
             <td className="px-4 py-3 whitespace-nowrap">
-               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(status)}`}>
-                  {status}
+               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(app.status)}`}>
+                  {app.status}
                </span>
             </td>
             <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
@@ -105,7 +93,7 @@ const UserApplicationRow = ({
                      </Tooltip>
                   </TooltipProvider>
 
-                  {status === 'Draft' && (
+                  {app.status === 'Draft' && (
                      <>
                         <TooltipProvider>
                            <Tooltip delayDuration={200}>
@@ -165,8 +153,7 @@ const UserApplicationRow = ({
                         </TooltipProvider>
                      </>
                   )}
-
-                  {status === 'Returned' && (
+                  {app.status === 'Returned' && (
                      <>
                         <TooltipProvider>
                            <Tooltip delayDuration={200}>
@@ -214,8 +201,7 @@ const UserApplicationRow = ({
                         </TooltipProvider>
                      </>
                   )}
-
-                  {status === 'Submitted' && (
+                  {app.status === 'Submitted' && ( // only show unsubmit if the application is not yet in progress
                      <TooltipProvider>
                         <Tooltip delayDuration={200}>
                            <TooltipTrigger asChild>

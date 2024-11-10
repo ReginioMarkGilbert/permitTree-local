@@ -49,17 +49,17 @@ const GET_USER_OOPS = gql`
 `;
 
 export const useUserOrderOfPayments = (userId, status) => {
-  const { data, loading, error, refetch } = useQuery(GET_USER_OOPS, {
-    variables: { userId, status },
-    skip: !userId,
-    fetchPolicy: 'network-only',
-    pollInterval: 5000 // Poll every 5 seconds
-  });
+   const { data, loading, error, refetch } = useQuery(GET_USER_OOPS, {
+      variables: { userId, status },
+      skip: !userId,
+      fetchPolicy: 'network-only',
+      pollInterval: 5000 // Poll every 5 seconds
+   });
 
-  return {
-    oops: data?.getOOPsByUserId || [],
-    loading,
-    error,
-    refetch
-  };
+   return {
+      oops: data?.getOOPsByUserId || [],
+      loading,
+      error,
+      refetch
+   };
 };
