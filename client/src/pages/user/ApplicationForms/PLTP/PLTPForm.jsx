@@ -63,7 +63,7 @@ const PLTPForm = () => {
    const [formData, setFormData] = useState(() => {
       const savedFormData = localStorage.getItem('pltpFormData');
       return savedFormData ? JSON.parse(savedFormData) : {
-         applicationType: 'Special/Private Land Timber Permit',
+         applicationType: 'Private Land Timber Permit',
          name: '',
          address: '',
          contactNumber: '',

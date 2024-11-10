@@ -5,6 +5,9 @@ const Admin = require('../models/admin');
 const CSAWPermit = require('../models/permits/CSAWPermit');
 const COVPermit = require('../models/permits/COVPermit');
 const PTPRPermit = require('../models/permits/PTPRPermit');
+const PLTCPPermit = require('../models/permits/PLTCPPermit');
+const PLTPPermit = require('../models/permits/PLTPPermit');
+const TCEBPPermit = require('../models/permits/TCEBPPermit');
 
 const authResolvers = {
    Query: {
@@ -21,17 +24,23 @@ const authResolvers = {
             };
 
             // Get applications from all permit types
-            const [csawPermits, covPermits, ptprPermits] = await Promise.all([
+            const [csawPermits, covPermits, ptprPermits, pltcpPermits, pltpPermits, tcebpPermits] = await Promise.all([
                CSAWPermit.find(query),
                COVPermit.find(query),
-               PTPRPermit.find(query)
+               PTPRPermit.find(query),
+               PLTCPPermit.find(query),
+               PLTPPermit.find(query),
+               TCEBPPermit.find(query)
             ]);
 
             // Combine all permits
             const allPermits = [
                ...csawPermits,
                ...covPermits,
-               ...ptprPermits
+               ...ptprPermits,
+               ...pltcpPermits,
+               ...pltpPermits,
+               ...tcebpPermits
             ];
 
             return allPermits;

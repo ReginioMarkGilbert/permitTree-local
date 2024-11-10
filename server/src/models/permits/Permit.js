@@ -4,7 +4,14 @@ const PermitSchema = new mongoose.Schema({
    applicationType: {
       type: String,
       required: true,
-      enum: ['Chainsaw Registration', 'Certificate of Verification', 'Private Tree Plantation Registration', 'Public Land Tree Cutting Permit', 'Special/Private Land Timber Permit', 'Tree Cutting and/or Earth Balling Permit']
+      enum: [
+         'Chainsaw Registration', // CSAW
+         'Certificate of Verification', // COV
+         'Private Tree Plantation Registration', // PTPR
+         'Public Land Tree Cutting Permit', // PLTCP
+         'Private Land Timber Permit', // PLTP
+         'Tree Cutting and/or Earth Balling Permit' // TCEBP
+      ]
    },
    applicationNumber: { type: String, required: true, unique: true },
    applicantId: {
@@ -23,56 +30,45 @@ const PermitSchema = new mongoose.Schema({
       enum: [
          'Draft',
          'Submitted',
+
          'TechnicalStaffReview',
          'ReturnedByTechnicalStaff',
          'AuthenticityApprovedByTechnicalStaff',
+
          'ReceivingClerkReview',
          'ReturnedByReceivingClerk',
          'ForRecordByReceivingClerk',
+
+         'CENRPENRReview',
+         'ReturnedByPENRCENROfficer',
+
          'ChiefRPSReview',
+
          'AwaitingOOP',
+
          'ForInspectionByTechnicalStaff',
          'ApprovedByTechnicalStaff',
+
          'PendingRelease',
          'Released'
       ]
    },
-   acceptedByTechnicalStaff: {
-      type: Boolean,
-      default: false
-   },
-   approvedByTechnicalStaff: {
-      type: Boolean,
-      default: false
-   },
-   acceptedByReceivingClerk: {
-      type: Boolean,
-      default: false
-   },
-   recordedByReceivingClerk: {
-      type: Boolean,
-      default: false
-   },
-   reviewedByChief: {
-      type: Boolean,
-      default: false
-   },
-   awaitingOOP: {
-      type: Boolean,
-      default: false
-   },
-   OOPCreated: { // for Created OOP tab in Chief/PENRCENROfficer/Accountant Dashboards
-      type: Boolean,
-      default: false
-   },
-   awaitingPermitCreation: {
-      type: Boolean,
-      default: false
-   },
-   PermitCreated: {
-      type: Boolean,
-      default: false
-   },
+   acceptedByTechnicalStaff: { type: Boolean, default: false },
+   approvedByTechnicalStaff: { type: Boolean, default: false },
+
+   acceptedByReceivingClerk: { type: Boolean, default: false },
+   recordedByReceivingClerk: { type: Boolean, default: false },
+
+   acceptedByPENRCENROfficer: { type: Boolean, default: false },
+   approvedByPENRCENROfficer: { type: Boolean, default: false },
+
+   reviewedByChief: { type: Boolean, default: false },
+
+   awaitingOOP: { type: Boolean, default: false },
+   OOPCreated: { type: Boolean, default: false }, // for Created OOP tab in Chief/PENRCENROfficer/Accountant Dashboards
+
+   awaitingPermitCreation: { type: Boolean, default: false },
+   PermitCreated: { type: Boolean, default: false },
    history: [{
       stage: String,
       status: String,

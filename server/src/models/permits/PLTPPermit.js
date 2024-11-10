@@ -9,7 +9,7 @@ const FileSchema = new mongoose.Schema({
 
 const PLTPPermitSchema = new mongoose.Schema({
    applicationNumber: { type: String, required: true, unique: true },
-   applicationType: { type: String, required: true, default: 'Special/Private Land Timber Permit' },
+   applicationType: { type: String, required: true, default: 'Private Land Timber Permit' },
    name: { type: String, required: true },
    address: { type: String, required: true },
    contactNumber: { type: String, required: true },

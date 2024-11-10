@@ -130,18 +130,42 @@ const TechnicalStaffDashboard = () => {
    };
 
    const renderTabDescription = () => {
-      if (activeSubTab === 'Awaiting Permit Creation') {
+      if (activeSubTab === 'Pending Reviews') {
          return (
             <div className="mb-4 -mt-4">
-               <h1 className="text-sm text-green-800">
-                  Applications ready for certificate generation or upload. Chainsaw registrations will be auto-generated,
-                  other types require manual certificate upload.
-               </h1>
+               <h1 className="text-sm text-green-800">This is the list of applications pending review to check for completeness and supporting documents.</h1>
             </div>
          );
       }
-      // ... other tab descriptions
-   };
+      if (activeSubTab === 'Returned Applications') {
+         return (
+            <div className="mb-4 -mt-4">
+               <h1 className="text-sm text-green-800">This is the list of applications that were returned due to incomplete documents or other issues.</h1>
+            </div>
+         );
+      }
+      if (activeSubTab === 'Accepted Applications') {
+         return (
+            <div className="mb-4 -mt-4">
+               <h1 className="text-sm text-green-800">This is the list of applications that have been accepted after review.</h1>
+            </div>
+         );
+      }
+      if (activeSubTab === 'For Inspection and Approval') {
+         return (
+            <div className="mb-4 -mt-4">
+               <h1 className="text-sm text-green-800">This is the list of applications (forwarded by the Chief RPS after review) that are pending inspection (e.g., chainsaws, etc.).</h1>
+            </div>
+         );
+      }
+      if (activeSubTab === 'Approved Applications') {
+         return (
+            <div className="mb-4 -mt-4">
+               <h1 className="text-sm text-green-800">This is the list of applications that have been approved for authenticity after inspection.</h1>
+            </div>
+         );
+      }
+   }
 
    const renderTable = () => {
       if (loading) return <p className="text-center text-gray-500">Loading applications...</p>;

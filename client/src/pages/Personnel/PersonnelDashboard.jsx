@@ -4,7 +4,7 @@ import TechnicalStaffDashboard from './components/PersonnelDashboardComponents/T
 import ChiefDashboard from './components/PersonnelDashboardComponents/Chief/ChiefDashboard';
 import AccountantDashboard from './components/PersonnelDashboardComponents/Accountant/AccountantDashboard';
 import BillCollectorDashboard from './components/PersonnelDashboardComponents/BillCollector/BillCollectorDashboard';
-import PENRCENROfficerDashboard from './components/PersonnelDashboardComponents/PENRCENROfficerDashboard';
+import PENRCENROfficerDashboard from './components/PersonnelDashboardComponents/PENRCENROfficer/PENRCENROfficerDashboard';
 import InspectionTeamDashboard from './components/PersonnelDashboardComponents/InspectionTeamDashboard';
 import { getUserRoles } from '../../utils/auth';
 

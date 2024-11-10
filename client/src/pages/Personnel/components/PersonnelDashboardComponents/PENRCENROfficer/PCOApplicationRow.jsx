@@ -1,3 +1,4 @@
+// PENR_CENR_Officer Application Row
 // Technical Staff Application Row
 
 import React, { useState } from 'react';
@@ -9,11 +10,10 @@ import {
    TooltipProvider,
    TooltipTrigger,
 } from "@/components/ui/tooltip";
-import TS_ViewModal from './TS_ViewModal';
-import TS_ReviewModal from './TS_ReviewModal';
-import TS_AuthenticityReviewModal from './TS_AuthenticityReviewModal';
-import GenerateCertificateModal from './GenerateCertificateModal';
-import CertificateActionHandler from './CertificateActionHandler';
+import TS_ViewModal from '../TechnicalStaff/TS_ViewModal';
+import PCOAppReviewModal from './PCOAppReviewModal';
+// import GenerateCertificateModal from './GenerateCertificateModal';
+// import CertificateActionHandler from './CertificateActionHandler';
 import { getUserRoles } from '../../../../../utils/auth';
 import { useUndoApplicationApproval } from '../../../hooks/useApplications';
 import { toast } from 'sonner';
@@ -88,11 +88,10 @@ const UPDATE_PERMIT_STAGE = gql`
   }
 `;
 
-const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, currentTab }) => {
+const PCOApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, currentTab }) => {
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-   const [isAuthenticityModalOpen, setIsAuthenticityModalOpen] = useState(false);
-   const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(false);
+   // const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(false);
    // const { handleUndoApproval, handleUndoAcceptance } = useUndoApplicationApproval();
    const [updatePermitStage] = useMutation(UPDATE_PERMIT_STAGE);
 
@@ -110,25 +109,26 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
       try {
          let variables;
 
-         if (currentTab === 'Approved Applications') {
+         if (currentTab === 'Accepted Applications') {
             variables = {
                id: app.id,
-               currentStage: 'ForInspectionByTechnicalStaff',
+               currentStage: 'CENRPENRReview',
                status: 'In Progress',
-               notes: 'Approval undone by Technical Staff',
-               approvedByTechnicalStaff: false,
-               awaitingPermitCreation: false
-            };
-         } else if (currentTab === 'Accepted Applications') {
-            // Existing undo logic for approved applications
-            variables = {
-               id: app.id,
-               currentStage: 'TechnicalStaffReview',
-               status: 'Submitted',
-               notes: 'Acceptance undone by Technical Staff',
-               acceptedByTechnicalStaff: false
+               notes: 'Acceptance undone by PENR/CENR Officer',
+               acceptedByPENRCENROfficer: false,
+               approvedByPENRCENROfficer: false
             };
          }
+         // } else if (currentTab === 'Approved Applications') {
+         //    // Existing undo logic for approved applications
+         //    variables = {
+         //       id: app.id,
+         //       currentStage: 'TechnicalStaffReview',
+         //       status: 'Submitted',
+         //       notes: 'Approval undone by PENR/CENR Officer',
+         //       approvedByPENRCENROfficer: false
+         //    };
+         // }
 
          await updatePermitStage({ variables });
          toast.success('Application status undone successfully');
@@ -138,10 +138,11 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
          toast.error('Failed to undo application status');
       }
    };
-
+   // correct way to format date in application row
    const formatDate = (timestamp) => {
-      const date = new Date(parseInt(timestamp));
-      return format(date, 'M/d/yyyy');
+      // const date = new Date(timestamp);
+      // return date.toLocaleDateString();
+      return new Date(timestamp).toLocaleDateString();
    };
 
    const showGenerateCertificateButton =
@@ -177,7 +178,7 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
       );
 
       // Print action
-      if (userRoles.includes('Technical_Staff') && !userRoles.includes('Receiving_Clerk')) {
+      if (userRoles.includes('PENR_CENR_Officer')) {
          actions.push(
             <TooltipProvider key="print-action">
                <Tooltip delayDuration={200}>
@@ -195,7 +196,7 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
       }
 
       // Review action
-      if (app.status === 'Submitted' && userRoles.includes('Technical_Staff') && !userRoles.includes('Receiving_Clerk')) {
+      if ((currentTab === 'Applications for Review' || app.currentStage === 'CENRPENRReview') && userRoles.includes('PENR_CENR_Officer')) {
          actions.push(
             <TooltipProvider key="review-action">
                <Tooltip delayDuration={200}>
@@ -212,32 +213,8 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
          );
       }
 
-      // Authenticity approval action
-      if (currentTab === 'For Inspection and Approval') {
-         actions.push(
-            <TooltipProvider key="authenticity-action">
-               <Tooltip delayDuration={200}>
-                  <TooltipTrigger asChild>
-                     <Button
-                        onClick={handleAuthenticityClick}
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 text-green-600 hover:text-green-800"
-                     >
-                        <FileCheck className="h-4 w-4" />
-                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                     <p>Approve Application Authenticity</p>
-                  </TooltipContent>
-               </Tooltip>
-            </TooltipProvider>
-         );
-      }
-
       // Undo button
-      if ((currentTab === 'Approved Applications' && app.approvedByTechnicalStaff) ||
-         (currentTab === 'Accepted Applications')) {
+      if (currentTab === 'Accepted Applications') {
          actions.push(
             <TooltipProvider key="undo-action">
                <Tooltip>
@@ -260,27 +237,27 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
       }
 
       // Certificate generation/upload button
-      if ((currentTab === 'Awaiting Permit Creation') && app.awaitingPermitCreation) {
-         actions.push(
-            <TooltipProvider key="generate-certificate-action">
-               <Tooltip>
-                  <TooltipTrigger asChild>
-                     <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 text-green-600"
-                        onClick={() => setIsCertificateModalOpen(true)}
-                     >
-                        <FileCheck2 className="h-4 w-4" />
-                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                     <p>{app.applicationType === 'Chainsaw Registration' ? 'Generate Certificate' : 'Upload Certificate'}</p>
-                  </TooltipContent>
-               </Tooltip>
-            </TooltipProvider>
-         );
-      }
+      // if ((currentTab === 'Awaiting Permit Creation') && app.awaitingPermitCreation) {
+      //    actions.push(
+      //       <TooltipProvider key="generate-certificate-action">
+      //          <Tooltip>
+      //             <TooltipTrigger asChild>
+      //                <Button
+      //                   variant="outline"
+      //                   size="icon"
+      //                   className="h-8 w-8 text-green-600"
+      //                   onClick={() => setIsCertificateModalOpen(true)}
+      //                >
+      //                   <FileCheck2 className="h-4 w-4" />
+      //                </Button>
+      //             </TooltipTrigger>
+      //             <TooltipContent>
+      //                <p>{app.applicationType === 'Chainsaw Registration' ? 'Generate Certificate' : 'Upload Certificate'}</p>
+      //             </TooltipContent>
+      //          </Tooltip>
+      //       </TooltipProvider>
+      //    );
+      // }
 
       return actions;
    };
@@ -296,7 +273,7 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
             </td>
             <td className="px-4 py-3 whitespace-nowrap">
                <div className="text-sm text-gray-900">
-                  {new Date(app.dateOfSubmission).toLocaleDateString()}
+                  {formatDate(app.dateOfSubmission)}
                </div>
             </td>
             <td className="px-4 py-3 whitespace-nowrap">
@@ -316,26 +293,20 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
             onClose={() => setIsViewModalOpen(false)}
             application={app}
          />
-         <TS_ReviewModal
+         <PCOAppReviewModal
             isOpen={isReviewModalOpen}
             onClose={() => setIsReviewModalOpen(false)}
             application={app}
             onReviewComplete={handleReviewComplete}
          />
-         <TS_AuthenticityReviewModal
-            isOpen={isAuthenticityModalOpen}
-            onClose={() => setIsAuthenticityModalOpen(false)}
-            application={app}
-            onReviewComplete={handleReviewComplete}
-         />
-         <CertificateActionHandler
+         {/* <CertificateActionHandler
             isOpen={isCertificateModalOpen}
             onClose={() => setIsCertificateModalOpen(false)}
             application={app}
             onComplete={handleCertificateComplete}
-         />
+         /> */}
       </>
    );
 };
 
-export default TS_ApplicationRow;
+export default PCOApplicationRow;

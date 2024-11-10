@@ -6,9 +6,15 @@ const GET_APPLICATIONS = gql`
     $currentStage: String
     $approvedByTechnicalStaff: Boolean
     $acceptedByTechnicalStaff: Boolean
+
     $acceptedByReceivingClerk: Boolean
     $recordedByReceivingClerk: Boolean
+
+    $acceptedByPENRCENROfficer: Boolean
+    $approvedByPENRCENROfficer: Boolean
+
     $reviewedByChief: Boolean
+
     $awaitingOOP: Boolean
     $awaitingPermitCreation: Boolean
     $PermitCreated: Boolean
@@ -18,9 +24,15 @@ const GET_APPLICATIONS = gql`
       currentStage: $currentStage
       approvedByTechnicalStaff: $approvedByTechnicalStaff
       acceptedByTechnicalStaff: $acceptedByTechnicalStaff
+
       acceptedByReceivingClerk: $acceptedByReceivingClerk
       recordedByReceivingClerk: $recordedByReceivingClerk
+
+      acceptedByPENRCENROfficer: $acceptedByPENRCENROfficer
+      approvedByPENRCENROfficer: $approvedByPENRCENROfficer
+
       reviewedByChief: $reviewedByChief
+
       awaitingOOP: $awaitingOOP
       awaitingPermitCreation: $awaitingPermitCreation
       PermitCreated: $PermitCreated
@@ -29,46 +41,49 @@ const GET_APPLICATIONS = gql`
         id
         applicationNumber
         applicationType
-        registrationType
-        ownerName
-        address
-        brand
-        model
-        serialNumber
-        dateOfAcquisition
-        powerOutput
-        maxLengthGuidebar
-        countryOfOrigin
-        purchasePrice
         status
         currentStage
         dateOfSubmission
-        acceptedByTechnicalStaff
-        approvedByTechnicalStaff
-        acceptedByReceivingClerk
-        recordedByReceivingClerk
-        reviewedByChief
-        awaitingOOP
-        OOPCreated
-        awaitingPermitCreation
-        PermitCreated
       }
-      ... on Permit {
+      ... on COVPermit {
         id
         applicationNumber
         applicationType
         status
         currentStage
         dateOfSubmission
-        acceptedByTechnicalStaff
-        approvedByTechnicalStaff
-        acceptedByReceivingClerk
-        recordedByReceivingClerk
-        reviewedByChief
-        awaitingOOP
-        OOPCreated
-        awaitingPermitCreation
-        PermitCreated
+      }
+      ... on PTPRPermit {
+        id
+        applicationNumber
+        applicationType
+        status
+        currentStage
+        dateOfSubmission
+      }
+      ... on PLTCPPermit {
+        id
+        applicationNumber
+        applicationType
+        status
+        currentStage
+        dateOfSubmission
+      }
+      ... on PLTPPermit {
+        id
+        applicationNumber
+        applicationType
+        status
+        currentStage
+        dateOfSubmission
+      }
+      ... on TCEBPPermit {
+        id
+        applicationNumber
+        applicationType
+        status
+        currentStage
+        dateOfSubmission
       }
     }
   }

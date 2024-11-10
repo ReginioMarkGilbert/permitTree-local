@@ -15,7 +15,7 @@ const CertificateSchema = new mongoose.Schema({
       type: String,
       required: true,
       enum: ['Chainsaw Registration', 'Certificate of Verification', 'Private Tree Plantation Registration',
-             'Public Land Tree Cutting Permit', 'Special/Private Land Timber Permit', 'Tree Cutting and/or Earth Balling Permit']
+         'Public Land Tree Cutting Permit', 'Private Land Timber Permit', 'Tree Cutting and/or Earth Balling Permit']
    },
    status: {
       type: String,

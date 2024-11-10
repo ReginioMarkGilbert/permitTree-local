@@ -41,7 +41,7 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
                case 'Private Tree Plantation Registration':
                   permitData = await fetchPTPRPermit(application.id);
                   break;
-               case 'Special/Private Land Timber Permit':
+               case 'Private Land Timber Permit':
                   permitData = await fetchPLTPPermit(application.id);
                   break;
                case 'Tree Cutting and/or Earth Balling Permit':
@@ -186,7 +186,7 @@ const EditDraftModal = ({ isOpen, onClose, onSave, application }) => {
                handleFileChange={handleFileChange}
                removeFile={removeFile}
             />;
-         case 'Special/Private Land Timber Permit':
+         case 'Private Land Timber Permit':
             return <PLTPEditForm
                formData={formData}
                handleInputChange={handleInputChange}

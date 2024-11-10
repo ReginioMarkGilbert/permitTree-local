@@ -208,7 +208,7 @@ const UserApplicationsStatusPage = () => {
             case 'Public Land Tree Cutting Permit':
                updateFunction = updatePLTCPPermit;
                break;
-            case 'Special/Private Land Timber Permit':
+            case 'Private Land Timber Permit':
                updateFunction = updatePLTPPermit;
                break;
             case 'Tree Cutting and/or Earth Balling Permit':

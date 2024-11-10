@@ -20,6 +20,8 @@ const permitTypes = gql`
     approvedByTechnicalStaff: Boolean!
     acceptedByReceivingClerk: Boolean!
     recordedByReceivingClerk: Boolean!
+    acceptedByPENRCENROfficer: Boolean!
+    approvedByPENRCENROfficer: Boolean!
     reviewedByChief: Boolean!
     awaitingOOP: Boolean!
     OOPCreated: Boolean!
@@ -38,6 +40,8 @@ const permitTypes = gql`
     acceptedByTechnicalStaff: Boolean!
     approvedByTechnicalStaff: Boolean!
     acceptedByReceivingClerk: Boolean!
+    acceptedByPENRCENROfficer: Boolean!
+    approvedByPENRCENROfficer: Boolean!
     reviewedByChief: Boolean!
     awaitingOOP: Boolean!
     OOPCreated: Boolean!
@@ -69,6 +73,8 @@ const permitTypes = gql`
     acceptedByTechnicalStaff: Boolean!
     approvedByTechnicalStaff: Boolean!
     acceptedByReceivingClerk: Boolean!
+    acceptedByPENRCENROfficer: Boolean!
+    approvedByPENRCENROfficer: Boolean!
     reviewedByChief: Boolean!
     awaitingOOP: Boolean!
     OOPCreated: Boolean!
@@ -109,6 +115,8 @@ const permitTypes = gql`
     acceptedByTechnicalStaff: Boolean!
     approvedByTechnicalStaff: Boolean!
     acceptedByReceivingClerk: Boolean!
+    acceptedByPENRCENROfficer: Boolean!
+    approvedByPENRCENROfficer: Boolean!
     reviewedByChief: Boolean!
     awaitingOOP: Boolean!
     OOPCreated: Boolean!
@@ -140,6 +148,8 @@ const permitTypes = gql`
     acceptedByTechnicalStaff: Boolean!
     approvedByTechnicalStaff: Boolean!
     acceptedByReceivingClerk: Boolean!
+    acceptedByPENRCENROfficer: Boolean!
+    approvedByPENRCENROfficer: Boolean!
     reviewedByChief: Boolean!
     awaitingOOP: Boolean!
     OOPCreated: Boolean!
@@ -170,6 +180,8 @@ const permitTypes = gql`
     acceptedByTechnicalStaff: Boolean!
     approvedByTechnicalStaff: Boolean!
     acceptedByReceivingClerk: Boolean!
+    acceptedByPENRCENROfficer: Boolean!
+    approvedByPENRCENROfficer: Boolean!
     reviewedByChief: Boolean!
     awaitingOOP: Boolean!
     OOPCreated: Boolean!
@@ -204,6 +216,8 @@ const permitTypes = gql`
     acceptedByTechnicalStaff: Boolean!
     approvedByTechnicalStaff: Boolean!
     acceptedByReceivingClerk: Boolean!
+    acceptedByPENRCENROfficer: Boolean!
+    approvedByPENRCENROfficer: Boolean!
     reviewedByChief: Boolean!
     awaitingOOP: Boolean!
     OOPCreated: Boolean!
@@ -299,13 +313,13 @@ const permitTypes = gql`
     getApplicationsByStatus(
       status: String,
       currentStage: String,
-      acceptedByTechnicalStaff: Boolean,
       approvedByTechnicalStaff: Boolean,
-      returnedByTechnicalStaff: Boolean,
-      reviewedByChief: Boolean,
+      acceptedByTechnicalStaff: Boolean,
       acceptedByReceivingClerk: Boolean,
-      returnedByReceivingClerk: Boolean,
       recordedByReceivingClerk: Boolean,
+      acceptedByPENRCENROfficer: Boolean,
+      approvedByPENRCENROfficer: Boolean,
+      reviewedByChief: Boolean,
       awaitingOOP: Boolean,
       awaitingPermitCreation: Boolean,
       PermitCreated: Boolean
@@ -341,17 +355,19 @@ const permitTypes = gql`
     saveTCEBPPermitDraft(input: TCEBPPermitInput!): TCEBPPermit!
 
     updatePermitStage(
-      id: ID!,
-      currentStage: String!,
-      status: String!,
-      notes: String,
-      reviewedByChief: Boolean,
-      awaitingOOP: Boolean,
-      acceptedByTechnicalStaff: Boolean,
-      approvedByTechnicalStaff: Boolean,
-      acceptedByReceivingClerk: Boolean,
-      recordedByReceivingClerk: Boolean,
-      awaitingPermitCreation: Boolean,
+      id: ID!
+      currentStage: String!
+      status: String!
+      notes: String
+      reviewedByChief: Boolean
+      awaitingOOP: Boolean
+      acceptedByTechnicalStaff: Boolean
+      approvedByTechnicalStaff: Boolean
+      acceptedByReceivingClerk: Boolean
+      recordedByReceivingClerk: Boolean
+      acceptedByPENRCENROfficer: Boolean
+      approvedByPENRCENROfficer: Boolean
+      awaitingPermitCreation: Boolean
       PermitCreated: Boolean
     ): Permit!
     acceptApplication(id: ID!): Permit!
@@ -519,7 +535,7 @@ const resolvePermitType = (obj) => {
       case 'Private Tree Plantation Registration':
          return 'PTPRPermit';
       case 'PLTP':
-      case 'Special/Private Land Timber Permit':
+      case 'Private Land Timber Permit':
          return 'PLTPPermit';
       case 'TCEBP':
       case 'Tree Cutting and/or Earth Balling Permit':

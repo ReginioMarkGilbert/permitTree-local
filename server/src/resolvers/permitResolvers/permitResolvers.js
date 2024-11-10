@@ -45,6 +45,8 @@ const permitResolvers = {
                reviewedByChief: permit.reviewedByChief || false,
                acceptedByTechnicalStaff: permit.acceptedByTechnicalStaff || false,
                approvedByTechnicalStaff: permit.approvedByTechnicalStaff || false,
+               acceptedByPENRCENROfficer: permit.acceptedByPENRCENROfficer || false,
+               approvedByPENRCENROfficer: permit.approvedByPENRCENROfficer || false,
                awaitingPermitCreation: permit.awaitingPermitCreation || false,
                PermitCreated: permit.PermitCreated || false
             }));
@@ -102,11 +104,16 @@ const permitResolvers = {
          status,
          currentStage,
          acceptedByTechnicalStaff,
+         approvedByTechnicalStaff,
+
          acceptedByReceivingClerk,
          recordedByReceivingClerk,
+
+         acceptedByPENRCENROfficer,
+         approvedByPENRCENROfficer,
+
          reviewedByChief,
          awaitingOOP,
-         approvedByTechnicalStaff,
          awaitingPermitCreation,
          PermitCreated
       }) => {
@@ -126,6 +133,12 @@ const permitResolvers = {
             }
             if (recordedByReceivingClerk !== undefined) {
                query.recordedByReceivingClerk = recordedByReceivingClerk;
+            }
+            if (acceptedByPENRCENROfficer !== undefined) {
+               query.acceptedByPENRCENROfficer = acceptedByPENRCENROfficer;
+            }
+            if (approvedByPENRCENROfficer !== undefined) {
+               query.approvedByPENRCENROfficer = approvedByPENRCENROfficer;
             }
             if (reviewedByChief !== undefined) {
                query.reviewedByChief = reviewedByChief;
@@ -186,14 +199,14 @@ const permitResolvers = {
          if (!user) throw new AuthenticationError('Not authenticated');
 
          const permits = await Permit.find({
-           status: 'Accepted',
-           awaitingOOP: true
+            status: 'Accepted',
+            awaitingOOP: true
          }).lean();
 
          return permits.map(permit => ({
-           ...permit,
-           id: permit._id.toString(),
-           dateOfSubmission: permit.dateOfSubmission.toISOString()
+            ...permit,
+            id: permit._id.toString(),
+            dateOfSubmission: permit.dateOfSubmission.toISOString()
          }));
       },
       getPermitByApplicationNumber: async (_, { applicationNumber }) => {
@@ -290,12 +303,18 @@ const permitResolvers = {
          currentStage,
          status,
          notes,
-         reviewedByChief,
-         awaitingOOP,
          acceptedByTechnicalStaff,
+         approvedByTechnicalStaff,
+
          acceptedByReceivingClerk,
          recordedByReceivingClerk,
-         approvedByTechnicalStaff,
+
+         acceptedByPENRCENROfficer,
+         approvedByPENRCENROfficer,
+
+         reviewedByChief,
+
+         awaitingOOP,
          awaitingPermitCreation,
          PermitCreated
       }, context) => {
@@ -322,6 +341,12 @@ const permitResolvers = {
             }
             if (recordedByReceivingClerk !== undefined) {
                permit.recordedByReceivingClerk = recordedByReceivingClerk;
+            }
+            if (acceptedByPENRCENROfficer !== undefined) {
+               permit.acceptedByPENRCENROfficer = acceptedByPENRCENROfficer;
+            }
+            if (approvedByPENRCENROfficer !== undefined) {
+               permit.approvedByPENRCENROfficer = approvedByPENRCENROfficer;
             }
             if (approvedByTechnicalStaff !== undefined) {
                permit.approvedByTechnicalStaff = approvedByTechnicalStaff;
@@ -424,7 +449,7 @@ const permitResolvers = {
                return 'PTPRPermit';
             case 'Public Land Tree Cutting Permit':
                return 'PLTCPPermit';
-            case 'Special/Private Land Timber Permit':
+            case 'Private Land Timber Permit':
                return 'PLTPPermit';
             case 'Tree Cutting and/or Earth Balling Permit':
                return 'TCEBPPermit';
@@ -455,7 +480,7 @@ const permitResolvers = {
    },
    PLTPPermit: {
       __isTypeOf(obj) {
-         return obj.applicationType === 'Special/Private Land Timber Permit';
+         return obj.applicationType === 'Private Land Timber Permit';
       }
    },
    TCEBPPermit: {

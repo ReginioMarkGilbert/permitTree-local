@@ -27,13 +27,19 @@ const RRC_RecordModal = ({ isOpen, onClose, application, onRecordComplete }) => 
          if (!application || !application.id) {
             throw new Error('Invalid application data');
          }
+
+         const nextStage = application.applicationType === 'Chainsaw Registration'
+            ? 'ChiefRPSReview'
+            : 'CENRPENRReview';
+
          const result = await recordApplication({
             variables: {
                id: application.id,
-               currentStage: 'ChiefRPSReview',
+               currentStage: nextStage,
                status: 'In Progress'
             }
          });
+
          console.log('Result:', result);
          onRecordComplete();
          onClose();
