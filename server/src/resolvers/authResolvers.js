@@ -30,7 +30,7 @@ const authResolvers = {
                COVPermit.find(query),
                PTPRPermit.find(query),
                PLTCPPermit.find(query),
-            PLTPPermit.find(query),
+               PLTPPermit.find(query),
                TCEBPPermit.find(query)
             ]);
 
@@ -59,8 +59,11 @@ const authResolvers = {
             let user = await User.findOne({ username });
 
             if (!user) {
-               console.log('User not found in User model, checking Admin model');
+               // console.log('User not found in User model, checking Admin model');
                user = await Admin.findOne({ username });
+               if (user) {
+                  console.log('AuthResolvers: User found in Admin model:', user.id, user.roles);
+               }
             }
 
             if (!user) {
