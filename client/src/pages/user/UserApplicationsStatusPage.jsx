@@ -362,16 +362,23 @@ const UserApplicationsStatusPage = () => {
    };
 
    const renderOrderOfPaymentsTable = () => {
-      if (oopsLoading) return <p className="text-center text-gray-500">Loading order of payments...</p>;
-      if (oopsError) return <p className="text-center text-red-500">Error loading order of payments</p>;
+      if (loading) return <p className="text-center text-gray-500">Loading...</p>;
+      if (error) return <p className="text-center text-red-500">Error: {error.message}</p>;
 
-      const filteredOOPs = oops.filter(oop =>
-         oop.billNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         oop.applicationId.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      const displayOOPs = filteredOOPs;
 
-      if (filteredOOPs.length === 0) {
-         return <p className="text-center text-gray-500">No order of payments found</p>;
+      if (displayOOPs.length === 0) {
+         return (
+            <div className="bg-white rounded-lg shadow-sm p-6 text-center">
+               <FileX className="mx-auto h-12 w-12 text-gray-400" />
+               <h3 className="mt-2 text-sm font-medium text-gray-900">No orders of payment found</h3>
+               <p className="mt-1 text-sm text-gray-500">
+                  {filters.applicationType ?
+                     `No orders of payment found for ${filters.applicationType}` :
+                     'No orders of payment available for your applications'}
+               </p>
+            </div>
+         );
       }
 
       return (
@@ -400,7 +407,7 @@ const UserApplicationsStatusPage = () => {
                   </tr>
                </thead>
                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredOOPs.map((oop) => (
+                  {displayOOPs.map((oop) => (
                      <UserOOPRow
                         key={oop._id}
                         oop={oop}
@@ -471,6 +478,261 @@ const UserApplicationsStatusPage = () => {
       );
    };
 
+   // Determine which filters to show based on activeMainTab
+   const renderFilters = () => {
+      if (activeMainTab === 'Order Of Payments') {
+         return (
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+               {/* Search Bar */}
+               <div className="relative w-full sm:w-1/3">
+                  <Input
+                     type="text"
+                     placeholder="Search by application or bill number..."
+                     value={searchTerm}
+                     onChange={(e) => setSearchTerm(e.target.value)}
+                     className="pl-10"
+                  />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+               </div>
+
+               {/* OOP-specific Filters */}
+               <div className="flex flex-wrap sm:flex-nowrap gap-2 w-full sm:w-auto">
+                  {/* Nature of Application Filter */}
+                  <Select
+                     value={filters.applicationType}
+                     onValueChange={(value) => setFilters(prev => ({ ...prev, applicationType: value === "all" ? "" : value }))}
+                  >
+                     <SelectTrigger className="w-[200px]">
+                        <SelectValue placeholder="Nature of Application" />
+                     </SelectTrigger>
+                     <SelectContent>
+                        <SelectItem value="all">All Types</SelectItem>
+                        <SelectItem value="Chainsaw Registration">Chainsaw Registration</SelectItem>
+                        <SelectItem value="Certificate of Verification">Certificate of Verification</SelectItem>
+                        <SelectItem value="Private Tree Plantation Registration">Private Tree Plantation Registration</SelectItem>
+                        <SelectItem value="Public Land Tree Cutting Permit">Public Land Tree Cutting Permit</SelectItem>
+                        <SelectItem value="Private Land Timber Permit">Private Land Timber Permit</SelectItem>
+                        <SelectItem value="Tree Cutting and/or Earth Balling Permit">Tree Cutting/Earth Balling Permit</SelectItem>
+                     </SelectContent>
+                  </Select>
+
+                  {/* Amount Range Filter */}
+                  <Select
+                     value={filters.amountRange}
+                     onValueChange={(value) => setFilters(prev => ({ ...prev, amountRange: value }))}
+                  >
+                     <SelectTrigger className="w-[200px]">
+                        <SelectValue placeholder="Amount Range" />
+                     </SelectTrigger>
+                     <SelectContent>
+                        <SelectItem value="all">All Amounts</SelectItem>
+                        <SelectItem value="0-1000">₱0 - ₱1,000</SelectItem>
+                        <SelectItem value="1001-5000">₱1,001 - ₱5,000</SelectItem>
+                        <SelectItem value="5001-10000">₱5,001 - ₱10,000</SelectItem>
+                        <SelectItem value="10001+">Above ₱10,000</SelectItem>
+                     </SelectContent>
+                  </Select>
+
+                  {/* Date Range Picker */}
+                  <Popover>
+                     <PopoverTrigger asChild>
+                        <Button
+                           variant="outline"
+                           className={`w-[200px] justify-start text-left font-normal ${
+                              filters.dateRange.from ? 'text-foreground' : 'text-muted-foreground'
+                           }`}
+                        >
+                           <CalendarIcon className="mr-2 h-4 w-4" />
+                           {filters.dateRange.from ? (
+                              filters.dateRange.to ? (
+                                 <>
+                                    {format(filters.dateRange.from, "MM/dd/yyyy")} -{" "}
+                                    {format(filters.dateRange.to, "MM/dd/yyyy")}
+                                 </>
+                              ) : (
+                                 format(filters.dateRange.from, "MM/dd/yyyy")
+                              )
+                           ) : (
+                              <span>Select date range</span>
+                           )}
+                        </Button>
+                     </PopoverTrigger>
+                     <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                           initialFocus
+                           mode="range"
+                           selected={filters.dateRange}
+                           onSelect={(range) =>
+                              setFilters(prev => ({ ...prev, dateRange: range || { from: undefined, to: undefined } }))
+                           }
+                           numberOfMonths={2}
+                        />
+                     </PopoverContent>
+                  </Popover>
+
+                  {/* Clear Filters Button */}
+                  <Button
+                     variant="outline"
+                     onClick={() => setFilters({
+                        applicationType: '',
+                        amountRange: '',
+                        dateRange: { from: undefined, to: undefined }
+                     })}
+                     className="px-3"
+                  >
+                     Clear
+                  </Button>
+               </div>
+            </div>
+         );
+      }
+
+      // Return original filters for Applications and Renewals tabs
+      return (
+         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+            {/* Search Bar */}
+            <div className="relative w-full sm:w-1/3">
+               <Input
+                  type="text"
+                  placeholder={`Search ${activeMainTab.toLowerCase()}...`}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+               />
+               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            </div>
+
+            {/* Filters */}
+            <div className="flex flex-wrap sm:flex-nowrap gap-2 w-full sm:w-auto">
+               {/* Application Type Filter */}
+               <Select
+                  value={filters.applicationType}
+                  onValueChange={(value) => setFilters(prev => ({ ...prev, applicationType: value === "all" ? "" : value }))}
+               >
+                  <SelectTrigger className="w-[200px]">
+                     <SelectValue placeholder="Application Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                     <SelectItem value="all">All Types</SelectItem>
+                     <SelectItem value="Chainsaw Registration">Chainsaw Registration</SelectItem>
+                     <SelectItem value="Certificate of Verification">Certificate of Verification</SelectItem>
+                     <SelectItem value="Private Tree Plantation Registration">Private Tree Plantation Registration</SelectItem>
+                     <SelectItem value="Public Land Tree Cutting Permit">Public Land Tree Cutting Permit</SelectItem>
+                     <SelectItem value="Private Land Timber Permit">Private Land Timber Permit</SelectItem>
+                     <SelectItem value="Tree Cutting and/or Earth Balling Permit">Tree Cutting/Earth Balling Permit</SelectItem>
+                  </SelectContent>
+               </Select>
+
+               {/* Date Range Picker */}
+               <Popover>
+                  <PopoverTrigger asChild>
+                     <Button
+                        variant="outline"
+                        className={`w-[200px] justify-start text-left font-normal ${
+                           filters.dateRange.from ? 'text-foreground' : 'text-muted-foreground'
+                        }`}
+                     >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {filters.dateRange.from ? (
+                           filters.dateRange.to ? (
+                              <>
+                                 {format(filters.dateRange.from, "MM/dd/yyyy")} -{" "}
+                                 {format(filters.dateRange.to, "MM/dd/yyyy")}
+                              </>
+                           ) : (
+                              format(filters.dateRange.from, "MM/dd/yyyy")
+                           )
+                        ) : (
+                           <span>Select date range</span>
+                        )}
+                     </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                     <Calendar
+                        initialFocus
+                        mode="range"
+                        selected={filters.dateRange}
+                        onSelect={(range) =>
+                           setFilters(prev => ({ ...prev, dateRange: range || { from: undefined, to: undefined } }))
+                           }
+                        numberOfMonths={2}
+                     />
+                  </PopoverContent>
+               </Popover>
+
+               {/* Clear Filters Button */}
+               <Button
+                  variant="outline"
+                  onClick={() => setFilters({
+                     applicationType: '',
+                     dateRange: { from: undefined, to: undefined }
+                  })}
+                  className="px-3"
+               >
+                  Clear
+               </Button>
+            </div>
+         </div>
+      );
+   };
+
+   // Update the filteredOOPs logic
+   const filteredOOPs = useMemo(() => {
+      return oops.filter(oop => {
+         // Search term filter
+         const matchesSearch =
+            (oop.billNo?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
+            (oop.applicationId?.toLowerCase().includes(searchTerm.toLowerCase()) || false);
+
+         // Nature of Application filter
+         const matchesType = !filters.applicationType ||
+            filters.applicationType === "all" ||
+            oop.natureOfApplication === filters.applicationType;
+
+         // Amount range filter
+         const matchesAmount = !filters.amountRange || (() => {
+            const amount = parseFloat(oop.totalAmount);
+            switch(filters.amountRange) {
+               case '0-1000': return amount >= 0 && amount <= 1000;
+               case '1001-5000': return amount > 1000 && amount <= 5000;
+               case '5001-10000': return amount > 5000 && amount <= 10000;
+               case '10001+': return amount > 10000;
+               default: return true;
+            }
+         })();
+
+         // Date range filter
+         const matchesDateRange = (() => {
+            if (!filters.dateRange.from && !filters.dateRange.to) return true;
+
+            // Convert createdAt timestamp to Date object
+            const oopDate = new Date(parseInt(oop.createdAt));
+            if (isNaN(oopDate.getTime())) {
+               console.warn('Invalid date:', oop.createdAt);
+               return true;
+            }
+
+            // Set time to start of day for consistent comparison
+            oopDate.setHours(0, 0, 0, 0);
+
+            const fromDate = filters.dateRange.from ? new Date(filters.dateRange.from) : null;
+            const toDate = filters.dateRange.to ? new Date(filters.dateRange.to) : null;
+
+            if (fromDate) fromDate.setHours(0, 0, 0, 0);
+            if (toDate) toDate.setHours(0, 0, 0, 0);
+
+            // For debugging
+            console.log('OOP Date:', oopDate);
+            console.log('From Date:', fromDate);
+            console.log('To Date:', toDate);
+
+            return (!fromDate || oopDate >= fromDate) && (!toDate || oopDate <= toDate);
+         })();
+
+         return matchesSearch && matchesType && matchesAmount && matchesDateRange;
+      });
+   }, [oops, searchTerm, filters]);
+
    return (
       <div className="bg-green-50 min-h-screen pt-20 pb-8 px-4 sm:px-6 lg:px-8">
          <div className="max-w-7xl mx-auto space-y-6">
@@ -522,91 +784,7 @@ const UserApplicationsStatusPage = () => {
                      ))}
                   </div>
 
-                  {/* Search and Filter Section */}
-                  <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-                     {/* Search Bar */}
-                     <div className="relative w-full sm:w-1/3">
-                        <Input
-                           type="text"
-                           placeholder={`Search ${activeMainTab.toLowerCase()}...`}
-                           value={searchTerm}
-                           onChange={(e) => setSearchTerm(e.target.value)}
-                           className="pl-10"
-                        />
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                     </div>
-
-                     {/* Filters */}
-                     <div className="flex flex-wrap sm:flex-nowrap gap-2 w-full sm:w-auto">
-                        {/* Application Type Filter */}
-                        <Select
-                           value={filters.applicationType}
-                           onValueChange={(value) => setFilters(prev => ({ ...prev, applicationType: value === "all" ? "" : value }))}
-                        >
-                           <SelectTrigger className="w-[200px]">
-                              <SelectValue placeholder="Application Type" />
-                           </SelectTrigger>
-                           <SelectContent>
-                              <SelectItem value="all">All Types</SelectItem>
-                              <SelectItem value="Chainsaw Registration">Chainsaw Registration</SelectItem>
-                              <SelectItem value="Certificate of Verification">Certificate of Verification</SelectItem>
-                              <SelectItem value="Private Tree Plantation Registration">Private Tree Plantation Registration</SelectItem>
-                              <SelectItem value="Public Land Tree Cutting Permit">Public Land Tree Cutting Permit</SelectItem>
-                              <SelectItem value="Private Land Timber Permit">Private Land Timber Permit</SelectItem>
-                              <SelectItem value="Tree Cutting and/or Earth Balling Permit">Tree Cutting/Earth Balling Permit</SelectItem>
-                           </SelectContent>
-                        </Select>
-
-                        {/* Date Range Picker */}
-                        <Popover>
-                           <PopoverTrigger asChild>
-                              <Button
-                                 variant="outline"
-                                 className={`w-[200px] justify-start text-left font-normal ${
-                                    filters.dateRange.from ? 'text-foreground' : 'text-muted-foreground'
-                                 }`}
-                              >
-                                 <CalendarIcon className="mr-2 h-4 w-4" />
-                                 {filters.dateRange.from ? (
-                                    filters.dateRange.to ? (
-                                       <>
-                                          {format(filters.dateRange.from, "MM/dd/yyyy")} -{" "}
-                                          {format(filters.dateRange.to, "MM/dd/yyyy")}
-                                       </>
-                                    ) : (
-                                       format(filters.dateRange.from, "MM/dd/yyyy")
-                                    )
-                                 ) : (
-                                    <span>Select date range</span>
-                                 )}
-                              </Button>
-                           </PopoverTrigger>
-                           <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                 initialFocus
-                                 mode="range"
-                                 selected={filters.dateRange}
-                                 onSelect={(range) =>
-                                    setFilters(prev => ({ ...prev, dateRange: range || { from: undefined, to: undefined } }))
-                                    }
-                                 numberOfMonths={2}
-                              />
-                           </PopoverContent>
-                        </Popover>
-
-                        {/* Clear Filters Button */}
-                        <Button
-                           variant="outline"
-                           onClick={() => setFilters({
-                              applicationType: '',
-                              dateRange: { from: undefined, to: undefined }
-                           })}
-                           className="px-3"
-                        >
-                           Clear
-                        </Button>
-                     </div>
-                  </div>
+                  {renderFilters()}
                </div>
             </div>
 
