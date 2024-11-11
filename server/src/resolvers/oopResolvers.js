@@ -3,6 +3,8 @@ const Permit = require('../models/permits/Permit');
 const { UserInputError } = require('apollo-server-express');
 const { generateBillNo } = require('../utils/billNumberGenerator');
 const { generateTrackingNumber } = require('../utils/trackingNumberGenerator');
+const NotificationService = require('../services/notificationService');
+const User = require('../models/User');
 
 const oopResolvers = {
    Query: {
@@ -106,6 +108,14 @@ const oopResolvers = {
                }
             );
 
+            // Notify applicant
+            await NotificationService.createOOPNotification({
+               oop,
+               recipientId: oop.userId,
+               type: 'OOP_CREATED',
+               remarks: 'Your Order of Payment has been created'
+            });
+
             return oop;
          } catch (error) {
             console.error('Error creating OOP:', error);
@@ -132,10 +142,18 @@ const oopResolvers = {
                { new: true }
             );
 
+            // Notify applicant of signature progress
+            await NotificationService.createOOPNotification({
+               oop: updatedOOP,
+               recipientId: updatedOOP.userId,
+               type: 'OOP_SIGNED',
+               remarks: `OOP has been signed by ${signatureType === 'rps' ? 'Chief RPS' : 'Technical Services'}`
+            });
+
             return updatedOOP;
          } catch (error) {
             console.error('Error updating OOP signature:', error);
-            throw new Error(`Failed to update signature: ${error.message}`);
+            throw error;
          }
       },
 
@@ -143,10 +161,6 @@ const oopResolvers = {
          try {
             const oop = await OOP.findById(id);
             if (!oop) throw new UserInputError('OOP not found');
-
-            if (!oop.OOPSignedByTwoSignatories) {
-               throw new UserInputError('OOP must be signed by both signatories before approval');
-            }
 
             const updatedOOP = await OOP.findByIdAndUpdate(
                id,
@@ -160,10 +174,18 @@ const oopResolvers = {
                { new: true }
             );
 
+            // Notify applicant
+            await NotificationService.createOOPNotification({
+               oop: updatedOOP,
+               recipientId: updatedOOP.userId,
+               type: 'OOP_READY_FOR_PAYMENT',
+               remarks: 'Your OOP has been approved and is ready for payment'
+            });
+
             return updatedOOP;
          } catch (error) {
             console.error('Error approving OOP:', error);
-            throw new Error(`Failed to approve OOP: ${error.message}`);
+            throw error;
          }
       },
 
@@ -202,6 +224,17 @@ const oopResolvers = {
                },
                { new: true }
             );
+
+            // Notify Accountant
+            const accountant = await User.findOne({ roles: 'Accountant' });
+            if (accountant) {
+               await NotificationService.createOOPNotification({
+                  oop: updatedOOP,
+                  recipientId: accountant._id,
+                  type: 'OOP_NEEDS_APPROVAL',
+                  remarks: 'New OOP awaiting approval'
+               });
+            }
 
             return updatedOOP;
          } catch (error) {
@@ -262,40 +295,30 @@ const oopResolvers = {
       generateOR: async (_, { Id, input }, context) => {
          try {
             const oop = await OOP.findById(Id);
-            if (!oop) {
-               throw new UserInputError('OOP not found');
-            }
+            if (!oop) throw new UserInputError('OOP not found');
 
-            if (oop.OOPstatus !== 'Completed OOP') {
-               throw new Error('Cannot generate OR: Payment not yet completed');
-            }
-
-            // Create receipt data with or without issuedBy
-            const receiptData = {
-               ...input,
-               dateIssued: new Date(),
-            };
-
-            // Only add issuedBy if user context exists
-            if (context && context.user && context.user._id) {
-               receiptData.issuedBy = context.user._id;
-            }
-
-            // Update OOP with official receipt details
             const updatedOOP = await OOP.findByIdAndUpdate(
                Id,
                {
                   $set: {
-                     officialReceipt: receiptData,
+                     officialReceipt: {
+                        ...input,
+                        dateIssued: new Date(),
+                        issuedBy: context.user?._id
+                     },
                      OOPstatus: 'Issued OR'
                   }
                },
                { new: true }
             );
 
-            if (!updatedOOP) {
-               throw new UserInputError('Failed to update OOP');
-            }
+            // Notify applicant
+            await NotificationService.createOOPNotification({
+               oop: updatedOOP,
+               recipientId: updatedOOP.userId,
+               type: 'OR_ISSUED',
+               remarks: 'Official Receipt has been generated for your payment'
+            });
 
             return updatedOOP;
          } catch (error) {
@@ -407,6 +430,14 @@ const oopResolvers = {
                },
                { new: true }
             );
+
+            // Notify applicant of payment proof status
+            await NotificationService.createOOPNotification({
+               oop: updatedOOP,
+               recipientId: updatedOOP.userId,
+               type: status === 'APPROVED' ? 'PAYMENT_VERIFIED' : 'PAYMENT_REJECTED',
+               remarks: notes
+            });
 
             return updatedOOP;
          } catch (error) {

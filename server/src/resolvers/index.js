@@ -13,32 +13,62 @@ const pltpResolvers = require('./permitResolvers/pltpResolvers');
 const tcebpResolvers = require('./permitResolvers/tcebpResolvers');
 const paymentResolvers = require('./paymentResolvers');
 const certificateResolvers = require('./certificateResolvers');
+const notificationResolvers = require('./notificationResolvers');
 const { resolvePermitType } = require('../schema/permitTypes');
 const oopResolvers = require('./oopResolvers');
 
+// Base resolvers with scalar types and type resolvers
+const baseResolvers = {
+  Upload: GraphQLUpload,
+  JSON: GraphQLJSON,
+  Permit: {
+    __resolveType: resolvePermitType
+  },
+  Query: {
+    ...userResolvers.Query,
+    ...adminResolvers.Query,
+    ...permitResolvers.Query,
+    ...oopResolvers.Query,
+    ...certificateResolvers.Query,
+    ...notificationResolvers.Query,
+  },
+  Mutation: {
+    ...userResolvers.Mutation,
+    ...adminResolvers.Mutation,
+    ...permitResolvers.Mutation,
+    ...oopResolvers.Mutation,
+    ...certificateResolvers.Mutation,
+    ...notificationResolvers.Mutation,
+  },
+  Subscription: {
+    ...notificationResolvers.Subscription,
+  },
+  // Permit type resolvers
+  CSAWPermit: permitResolvers.CSAWPermit,
+  COVPermit: permitResolvers.COVPermit,
+  PTPRPermit: permitResolvers.PTPRPermit,
+  PLTCPPermit: permitResolvers.PLTCPPermit,
+  PLTPPermit: permitResolvers.PLTPPermit,
+  TCEBPPermit: permitResolvers.TCEBPPermit,
+};
+
+// Merge all resolvers
 const resolvers = mergeResolvers([
-   {
-      Upload: GraphQLUpload,
-      JSON: GraphQLJSON
-   },
-   {
-      Permit: {
-         __resolveType: resolvePermitType
-      }
-   },
-   authResolvers,
-   userResolvers,
-   adminResolvers,
-   permitResolvers,
-   covResolvers,
-   csawResolvers,
-   pltcpResolvers,
-   ptprResolvers,
-   pltpResolvers,
-   tcebpResolvers,
-   oopResolvers,
-   paymentResolvers,
-   certificateResolvers
+  baseResolvers,
+  authResolvers,
+  userResolvers,
+  adminResolvers,
+  permitResolvers,
+  covResolvers,
+  csawResolvers,
+  pltcpResolvers,
+  ptprResolvers,
+  pltpResolvers,
+  tcebpResolvers,
+  oopResolvers,
+  paymentResolvers,
+  certificateResolvers,
+  notificationResolvers
 ]);
 
 module.exports = resolvers;
