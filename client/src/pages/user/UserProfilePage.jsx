@@ -253,7 +253,13 @@ export default function UserProfilePage() {
    if (loading) {
       return (
          <div className="flex items-center justify-center h-[calc(100vh-6rem)]">
-            <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+            <svg
+               data-testid="loading-spinner"
+               className="lucide lucide-loader-circle h-8 w-8 animate-spin text-green-600"
+               // ... rest of the svg props
+            >
+               <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+            </svg>
          </div>
       );
    }
