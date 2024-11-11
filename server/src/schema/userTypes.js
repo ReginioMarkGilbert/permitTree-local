@@ -18,6 +18,12 @@ const userTypes = gql`
     details: String
   }
 
+  type UserStats {
+    totalApplications: Int!
+    activePermits: Int!
+    pendingPayments: Int!
+  }
+
   type User {
     id: ID!
     username: String!
@@ -31,6 +37,7 @@ const userTypes = gql`
     profilePicture: ProfilePicture
     lastPasswordChange: String
     recentActivities: [UserActivity!]!
+    stats: UserStats!
   }
 
   input UpdateUserProfileInput {
@@ -57,6 +64,7 @@ const userTypes = gql`
     me: User
     getUserApplications(status: String, currentStage: String): [Permit!]!
     getUserActivities(limit: Int): [UserActivity!]!
+    getUserStats: UserStats!
   }
 
   extend type Mutation {

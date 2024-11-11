@@ -1,5 +1,7 @@
 const User = require('../models/User');
 const UserActivity = require('../models/UserActivity');
+const { OOP } = require('../models/OOP');
+const Permit = require('../models/permits/Permit');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
@@ -32,10 +34,8 @@ const userResolvers = {
             throw new Error('User not found');
          }
 
-         // Fetch recent activities
-         const recentActivities = await UserActivity.find({ userId: user._id })
-            .sort({ timestamp: -1 })
-            .limit(5);
+         // Fetch stats
+         const stats = await userResolvers.Query.getUserStats(_, __, context);
 
          return {
             id: user._id,
@@ -48,12 +48,16 @@ const userResolvers = {
             address: user.address,
             roles: user.roles,
             lastPasswordChange: user.lastPasswordChange.toISOString(),
-            recentActivities: recentActivities.map(activity => ({
-               id: activity._id,
-               type: activity.type,
-               timestamp: activity.timestamp.toISOString(),
-               details: activity.details
-            })),
+            recentActivities: await UserActivity.find({ userId: user._id })
+               .sort({ timestamp: -1 })
+               .limit(5)
+               .then(activities => activities.map(activity => ({
+                  id: activity._id,
+                  type: activity.type,
+                  timestamp: activity.timestamp.toISOString(),
+                  details: activity.details
+               }))),
+            stats,
             profilePicture: user.profilePicture && user.profilePicture.data ? {
                data: user.profilePicture.data.toString('base64'),
                contentType: user.profilePicture.contentType
@@ -81,7 +85,40 @@ const userResolvers = {
             timestamp: activity.timestamp.toISOString(),
             details: activity.details
          }));
-      }
+      },
+      getUserStats: async (_, __, context) => {
+         if (!context.user) {
+            throw new Error('Not authenticated');
+         }
+
+         try {
+            // Get total applications
+            const totalApplications = await Permit.countDocuments({
+               applicantId: context.user.id
+            });
+
+            // Get active permits (status is 'Approved' or 'Released')
+            const activePermits = await Permit.countDocuments({
+               applicantId: context.user.id,
+               status: { $in: ['Approved', 'Released'] }
+            });
+
+            // Get pending payments (OOPs with status 'Awaiting Payment')
+            const pendingPayments = await OOP.countDocuments({
+               userId: context.user.id,
+               OOPstatus: 'Awaiting Payment'
+            });
+
+            return {
+               totalApplications,
+               activePermits,
+               pendingPayments
+            };
+         } catch (error) {
+            console.error('Error fetching user stats:', error);
+            throw new Error('Failed to fetch user statistics');
+         }
+      },
    },
    Mutation: {
       registerUser: async (_, { firstName, lastName, username, password }) => {

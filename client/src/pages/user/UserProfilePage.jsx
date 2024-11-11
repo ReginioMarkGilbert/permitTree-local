@@ -38,6 +38,11 @@ const GET_USER_DETAILS = gql`
         timestamp
         details
       }
+      stats {
+        totalApplications
+        activePermits
+        pendingPayments
+      }
     }
   }
 `;
@@ -81,13 +86,18 @@ export default function UserProfilePage() {
    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
    const [lastPasswordChange, setLastPasswordChange] = useState(null);
    const [activities, setActivities] = useState([]);
+   const [userStats, setUserStats] = useState({
+      totalApplications: 0,
+      activePermits: 0,
+      pendingPayments: 0
+   });
 
    const { loading, error, data, refetch } = useQuery(GET_USER_DETAILS);
    const [updateUserProfile] = useMutation(UPDATE_USER_PROFILE);
 
    useEffect(() => {
       if (data?.getUserDetails) {
-         const { firstName, lastName, email, phone, address, company, profilePicture, lastPasswordChange, recentActivities } = data.getUserDetails;
+         const { firstName, lastName, email, phone, address, company, profilePicture, lastPasswordChange, recentActivities, stats } = data.getUserDetails;
          const fetchedData = {
             fullName: `${firstName} ${lastName}`,
             email: email || '',
@@ -102,6 +112,7 @@ export default function UserProfilePage() {
          setInitialUserInfo(fetchedData);
          setLastPasswordChange(lastPasswordChange);
          setActivities(recentActivities || []);
+         setUserStats(stats);
       }
    }, [data]);
 
@@ -313,15 +324,15 @@ export default function UserProfilePage() {
                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="bg-gray-50 p-4 rounded-lg">
                      <h4 className="text-sm font-medium text-gray-500">Total Applications</h4>
-                     <p className="text-2xl font-semibold mt-1">12</p>
+                     <p className="text-2xl font-semibold mt-1">{userStats.totalApplications}</p>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg">
                      <h4 className="text-sm font-medium text-gray-500">Active Permits</h4>
-                     <p className="text-2xl font-semibold mt-1">3</p>
+                     <p className="text-2xl font-semibold mt-1">{userStats.activePermits}</p>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg">
                      <h4 className="text-sm font-medium text-gray-500">Pending Payments</h4>
-                     <p className="text-2xl font-semibold mt-1">2</p>
+                     <p className="text-2xl font-semibold mt-1">{userStats.pendingPayments}</p>
                   </div>
                </div>
             </div>
