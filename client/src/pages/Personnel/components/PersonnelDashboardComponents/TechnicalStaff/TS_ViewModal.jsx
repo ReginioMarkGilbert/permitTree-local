@@ -35,25 +35,6 @@ const TS_ViewModal = ({ isOpen, onClose, application }) => {
                      <h3 className="font-semibold">Date of Submission:</h3>
                      <p>{new Date(application.dateOfSubmission).toLocaleString()}</p>
                   </div>
-                  {/* Add more fields here based on the application type */}
-                  {application.applicationType === 'Chainsaw Registration' && (
-                     <>
-                        <div>
-                           <h3 className="font-semibold">Owner Name:</h3>
-                           <p>{application.ownerName}</p>
-                        </div>
-                        <div>
-                           <h3 className="font-semibold">Brand:</h3>
-                           <p>{application.brand}</p>
-                        </div>
-                        <div>
-                           <h3 className="font-semibold">Model:</h3>
-                           <p>{application.model}</p>
-                        </div>
-                        {/* Add more CSAW-specific fields */}
-                     </>
-                  )}
-                  {/* Add conditions for other application types */}
                </div>
             </ScrollArea>
             <DialogFooter>
