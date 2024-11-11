@@ -8,7 +8,8 @@ describe('ViewApplicationModal', () => {
       applicationNumber: 'PMDQ-CSAW-2024-1020-000022',
       applicationType: 'Chainsaw Registration',
       status: 'Draft',
-      dateOfSubmission: '1697760000000', // October 20, 2024
+      currentStage: 'Submitted',
+      dateOfSubmission: '2024-01-20T00:00:00.000Z', // Use ISO string format
    }
 
    it('renders correctly with application data', () => {
@@ -20,9 +21,10 @@ describe('ViewApplicationModal', () => {
       expect(screen.getByText('Chainsaw Registration')).toBeInTheDocument()
       expect(screen.getByText('Draft')).toBeInTheDocument()
 
-      // Check for a valid date string without specifying the exact date
-      const dateElement = screen.getByText(/^(January|February|March|April|May|June|July|August|September|October|November|December)\s\d{1,2},\s\d{4}$/)
-      expect(dateElement).toBeInTheDocument()
+      // Check for the date using a more flexible approach
+      const dateLabel = screen.getByText('Submission Date:')
+      const dateCell = dateLabel.closest('.grid').querySelector('.col-span-3')
+      expect(dateCell).toHaveTextContent('1/20/2024') // Match the exact expected format
    })
 
    it('does not render when application is null', () => {

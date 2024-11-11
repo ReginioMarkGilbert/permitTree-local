@@ -8,10 +8,10 @@ import { MemoryRouter } from 'react-router-dom';
 
 // Mock the toast function
 vi.mock('sonner', () => ({
-   toast: {
-      success: vi.fn(),
-      error: vi.fn(),
-   },
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+  },
 }));
 
 const GET_USER_DETAILS = gql`
@@ -28,23 +28,17 @@ const GET_USER_DETAILS = gql`
         data
         contentType
       }
-    }
-  }
-`;
-
-const UPDATE_USER_PROFILE = gql`
-  mutation UpdateUserProfile($input: UpdateUserProfileInput!) {
-    updateUserProfile(input: $input) {
-      id
-      firstName
-      lastName
-      email
-      phone
-      company
-      address
-      profilePicture {
-        data
-        contentType
+      lastPasswordChange
+      recentActivities {
+        id
+        type
+        timestamp
+        details
+      }
+      stats {
+        totalApplications
+        activePermits
+        pendingPayments
       }
     }
   }
@@ -66,59 +60,17 @@ const mocks = [
           company: 'Example Inc.',
           address: '123 Main St',
           profilePicture: null,
+          lastPasswordChange: new Date().toISOString(),
+          recentActivities: [],
+          stats: {
+            totalApplications: 0,
+            activePermits: 0,
+            pendingPayments: 0
+          }
         },
       },
     },
-  },
-  {
-    request: {
-      query: GET_USER_DETAILS,
-    },
-    result: {
-      data: {
-        getUserDetails: {
-          id: '1',
-          firstName: 'John',
-          lastName: 'Doe',
-          email: 'john.doe@example.com',
-          phone: '1234567890',
-          company: 'Example Inc.',
-          address: '123 Main St',
-          profilePicture: null,
-        },
-      },
-    },
-  },
-  {
-    request: {
-      query: UPDATE_USER_PROFILE,
-      variables: {
-        input: {
-          firstName: 'John',
-          lastName: 'Doe',
-          email: 'new.email@example.com',
-          phone: '1234567890',
-          company: 'Example Inc.',
-          address: '123 Main St',
-          removeProfilePicture: false,
-        },
-      },
-    },
-    result: {
-      data: {
-        updateUserProfile: {
-          id: '1',
-          firstName: 'John',
-          lastName: 'Doe',
-          email: 'new.email@example.com',
-          phone: '1234567890',
-          company: 'Example Inc.',
-          address: '123 Main St',
-          profilePicture: null,
-        },
-      },
-    },
-  },
+  }
 ];
 
 describe('UserProfilePage', () => {

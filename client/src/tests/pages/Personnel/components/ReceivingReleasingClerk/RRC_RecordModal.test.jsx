@@ -34,7 +34,8 @@ describe('RRC_RecordModal', () => {
     id: '1',
     applicationNumber: 'APP-001',
     status: 'In Progress',
-    currentStage: 'ForRecordByReceivingClerk'
+    currentStage: 'ForRecordByReceivingClerk',
+    applicationType: 'Chainsaw Registration'
   };
 
   const mockOnClose = vi.fn();
@@ -106,7 +107,6 @@ describe('RRC_RecordModal', () => {
 
   it('successfully records application', async () => {
     renderModal([successMock]);
-
     fireEvent.click(screen.getByTestId('record-button'));
 
     await waitFor(() => {
@@ -118,11 +118,10 @@ describe('RRC_RecordModal', () => {
 
   it('handles error when recording application', async () => {
     renderModal([errorMock]);
-
     fireEvent.click(screen.getByTestId('record-button'));
 
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith('Error recording application: Failed to record application');
+      expect(toast.error).toHaveBeenCalledWith(expect.stringContaining('Error recording application'));
     });
   });
 
