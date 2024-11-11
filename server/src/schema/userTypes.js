@@ -11,6 +11,13 @@ const userTypes = gql`
     contentType: String!
   }
 
+  type UserActivity {
+    id: ID!
+    type: String!
+    timestamp: String!
+    details: String
+  }
+
   type User {
     id: ID!
     username: String!
@@ -23,6 +30,7 @@ const userTypes = gql`
     address: String
     profilePicture: ProfilePicture
     lastPasswordChange: String
+    recentActivities: [UserActivity!]!
   }
 
   input UpdateUserProfileInput {
@@ -48,6 +56,7 @@ const userTypes = gql`
     getUserDetails: User
     me: User
     getUserApplications(status: String, currentStage: String): [Permit!]!
+    getUserActivities(limit: Int): [UserActivity!]!
   }
 
   extend type Mutation {

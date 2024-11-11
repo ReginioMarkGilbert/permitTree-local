@@ -2,12 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Admin = require('../models/admin');
-const CSAWPermit = require('../models/permits/CSAWPermit');
-const COVPermit = require('../models/permits/COVPermit');
-const PTPRPermit = require('../models/permits/PTPRPermit');
-const PLTCPPermit = require('../models/permits/PLTCPPermit');
-const PLTPPermit = require('../models/permits/PLTPPermit');
-const TCEBPPermit = require('../models/permits/TCEBPPermit');
+const UserActivity = require('../models/UserActivity');
 
 const authResolvers = {
    Query: {
@@ -84,6 +79,13 @@ const authResolvers = {
                process.env.JWT_SECRET || 'default_secret',
                { expiresIn: '12h' }
             );
+
+            // Log the login activity
+            await UserActivity.create({
+               userId: user.id,
+               type: 'LOGIN',
+               details: 'User logged in'
+            });
 
             return {
                token,

@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const UserActivity = require('../models/UserActivity');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
@@ -30,6 +31,12 @@ const userResolvers = {
          if (!user) {
             throw new Error('User not found');
          }
+
+         // Fetch recent activities
+         const recentActivities = await UserActivity.find({ userId: user._id })
+            .sort({ timestamp: -1 })
+            .limit(5);
+
          return {
             id: user._id,
             username: user.username,
@@ -41,6 +48,12 @@ const userResolvers = {
             address: user.address,
             roles: user.roles,
             lastPasswordChange: user.lastPasswordChange.toISOString(),
+            recentActivities: recentActivities.map(activity => ({
+               id: activity._id,
+               type: activity.type,
+               timestamp: activity.timestamp.toISOString(),
+               details: activity.details
+            })),
             profilePicture: user.profilePicture && user.profilePicture.data ? {
                data: user.profilePicture.data.toString('base64'),
                contentType: user.profilePicture.contentType
@@ -53,6 +66,22 @@ const userResolvers = {
          }
          return await User.findById(req.user._id);
       },
+      getUserActivities: async (_, { limit = 10 }, context) => {
+         if (!context.user) {
+            throw new Error('Not authenticated');
+         }
+
+         const activities = await UserActivity.find({ userId: context.user.id })
+            .sort({ timestamp: -1 })
+            .limit(limit);
+
+         return activities.map(activity => ({
+            id: activity._id,
+            type: activity.type,
+            timestamp: activity.timestamp.toISOString(),
+            details: activity.details
+         }));
+      }
    },
    Mutation: {
       registerUser: async (_, { firstName, lastName, username, password }) => {
@@ -124,6 +153,13 @@ const userResolvers = {
                throw new Error('User not found');
             }
 
+            // Log the activity
+            await UserActivity.create({
+               userId: context.user.id,
+               type: 'PROFILE_UPDATE',
+               details: 'Profile information updated'
+            });
+
             return {
                id: updatedUser._id,
                username: updatedUser.username,
@@ -170,6 +206,13 @@ const userResolvers = {
             // Set the new password - the pre-save hook will hash it
             user.password = newPassword;
             await user.save();
+
+            // Log the activity
+            await UserActivity.create({
+               userId: context.user.id,
+               type: 'PASSWORD_CHANGE',
+               details: 'Password was changed'
+            });
 
             return true;
          } catch (error) {

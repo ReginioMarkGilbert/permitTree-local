@@ -15,7 +15,7 @@ import {
    DialogTitle,
    DialogDescription
 } from "@/components/ui/dialog";
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns';
 
 const GET_USER_DETAILS = gql`
   query GetUserDetails {
@@ -32,6 +32,12 @@ const GET_USER_DETAILS = gql`
         contentType
       }
       lastPasswordChange
+      recentActivities {
+        id
+        type
+        timestamp
+        details
+      }
     }
   }
 `;
@@ -74,13 +80,14 @@ export default function UserProfilePage() {
    const location = useLocation();
    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
    const [lastPasswordChange, setLastPasswordChange] = useState(null);
+   const [activities, setActivities] = useState([]);
 
    const { loading, error, data, refetch } = useQuery(GET_USER_DETAILS);
    const [updateUserProfile] = useMutation(UPDATE_USER_PROFILE);
 
    useEffect(() => {
       if (data?.getUserDetails) {
-         const { firstName, lastName, email, phone, address, company, profilePicture, lastPasswordChange } = data.getUserDetails;
+         const { firstName, lastName, email, phone, address, company, profilePicture, lastPasswordChange, recentActivities } = data.getUserDetails;
          const fetchedData = {
             fullName: `${firstName} ${lastName}`,
             email: email || '',
@@ -94,6 +101,7 @@ export default function UserProfilePage() {
          setUserInfo(fetchedData);
          setInitialUserInfo(fetchedData);
          setLastPasswordChange(lastPasswordChange);
+         setActivities(recentActivities || []);
       }
    }, [data]);
 
@@ -202,6 +210,32 @@ export default function UserProfilePage() {
       } catch (error) {
          console.error('Error formatting date:', error);
          return 'Date unavailable';
+      }
+   };
+
+   const getActivityIcon = (type) => {
+      switch (type) {
+         case 'LOGIN':
+            return <div className="w-2 h-2 bg-green-500 rounded-full" />;
+         case 'PROFILE_UPDATE':
+            return <div className="w-2 h-2 bg-blue-500 rounded-full" />;
+         case 'PASSWORD_CHANGE':
+            return <div className="w-2 h-2 bg-yellow-500 rounded-full" />;
+         default:
+            return <div className="w-2 h-2 bg-gray-500 rounded-full" />;
+      }
+   };
+
+   const getActivityText = (type) => {
+      switch (type) {
+         case 'LOGIN':
+            return 'Last login';
+         case 'PROFILE_UPDATE':
+            return 'Profile updated';
+         case 'PASSWORD_CHANGE':
+            return 'Password changed';
+         default:
+            return 'Activity recorded';
       }
    };
 
@@ -380,20 +414,20 @@ export default function UserProfilePage() {
                      <h3 className="text-lg font-medium mb-4">Recent Activity</h3>
                      <Separator className="mb-4" />
                      <div className="space-y-4">
-                        <div className="flex items-center justify-between text-sm">
-                           <div className="flex items-center space-x-2">
-                              <div className="w-2 h-2 bg-green-500 rounded-full" />
-                              <span>Last login</span>
+                        {activities.map((activity) => (
+                           <div key={activity.id} className="flex items-center justify-between text-sm">
+                              <div className="flex items-center space-x-2">
+                                 {getActivityIcon(activity.type)}
+                                 <span>{getActivityText(activity.type)}</span>
+                              </div>
+                              <span className="text-gray-500">
+                                 {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
+                              </span>
                            </div>
-                           <span className="text-gray-500">Today, 9:42 AM</span>
-                        </div>
-                        <div className="flex items-center justify-between text-sm">
-                           <div className="flex items-center space-x-2">
-                              <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                              <span>Profile updated</span>
-                           </div>
-                           <span className="text-gray-500">Yesterday, 3:15 PM</span>
-                        </div>
+                        ))}
+                        {activities.length === 0 && (
+                           <p className="text-gray-500 text-center">No recent activity</p>
+                        )}
                      </div>
                   </div>
 
