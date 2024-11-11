@@ -22,6 +22,7 @@ const userTypes = gql`
     company: String
     address: String
     profilePicture: ProfilePicture
+    lastPasswordChange: String
   }
 
   input UpdateUserProfileInput {

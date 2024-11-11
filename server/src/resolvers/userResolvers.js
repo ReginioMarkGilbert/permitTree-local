@@ -40,6 +40,7 @@ const userResolvers = {
             company: user.company,
             address: user.address,
             roles: user.roles,
+            lastPasswordChange: user.lastPasswordChange.toISOString(),
             profilePicture: user.profilePicture && user.profilePicture.data ? {
                data: user.profilePicture.data.toString('base64'),
                contentType: user.profilePicture.contentType

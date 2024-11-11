@@ -15,6 +15,7 @@ import {
    DialogTitle,
    DialogDescription
 } from "@/components/ui/dialog";
+import { formatDistanceToNow } from 'date-fns';
 
 const GET_USER_DETAILS = gql`
   query GetUserDetails {
@@ -30,6 +31,7 @@ const GET_USER_DETAILS = gql`
         data
         contentType
       }
+      lastPasswordChange
     }
   }
 `;
@@ -71,13 +73,14 @@ export default function UserProfilePage() {
    const [isLoading, setIsLoading] = useState(false);
    const location = useLocation();
    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+   const [lastPasswordChange, setLastPasswordChange] = useState(null);
 
    const { loading, error, data, refetch } = useQuery(GET_USER_DETAILS);
    const [updateUserProfile] = useMutation(UPDATE_USER_PROFILE);
 
    useEffect(() => {
       if (data?.getUserDetails) {
-         const { firstName, lastName, email, phone, address, company, profilePicture } = data.getUserDetails;
+         const { firstName, lastName, email, phone, address, company, profilePicture, lastPasswordChange } = data.getUserDetails;
          const fetchedData = {
             fullName: `${firstName} ${lastName}`,
             email: email || '',
@@ -90,6 +93,7 @@ export default function UserProfilePage() {
          };
          setUserInfo(fetchedData);
          setInitialUserInfo(fetchedData);
+         setLastPasswordChange(lastPasswordChange);
       }
    }, [data]);
 
@@ -190,6 +194,16 @@ export default function UserProfilePage() {
 
    const inputClasses = `w-full rounded-md focus:ring-green-500 focus:border-green-500 h-12 pl-3 ${isEditing ? 'bg-gray-100 border-gray-300' : 'bg-white border-transparent'
       }`;
+
+   const getPasswordChangeText = () => {
+      if (!lastPasswordChange) return 'Never changed';
+      try {
+         return `Last changed ${formatDistanceToNow(new Date(lastPasswordChange))} ago`;
+      } catch (error) {
+         console.error('Error formatting date:', error);
+         return 'Date unavailable';
+      }
+   };
 
    if (loading) {
       return (
@@ -352,7 +366,7 @@ export default function UserProfilePage() {
                         <div className="flex items-center justify-between">
                            <div>
                               <h4 className="font-medium">Password</h4>
-                              <p className="text-sm text-gray-500">Last changed 3 months ago</p>
+                              <p className="text-sm text-gray-500">{getPasswordChangeText()}</p>
                            </div>
                            <Button variant="outline" size="sm" onClick={() => setIsChangePasswordOpen(true)}>
                               Change Password
