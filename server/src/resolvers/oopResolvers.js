@@ -297,6 +297,10 @@ const oopResolvers = {
             const oop = await OOP.findById(Id);
             if (!oop) throw new UserInputError('OOP not found');
 
+            if (oop.OOPstatus !== 'Completed OOP') {
+               throw new Error('Cannot generate OR: Payment not yet completed');
+            }
+
             const updatedOOP = await OOP.findByIdAndUpdate(
                Id,
                {
