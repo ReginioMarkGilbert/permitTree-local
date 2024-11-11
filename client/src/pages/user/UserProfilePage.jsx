@@ -7,6 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Pencil, Camera, Trash2, Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import ChangePasswordForm from './components/ChangePasswordForm';
+import {
+   Dialog,
+   DialogContent,
+   DialogHeader,
+   DialogTitle,
+   DialogDescription
+} from "@/components/ui/dialog";
 
 const GET_USER_DETAILS = gql`
   query GetUserDetails {
@@ -62,6 +70,7 @@ export default function UserProfilePage() {
    const [isEditing, setIsEditing] = useState(false);
    const [isLoading, setIsLoading] = useState(false);
    const location = useLocation();
+   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
    const { loading, error, data, refetch } = useQuery(GET_USER_DETAILS);
    const [updateUserProfile] = useMutation(UPDATE_USER_PROFILE);
@@ -345,7 +354,7 @@ export default function UserProfilePage() {
                               <h4 className="font-medium">Password</h4>
                               <p className="text-sm text-gray-500">Last changed 3 months ago</p>
                            </div>
-                           <Button variant="outline" size="sm">
+                           <Button variant="outline" size="sm" onClick={() => setIsChangePasswordOpen(true)}>
                               Change Password
                            </Button>
                         </div>
@@ -410,6 +419,19 @@ export default function UserProfilePage() {
                   disabled={!isEditing}
                />
             </div>
+
+            {/* Change Password Dialog */}
+            <Dialog open={isChangePasswordOpen} onOpenChange={setIsChangePasswordOpen}>
+               <DialogContent>
+                  <DialogHeader>
+                     <DialogTitle>Change Password</DialogTitle>
+                     <DialogDescription>
+                        Make sure to remember your new password.
+                     </DialogDescription>
+                  </DialogHeader>
+                  <ChangePasswordForm onClose={() => setIsChangePasswordOpen(false)} />
+               </DialogContent>
+            </Dialog>
          </div>
       </div>
    );

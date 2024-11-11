@@ -59,6 +59,13 @@ const userTypes = gql`
     updateUserProfile(input: UpdateUserProfileInput!): User!
     login(username: String!, password: String!): AuthPayload!
     logout: Boolean!
+    changePassword(input: ChangePasswordInput!): Boolean!
+  }
+
+  input ChangePasswordInput {
+    currentPassword: String!
+    newPassword: String!
+    confirmPassword: String!
   }
 `;
 

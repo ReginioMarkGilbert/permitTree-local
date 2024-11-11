@@ -53,62 +53,52 @@ const authResolvers = {
 
    Mutation: {
       login: async (_, { username, password }) => {
-         console.log('Login attempt for username:', username);
-         let user = await User.findOne({ username });
-         // let isAdmin = false;
+         try {
+            console.log('Login attempt for username:', username);
+            let user = await User.findOne({ username });
 
-         if (!user) {
-            console.log('User not found in User model, checking Admin model');
-            user = await Admin.findOne({ username });
-            // isAdmin = !!user; // if user is found, isAdmin is true, otherwise false
-         }
-
-         if (!user) {
-            console.log('User not found in either model');
-            throw new Error('Invalid credentials');
-         }
-
-         const isValid = await bcrypt.compare(password, user.password);
-         console.log('Password valid:', isValid);
-
-         if (!isValid) {
-            throw new Error('Invalid credentials');
-         }
-
-         // const roles = isAdmin ? user.roles : [user.role] || ['user']; // if roles is null, set it to ['user']
-         // const roles = isAdmin ? user.roles : [user.role];
-         // const roles = () => {
-         //    if (isAdmin) {
-         //       return user.roles;
-         //    } else if {
-         // }
-
-         const token = jwt.sign(
-            // {
-            //    id: user.id,
-            //    username: user.username,
-            //    roles,
-            //    isAdmin
-            // },
-            {
-               id: user.id,
-               username: user.username,
-               roles: user.roles
-            },
-            process.env.JWT_SECRET,
-            { expiresIn: '12h' }
-         );
-
-         return {
-            token,
-            user: {
-               id: user.id,
-               username: user.username,
-               firstName: user.firstName,
-               lastName: user.lastName,
-               roles: user.roles
+            if (!user) {
+               console.log('User not found in User model, checking Admin model');
+               user = await Admin.findOne({ username });
             }
-         };
+
+            if (!user) {
+               console.log('User not found in either model');
+               throw new Error('Invalid credentials');
+            }
+
+            // Use bcrypt.compare to properly compare hashed passwords
+            const isValid = await bcrypt.compare(password, user.password);
+            console.log('Password valid:', isValid);
+
+            if (!isValid) {
+               throw new Error('Invalid credentials');
+            }
+
+            const token = jwt.sign(
+               {
+                  id: user.id,
+                  username: user.username,
+                  roles: user.roles
+               },
+               process.env.JWT_SECRET || 'default_secret',
+               { expiresIn: '12h' }
+            );
+
+            return {
+               token,
+               user: {
+                  id: user.id,
+                  username: user.username,
+                  firstName: user.firstName,
+                  lastName: user.lastName,
+                  roles: user.roles
+               }
+            };
+         } catch (error) {
+            console.error('Login error:', error);
+            throw new Error('Invalid credentials');
+         }
       },
       logout: async (_, __, context) => {
          // Here you would typically invalidate the token on the server side

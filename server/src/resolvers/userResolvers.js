@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 // Add this function at the top of the file
 const generateToken = (user) => {
@@ -140,6 +141,39 @@ const userResolvers = {
          } catch (error) {
             console.error('Error updating user profile:', error);
             throw new Error('Error updating user profile: ' + error.message);
+         }
+      },
+      changePassword: async (_, { input }, context) => {
+         if (!context.user) {
+            throw new Error('Not authenticated');
+         }
+
+         const { currentPassword, newPassword, confirmPassword } = input;
+
+         if (newPassword !== confirmPassword) {
+            throw new Error('New password and confirm password do not match');
+         }
+
+         try {
+            const user = await User.findById(context.user.id);
+            if (!user) {
+               throw new Error('User not found');
+            }
+
+            // Use the comparePassword method
+            const isMatch = await user.comparePassword(currentPassword);
+            if (!isMatch) {
+               throw new Error('Current password is incorrect');
+            }
+
+            // Set the new password - the pre-save hook will hash it
+            user.password = newPassword;
+            await user.save();
+
+            return true;
+         } catch (error) {
+            console.error('Error changing password:', error);
+            throw new Error(error.message || 'Failed to change password');
          }
       },
    }
