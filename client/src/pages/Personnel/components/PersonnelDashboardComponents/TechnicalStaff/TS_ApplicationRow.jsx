@@ -177,22 +177,22 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
       );
 
       // Print action
-      if (userRoles.includes('Technical_Staff') && !userRoles.includes('Receiving_Clerk')) {
-         actions.push(
-            <TooltipProvider key="print-action">
-               <Tooltip delayDuration={200}>
-                  <TooltipTrigger asChild>
-                     <Button onClick={() => onPrint(app.id)} variant="outline" size="icon" className="h-8 w-8">
-                        <Printer className="h-4 w-4" />
-                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                     <p>Print Application</p>
-                  </TooltipContent>
-               </Tooltip>
-            </TooltipProvider>
-         );
-      }
+      // if (userRoles.includes('Technical_Staff') && !userRoles.includes('Receiving_Clerk')) {
+      //    actions.push(
+      //       <TooltipProvider key="print-action">
+      //          <Tooltip delayDuration={200}>
+   //             <TooltipTrigger asChild>
+      //                <Button onClick={() => onPrint(app.id)} variant="outline" size="icon" className="h-8 w-8">
+      //                   <Printer className="h-4 w-4" />
+      //                </Button>
+      //             </TooltipTrigger>
+      //             <TooltipContent>
+      //                <p>Print Application</p>
+      //             </TooltipContent>
+      //          </Tooltip>
+      //       </TooltipProvider>
+      //    );
+      // }
 
       // Review action
       if (app.status === 'Submitted' && userRoles.includes('Technical_Staff') && !userRoles.includes('Receiving_Clerk')) {
