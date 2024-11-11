@@ -34,8 +34,24 @@ const userResolvers = {
             throw new Error('User not found');
          }
 
-         // Fetch stats
+         // Get stats
          const stats = await userResolvers.Query.getUserStats(_, __, context);
+
+         // Get the most recent activity of each type
+         const recentActivities = await UserActivity.aggregate([
+            { $match: { userId: user._id } },
+            { $sort: { timestamp: -1 } },
+            {
+               $group: {
+                  _id: '$type',
+                  id: { $first: '$_id' },
+                  type: { $first: '$type' },
+                  timestamp: { $first: '$timestamp' },
+                  details: { $first: '$details' }
+               }
+            },
+            { $limit: 2 } // Limit to 2 most recent unique activities
+         ]);
 
          return {
             id: user._id,
@@ -48,15 +64,12 @@ const userResolvers = {
             address: user.address,
             roles: user.roles,
             lastPasswordChange: user.lastPasswordChange.toISOString(),
-            recentActivities: await UserActivity.find({ userId: user._id })
-               .sort({ timestamp: -1 })
-               .limit(5)
-               .then(activities => activities.map(activity => ({
-                  id: activity._id,
-                  type: activity.type,
-                  timestamp: activity.timestamp.toISOString(),
-                  details: activity.details
-               }))),
+            recentActivities: recentActivities.map(activity => ({
+               id: activity.id,
+               type: activity.type,
+               timestamp: activity.timestamp.toISOString(),
+               details: activity.details
+            })),
             stats,
             profilePicture: user.profilePicture && user.profilePicture.data ? {
                data: user.profilePicture.data.toString('base64'),
