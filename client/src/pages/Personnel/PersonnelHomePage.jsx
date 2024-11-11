@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "../../comp
 import { Bell, ClipboardList, Users, Settings, TrendingUp, CheckCircle, XCircle, ClipboardCheck, RotateCcw } from "lucide-react";
 import { FaChartLine } from 'react-icons/fa';
 import '../../components/ui/styles/customScrollBar.css';
-import { useChiefRPSNotification } from './contexts/ChiefRPSNotificationContext';
 import useDebounce from '../../hooks/useDebounce';
 import { getUserRoles } from '../../utils/auth';
 
@@ -15,7 +14,6 @@ const PersonnelHomePage = () => {
    const [loading, setLoading] = useState(true);
    const [error, setError] = useState(null);
    const navigate = useNavigate();
-   const { unreadCount } = useChiefRPSNotification();
    const [refreshTrigger, setRefreshTrigger] = useState(0);
    const debouncedRefreshTrigger = useDebounce(refreshTrigger, 300);
 
@@ -29,23 +27,10 @@ const PersonnelHomePage = () => {
    });
 
    const quickActions = [
-      { title: "Reports", icon: <FaChartLine className="h-6 w-6" />, link: "/chief-rps/reports" },
-      { title: "All Applications", icon: <ClipboardList className="h-6 w-6" />, link: "/chief-rps/dashboard" },
-      { title: "System Settings", icon: <Settings className="h-6 w-6" />, link: "/chief-rps/settings" },
-      {
-         title: "Notifications",
-         icon: (
-            <div className="relative">
-               <Bell className="h-6 w-6" />
-               {unreadCount > 0 && (
-                  <span className="absolute -top-2 left-3 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
-                     {unreadCount}
-                  </span>
-               )}
-            </div>
-         ),
-         link: "/chief-rps/notifications"
-      },
+      { title: "Reports", icon: <FaChartLine className="h-6 w-6" />, link: "/personnel/reports" },
+      { title: "All Applications", icon: <ClipboardList className="h-6 w-6" />, link: "/personnel/dashboard" },
+      { title: "System Settings", icon: <Settings className="h-6 w-6" />, link: "/personnel/settings" },
+      { title: "Notifications", icon: <Bell className="h-6 w-6" />, link: "/personnel/notifications" },
    ];
 
    //  #region - temporarily comment out til converted to graphql

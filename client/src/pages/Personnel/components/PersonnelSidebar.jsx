@@ -2,7 +2,6 @@ import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { FaBell, FaChartLine, FaCog, FaFileInvoiceDollar, FaHome, FaSignOutAlt, FaTachometerAlt } from 'react-icons/fa';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { removeToken } from '../../../utils/tokenManager';
-import { useChiefRPSNotification } from '../contexts/ChiefRPSNotificationContext';
 import { isAuthenticated, getUserRoles } from '../../../utils/auth';
 import { gql, useMutation } from '@apollo/client';
 
@@ -14,7 +13,6 @@ const LOGOUT_MUTATION = gql`
 
 const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
    const navigate = useNavigate();
-   const { unreadCount } = useChiefRPSNotification();
    const [logout] = useMutation(LOGOUT_MUTATION);
    const userRoles = getUserRoles();
    const [showText, setShowText] = useState(false);
@@ -85,7 +83,7 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
       { to: "/personnel/home", icon: <FaHome />, text: "Home" },
       { to: getDashboardLink(), icon: <FaTachometerAlt />, text: "Dashboard" },
       ...(shouldShowOrderOfPayment() ? [{ to: "/personnel/order-of-payment", icon: <FaFileInvoiceDollar />, text: "Order of Payment" }] : []),
-      { to: "/personnel/notifications", icon: <FaBell />, text: "Notifications", badge: unreadCount },
+      { to: "/personnel/notifications", icon: <FaBell />, text: "Notifications" },
       { to: "/personnel/reports", icon: <FaChartLine />, text: "Reports" },
       { to: "/personnel/settings", icon: <FaCog />, text: "Settings" },
       { to: "/auth", icon: <FaSignOutAlt />, text: "Logout" }

@@ -2,7 +2,6 @@ import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { FaBell, FaClipboardList, FaFileAlt, FaHome, FaSignInAlt, FaUser, FaSignOutAlt } from 'react-icons/fa';
 import { NavLink, useNavigate } from 'react-router-dom';
 import permitTreeLogo from '../../assets/denr-logo.png';
-import { useNotification } from '../../pages/user/contexts/UserNotificationContext';
 import { isAuthenticated } from '../../utils/auth';
 import { removeToken } from '../../utils/tokenManager';
 import { gql, useMutation } from '@apollo/client';
@@ -15,7 +14,6 @@ const LOGOUT_MUTATION = gql`
 
 const Sidebar = React.memo(({ isOpen, onToggle }) => {
    const navigate = useNavigate();
-   const { unreadCount } = useNotification();
    const [logout] = useMutation(LOGOUT_MUTATION);
    const [showText, setShowText] = useState(false);
    const [isAuth, setIsAuth] = useState(isAuthenticated());
@@ -60,7 +58,7 @@ const Sidebar = React.memo(({ isOpen, onToggle }) => {
       { to: '/home', icon: <FaHome />, text: 'Home' },
       { to: '/permits', icon: <FaFileAlt />, text: 'Apply' },
       { to: '/applicationsStatus', icon: <FaClipboardList />, text: 'Application Status' },
-      { to: '/notifications', icon: <FaBell />, text: 'Notifications', badge: unreadCount },
+      { to: '/notifications', icon: <FaBell />, text: 'Notifications' },
       { to: '/profile', icon: <FaUser />, text: 'Profile' },
       { to: '/auth', icon: <FaSignOutAlt />, text: 'Logout' }
    ];
