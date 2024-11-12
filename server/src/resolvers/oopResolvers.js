@@ -4,7 +4,9 @@ const { UserInputError } = require('apollo-server-express');
 const { generateBillNo } = require('../utils/billNumberGenerator');
 const { generateTrackingNumber } = require('../utils/trackingNumberGenerator');
 const NotificationService = require('../services/userNotificationService');
+const PersonnelNotificationService = require('../services/personnelNotificationService');
 const User = require('../models/User');
+const Admin = require('../models/admin');
 
 const oopResolvers = {
    Query: {
@@ -115,6 +117,20 @@ const oopResolvers = {
                type: 'OOP_CREATED',
                remarks: 'Your Order of Payment has been created'
             });
+
+            // Notify Chief TSD
+            const chiefTSD = await Admin.findOne({ roles: 'Chief_TSD' });
+            if (chiefTSD) {
+               await PersonnelNotificationService.createOOPPersonnelNotification({
+                  oop: permit,
+                  // application: permit,
+                  recipientId: chiefTSD._id,
+                  type: 'OOP_PENDING_SIGNATURE',
+                  OOPStatus: 'Pending Signature',
+                  remarks: 'Your Order of Payment has been created',
+                  priority: 'high'
+               });
+            }
 
             return oop;
          } catch (error) {

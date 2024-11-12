@@ -12,6 +12,25 @@ import {
 import TS_ViewModal from '../TechnicalStaff/TS_ViewModal';
 import ChiefReviewModal from './ChiefReviewModal';
 
+const DELETE_OOP = gql`
+  mutation DeleteOOP($applicationId: String!) {
+    deleteOOP(applicationId: $applicationId) {
+      _id
+      applicationId
+    }
+  }
+`;
+
+const UNDO_OOP_CREATION = gql`
+  mutation UndoOOPCreation($id: ID!) {
+    undoOOPCreation(id: $id) {
+      id
+      awaitingOOP
+      OOPCreated
+    }
+  }
+`;
+
 const UPDATE_PERMIT_STAGE = gql`
   mutation UpdatePermitStage(
     $id: ID!,
@@ -43,7 +62,8 @@ const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
    const [updatePermitStage] = useMutation(UPDATE_PERMIT_STAGE);
-
+   const [undoOOPCreation] = useMutation(UNDO_OOP_CREATION);
+   const [deleteOOP] = useMutation(DELETE_OOP);
    const handleViewClick = () => setIsViewModalOpen(true);
    const handleReviewClick = () => setIsReviewModalOpen(true);
 
@@ -55,6 +75,30 @@ const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab
    const handlePrint = () => {
       // Implement print functionality
       console.log('Print application:', app.id);
+   };
+
+   const handleUndoOOP = async () => {
+      try {
+         // First, delete the OOP document
+         await deleteOOP({
+            variables: {
+               applicationId: app.applicationNumber // Use applicationNumber here
+            }
+         });
+
+         // Then, update the permit status
+         await undoOOPCreation({
+            variables: {
+               id: app.id
+            }
+         });
+
+         toast.success('OOP creation undone successfully');
+         onReviewComplete(); // Refresh the list
+      } catch (error) {
+         console.error('Error undoing OOP creation:', error);
+         toast.error('Failed to undo OOP creation');
+      }
    };
 
    const handleUndo = async () => {
@@ -126,7 +170,28 @@ const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab
             </TooltipProvider>
          );
       }
-
+      if (currentTab === 'Created OOP') {
+         actions.push(
+            <TooltipProvider key="undo-oop-action">
+               <Tooltip delayDuration={200}>
+                  <TooltipTrigger asChild>
+                     <Button
+                        onClick={handleUndoOOP}
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 text-yellow-600 hover:text-yellow-800"
+                        data-testid="undo-oop-button"
+                     >
+                        <RotateCcw className="h-4 w-4" />
+                     </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                     <p>Undo OOP Creation</p>
+                  </TooltipContent>
+               </Tooltip>
+            </TooltipProvider>
+         )
+      }
       // Undo action for completed reviews
       if (currentTab === 'Completed Reviews') {
          actions.push(
