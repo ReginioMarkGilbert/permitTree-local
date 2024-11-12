@@ -24,7 +24,7 @@ const PersonnelNotificationsPage = () => {
    );
 
    return (
-      <div className="container mx-auto p-6 max-w-5xl">
+      <div className="container mx-auto p-6 max-w-5xl pt-24">
          <div className="flex justify-between items-center mb-8">
             <div className="flex items-center gap-3">
                <BellRing className="h-8 w-8 text-primary" />
