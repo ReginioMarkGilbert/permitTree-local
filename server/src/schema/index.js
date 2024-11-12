@@ -7,7 +7,7 @@ const certificateTypes = require('./certificateTypes');
 const queryTypes = require('./queryTypes');
 const paymentTypes = require('./paymentTypes');
 const mutationTypes = require('./mutationTypes');
-const { notificationTypes } = require('./notificationTypes');
+const { notificationTypes } = require('./userNotificationTypes');
 const { personnelNotificationTypes } = require('./personnelNotificationTypes');
 
 const rootTypeDefs = gql`

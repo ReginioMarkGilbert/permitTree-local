@@ -12,25 +12,6 @@ import {
 import TS_ViewModal from '../TechnicalStaff/TS_ViewModal';
 import ChiefReviewModal from './ChiefReviewModal';
 
-const DELETE_OOP = gql`
-  mutation DeleteOOP($applicationId: String!) {
-    deleteOOP(applicationId: $applicationId) {
-      _id
-      applicationId
-    }
-  }
-`;
-
-const UNDO_OOP_CREATION = gql`
-  mutation UndoOOPCreation($id: ID!) {
-    undoOOPCreation(id: $id) {
-      id
-      awaitingOOP
-      OOPCreated
-    }
-  }
-`;
-
 const UPDATE_PERMIT_STAGE = gql`
   mutation UpdatePermitStage(
     $id: ID!,
@@ -61,8 +42,6 @@ const UPDATE_PERMIT_STAGE = gql`
 const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab }) => {
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-   const [undoOOPCreation] = useMutation(UNDO_OOP_CREATION);
-   const [deleteOOP] = useMutation(DELETE_OOP);
    const [updatePermitStage] = useMutation(UPDATE_PERMIT_STAGE);
 
    const handleViewClick = () => setIsViewModalOpen(true);
@@ -76,30 +55,6 @@ const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab
    const handlePrint = () => {
       // Implement print functionality
       console.log('Print application:', app.id);
-   };
-
-   const handleUndoOOP = async () => {
-      try {
-         // First, delete the OOP document
-         await deleteOOP({
-            variables: {
-               applicationId: app.applicationNumber // Use applicationNumber here
-            }
-         });
-
-         // Then, update the permit status
-         await undoOOPCreation({
-            variables: {
-               id: app.id
-            }
-         });
-
-         toast.success('OOP creation undone successfully');
-         onReviewComplete(); // Refresh the list
-      } catch (error) {
-         console.error('Error undoing OOP creation:', error);
-         toast.error('Failed to undo OOP creation');
-      }
    };
 
    const handleUndo = async () => {
@@ -194,8 +149,6 @@ const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab
             </TooltipProvider>
          );
       }
-
-      // ... other actions remain the same
 
       return actions;
    };

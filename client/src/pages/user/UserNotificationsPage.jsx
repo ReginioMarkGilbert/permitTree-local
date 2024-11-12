@@ -1,6 +1,6 @@
 import React from 'react';
 import NotificationList from '../../components/notifications/NotificationList';
-import { useNotifications } from './hooks/useNotifications';
+import { useNotifications } from './hooks/useUserNotifications';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';

@@ -1,4 +1,4 @@
-const Notification = require('../models/Notification');
+const Notification = require('../models/UserNotification');
 const { pubsub } = require('../config/pubsub');
 const User = require('../models/User');
 
