@@ -193,6 +193,7 @@ const ChiefDashboard = () => {
                         app={app}
                         onReviewComplete={handleReviewComplete}
                         getStatusColor={getStatusColor}
+                        currentTab={activeSubTab}
                      />
                   ))}
                </tbody>
