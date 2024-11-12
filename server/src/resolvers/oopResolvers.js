@@ -3,7 +3,7 @@ const Permit = require('../models/permits/Permit');
 const { UserInputError } = require('apollo-server-express');
 const { generateBillNo } = require('../utils/billNumberGenerator');
 const { generateTrackingNumber } = require('../utils/trackingNumberGenerator');
-const NotificationService = require('../services/notificationService');
+const NotificationService = require('../services/userNotificationService');
 const User = require('../models/User');
 
 const oopResolvers = {

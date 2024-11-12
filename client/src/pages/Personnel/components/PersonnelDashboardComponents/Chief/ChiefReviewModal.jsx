@@ -49,7 +49,7 @@ const ChiefReviewModal = ({ isOpen, onClose, application, onReviewComplete }) =>
                id: application.id,
                currentStage: 'ForInspectionByTechnicalStaff',
                status: 'In Progress',
-               notes: 'Application approved by Chief RPS',
+               notes: 'Application approved by Chief RPS, ready for Order of Payment creation',
                reviewedByChief: true,
                awaitingOOP: true
             }
