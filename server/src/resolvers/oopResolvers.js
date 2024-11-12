@@ -198,12 +198,34 @@ const oopResolvers = {
                oop: updatedOOP,
                recipientId: updatedOOP.userId,
                type: 'OOP_READY_FOR_PAYMENT',
-               remarks: 'Your OOP has been approved and is ready for payment'
+               remarks: 'Your OOP has been approved and is ready for payment, navigate to your application dashboard > Order of Payment > Awaiting Payment to proceed with payment.'
             });
 
             return updatedOOP;
          } catch (error) {
             console.error('Error approving OOP:', error);
+            throw error;
+         }
+      },
+
+      undoAccountantOOPApproval: async (_, { id }) => {
+         try {
+            const oop = await OOP.findById(id);
+            if (!oop) throw new UserInputError('OOP not found');
+
+            const updatedOOP = await OOP.findByIdAndUpdate(
+               id,
+               {
+                  $set: {
+                     OOPstatus: 'For Approval'
+                  }
+               },
+               { new: true }
+            );
+
+            return updatedOOP;
+         } catch (error) {
+            console.error('Error undoing accountant OOP approval:', error);
             throw error;
          }
       },

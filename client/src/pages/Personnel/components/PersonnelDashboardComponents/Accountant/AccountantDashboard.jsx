@@ -84,6 +84,7 @@ const AccountantDashboard = () => {
                         key={oop._id}
                         oop={oop}
                         onReviewComplete={handleReviewComplete}
+                        currentTab={activeSubTab}
                      />
                   ))}
                </tbody>

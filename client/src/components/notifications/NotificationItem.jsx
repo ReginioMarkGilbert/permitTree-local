@@ -48,7 +48,7 @@ const NotificationItem = ({ notification }) => {
 
          {!notification.read && (
             <div className="shrink-0">
-               <div className="h-2 w-2 rounded-full bg-primary" />
+               <div className="h-2 w-2 rounded-full bg-red-400" />
             </div>
          )}
       </div>

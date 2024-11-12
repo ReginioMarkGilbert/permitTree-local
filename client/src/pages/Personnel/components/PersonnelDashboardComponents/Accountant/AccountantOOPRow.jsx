@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Eye, Printer, CheckCircle2 } from "lucide-react";
+import { Eye, Printer, CheckCircle2, RotateCcw } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import {
    Tooltip,
@@ -12,6 +12,8 @@ import { format } from "date-fns";
 import AccountantReviewModal from './AccountantReviewModal';
 import ViewOOPModal from '@/pages/user/components/ViewOOPModal';
 import { gql } from 'graphql-tag';
+import { useMutation } from '@apollo/client';
+import { toast } from 'sonner';
 
 const UPDATE_OOP_TRACKING = gql`
   mutation UpdateOOPTracking($id: ID!, $tracking: OOPTrackingInput!) {
@@ -57,10 +59,20 @@ const GET_OOP = gql`
   }
 `;
 
-const AccountantOOPRow = ({ oop, onReviewComplete }) => {
+const UNDO_ACCOUNTANT_OOP_APPROVAL = gql`
+  mutation UndoAccountantOOPApproval($id: ID!) {
+    undoAccountantOOPApproval(id: $id) {
+      _id
+      OOPstatus
+    }
+  }
+`;
+
+const AccountantOOPRow = ({ oop, onReviewComplete, currentTab }) => {
    const navigate = useNavigate();
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
    const [isViewOOPModalOpen, setIsViewOOPModalOpen] = useState(false);
+   const [undoAccountantOOPApproval] = useMutation(UNDO_ACCOUNTANT_OOP_APPROVAL);
 
    useEffect(() => {
       console.log('OOP data in AccountantOOPRow:', oop);
@@ -108,6 +120,21 @@ const AccountantOOPRow = ({ oop, onReviewComplete }) => {
          console.error('Error sending OR:', error);
          toast.error('Failed to send Official Receipt');
 
+      }
+   };
+
+   const handleUndo = async () => {
+      try {
+         await undoAccountantOOPApproval({
+            variables: {
+               id: oop._id
+            }
+         });
+         toast.success('OOP approval undone successfully');
+         onReviewComplete();
+      } catch (error) {
+         console.error('Error undoing approval:', error);
+         toast.error('Failed to undo approval');
       }
    };
 
@@ -188,6 +215,26 @@ const AccountantOOPRow = ({ oop, onReviewComplete }) => {
                            </TooltipTrigger>
                            <TooltipContent>
                               <p>Approve OOP</p>
+                           </TooltipContent>
+                        </Tooltip>
+                     </TooltipProvider>
+                  )}
+
+                  {currentTab === 'Approved OOP' && oop.OOPstatus === 'Awaiting Payment' && (
+                     <TooltipProvider>
+                        <Tooltip delayDuration={200}>
+                           <TooltipTrigger asChild>
+                              <Button
+                                 onClick={handleUndo}
+                                 variant="outline"
+                                 size="icon"
+                                 className="h-8 w-8 text-yellow-600 hover:text-yellow-800"
+                              >
+                                 <RotateCcw className="h-4 w-4" />
+                              </Button>
+                           </TooltipTrigger>
+                           <TooltipContent>
+                              <p>Undo Approval</p>
                            </TooltipContent>
                         </Tooltip>
                      </TooltipProvider>
