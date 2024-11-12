@@ -7,7 +7,9 @@ const PLTCPPermit = require('../../models/permits/PLTCPPermit');
 const PLTPPermit = require('../../models/permits/PLTPPermit');
 const TCEBPPermit = require('../../models/permits/TCEBPPermit');
 const NotificationService = require('../../services/notificationService');
+const PersonnelNotificationService = require('../../services/personnelNotificationService');
 const User = require('../../models/User');
+const Admin = require('../../models/admin');
 // ... import other permit types
 
 const permitResolvers = {
@@ -298,6 +300,7 @@ const permitResolvers = {
          permit.currentStage = 'TechnicalStaffReview';
          await permit.save();
 
+         // User notification
          await NotificationService.createApplicationNotification({
             application: permit,
             recipientId: permit.applicantId,
@@ -305,13 +308,13 @@ const permitResolvers = {
             stage: 'Submitted'
          });
 
-         // Notify Technical Staff
+         // Personnel notification
          const technicalStaff = await User.findOne({ roles: 'Technical_Staff' });
          if (technicalStaff) {
-            await NotificationService.createApplicationNotification({
+            await PersonnelNotificationService.createApplicationPersonnelNotification({
                application: permit,
                recipientId: technicalStaff._id,
-               type: 'APPLICATION_NEEDS_REVIEW',
+               type: 'PENDING_TECHNICAL_REVIEW',
                stage: 'TechnicalStaffReview'
             });
          }
@@ -378,43 +381,19 @@ const permitResolvers = {
                permit.PermitCreated = PermitCreated;
             }
 
-            permit.history.push({
-               stage: currentStage,
-               status: status,
-               timestamp: new Date(),
-               notes: notes || ''
-            });
+            // permit.history.push({
+            //    stage: currentStage,
+            //    status: status,
+            //    timestamp: new Date(),
+            //    notes: notes || ''
+            // });
 
-            const updatedPermit = await permit.save();
+            // const updatedPermit = await permit.save();
 
-            // Send notifications based on stage/status changes
-            if (currentStage !== permit.currentStage) {
-               // Notify applicant
-               await NotificationService.createApplicationNotification({
-                  application: permit,
-                  recipientId: permit.applicantId,
-                  type: 'APPLICATION_UNDER_REVIEW',
-                  stage: currentStage,
-                  remarks: notes
-               });
-
-               // Notify next personnel in workflow
-               const nextPersonnelRole = getNextPersonnelRole(currentStage);
-               if (nextPersonnelRole) {
-                  const nextPersonnel = await User.findOne({ roles: nextPersonnelRole });
-                  if (nextPersonnel) {
-                     await NotificationService.createApplicationNotification({
-                        application: permit,
-                        recipientId: nextPersonnel._id,
-                        type: 'APPLICATION_NEEDS_REVIEW',
-                        stage: currentStage
-                     });
-                  }
-               }
-            }
-
-            // Handle Technical Staff Review notifications
+            // #region - send user notifications for technical staff review
             if (currentStage === 'ForRecordByReceivingClerk' && acceptedByTechnicalStaff) {
+               // Update permit status
+               permit.acceptedByTechnicalStaff = true;
                // Notify applicant
                await NotificationService.createApplicationNotification({
                   application: permit,
@@ -423,9 +402,6 @@ const permitResolvers = {
                   stage: currentStage,
                   remarks: notes
                });
-
-               // Notify Receiving Clerk
-               await NotificationService.notifyNextPersonnel('ReceivingClerkReview', permit);
             }
 
             // Handle Technical Staff Return notifications
@@ -437,9 +413,33 @@ const permitResolvers = {
                   stage: currentStage,
                   remarks: notes
                });
+            }``
+            // #endregion
+
+            // send receiving clerk notifications
+            const receivingClerk = await Admin.findOne({ roles: 'Receiving_Clerk' });
+            if (receivingClerk) {
+               await PersonnelNotificationService.createApplicationPersonnelNotification({
+                  application: permit,
+                  recipientId: receivingClerk._id,
+                  type: 'PENDING_RECEIVING_CLERK_RECORD',
+                  stage: 'ForRecordByReceivingClerk',
+                  remarks: notes,
+                  priority: 'high'
+               });
             }
 
-            return updatedPermit;
+            permit.history.push({
+               stage: currentStage,
+               status: status,
+               timestamp: new Date(),
+               notes: notes || ''
+            });
+
+            // return updatedPermit;
+            await permit.save();
+            return permit;
+
          } catch (error) {
             console.error('Error updating permit:', error);
             throw error;
@@ -525,7 +525,7 @@ const permitResolvers = {
 
          await permit.save();
 
-         // Notify applicant
+         // User notification
          await NotificationService.createApplicationNotification({
             application: permit,
             recipientId: permit.applicantId,
@@ -534,8 +534,17 @@ const permitResolvers = {
             remarks: notes
          });
 
-         // Notify Receiving Clerk
-         await NotificationService.notifyNextPersonnel('ReceivingClerkReview', permit);
+         // Personnel notification
+         const receivingClerk = await User.findOne({ roles: 'Receiving_Clerk' });
+         if (receivingClerk) {
+            await PersonnelNotificationService.createApplicationPersonnelNotification({
+               application: permit,
+               recipientId: receivingClerk._id,
+               type: 'PENDING_RECEIVING_CLERK_RECORD',
+               stage: 'ReceivingClerkReview',
+               remarks: notes
+            });
+         }
 
          return permit;
       },
