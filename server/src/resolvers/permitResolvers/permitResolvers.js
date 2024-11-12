@@ -390,10 +390,8 @@ const permitResolvers = {
 
             // const updatedPermit = await permit.save();
 
-            // #region - send user notifications for technical staff review
+            // #region - Technical Staff Review
             if (currentStage === 'ForRecordByReceivingClerk' && acceptedByTechnicalStaff) {
-               // Update permit status
-               permit.acceptedByTechnicalStaff = true;
                // Notify applicant
                await NotificationService.createApplicationNotification({
                   application: permit,
@@ -402,6 +400,18 @@ const permitResolvers = {
                   stage: currentStage,
                   remarks: notes
                });
+               // Notify Receiving_Clerk
+               const receivingClerk = await Admin.findOne({ roles: 'Receiving_Clerk' });
+               if (receivingClerk) {
+                  await PersonnelNotificationService.createApplicationPersonnelNotification({
+                     application: permit,
+                     recipientId: receivingClerk._id,
+                     type: 'PENDING_RECEIVING_CLERK_RECORD',
+                     stage: 'ForRecordByReceivingClerk',
+                     remarks: notes,
+                     priority: 'high'
+                  });
+               }
             }
 
             // Handle Technical Staff Return notifications
@@ -413,21 +423,11 @@ const permitResolvers = {
                   stage: currentStage,
                   remarks: notes
                });
-            }``
+            } ``
             // #endregion
 
-            // send receiving clerk notifications
-            const receivingClerk = await Admin.findOne({ roles: 'Receiving_Clerk' });
-            if (receivingClerk) {
-               await PersonnelNotificationService.createApplicationPersonnelNotification({
-                  application: permit,
-                  recipientId: receivingClerk._id,
-                  type: 'PENDING_RECEIVING_CLERK_RECORD',
-                  stage: 'ForRecordByReceivingClerk',
-                  remarks: notes,
-                  priority: 'high'
-               });
-            }
+
+
 
             permit.history.push({
                stage: currentStage,
