@@ -1,70 +1,59 @@
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { CheckCircle } from 'lucide-react';
+import { format } from 'date-fns';
+import { Check, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Separator } from '@/components/ui/separator';
 
-const NotificationList = ({
-  notifications = [],
-  loading,
-  onMarkAsRead,
-  unreadOnly,
-  roleSpecific
-}) => {
-  if (loading) return <div className="p-4 text-center">Loading notifications...</div>;
-  if (!notifications.length) return <div className="p-4 text-center">No notifications</div>;
+const NotificationList = ({ notifications = [], loading, onMarkAsRead, unreadOnly }) => {
+   if (loading) {
+      return (
+         <div className="flex justify-center items-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+         </div>
+      );
+   }
 
-  return (
-    <ScrollArea className="h-[500px] w-full">
-      <div className="space-y-2 p-4">
-        {notifications.map((notification, index) => (
-          <React.Fragment key={notification.id}>
+   if (!notifications.length) {
+      return (
+         <div className="text-center py-8 text-muted-foreground">
+            No notifications to display
+         </div>
+      );
+   }
+
+   return (
+      <div className="space-y-2">
+         {notifications.map((notification) => (
             <div
-              onClick={() => !notification.read && onMarkAsRead(notification.id)}
-              className={cn(
-                "flex items-start justify-between p-4 rounded-lg transition-all duration-200 transform",
-                notification.read
-                  ? "bg-background hover:bg-muted/30"
-                  : "bg-muted hover:bg-muted/80 cursor-pointer hover:-translate-y-0.5 hover:shadow-md",
-              )}
+               key={notification.id}
+               className={cn(
+                  "p-4 rounded-lg transition-colors relative group hover:bg-accent",
+                  !notification.read && "bg-accent/50"
+               )}
             >
-              <div className="space-y-1 flex-1">
-                <div className="flex items-center gap-2">
-                  <h4 className="font-semibold">{notification.title}</h4>
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      "transition-colors",
-                      !notification.read && "bg-primary/10 hover:bg-primary/20"
-                    )}
-                  >
-                    {notification.type}
-                  </Badge>
+               <div className="flex justify-between items-start gap-4">
+                  <div className="flex-1">
+                     <h4 className="text-sm font-semibold mb-1">{notification.title}</h4>
+                     <p className="text-sm text-muted-foreground">{notification.message}</p>
+                     <div className="flex items-center gap-2 mt-2">
+                        <span className="text-xs text-muted-foreground">
+                           {format(new Date(notification.createdAt), 'MMM d, yyyy h:mm a')}
+                        </span>
+                     </div>
+                  </div>
                   {!notification.read && (
-                    <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                     <button
+                        onClick={() => onMarkAsRead(notification.id)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-background rounded-full"
+                        title="Mark as read"
+                     >
+                        <Check className="h-4 w-4" />
+                     </button>
                   )}
-                </div>
-                <p className="text-sm text-muted-foreground">{notification.message}</p>
-                <p className="text-xs text-muted-foreground">
-                  {new Date(notification.createdAt).toLocaleString()}
-                </p>
-              </div>
-              {notification.read ? (
-                <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 ml-4" />
-              ) : (
-                <div className="w-4 h-4 flex-shrink-0 ml-4" />
-              )}
+               </div>
             </div>
-            {index < notifications.length - 1 && (
-              <Separator className="my-2 bg-border/50" />
-            )}
-          </React.Fragment>
-        ))}
+         ))}
       </div>
-    </ScrollArea>
-  );
+   );
 };
 
 export default NotificationList;

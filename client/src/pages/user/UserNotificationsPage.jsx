@@ -45,7 +45,7 @@ const UserNotificationsPage = () => {
             )}
          </div>
 
-         <Card className="border-none shadow-lg">
+         <Card className="border-none shadow-lg min-h-[1200px]">
             <Tabs defaultValue="all" className="w-full">
                <TabsList className="grid w-full grid-cols-4 mb-4">
                   <TabsTrigger value="all">
