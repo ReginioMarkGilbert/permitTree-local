@@ -106,6 +106,7 @@ const ReceivingReleasingClerkDashboard = () => {
                         app={app}
                         onRecordComplete={handleRecordComplete}
                         getStatusColor={getStatusColor}
+                        currentTab={activeSubTab}
                      />
                   ))}
                </tbody>

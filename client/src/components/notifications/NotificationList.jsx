@@ -1,57 +1,35 @@
 import React from 'react';
-import { format } from 'date-fns';
-import { Check, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Loader2, Bell } from 'lucide-react';
+import NotificationItem from './NotificationItem';
 
-const NotificationList = ({ notifications = [], loading, onMarkAsRead, unreadOnly }) => {
-   if (loading) {
-      return (
-         <div className="flex justify-center items-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-         </div>
-      );
-   }
-
-   if (!notifications.length) {
-      return (
-         <div className="text-center py-8 text-muted-foreground">
-            No notifications to display
-         </div>
-      );
-   }
-
+const NotificationList = ({ notifications, loading, onMarkAsRead }) => {
    return (
-      <div className="space-y-2">
-         {notifications.map((notification) => (
-            <div
-               key={notification.id}
-               className={cn(
-                  "p-4 rounded-lg transition-colors relative group hover:bg-accent",
-                  !notification.read && "bg-accent/50"
-               )}
-            >
-               <div className="flex justify-between items-start gap-4">
-                  <div className="flex-1">
-                     <h4 className="text-sm font-semibold mb-1">{notification.title}</h4>
-                     <p className="text-sm text-muted-foreground">{notification.message}</p>
-                     <div className="flex items-center gap-2 mt-2">
-                        <span className="text-xs text-muted-foreground">
-                           {format(new Date(notification.createdAt), 'MMM d, yyyy h:mm a')}
-                        </span>
-                     </div>
-                  </div>
-                  {!notification.read && (
-                     <button
-                        onClick={() => onMarkAsRead(notification.id)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-background rounded-full"
-                        title="Mark as read"
-                     >
-                        <Check className="h-4 w-4" />
-                     </button>
-                  )}
-               </div>
+      <div className="space-y-4 h-[calc(7*7rem)] overflow-y-auto pr-2">
+         {loading ? (
+            <div className="flex justify-center items-center h-48">
+               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
-         ))}
+         ) : notifications?.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
+               <Bell className="h-12 w-12 mb-2" />
+               <p>No notifications</p>
+            </div>
+         ) : (
+            notifications?.map((notification) => (
+               <div
+                  key={notification.id}
+                  onClick={() => !notification.read && onMarkAsRead(notification.id)}
+                  className={cn(
+                     "p-4 rounded-lg border transition-colors cursor-pointer",
+                     !notification.read && "bg-muted/50 hover:bg-muted",
+                     notification.read && "bg-background"
+                  )}
+               >
+                  <NotificationItem notification={notification} />
+               </div>
+            ))
+         )}
       </div>
    );
 };

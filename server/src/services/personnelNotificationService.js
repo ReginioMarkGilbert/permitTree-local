@@ -49,18 +49,22 @@ class PersonnelNotificationService {
          });
 
          const notificationMap = {
+            // Technical Staff notification
             'PENDING_TECHNICAL_REVIEW': {
                title: 'Technical Review Required',
                message: `Application ${application.applicationNumber} requires technical review.`
             },
+            // Receiving Clerk notification
             'PENDING_RECEIVING_CLERK_RECORD': {
                title: 'Record Application',
                message: `Application ${application.applicationNumber} needs to be recorded.`
             },
+            // Chief notification
             'PENDING_CHIEF_REVIEW': {
                title: 'Chief Review Required',
                message: `Application ${application.applicationNumber} requires Chief RPS review.`
             },
+            // PENR/CENR Officer notification
             'PENDING_PENRCENR_APPROVAL': {
                title: 'PENR/CENR Approval Required',
                message: `Application ${application.applicationNumber} requires PENR/CENR Officer approval.`

@@ -46,7 +46,7 @@ const PersonnelNotificationsPage = () => {
          </div>
 
          <Card className="border-none shadow-lg min-h-[800px]">
-            <Tabs defaultValue="all" className="w-full">
+            <Tabs defaultValue="unread" className="w-full">
                <TabsList className="grid w-full grid-cols-4 mb-4">
                   <TabsTrigger value="all">
                      <span className="flex items-center gap-2">
