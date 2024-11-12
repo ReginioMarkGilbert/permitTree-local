@@ -56,15 +56,15 @@ const paymentProofSchema = new mongoose.Schema({
    payerDetails: {
       name: {
          type: String,
-         required: true
+         default: ''
       },
       email: {
          type: String,
-         required: true
+         default: ''
       },
       phoneNumber: {
          type: String,
-         required: true
+         default: ''
       }
    },
    status: {

@@ -134,12 +134,21 @@ class PersonnelNotificationService {
             'OOP_PENDING_APPROVAL': {
                title: 'Order of Payment Pending Approval',
                message: `Order of Payment (${oop.billNo}) requires your approval.`
+            },
+            'PAYMENT_PROOF_SUBMITTED': {
+               title: 'New Payment Proof Submitted',
+               message: `A payment proof for Order of Payment (${oop.billNo}) has been submitted and requires your verification.`,
+               priority: 'high'
+            },
+            'PAYMENT_PENDING_VERIFICATION': {
+               title: 'Payment Pending Verification',
+               message: `Payment for Order of Payment (${oop.billNo}) is pending verification.`,
+               priority: 'high'
             }
          };
 
          const template = OOPNotificationMap[type];
          if (!template) {
-            console.error(`Unknown notification type: ${type}`);
             throw new Error(`Unknown notification type: ${type}`);
          }
 
@@ -154,12 +163,10 @@ class PersonnelNotificationService {
                remarks,
                actionRequired: type
             },
-            priority
+            priority: template.priority || priority
          });
 
-         console.log('OOP personnel notification created:', notification);
          return notification;
-
       } catch (error) {
          console.error('Error creating OOP personnel notification:', error);
          throw error;

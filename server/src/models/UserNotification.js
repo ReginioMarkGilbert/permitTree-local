@@ -49,7 +49,9 @@ const NotificationSchema = new mongoose.Schema({
          // Permit Related
          'PERMIT_READY',
          'PERMIT_SIGNED',
-         'PERMIT_RELEASED'
+         'PERMIT_RELEASED',
+
+         'PAYMENT_PROOF_SUBMITTED'
       ]
    },
    title: {

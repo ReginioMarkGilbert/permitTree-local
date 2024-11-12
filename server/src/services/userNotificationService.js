@@ -125,6 +125,10 @@ class NotificationService {
          'OOP_FORWARDED_TO_ACCOUNTANT': {
             title: 'Order of Payment Forwarded for Approval',
             message: `Order of Payment (${oop.billNo}) has been forwarded to the Accountant for approval.`
+         },
+         'PAYMENT_PROOF_SUBMITTED': {
+            title: 'Payment Proof Submitted',
+            message: `Your payment proof for Order of Payment (${oop.billNo}) has been submitted and is pending verification.`
          }
       };
 

@@ -522,6 +522,27 @@ const oopResolvers = {
                { new: true }
             );
 
+            // Notify Bill Collector
+            const billCollector = await Admin.findOne({ roles: 'Bill_Collector' });
+            if (billCollector) {
+               await PersonnelNotificationService.createOOPPersonnelNotification({
+                  oop: updatedOOP,
+                  recipientId: billCollector._id,
+                  type: 'PAYMENT_PROOF_SUBMITTED',
+                  OOPStatus: 'Payment Proof Submitted',
+                  remarks: 'New payment proof requires verification',
+                  priority: 'high'
+               });
+            }
+
+            // Notify user that their payment proof was submitted
+            await UserNotificationService.createOOPUserNotification({
+               oop: updatedOOP,
+               recipientId: updatedOOP.userId,
+               type: 'PAYMENT_PROOF_SUBMITTED',
+               remarks: 'Your payment proof has been submitted and is pending verification'
+            });
+
             return updatedOOP;
          } catch (error) {
             throw new Error(`Failed to submit payment proof: ${error.message}`);

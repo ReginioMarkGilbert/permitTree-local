@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -24,20 +24,26 @@ const GCashPaymentStep = ({ oop, formData = {}, onBack }) => {
    const [paymentStatus, setPaymentStatus] = useState('processing');
    const [countdown, setCountdown] = useState(5);
    const [submitPaymentProof] = useMutation(SUBMIT_PAYMENT_PROOF);
+   const redirectTimeoutRef = useRef(null);
+   const paymentProcessed = useRef(false);
 
    useEffect(() => {
-      // Simulate payment processing and generate payment proof
-      const timer = setTimeout(async () => {
+      let timer;
+
+      const processPayment = async () => {
+         if (paymentProcessed.current) return;
+
          try {
             const transactionId = `GCASH-${Date.now()}`;
             const referenceNumber = `REF-${Math.random().toString(36).substr(2, 9)}`;
 
-            // Add validation for required fields
             if (!formData.fullName || !formData.email || !formData.phoneNumber) {
                throw new Error('Missing required payment details');
             }
 
-            await submitPaymentProof({
+            paymentProcessed.current = true; // Mark as processed before the API call
+
+            const result = await submitPaymentProof({
                variables: {
                   oopId: oop._id,
                   paymentProof: {
@@ -54,37 +60,54 @@ const GCashPaymentStep = ({ oop, formData = {}, onBack }) => {
                }
             });
 
-            setPaymentStatus('success');
+            if (result.data?.submitPaymentProof) {
+               setPaymentStatus('success');
+               startCountdown();
+            }
          } catch (error) {
             console.error('Error submitting payment proof:', error);
             toast.error(error.message || 'Failed to process payment');
             setPaymentStatus('failed');
+            paymentProcessed.current = false; // Reset if failed
          }
-      }, 3000);
+      };
 
-      return () => clearTimeout(timer);
-   }, [oop, formData, submitPaymentProof]);
+      timer = setTimeout(processPayment, 3000);
 
-   useEffect(() => {
-      if (paymentStatus === 'success') {
-         const interval = setInterval(() => {
-            setCountdown((prev) => {
-               if (prev <= 1) {
-                  clearInterval(interval);
-                  navigate('/applicationsStatus', {
-                     state: {
-                        paymentSuccess: true,
-                        message: 'Payment completed successfully'
-                     }
-                  });
+      return () => {
+         clearTimeout(timer);
+      };
+   }, []); // Empty dependency array since we only want this to run once
+
+   const startCountdown = () => {
+      let count = 5;
+      const interval = setInterval(() => {
+         count--;
+         setCountdown(count);
+
+         if (count <= 0) {
+            clearInterval(interval);
+            navigate('/applicationsStatus', {
+               replace: true,
+               state: {
+                  paymentSuccess: true,
+                  message: 'Payment completed successfully'
                }
-               return prev - 1;
             });
-         }, 1000);
+         }
+      }, 1000);
 
-         return () => clearInterval(interval);
-      }
-   }, [paymentStatus, navigate]);
+      return () => clearInterval(interval);
+   };
+
+   // Clean up on unmount
+   useEffect(() => {
+      return () => {
+         if (redirectTimeoutRef.current) {
+            clearTimeout(redirectTimeoutRef.current);
+         }
+      };
+   }, []);
 
    return (
       <Card className="w-full max-w-2xl mx-auto">

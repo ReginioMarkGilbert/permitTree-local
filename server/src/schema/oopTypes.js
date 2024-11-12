@@ -53,16 +53,16 @@ const oopTypes = gql`
     transactionId: String!
     paymentMethod: String!
     amount: Float!
-    timestamp: String!
+    timestamp: String
     referenceNumber: String!
-    payerDetails: PayerDetails!
-    status: String!
+    payerDetails: PayerDetails
+    status: String
   }
 
   type PayerDetails {
-    name: String!
-    email: String!
-    phoneNumber: String!
+    name: String
+    email: String
+    phoneNumber: String
   }
 
   input OOPInput {
