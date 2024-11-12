@@ -484,6 +484,30 @@ const permitResolvers = {
             }
             // #endregion - Receiving Clerk Record notifications
 
+            if (currentStage === 'ForInspectionByTechnicalStaff' && reviewedByChief) {
+               // Notify applicant
+               await NotificationService.createApplicationNotification({
+                  application: permit,
+                  recipientId: permit.applicantId,
+                  type: 'APPLICATION_REVIEWED_BY_CHIEF',
+                  stage: currentStage,
+                  remarks: notes
+               });
+
+               // Notify Technical Staff for inspection
+               const technicalStaff = await Admin.findOne({ roles: 'Technical_Staff' });
+               if (technicalStaff) {
+                  await PersonnelNotificationService.createApplicationPersonnelNotification({
+                     application: permit,
+                     recipientId: technicalStaff._id,
+                     type: 'PENDING_INSPECTION',
+                     stage: currentStage,
+                     remarks: notes,
+                     priority: 'high'
+                  });
+               }
+            }
+
             permit.history.push({
                stage: currentStage,
                status: status,

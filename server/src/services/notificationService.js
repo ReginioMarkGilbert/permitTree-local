@@ -54,6 +54,10 @@ class NotificationService {
          'APPLICATION_RECORDED': {
             title: 'Application Recorded',
             message: `Your application ${application.applicationNumber} has been recorded by receiving clerk.`
+         },
+         'APPLICATION_REVIEWED_BY_CHIEF': {
+            title: 'Application Reviewed by Chief',
+            message: `Your application ${application.applicationNumber} has been reviewed by Chief RPS/TSD and is now proceeding to technical inspection.`
          }
       };
 
