@@ -85,6 +85,9 @@ class NotificationService {
       type,
       remarks = ''
    }) {
+      if (!oop || !oop.billNo) {
+         throw new Error('Invalid OOP data provided');
+      }
       const notificationMap = {
          'OOP_CREATED': {
             title: 'Order of Payment Created',
