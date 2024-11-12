@@ -3,7 +3,7 @@ const Permit = require('../models/permits/Permit');
 const { UserInputError } = require('apollo-server-express');
 const { generateBillNo } = require('../utils/billNumberGenerator');
 const { generateTrackingNumber } = require('../utils/trackingNumberGenerator');
-const NotificationService = require('../services/userNotificationService');
+const UserNotificationService = require('../services/userNotificationService');
 const PersonnelNotificationService = require('../services/personnelNotificationService');
 const User = require('../models/User');
 const Admin = require('../models/admin');
@@ -111,7 +111,7 @@ const oopResolvers = {
             );
 
             // Notify applicant
-            await NotificationService.createOOPNotification({
+            await UserNotificationService.createOOPUserNotification({
                oop,
                recipientId: oop.userId,
                type: 'OOP_CREATED',
@@ -158,13 +158,16 @@ const oopResolvers = {
                { new: true }
             );
 
-            // Notify applicant of signature progress
-            await NotificationService.createOOPNotification({
-               oop: updatedOOP,
-               recipientId: updatedOOP.userId,
-               type: 'OOP_SIGNED',
-               remarks: `OOP has been signed by ${signatureType === 'rps' ? 'Chief RPS' : 'Technical Services'}`
-            });
+            // Check if both signatures are present
+            if (updatedOOP.rpsSignatureImage && updatedOOP.tsdSignatureImage) {
+               // Notify user that signatures are complete
+               await UserNotificationService.createOOPUserNotification({
+                  oop: updatedOOP,
+                  recipientId: updatedOOP.userId,
+                  type: 'OOP_SIGNATURES_COMPLETE',
+                  remarks: 'All required signatures have been completed.'
+               });
+            }
 
             return updatedOOP;
          } catch (error) {
@@ -191,7 +194,7 @@ const oopResolvers = {
             );
 
             // Notify applicant
-            await NotificationService.createOOPNotification({
+            await UserNotificationService.createOOPUserNotification({
                oop: updatedOOP,
                recipientId: updatedOOP.userId,
                type: 'OOP_READY_FOR_PAYMENT',
@@ -241,14 +244,24 @@ const oopResolvers = {
                { new: true }
             );
 
+            // Notify user
+            await UserNotificationService.createOOPUserNotification({
+               oop: updatedOOP,
+               recipientId: updatedOOP.userId,
+               type: 'OOP_FORWARDED_TO_ACCOUNTANT',
+               remarks: 'Your Order of Payment has been forwarded to the Accountant for approval.'
+            });
+
             // Notify Accountant
-            const accountant = await User.findOne({ roles: 'Accountant' });
+            const accountant = await Admin.findOne({ roles: 'Accountant' });
             if (accountant) {
-               await NotificationService.createOOPNotification({
+               await PersonnelNotificationService.createOOPPersonnelNotification({
                   oop: updatedOOP,
                   recipientId: accountant._id,
-                  type: 'OOP_NEEDS_APPROVAL',
-                  remarks: 'New OOP awaiting approval'
+                  type: 'OOP_PENDING_APPROVAL',
+                  OOPStatus: 'For Approval',
+                  remarks: 'New Order of Payment awaiting your approval.',
+                  priority: 'high'
                });
             }
 
@@ -333,7 +346,7 @@ const oopResolvers = {
             );
 
             // Notify applicant
-            await NotificationService.createOOPNotification({
+            await UserNotificationService.createOOPUserNotification({
                oop: updatedOOP,
                recipientId: updatedOOP.userId,
                type: 'OR_ISSUED',
@@ -452,7 +465,7 @@ const oopResolvers = {
             );
 
             // Notify applicant of payment proof status
-            await NotificationService.createOOPNotification({
+            await UserNotificationService.createOOPUserNotification({
                oop: updatedOOP,
                recipientId: updatedOOP.userId,
                type: status === 'APPROVED' ? 'PAYMENT_VERIFIED' : 'PAYMENT_REJECTED',

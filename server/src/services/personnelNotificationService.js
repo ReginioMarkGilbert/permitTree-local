@@ -130,6 +130,10 @@ class PersonnelNotificationService {
             'OOP_PENDING_SIGNATURE': {
                title: 'Order of Payment Pending Signature',
                message: `Order of Payment (${oop.billNo}) requires your signature.`
+            },
+            'OOP_PENDING_APPROVAL': {
+               title: 'Order of Payment Pending Approval',
+               message: `Order of Payment (${oop.billNo}) requires your approval.`
             }
          };
 

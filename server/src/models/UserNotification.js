@@ -33,6 +33,8 @@ const NotificationSchema = new mongoose.Schema({
          // OOP Related
          'OOP_CREATED',
          'OOP_SIGNED',
+         'OOP_SIGNATURES_COMPLETE',
+         'OOP_FORWARDED_TO_ACCOUNTANT',
          'OOP_APPROVED',
          'OOP_READY_FOR_PAYMENT',
          'OOP_NEEDS_APPROVAL',

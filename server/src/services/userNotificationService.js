@@ -79,7 +79,7 @@ class NotificationService {
       });
    }
 
-   static async createOOPNotification({
+   static async createOOPUserNotification({
       oop,
       recipientId,
       type,
@@ -91,15 +91,15 @@ class NotificationService {
             message: `Order of Payment (${oop.billNo}) has been created for your application.`
          },
          'OOP_SIGNED': {
-            title: 'OOP Signed',
+            title: 'Order of Payment Signed',
             message: `Order of Payment (${oop.billNo}) has been signed by authorities.`
          },
          'OOP_NEEDS_APPROVAL': {
-            title: 'OOP Needs Approval',
+            title: 'Order of Payment Needs Approval',
             message: `Order of Payment (${oop.billNo}) requires your approval.`
          },
          'OOP_READY_FOR_PAYMENT': {
-            title: 'Ready for Payment',
+            title: 'Order of Payment Ready for Payment',
             message: `Order of Payment (${oop.billNo}) is ready for payment.`
          },
          'PAYMENT_VERIFIED': {
@@ -113,6 +113,15 @@ class NotificationService {
          'OR_ISSUED': {
             title: 'Official Receipt Issued',
             message: `Official Receipt has been issued for Order of Payment (${oop.billNo}).`
+         },
+         'OOP_SIGNATURES_COMPLETE': {
+            title: 'Order of Payment Signatures Complete',
+            message: `Order of Payment (${oop.billNo}) has been signed by all required signatories.`
+         },
+         //
+         'OOP_FORWARDED_TO_ACCOUNTANT': {
+            title: 'Order of Payment Forwarded for Approval',
+            message: `Order of Payment (${oop.billNo}) has been forwarded to the Accountant for approval.`
          }
       };
 
