@@ -10,6 +10,7 @@ export const GET_PERSONNEL_NOTIFICATIONS = gql`
       message
       metadata {
         applicationId
+        oopId
         stage
         status
         remarks
@@ -31,6 +32,7 @@ export const GET_UNREAD_PERSONNEL_NOTIFICATIONS = gql`
       message
       metadata {
         applicationId
+        oopId
         stage
         status
         remarks
@@ -53,6 +55,7 @@ export const PERSONNEL_NOTIFICATION_SUBSCRIPTION = gql`
       message
       metadata {
         applicationId
+        oopId
         stage
         status
         remarks

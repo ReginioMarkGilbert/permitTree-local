@@ -86,7 +86,6 @@ class NotificationService {
       remarks = ''
    }) {
       const notificationMap = {
-         // OOP Creation and Signing
          'OOP_CREATED': {
             title: 'Order of Payment Created',
             message: `Order of Payment (${oop.billNo}) has been created for your application.`
@@ -99,8 +98,6 @@ class NotificationService {
             title: 'OOP Needs Approval',
             message: `Order of Payment (${oop.billNo}) requires your approval.`
          },
-
-         // Payment Related
          'OOP_READY_FOR_PAYMENT': {
             title: 'Ready for Payment',
             message: `Order of Payment (${oop.billNo}) is ready for payment.`
