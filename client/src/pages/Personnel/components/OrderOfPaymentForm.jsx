@@ -80,6 +80,7 @@ const OrderOfPaymentForm = ({ onClose }) => {
    const [step, setStep] = useState(1);
    const [formData, setFormData] = useState({
       applicationId: '',
+      applicationNumber: '',
       applicantName: '',
       billNo: '',
       date: new Date(),
@@ -97,9 +98,11 @@ const OrderOfPaymentForm = ({ onClose }) => {
    const handleApplicationSelect = (applicationId) => {
       const selectedApp = applications.find(app => app.id === applicationId);
       if (selectedApp) {
+         console.log('Selected application:', selectedApp);
          setFormData(prev => ({
             ...prev,
-            applicationId: selectedApp.applicationNumber,
+            applicationId: selectedApp.id,
+            applicationNumber: selectedApp.applicationNumber,
             applicantName: selectedApp.ownerName || selectedApp.name,
             namePayee: selectedApp.ownerName || selectedApp.name,
             address: selectedApp.address,
@@ -179,47 +182,52 @@ const OrderOfPaymentForm = ({ onClose }) => {
    const handleSubmit = async (e) => {
       e.preventDefault();
       try {
-         // Validate fees before submission
-         if (!formData.fees || formData.fees.length === 0) {
-            toast.error('Please add at least one fee');
-            return;
-         }
-
          // Validate required fields
-         if (!formData.namePayee || !formData.address || !formData.natureOfApplication) {
+         if (!formData.applicationId || !formData.applicationNumber || !formData.namePayee || !formData.address || !formData.natureOfApplication) {
             toast.error('Please fill in all required fields');
             return;
          }
 
-         // Transform and validate fees
+         // Validate fees
          const validFees = formData.fees.filter(fee =>
             fee.legalBasis && fee.description && fee.amount && !isNaN(parseFloat(fee.amount))
          );
 
          if (validFees.length === 0) {
-            toast.error('Please add valid fee details');
+            toast.error('Please add at least one valid fee');
             return;
          }
 
+         // Transform the data
          const transformedData = {
-            applicationId: formData.applicationId,
-            namePayee: formData.namePayee,
-            address: formData.address,
-            natureOfApplication: formData.natureOfApplication,
+            applicationId: formData.applicationId.toString(),
+            applicationNumber: formData.applicationNumber,
+            namePayee: formData.namePayee.trim(),
+            address: formData.address.trim(),
+            natureOfApplication: formData.natureOfApplication.trim(),
             items: validFees.map(fee => ({
-               legalBasis: fee.legalBasis,
-               description: fee.description,
+               legalBasis: fee.legalBasis.trim(),
+               description: fee.description.trim(),
                amount: parseFloat(fee.amount)
-            })),
-            rpsSignatureImage: formData.rpsSignature || null,
-            tsdSignatureImage: formData.tsdSignature || null
+            }))
          };
+
+         // Add signatures if they exist
+         if (formData.rpsSignature) {
+            transformedData.rpsSignatureImage = formData.rpsSignature;
+         }
+         if (formData.tsdSignature) {
+            transformedData.tsdSignatureImage = formData.tsdSignature;
+         }
 
          console.log('Submitting OOP data:', transformedData);
 
-         await createOOP(transformedData);
-         toast.success('Order of Payment created successfully');
-         navigate('/personnel/dashboard');
+         const result = await createOOP(transformedData);
+
+         if (result) {
+            toast.success('Order of Payment created successfully');
+            navigate('/personnel/dashboard');
+         }
       } catch (error) {
          console.error('Error creating Order of Payment:', error);
          toast.error(`Failed to create Order of Payment: ${error.message}`);
@@ -266,6 +274,14 @@ const OrderOfPaymentForm = ({ onClose }) => {
                      />
                   )}
 
+                  <Label htmlFor="applicationId">Application Number</Label>
+                  <Input
+                     id="applicationNumber"
+                     name="applicationNumber"
+                     value={formData.applicationNumber}
+                     onChange={handleInputChange}
+                     disabled
+                  />
                   <Label htmlFor="applicationId">Application ID</Label>
                   <Input
                      id="applicationId"

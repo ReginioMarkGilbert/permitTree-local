@@ -26,6 +26,10 @@ const PaymentInformationStep = ({ oop, onNext }) => {
                      </div>
                      <div className="flex justify-between text-sm">
                         <span className="text-gray-500">Application Number:</span>
+                        <span className="text-gray-900">{oop?.applicationNumber}</span>
+                     </div>
+                     <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Applicant ID:</span>
                         <span className="text-gray-900">{oop?.applicationId}</span>
                      </div>
                   </div>

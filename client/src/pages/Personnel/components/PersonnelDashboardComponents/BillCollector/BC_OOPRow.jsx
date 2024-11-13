@@ -117,7 +117,7 @@ const BillCollectorOOPRow = ({ oop, onReviewComplete }) => {
       <>
          <tr key={oop._id}>
             <td className="px-4 py-4 whitespace-nowrap">
-               {oop.applicationId}
+               {oop.applicationNumber}
             </td>
             <td className="px-4 py-4 whitespace-nowrap">
                {oop.billNo}

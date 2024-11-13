@@ -13,9 +13,15 @@ const oopResolvers = {
       getOOPs: async () => {
          try {
             const oops = await OOP.find().sort({ createdAt: -1 });
+
+            // Add debug log
+            console.log('OOPs from database:', oops);
+
             return oops.map(oop => ({
                ...oop._doc,
-               totalAmount: oop.items.reduce((sum, item) => sum + item.amount, 0)
+               totalAmount: oop.items.reduce((sum, item) => sum + item.amount, 0),
+               // Ensure applicationNumber is included
+               applicationNumber: oop.applicationNumber
             }));
          } catch (error) {
             console.error('Error fetching OOPs:', error);
@@ -66,71 +72,38 @@ const oopResolvers = {
    Mutation: {
       createOOP: async (_, { input }) => {
          try {
-            // First, get the permit to find the applicantId
-            const permit = await Permit.findOne({ applicationNumber: input.applicationId });
+            const permit = await Permit.findById(input.applicationId);
             if (!permit) {
                throw new Error('Permit not found');
             }
 
-            // Generate billNo
-            const billNo = await generateBillNo();
+            // Debug log
+            console.log('Creating OOP with permit:', permit);
 
-            // Calculate total amount
-            const totalAmount = input.items.reduce((sum, item) => sum + item.amount, 0);
-
-            // Generate tracking number
-            const trackingNo = await generateTrackingNumber();
-            console.log('Generated tracking number:', trackingNo); // Debug log
-
+            // Create new OOP with explicit applicationNumber
             const oop = new OOP({
                ...input,
-               userId: permit.applicantId, // Use the applicantId from the permit
-               billNo,
-               totalAmount,
+               userId: permit.applicantId,
+               applicationNumber: permit.applicationNumber, // Ensure this is set
+               billNo: await generateBillNo(),
+               totalAmount: input.items.reduce((sum, item) => sum + parseFloat(item.amount), 0),
+               trackingNo: await generateTrackingNumber(),
                OOPstatus: 'Pending Signature',
-               tracking: {
-                  trackingNo,
-                  receivedDate: new Date(),
-                  receivedTime: new Date().toLocaleTimeString()
-               }
+               receivedDate: new Date(),
+               receivedTime: new Date().toLocaleTimeString()
             });
 
-            console.log('OOP before save:', oop); // Debug log
+            console.log('New OOP before save:', oop); // Debug log
             await oop.save();
-            console.log('OOP after save:', oop); // Debug log
+            console.log('New OOP after save:', oop); // Debug log
 
             // Update permit status
-            await Permit.findOneAndUpdate(
-               { applicationNumber: input.applicationId },
-               {
-                  $set: {
-                     OOPCreated: true,
-                     awaitingOOP: false
-                  }
+            await Permit.findByIdAndUpdate(input.applicationId, {
+               $set: {
+                  OOPCreated: true,
+                  awaitingOOP: false
                }
-            );
-
-            // Notify applicant
-            await UserNotificationService.createOOPUserNotification({
-               oop,
-               recipientId: oop.userId,
-               type: 'OOP_CREATED',
-               remarks: 'Your Order of Payment has been created'
             });
-
-            // Notify Chief TSD
-            const chiefTSD = await Admin.findOne({ roles: 'Chief_TSD' });
-            if (chiefTSD) {
-               await PersonnelNotificationService.createOOPPersonnelNotification({
-                  oop: permit,
-                  // application: permit,
-                  recipientId: chiefTSD._id,
-                  type: 'OOP_PENDING_SIGNATURE',
-                  OOPStatus: 'Pending Signature',
-                  remarks: 'Your Order of Payment has been created',
-                  priority: 'high'
-               });
-            }
 
             return oop;
          } catch (error) {
@@ -186,7 +159,7 @@ const oopResolvers = {
                {
                   $set: {
                      OOPstatus: status,
-                     OOPApproved: status === 'Approved',
+                     OOPApproved: true,
                      notes: notes
                   }
                },
@@ -217,7 +190,8 @@ const oopResolvers = {
                id,
                {
                   $set: {
-                     OOPstatus: 'For Approval'
+                     OOPstatus: 'For Approval',
+                     OOPApproved: false
                   }
                },
                { new: true }
@@ -372,7 +346,7 @@ const oopResolvers = {
                oop: updatedOOP,
                recipientId: updatedOOP.userId,
                type: 'OR_ISSUED',
-               remarks: 'Official Receipt has been generated for your payment, navigate to your application dashboard > Order of Payment > Issued OR to view your Official Receipt.'
+               remarks: 'Official Receipt has been generated for your payment, '
             });
 
             return updatedOOP;
@@ -409,19 +383,25 @@ const oopResolvers = {
 
       deleteOOP: async (_, { applicationId }) => {
          try {
-            // First, find and delete the OOP
+            // First, find the permit to get the application number
+            const permit = await Permit.findById(applicationId);
+            if (!permit) {
+               throw new Error('Permit not found');
+            }
+
+            // Find and delete the OOP using applicationId
             const deletedOOP = await OOP.findOneAndDelete({ applicationId });
             if (!deletedOOP) {
                throw new Error('OOP not found');
             }
 
-            // Then, update the permit to reset OOP-related flags
-            await Permit.findOneAndUpdate(
-               { applicationNumber: applicationId },
+            // Update the permit status
+            await Permit.findByIdAndUpdate(
+               applicationId,
                {
                   $set: {
                      OOPCreated: false,
-                     awaitingOOP: true // Reset to awaiting OOP state
+                     awaitingOOP: true
                   }
                }
             );

@@ -46,6 +46,7 @@ export const GET_OOP = gql`
       _id
       billNo
       applicationId
+      applicationNumber
       date
       namePayee
       address
@@ -79,6 +80,7 @@ export const GET_ALL_OOPS = gql`
       _id
       billNo
       applicationId
+      applicationNumber
       date
       namePayee
       address
@@ -111,6 +113,16 @@ export const GET_USER_OOPS = gql`
       _id
       billNo
       applicationId
+      applicationNumber
+      date
+      namePayee
+      address
+      natureOfApplication
+      items {
+        legalBasis
+        description
+        amount
+      }
       totalAmount
       OOPstatus
       createdAt
@@ -156,6 +168,16 @@ const CREATE_OOP = gql`
       _id
       billNo
       applicationId
+      applicationNumber
+      namePayee
+      address
+      natureOfApplication
+      items {
+        legalBasis
+        description
+        amount
+      }
+      totalAmount
       OOPstatus
     }
   }
@@ -242,40 +264,47 @@ export const useOrderOfPayments = (userId = null) => {
 
    const handleCreateOOP = async (oopData) => {
       try {
-         console.log('Creating OOP with data:', oopData); // Debug log
-
-         if (!oopData.items || !Array.isArray(oopData.items)) {
-            throw new Error('Invalid items data');
+         // Validate input
+         if (!oopData.items?.length) {
+            throw new Error('At least one fee item is required');
          }
 
+         // Transform the input to match the schema exactly
+         const input = {
+            applicationId: oopData.applicationId.toString(),
+            applicationNumber: oopData.applicationNumber,
+            namePayee: oopData.namePayee,
+            address: oopData.address,
+            natureOfApplication: oopData.natureOfApplication,
+            items: oopData.items.map(item => ({
+               legalBasis: item.legalBasis,
+               description: item.description,
+               amount: parseFloat(item.amount)
+            }))
+         };
+
+         // Add optional fields
+         if (oopData.rpsSignatureImage) {
+            input.rpsSignatureImage = oopData.rpsSignatureImage;
+         }
+         if (oopData.tsdSignatureImage) {
+            input.tsdSignatureImage = oopData.tsdSignatureImage;
+         }
+
+         console.log('Mutation input:', input);
+
          const { data } = await createOOP({
-            variables: {
-               input: {
-                  userId: oopData.userId, // Add userId to input
-                  applicationId: oopData.applicationId,
-                  namePayee: oopData.namePayee,
-                  address: oopData.address,
-                  natureOfApplication: oopData.natureOfApplication,
-                  items: oopData.items.map(item => ({
-                     legalBasis: item.legalBasis,
-                     description: item.description,
-                     amount: parseFloat(item.amount)
-                  })),
-                  rpsSignatureImage: oopData.rpsSignatureImage,
-                  tsdSignatureImage: oopData.tsdSignatureImage
-               }
-            },
+            variables: { input },
             refetchQueries: [{
                query: GET_APPLICATIONS_AWAITING_OOP,
                variables: { awaitingOOP: true }
             }]
          });
 
-         console.log('CreateOOP response:', data); // Debug log
          return data.createOOP;
       } catch (error) {
          console.error('Error in handleCreateOOP:', error);
-         throw new Error(error.message);
+         throw error;
       }
    };
 

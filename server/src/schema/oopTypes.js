@@ -5,7 +5,8 @@ const oopTypes = gql`
     _id: ID!
     userId: ID!
     billNo: String!
-    applicationId: String!
+    applicationId: ID!
+    applicationNumber: String!
     date: String!
     namePayee: String!
     address: String!
@@ -66,7 +67,8 @@ const oopTypes = gql`
   }
 
   input OOPInput {
-    applicationId: String!
+    applicationId: ID!
+    applicationNumber: String!
     namePayee: String!
     address: String!
     natureOfApplication: String!

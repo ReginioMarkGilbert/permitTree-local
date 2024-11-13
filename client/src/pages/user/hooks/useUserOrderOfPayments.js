@@ -6,6 +6,7 @@ const GET_USER_OOPS = gql`
       _id
       billNo
       applicationId
+      applicationNumber
       namePayee
       address
       natureOfApplication

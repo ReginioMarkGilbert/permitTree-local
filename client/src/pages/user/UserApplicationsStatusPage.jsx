@@ -48,6 +48,7 @@ const GET_OOP_DETAILS = gql`
       _id
       billNo
       applicationId
+      applicationNumber
       namePayee
       address
       natureOfApplication

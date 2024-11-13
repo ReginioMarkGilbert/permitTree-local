@@ -39,7 +39,7 @@ const AccountantDashboard = () => {
 
       const filteredOOPs = oops.filter(oop => {
          if (activeSubTab === 'Pending Approval') {
-            return oop.OOPstatus === 'For Approval' && oop.OOPSignedByTwoSignatories === true;
+            return oop.OOPstatus === 'For Approval';
          } else if (activeSubTab === 'Approved OOP') {
             return oop.OOPstatus === 'Awaiting Payment';
          }
@@ -119,9 +119,8 @@ const AccountantDashboard = () => {
                            setActiveMainTab(tab);
                            setActiveSubTab(subTabs[tab][0]);
                         }}
-                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${
-                           activeMainTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'
-                        }`}
+                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeMainTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'
+                           }`}
                      >
                         {tab}
                      </button>
@@ -136,9 +135,8 @@ const AccountantDashboard = () => {
                      <button
                         key={tab}
                         onClick={() => setActiveSubTab(tab)}
-                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${
-                           activeSubTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'
-                        }`}
+                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeSubTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'
+                           }`}
                      >
                         {tab}
                      </button>

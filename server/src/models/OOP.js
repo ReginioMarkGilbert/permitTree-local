@@ -81,9 +81,13 @@ const oopSchema = new mongoose.Schema({
       unique: true
    },
    applicationId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: 'Permit'
+   },
+   applicationNumber: {
+      type: String,
+      required: true
    },
    date: {
       type: Date,

@@ -17,6 +17,7 @@ const GET_OOP_DETAILS = gql`
       _id
       billNo
       applicationId
+      applicationNumber
       totalAmount
       OOPstatus
       items {

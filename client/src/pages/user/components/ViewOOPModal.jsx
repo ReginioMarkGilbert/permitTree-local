@@ -1,3 +1,4 @@
+// used both by user and personnel
 import React, { useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -51,7 +52,7 @@ const ViewOOPModal = ({ isOpen, onClose, oop }) => {
                         <p><span className="font-semibold">Date:</span> {format(new Date(parseInt(oop.createdAt)), 'MMMM d, yyyy')}</p>
                      </div>
                      <div>
-                        <p><span className="font-semibold">Application No:</span> {oop.applicationId}</p>
+                        <p><span className="font-semibold">Application No:</span> {oop.applicationNumber}</p>
                         <p><span className="font-semibold">Status:</span> {oop.OOPstatus}</p>
                      </div>
                   </div>

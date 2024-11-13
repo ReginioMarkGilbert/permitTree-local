@@ -34,6 +34,7 @@ const GET_OOP = gql`
       _id
       billNo
       applicationId
+      applicationNumber
       date
       namePayee
       address
@@ -142,7 +143,7 @@ const AccountantOOPRow = ({ oop, onReviewComplete, currentTab }) => {
       <>
          <tr key={oop._id}>
             <td className="px-4 py-4 whitespace-nowrap">
-               {oop.applicationId}
+               {oop.applicationNumber}
             </td>
             <td className="px-4 py-4 whitespace-nowrap">
                {oop.billNo}
