@@ -47,7 +47,7 @@ const certificateResolvers = {
                certificateNumber,
                applicationId: input.applicationId,
                applicationType: input.applicationType,
-               status: 'Pending Signature',
+               certificateStatus: 'Pending Signature',
                dateCreated: new Date().toISOString(),
                certificateData: input.certificateData
             };
@@ -55,11 +55,14 @@ const certificateResolvers = {
             const certificate = new Certificate(certificateData);
             const savedCertificate = await certificate.save();
 
-            // Update permit status
+            // Update permit status with correct flags
             await Permit.findByIdAndUpdate(input.applicationId, {
                $set: {
                   certificateGenerated: true,
-                  certificateId: savedCertificate._id
+                  certificateId: savedCertificate._id,
+                  PermitCreated: true,
+                  awaitingPermitCreation: false
+                  // currentStage: 'AuthenticityApprovedByTechnicalStaff'
                }
             });
 
@@ -96,11 +99,14 @@ const certificateResolvers = {
 
             const savedCertificate = await certificate.save();
 
-            // Update permit status
+            // Update permit status with correct flags
             await Permit.findByIdAndUpdate(input.applicationId, {
                $set: {
                   certificateGenerated: true,
-                  certificateId: savedCertificate._id
+                  certificateId: savedCertificate._id,
+                  PermitCreated: true,
+                  awaitingPermitCreation: false,
+                  currentStage: 'AuthenticityApprovedByTechnicalStaff'
                }
             });
 
