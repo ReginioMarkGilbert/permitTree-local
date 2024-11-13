@@ -12,7 +12,7 @@ import {
 import TS_ViewModal from './TS_ViewModal';
 import TS_ReviewModal from './TS_ReviewModal';
 import TS_AuthenticityReviewModal from './TS_AuthenticityReviewModal';
-import GenerateCertificateModal from './GenerateCertificateModal';
+// import GenerateCertificateModal from './GenerateCertificateModal';
 import CertificateActionHandler from './CertificateActionHandler';
 import { getUserRoles } from '../../../../../utils/auth';
 import { useUndoApplicationApproval } from '../../../hooks/useApplications';
@@ -181,7 +181,7 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
       //    actions.push(
       //       <TooltipProvider key="print-action">
       //          <Tooltip delayDuration={200}>
-   //             <TooltipTrigger asChild>
+      //             <TooltipTrigger asChild>
       //                <Button onClick={() => onPrint(app.id)} variant="outline" size="icon" className="h-8 w-8">
       //                   <Printer className="h-4 w-4" />
       //                </Button>
