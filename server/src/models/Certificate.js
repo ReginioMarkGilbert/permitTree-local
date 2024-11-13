@@ -1,33 +1,23 @@
 const mongoose = require('mongoose');
 
 const CertificateSchema = new mongoose.Schema({
-   certificateNumber: {
-      type: String,
-      required: true,
-      unique: true
-   },
-   applicationId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Permit',
-      required: true
-   },
+   certificateNumber: { type: String, required: true, unique: true },
+   applicationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Permit', required: true },
    applicationType: {
       type: String,
       required: true,
       enum: ['Chainsaw Registration', 'Certificate of Verification', 'Private Tree Plantation Registration',
          'Public Land Tree Cutting Permit', 'Private Land Timber Permit', 'Tree Cutting and/or Earth Balling Permit']
    },
-   status: {
+   certificateStatus: {
       type: String,
-      enum: ['Pending Signature', 'Signed', 'Released'],
+      enum: ['Pending Signature', 'Complete Signatures', 'Released'],
       default: 'Pending Signature'
    },
-   dateCreated: {
-      type: Date,
-      default: Date.now
-   },
+   dateCreated: { type: Date, default: Date.now },
    dateIssued: Date,
    expiryDate: Date,
+
    signedBy: {
       PENRO: {
          userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -53,8 +43,13 @@ const CertificateSchema = new mongoose.Schema({
       otherDetails: mongoose.Schema.Types.Mixed
    },
    uploadedCertificate: {
-      fileUrl: String,
-      uploadDate: Date,
+      fileData: Buffer,
+      filename: String,
+      contentType: String,
+      uploadDate: {
+         type: Date,
+         default: Date.now
+      },
       metadata: {
          certificateType: String,
          issueDate: Date,
@@ -63,7 +58,25 @@ const CertificateSchema = new mongoose.Schema({
       }
    }
 }, {
-   timestamps: true
+   timestamps: true,
+   toObject: {
+      virtuals: true,
+      transform: function(doc, ret) {
+         ret.id = ret._id.toString();
+         delete ret._id;
+         delete ret.__v;
+         return ret;
+      }
+   },
+   toJSON: {
+      virtuals: true,
+      transform: function(doc, ret) {
+         ret.id = ret._id.toString();
+         delete ret._id;
+         delete ret.__v;
+         return ret;
+      }
+   }
 });
 
 module.exports = mongoose.model('Certificate', CertificateSchema);

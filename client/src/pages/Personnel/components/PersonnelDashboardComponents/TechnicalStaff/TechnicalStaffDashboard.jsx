@@ -5,45 +5,45 @@ import { Input } from "@/components/ui/input";
 import TS_ApplicationRow from './TS_ApplicationRow';
 import { useApplications } from '../../../hooks/useApplications';
 import { toast } from 'sonner';
-import { gql } from '@apollo/client';
+// import { gql } from '@apollo/client';
 
-const GET_CERTIFICATES = gql`
-  query GetCertificates($status: String) {
-    getCertificates(status: $status) {
-      id
-      certificateNumber
-      applicationId
-      applicationType
-      status
-      dateCreated
-      certificateData {
-        registrationType
-        ownerName
-        address
-        chainsawDetails {
-          brand
-          model
-          serialNumber
-          dateOfAcquisition
-          powerOutput
-          maxLengthGuidebar
-          countryOfOrigin
-          purchasePrice
-        }
-      }
-      uploadedCertificate {
-        fileUrl
-        uploadDate
-        metadata {
-          certificateType
-          issueDate
-          expiryDate
-          remarks
-        }
-      }
-    }
-  }
-`;
+// const GET_CERTIFICATES = gql`
+//   query GetCertificates($status: String) {
+//     getCertificates(status: $status) {
+//       id
+//       certificateNumber
+//       applicationId
+//       applicationType
+//       status
+//       dateCreated
+//       certificateData {
+//         registrationType
+//         ownerName
+//         address
+//         chainsawDetails {
+//           brand
+//           model
+//           serialNumber
+//           dateOfAcquisition
+//           powerOutput
+//           maxLengthGuidebar
+//           countryOfOrigin
+//           purchasePrice
+//         }
+//       }
+//       uploadedCertificate {
+//         fileUrl
+//         uploadDate
+//         metadata {
+//           certificateType
+//           issueDate
+//           expiryDate
+//           remarks
+//         }
+//       }
+//     }
+//   }
+// `;
 
 const TechnicalStaffDashboard = () => {
    const [searchTerm, setSearchTerm] = useState('');
@@ -58,13 +58,19 @@ const TechnicalStaffDashboard = () => {
                currentStage: 'TechnicalStaffReview'
             };
          case 'Returned Applications':
-            return { currentStage: 'ReturnedByTechnicalStaff', status: 'Returned' };
+            return {
+               currentStage: 'ReturnedByTechnicalStaff',
+               status: 'Returned'
+            };
          case 'Accepted Applications':
             return { acceptedByTechnicalStaff: true };
          case 'For Inspection and Approval':
             return { currentStage: 'ForInspectionByTechnicalStaff' };
          case 'Approved Applications':
-            return { currentStage: 'AuthenticityApprovedByTechnicalStaff', approvedByTechnicalStaff: true };
+            return {
+               currentStage: 'AuthenticityApprovedByTechnicalStaff',
+               approvedByTechnicalStaff: true
+            };
          // Certificates/Permits
          case 'Awaiting Permit Creation':
             return {
@@ -72,10 +78,21 @@ const TechnicalStaffDashboard = () => {
                awaitingPermitCreation: true,
                PermitCreated: false
             };
+         // Applications awaiting certificate/permit creation
          case 'Created Permits':
             return {
-               PermitCreated: true,
-               status: 'Pending Signature'  // Only show permits awaiting signature
+               // certificateStatus: 'Pending Signature',
+               PermitCreated: true
+            };
+         case 'Pending Signature':
+            return {
+               status: 'In Progress',
+               certificateStatus: 'Pending Signature'
+            };
+         // Certificates/Permits
+         case 'Signed Certificates':
+            return {
+               certificateStatus: 'Complete Signatures'
             };
          default:
             toast.error('Invalid subtab selected');
@@ -85,10 +102,11 @@ const TechnicalStaffDashboard = () => {
 
    const { applications, loading, error, refetch } = useApplications(getQueryParamsForTab(activeSubTab));
 
-   const mainTabs = ['Applications', 'Certificates/Permits'];
+   const mainTabs = ['Applications', 'Application Awaiting Certificate/Permit Creation', 'Certificates/Permits'];
    const subTabs = {
       'Applications': ['Pending Reviews', 'Returned Applications', 'Accepted Applications', 'For Inspection and Approval', 'Approved Applications'],
-      'Certificates/Permits': ['Awaiting Permit Creation', 'Created Permits']
+      'Application Awaiting Certificate/Permit Creation': ['Awaiting Permit Creation', 'Created Permits'],
+      'Certificates/Permits': ['Pending Signature', 'Signed Certificates']
    };
 
    const filteredApplications = useMemo(() => {

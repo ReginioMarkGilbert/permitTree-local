@@ -12,15 +12,18 @@ const UPLOAD_CERTIFICATE = gql`
     uploadCertificate(input: $input) {
       id
       certificateNumber
-      status
+      certificateStatus
       dateCreated
       uploadedCertificate {
-        fileUrl
+        fileData
+        filename
+        contentType
         uploadDate
         metadata {
           certificateType
           issueDate
           expiryDate
+          remarks
         }
       }
     }
@@ -50,6 +53,20 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
       }));
    };
 
+   // Function to convert file to base64
+   const fileToBase64 = (file) => {
+      return new Promise((resolve, reject) => {
+         const reader = new FileReader();
+         reader.readAsDataURL(file);
+         reader.onload = () => {
+            // Extract the base64 string from the Data URL
+            const base64String = reader.result.split(',')[1];
+            resolve(base64String);
+         };
+         reader.onerror = (error) => reject(error);
+      });
+   };
+
    const handleUpload = async () => {
       if (!certificateFile) {
          toast.error('Please select a certificate file to upload');
@@ -58,18 +75,22 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
 
       setIsUploading(true);
       try {
-         // TODO: Implement file upload to storage service
-         const fileUrl = 'temporary-url'; // Replace with actual upload logic
+         // Convert file to base64
+         const fileData = await fileToBase64(certificateFile);
 
          const { data } = await uploadCertificate({
             variables: {
                input: {
                   applicationId: application.id,
                   applicationType: application.applicationType,
-                  fileUrl,
-                  metadata: {
-                     ...metadata,
-                     certificateType: application.applicationType
+                  uploadedCertificate: {
+                     fileData,
+                     filename: certificateFile.name,
+                     contentType: certificateFile.type,
+                     metadata: {
+                        ...metadata,
+                        certificateType: application.applicationType
+                     }
                   }
                }
             }

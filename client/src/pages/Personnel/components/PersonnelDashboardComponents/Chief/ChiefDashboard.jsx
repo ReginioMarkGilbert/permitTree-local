@@ -22,12 +22,7 @@ const ChiefDashboard = () => {
             return { awaitingOOP: true };
          case 'Created OOP':
             return { awaitingOOP: false, OOPCreated: true, status: 'In Progress' };
-         case 'Pending Signature':
-            return { OOPstatus: 'Pending Signature' };
-         case 'Signed Order Of Payment':
-            return { OOPSignedByTwoSignatories: true, OOPstatus: 'For Approval' };
-         case 'Signed Certificates':
-            return { CertificateStatus: 'Approved' };
+
          default:
             return { currentStage: 'ChiefRPSReview' };
       }
@@ -92,14 +87,16 @@ const ChiefDashboard = () => {
          console.error('Error fetching OOPs:', oopsError);
          return <p className="text-center text-red-500">Error loading order of payments. Please try again later.</p>;
       }
-
+      //  render based on active subtab
       const filteredOOPs = oops.filter(oop => {
-         if (activeSubTab === 'Pending Signature') {
-            return oop.OOPstatus === 'Pending Signature';
-         } else if (activeSubTab === 'Signed Order Of Payment') {
-            return oop.OOPSignedByTwoSignatories === true && oop.OOPstatus === 'For Approval';
+         switch (activeSubTab) {
+            case 'Pending Signature':
+               return oop.OOPstatus === 'Pending Signature';
+            case 'Signed Order Of Payment':
+               return oop.OOPSignedByTwoSignatories === true;
+            default:
+               return true;
          }
-         return true;
       }).filter(oop =>
          oop.applicationId.toLowerCase().includes(searchTerm.toLowerCase()) ||
          oop.billNo.toLowerCase().includes(searchTerm.toLowerCase())
