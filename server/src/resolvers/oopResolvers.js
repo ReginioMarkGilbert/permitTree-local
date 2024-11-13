@@ -372,7 +372,7 @@ const oopResolvers = {
                oop: updatedOOP,
                recipientId: updatedOOP.userId,
                type: 'OR_ISSUED',
-               remarks: 'Official Receipt has been generated for your payment'
+               remarks: 'Official Receipt has been generated for your payment, navigate to your application dashboard > Order of Payment > Issued OR to view your Official Receipt.'
             });
 
             return updatedOOP;

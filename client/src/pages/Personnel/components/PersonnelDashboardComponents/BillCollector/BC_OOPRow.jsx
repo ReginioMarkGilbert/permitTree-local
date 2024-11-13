@@ -82,7 +82,7 @@ const BillCollectorOOPRow = ({ oop, onReviewComplete }) => {
             return 'bg-gray-100 text-gray-800';
       }
    };
-
+   // undo payment approval
    const handleUndoApproval = async () => {
       try {
          await undoApproval({

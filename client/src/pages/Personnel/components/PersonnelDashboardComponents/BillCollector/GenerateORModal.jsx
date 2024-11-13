@@ -68,7 +68,7 @@ const GenerateORModal = ({ oop, isOpen, onClose, onComplete }) => {
                input: {
                   orNumber,
                   remarks,
-                  amount: parseFloat(oop.totalAmount), // Ensure amount is a number
+                  amount: parseFloat(oop.totalAmount), // make sure amount is a number
                   paymentMethod: 'GCASH'
                }
             }
