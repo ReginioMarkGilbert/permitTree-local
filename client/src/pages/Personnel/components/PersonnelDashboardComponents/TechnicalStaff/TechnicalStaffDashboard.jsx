@@ -5,45 +5,47 @@ import { Input } from "@/components/ui/input";
 import TS_ApplicationRow from './TS_ApplicationRow';
 import { useApplications } from '../../../hooks/useApplications';
 import { toast } from 'sonner';
-// import { gql } from '@apollo/client';
+import { gql, useQuery } from '@apollo/client';
 
-// const GET_CERTIFICATES = gql`
-//   query GetCertificates($status: String) {
-//     getCertificates(status: $status) {
-//       id
-//       certificateNumber
-//       applicationId
-//       applicationType
-//       status
-//       dateCreated
-//       certificateData {
-//         registrationType
-//         ownerName
-//         address
-//         chainsawDetails {
-//           brand
-//           model
-//           serialNumber
-//           dateOfAcquisition
-//           powerOutput
-//           maxLengthGuidebar
-//           countryOfOrigin
-//           purchasePrice
-//         }
-//       }
-//       uploadedCertificate {
-//         fileUrl
-//         uploadDate
-//         metadata {
-//           certificateType
-//           issueDate
-//           expiryDate
-//           remarks
-//         }
-//       }
-//     }
-//   }
-// `;
+const GET_CERTIFICATES = gql`
+  query GetCertificates($status: String) {
+    getCertificates(status: $status) {
+      id
+      certificateNumber
+      applicationId
+      applicationType
+      certificateStatus
+      dateCreated
+      certificateData {
+        registrationType
+        ownerName
+        address
+        chainsawDetails {
+          brand
+          model
+          serialNumber
+          dateOfAcquisition
+          powerOutput
+          maxLengthGuidebar
+          countryOfOrigin
+          purchasePrice
+        }
+      }
+      uploadedCertificate {
+        fileData
+        filename
+        contentType
+        uploadDate
+        metadata {
+          certificateType
+          issueDate
+          expiryDate
+          remarks
+        }
+      }
+    }
+  }
+`;
 
 const TechnicalStaffDashboard = () => {
    const [searchTerm, setSearchTerm] = useState('');
@@ -101,6 +103,12 @@ const TechnicalStaffDashboard = () => {
    };
 
    const { applications, loading, error, refetch } = useApplications(getQueryParamsForTab(activeSubTab));
+
+   const { data: certificatesData, loading: certificatesLoading, error: certificatesError, refetch: refetchCertificates }
+      = useQuery(GET_CERTIFICATES, {
+         variables: { status: activeSubTab === 'Pending Signature' ? 'Pending Signature' : 'Complete Signatures' },
+         skip: !activeMainTab.includes('Certificates'),
+      });
 
    const mainTabs = ['Applications', 'Application Awaiting Certificate/Permit Creation', 'Certificates/Permits'];
    const subTabs = {
@@ -186,6 +194,57 @@ const TechnicalStaffDashboard = () => {
    }
 
    const renderTable = () => {
+      if (activeMainTab === 'Certificates/Permits') {
+         if (certificatesLoading) return <p className="text-center text-gray-500">Loading certificates...</p>;
+         if (certificatesError) return <p className="text-center text-red-500">Error loading certificates</p>;
+
+         const certificates = certificatesData?.getCertificates || [];
+         const filteredCertificates = certificates.filter(cert =>
+            cert.certificateNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            cert.applicationType.toLowerCase().includes(searchTerm.toLowerCase())
+         );
+
+         if (filteredCertificates.length === 0) {
+            return <p className="text-center text-gray-500">No certificates found</p>;
+         }
+
+         return (
+            <div className="bg-white rounded-lg shadow overflow-x-auto">
+               <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                     <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                           Certificate Number
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                           Application Type
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                           Date Created
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                           Status
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                           Actions
+                        </th>
+                     </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                     {filteredCertificates.map((certificate) => (
+                        <TS_CertificateRow
+                           key={certificate.id}
+                           certificate={certificate}
+                           onViewClick={handleViewCertificate}
+                           onReviewComplete={refetchCertificates}
+                        />
+                     ))}
+                  </tbody>
+               </table>
+            </div>
+         );
+      }
+
       if (loading) return <p className="text-center text-gray-500">Loading applications...</p>;
       if (error) {
          console.error('Error fetching applications:', error);
