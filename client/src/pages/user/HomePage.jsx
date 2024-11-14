@@ -7,7 +7,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import HomeFooter from '../../components/ui/HomeFooter';
 import '../../components/ui/styles/customScrollBar.css';
 import { gql, useQuery } from '@apollo/client';
-import { useRecentApplications } from './hooks/useRecentApplications';
+import { useRecentApplications } from './hooks/useUserRecentApplications';
 
 const GET_USER_DETAILS = gql`
   query GetUserDetails {

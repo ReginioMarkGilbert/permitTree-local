@@ -65,17 +65,77 @@ const permitResolvers = {
             throw new Error(`Failed to fetch permits: ${error.message}`);
          }
       },
-      getRecentApplications: async (_, { limit }, { user }) => {
+      getRecentApplications: async (_, { limit, currentStages, roles }, { user }) => {
          if (!user) {
-            throw new Error('You must be logged in to view your applications');
+            throw new Error('You must be logged in to view applications');
          }
 
          try {
-            const permits = await Permit.find({ applicantId: user.id })
+            let query = {};
+
+            // Role-based filtering
+            if (roles?.length > 0) {
+               if (roles.includes('Technical_Staff')) {
+                  query = {
+                     $or: [
+                        { status: 'Submitted' }, // New applications
+                        { currentStage: 'TechnicalStaffReview' },
+                        { currentStage: 'ForInspectionByTechnicalStaff' },
+                        { currentStage: 'ReturnedByTechnicalStaff' }
+                     ]
+                  };
+               } else if (roles.includes('Receiving_Clerk')) {
+                  query = {
+                     $or: [
+                        { currentStage: 'ReceivingClerkReview' },
+                        { currentStage: 'ForRecordByReceivingClerk' },
+                        { currentStage: 'ReturnedByReceivingClerk' }
+                     ]
+                  };
+               } else if (roles.includes('Chief_RPS')) {
+                  query = {
+                     $or: [
+                        { currentStage: 'ChiefRPSReview' },
+                        { status: 'In Progress', reviewedByChief: false }
+                     ]
+                  };
+               } else if (roles.includes('PENR_CENR_Officer')) {
+                  query = {
+                     $or: [
+                        { currentStage: 'CENRPENRReview' },
+                        { currentStage: 'ReturnedByPENRCENROfficer' },
+                        { status: 'In Progress', approvedByPENRCENROfficer: false }
+                     ]
+                  };
+               } else if (roles.includes('OOP_Staff_Incharge')) {
+                  query = {
+                     $or: [
+                        { currentStage: 'AwaitingOOP' },
+                        { awaitingOOP: true }
+                     ]
+                  };
+               } else if (roles.includes('Releasing_Clerk')) {
+                  query = {
+                     $or: [
+                        { currentStage: 'PendingRelease' },
+                        { status: 'Approved', PermitCreated: true }
+                     ]
+                  };
+               }
+            } else {
+               // For regular users, show their own applications
+               query.applicantId = user.id;
+            }
+
+            console.log('Query:', query);
+
+            const permits = await Permit.find(query)
                .sort({ dateOfSubmission: -1 })
                .limit(limit)
                .lean()
                .exec();
+
+            console.log('Found permits:', permits.length);
 
             return permits.map(permit => ({
                ...permit,
@@ -271,8 +331,12 @@ const permitResolvers = {
          if (permit.status !== 'Submitted') {
             throw new Error('Only submitted permits can be unsubmitted');
          }
+         if (permit.currentStage !== 'TechnicalStaffReview') {
+            throw new Error('Application cannot be unsubmitted at this stage');
+         }
 
          permit.status = 'Draft';
+         permit.currentStage = 'Draft';
          await permit.save();
 
          return permit;

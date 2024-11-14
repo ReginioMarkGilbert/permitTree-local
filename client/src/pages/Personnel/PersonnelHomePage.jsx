@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "../../components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "../../components/ui/Card";
@@ -8,9 +8,9 @@ import '../../components/ui/styles/customScrollBar.css';
 import useDebounce from '../../hooks/useDebounce';
 import { getUserRoles } from '../../utils/auth';
 import { usePersonnelNotifications } from './hooks/usePersonnelNotifications';
+import { useRecentApplications } from './hooks/useRecentApplications';
 
 const PersonnelHomePage = () => {
-   const [recentApplications, setRecentApplications] = useState([]);
    const [loading, setLoading] = useState(true);
    const [error, setError] = useState(null);
    const navigate = useNavigate();
@@ -40,55 +40,6 @@ const PersonnelHomePage = () => {
       { title: "Notifications", icon: <Bell className="h-6 w-6" />, link: "/personnel/notifications" },
    ];
 
-   //  #region - temporarily comment out til converted to graphql
-   //  const fetchData = useCallback(async () => {
-   //      setLoading(true);
-   //      try {
-   //          const token = localStorage.getItem('token');
-   //          if (!token) {
-   //              throw new Error('No authentication token found.');
-   //          }
-
-   //          const [totalUsersResponse, applicationsForReviewResponse, applicationsReturnedResponse] = await Promise.all([
-   //              axios.get('http://localhost:3000/api/admin/reports/total-users', {
-   //                  headers: { Authorization: token }
-   //              }),
-   //              axios.get('http://localhost:3000/api/admin/reports/applications-for-review', {
-   //                  headers: { Authorization: token }
-   //              }),
-   //              axios.get('http://localhost:3000/api/admin/reports/applications-returned', {
-   //                  headers: { Authorization: token }
-   //              })
-   //          ]);
-
-   //          setDashboardStats(prevStats => ({
-   //              ...prevStats,
-   //              totalUsers: totalUsersResponse.data.totalUsers,
-   //              applicationsForReview: applicationsForReviewResponse.data.applicationsForReview,
-   //              applicationsReturned: applicationsReturnedResponse.data.applicationsReturned
-   //          }));
-
-   //          // Fetch all applications (for recent applications display)
-   //          const applicationsResponse = await axios.get('http://localhost:3000/api/admin/all-applications', {
-   //              headers: { Authorization: token },
-   //              params: { excludeDrafts: true }
-   //          });
-
-   //          // Filter out draft applications on the client side as well
-   //          const nonDraftApplications = applicationsResponse.data.filter(app => app.status !== 'Draft');
-   //          setRecentApplications(nonDraftApplications);
-
-   //          setLoading(false);
-   //      } catch (err) {
-   //          console.error('Error fetching data:', err.response ? err.response.data : err.message);
-   //          setError('Failed to fetch data. Please try again later.');
-   //          setLoading(false);
-   //      }
-   //  }, []);
-
-   //  useEffect(() => {
-   //      fetchData();
-   //  }, [debouncedRefreshTrigger, fetchData]);
 
    const handleViewAllApplications = () => {
       const userRoles = getUserRoles();
@@ -176,6 +127,13 @@ const PersonnelHomePage = () => {
       }
    }
 
+   // Fetch recent applications with a limit of 7
+   const {
+      recentApplications,
+      loading: applicationsLoading,
+      error: applicationsError
+   } = useRecentApplications(7);
+
    return (
       <div className="min-h-screen bg-green-50 flex flex-col pt-16">
          <main className="container mx-auto py-8 flex-grow mt-4">
@@ -203,38 +161,60 @@ const PersonnelHomePage = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                {/* Recent Applications Card */}
-               <Card className="bg-white recent-applications-card">
+               <Card className="bg-white">
                   <CardHeader>
-                     <CardTitle className="text-green-800">Recent Applications</CardTitle>
+                     <CardTitle className="text-green-800 flex items-center gap-2">
+                        <ClipboardList className="h-5 w-5" />
+                        Recent Applications
+                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                     {loading ? (
-                        <p className="text-center text-gray-500">Loading applications...</p>
-                     ) : error ? (
-                        <p className="text-center text-red-500">{error}</p>
+                  <CardContent className="relative flex flex-col h-full">
+                     {applicationsLoading ? (
+                        <div className="flex items-center justify-center h-[21.5rem]">
+                           <p className="text-gray-500">Loading applications...</p>
+                        </div>
+                     ) : applicationsError ? (
+                        <div className="flex flex-col items-center justify-center h-[21.5rem] text-gray-500">
+                           <AlertCircle className="h-12 w-12 mb-2 text-red-400" />
+                           <p className="text-red-500">Error loading applications</p>
+                           <p className="text-sm text-gray-400 mt-1">{applicationsError.message}</p>
+                        </div>
+                     ) : recentApplications.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-[21.5rem] text-gray-500">
+                           <ClipboardList className="h-12 w-12 mb-2 text-gray-400" />
+                           <p>No applications yet</p>
+                        </div>
                      ) : (
-                        <div className="space-y-4 h-[21.5rem] overflow-y-auto custom-scrollbar"> {/* Increased height to h-96 */}
-                           {recentApplications.slice(0, 7).map((app, index) => (
-                              <div key={index} className="flex items-center justify-between border-b border-gray-200 pb-2 last:border-b-0">
-                                 <div className="flex-grow mr-4">
-                                    <p className="font-semibold text-green-800">{app.applicationType}</p>
-                                    <p className="text-sm text-gray-500">ID: {app.customId}</p>
-                                    <p className="text-sm text-gray-500">Date: {new Date(app.dateOfSubmission).toLocaleDateString()}</p>
-                                 </div>
-                                 <div className="flex-shrink-0 text-right">
-                                    <span className={`px-2 py-1 rounded-full text-xs whitespace-nowrap ${app.status === "Approved" ? "bg-green-200 text-green-800" :
-                                       app.status === "Submitted" ? "bg-yellow-200 text-yellow-800" :
-                                          app.status === "In Progress" ? "bg-blue-200 text-blue-800" :
-                                             app.status === "Accepted" ? "bg-green-200 text-green-800" :
-                                                app.status === "Released" ? "bg-green-200 text-green-800" :
-                                                   app.status === "Expired" ? "bg-red-200 text-red-800" :
-                                                      app.status === "Rejected" ? "bg-red-200 text-red-800" :
-                                                         app.status === "Returned" ? "bg-orange-200 text-orange-800" :
-                                                            app.status === "Payment Proof Submitted" ? "bg-purple-200 text-purple-800" :
-                                                               "bg-gray-200 text-gray-800"
-                                       }`}>
-                                       {app.status === "Submitted" ? "For Review" : app.status}
-                                    </span>
+                        <div className="space-y-3 h-[21.5rem] overflow-y-auto custom-scrollbar pr-2">
+                           {recentApplications.map((app) => (
+                              <div
+                                 key={app.id}
+                                 className="group relative rounded-lg p-4 transition-all duration-200 bg-gray-50 hover:bg-gray-100"
+                              >
+                                 <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                       <p className="font-semibold text-green-800">
+                                          {app.applicationType}
+                                       </p>
+                                       <div className="mt-1 space-y-1">
+                                          <p className="text-sm text-gray-600">
+                                             Application ID: {app.applicationNumber}
+                                          </p>
+                                          <p className="text-sm text-gray-600">
+                                             Submitted: {new Date(app.dateOfSubmission).toLocaleDateString()}
+                                          </p>
+                                       </div>
+                                    </div>
+                                    <div className="ml-4">
+                                       <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${app.status === "Approved" ? "bg-green-100 text-green-800" :
+                                             app.status === "Submitted" ? "bg-blue-100 text-blue-800" :
+                                                app.status === "In Progress" ? "bg-yellow-100 text-yellow-800" :
+                                                   app.status === "Rejected" ? "bg-red-100 text-red-800" :
+                                                      "bg-gray-100 text-gray-800"
+                                          }`}>
+                                          {app.status}
+                                       </span>
+                                    </div>
                                  </div>
                               </div>
                            ))}
@@ -243,7 +223,7 @@ const PersonnelHomePage = () => {
                   </CardContent>
                   <CardFooter>
                      <Button
-                        className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white"
+                        className="w-full bg-green-600 hover:bg-green-700 text-white"
                         onClick={handleViewAllApplications}
                      >
                         View All Applications
@@ -284,11 +264,10 @@ const PersonnelHomePage = () => {
                            {notifications.slice(0, 7).map((notification) => (
                               <div
                                  key={notification.id}
-                                 className={`group relative rounded-lg p-4 transition-all duration-200 ${
-                                    !notification.read
+                                 className={`group relative rounded-lg p-4 transition-all duration-200 ${!notification.read
                                        ? 'bg-green-50 hover:bg-green-100'
                                        : 'bg-gray-50 hover:bg-gray-100'
-                                 } cursor-pointer`}
+                                    } cursor-pointer`}
                                  onClick={() => markAsRead(notification.id)}
                               >
                                  <div className="flex items-start gap-3">
@@ -316,13 +295,12 @@ const PersonnelHomePage = () => {
                                                 minute: '2-digit'
                                              })}
                                           </span>
-                                          <span className={`px-2 py-0.5 rounded-full text-xs ${
-                                             notification.priority === 'high'
+                                          <span className={`px-2 py-0.5 rounded-full text-xs ${notification.priority === 'high'
                                                 ? 'bg-red-100 text-red-800'
                                                 : notification.priority === 'medium'
                                                    ? 'bg-yellow-100 text-yellow-800'
                                                    : 'bg-green-100 text-green-800'
-                                          }`}>
+                                             }`}>
                                              {notification.priority}
                                           </span>
                                        </div>
