@@ -2,11 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "../../components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "../../components/ui/Card";
-import { Bell, ClipboardList, Users, Settings, TrendingUp, CheckCircle, XCircle, ClipboardCheck, RotateCcw } from "lucide-react";
+import { Bell, ClipboardList, Users, Settings, TrendingUp, CheckCircle, XCircle, ClipboardCheck, RotateCcw, Info, AlertCircle, AlertTriangle } from "lucide-react";
 import { FaChartLine } from 'react-icons/fa';
 import '../../components/ui/styles/customScrollBar.css';
 import useDebounce from '../../hooks/useDebounce';
 import { getUserRoles } from '../../utils/auth';
+import { usePersonnelNotifications } from './hooks/usePersonnelNotifications';
 
 const PersonnelHomePage = () => {
    const [recentApplications, setRecentApplications] = useState([]);
@@ -24,6 +25,13 @@ const PersonnelHomePage = () => {
       applicationsReturned: 0,
       applicationIncrease: 12
    });
+
+   const {
+      notifications,
+      loading: notificationsLoading,
+      error: notificationsError,
+      markAsRead
+   } = usePersonnelNotifications();
 
    const quickActions = [
       { title: "Reports", icon: <FaChartLine className="h-6 w-6" />, link: "/personnel/reports" },
@@ -195,7 +203,7 @@ const PersonnelHomePage = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                {/* Recent Applications Card */}
-               <Card className="lg:col-span-2 bg-white recent-applications-card">
+               <Card className="bg-white recent-applications-card">
                   <CardHeader>
                      <CardTitle className="text-green-800">Recent Applications</CardTitle>
                   </CardHeader>
@@ -239,6 +247,101 @@ const PersonnelHomePage = () => {
                         onClick={handleViewAllApplications}
                      >
                         View All Applications
+                     </Button>
+                  </CardFooter>
+               </Card>
+
+               {/* Recent Notifications Card */}
+               <Card className="bg-white">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                     <CardTitle className="text-green-800 flex items-center gap-2">
+                        <Bell className="h-5 w-5" />
+                        Recent Notifications
+                     </CardTitle>
+                     {notifications.length > 0 && (
+                        <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                           {notifications.length} new
+                        </span>
+                     )}
+                  </CardHeader>
+                  <CardContent>
+                     {notificationsLoading ? (
+                        <div className="flex items-center justify-center h-[21.5rem]">
+                           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                        </div>
+                     ) : notificationsError ? (
+                        <div className="flex items-center justify-center h-[21.5rem] text-red-500">
+                           <AlertCircle className="h-5 w-5 mr-2" />
+                           Error loading notifications
+                        </div>
+                     ) : notifications.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-[21.5rem] text-gray-500">
+                           <Bell className="h-12 w-12 mb-2 text-gray-400" />
+                           <p>No notifications yet</p>
+                        </div>
+                     ) : (
+                        <div className="space-y-3 h-[21.5rem] overflow-y-auto custom-scrollbar pr-2">
+                           {notifications.slice(0, 7).map((notification) => (
+                              <div
+                                 key={notification.id}
+                                 className={`group relative rounded-lg p-4 transition-all duration-200 ${
+                                    !notification.read
+                                       ? 'bg-green-50 hover:bg-green-100'
+                                       : 'bg-gray-50 hover:bg-gray-100'
+                                 } cursor-pointer`}
+                                 onClick={() => markAsRead(notification.id)}
+                              >
+                                 <div className="flex items-start gap-3">
+                                    <div className="flex-shrink-0">
+                                       {notification.priority === 'high' ? (
+                                          <AlertCircle className="h-5 w-5 text-red-500" />
+                                       ) : notification.priority === 'medium' ? (
+                                          <AlertTriangle className="h-5 w-5 text-yellow-500" />
+                                       ) : (
+                                          <Info className="h-5 w-5 text-green-500" />
+                                       )}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                       <p className="text-sm font-semibold text-gray-900 mb-1">
+                                          {notification.title}
+                                       </p>
+                                       <p className="text-sm text-gray-600 line-clamp-2">
+                                          {notification.message}
+                                       </p>
+                                       <div className="flex items-center gap-2 mt-2">
+                                          <span className="text-xs text-gray-500">
+                                             {new Date(notification.createdAt).toLocaleDateString()} at{' '}
+                                             {new Date(notification.createdAt).toLocaleTimeString([], {
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                             })}
+                                          </span>
+                                          <span className={`px-2 py-0.5 rounded-full text-xs ${
+                                             notification.priority === 'high'
+                                                ? 'bg-red-100 text-red-800'
+                                                : notification.priority === 'medium'
+                                                   ? 'bg-yellow-100 text-yellow-800'
+                                                   : 'bg-green-100 text-green-800'
+                                          }`}>
+                                             {notification.priority}
+                                          </span>
+                                       </div>
+                                    </div>
+                                    {!notification.read && (
+                                       <div className="absolute top-4 right-4 h-2 w-2 rounded-full bg-green-500"></div>
+                                    )}
+                                 </div>
+                              </div>
+                           ))}
+                        </div>
+                     )}
+                  </CardContent>
+                  <CardFooter>
+                     <Button
+                        className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white"
+                        onClick={() => navigate('/personnel/notifications')}
+                     >
+                        View All Notifications
                      </Button>
                   </CardFooter>
                </Card>
