@@ -40,7 +40,7 @@ const tcebpResolvers = {
                applicantId: user.id,
                applicationType: 'Tree Cutting and/or Earth Balling Permit',
                status: 'Submitted',
-               currentStage: 'Submitted', // Ensure this is set
+               currentStage: 'TechnicalStaffReview', // Ensure this is set
                dateOfSubmission: new Date().toISOString(),
                files: processedFiles,
             };
