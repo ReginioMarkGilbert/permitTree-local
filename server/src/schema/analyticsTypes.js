@@ -30,8 +30,41 @@ const analyticsTypes = gql`
         successRateData: [SuccessRateStats!]!
     }
 
+    type RevenueStats {
+        total: Float!
+        paid: Float!
+        pending: Float!
+        overdue: Float!
+    }
+
+    type MonthlyRevenue {
+        month: String!
+        revenue: Float!
+        target: Float!
+    }
+
+    type PaymentStatusStats {
+        status: String!
+        count: Int!
+        amount: Float!
+    }
+
+    type PermitTypeRevenue {
+        permitType: String!
+        revenue: Float!
+        count: Int!
+    }
+
+    type FinancialAnalytics {
+        revenueStats: RevenueStats!
+        monthlyRevenue: [MonthlyRevenue!]!
+        paymentStatus: [PaymentStatusStats!]!
+        permitTypeRevenue: [PermitTypeRevenue!]!
+    }
+
     extend type Query {
         getApplicationAnalytics(timeFilter: String!): ApplicationAnalytics!
+        getFinancialAnalytics(timeFilter: String!): FinancialAnalytics!
     }
 `;
 
