@@ -9,6 +9,7 @@ const paymentTypes = require('./paymentTypes');
 const mutationTypes = require('./mutationTypes');
 const { notificationTypes } = require('./userNotificationTypes');
 const { personnelNotificationTypes } = require('./personnelNotificationTypes');
+const analyticsTypes = require('./analyticsTypes');
 
 const rootTypeDefs = gql`
   scalar Upload
@@ -38,5 +39,6 @@ module.exports = [
   mutationTypes,
   paymentTypes,
   notificationTypes,
-  personnelNotificationTypes
+  personnelNotificationTypes,
+  analyticsTypes
 ];

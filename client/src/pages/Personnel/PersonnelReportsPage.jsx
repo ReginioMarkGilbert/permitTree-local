@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
     Card,
     CardContent,
@@ -10,116 +10,53 @@ import { ResponsivePie } from '@nivo/pie';
 import { ResponsiveLine } from '@nivo/line';
 import { ResponsiveBar } from '@nivo/bar';
 import { Skeleton } from "@/components/ui/skeleton";
+import { useQuery } from '@apollo/client';
+import { gql } from '@apollo/client';
+
+const GET_APPLICATION_ANALYTICS = gql`
+    query GetApplicationAnalytics($timeFilter: String!) {
+        getApplicationAnalytics(timeFilter: $timeFilter) {
+            applicationTypes {
+                id
+                label
+                value
+            }
+            statusData {
+                id
+                label
+                value
+            }
+            processingTimeData {
+                id
+                data {
+                    x
+                    y
+                }
+            }
+            successRateData {
+                month
+                success
+                rejection
+            }
+        }
+    }
+`;
 
 export default function PersonnelReportsPage() {
     const [timeFilter, setTimeFilter] = useState('week');
-    const [loading, setLoading] = useState(false);
-    const [filteredData, setFilteredData] = useState({
-        applicationTypes: [],
-        statusData: [],
-        processingTimeData: [],
-        successRateData: []
+    const { loading, error, data } = useQuery(GET_APPLICATION_ANALYTICS, {
+        variables: { timeFilter },
+        fetchPolicy: 'network-only'
     });
 
-    // Mock data for application types
-    const applicationTypesData = [
-        { id: 'Chainsaw Registration', value: 450, label: 'Chainsaw Registration' },
-        { id: 'Certificate of Registration', value: 300, label: 'Certificate of Registration' },
-        { id: 'Private Land Timber Permit', value: 150, label: 'Private Land Timber Permit' },
-        { id: 'Tree Plantation Registration', value: 100, label: 'Tree Plantation Registration' }
-    ];
-
-    // Mock data for application status
-    const statusData = [
-        { id: 'Approved', value: 600, label: 'Approved' },
-        { id: 'Pending', value: 250, label: 'Pending' },
-        { id: 'Rejected', value: 50, label: 'Rejected' },
-        { id: 'Under Review', value: 100, label: 'Under Review' }
-    ];
-
-    // Mock data for processing time
-    const processingTimeData = [
-        {
-            id: "Processing Time",
-            data: [
-                { x: 'Jan', y: 5 },
-                { x: 'Feb', y: 4 },
-                { x: 'Mar', y: 6 },
-                { x: 'Apr', y: 3 },
-                { x: 'May', y: 5 },
-                { x: 'Jun', y: 4 }
-            ]
-        }
-    ];
-
-    // Mock data for success/rejection rates
-    const successRateData = [
-        { month: 'Jan', success: 85, rejection: 15 },
-        { month: 'Feb', success: 88, rejection: 12 },
-        { month: 'Mar', success: 90, rejection: 10 },
-        { month: 'Apr', success: 87, rejection: 13 },
-        { month: 'May', success: 92, rejection: 8 },
-        { month: 'Jun', success: 89, rejection: 11 }
-    ];
-
-    useEffect(() => {
-        // Simulate API call and data filtering
-        setLoading(true);
-
-        // Filter data based on timeFilter
-        const filterData = () => {
-            let filtered = {};
-
-            switch(timeFilter) {
-                case 'week':
-                    filtered = {
-                        applicationTypes: applicationTypesData.map(item => ({
-                            ...item,
-                            value: Math.floor(item.value * 0.2) // Show 20% for week
-                        })),
-                        statusData: statusData.map(item => ({
-                            ...item,
-                            value: Math.floor(item.value * 0.2)
-                        })),
-                        processingTimeData: [{
-                            id: "Processing Time",
-                            data: processingTimeData[0].data.slice(-7) // Last 7 days
-                        }],
-                        successRateData: successRateData.slice(-7)
-                    };
-                    break;
-                case 'month':
-                    filtered = {
-                        applicationTypes: applicationTypesData.map(item => ({
-                            ...item,
-                            value: Math.floor(item.value * 0.5) // Show 50% for month
-                        })),
-                        statusData: statusData.map(item => ({
-                            ...item,
-                            value: Math.floor(item.value * 0.5)
-                        })),
-                        processingTimeData: [{
-                            id: "Processing Time",
-                            data: processingTimeData[0].data.slice(-30) // Last 30 days
-                        }],
-                        successRateData: successRateData.slice(-30)
-                    };
-                    break;
-                default:
-                    filtered = {
-                        applicationTypes: applicationTypesData,
-                        statusData: statusData,
-                        processingTimeData: processingTimeData,
-                        successRateData: successRateData
-                    };
-            }
-
-            setFilteredData(filtered);
-            setLoading(false);
-        };
-
-        filterData();
-    }, [timeFilter]);
+    if (error) {
+        console.error('Error fetching analytics:', error);
+        return (
+            <div className="min-h-screen bg-green-50 p-8 pt-24">
+                <div className="text-red-500">Error loading analytics data</div>
+            </div>
+        );
+    }
 
     if (loading) {
         return (
@@ -134,6 +71,13 @@ export default function PersonnelReportsPage() {
             </div>
         );
     }
+
+    const {
+        applicationTypes,
+        statusData,
+        processingTimeData,
+        successRateData
+    } = data.getApplicationAnalytics;
 
     return (
         <div className="min-h-screen bg-green-50 p-8">
@@ -158,7 +102,7 @@ export default function PersonnelReportsPage() {
                         <h2 className="text-xl font-semibold text-green-700 mb-4">Applications by Type</h2>
                         <div className="h-[400px]">
                             <ResponsivePie
-                                data={filteredData.applicationTypes}
+                                data={applicationTypes}
                                 margin={{ top: 40, right: 80, bottom: 100, left: 80 }}
                                 innerRadius={0.5}
                                 padAngle={0.7}
@@ -207,7 +151,7 @@ export default function PersonnelReportsPage() {
                         <h2 className="text-xl font-semibold text-green-700 mb-4">Application Status Distribution</h2>
                         <div className="h-[400px]">
                             <ResponsivePie
-                                data={filteredData.statusData}
+                                data={statusData}
                                 margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
                                 innerRadius={0.5}
                                 padAngle={0.7}
@@ -240,7 +184,7 @@ export default function PersonnelReportsPage() {
                         </CardHeader>
                         <CardContent className="h-[400px]">
                             <ResponsiveLine
-                                data={filteredData.processingTimeData}
+                                data={processingTimeData}
                                 margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
                                 xScale={{ type: 'point' }}
                                 yScale={{ type: 'linear', min: 'auto', max: 'auto' }}
@@ -294,7 +238,7 @@ export default function PersonnelReportsPage() {
                         </CardHeader>
                         <CardContent className="h-[400px]">
                             <ResponsiveBar
-                                data={filteredData.successRateData}
+                                data={successRateData}
                                 keys={['success', 'rejection']}
                                 indexBy="month"
                                 margin={{ top: 50, right: 130, bottom: 50, left: 60 }}

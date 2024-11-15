@@ -17,6 +17,7 @@ const notificationResolvers = require('./userNotificationResolvers');
 const { resolvePermitType } = require('../schema/permitTypes');
 const oopResolvers = require('./oopResolvers');
 const personnelNotificationResolvers = require('./personnelNotificationResolvers');
+const analyticsResolvers = require('./analyticsResolvers');
 
 // Base resolvers with scalar types and type resolvers
 const baseResolvers = {
@@ -33,6 +34,7 @@ const baseResolvers = {
     ...certificateResolvers.Query,
     ...notificationResolvers.Query,
     ...personnelNotificationResolvers.Query,
+    ...analyticsResolvers.Query
   },
   Mutation: {
     ...userResolvers.Mutation,
@@ -42,6 +44,7 @@ const baseResolvers = {
     ...certificateResolvers.Mutation,
     ...notificationResolvers.Mutation,
     ...personnelNotificationResolvers.Mutation,
+    ...analyticsResolvers.Mutation
   },
   Subscription: {
     ...notificationResolvers.Subscription,
@@ -72,7 +75,8 @@ const resolvers = mergeResolvers([
   paymentResolvers,
   certificateResolvers,
   notificationResolvers,
-  personnelNotificationResolvers
+  personnelNotificationResolvers,
+  analyticsResolvers
 ]);
 
 module.exports = resolvers;
