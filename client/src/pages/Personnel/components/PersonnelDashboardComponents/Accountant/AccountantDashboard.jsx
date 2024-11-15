@@ -41,6 +41,17 @@ const AccountantDashboard = () => {
 
    const filteredOOPs = useMemo(() => {
       return oops.filter(oop => {
+         // First filter by status based on activeSubTab
+         const matchesStatus = (() => {
+            if (activeSubTab === 'Pending Approval') {
+               return oop.OOPstatus === 'For Approval';
+            } else if (activeSubTab === 'Approved OOP') {
+               return oop.OOPstatus === 'Awaiting Payment' || oop.OOPstatus === 'Payment Proof Approved' || oop.OOPstatus === 'Completed OOP' || oop.OOPstatus === 'Issued OR';
+            }
+            return true;
+         })();
+
+         // Then apply the rest of the filters
          const matchesSearch = oop.applicationId.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
             oop.billNo.toLowerCase().includes(filters.searchTerm.toLowerCase());
 
@@ -71,7 +82,7 @@ const AccountantDashboard = () => {
             return (!fromDate || oopDate >= fromDate) && (!toDate || oopDate <= toDate);
          })();
 
-         return matchesSearch && matchesType && matchesAmount && matchesDateRange;
+         return matchesStatus && matchesSearch && matchesType && matchesAmount && matchesDateRange;
       });
    }, [oops, filters, activeSubTab]);
 
