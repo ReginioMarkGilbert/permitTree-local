@@ -1,5 +1,6 @@
 const Payment = require('../models/Payment');
 const { OOP } = require('../models/OOP');
+const FinancialAnalyticsService = require('../services/financialAnalyticsService');
 
 const paymentResolvers = {
    Query: {
@@ -85,6 +86,9 @@ const paymentResolvers = {
                paymentProof: paymentProof
             });
 
+            // Trigger financial analytics update
+            await FinancialAnalyticsService.updateFinancialMetricsOnPayment(oop);
+
             return {
                success: true,
                message: 'Payment confirmed and proof generated successfully',
@@ -109,10 +113,12 @@ const paymentResolvers = {
 
             // Update OOP status if payment is verified
             if (status === 'VERIFIED') {
-               await OOP.findByIdAndUpdate(payment.oopId, {
-                  // OOPstatus: 'Payment Proof Approved'
+               const oop = await OOP.findByIdAndUpdate(payment.oopId, {
                   OOPstatus: 'Completed OOP'
-               });
+               }, { new: true });
+
+               // Update financial metrics
+               await FinancialAnalyticsService.updateFinancialMetricsOnPayment(oop);
             }
             if (status === 'REJECTED') {
                await OOP.findByIdAndUpdate(payment.oopId, {
