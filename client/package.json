@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.11.8",
+    "@headlessui/react": "^2.2.0",
     "@nivo/bar": "^0.87.0",
     "@nivo/calendar": "^0.87.0",
     "@nivo/core": "^0.87.0",
@@ -33,7 +34,7 @@
     "@radix-ui/react-popover": "^1.1.2",
     "@radix-ui/react-radio-group": "^1.2.1",
     "@radix-ui/react-scroll-area": "^1.2.0",
-    "@radix-ui/react-select": "^2.1.1",
+    "@radix-ui/react-select": "^2.1.2",
     "@radix-ui/react-separator": "^1.1.0",
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-switch": "^1.1.1",

@@ -1,16 +1,24 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { RefreshCw, Search } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import ChiefApplicationRow from './ChiefApplicationRow';
 import { useApplications } from '../../../hooks/useApplications';
 import { useOrderOfPayments } from '../../../hooks/useOrderOfPayments';
 import ChiefOOPRow from './ChiefOOPRow';
+import ChiefApplicationFilters from './ChiefApplicationFilters';
 
 const ChiefDashboard = () => {
    const [searchTerm, setSearchTerm] = useState('');
    const [activeMainTab, setActiveMainTab] = useState('Applications');
    const [activeSubTab, setActiveSubTab] = useState('Applications for Review');
+   const [filters, setFilters] = useState({
+      searchTerm: '',
+      applicationType: '',
+      dateRange: {
+         from: undefined,
+         to: undefined
+      }
+   });
 
    const getQueryParamsForTab = (tab) => {
       switch (tab) {
@@ -39,11 +47,32 @@ const ChiefDashboard = () => {
    };
 
    const filteredApplications = useMemo(() => {
-      return applications.filter(app =>
-         app.applicationNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         app.applicationType.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-   }, [applications, searchTerm]);
+      return applications.filter(app => {
+         const matchesSearch = app.applicationNumber.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+            app.applicationType.toLowerCase().includes(filters.searchTerm.toLowerCase());
+
+         const matchesType = !filters.applicationType ||
+            filters.applicationType === "all" ||
+            app.applicationType === filters.applicationType;
+
+         const matchesDateRange = (() => {
+            if (!filters.dateRange.from && !filters.dateRange.to) return true;
+
+            const appDate = new Date(app.dateOfSubmission);
+            appDate.setHours(0, 0, 0, 0);
+
+            const fromDate = filters.dateRange.from ? new Date(filters.dateRange.from) : null;
+            const toDate = filters.dateRange.to ? new Date(filters.dateRange.to) : null;
+
+            if (fromDate) fromDate.setHours(0, 0, 0, 0);
+            if (toDate) toDate.setHours(0, 0, 0, 0);
+
+            return (!fromDate || appDate >= fromDate) && (!toDate || appDate <= toDate);
+         })();
+
+         return matchesSearch && matchesType && matchesDateRange;
+      });
+   }, [applications, filters]);
 
    useEffect(() => {
       refetch();
@@ -199,6 +228,10 @@ const ChiefDashboard = () => {
       );
    };
 
+   const renderFilters = () => {
+      return <ChiefApplicationFilters filters={filters} setFilters={setFilters} />;
+   };
+
    return (
       <div className="bg-green-50 min-h-screen pt-20 pb-8 px-4 sm:px-6 lg:px-8">
          <div className="max-w-7xl mx-auto space-y-6">
@@ -236,7 +269,7 @@ const ChiefDashboard = () => {
 
             {/* Sub Tabs and Search Section */}
             <div className="bg-white rounded-lg shadow-sm p-6">
-               <div className="space-y-4">
+               <div className="space-y-4 relative">
                   {/* Sub Tabs */}
                   <div className="bg-gray-100 p-1 rounded-md inline-flex flex-wrap gap-1">
                      {subTabs[activeMainTab].map((tab) => (
@@ -254,18 +287,7 @@ const ChiefDashboard = () => {
                   </div>
 
                   {renderTabDescription()}
-
-                  {/* Search Bar */}
-                  <div className="relative w-full sm:w-1/3">
-                     <Input
-                        type="text"
-                        placeholder="Search applications..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10"
-                     />
-                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  </div>
+                  {renderFilters()}
                </div>
             </div>
 
