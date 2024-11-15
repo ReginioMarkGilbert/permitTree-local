@@ -88,10 +88,19 @@ export const useRecentApplications = (limit = 7) => {
    const getQueryParamsForRole = () => {
       if (roles.includes('Technical_Staff')) {
          return {
-            //   status: 'Submitted',
-            currentStage: 'TechnicalStaffReview',
-            currentStage: 'ReturnedByTechnicalStaff',
-            currentStage: 'ForInspectionByTechnicalStaff'
+            // if (status: 'In Progress' && currentStage: 'ReturnedByTechnicalStaff' || currentStage: 'ForInspectionByTechnicalStaff') || status: 'Submitted' && currentStage: 'TechnicalStaffReview'
+            $or: [
+               {
+                  status: 'In Progress',
+                  currentStage: {
+                     $in: ['ReturnedByTechnicalStaff', 'ForInspectionByTechnicalStaff']
+                  }
+               },
+               {
+                  status: 'Submitted',
+                  currentStage: 'TechnicalStaffReview'
+               }
+            ]
          };
       }
       if (roles.includes('Receiving_Clerk')) {
@@ -119,7 +128,8 @@ export const useRecentApplications = (limit = 7) => {
       }
       // Default case for other roles or no role
       return {
-         status: 'Submitted'
+         // status: 'Submitted'
+         status: 'In Progress'
       };
    };
 
