@@ -12,6 +12,7 @@ export const GET_APPLICATIONS_AWAITING_OOP = gql`
       status
       currentStage
       awaitingOOP
+      OOPCreated
       ... on CSAWPermit {
         ownerName
         address
@@ -226,7 +227,7 @@ export const useOrderOfPayments = (userId = null) => {
       error: applicationsError,
       refetch: refetchApplications
    } = useQuery(GET_APPLICATIONS_AWAITING_OOP, {
-      variables: { awaitingOOP: true },
+      variables: { awaitingOOP: true, OOPCreated: false },
       fetchPolicy: 'network-only'
    });
 
@@ -297,7 +298,7 @@ export const useOrderOfPayments = (userId = null) => {
             variables: { input },
             refetchQueries: [{
                query: GET_APPLICATIONS_AWAITING_OOP,
-               variables: { awaitingOOP: true }
+               variables: { awaitingOOP: true, OOPCreated: false }
             }]
          });
 

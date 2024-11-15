@@ -55,7 +55,21 @@ const PaymentPage = () => {
    if (loading) {
       return (
          <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600" />
+            <div
+               data-testid="loading-spinner"
+               className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"
+            />
+         </div>
+      );
+   }
+
+   if (error) {
+      return (
+         <div
+            data-testid="error-message"
+            className="min-h-screen bg-gray-50 flex items-center justify-center text-red-600"
+         >
+            Error loading payment details
          </div>
       );
    }
@@ -118,6 +132,7 @@ const PaymentPage = () => {
          <div className="w-full max-w-4xl pt-24 px-4 sm:px-6 lg:px-8">
             <div className="mb-4">
                <Button
+                  data-testid="back-to-applications-button"
                   variant="outline"
                   onClick={() => navigate('/applicationsStatus')}
                   className="flex items-center gap-2"
@@ -126,7 +141,7 @@ const PaymentPage = () => {
                   Back
                </Button>
             </div>
-            <div className="rounded-lg shadow-sm p-6 mb-8">
+            <div data-testid="step-indicator" className="rounded-lg shadow-sm p-6 mb-8">
                <PaymentStepIndicator currentStep={currentStep} />
             </div>
             <div className="flex justify-center">

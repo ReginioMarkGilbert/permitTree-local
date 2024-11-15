@@ -178,6 +178,7 @@ const permitResolvers = {
 
          reviewedByChief,
          awaitingOOP,
+         OOPCreated,
          awaitingPermitCreation,
          PermitCreated
       }) => {
@@ -216,6 +217,9 @@ const permitResolvers = {
             if (PermitCreated !== undefined) {
                query.PermitCreated = PermitCreated;
             }
+            if (OOPCreated !== undefined) {
+               query.OOPCreated = OOPCreated;
+            }
 
             console.log('Query parameters:', query);
 
@@ -229,6 +233,7 @@ const permitResolvers = {
                id: p._id,
                applicationNumber: p.applicationNumber,
                awaitingOOP: p.awaitingOOP,
+               OOPCreated: p.OOPCreated,
                status: p.status
             })));
 
@@ -402,6 +407,7 @@ const permitResolvers = {
          reviewedByChief,
 
          awaitingOOP,
+         OOPCreated,
          awaitingPermitCreation,
          PermitCreated
       }, { user }) => {
@@ -444,7 +450,9 @@ const permitResolvers = {
             if (PermitCreated !== undefined) {
                permit.PermitCreated = PermitCreated;
             }
-
+            if (OOPCreated !== undefined) {
+               permit.OOPCreated = OOPCreated;
+            }
             // permit.history.push({
             //    stage: currentStage,
             //    status: status,

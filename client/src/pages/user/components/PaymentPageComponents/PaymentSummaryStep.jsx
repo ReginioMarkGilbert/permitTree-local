@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 const PaymentSummaryStep = ({ oop, formData, onNext, onBack }) => {
    return (
-      <Card className="w-full max-w-2xl mx-auto">
+      <Card data-testid="payment-summary-step" className="w-full max-w-2xl mx-auto">
          <CardHeader>
             <CardTitle className="text-center">Payment Summary</CardTitle>
          </CardHeader>
@@ -51,13 +51,17 @@ const PaymentSummaryStep = ({ oop, formData, onNext, onBack }) => {
                </div>
             </div>
 
-            <div className="flex justify-between pt-4">
-               <Button type="button" variant="outline" onClick={onBack}>
+            <div className="flex justify-between gap-4">
+               <Button
+                  data-testid="back-button"
+                  variant="outline"
+                  onClick={onBack}
+               >
                   Back
                </Button>
                <Button
+                  data-testid="proceed-payment-button"
                   onClick={onNext}
-                  className="bg-green-600 hover:bg-green-700"
                >
                   Proceed to Payment
                </Button>

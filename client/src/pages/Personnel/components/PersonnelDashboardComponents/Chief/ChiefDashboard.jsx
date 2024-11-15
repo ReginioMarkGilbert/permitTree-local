@@ -21,7 +21,7 @@ const ChiefDashboard = () => {
          case 'Awaiting OOP':
             return { awaitingOOP: true };
          case 'Created OOP':
-            return { awaitingOOP: false, OOPCreated: true, status: 'In Progress' };
+            return { OOPCreated: true, awaitingOOP: false };
 
          default:
             return { currentStage: 'ChiefRPSReview' };

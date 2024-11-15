@@ -110,7 +110,10 @@ const GCashPaymentStep = ({ oop, formData = {}, onBack }) => {
    }, []);
 
    return (
-      <Card className="w-full max-w-2xl mx-auto">
+      <div
+         data-testid="gcash-payment-step"
+         className="flex flex-col p-6 rounded-lg shadow-lg bg-white w-full max-w-2xl mx-auto"
+      >
          <CardHeader>
             <CardTitle className="text-center">GCash Payment</CardTitle>
          </CardHeader>
@@ -167,16 +170,17 @@ const GCashPaymentStep = ({ oop, formData = {}, onBack }) => {
                      </div>
                      <p className="text-lg font-medium text-red-600">Payment Failed</p>
                      <Button
+                        data-testid="back-button"
                         variant="outline"
                         onClick={onBack}
                      >
-                        Try Again
+                        Back
                      </Button>
                   </div>
                )}
             </div>
          </CardContent>
-      </Card>
+      </div>
    );
 };
 

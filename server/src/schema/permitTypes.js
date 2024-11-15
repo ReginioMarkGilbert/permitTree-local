@@ -321,6 +321,7 @@ const permitTypes = gql`
       approvedByPENRCENROfficer: Boolean,
       reviewedByChief: Boolean,
       awaitingOOP: Boolean,
+      OOPCreated: Boolean,
       awaitingPermitCreation: Boolean,
       PermitCreated: Boolean
     ): [Permit!]!
