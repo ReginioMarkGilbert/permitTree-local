@@ -1,14 +1,198 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Search } from "lucide-react";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
 
 const OOPFilters = ({ filters, setFilters }) => {
+   const applicationTypes = [
+      { value: "all", label: "All Types" },
+      { value: "Chainsaw Registration", label: "Chainsaw Registration" },
+      { value: "Certificate of Verification", label: "Certificate of Verification" },
+      { value: "Private Tree Plantation Registration", label: "Private Tree Plantation Registration" },
+      { value: "Public Land Tree Cutting Permit", label: "Public Land Tree Cutting Permit" },
+      { value: "Private Land Timber Permit", label: "Private Land Timber Permit" },
+      { value: "Tree Cutting and/or Earth Balling Permit", label: "Tree Cutting/Earth Balling Permit" }
+   ];
+
+   const amountRanges = [
+      { value: "all", label: "All Amounts" },
+      { value: "0-1000", label: "₱0 - ₱1,000" },
+      { value: "1001-5000", label: "₱1,001 - ₱5,000" },
+      { value: "5001-10000", label: "₱5,001 - ₱10,000" },
+      { value: "10001+", label: "Above ₱10,000" }
+   ];
+
+   // Browser detection
+   const isChrome = useMemo(() => {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      const isBrave = navigator.brave !== undefined;
+      return userAgent.includes('chrome') && !userAgent.includes('edg') && !isBrave;
+   }, []);
+
+   // Application Type Select Component
+   const ApplicationTypeSelect = () => {
+      if (isChrome) {
+         return (
+            <select
+               value={filters.applicationType}
+               onChange={(e) => setFilters(prev => ({
+                  ...prev,
+                  applicationType: e.target.value === "all" ? "" : e.target.value
+               }))}
+               className="w-[200px] h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
+            >
+               {applicationTypes.map((type) => (
+                  <option key={type.value} value={type.value}>
+                     {type.label}
+                  </option>
+               ))}
+            </select>
+         );
+      }
+
+      return (
+         <Select
+            value={filters.applicationType}
+            onValueChange={(value) => setFilters(prev => ({
+               ...prev,
+               applicationType: value === "all" ? "" : value
+            }))}
+         >
+            <SelectTrigger className="w-[200px]">
+               <SelectValue placeholder="Nature of Application" />
+            </SelectTrigger>
+            <SelectContent position="popper" side="bottom" className="w-[200px]">
+               {applicationTypes.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                     {type.label}
+                  </SelectItem>
+               ))}
+            </SelectContent>
+         </Select>
+      );
+   };
+
+   // Amount Range Select Component
+   const AmountRangeSelect = () => {
+      if (isChrome) {
+         return (
+            <select
+               value={filters.amountRange}
+               onChange={(e) => setFilters(prev => ({
+                  ...prev,
+                  amountRange: e.target.value
+               }))}
+               className="w-[200px] h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
+            >
+               {amountRanges.map((range) => (
+                  <option key={range.value} value={range.value}>
+                     {range.label}
+                  </option>
+               ))}
+            </select>
+         );
+      }
+
+      return (
+         <Select
+            value={filters.amountRange}
+            onValueChange={(value) => setFilters(prev => ({ ...prev, amountRange: value }))}
+         >
+            <SelectTrigger className="w-[200px]">
+               <SelectValue placeholder="Amount Range" />
+            </SelectTrigger>
+            <SelectContent position="popper" side="bottom" className="w-[200px]">
+               {amountRanges.map((range) => (
+                  <SelectItem key={range.value} value={range.value}>
+                     {range.label}
+                  </SelectItem>
+               ))}
+            </SelectContent>
+         </Select>
+      );
+   };
+
+   // Date Range Component
+   const DateRangeComponent = () => {
+      if (isChrome) {
+         return (
+            <div className="flex items-center space-x-2">
+               <div className="flex items-center rounded-md border border-input">
+                  <input
+                     type="date"
+                     value={filters.dateRange.from ? format(filters.dateRange.from, "yyyy-MM-dd") : ""}
+                     onChange={(e) => {
+                        const from = e.target.value ? new Date(e.target.value) : undefined;
+                        setFilters(prev => ({
+                           ...prev,
+                           dateRange: { ...prev.dateRange, from }
+                        }));
+                     }}
+                     className="h-10 px-3 py-2 rounded-md bg-background text-sm focus:outline-none"
+                  />
+               </div>
+               <span className="text-sm text-muted-foreground">to</span>
+               <div className="flex items-center rounded-md border border-input">
+                  <input
+                     type="date"
+                     value={filters.dateRange.to ? format(filters.dateRange.to, "yyyy-MM-dd") : ""}
+                     onChange={(e) => {
+                        const to = e.target.value ? new Date(e.target.value) : undefined;
+                        setFilters(prev => ({
+                           ...prev,
+                           dateRange: { ...prev.dateRange, to }
+                        }));
+                     }}
+                     className="h-10 px-3 py-2 rounded-md bg-background text-sm focus:outline-none"
+                  />
+               </div>
+            </div>
+         );
+      }
+
+      return (
+         <Popover>
+            <PopoverTrigger asChild>
+               <Button
+                  variant="outline"
+                  className={`w-[200px] justify-start text-left font-normal ${
+                     filters.dateRange.from ? 'text-foreground' : 'text-muted-foreground'
+                  }`}
+               >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {filters.dateRange.from ? (
+                     filters.dateRange.to ? (
+                        <>
+                           {format(filters.dateRange.from, "MM/dd/yyyy")} -{" "}
+                           {format(filters.dateRange.to, "MM/dd/yyyy")}
+                        </>
+                     ) : (
+                        format(filters.dateRange.from, "MM/dd/yyyy")
+                     )
+                  ) : (
+                     <span>Select date range</span>
+                  )}
+               </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+               <Calendar
+                  initialFocus
+                  mode="range"
+                  selected={filters.dateRange}
+                  onSelect={(range) =>
+                     setFilters(prev => ({ ...prev, dateRange: range || { from: undefined, to: undefined } }))
+                  }
+                  numberOfMonths={2}
+               />
+            </PopoverContent>
+         </Popover>
+      );
+   };
+
    return (
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
          {/* Search Bar */}
@@ -26,77 +210,13 @@ const OOPFilters = ({ filters, setFilters }) => {
          {/* OOP-specific Filters */}
          <div className="flex flex-wrap sm:flex-nowrap gap-2 w-full sm:w-auto">
             {/* Nature of Application Filter */}
-            <Select
-               value={filters.applicationType}
-               onValueChange={(value) => setFilters(prev => ({ ...prev, applicationType: value === "all" ? "" : value }))}
-            >
-               <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Nature of Application" />
-               </SelectTrigger>
-               <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="Chainsaw Registration">Chainsaw Registration</SelectItem>
-                  <SelectItem value="Certificate of Verification">Certificate of Verification</SelectItem>
-                  <SelectItem value="Private Tree Plantation Registration">Private Tree Plantation Registration</SelectItem>
-                  <SelectItem value="Public Land Tree Cutting Permit">Public Land Tree Cutting Permit</SelectItem>
-                  <SelectItem value="Private Land Timber Permit">Private Land Timber Permit</SelectItem>
-                  <SelectItem value="Tree Cutting and/or Earth Balling Permit">Tree Cutting/Earth Balling Permit</SelectItem>
-               </SelectContent>
-            </Select>
+            <ApplicationTypeSelect />
 
             {/* Amount Range Filter */}
-            <Select
-               value={filters.amountRange}
-               onValueChange={(value) => setFilters(prev => ({ ...prev, amountRange: value }))}
-            >
-               <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Amount Range" />
-               </SelectTrigger>
-               <SelectContent>
-                  <SelectItem value="all">All Amounts</SelectItem>
-                  <SelectItem value="0-1000">₱0 - ₱1,000</SelectItem>
-                  <SelectItem value="1001-5000">₱1,001 - ₱5,000</SelectItem>
-                  <SelectItem value="5001-10000">₱5,001 - ₱10,000</SelectItem>
-                  <SelectItem value="10001+">Above ₱10,000</SelectItem>
-               </SelectContent>
-            </Select>
+            <AmountRangeSelect />
 
             {/* Date Range Picker */}
-            <Popover>
-               <PopoverTrigger asChild>
-                  <Button
-                     variant="outline"
-                     className={`w-[200px] justify-start text-left font-normal ${
-                        filters.dateRange.from ? 'text-foreground' : 'text-muted-foreground'
-                     }`}
-                  >
-                     <CalendarIcon className="mr-2 h-4 w-4" />
-                     {filters.dateRange.from ? (
-                        filters.dateRange.to ? (
-                           <>
-                              {format(filters.dateRange.from, "MM/dd/yyyy")} -{" "}
-                              {format(filters.dateRange.to, "MM/dd/yyyy")}
-                           </>
-                        ) : (
-                           format(filters.dateRange.from, "MM/dd/yyyy")
-                        )
-                     ) : (
-                        <span>Select date range</span>
-                     )}
-                  </Button>
-               </PopoverTrigger>
-               <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                     initialFocus
-                     mode="range"
-                     selected={filters.dateRange}
-                     onSelect={(range) =>
-                        setFilters(prev => ({ ...prev, dateRange: range || { from: undefined, to: undefined } }))
-                     }
-                     numberOfMonths={2}
-                  />
-               </PopoverContent>
-            </Popover>
+            <DateRangeComponent />
 
             {/* Clear Filters Button */}
             <Button
