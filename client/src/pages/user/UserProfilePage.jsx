@@ -21,6 +21,7 @@ const GET_USER_DETAILS = gql`
   query GetUserDetails {
     getUserDetails {
       id
+      username
       firstName
       lastName
       email
@@ -70,6 +71,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
 export default function UserProfilePage() {
    const [userInfo, setUserInfo] = useState({
       fullName: '',
+      username: '',
       email: '',
       phone: '',
       address: '',
@@ -97,9 +99,10 @@ export default function UserProfilePage() {
 
    useEffect(() => {
       if (data?.getUserDetails) {
-         const { firstName, lastName, email, phone, address, company, profilePicture, lastPasswordChange, recentActivities, stats } = data.getUserDetails;
+         const { firstName, lastName, username, email, phone, address, company, profilePicture, lastPasswordChange, recentActivities, stats } = data.getUserDetails;
          const fetchedData = {
             fullName: `${firstName} ${lastName}`,
+            username: username || '',
             email: email || '',
             phone: phone || '',
             address: address || '',
@@ -122,6 +125,10 @@ export default function UserProfilePage() {
          toast.error('Full Name must only contain letters and spaces.');
          return;
       }
+      if (id === 'username' && /[^a-z0-9_]/.test(value)) {
+         toast.error('Username must only contain lowercase letters, numbers, and underscores.');
+         return;
+      }
       setUserInfo(prev => ({ ...prev, [id]: value }));
    };
 
@@ -129,10 +136,14 @@ export default function UserProfilePage() {
       e.preventDefault();
       if (isEditing) {
          try {
-            const [firstName, lastName] = userInfo.fullName.split(' ');
+            const nameParts = userInfo.fullName.trim().split(/\s+/);
+            const lastName = nameParts.pop();
+            const firstName = nameParts.join(' ');
+
             const input = {
                firstName,
                lastName,
+               username: userInfo.username,
                email: userInfo.email,
                phone: userInfo.phone,
                company: userInfo.company,
@@ -300,7 +311,10 @@ export default function UserProfilePage() {
                               className="h-full w-full object-cover"
                            />
                         ) : (
-                           <span>{userInfo.fullName.split(' ').map(n => n[0]).join('')}</span>
+                           <span>
+                              {userInfo.fullName.split(' ')[0][0]}
+                              {userInfo.fullName.split(' ').slice(-1)[0][0]}
+                           </span>
                         )}
                      </div>
                      {isEditing && (
@@ -355,6 +369,16 @@ export default function UserProfilePage() {
                            <Input
                               id="fullName"
                               value={userInfo.fullName}
+                              onChange={handleInputChange}
+                              disabled={!isEditing}
+                              className={!isEditing ? 'bg-gray-50' : ''}
+                           />
+                        </div>
+                        <div className="space-y-2">
+                           <Label htmlFor="username">Username</Label>
+                           <Input
+                              id="username"
+                              value={userInfo.username}
                               onChange={handleInputChange}
                               disabled={!isEditing}
                               className={!isEditing ? 'bg-gray-50' : ''}

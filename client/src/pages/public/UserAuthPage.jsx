@@ -61,7 +61,9 @@ const UserAuthPage = () => {
 
    useEffect(() => {
       if (firstName && lastName) {
-         setUsername(`${firstName.toLowerCase()}_${lastName.toLowerCase()}`);
+         const formattedFirstName = firstName.trim().toLowerCase().replace(/\s+/g, '_');
+         const formattedLastName = lastName.trim().toLowerCase();
+         setUsername(`${formattedFirstName}_${formattedLastName}`);
       } else {
          setUsername('');
       }

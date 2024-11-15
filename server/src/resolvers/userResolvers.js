@@ -58,6 +58,7 @@ const userResolvers = {
             username: user.username,
             firstName: user.firstName,
             lastName: user.lastName,
+            fullName: `${user.firstName} ${user.lastName}`,
             email: user.email,
             phone: user.phone,
             company: user.company,
@@ -173,11 +174,23 @@ const userResolvers = {
          }
          try {
             const userId = context.user.id;
-            const { firstName, lastName, email, phone, company, address, removeProfilePicture, profilePicture } = input;
+            const { firstName, lastName, username, email, phone, company, address, removeProfilePicture, profilePicture } = input;
+
+            // Add username validation
+            if (username) {
+               const existingUser = await User.findOne({
+                  username,
+                  _id: { $ne: userId } // Exclude current user
+               });
+               if (existingUser) {
+                  throw new Error('Username already exists');
+               }
+            }
 
             const updateData = {
                firstName,
                lastName,
+               username,
                email,
                phone,
                company,
