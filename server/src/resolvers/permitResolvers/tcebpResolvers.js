@@ -1,6 +1,8 @@
 const TCEBPPermit = require('../../models/permits/TCEBPPermit');
 const { TCEBP_ApplicationNumber } = require('../../utils/customIdGenerator');
 const { Binary } = require('mongodb');
+const Admin = require('../../models/admin');
+const PersonnelNotificationService = require('../../services/personnelNotificationService');
 
 const tcebpResolvers = {
    Query: {
@@ -47,6 +49,19 @@ const tcebpResolvers = {
 
             const newPermit = new TCEBPPermit(permitData);
             const savedPermit = await newPermit.save();
+
+            const technicalStaff = await Admin.findOne({ roles: 'Technical_Staff' });
+            if (technicalStaff) {
+               await PersonnelNotificationService.createApplicationPersonnelNotification({
+                  application: plainPermit,
+                  recipientId: technicalStaff._id,
+                  type: 'PENDING_TECHNICAL_REVIEW',
+                  stage: 'TechnicalStaffReview',
+                  // remarks: notes,
+                  priority: 'high'
+               });
+            }
+
             return {
                ...savedPermit.toObject(),
                id: savedPermit._id.toString()

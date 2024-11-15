@@ -1,6 +1,8 @@
 const PTPRPermit = require('../../models/permits/PTPRPermit');
 const { PTPR_ApplicationNumber } = require('../../utils/customIdGenerator');
 const { Binary } = require('mongodb');
+const Admin = require('../../models/admin');
+const PersonnelNotificationService = require('../../services/personnelNotificationService');
 
 const ptprResolvers = {
    Query: {
@@ -47,6 +49,19 @@ const ptprResolvers = {
 
             const newPermit = new PTPRPermit(permitData);
             const savedPermit = await newPermit.save();
+
+            const technicalStaff = await Admin.findOne({ roles: 'Technical_Staff' });
+            if (technicalStaff) {
+               await PersonnelNotificationService.createApplicationPersonnelNotification({
+                  application: plainPermit,
+                  recipientId: technicalStaff._id,
+                  type: 'PENDING_TECHNICAL_REVIEW',
+                  stage: 'TechnicalStaffReview',
+                  // remarks: notes,
+                  priority: 'high'
+               });
+            }
+
             return savedPermit;
          } catch (error) {
             console.error('Error creating PTPR permit:', error);

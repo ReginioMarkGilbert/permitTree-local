@@ -2,6 +2,8 @@ const CSAWPermit = require('../../models/permits/CSAWPermit');
 const { CSAW_ApplicationNumber } = require('../../utils/customIdGenerator');
 const { Binary } = require('mongodb');
 const { format } = require('date-fns');
+const Admin = require('../../models/admin');
+const PersonnelNotificationService = require('../../services/personnelNotificationService');
 
 const csawResolvers = {
    Query: {
@@ -61,6 +63,19 @@ const csawResolvers = {
 
             const newPermit = new CSAWPermit(permitData);
             const savedPermit = await newPermit.save();
+
+            const technicalStaff = await Admin.findOne({ roles: 'Technical_Staff' });
+            if (technicalStaff) {
+               await PersonnelNotificationService.createApplicationPersonnelNotification({
+                  application: plainPermit,
+                  recipientId: technicalStaff._id,
+                  type: 'PENDING_TECHNICAL_REVIEW',
+                  stage: 'TechnicalStaffReview',
+                  // remarks: notes,
+                  priority: 'high'
+               });
+            }
+
             return {
                ...savedPermit.toObject(),
                id: savedPermit._id.toString()

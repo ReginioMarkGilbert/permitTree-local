@@ -378,13 +378,15 @@ const permitResolvers = {
          });
 
          // Personnel notification
-         const technicalStaff = await User.findOne({ roles: 'Technical_Staff' });
+         const technicalStaff = await Admin.findOne({ roles: 'Technical_Staff' });
          if (technicalStaff) {
             await PersonnelNotificationService.createApplicationPersonnelNotification({
                application: permit,
                recipientId: technicalStaff._id,
                type: 'PENDING_TECHNICAL_REVIEW',
-               stage: 'TechnicalStaffReview'
+               stage: 'TechnicalStaffReview',
+               remarks: notes,
+               priority: 'high'
             });
          }
 
