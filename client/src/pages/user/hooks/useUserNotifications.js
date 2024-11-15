@@ -77,7 +77,7 @@ export const MARK_ALL_NOTIFICATIONS_AS_READ = gql`
   }
 `;
 
-export const useNotifications = () => {
+export const useUserNotifications = () => {
    const { data: allData, loading: allLoading, error: allError, refetch: refetchAll } = useQuery(GET_NOTIFICATIONS, {
       onError: (error) => {
          console.error('Error fetching notifications:', error);

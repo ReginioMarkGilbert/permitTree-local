@@ -1,6 +1,6 @@
 import React from 'react';
 import NotificationList from '../../components/notifications/NotificationList';
-import { useNotifications } from './hooks/useUserNotifications';
+import { useUserNotifications } from './hooks/useUserNotifications';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -13,7 +13,7 @@ const UserNotificationsPage = () => {
       loading,
       markAsRead,
       markAllAsRead
-   } = useNotifications();
+   } = useUserNotifications();
 
    const applicationNotifications = notifications?.filter(n =>
       n.type.startsWith('APPLICATION_') || n.type.startsWith('PERMIT_')

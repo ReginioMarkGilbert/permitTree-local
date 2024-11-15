@@ -2,12 +2,13 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '../../components/ui/Card';
-import { FaClipboardList, FaUser, FaBell } from 'react-icons/fa';
+import { FaClipboardList, FaUser, FaBell, FaCheckCircle } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
 import HomeFooter from '../../components/ui/HomeFooter';
 import '../../components/ui/styles/customScrollBar.css';
 import { gql, useQuery } from '@apollo/client';
 import { useRecentApplications } from './hooks/useUserRecentApplications';
+import { useUserNotifications } from './hooks/useUserNotifications';
 
 const GET_USER_DETAILS = gql`
   query GetUserDetails {
@@ -20,9 +21,15 @@ const GET_USER_DETAILS = gql`
 
 const HomePage = () => {
    const { recentApplications, loading: applicationsLoading, error: applicationsError } = useRecentApplications();
+   const { 
+      notifications, 
+      unreadNotifications, 
+      loading: notificationsLoading, 
+      error: notificationsError,
+      markAsRead,
+      markAllAsRead 
+   } = useUserNotifications();
    const [recentNotifications, setRecentNotifications] = useState([]);
-   const [notificationsLoading, setNotificationsLoading] = useState(true);
-   const [notificationsError, setNotificationsError] = useState(null);
    const [unreadCount, setUnreadCount] = useState(0);
 
    const location = useLocation();
@@ -60,8 +67,27 @@ const HomePage = () => {
    }, []);
 
    const formatNotificationType = (type) => {
-      // Implement this function based on your notification types
-      return type;
+      switch (type) {
+         case 'APPLICATION_STATUS':
+            return 'Application Update';
+         case 'SYSTEM':
+            return 'System Notice';
+         case 'PAYMENT':
+            return 'Payment Update';
+         default:
+            return 'Notification';
+      }
+   };
+
+   const formatDate = (dateString) => {
+      const date = new Date(parseInt(dateString));
+      const now = new Date();
+      const diffInHours = Math.abs(now - date) / 36e5;
+
+      if (diffInHours < 24) {
+         return `${Math.round(diffInHours)} hours ago`;
+      }
+      return date.toLocaleDateString();
    };
 
    if (userLoading || applicationsLoading) return <p>Loading...</p>;
@@ -142,42 +168,56 @@ const HomePage = () => {
 
                {/* Notifications */}
                <Card className="bg-white notifications-card group">
-                  <CardHeader>
-                     <CardTitle className="text-green-800 flex items-center justify-between">
-                        Notifications
-                        {unreadCount > 0 && (
-                           <span className="bg-red-500 text-white rounded-full px-2 py-1 text-xs">
-                              {unreadCount} new
-                           </span>
-                        )}
-                     </CardTitle>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                     <CardTitle className="text-green-800">Recent Notifications</CardTitle>
+                     {unreadNotifications.length > 0 && (
+                        <Button
+                           onClick={markAllAsRead}
+                           className="text-sm text-green-600 hover:text-green-700"
+                           variant="ghost"
+                        >
+                           Mark all as read
+                        </Button>
+                     )}
                   </CardHeader>
                   <CardContent className="relative flex flex-col h-full">
                      {notificationsLoading ? (
                         <p className="text-center text-gray-500">Loading notifications...</p>
                      ) : notificationsError ? (
-                        <p className="text-center text-red-500">{notificationsError}</p>
-                     ) : recentNotifications.length === 0 ? (
-                        <p className="text-center text-gray-500">No recent notifications</p>
+                        <p className="text-center text-red-500">{notificationsError.message}</p>
+                     ) : notifications.length === 0 ? (
+                        <div className="h-[365px] flex items-center justify-center">
+                           <p className="text-gray-500">No notifications</p>
+                        </div>
                      ) : (
                         <div className="space-y-4 h-[365px] overflow-y-auto custom-scrollbar notifications-container group-hover:scrollbar-visible">
-                           {recentNotifications.map((notification, index) => (
+                           {notifications.slice(0, 10).map((notification) => (
                               <div
-                                 key={index}
-                                 className={`p-4 mb-2 last:mb-0 border-l-4 ${notification.read
-                                    ? 'bg-white border-gray-300'
-                                    : 'bg-green-100 border-green-500'
-                                    }`}
+                                 key={notification.id}
+                                 className={`flex items-start border-b border-gray-200 pb-3 last:border-b-0 last:pb-0 ${
+                                    !notification.read ? 'bg-green-50' : ''
+                                 }`}
                               >
-                                 <p className={`font-semibold ${notification.read ? 'text-gray-800' : 'text-green-800'}`}>
-                                    {formatNotificationType(notification.type)}
-                                 </p>
-                                 <p className={`text-sm ${notification.read ? 'text-gray-600' : 'text-green-700'}`}>
-                                    {notification.message}
-                                 </p>
-                                 <p className="text-xs text-gray-500 mt-1">
-                                    {new Date(notification.createdAt).toLocaleDateString()}
-                                 </p>
+                                 <div className="flex-grow pr-4">
+                                    <div className="flex items-center justify-between">
+                                       <p className="font-semibold text-green-800">
+                                          {formatNotificationType(notification.type)}
+                                       </p>
+                                       {!notification.read && (
+                                          <Button
+                                             onClick={() => markAsRead(notification.id)}
+                                             className="text-sm text-green-600 hover:text-green-700 p-1"
+                                             variant="ghost"
+                                          >
+                                             <FaCheckCircle className="h-4 w-4" />
+                                          </Button>
+                                       )}
+                                    </div>
+                                    <p className="text-sm text-gray-700">{notification.message}</p>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                       {formatDate(notification.createdAt)}
+                                    </p>
+                                 </div>
                               </div>
                            ))}
                         </div>
