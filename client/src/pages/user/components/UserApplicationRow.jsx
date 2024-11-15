@@ -55,7 +55,7 @@ const UserApplicationRow = ({
 
    return (
       <>
-         <tr>
+         <tr className="border-b border-gray-200 transition-colors hover:bg-gray-50">
             <td className="px-4 py-3 whitespace-nowrap">
                <div className="text-sm text-gray-900">{app.applicationNumber}</div>
             </td>
