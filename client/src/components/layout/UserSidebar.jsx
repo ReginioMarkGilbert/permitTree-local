@@ -108,7 +108,8 @@ const Sidebar = React.memo(({ isOpen, onToggle }) => {
       <div
          className={`h-full bg-green-800 text-white flex flex-col fixed top-0 left-0
             ${isOpen ? 'w-64' : 'w-16'} z-10 transition-all duration-300 ease-in-out
-            border-r border-green-700`}
+            border-r border-green-700
+            ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
       >
          <div className="flex flex-col flex-grow">
             {/* Logo Section */}
