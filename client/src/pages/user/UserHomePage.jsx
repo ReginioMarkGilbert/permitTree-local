@@ -96,10 +96,12 @@ const HomePage = ({ sidebarOpen }) => {
          <main className={`px-4 sm:px-6 py-8 flex-grow
             transition-all duration-300
             ${sidebarOpen
-               ? 'lg:pl-64 lg:pr-8' // When sidebar is open
-               : 'lg:pl-16 lg:pr-8' // When sidebar is collapsed
+               ? 'lg:pl-64' // Only add left padding on desktop when sidebar is open
+               : 'lg:pl-16' // Only add left padding on desktop when sidebar is collapsed
             }
-            max-w-screen-2xl mx-auto`}>
+            lg:pr-8
+            max-w-screen-2xl mx-auto
+            ${sidebarOpen ? 'lg:ml-0' : 'ml-0'}`}>
             <div className="w-full">
                {/* Welcome Section - adjust text sizes */}
                <div className="text-center mb-8 sm:mb-12">
