@@ -1,15 +1,11 @@
 import React from 'react';
 import { Card } from "@/components/ui/card";
 import { ResponsivePie } from '@nivo/pie';
-import { ResponsiveLine } from '@nivo/line';
-import { ResponsiveBar } from '@nivo/bar';
 
 const ApplicationAnalytics = ({ data }) => {
    const {
       applicationTypes,
-      statusData,
-      processingTimeData,
-      successRateData
+      statusData
    } = data;
 
    return (
@@ -90,117 +86,6 @@ const ApplicationAnalytics = ({ data }) => {
                         }
                      ]}
                   />
-               </div>
-            </Card>
-         </div>
-
-         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-               <div className="p-6">
-                  <h2 className="text-xl font-semibold text-green-700 mb-4">Average Processing Time (Days)</h2>
-                  <div className="h-[400px]">
-                     <ResponsiveLine
-                        data={processingTimeData}
-                        margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
-                        xScale={{ type: 'point' }}
-                        yScale={{ type: 'linear', min: 'auto', max: 'auto' }}
-                        axisTop={null}
-                        axisRight={null}
-                        axisBottom={{
-                           tickSize: 5,
-                           tickPadding: 5,
-                           tickRotation: 0,
-                           legend: 'Month',
-                           legendOffset: 36,
-                           legendPosition: 'middle'
-                        }}
-                        axisLeft={{
-                           tickSize: 5,
-                           tickPadding: 5,
-                           tickRotation: 0,
-                           legend: 'Days',
-                           legendOffset: -40,
-                           legendPosition: 'middle'
-                        }}
-                        pointSize={10}
-                        pointColor={{ theme: 'background' }}
-                        pointBorderWidth={2}
-                        pointBorderColor={{ from: 'serieColor' }}
-                        pointLabelYOffset={-12}
-                        useMesh={true}
-                        legends={[
-                           {
-                              anchor: 'bottom-right',
-                              direction: 'column',
-                              justify: false,
-                              translateX: 100,
-                              translateY: 0,
-                              itemsSpacing: 0,
-                              itemDirection: 'left-to-right',
-                              itemWidth: 80,
-                              itemHeight: 20,
-                              itemOpacity: 0.75,
-                              symbolSize: 12,
-                              symbolShape: 'circle'
-                           }
-                        ]}
-                     />
-                  </div>
-               </div>
-            </Card>
-
-            <Card>
-               <div className="p-6">
-                  <h2 className="text-xl font-semibold text-green-700 mb-4">Success/Rejection Rates</h2>
-                  <div className="h-[400px]">
-                     <ResponsiveBar
-                        data={successRateData}
-                        keys={['success', 'rejection']}
-                        indexBy="month"
-                        margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
-                        padding={0.3}
-                        valueScale={{ type: 'linear' }}
-                        indexScale={{ type: 'band', round: true }}
-                        colors={['#22c55e', '#ef4444']}
-                        borderColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
-                        axisTop={null}
-                        axisRight={null}
-                        axisBottom={{
-                           tickSize: 5,
-                           tickPadding: 5,
-                           tickRotation: 0,
-                           legend: 'Month',
-                           legendPosition: 'middle',
-                           legendOffset: 32
-                        }}
-                        axisLeft={{
-                           tickSize: 5,
-                           tickPadding: 5,
-                           tickRotation: 0,
-                           legend: 'Rate (%)',
-                           legendPosition: 'middle',
-                           legendOffset: -40
-                        }}
-                        labelSkipWidth={12}
-                        labelSkipHeight={12}
-                        legends={[
-                           {
-                              dataFrom: 'keys',
-                              anchor: 'bottom-right',
-                              direction: 'column',
-                              justify: false,
-                              translateX: 120,
-                              translateY: 0,
-                              itemsSpacing: 2,
-                              itemWidth: 100,
-                              itemHeight: 20,
-                              itemDirection: 'left-to-right',
-                              itemOpacity: 0.85,
-                              symbolSize: 20
-                           }
-                        ]}
-                     />
-                  </div>
                </div>
             </Card>
          </div>

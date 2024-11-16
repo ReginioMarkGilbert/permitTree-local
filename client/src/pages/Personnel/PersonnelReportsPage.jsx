@@ -20,18 +20,6 @@ const GET_APPLICATION_ANALYTICS = gql`
                 label
                 value
             }
-            processingTimeData {
-                id
-                data {
-                    x
-                    y
-                }
-            }
-            successRateData {
-                month
-                success
-                rejection
-            }
         }
     }
 `;
@@ -44,21 +32,6 @@ const GET_FINANCIAL_ANALYTICS = gql`
                 paid
                 pending
                 overdue
-            }
-            monthlyRevenue {
-                month
-                revenue
-                target
-            }
-            paymentStatus {
-                status
-                count
-                amount
-            }
-            permitTypeRevenue {
-                permitType
-                revenue
-                count
             }
         }
     }
@@ -83,17 +56,7 @@ export default function PersonnelReportsPage() {
    const financialAnalyticsData = {
       revenueStats: financialData?.getFinancialAnalytics?.revenueStats || {
          total: 0, paid: 0, pending: 0, overdue: 0
-      },
-      monthlyRevenueData: (financialData?.getFinancialAnalytics?.monthlyRevenue || []).map(item => ({
-         x: item.month,
-         y: item.revenue,
-         target: item.target
-      })),
-      permitTypeRevenueData: (financialData?.getFinancialAnalytics?.permitTypeRevenue || []).map(item => ({
-         id: item.permitType,
-         label: item.permitType,
-         value: item.revenue
-      }))
+      }
    };
 
    return (
