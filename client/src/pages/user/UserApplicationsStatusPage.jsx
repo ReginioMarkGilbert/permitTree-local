@@ -41,6 +41,7 @@ import { CalendarIcon, Filter } from "lucide-react";
 import { format } from "date-fns";
 import ApplicationFilters from './components/ApplicationFilters';
 import OOPFilters from './components/OOPFilters';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 const GET_OOP_DETAILS = gql`
   query GetOOPDetails($id: ID!) {
@@ -92,6 +93,8 @@ const UserApplicationsStatusPage = () => {
          to: undefined
       }
    });
+
+   const isMobile = useMediaQuery('(max-width: 640px)');
 
    const getQueryParamsForTab = (tab) => {
       switch (tab) {
@@ -390,6 +393,20 @@ const UserApplicationsStatusPage = () => {
          );
       }
 
+      if (isMobile) {
+         return (
+            <div className="space-y-4">
+               {displayOOPs.map((oop) => (
+                  <UserOOPRow
+                     key={oop._id}
+                     oop={oop}
+                     onRefetch={handleRefetch}
+                  />
+               ))}
+            </div>
+         );
+      }
+
       return (
          <div className="bg-white rounded-lg shadow overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -437,6 +454,32 @@ const UserApplicationsStatusPage = () => {
       if (error) return <p className="text-center text-red-500">Error: {error.message}</p>;
       if (filteredApplications.length === 0) {
          return <p className="text-center text-gray-500">No applications found.</p>;
+      }
+
+      if (isMobile) {
+         return (
+            <div className="space-y-4">
+               {filteredApplications.map((app) => (
+                  <UserApplicationRow
+                     key={app.id}
+                     app={app}
+                     onEdit={handleEditApplication}
+                     onDelete={handleDeleteClick}
+                     onUnsubmit={handleUnsubmitClick}
+                     onSubmit={handleSubmitClick}
+                     onResubmit={handleResubmitClick}
+                     getStatusColor={getStatusColor}
+                     fetchCOVPermit={fetchCOVPermit}
+                     fetchCSAWPermit={fetchCSAWPermit}
+                     fetchPLTCPPermit={fetchPLTCPPermit}
+                     fetchPTPRPermit={fetchPTPRPermit}
+                     fetchPLTPPermit={fetchPLTPPermit}
+                     fetchTCEBPPermit={fetchTCEBPPermit}
+                     currentTab={activeSubTab}
+                  />
+               ))}
+            </div>
+         );
       }
 
       return (
@@ -511,7 +554,7 @@ const UserApplicationsStatusPage = () => {
          // Amount range filter
          const matchesAmount = !filters.amountRange || (() => {
             const amount = parseFloat(oop.totalAmount);
-            switch(filters.amountRange) {
+            switch (filters.amountRange) {
                case '0-1000': return amount >= 0 && amount <= 1000;
                case '1001-5000': return amount > 1000 && amount <= 5000;
                case '5001-10000': return amount > 5000 && amount <= 10000;
@@ -552,6 +595,59 @@ const UserApplicationsStatusPage = () => {
       });
    }, [oops, searchTerm, filters]);
 
+   const renderTabs = () => {
+      if (isMobile) {
+         return (
+            <div className="space-y-4">
+               <Select value={activeMainTab} onValueChange={handleTabChange}>
+                  <SelectTrigger className="w-full">
+                     <SelectValue placeholder="Select tab" />
+                  </SelectTrigger>
+                  <SelectContent>
+                     {mainTabs.map((tab) => (
+                        <SelectItem key={tab} value={tab}>
+                           {tab}
+                        </SelectItem>
+                     ))}
+                  </SelectContent>
+               </Select>
+
+               <Select value={activeSubTab} onValueChange={handleSubTabChange}>
+                  <SelectTrigger className="w-full">
+                     <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                     {subTabs[activeMainTab].map((tab) => (
+                        <SelectItem key={tab} value={tab}>
+                           {tab}
+                        </SelectItem>
+                     ))}
+                  </SelectContent>
+               </Select>
+            </div>
+         );
+      }
+
+      return (
+         <div className="flex flex-col sm:flex-row gap-4">
+            <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
+               {mainTabs.map((tab) => (
+                  <button
+                     key={tab}
+                     onClick={() => handleTabChange(tab)}
+                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors
+                        ${activeMainTab === tab
+                           ? 'bg-white text-green-800 shadow'
+                           : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
+                  >
+                     {tab}
+                  </button>
+               ))}
+            </div>
+         </div>
+      );
+   };
+
    return (
       <div className="bg-green-50 min-h-screen pt-20 pb-8 px-4 sm:px-6 lg:px-8">
          <div className="max-w-7xl mx-auto space-y-6">
@@ -559,49 +655,36 @@ const UserApplicationsStatusPage = () => {
             <div className="bg-white rounded-lg shadow-sm p-6">
                <div className="flex items-center justify-between mb-4">
                   <h1 className="text-2xl font-semibold text-gray-900">My Applications</h1>
-                  <Button onClick={handleRefetch} variant="outline">
+                  <Button onClick={handleRefetch} variant="outline" size="sm">
                      <RefreshCw className="mr-2 h-4 w-4" />
-                     Refresh
+                     {!isMobile && "Refresh"}
                   </Button>
                </div>
 
-               {/* Main Tabs */}
-               <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-                     {mainTabs.map((tab) => (
-                        <button
-                           key={tab}
-                           onClick={() => handleTabChange(tab)}
-                           className={`px-4 py-2 rounded-md text-sm font-medium transition-colors
-                              ${activeMainTab === tab
-                                 ? 'bg-white text-green-800 shadow'
-                                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
-                        >
-                           {tab}
-                        </button>
-                     ))}
-                  </div>
-               </div>
+               {/* Tabs Section */}
+               {renderTabs()}
             </div>
 
             {/* Sub Tabs and Search Section */}
             <div className="bg-white rounded-lg shadow-sm p-6">
                <div className="space-y-4">
-                  {/* Sub Tabs */}
-                  <div className="bg-gray-100 p-1 rounded-md inline-flex flex-wrap gap-1">
-                     {subTabs[activeMainTab].map((tab) => (
-                        <button
-                           key={tab}
-                           onClick={() => handleSubTabChange(tab)}
-                           className={`px-3 py-2 rounded-md text-sm font-medium transition-colors
-                              ${activeSubTab === tab
-                                 ? 'bg-white text-green-800 shadow'
-                                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
-                        >
-                           {tab}
-                        </button>
-                     ))}
-                  </div>
+                  {/* Sub Tabs - Only show if not mobile */}
+                  {!isMobile && (
+                     <div className="bg-gray-100 p-1 rounded-md inline-flex flex-wrap gap-1">
+                        {subTabs[activeMainTab].map((tab) => (
+                           <button
+                              key={tab}
+                              onClick={() => handleSubTabChange(tab)}
+                              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors
+                                 ${activeSubTab === tab
+                                    ? 'bg-white text-green-800 shadow'
+                                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
+                           >
+                              {tab}
+                           </button>
+                        ))}
+                     </div>
+                  )}
 
                   {renderFilters()}
                </div>
