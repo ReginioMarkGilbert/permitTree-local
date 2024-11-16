@@ -93,17 +93,11 @@ const HomePage = ({ sidebarOpen }) => {
    return (
       <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex flex-col pt-16">
          <ToastContainer />
-         <main className={`px-4 sm:px-6 py-8 flex-grow
-            transition-all duration-300
-            ${sidebarOpen
-               ? 'lg:pl-64' // Only add left padding on desktop when sidebar is open
-               : 'lg:pl-16' // Only add left padding on desktop when sidebar is collapsed
-            }
-            lg:pr-8
-            max-w-screen-2xl mx-auto
-            ${sidebarOpen ? 'lg:ml-0' : 'ml-0'}`}>
-            <div className="w-full">
-               {/* Welcome Section - adjust text sizes */}
+         <main className={`flex-grow transition-all duration-300 mx-auto w-full max-w-[90rem] px-4 sm:px-6 lg:px-8 py-8
+            ${sidebarOpen ? 'lg:ml-64' : ''}`}
+         >
+            <div className="max-w-[85rem] mx-auto">
+               {/* Welcome Section */}
                <div className="text-center mb-8 sm:mb-12">
                   <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 sm:mb-3">
                      {isNewUser ? "Welcome" : "Welcome back"}, {firstName}!
@@ -113,7 +107,7 @@ const HomePage = ({ sidebarOpen }) => {
                   </p>
                </div>
 
-               {/* Quick Actions - already responsive, but adjust spacing */}
+               {/* Quick Actions */}
                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-10">
                   {quickActions.map((action, index) => (
                      <Card
@@ -148,11 +142,10 @@ const HomePage = ({ sidebarOpen }) => {
                   ))}
                </div>
 
-               {/* Main Content Grid - adjust column spans */}
-               <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6 lg:gap-8">
-                  {/* Recent Applications - adjust spans for different breakpoints */}
-                  <Card className="xl:col-span-8 bg-white rounded-xl shadow-md hover:shadow-xl
-                     transition-all duration-300 overflow-hidden">
+               {/* Main Content Grid */}
+               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 lg:gap-8">
+                  {/* Recent Applications Card - reduce span */}
+                  <Card className="lg:col-span-7 bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
                      <CardHeader className="border-b border-gray-100">
                         <div className="flex items-center space-x-3">
                            <div className="p-2 rounded-lg bg-green-50 text-green-600">
@@ -228,9 +221,8 @@ const HomePage = ({ sidebarOpen }) => {
                      </CardFooter>
                   </Card>
 
-                  {/* Notifications - adjust spans for different breakpoints */}
-                  <Card className="xl:col-span-4 bg-white rounded-xl shadow-md hover:shadow-xl
-                     transition-all duration-300 overflow-hidden">
+                  {/* Notifications Card - increase span */}
+                  <Card className="lg:col-span-5 bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
                      <CardHeader className="flex flex-row items-center justify-between
                         border-b border-gray-100 pb-3 sm:pb-4">
                         <div className="flex items-center space-x-3">

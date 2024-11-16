@@ -51,6 +51,7 @@ const GET_FINANCIAL_ANALYTICS = gql`
                 paid
                 pending
                 overdue
+                monthlyGrowth
             }
             monthlyRevenue {
                 month
@@ -89,7 +90,7 @@ export default function PersonnelReportsPage() {
 
    // Prepare data for charts
    const revenueStats = financialData?.getFinancialAnalytics?.revenueStats || {
-      total: 0, paid: 0, pending: 0, overdue: 0
+      total: 0, paid: 0, pending: 0, overdue: 0, monthlyGrowth: 0
    };
 
    const monthlyRevenueData = (financialData?.getFinancialAnalytics?.monthlyRevenue || []).map(item => ({
@@ -118,10 +119,10 @@ export default function PersonnelReportsPage() {
    } = appData.getApplicationAnalytics;
 
    return (
-      <div className="min-h-screen bg-green-50 p-8">
-         <div className="max-w-7xl mx-auto pt-24">
-            <div className="flex justify-between items-center mb-10">
-               <h1 className="text-4xl font-bold text-green-700">Analytics Dashboard</h1>
+      <div className="min-h-screen bg-green-50 px-4 sm:px-6 py-6 sm:py-8">
+         <div className="max-w-7xl mx-auto pt-16 sm:pt-24">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-10">
+               <h1 className="text-2xl sm:text-4xl font-bold text-green-700">Analytics Dashboard</h1>
                <Select value={timeFilter} onValueChange={setTimeFilter}>
                   <SelectTrigger className="w-[180px]">
                      <SelectValue placeholder="Select time period" />
@@ -137,29 +138,24 @@ export default function PersonnelReportsPage() {
 
             <Tabs defaultValue="applications" className="space-y-4">
                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="applications">Application Analytics</TabsTrigger>
-                  <TabsTrigger value="financial">Financial Analytics</TabsTrigger>
+                  <TabsTrigger value="applications" className="text-sm sm:text-base">Application Analytics</TabsTrigger>
+                  <TabsTrigger value="financial" className="text-sm sm:text-base">Financial Analytics</TabsTrigger>
                </TabsList>
 
                <TabsContent value="applications">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                     <Card className="p-6 shadow-lg">
-                        <h2 className="text-xl font-semibold text-green-700 mb-4">Applications by Type</h2>
-                        <div className="h-[400px]">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                     <Card className="p-4 sm:p-6 shadow-lg">
+                        <h2 className="text-lg sm:text-xl font-semibold text-green-700 mb-2 sm:mb-4">Applications by Type</h2>
+                        <div className="h-[300px] sm:h-[400px]">
                            <ResponsivePie
                               data={applicationTypes}
-                              margin={{ top: 40, right: 80, bottom: 100, left: 80 }}
+                              margin={{ top: 20, right: 20, bottom: 60, left: 20 }}
                               innerRadius={0.5}
                               padAngle={0.7}
                               cornerRadius={3}
                               activeOuterRadiusOffset={8}
                               colors={{ scheme: 'nivo' }}
-                              borderWidth={1}
-                              borderColor={{
-                                 from: 'color',
-                                 modifiers: [['darker', 0.2]]
-                              }}
-                              enableArcLinkLabels={true}
+                              enableArcLinkLabels={window.innerWidth > 640}
                               arcLinkLabelsSkipAngle={10}
                               arcLinkLabelsTextColor="#333333"
                               arcLabelsSkipAngle={10}
@@ -192,12 +188,12 @@ export default function PersonnelReportsPage() {
                         </div>
                      </Card>
 
-                     <Card className="p-6 shadow-lg">
-                        <h2 className="text-xl font-semibold text-green-700 mb-4">Application Status Distribution</h2>
-                        <div className="h-[400px]">
+                     <Card className="p-4 sm:p-6 shadow-lg">
+                        <h2 className="text-lg sm:text-xl font-semibold text-green-700 mb-2 sm:mb-4">Application Status Distribution</h2>
+                        <div className="h-[300px] sm:h-[400px]">
                            <ResponsivePie
                               data={statusData}
-                              margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
+                              margin={{ top: 20, right: 20, bottom: 60, left: 20 }}
                               innerRadius={0.5}
                               padAngle={0.7}
                               cornerRadius={3}
@@ -222,7 +218,7 @@ export default function PersonnelReportsPage() {
                      </Card>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mt-4 sm:mt-6">
                      <Card>
                         <CardHeader>
                            <CardTitle>Average Processing Time (Days)</CardTitle>
@@ -230,7 +226,7 @@ export default function PersonnelReportsPage() {
                         <CardContent className="h-[400px]">
                            <ResponsiveLine
                               data={processingTimeData}
-                              margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
+                              margin={{ top: 30, right: 30, bottom: 50, left: 50 }}
                               xScale={{ type: 'point' }}
                               yScale={{ type: 'linear', min: 'auto', max: 'auto' }}
                               axisTop={null}
@@ -286,7 +282,7 @@ export default function PersonnelReportsPage() {
                               data={successRateData}
                               keys={['success', 'rejection']}
                               indexBy="month"
-                              margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
+                              margin={{ top: 30, right: 30, bottom: 50, left: 50 }}
                               padding={0.3}
                               valueScale={{ type: 'linear' }}
                               indexScale={{ type: 'band', round: true }}
@@ -336,10 +332,10 @@ export default function PersonnelReportsPage() {
 
                <TabsContent value="financial">
                   {/* Revenue Stats Cards */}
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-4 sm:mb-6">
                      <Card>
                         <CardHeader className="pb-2">
-                           <CardTitle className="text-sm font-medium">
+                           <CardTitle className="text-xs sm:text-sm font-medium">
                               Total Revenue
                               <span className="text-xs text-green-600 ml-2">
                                  +{revenueStats.monthlyGrowth}%
@@ -347,7 +343,7 @@ export default function PersonnelReportsPage() {
                            </CardTitle>
                         </CardHeader>
                         <CardContent>
-                           <div className="text-2xl font-bold">
+                           <div className="text-lg sm:text-2xl font-bold">
                               ₱{revenueStats.total.toLocaleString()}
                            </div>
                         </CardContent>
@@ -355,10 +351,10 @@ export default function PersonnelReportsPage() {
 
                      <Card>
                         <CardHeader className="pb-2">
-                           <CardTitle className="text-sm font-medium">Paid Revenue</CardTitle>
+                           <CardTitle className="text-xs sm:text-sm font-medium">Paid Revenue</CardTitle>
                         </CardHeader>
                         <CardContent>
-                           <div className="text-2xl font-bold text-green-600">
+                           <div className="text-lg sm:text-2xl font-bold text-green-600">
                               ₱{revenueStats.paid.toLocaleString()}
                            </div>
                         </CardContent>
@@ -366,10 +362,10 @@ export default function PersonnelReportsPage() {
 
                      <Card>
                         <CardHeader className="pb-2">
-                           <CardTitle className="text-sm font-medium">Pending Payments</CardTitle>
+                           <CardTitle className="text-xs sm:text-sm font-medium">Pending Payments</CardTitle>
                         </CardHeader>
                         <CardContent>
-                           <div className="text-2xl font-bold text-yellow-500">
+                           <div className="text-lg sm:text-2xl font-bold text-yellow-500">
                               ₱{revenueStats.pending.toLocaleString()}
                            </div>
                         </CardContent>
@@ -377,23 +373,23 @@ export default function PersonnelReportsPage() {
 
                      <Card>
                         <CardHeader className="pb-2">
-                           <CardTitle className="text-sm font-medium">Overdue Payments</CardTitle>
+                           <CardTitle className="text-xs sm:text-sm font-medium">Overdue Payments</CardTitle>
                         </CardHeader>
                         <CardContent>
-                           <div className="text-2xl font-bold text-red-500">
+                           <div className="text-lg sm:text-2xl font-bold text-red-500">
                               ₱{revenueStats.overdue.toLocaleString()}
                            </div>
                         </CardContent>
                      </Card>
                   </div>
 
-                  {/* New Financial Analytics Charts */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  {/* Financial Charts */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                      <Card>
-                        <CardHeader>
-                           <CardTitle>Monthly Revenue Trend</CardTitle>
+                        <CardHeader className="pb-2 sm:pb-4">
+                           <CardTitle className="text-lg sm:text-xl">Monthly Revenue Trend</CardTitle>
                         </CardHeader>
-                        <CardContent className="h-[400px]">
+                        <CardContent className="h-[300px] sm:h-[400px]">
                            <ResponsiveLine
                               data={[
                                  {
@@ -458,10 +454,10 @@ export default function PersonnelReportsPage() {
                      </Card>
 
                      <Card>
-                        <CardHeader>
-                           <CardTitle>Revenue by Permit Type</CardTitle>
+                        <CardHeader className="pb-2 sm:pb-4">
+                           <CardTitle className="text-lg sm:text-xl">Revenue by Permit Type</CardTitle>
                         </CardHeader>
-                        <CardContent className="h-[400px]">
+                        <CardContent className="h-[300px] sm:h-[400px]">
                            <ResponsivePie
                               data={permitTypeRevenueData}
                               margin={{ top: 40, right: 80, bottom: 100, left: 80 }}
