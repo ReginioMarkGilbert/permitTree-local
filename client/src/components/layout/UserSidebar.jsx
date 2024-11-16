@@ -74,8 +74,8 @@ const Sidebar = React.memo(({ isOpen, onToggle }) => {
             flex items-center py-2.5 px-3 rounded-md mt-1.5
             ${isOpen ? '' : 'justify-center'}
             transition-all duration-200 ease-in-out
-            ${isActive && item.to !== '/auth' 
-               ? 'bg-green-700 text-white' 
+            ${isActive && item.to !== '/auth'
+               ? 'bg-green-700 text-white'
                : 'hover:bg-green-700/50 hover:text-white'}
             group
          `}
@@ -92,7 +92,7 @@ const Sidebar = React.memo(({ isOpen, onToggle }) => {
             )}
          </div>
          {isOpen && (
-            <span className={`ml-3 font-medium text-sm transition-opacity duration-300 
+            <span className={`ml-3 font-medium text-sm transition-opacity duration-300
                ${showText ? 'opacity-100' : 'opacity-0'}`}>
                {item.text}
             </span>
@@ -106,22 +106,22 @@ const Sidebar = React.memo(({ isOpen, onToggle }) => {
 
    return (
       <div
-         className={`h-full bg-green-800 text-white flex flex-col fixed top-0 left-0 
+         className={`h-full bg-green-800 text-white flex flex-col fixed top-0 left-0
             ${isOpen ? 'w-64' : 'w-16'} z-10 transition-all duration-300 ease-in-out
             border-r border-green-700`}
       >
          <div className="flex flex-col flex-grow">
             {/* Logo Section */}
-            <div className={`flex items-center p-4 mb-4 border-b border-green-700 h-16 
+            <div className={`flex items-center p-4 mb-4 border-b border-green-700 h-16
                ${isOpen ? 'justify-start' : 'justify-center'}`}>
                <img
                   src={permitTreeLogo}
                   alt="PermitTree Logo"
-                  className={`transition-all duration-300 
+                  className={`transition-all duration-300
                      ${isOpen ? 'w-8 h-8' : 'w-8 h-8'}`}
                />
                {isOpen && (
-                  <span className={`ml-3 font-semibold text-lg transition-opacity duration-300 
+                  <span className={`ml-3 font-semibold text-lg transition-opacity duration-300
                      ${showText ? 'opacity-100' : 'opacity-0'}`}>
                      PermitTree
                   </span>
@@ -141,7 +141,7 @@ const Sidebar = React.memo(({ isOpen, onToggle }) => {
                </div>
             </div>
 
-            
+
          </div>
       </div>
    );

@@ -8,7 +8,7 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
     };
 
     return (
-        <nav className="bg-white border-b border-gray-200 shadow-sm z-10 fixed top-0 left-0 right-0">
+        <nav className="pl-2 bg-white border-b border-gray-200 shadow-sm z-10 fixed top-0 left-0 right-0">
             <div className="max-w-[2520px] mx-auto flex justify-between items-center px-4 h-16">
                 {/* Left Section */}
                 <div className="flex items-center gap-3">
