@@ -54,36 +54,46 @@ const Sidebar = React.memo(({ isOpen, onToggle }) => {
       }
    }, [navigate, isOpen, onToggle]);
 
-   const navItems = [
+   const mainNavItems = useMemo(() => [
       { to: '/home', icon: <FaHome />, text: 'Home' },
       { to: '/permits', icon: <FaFileAlt />, text: 'Apply' },
       { to: '/applicationsStatus', icon: <FaClipboardList />, text: 'Application Status' },
       { to: '/notifications', icon: <FaBell />, text: 'Notifications' },
+   ], []);
+
+   const accountNavItems = useMemo(() => [
       { to: '/profile', icon: <FaUser />, text: 'Profile' },
       { to: '/auth', icon: <FaSignOutAlt />, text: 'Logout' }
-   ];
+   ], []);
 
    const renderNavItem = (item, index) => (
       <NavLink
          key={index}
          to={item.to}
          className={({ isActive }) => `
-            flex items-center py-2.5 px-4 rounded-md mt-2
+            flex items-center py-2.5 px-3 rounded-md mt-1.5
             ${isOpen ? '' : 'justify-center'}
-            ${isActive && item.to !== '/auth' ? 'bg-green-700 text-white' : 'hover:bg-gray-700 hover:text-white'}
+            transition-all duration-200 ease-in-out
+            ${isActive && item.to !== '/auth' 
+               ? 'bg-green-700 text-white' 
+               : 'hover:bg-green-700/50 hover:text-white'}
+            group
          `}
          onClick={item.to === '/auth' ? handleLogout : undefined}
       >
          <div className="relative w-6 h-6 flex items-center justify-center">
+            <span className="transition-transform duration-200 group-hover:scale-105">
+               {item.icon}
+            </span>
             {item.badge > 0 && (
-               <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
+               <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
                   {item.badge}
                </span>
             )}
-            {item.icon}
          </div>
          {isOpen && (
-            <span className={`ml-3 transition-opacity duration-450 ease-in-out ${showText ? 'opacity-100' : 'opacity-0'}`}>
+            <span className={`ml-3 font-medium text-sm transition-opacity duration-300 
+               ${showText ? 'opacity-100' : 'opacity-0'}`}>
                {item.text}
             </span>
          )}
@@ -96,38 +106,42 @@ const Sidebar = React.memo(({ isOpen, onToggle }) => {
 
    return (
       <div
-         className={`h-full bg-green-800 text-white flex flex-col justify-between fixed top-0 left-0 ${isOpen ? 'w-48 md:w-64' : 'w-16'
-            } z-10 transition-all duration-300 ease-in-out`}
+         className={`h-full bg-green-800 text-white flex flex-col fixed top-0 left-0 
+            ${isOpen ? 'w-64' : 'w-16'} z-10 transition-all duration-300 ease-in-out
+            border-r border-green-700`}
       >
-         <div className="flex flex-col h-full">
-            {/* Add a spacer div to replace the logo */}
-            <div className="h-20"></div>
-            {/* <div className={`h-20 flex items-center justify-center ${isOpen ? 'px-4' : ''}`}>
-               {isOpen ? (
-                  <div className="flex items-center">
-                     <img src={permitTreeLogo} alt="PermitTree Logo" className="h-12" />
-                     <span className={`pl-2 text-xl font-semibold transition-opacity duration-300 ease-in-out ${showText ? 'opacity-100' : 'opacity-0'}`}>
-                        PermitTree
-                     </span>
-                  </div>
-               ) : (
-                  <img src={permitTreeLogo} alt="PermitTree Logo" className="h-8 w-8" />
-               )}
-            </div> */}
-            <nav className="flex-grow mt-6">
-               {navItems.slice(0, 4).map(renderNavItem)}
-            </nav>
-            <div className="mb-10">
+         <div className="flex flex-col flex-grow">
+            {/* Logo Section */}
+            <div className={`flex items-center p-4 mb-4 border-b border-green-700 h-16 
+               ${isOpen ? 'justify-start' : 'justify-center'}`}>
+               <img
+                  src={permitTreeLogo}
+                  alt="PermitTree Logo"
+                  className={`transition-all duration-300 
+                     ${isOpen ? 'w-8 h-8' : 'w-8 h-8'}`}
+               />
                {isOpen && (
-                  <>
-                     <div className="line mx-4" style={{ borderBottom: '1px solid #ffffff', marginBottom: '1em' }}></div>
-                     <h2 className={`px-4 text-sm text-white uppercase mb-2 transition-opacity duration-300 ease-in-out ${showText ? 'opacity-100' : 'opacity-0'}`}>
-                        Account Pages
-                     </h2>
-                  </>
+                  <span className={`ml-3 font-semibold text-lg transition-opacity duration-300 
+                     ${showText ? 'opacity-100' : 'opacity-0'}`}>
+                     PermitTree
+                  </span>
                )}
-               {navItems.slice(4).map(renderNavItem)}
             </div>
+
+            {/* Main Navigation */}
+            <nav className="flex-grow px-3">
+               {mainNavItems.map((item, index) => renderNavItem(item, index))}
+            </nav>
+
+            {/* Account Navigation */}
+            <div className="mt-auto">
+               <div className="px-3 mb-8">
+                  <div className="border-t border-green-700 my-2"></div>
+                  {accountNavItems.map((item, index) => renderNavItem(item, index))}
+               </div>
+            </div>
+
+            
          </div>
       </div>
    );
