@@ -9,7 +9,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../../../../components/ui/Modal';
-import '../../../../components/ui/styles/CSAWFormScrollbar.css';
+// import '../../../../components/ui/styles/CSAWFormScrollbar.css';
+import '../../../../components/ui/styles/customScrollBar.css'
 import { CheckboxItem, UploadCard, CustomSelect, CustomDatePicker, formatLabel, formatReviewValue } from './CSAWFormUtils';
 import { gql, useMutation } from '@apollo/client';
 
@@ -380,13 +381,15 @@ const ChainsawRegistrationForm = () => {
 
    return (
       <div className="min-h-screen bg-green-50 flex flex-col justify-between pt-[83px]">
-         <div className="container mx-auto px-4 flex-grow">
-            <h1 className="text-3xl font-[700] text-green-800 mb-6 text-center">Chainsaw Registration Application</h1>
+         <div className="container mx-auto">
+            <h1 className="text-2xl sm:text-3xl font-[700] text-green-800 mb-4 text-center">
+               Chainsaw Registration Application
+            </h1>
             <Card className="max-w-2xl mx-auto shadow-lg">
-               <CardHeader>
-                  <CardTitle>{steps[currentStep].title}</CardTitle>
+               <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="text-lg sm:text-xl">{steps[currentStep].title}</CardTitle>
                </CardHeader>
-               <CardContent>
+               <CardContent className="p-4 sm:p-6">
                   <form onSubmit={handleSubmit}>
                      {currentStep === 0 && (
                         <div className="space-y-6 pb-4">
@@ -478,7 +481,7 @@ const ChainsawRegistrationForm = () => {
                            <p className="text-sm text-gray-700 mb-4 font-semibold">
                               Please upload the required documents.
                            </p>
-                           <div className="upload-cards-container csaw-form-scrollbar">
+                           <div className="upload-cards-container custom-scrollbar h-[600px] overflow-y-auto pr-2">
                               <UploadCard
                                  label="Official Receipt of Chainsaw Purchase"
                                  documentLabel="Upload 1 certified copy and 1 original for verification (or Affidavit of Ownership if original is lost)"
@@ -544,7 +547,7 @@ const ChainsawRegistrationForm = () => {
 
                      {currentStep === 4 && (
                         <div className="space-y-4">
-                           <div className="space-y-5 h-[600px]">
+                           <div className="space-y-5 custom-scrollbar h-[600px] overflow-y-auto px-2">
                               <div>
                                  <h3 className="text-lg font-semibold mb-1 text-green-700">Owner Details</h3>
                                  <div className="space-y-2">
@@ -588,7 +591,7 @@ const ChainsawRegistrationForm = () => {
                               <div>
                                  <h3 className="text-lg font-semibold mb-2 text-green-700">Chainsaw Details</h3>
                                  <div className="space-y-4">
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                        <div>
                                           <Label htmlFor="brand">Brand</Label>
                                           <Input
@@ -612,7 +615,7 @@ const ChainsawRegistrationForm = () => {
                                           />
                                        </div>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                        <div>
                                           <Label htmlFor="serialNumber">Serial No.</Label>
                                           <Input
@@ -632,7 +635,7 @@ const ChainsawRegistrationForm = () => {
                                           />
                                        </div>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                        <div>
                                           <Label htmlFor="powerOutput">Power Output (kW/bhp)</Label>
                                           <Input
@@ -656,7 +659,7 @@ const ChainsawRegistrationForm = () => {
                                           />
                                        </div>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                                        <div>
                                           <Label htmlFor="countryOfOrigin">Country of Origin</Label>
                                           <Input
@@ -687,16 +690,16 @@ const ChainsawRegistrationForm = () => {
                         </div>
                      )}
 
-                     {currentStep === 5 && ( // Review Your Application
-                        <div className="space-y-6 h-[630px] flex flex-col">
-                           <div className="review-step-container csaw-form-scrollbar flex-grow overflow-auto">
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     {currentStep === 5 && (
+                        <div className="space-y-6 h-[600px] flex flex-col">
+                           <div className="review-step-container custom-scrollbar flex-grow overflow-auto px-2">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                                  {Object.entries(formData)
                                     .filter(([key]) => key !== 'status' && key !== 'dateOfSubmission' && key !== 'files')
                                     .map(([key, value]) => (
                                        <div key={key} className="bg-white p-3 rounded-lg shadow">
                                           <h4 className="font-semibold text-green-600 mb-1 text-sm">{formatLabel(key)}</h4>
-                                          <p className="text-gray-700 text-sm">
+                                          <p className="text-gray-700 text-sm break-words">
                                              {formatReviewValue(key, value)}
                                           </p>
                                        </div>
@@ -705,14 +708,16 @@ const ChainsawRegistrationForm = () => {
 
                               <div className="bg-white p-3 rounded-lg shadow mt-4">
                                  <h4 className="font-semibold text-green-600 mb-2 text-sm">Uploaded Files</h4>
-                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     {Object.entries(formData.files).map(([docType, files]) => (
                                        <div key={docType} className="border-b pb-2">
                                           <h5 className="font-medium text-gray-700 mb-1 text-xs">{formatLabel(docType)}</h5>
                                           {files.length > 0 ? (
                                              <ul className="list-disc list-inside">
                                                 {files.map((file, index) => (
-                                                   <li key={index} className="text-xs text-gray-600">{file.name}</li>
+                                                   <li key={index} className="text-xs text-gray-600 truncate">
+                                                      {file.name}
+                                                   </li>
                                                 ))}
                                              </ul>
                                           ) : (
@@ -727,14 +732,14 @@ const ChainsawRegistrationForm = () => {
                      )}
                   </form>
                </CardContent>
-               <CardFooter className="mt-14 flex flex-col sm:flex-row justify-between items-center gap-4">
+               <CardFooter className="flex flex-col sm:flex-row justify-between items-center gap-4 p-4">
                   <div className="w-full sm:w-auto">
                      {currentStep > 0 && (
                         <Button
                            type="button"
                            variant="outline"
                            onClick={handlePrevStep}
-                           className="w-full sm:w-auto"
+                           className="w-full sm:w-auto px-4 py-2"
                         >
                            Previous
                         </Button>
@@ -745,7 +750,7 @@ const ChainsawRegistrationForm = () => {
                         <Button
                            type="button"
                            onClick={handleNextStep}
-                           className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
+                           className="w-full sm:w-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white"
                         >
                            Next
                         </Button>
@@ -755,14 +760,14 @@ const ChainsawRegistrationForm = () => {
                               type="button"
                               variant="outline"
                               onClick={handleSaveAsDraft}
-                              className="w-full sm:w-auto"
+                              className="w-full sm:w-auto px-4 py-2"
                            >
                               Save as Draft
                            </Button>
                            <Button
                               type="submit"
                               onClick={handleSubmit}
-                              className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
+                              className="w-full sm:w-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white"
                            >
                               Submit Application
                            </Button>
