@@ -79,15 +79,10 @@ const HomePage = () => {
       }
    };
 
-   const formatDate = (dateString) => {
-      const date = new Date(parseInt(dateString));
-      const now = new Date();
-      const diffInHours = Math.abs(now - date) / 36e5;
-
-      if (diffInHours < 24) {
-         return `${Math.round(diffInHours)} hours ago`;
-      }
-      return date.toLocaleDateString();
+   const formatDate = (timestamp) => {
+      // const date = new Date(timestamp);
+      // return date.toLocaleDateString();
+      return new Date(timestamp).toLocaleDateString();
    };
 
    if (userLoading || applicationsLoading) return <p>Loading...</p>;
@@ -96,164 +91,235 @@ const HomePage = () => {
    const { firstName, lastName } = userData?.me || {};
 
    return (
-      <div className="min-h-screen bg-green-50 flex flex-col pt-16">
+      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex flex-col pt-16">
          <ToastContainer />
-         <main className="container mx-auto py-8 flex-grow mt-4">
-            <h1 className="text-3xl font-bold text-green-800 mb-6">
-               {isNewUser ? "Welcome" : "Welcome back"}, {firstName}!
-            </h1>
-            {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-               {quickActions.map((action, index) => (
-                  <Card key={index} className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
-                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <div className="flex items-center space-x-2">
-                           <div className="text-green-600">{action.icon}</div>
-                           <CardTitle className="text-sm font-medium text-green-800">{action.title}</CardTitle>
+         <main className="container mx-auto px-6 py-8 flex-grow">
+            <div className="max-w-7xl mx-auto">
+               {/* Welcome Section */}
+               <div className="text-center mb-12">
+                  <h1 className="text-4xl font-bold text-gray-900 mb-3">
+                     {isNewUser ? "Welcome" : "Welcome back"}, {firstName}!
+                  </h1>
+                  <p className="text-lg text-gray-600">
+                     Manage your environmental permits and applications all in one place.
+                  </p>
+               </div>
+
+               {/* Quick Actions */}
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                  {quickActions.map((action, index) => (
+                     <Card 
+                        key={index} 
+                        className="group bg-white rounded-xl shadow-md hover:shadow-xl 
+                           transition-all duration-300 overflow-hidden"
+                     >
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                           <div className="flex items-center space-x-3">
+                              <div className="p-2 rounded-lg bg-green-50 text-green-600 
+                                 group-hover:bg-green-100 transition-colors duration-300">
+                                 {action.icon}
+                              </div>
+                              <CardTitle className="text-base font-semibold text-gray-900">
+                                 {action.title}
+                              </CardTitle>
+                           </div>
+                        </CardHeader>
+                        <CardContent>
+                           <Button 
+                              className="w-full bg-gradient-to-r from-green-600 to-green-700
+                                 hover:from-green-700 hover:to-green-800 text-white
+                                 transform transition-all duration-300
+                                 hover:translate-y-[-2px] active:translate-y-0
+                                 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+                              onClick={() => window.location.href = action.link}
+                           >
+                              Go to {action.title}
+                           </Button>
+                        </CardContent>
+                     </Card>
+                  ))}
+               </div>
+
+               {/* Recent Applications and Notifications */}
+               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  {/* Recent Applications */}
+                  <Card className="lg:col-span-2 bg-white rounded-xl shadow-md hover:shadow-xl 
+                     transition-all duration-300 overflow-hidden">
+                     <CardHeader className="border-b border-gray-100">
+                        <div className="flex items-center space-x-3">
+                           <div className="p-2 rounded-lg bg-green-50 text-green-600">
+                              <ClipboardList className="h-6 w-6" />
+                           </div>
+                           <CardTitle className="text-xl font-semibold text-gray-900">
+                              Recent Applications
+                           </CardTitle>
                         </div>
                      </CardHeader>
-                     <CardContent>
-                        <Button className="w-full bg-green-600 hover:bg-green-700 text-white" onClick={() => window.location.href = action.link}>
-                           Go to {action.title}
-                        </Button>
-                     </CardContent>
-                  </Card>
-               ))}
-            </div>
-
-            {/* Recent Applications and Notifications */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-               {/* Recent Applications */}
-               <Card className="lg:col-span-2 bg-white recent-applications-card group">
-                  <CardHeader>
-                     <CardTitle className="text-green-800">Recent Applications</CardTitle>
-                  </CardHeader>
-                  <CardContent className="relative flex flex-col h-full">
-                     {applicationsLoading ? (
-                        <p className="text-center text-gray-500">Loading applications...</p>
-                     ) : applicationsError ? (
-                        <p className="text-center text-red-500">{applicationsError.message}</p>
-                     ) : recentApplications.length === 0 ? (
-                        <div className="h-[365px] flex items-center justify-center">
-                           <p className="text-gray-500">No recent applications</p>
-                        </div>
-                     ) : (
-                        <div className="space-y-4 h-[365px] overflow-y-auto custom-scrollbar applications-container group-hover:scrollbar-visible">
-                           {recentApplications.slice(0, 7).map((app, index) => (
-                              <div key={index} className="flex items-center border-b border-gray-200 pb-2 last:border-b-0 last:pb-0">
-                                 <div className="flex-grow pr-4">
-                                    <p className="font-semibold text-green-800">{app.applicationType}</p>
-                                    <p className="text-sm text-gray-500">Application ID: {app.applicationNumber}</p>
-                                    <p className="text-sm text-gray-500">Submitted: {new Date(parseInt(app.dateOfSubmission)).toLocaleDateString()}</p>
-                                 </div>
-                                 <div className="flex-shrink-0 w-24 text-right mr-4">
-                                    <span className={`inline-block px-2 py-1 rounded-full text-xs ${getStatusColor(app.status)}`}>
-                                       {app.status}
-                                    </span>
-                                 </div>
-                              </div>
-                           ))}
-                        </div>
-                     )}
-                  </CardContent>
-                  <CardFooter>
-                     <Button
-                        className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white"
-                        onClick={() => window.location.href = '/applicationsStatus'}
-                     >
-                        View All Applications
-                     </Button>
-                  </CardFooter>
-               </Card>
-
-               {/* Notifications */}
-               <Card className="bg-white notifications-card group">
-                  <CardHeader className="flex flex-row items-center justify-between pb-2">
-                     <CardTitle className="text-green-800 flex items-center gap-2">
-                        <Bell className="h-5 w-5" />
-                        Recent Notifications
-                     </CardTitle>
-                     {unreadNotifications.length > 0 && (
-                        <div className="flex items-center gap-2">
-                           <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                              {unreadNotifications.length} new
-                           </span>
-                           <Button
-                              onClick={markAllAsRead}
-                              className="text-sm text-green-600 hover:text-green-700"
-                              variant="ghost"
-                           >
-                              Mark all as read
-                           </Button>
-                        </div>
-                     )}
-                  </CardHeader>
-                  <CardContent className="relative flex flex-col h-full">
-                     {notificationsLoading ? (
-                        <div className="flex items-center justify-center h-[21.5rem]">
-                           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-                        </div>
-                     ) : notificationsError ? (
-                        <div className="flex items-center justify-center h-[21.5rem] text-red-500">
-                           <AlertCircle className="h-5 w-5 mr-2" />
-                           Error loading notifications
-                        </div>
-                     ) : notifications.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-[21.5rem] text-gray-500">
-                           <Bell className="h-12 w-12 mb-2 text-gray-400" />
-                           <p>No notifications yet</p>
-                        </div>
-                     ) : (
-                        <div className="space-y-3 h-[21.5rem] overflow-y-auto custom-scrollbar pr-2">
-                           {notifications.slice(0, 10).map((notification) => (
-                              <div
-                                 key={notification.id}
-                                 className={`group relative rounded-lg p-4 transition-all duration-200 ${
-                                    !notification.read ? 'bg-green-50 hover:bg-green-100' : 'bg-gray-50 hover:bg-gray-100'
-                                 } cursor-pointer`}
-                                 onClick={() => markAsRead(notification.id)}
-                              >
-                                 <div className="flex items-start gap-3">
-                                    <div className="flex-shrink-0">
-                                       {notification.type === 'APPLICATION_STATUS' ? (
-                                          <ClipboardList className="h-5 w-5 text-blue-500" />
-                                       ) : notification.type === 'PAYMENT' ? (
-                                          <TrendingUp className="h-5 w-5 text-green-500" />
-                                       ) : (
-                                          <Info className="h-5 w-5 text-green-500" />
-                                       )}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                       <p className="text-sm font-semibold text-gray-900 mb-1">
-                                          {formatNotificationType(notification.type)}
+                     <CardContent className="relative flex flex-col h-full pt-6">
+                        {applicationsLoading ? (
+                           <div className="flex items-center justify-center h-[365px]">
+                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                           </div>
+                        ) : applicationsError ? (
+                           <div className="flex items-center justify-center h-[365px] text-red-500">
+                              <AlertCircle className="h-6 w-6 mr-2" />
+                              <p>Error loading applications</p>
+                           </div>
+                        ) : recentApplications.length === 0 ? (
+                           <div className="h-[365px] flex flex-col items-center justify-center text-gray-500">
+                              <ClipboardList className="h-12 w-12 mb-3 text-gray-400" />
+                              <p className="text-lg">No recent applications</p>
+                              <p className="text-sm mt-2">Start by creating a new application</p>
+                           </div>
+                        ) : (
+                           <div className="space-y-4 h-[365px] overflow-y-auto custom-scrollbar pr-4">
+                              {recentApplications.slice(0, 7).map((app, index) => (
+                                 <div 
+                                    key={index} 
+                                    className="group flex items-center border-b border-gray-100 pb-4 last:border-b-0
+                                       hover:bg-gray-50 rounded-lg transition-all duration-200 -mx-2 px-4"
+                                 >
+                                    <div className="flex-grow">
+                                       <p className="font-semibold text-gray-900 group-hover:text-green-700 
+                                          transition-colors duration-200">
+                                          {app.applicationType}
                                        </p>
-                                       <p className="text-sm text-gray-600 line-clamp-2">
-                                          {notification.message}
-                                       </p>
-                                       <div className="flex items-center gap-2 mt-2">
-                                          <span className="text-xs text-gray-500">
-                                             {formatDate(notification.createdAt)}
-                                          </span>
+                                       <div className="flex items-center gap-2 mt-1">
+                                          <p className="text-sm text-gray-500">ID: {app.applicationNumber}</p>
+                                          <span className="text-gray-300">•</span>
+                                          <p className="text-sm text-gray-500">
+                                             {formatDate(app.dateOfSubmission)}
+                                          </p>
                                        </div>
                                     </div>
-                                    {!notification.read && (
-                                       <div className="absolute top-4 right-4 h-2 w-2 rounded-full bg-green-500"></div>
-                                    )}
+                                    <div className="flex-shrink-0">
+                                       <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium
+                                          ${getStatusColor(app.status)}`}>
+                                          {app.status}
+                                       </span>
+                                    </div>
                                  </div>
-                              </div>
-                           ))}
+                              ))}
+                           </div>
+                        )}
+                     </CardContent>
+                     <CardFooter className="border-t border-gray-100 pt-4">
+                        <Button
+                           className="w-full bg-gradient-to-r from-green-600 to-green-700
+                              hover:from-green-700 hover:to-green-800 text-white
+                              transform transition-all duration-300
+                              hover:translate-y-[-2px] active:translate-y-0
+                              focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+                           onClick={() => window.location.href = '/applicationsStatus'}
+                        >
+                           View All Applications
+                        </Button>
+                     </CardFooter>
+                  </Card>
+
+                  {/* Notifications */}
+                  <Card className="bg-white rounded-xl shadow-md hover:shadow-xl 
+                     transition-all duration-300 overflow-hidden">
+                     <CardHeader className="flex flex-row items-center justify-between border-b border-gray-100 pb-4">
+                        <div className="flex items-center space-x-3">
+                           <div className="p-2 rounded-lg bg-green-50 text-green-600">
+                              <Bell className="h-6 w-6" />
+                           </div>
+                           <CardTitle className="text-xl font-semibold text-gray-900">
+                              Notifications
+                           </CardTitle>
                         </div>
-                     )}
-                  </CardContent>
-                  <CardFooter>
-                     <Button
-                        className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white"
-                        onClick={() => window.location.href = '/notifications'}
-                     >
-                        View All Notifications
-                     </Button>
-                  </CardFooter>
-               </Card>
+                        {unreadNotifications.length > 0 && (
+                           <div className="flex items-center gap-2">
+                              <span className="bg-green-100 text-green-800 text-sm font-medium px-2.5 py-1 rounded-full">
+                                 {unreadNotifications.length}
+                              </span>
+                              <Button
+                                 onClick={markAllAsRead}
+                                 className="text-sm text-green-600 hover:text-green-700 
+                                    hover:bg-green-50 rounded-lg px-3 py-1.5
+                                    transition-all duration-200"
+                                 variant="ghost"
+                              >
+                                 Clear all
+                              </Button>
+                           </div>
+                        )}
+                     </CardHeader>
+                     <CardContent className="relative flex flex-col h-full pt-6">
+                        {notificationsLoading ? (
+                           <div className="flex items-center justify-center h-[21.5rem]">
+                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                           </div>
+                        ) : notificationsError ? (
+                           <div className="flex items-center justify-center h-[21.5rem] text-red-500">
+                              <AlertCircle className="h-6 w-6 mr-2" />
+                              <p>Error loading notifications</p>
+                           </div>
+                        ) : notifications.length === 0 ? (
+                           <div className="flex flex-col items-center justify-center h-[21.5rem] text-gray-500">
+                              <Bell className="h-12 w-12 mb-3 text-gray-400" />
+                              <p className="text-lg">No notifications yet</p>
+                              <p className="text-sm mt-2">We'll notify you of important updates</p>
+                           </div>
+                        ) : (
+                           <div className="space-y-3 h-[21.5rem] overflow-y-auto custom-scrollbar pr-4">
+                              {notifications.slice(0, 10).map((notification) => (
+                                 <div
+                                    key={notification.id}
+                                    onClick={() => markAsRead(notification.id)}
+                                    className={`group relative rounded-lg p-4 transition-all duration-200 
+                                       cursor-pointer transform hover:translate-x-1
+                                       ${!notification.read 
+                                          ? 'bg-green-50 hover:bg-green-100' 
+                                          : 'bg-gray-50 hover:bg-gray-100'
+                                       }`}
+                                 >
+                                    <div className="flex items-start gap-3">
+                                       <div className="flex-shrink-0">
+                                          {notification.type === 'APPLICATION_STATUS' ? (
+                                             <ClipboardList className="h-5 w-5 text-blue-500" />
+                                          ) : notification.type === 'PAYMENT' ? (
+                                             <TrendingUp className="h-5 w-5 text-green-500" />
+                                          ) : (
+                                             <Info className="h-5 w-5 text-green-500" />
+                                          )}
+                                       </div>
+                                       <div className="flex-1 min-w-0">
+                                          <p className="text-sm font-semibold text-gray-900 group-hover:text-green-700
+                                             transition-colors duration-200">
+                                             {formatNotificationType(notification.type)}
+                                          </p>
+                                          <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                                             {notification.message}
+                                          </p>
+                                          <p className="text-xs text-gray-500 mt-2">
+                                             {formatDate(notification.createdAt)}
+                                          </p>
+                                       </div>
+                                       {!notification.read && (
+                                          <div className="absolute top-4 right-4 h-2 w-2 rounded-full bg-green-500"></div>
+                                       )}
+                                    </div>
+                                 </div>
+                              ))}
+                           </div>
+                        )}
+                     </CardContent>
+                     <CardFooter className="border-t border-gray-100 pt-4">
+                        <Button
+                           className="w-full bg-gradient-to-r from-green-600 to-green-700
+                              hover:from-green-700 hover:to-green-800 text-white
+                              transform transition-all duration-300
+                              hover:translate-y-[-2px] active:translate-y-0
+                              focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+                           onClick={() => window.location.href = '/notifications'}
+                        >
+                           View All Notifications
+                        </Button>
+                     </CardFooter>
+                  </Card>
+               </div>
             </div>
          </main>
          <HomeFooter />
