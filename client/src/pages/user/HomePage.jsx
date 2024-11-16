@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '../../components/ui/Card';
-import { FaClipboardList, FaUser, FaBell, FaCheckCircle } from 'react-icons/fa';
+import { Bell, ClipboardList, Users, Settings, TrendingUp, CheckCircle, XCircle, ClipboardCheck, RotateCcw, Info, AlertCircle, AlertTriangle } from "lucide-react";
 import { toast, ToastContainer } from 'react-toastify';
 import HomeFooter from '../../components/ui/HomeFooter';
 import '../../components/ui/styles/customScrollBar.css';
@@ -21,13 +21,13 @@ const GET_USER_DETAILS = gql`
 
 const HomePage = () => {
    const { recentApplications, loading: applicationsLoading, error: applicationsError } = useRecentApplications();
-   const { 
-      notifications, 
-      unreadNotifications, 
-      loading: notificationsLoading, 
+   const {
+      notifications,
+      unreadNotifications,
+      loading: notificationsLoading,
       error: notificationsError,
       markAsRead,
-      markAllAsRead 
+      markAllAsRead
    } = useUserNotifications();
    const [recentNotifications, setRecentNotifications] = useState([]);
    const [unreadCount, setUnreadCount] = useState(0);
@@ -39,10 +39,10 @@ const HomePage = () => {
    const { loading: userLoading, error: userError, data: userData } = useQuery(GET_USER_DETAILS);
 
    const quickActions = useMemo(() => [
-      { title: "New Application", icon: <FaClipboardList className="h-6 w-6" />, link: "/permits" },
-      { title: "My Applications", icon: <FaClipboardList className="h-6 w-6" />, link: "/applicationsStatus" },
-      { title: "Notifications", icon: <FaBell className="h-6 w-6" />, link: "/notifications" },
-      { title: "Profile", icon: <FaUser className="h-6 w-6" />, link: "/profile" },
+      { title: "New Application", icon: <ClipboardList className="h-6 w-6" />, link: "/permits" },
+      { title: "My Applications", icon: <ClipboardList className="h-6 w-6" />, link: "/applicationsStatus" },
+      { title: "Notifications", icon: <Bell className="h-6 w-6" />, link: "/notifications" },
+      { title: "Profile", icon: <Users className="h-6 w-6" />, link: "/profile" },
    ], []);
 
    const getStatusColor = useCallback((status) => {
@@ -168,55 +168,77 @@ const HomePage = () => {
 
                {/* Notifications */}
                <Card className="bg-white notifications-card group">
-                  <CardHeader className="flex flex-row items-center justify-between">
-                     <CardTitle className="text-green-800">Recent Notifications</CardTitle>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                     <CardTitle className="text-green-800 flex items-center gap-2">
+                        <Bell className="h-5 w-5" />
+                        Recent Notifications
+                     </CardTitle>
                      {unreadNotifications.length > 0 && (
-                        <Button
-                           onClick={markAllAsRead}
-                           className="text-sm text-green-600 hover:text-green-700"
-                           variant="ghost"
-                        >
-                           Mark all as read
-                        </Button>
+                        <div className="flex items-center gap-2">
+                           <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                              {unreadNotifications.length} new
+                           </span>
+                           <Button
+                              onClick={markAllAsRead}
+                              className="text-sm text-green-600 hover:text-green-700"
+                              variant="ghost"
+                           >
+                              Mark all as read
+                           </Button>
+                        </div>
                      )}
                   </CardHeader>
                   <CardContent className="relative flex flex-col h-full">
                      {notificationsLoading ? (
-                        <p className="text-center text-gray-500">Loading notifications...</p>
+                        <div className="flex items-center justify-center h-[21.5rem]">
+                           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                        </div>
                      ) : notificationsError ? (
-                        <p className="text-center text-red-500">{notificationsError.message}</p>
+                        <div className="flex items-center justify-center h-[21.5rem] text-red-500">
+                           <AlertCircle className="h-5 w-5 mr-2" />
+                           Error loading notifications
+                        </div>
                      ) : notifications.length === 0 ? (
-                        <div className="h-[365px] flex items-center justify-center">
-                           <p className="text-gray-500">No notifications</p>
+                        <div className="flex flex-col items-center justify-center h-[21.5rem] text-gray-500">
+                           <Bell className="h-12 w-12 mb-2 text-gray-400" />
+                           <p>No notifications yet</p>
                         </div>
                      ) : (
-                        <div className="space-y-4 h-[365px] overflow-y-auto custom-scrollbar notifications-container group-hover:scrollbar-visible">
+                        <div className="space-y-3 h-[21.5rem] overflow-y-auto custom-scrollbar pr-2">
                            {notifications.slice(0, 10).map((notification) => (
                               <div
                                  key={notification.id}
-                                 className={`flex items-start border-b border-gray-200 pb-3 last:border-b-0 last:pb-0 ${
-                                    !notification.read ? 'bg-green-50' : ''
-                                 }`}
+                                 className={`group relative rounded-lg p-4 transition-all duration-200 ${
+                                    !notification.read ? 'bg-green-50 hover:bg-green-100' : 'bg-gray-50 hover:bg-gray-100'
+                                 } cursor-pointer`}
+                                 onClick={() => markAsRead(notification.id)}
                               >
-                                 <div className="flex-grow pr-4">
-                                    <div className="flex items-center justify-between">
-                                       <p className="font-semibold text-green-800">
-                                          {formatNotificationType(notification.type)}
-                                       </p>
-                                       {!notification.read && (
-                                          <Button
-                                             onClick={() => markAsRead(notification.id)}
-                                             className="text-sm text-green-600 hover:text-green-700 p-1"
-                                             variant="ghost"
-                                          >
-                                             <FaCheckCircle className="h-4 w-4" />
-                                          </Button>
+                                 <div className="flex items-start gap-3">
+                                    <div className="flex-shrink-0">
+                                       {notification.type === 'APPLICATION_STATUS' ? (
+                                          <ClipboardList className="h-5 w-5 text-blue-500" />
+                                       ) : notification.type === 'PAYMENT' ? (
+                                          <TrendingUp className="h-5 w-5 text-green-500" />
+                                       ) : (
+                                          <Info className="h-5 w-5 text-green-500" />
                                        )}
                                     </div>
-                                    <p className="text-sm text-gray-700">{notification.message}</p>
-                                    <p className="text-xs text-gray-500 mt-1">
-                                       {formatDate(notification.createdAt)}
-                                    </p>
+                                    <div className="flex-1 min-w-0">
+                                       <p className="text-sm font-semibold text-gray-900 mb-1">
+                                          {formatNotificationType(notification.type)}
+                                       </p>
+                                       <p className="text-sm text-gray-600 line-clamp-2">
+                                          {notification.message}
+                                       </p>
+                                       <div className="flex items-center gap-2 mt-2">
+                                          <span className="text-xs text-gray-500">
+                                             {formatDate(notification.createdAt)}
+                                          </span>
+                                       </div>
+                                    </div>
+                                    {!notification.read && (
+                                       <div className="absolute top-4 right-4 h-2 w-2 rounded-full bg-green-500"></div>
+                                    )}
                                  </div>
                               </div>
                            ))}

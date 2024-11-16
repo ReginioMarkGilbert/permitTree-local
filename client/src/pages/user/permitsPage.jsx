@@ -59,7 +59,7 @@ const PermitsPage = () => {
    return (
       <div className="bg-gradient-to-b from-green-50 to-white min-h-screen flex flex-col pt-16">
          <main className="container mx-auto px-6 py-8 flex-grow">
-            <div className="max-w-6xl mx-auto">
+            <div className="max-w-7xl mx-auto">
                <div className="text-center mb-12">
                   <h1 className="text-4xl font-bold text-gray-900 mb-4">
                      Permit Applications
