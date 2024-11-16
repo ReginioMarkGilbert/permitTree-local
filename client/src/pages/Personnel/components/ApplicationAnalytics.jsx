@@ -1,11 +1,13 @@
 import React from 'react';
 import { Card } from "@/components/ui/card";
 import { ResponsivePie } from '@nivo/pie';
+import { ResponsiveBar } from '@nivo/bar';
 
 const ApplicationAnalytics = ({ data }) => {
    const {
       applicationTypes,
-      statusData
+      statusData,
+      weeklyVolume
    } = data;
 
    return (
@@ -89,6 +91,52 @@ const ApplicationAnalytics = ({ data }) => {
                </div>
             </Card>
          </div>
+
+         <Card className="p-6 shadow-lg">
+            <h2 className="text-xl font-semibold text-green-700 mb-4">Weekly Application Volume</h2>
+            <div className="h-[400px]">
+               <ResponsiveBar
+                  data={weeklyVolume}
+                  keys={['count']}
+                  indexBy="day"
+                  margin={{ top: 50, right: 50, bottom: 50, left: 60 }}
+                  padding={0.3}
+                  valueScale={{ type: 'linear' }}
+                  indexScale={{ type: 'band', round: true }}
+                  colors="#22c55e"
+                  borderRadius={4}
+                  borderColor={{
+                     from: 'color',
+                     modifiers: [['darker', 1.6]]
+                  }}
+                  axisTop={null}
+                  axisRight={null}
+                  axisBottom={{
+                     tickSize: 5,
+                     tickPadding: 5,
+                     tickRotation: 0,
+                     legend: 'Day of Week',
+                     legendPosition: 'middle',
+                     legendOffset: 32
+                  }}
+                  axisLeft={{
+                     tickSize: 5,
+                     tickPadding: 5,
+                     tickRotation: 0,
+                     legend: 'Number of Applications',
+                     legendPosition: 'middle',
+                     legendOffset: -40
+                  }}
+                  labelSkipWidth={12}
+                  labelSkipHeight={12}
+                  labelTextColor={{
+                     from: 'color',
+                     modifiers: [['darker', 1.6]]
+                  }}
+                  animate={true}
+               />
+            </div>
+         </Card>
       </div>
    );
 };

@@ -2,18 +2,29 @@ const Permit = require('../models/permits/Permit');
 const moment = require('moment');
 
 class AnalyticsService {
-    async getApplicationAnalytics(timeFilter) {
+    static async getApplicationAnalytics(timeFilter) {
         try {
-            const startDate = this.getStartDate(timeFilter);
-            const permits = await Permit.find({
-                dateOfSubmission: { $gte: startDate }
+            // Get date range based on time filter
+            const dateRange = this.getDateRange(timeFilter);
+
+            // Get applications within date range
+            const applications = await Permit.find({
+                dateOfSubmission: { $gte: dateRange.start, $lte: dateRange.end }
             });
 
+            // Calculate application types distribution
+            const applicationTypes = this.calculateApplicationTypes(applications);
+
+            // Calculate status distribution
+            const statusData = this.calculateStatusDistribution(applications);
+
+            // Calculate weekly volume
+            const weeklyVolume = this.calculateWeeklyVolume(applications);
+
             return {
-                applicationTypes: await this.getApplicationTypeStats(permits),
-                statusData: await this.getStatusStats(permits),
-                processingTimeData: await this.getProcessingTimeStats(permits),
-                successRateData: await this.getSuccessRateStats(permits)
+                applicationTypes,
+                statusData,
+                weeklyVolume
             };
         } catch (error) {
             console.error('Error in getApplicationAnalytics:', error);
@@ -21,90 +32,70 @@ class AnalyticsService {
         }
     }
 
-    getStartDate(timeFilter) {
-        switch(timeFilter) {
-            case 'week':
-                return moment().subtract(7, 'days').toDate();
-            case 'month':
-                return moment().subtract(30, 'days').toDate();
-            case 'year':
-                return moment().subtract(1, 'year').toDate();
-            default:
-                return moment().subtract(5, 'years').toDate(); // For all time
-        }
+    static calculateWeeklyVolume(applications) {
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const volumeByDay = new Array(7).fill(0);
+
+        applications.forEach(app => {
+            const dayIndex = moment(app.dateOfSubmission).day();
+            volumeByDay[dayIndex]++;
+        });
+
+        return days.map((day, index) => ({
+            day,
+            count: volumeByDay[index]
+        }));
     }
 
-    async getApplicationTypeStats(permits) {
-        const typeCounts = permits.reduce((acc, permit) => {
-            acc[permit.applicationType] = (acc[permit.applicationType] || 0) + 1;
+    static getDateRange(timeFilter) {
+        const end = moment();
+        let start;
+
+        switch (timeFilter) {
+            case 'week':
+                start = moment().subtract(1, 'week');
+                break;
+            case 'month':
+                start = moment().subtract(1, 'month');
+                break;
+            case 'year':
+                start = moment().subtract(1, 'year');
+                break;
+            case 'all':
+                start = moment(0); // Beginning of time
+                break;
+            default:
+                start = moment().subtract(1, 'week');
+        }
+
+        return { start: start.toDate(), end: end.toDate() };
+    }
+
+    static calculateApplicationTypes(applications) {
+        const typeCount = applications.reduce((acc, app) => {
+            acc[app.applicationType] = (acc[app.applicationType] || 0) + 1;
             return acc;
         }, {});
 
-        return Object.entries(typeCounts).map(([type, value]) => ({
+        return Object.entries(typeCount).map(([type, count]) => ({
             id: type,
             label: type,
-            value
+            value: count
         }));
     }
 
-    async getStatusStats(permits) {
-        const statusCounts = permits.reduce((acc, permit) => {
-            acc[permit.status] = (acc[permit.status] || 0) + 1;
+    static calculateStatusDistribution(applications) {
+        const statusCount = applications.reduce((acc, app) => {
+            acc[app.status] = (acc[app.status] || 0) + 1;
             return acc;
         }, {});
 
-        return Object.entries(statusCounts).map(([status, value]) => ({
+        return Object.entries(statusCount).map(([status, count]) => ({
             id: status,
             label: status,
-            value
-        }));
-    }
-
-    async getProcessingTimeStats(permits) {
-        const monthlyAvg = permits.reduce((acc, permit) => {
-            if (permit.status === 'Approved') {
-                const month = moment(permit.dateOfSubmission).format('MMM');
-                const processingTime = moment(permit.approvalDate).diff(moment(permit.dateOfSubmission), 'days');
-
-                if (!acc[month]) {
-                    acc[month] = { total: 0, count: 0 };
-                }
-                acc[month].total += processingTime;
-                acc[month].count += 1;
-            }
-            return acc;
-        }, {});
-
-        const data = Object.entries(monthlyAvg).map(([month, stats]) => ({
-            x: month,
-            y: Math.round(stats.total / stats.count)
-        }));
-
-        return [{
-            id: "Processing Time",
-            data: data
-        }];
-    }
-
-    async getSuccessRateStats(permits) {
-        const monthlyStats = permits.reduce((acc, permit) => {
-            const month = moment(permit.dateOfSubmission).format('MMM');
-            if (!acc[month]) {
-                acc[month] = { total: 0, success: 0 };
-            }
-            acc[month].total += 1;
-            if (permit.status === 'Approved') {
-                acc[month].success += 1;
-            }
-            return acc;
-        }, {});
-
-        return Object.entries(monthlyStats).map(([month, stats]) => ({
-            month,
-            success: Math.round((stats.success / stats.total) * 100),
-            rejection: Math.round(((stats.total - stats.success) / stats.total) * 100)
+            value: count
         }));
     }
 }
 
-module.exports = new AnalyticsService(); 
+module.exports = AnalyticsService;

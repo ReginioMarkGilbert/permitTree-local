@@ -20,6 +20,10 @@ const GET_APPLICATION_ANALYTICS = gql`
                 label
                 value
             }
+            weeklyVolume {
+                day
+                count
+            }
         }
     }
 `;
