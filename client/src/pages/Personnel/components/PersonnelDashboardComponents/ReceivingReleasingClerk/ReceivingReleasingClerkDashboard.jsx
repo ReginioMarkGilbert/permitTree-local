@@ -4,9 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import RRC_ApplicationRow from './RRC_ApplicationRow';
 import { useApplications } from '../../../hooks/useApplications';
+import RRCApplicationFilters from './RRCApplicationFilters';
 
 const ReceivingReleasingClerkDashboard = () => {
-   const [searchTerm, setSearchTerm] = useState('');
+   const [filters, setFilters] = useState({
+      searchTerm: '',
+      applicationType: '',
+      dateRange: {
+         from: undefined,
+         to: undefined
+      }
+   });
    const [activeMainTab, setActiveMainTab] = useState('Applications');
    const [activeSubTab, setActiveSubTab] = useState('Applications For Review'); // set default tab
 
@@ -40,11 +48,32 @@ const ReceivingReleasingClerkDashboard = () => {
    };
 
    const filteredApplications = useMemo(() => {
-      return applications.filter(app =>
-         app.applicationNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         app.applicationType.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-   }, [applications, searchTerm]);
+      return applications.filter(app => {
+         const matchesSearch = app.applicationNumber.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+            app.applicationType.toLowerCase().includes(filters.searchTerm.toLowerCase());
+
+         const matchesType = !filters.applicationType ||
+            filters.applicationType === "all" ||
+            app.applicationType === filters.applicationType;
+
+         const matchesDateRange = (() => {
+            if (!filters.dateRange.from && !filters.dateRange.to) return true;
+
+            const appDate = new Date(app.dateOfSubmission);
+            appDate.setHours(0, 0, 0, 0);
+
+            const fromDate = filters.dateRange.from ? new Date(filters.dateRange.from) : null;
+            const toDate = filters.dateRange.to ? new Date(filters.dateRange.to) : null;
+
+            if (fromDate) fromDate.setHours(0, 0, 0, 0);
+            if (toDate) toDate.setHours(0, 0, 0, 0);
+
+            return (!fromDate || appDate >= fromDate) && (!toDate || appDate <= toDate);
+         })();
+
+         return matchesSearch && matchesType && matchesDateRange;
+      });
+   }, [applications, filters]);
 
    useEffect(() => {
       refetch();
@@ -77,6 +106,10 @@ const ReceivingReleasingClerkDashboard = () => {
       }
    }
 
+   const renderFilters = () => {
+      return <RRCApplicationFilters filters={filters} setFilters={setFilters} />;
+   };
+
    const renderTable = () => {
       if (loading) return <p className="text-center text-gray-500">Loading applications...</p>;
       if (error) {
@@ -106,6 +139,7 @@ const ReceivingReleasingClerkDashboard = () => {
                         app={app}
                         onRecordComplete={handleRecordComplete}
                         getStatusColor={getStatusColor}
+                        currentTab={activeSubTab}
                      />
                   ))}
                </tbody>
@@ -115,55 +149,74 @@ const ReceivingReleasingClerkDashboard = () => {
    };
 
    return (
-      <div className="min-h-screen bg-green-50">
-         <div className="container mx-auto px-4 sm:px-6 py-8 pt-24">
-            <div className="flex justify-between items-center mb-6">
-               <h1 className="text-3xl font-bold text-green-800">Receiving/Releasing Clerk Dashboard</h1>
-               <Button onClick={refetch} variant="outline">
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Refresh
-               </Button>
-            </div>
-            <div className="mb-6 overflow-x-auto">
-               <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-                  {mainTabs.map((tab) => (
-                     <button
-                        key={tab}
-                        onClick={() => {
-                           setActiveMainTab(tab);
-                           setActiveSubTab(subTabs[tab][0]);
-                        }}
-                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeMainTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
-                     >
-                        {tab}
-                     </button>
-                  ))}
+      <div className="bg-green-50 min-h-screen pt-20 pb-8 px-4 sm:px-6 lg:px-8">
+         <div className="max-w-7xl mx-auto space-y-6">
+            {/* Header Section */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+               <div className="flex items-center justify-between mb-4">
+                  <h1 className="text-2xl font-semibold text-gray-900">Receiving/Releasing Clerk Dashboard</h1>
+                  <Button onClick={refetch} variant="outline">
+                     <RefreshCw className="mr-2 h-4 w-4" />
+                     Refresh
+                  </Button>
+               </div>
+
+               {/* Main Tabs */}
+               <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
+                     {mainTabs.map((tab) => (
+                        <button
+                           key={tab}
+                           onClick={() => {
+                              setActiveMainTab(tab);
+                              setActiveSubTab(subTabs[tab][0]);
+                           }}
+                           className={`px-4 py-2 rounded-md text-sm font-medium transition-colors
+                              ${activeMainTab === tab
+                                 ? 'bg-white text-green-800 shadow'
+                                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
+                        >
+                           {tab}
+                        </button>
+                     ))}
+                  </div>
                </div>
             </div>
-            <div className="mb-6 overflow-x-auto">
-               <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-                  {subTabs[activeMainTab].map((tab) => (
-                     <button
-                        key={tab}
-                        onClick={() => setActiveSubTab(tab)}
-                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeSubTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
-                     >
-                        {tab}
-                     </button>
-                  ))}
+
+            {/* Sub Tabs and Filters Section */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+               <div className="space-y-4">
+                  {/* Sub Tabs */}
+                  <div className="bg-gray-100 p-1 rounded-md inline-flex flex-wrap gap-1">
+                     {subTabs[activeMainTab].map((tab) => (
+                        <button
+                           key={tab}
+                           onClick={() => setActiveSubTab(tab)}
+                           className={`px-3 py-2 rounded-md text-sm font-medium transition-colors
+                              ${activeSubTab === tab
+                                 ? 'bg-white text-green-800 shadow'
+                                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
+                        >
+                           {tab}
+                        </button>
+                     ))}
+                  </div>
+
+                  {renderFilters()}
+
+                  {renderTabDescription()}
+                  <div className="mb-6">
+                     <Input
+                        type="text"
+                        placeholder="Search applications..."
+                        value={filters.searchTerm}
+                        onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
+                        className="border rounded-md p-2 w-full"
+                     />
+                  </div>
+                  {renderTable()}
                </div>
             </div>
-            {renderTabDescription()}
-            <div className="mb-6">
-               <Input
-                  type="text"
-                  placeholder="Search applications..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="border rounded-md p-2 w-full"
-               />
-            </div>
-            {renderTable()}
          </div>
       </div>
    );

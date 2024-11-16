@@ -82,7 +82,7 @@ const BillCollectorOOPRow = ({ oop, onReviewComplete }) => {
             return 'bg-gray-100 text-gray-800';
       }
    };
-
+   // undo payment approval
    const handleUndoApproval = async () => {
       try {
          await undoApproval({
@@ -117,7 +117,7 @@ const BillCollectorOOPRow = ({ oop, onReviewComplete }) => {
       <>
          <tr key={oop._id}>
             <td className="px-4 py-4 whitespace-nowrap">
-               {oop.applicationId}
+               {oop.applicationNumber}
             </td>
             <td className="px-4 py-4 whitespace-nowrap">
                {oop.billNo}

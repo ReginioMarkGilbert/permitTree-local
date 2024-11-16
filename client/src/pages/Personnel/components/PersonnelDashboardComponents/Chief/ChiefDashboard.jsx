@@ -1,16 +1,24 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Search } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import ChiefApplicationRow from './ChiefApplicationRow';
 import { useApplications } from '../../../hooks/useApplications';
 import { useOrderOfPayments } from '../../../hooks/useOrderOfPayments';
 import ChiefOOPRow from './ChiefOOPRow';
+import ChiefApplicationFilters from './ChiefApplicationFilters';
 
 const ChiefDashboard = () => {
    const [searchTerm, setSearchTerm] = useState('');
    const [activeMainTab, setActiveMainTab] = useState('Applications');
    const [activeSubTab, setActiveSubTab] = useState('Applications for Review');
+   const [filters, setFilters] = useState({
+      searchTerm: '',
+      applicationType: '',
+      dateRange: {
+         from: undefined,
+         to: undefined
+      }
+   });
 
    const getQueryParamsForTab = (tab) => {
       switch (tab) {
@@ -21,13 +29,8 @@ const ChiefDashboard = () => {
          case 'Awaiting OOP':
             return { awaitingOOP: true };
          case 'Created OOP':
-            return { awaitingOOP: false, OOPCreated: true, status: 'In Progress' };
-         case 'Pending Signature':
-            return { OOPstatus: 'Pending Signature' };
-         case 'Signed Order Of Payment':
-            return { OOPSignedByTwoSignatories: true, OOPstatus: 'For Approval' };
-         case 'Signed Certificates':
-            return { CertificateStatus: 'Approved' };
+            return { OOPCreated: true, awaitingOOP: false };
+
          default:
             return { currentStage: 'ChiefRPSReview' };
       }
@@ -44,11 +47,32 @@ const ChiefDashboard = () => {
    };
 
    const filteredApplications = useMemo(() => {
-      return applications.filter(app =>
-         app.applicationNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         app.applicationType.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-   }, [applications, searchTerm]);
+      return applications.filter(app => {
+         const matchesSearch = app.applicationNumber.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+            app.applicationType.toLowerCase().includes(filters.searchTerm.toLowerCase());
+
+         const matchesType = !filters.applicationType ||
+            filters.applicationType === "all" ||
+            app.applicationType === filters.applicationType;
+
+         const matchesDateRange = (() => {
+            if (!filters.dateRange.from && !filters.dateRange.to) return true;
+
+            const appDate = new Date(app.dateOfSubmission);
+            appDate.setHours(0, 0, 0, 0);
+
+            const fromDate = filters.dateRange.from ? new Date(filters.dateRange.from) : null;
+            const toDate = filters.dateRange.to ? new Date(filters.dateRange.to) : null;
+
+            if (fromDate) fromDate.setHours(0, 0, 0, 0);
+            if (toDate) toDate.setHours(0, 0, 0, 0);
+
+            return (!fromDate || appDate >= fromDate) && (!toDate || appDate <= toDate);
+         })();
+
+         return matchesSearch && matchesType && matchesDateRange;
+      });
+   }, [applications, filters]);
 
    useEffect(() => {
       refetch();
@@ -92,14 +116,16 @@ const ChiefDashboard = () => {
          console.error('Error fetching OOPs:', oopsError);
          return <p className="text-center text-red-500">Error loading order of payments. Please try again later.</p>;
       }
-
+      //  render based on active subtab
       const filteredOOPs = oops.filter(oop => {
-         if (activeSubTab === 'Pending Signature') {
-            return oop.OOPstatus === 'Pending Signature';
-         } else if (activeSubTab === 'Signed Order Of Payment') {
-            return oop.OOPSignedByTwoSignatories === true && oop.OOPstatus === 'For Approval';
+         switch (activeSubTab) {
+            case 'Pending Signature':
+               return oop.OOPstatus === 'Pending Signature';
+            case 'Signed Order Of Payment':
+               return oop.OOPSignedByTwoSignatories === true;
+            default:
+               return true;
          }
-         return true;
       }).filter(oop =>
          oop.applicationId.toLowerCase().includes(searchTerm.toLowerCase()) ||
          oop.billNo.toLowerCase().includes(searchTerm.toLowerCase())
@@ -193,6 +219,7 @@ const ChiefDashboard = () => {
                         app={app}
                         onReviewComplete={handleReviewComplete}
                         getStatusColor={getStatusColor}
+                        currentTab={activeSubTab}
                      />
                   ))}
                </tbody>
@@ -201,57 +228,69 @@ const ChiefDashboard = () => {
       );
    };
 
+   const renderFilters = () => {
+      return <ChiefApplicationFilters filters={filters} setFilters={setFilters} />;
+   };
+
    return (
-      <div className="min-h-screen bg-green-50">
-         <div className="container mx-auto px-4 sm:px-6 py-8 pt-24">
-            <div className="flex justify-between items-center mb-6">
-               <h1 className="text-3xl font-bold text-green-800">Chief RPS/TSD Dashboard</h1>
-               <Button onClick={handleRefresh} variant="outline">
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Refresh
-               </Button>
-            </div>
-            {/* Main Tabs */}
-            <div className="mb-6 overflow-x-auto">
-               <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-                  {mainTabs.map((tab) => (
-                     <button
-                        key={tab}
-                        onClick={() => {
-                           setActiveMainTab(tab);
-                           setActiveSubTab(subTabs[tab][0]);
-                        }}
-                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeMainTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
-                     >
-                        {tab}
-                     </button>
-                  ))}
+      <div className="bg-green-50 min-h-screen pt-20 pb-8 px-4 sm:px-6 lg:px-8">
+         <div className="max-w-7xl mx-auto space-y-6">
+            {/* Header Section */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+               <div className="flex items-center justify-between mb-4">
+                  <h1 className="text-2xl font-semibold text-gray-900">Chief RPS/TSD Dashboard</h1>
+                  <Button onClick={handleRefresh} variant="outline">
+                     <RefreshCw className="mr-2 h-4 w-4" />
+                     Refresh
+                  </Button>
+               </div>
+
+               {/* Main Tabs */}
+               <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
+                     {mainTabs.map((tab) => (
+                        <button
+                           key={tab}
+                           onClick={() => {
+                              setActiveMainTab(tab);
+                              setActiveSubTab(subTabs[tab][0]);
+                           }}
+                           className={`px-4 py-2 rounded-md text-sm font-medium transition-colors
+                              ${activeMainTab === tab
+                                 ? 'bg-white text-green-800 shadow'
+                                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
+                        >
+                           {tab}
+                        </button>
+                     ))}
+                  </div>
                </div>
             </div>
-            {/* Subtabs */}
-            <div className="mb-6 overflow-x-auto">
-               <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-                  {subTabs[activeMainTab].map((tab) => (
-                     <button
-                        key={tab}
-                        onClick={() => setActiveSubTab(tab)}
-                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeSubTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
-                     >
-                        {tab}
-                     </button>
-                  ))}
+
+            {/* Sub Tabs and Search Section */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+               <div className="space-y-4 relative">
+                  {/* Sub Tabs */}
+                  <div className="bg-gray-100 p-1 rounded-md inline-flex flex-wrap gap-1">
+                     {subTabs[activeMainTab].map((tab) => (
+                        <button
+                           key={tab}
+                           onClick={() => setActiveSubTab(tab)}
+                           className={`px-3 py-2 rounded-md text-sm font-medium transition-colors
+                              ${activeSubTab === tab
+                                 ? 'bg-white text-green-800 shadow'
+                                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
+                        >
+                           {tab}
+                        </button>
+                     ))}
+                  </div>
+
+                  {renderTabDescription()}
+                  {renderFilters()}
                </div>
             </div>
-            {renderTabDescription()}
-            <div className="mb-6">
-               <Input
-                  type="text"
-                  placeholder="Search applications..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="border rounded-md p-2 w-full"
-               />
-            </div>
+
             {renderTable()}
          </div>
       </div>

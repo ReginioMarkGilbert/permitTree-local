@@ -1,6 +1,8 @@
 const PLTPPermit = require('../../models/permits/PLTPPermit');
 const { PLTP_ApplicationNumber } = require('../../utils/customIdGenerator');
 const { Binary } = require('mongodb');
+const Admin = require('../../models/admin');
+const PersonnelNotificationService = require('../../services/personnelNotificationService');
 
 const pltpResolvers = {
    Query: {
@@ -47,6 +49,18 @@ const pltpResolvers = {
 
             const newPermit = new PLTPPermit(permitData);
             const savedPermit = await newPermit.save();
+
+            const technicalStaff = await Admin.findOne({ roles: 'Technical_Staff' });
+            if (technicalStaff) {
+               await PersonnelNotificationService.createApplicationPersonnelNotification({
+                  application: savedPermit,
+                  recipientId: technicalStaff._id,
+                  type: 'PENDING_TECHNICAL_REVIEW',
+                  stage: 'TechnicalStaffReview',
+                  priority: 'high'
+               });
+            }
+
             return {
                ...savedPermit.toObject(),
                id: savedPermit._id.toString()

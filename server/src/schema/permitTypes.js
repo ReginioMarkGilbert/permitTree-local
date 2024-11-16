@@ -321,6 +321,7 @@ const permitTypes = gql`
       approvedByPENRCENROfficer: Boolean,
       reviewedByChief: Boolean,
       awaitingOOP: Boolean,
+      OOPCreated: Boolean,
       awaitingPermitCreation: Boolean,
       PermitCreated: Boolean
     ): [Permit!]!
@@ -370,9 +371,15 @@ const permitTypes = gql`
       awaitingPermitCreation: Boolean
       PermitCreated: Boolean
     ): Permit!
-    acceptApplication(id: ID!): Permit!
-    recordApplication(id: ID!, currentStage: String!, status: String!): Permit!
+    acceptApplication(id: ID!, notes: String): Permit!
+    recordApplication(id: ID!, notes: String): Permit!
+    reviewByChief(id: ID!, notes: String): Permit!
+    approveByPENRCENR(id: ID!, notes: String): Permit!
+
     reviewApplication(id: ID!): Permit!
+    submitPermit(id: ID!): Permit!
+    deletePermit(id: ID!): Boolean!
+    unsubmitPermit(id: ID!): Permit!
   }
 
   input COVPermitInput {

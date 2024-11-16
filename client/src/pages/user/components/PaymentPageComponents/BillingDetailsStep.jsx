@@ -19,7 +19,7 @@ const BillingDetailsStep = ({ formData, setFormData, onNext, onBack }) => {
    };
 
    return (
-      <Card className="w-full max-w-2xl mx-auto">
+      <Card data-testid="billing-details-step" className="w-full max-w-2xl mx-auto">
          <CardHeader>
             <CardTitle className="text-center">Billing Details</CardTitle>
          </CardHeader>
@@ -76,12 +76,19 @@ const BillingDetailsStep = ({ formData, setFormData, onNext, onBack }) => {
                   </div>
                </div>
 
-               <div className="flex justify-between pt-4">
-                  <Button type="button" variant="outline" onClick={onBack}>
+               <div className="flex justify-between gap-4">
+                  <Button
+                     data-testid="back-button"
+                     variant="outline"
+                     onClick={onBack}
+                  >
                      Back
                   </Button>
-                  <Button type="submit" className="bg-green-600 hover:bg-green-700">
-                     Continue
+                  <Button
+                     data-testid="next-button"
+                     onClick={onNext}
+                  >
+                     Next
                   </Button>
                </div>
             </form>

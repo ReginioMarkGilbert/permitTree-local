@@ -40,6 +40,7 @@ const mutationTypes = gql`
     updateOOP(id: ID!, input: OOPInput!): OOP
     updateOOPSignature(id: ID!, signatureType: String!, signatureImage: String!): OOP
     approveOOP(id: ID!, notes: String, status: String!): OOP
+    undoAccountantOOPApproval(id: ID!): OOP
     forwardOOPToAccountant(id: ID!): OOP
     undoApproval(paymentId: ID!): OOP
 

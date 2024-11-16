@@ -3,15 +3,25 @@ const Permit = require('../models/permits/Permit');
 const { UserInputError } = require('apollo-server-express');
 const { generateBillNo } = require('../utils/billNumberGenerator');
 const { generateTrackingNumber } = require('../utils/trackingNumberGenerator');
+const UserNotificationService = require('../services/userNotificationService');
+const PersonnelNotificationService = require('../services/personnelNotificationService');
+const User = require('../models/User');
+const Admin = require('../models/admin');
 
 const oopResolvers = {
    Query: {
       getOOPs: async () => {
          try {
             const oops = await OOP.find().sort({ createdAt: -1 });
+
+            // Add debug log
+            console.log('OOPs from database:', oops);
+
             return oops.map(oop => ({
                ...oop._doc,
-               totalAmount: oop.items.reduce((sum, item) => sum + item.amount, 0)
+               totalAmount: oop.items.reduce((sum, item) => sum + item.amount, 0),
+               // Ensure applicationNumber is included
+               applicationNumber: oop.applicationNumber
             }));
          } catch (error) {
             console.error('Error fetching OOPs:', error);
@@ -62,49 +72,38 @@ const oopResolvers = {
    Mutation: {
       createOOP: async (_, { input }) => {
          try {
-            // First, get the permit to find the applicantId
-            const permit = await Permit.findOne({ applicationNumber: input.applicationId });
+            const permit = await Permit.findById(input.applicationId);
             if (!permit) {
                throw new Error('Permit not found');
             }
 
-            // Generate billNo
-            const billNo = await generateBillNo();
+            // Debug log
+            console.log('Creating OOP with permit:', permit);
 
-            // Calculate total amount
-            const totalAmount = input.items.reduce((sum, item) => sum + item.amount, 0);
-
-            // Generate tracking number
-            const trackingNo = await generateTrackingNumber();
-            console.log('Generated tracking number:', trackingNo); // Debug log
-
+            // Create new OOP with explicit applicationNumber
             const oop = new OOP({
                ...input,
-               userId: permit.applicantId, // Use the applicantId from the permit
-               billNo,
-               totalAmount,
+               userId: permit.applicantId,
+               applicationNumber: permit.applicationNumber, // Ensure this is set
+               billNo: await generateBillNo(),
+               totalAmount: input.items.reduce((sum, item) => sum + parseFloat(item.amount), 0),
+               trackingNo: await generateTrackingNumber(),
                OOPstatus: 'Pending Signature',
-               tracking: {
-                  trackingNo,
-                  receivedDate: new Date(),
-                  receivedTime: new Date().toLocaleTimeString()
-               }
+               receivedDate: new Date(),
+               receivedTime: new Date().toLocaleTimeString()
             });
 
-            console.log('OOP before save:', oop); // Debug log
+            console.log('New OOP before save:', oop); // Debug log
             await oop.save();
-            console.log('OOP after save:', oop); // Debug log
+            console.log('New OOP after save:', oop); // Debug log
 
             // Update permit status
-            await Permit.findOneAndUpdate(
-               { applicationNumber: input.applicationId },
-               {
-                  $set: {
-                     OOPCreated: true,
-                     awaitingOOP: false
-                  }
+            await Permit.findByIdAndUpdate(input.applicationId, {
+               $set: {
+                  OOPCreated: true,
+                  awaitingOOP: false
                }
-            );
+            });
 
             return oop;
          } catch (error) {
@@ -132,10 +131,21 @@ const oopResolvers = {
                { new: true }
             );
 
+            // Check if both signatures are present
+            if (updatedOOP.rpsSignatureImage && updatedOOP.tsdSignatureImage) {
+               // Notify user that signatures are complete
+               await UserNotificationService.createOOPUserNotification({
+                  oop: updatedOOP,
+                  recipientId: updatedOOP.userId,
+                  type: 'OOP_SIGNATURES_COMPLETE',
+                  remarks: 'All required signatures have been completed.'
+               });
+            }
+
             return updatedOOP;
          } catch (error) {
             console.error('Error updating OOP signature:', error);
-            throw new Error(`Failed to update signature: ${error.message}`);
+            throw error;
          }
       },
 
@@ -144,17 +154,44 @@ const oopResolvers = {
             const oop = await OOP.findById(id);
             if (!oop) throw new UserInputError('OOP not found');
 
-            if (!oop.OOPSignedByTwoSignatories) {
-               throw new UserInputError('OOP must be signed by both signatories before approval');
-            }
-
             const updatedOOP = await OOP.findByIdAndUpdate(
                id,
                {
                   $set: {
                      OOPstatus: status,
-                     OOPApproved: status === 'Approved',
+                     OOPApproved: true,
                      notes: notes
+                  }
+               },
+               { new: true }
+            );
+
+            // Notify applicant
+            await UserNotificationService.createOOPUserNotification({
+               oop: updatedOOP,
+               recipientId: updatedOOP.userId,
+               type: 'OOP_READY_FOR_PAYMENT',
+               remarks: 'Your OOP has been approved and is ready for payment, navigate to your application dashboard > Order of Payment > Awaiting Payment to proceed with payment.'
+            });
+
+            return updatedOOP;
+         } catch (error) {
+            console.error('Error approving OOP:', error);
+            throw error;
+         }
+      },
+
+      undoAccountantOOPApproval: async (_, { id }) => {
+         try {
+            const oop = await OOP.findById(id);
+            if (!oop) throw new UserInputError('OOP not found');
+
+            const updatedOOP = await OOP.findByIdAndUpdate(
+               id,
+               {
+                  $set: {
+                     OOPstatus: 'For Approval',
+                     OOPApproved: false
                   }
                },
                { new: true }
@@ -162,8 +199,8 @@ const oopResolvers = {
 
             return updatedOOP;
          } catch (error) {
-            console.error('Error approving OOP:', error);
-            throw new Error(`Failed to approve OOP: ${error.message}`);
+            console.error('Error undoing accountant OOP approval:', error);
+            throw error;
          }
       },
 
@@ -202,6 +239,27 @@ const oopResolvers = {
                },
                { new: true }
             );
+
+            // Notify user
+            await UserNotificationService.createOOPUserNotification({
+               oop: updatedOOP,
+               recipientId: updatedOOP.userId,
+               type: 'OOP_FORWARDED_TO_ACCOUNTANT',
+               remarks: 'Your Order of Payment has been forwarded to the Accountant for approval.'
+            });
+
+            // Notify Accountant
+            const accountant = await Admin.findOne({ roles: 'Accountant' });
+            if (accountant) {
+               await PersonnelNotificationService.createOOPPersonnelNotification({
+                  oop: updatedOOP,
+                  recipientId: accountant._id,
+                  type: 'OOP_PENDING_APPROVAL',
+                  OOPStatus: 'For Approval',
+                  remarks: 'New Order of Payment awaiting your approval.',
+                  priority: 'high'
+               });
+            }
 
             return updatedOOP;
          } catch (error) {
@@ -262,40 +320,34 @@ const oopResolvers = {
       generateOR: async (_, { Id, input }, context) => {
          try {
             const oop = await OOP.findById(Id);
-            if (!oop) {
-               throw new UserInputError('OOP not found');
-            }
+            if (!oop) throw new UserInputError('OOP not found');
 
             if (oop.OOPstatus !== 'Completed OOP') {
                throw new Error('Cannot generate OR: Payment not yet completed');
             }
 
-            // Create receipt data with or without issuedBy
-            const receiptData = {
-               ...input,
-               dateIssued: new Date(),
-            };
-
-            // Only add issuedBy if user context exists
-            if (context && context.user && context.user._id) {
-               receiptData.issuedBy = context.user._id;
-            }
-
-            // Update OOP with official receipt details
             const updatedOOP = await OOP.findByIdAndUpdate(
                Id,
                {
                   $set: {
-                     officialReceipt: receiptData,
+                     officialReceipt: {
+                        ...input,
+                        dateIssued: new Date(),
+                        issuedBy: context.user?._id
+                     },
                      OOPstatus: 'Issued OR'
                   }
                },
                { new: true }
             );
 
-            if (!updatedOOP) {
-               throw new UserInputError('Failed to update OOP');
-            }
+            // Notify applicant
+            await UserNotificationService.createOOPUserNotification({
+               oop: updatedOOP,
+               recipientId: updatedOOP.userId,
+               type: 'OR_ISSUED',
+               remarks: 'Official Receipt has been generated for your payment, '
+            });
 
             return updatedOOP;
          } catch (error) {
@@ -331,19 +383,25 @@ const oopResolvers = {
 
       deleteOOP: async (_, { applicationId }) => {
          try {
-            // First, find and delete the OOP
+            // First, find the permit to get the application number
+            const permit = await Permit.findById(applicationId);
+            if (!permit) {
+               throw new Error('Permit not found');
+            }
+
+            // Find and delete the OOP using applicationId
             const deletedOOP = await OOP.findOneAndDelete({ applicationId });
             if (!deletedOOP) {
                throw new Error('OOP not found');
             }
 
-            // Then, update the permit to reset OOP-related flags
-            await Permit.findOneAndUpdate(
-               { applicationNumber: applicationId },
+            // Update the permit status
+            await Permit.findByIdAndUpdate(
+               applicationId,
                {
                   $set: {
                      OOPCreated: false,
-                     awaitingOOP: true // Reset to awaiting OOP state
+                     awaitingOOP: true
                   }
                }
             );
@@ -408,6 +466,14 @@ const oopResolvers = {
                { new: true }
             );
 
+            // Notify applicant of payment proof status
+            await UserNotificationService.createOOPUserNotification({
+               oop: updatedOOP,
+               recipientId: updatedOOP.userId,
+               type: status === 'APPROVED' ? 'PAYMENT_VERIFIED' : 'PAYMENT_REJECTED',
+               remarks: notes
+            });
+
             return updatedOOP;
          } catch (error) {
             throw new Error(`Failed to review payment proof: ${error.message}`);
@@ -435,6 +501,27 @@ const oopResolvers = {
                },
                { new: true }
             );
+
+            // Notify Bill Collector
+            const billCollector = await Admin.findOne({ roles: 'Bill_Collector' });
+            if (billCollector) {
+               await PersonnelNotificationService.createOOPPersonnelNotification({
+                  oop: updatedOOP,
+                  recipientId: billCollector._id,
+                  type: 'PAYMENT_PROOF_SUBMITTED',
+                  OOPStatus: 'Payment Proof Submitted',
+                  remarks: 'New payment proof requires verification',
+                  priority: 'high'
+               });
+            }
+
+            // Notify user that their payment proof was submitted
+            await UserNotificationService.createOOPUserNotification({
+               oop: updatedOOP,
+               recipientId: updatedOOP.userId,
+               type: 'PAYMENT_PROOF_SUBMITTED',
+               remarks: 'Your payment proof has been submitted and is pending verification'
+            });
 
             return updatedOOP;
          } catch (error) {

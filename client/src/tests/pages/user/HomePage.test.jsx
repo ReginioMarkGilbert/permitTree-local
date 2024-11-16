@@ -5,10 +5,17 @@ import { MockedProvider } from '@apollo/client/testing';
 import { MemoryRouter } from 'react-router-dom';
 import { gql } from '@apollo/client';
 import HomePage from '../../../pages/user/HomePage';
-import { useRecentApplications } from '../../../pages/user/hooks/useRecentApplications';
+import { useRecentApplications } from '../../../pages/user/hooks/useUserRecentApplications';
 
 // Mock the hooks
-vi.mock('../../../pages/user/hooks/useRecentApplications');
+vi.mock('../../../pages/user/hooks/useUserRecentApplications', () => ({
+  useRecentApplications: vi.fn(() => ({
+    recentApplications: [],
+    loading: false,
+    error: null,
+    refetch: vi.fn()
+  }))
+}));
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return {
@@ -71,6 +78,7 @@ describe('HomePage', () => {
       recentApplications: mockRecentApplications,
       loading: false,
       error: null,
+      refetch: vi.fn()
     });
   });
 
@@ -120,6 +128,7 @@ describe('HomePage', () => {
       recentApplications: [],
       loading: true,
       error: null,
+      refetch: vi.fn()
     });
 
     renderWithProviders(<HomePage />);
@@ -132,6 +141,7 @@ describe('HomePage', () => {
       recentApplications: [],
       loading: false,
       error: new Error('Failed to fetch applications'),
+      refetch: vi.fn()
     });
 
     renderWithProviders(<HomePage />);
@@ -146,6 +156,7 @@ describe('HomePage', () => {
       recentApplications: [],
       loading: false,
       error: null,
+      refetch: vi.fn()
     });
 
     renderWithProviders(<HomePage />);

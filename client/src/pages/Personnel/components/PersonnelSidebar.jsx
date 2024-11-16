@@ -2,7 +2,6 @@ import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { FaBell, FaChartLine, FaCog, FaFileInvoiceDollar, FaHome, FaSignOutAlt, FaTachometerAlt } from 'react-icons/fa';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { removeToken } from '../../../utils/tokenManager';
-import { useChiefRPSNotification } from '../contexts/ChiefRPSNotificationContext';
 import { isAuthenticated, getUserRoles } from '../../../utils/auth';
 import { gql, useMutation } from '@apollo/client';
 
@@ -14,7 +13,6 @@ const LOGOUT_MUTATION = gql`
 
 const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
    const navigate = useNavigate();
-   const { unreadCount } = useChiefRPSNotification();
    const [logout] = useMutation(LOGOUT_MUTATION);
    const userRoles = getUserRoles();
    const [showText, setShowText] = useState(false);
@@ -81,37 +79,42 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
       return userRoles.includes('Chief_RPS') || userRoles.includes('Chief_TSD');
    };
 
-   const navItems = [
+   const mainNavItems = useMemo(() => [
       { to: "/personnel/home", icon: <FaHome />, text: "Home" },
       { to: getDashboardLink(), icon: <FaTachometerAlt />, text: "Dashboard" },
       ...(shouldShowOrderOfPayment() ? [{ to: "/personnel/order-of-payment", icon: <FaFileInvoiceDollar />, text: "Order of Payment" }] : []),
-      { to: "/personnel/notifications", icon: <FaBell />, text: "Notifications", badge: unreadCount },
+      { to: "/personnel/notifications", icon: <FaBell />, text: "Notifications" },
       { to: "/personnel/reports", icon: <FaChartLine />, text: "Reports" },
+   ], [getDashboardLink, shouldShowOrderOfPayment]);
+
+   const accountNavItems = useMemo(() => [
       { to: "/personnel/settings", icon: <FaCog />, text: "Settings" },
       { to: "/auth", icon: <FaSignOutAlt />, text: "Logout" }
-   ];
+   ], []);
 
    const renderNavItem = (item, index) => (
       <NavLink
          key={index}
          to={item.to}
          className={({ isActive }) => `
-            flex items-center py-2.5 px-4 rounded-md mt-2
+            flex items-center py-2.5 px-3 rounded-md mt-1.5
             ${isOpen ? '' : 'justify-center'}
-            ${isActive && item.to !== '/auth' ? 'bg-green-700 text-white' : 'hover:bg-gray-700 hover:text-white'}
+            transition-all duration-200 ease-in-out
+            ${isActive && item.to !== '/auth' 
+               ? 'bg-green-700 text-white' 
+               : 'hover:bg-green-700/50 hover:text-white'}
+            group
          `}
          onClick={item.to === '/auth' ? handleLogout : undefined}
       >
          <div className="relative w-6 h-6 flex items-center justify-center">
-            {item.badge > 0 && (
-               <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
-                  {item.badge}
-               </span>
-            )}
-            {item.icon}
+            <span className="transition-transform duration-200 group-hover:scale-105">
+               {item.icon}
+            </span>
          </div>
          {isOpen && (
-            <span className={`ml-3 transition-opacity duration-450 ease-in-out ${showText ? 'opacity-100' : 'opacity-0'}`}>
+            <span className={`ml-3 font-medium text-sm transition-opacity duration-300 
+               ${showText ? 'opacity-100' : 'opacity-0'}`}>
                {item.text}
             </span>
          )}
@@ -124,20 +127,37 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
 
    return (
       <div
-         className={`h-full bg-green-800 text-white flex flex-col justify-between fixed top-0 left-0 ${isOpen ? 'w-48 md:w-64' : 'w-16'
-            } z-10 transition-all duration-300 ease-in-out`}
+         className={`h-full bg-green-800 text-white flex flex-col fixed top-0 left-0 
+            ${isOpen ? 'w-64' : 'w-16'} z-10 transition-all duration-300 ease-in-out
+            border-r border-green-700`}
       >
-         <div className="flex flex-col h-full">
-            {/* Add a spacer div to replace the logo */}
-            <div className="h-20"></div>
-            <nav className="flex-grow">
-               {navItems.slice(0, -1).map(renderNavItem)}
-            </nav>
-            <div className="mb-10">
+         <div className="flex flex-col flex-grow">
+            {/* Logo Section */}
+            <div className={`flex items-center p-4 mb-4 border-b border-green-700 h-16 
+               ${isOpen ? 'justify-start' : 'justify-center'}`}>
+               <div className={`transition-all duration-300 text-2xl font-bold
+                  ${isOpen ? 'w-8 h-8' : 'w-8 h-8'}`}>
+                  P
+               </div>
                {isOpen && (
-                  <div className="line mx-4" style={{ borderBottom: '1px solid #ffffff', marginBottom: '1em' }}></div>
+                  <span className={`ml-3 font-semibold text-lg transition-opacity duration-300 
+                     ${showText ? 'opacity-100' : 'opacity-0'}`}>
+                     Personnel
+                  </span>
                )}
-               {renderNavItem(navItems[navItems.length - 1])}
+            </div>
+
+            {/* Main Navigation */}
+            <nav className="flex-grow px-3">
+               {mainNavItems.map((item, index) => renderNavItem(item, index))}
+            </nav>
+
+            {/* Account Navigation */}
+            <div className="mt-auto">
+               <div className="px-3 mb-8">
+                  <div className="border-t border-green-700 my-2"></div>
+                  {accountNavItems.map((item, index) => renderNavItem(item, index))}
+               </div>
             </div>
          </div>
       </div>

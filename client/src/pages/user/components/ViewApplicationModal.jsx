@@ -11,8 +11,9 @@ const ViewApplicationModal = ({ isOpen, onClose, application }) => {
    if (!application) return null;
 
    const formatDate = (timestamp) => {
-      const date = new Date(parseInt(timestamp));
-      return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      // const date = new Date(timestamp);
+      // return date.toLocaleDateString();
+      return new Date(timestamp).toLocaleDateString();
    };
 
    return (
@@ -34,6 +35,10 @@ const ViewApplicationModal = ({ isOpen, onClose, application }) => {
                <div className="grid grid-cols-4 items-center gap-4">
                   <label className="text-right font-medium">Status:</label>
                   <span className="col-span-3">{application.status}</span>
+               </div>
+               <div className="grid grid-cols-4 items-center gap-4">
+                  <label className="text-right font-medium">Current Stage:</label>
+                  <span className="col-span-3">{application.currentStage}</span>
                </div>
                <div className="grid grid-cols-4 items-center gap-4">
                   <label className="text-right font-medium">Submission Date:</label>

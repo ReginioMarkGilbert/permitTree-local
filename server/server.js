@@ -7,6 +7,7 @@ const cors = require('cors');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const User = require('./src/models/User');
+const Admin = require('./src/models/admin');
 
 const { permitTypes } = require('./src/schema/permitTypes');
 const typeDefs = require('./src/schema');
@@ -26,12 +27,19 @@ const startServer = async () => {
          if (token) {
             try {
                const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
-               const user = await User.findById(decoded.id);
-               return { user };
+               let user = await User.findById(decoded.id);
+               if (!user) {
+                  user = await Admin.findById(decoded.id);
+               }
+               if (user) {
+                  console.log('User found in context:', user.id, user.roles);
+                  return { user };
+               }
             } catch (error) {
                console.error('Error verifying token:', error);
             }
          }
+         console.log('No user in context');
          return {};
       },
    });
@@ -49,12 +57,19 @@ const startServer = async () => {
          if (token) {
             try {
                const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
-               const user = await User.findById(decoded.id);
-               return { user };
+               let user = await User.findById(decoded.id);
+               if (!user) {
+                  user = await Admin.findById(decoded.id);
+               }
+               if (user) {
+                  console.log('User found in context:', user.id, user.roles);
+                  return { user };
+               }
             } catch (error) {
                console.error('Error verifying token:', error);
             }
          }
+         console.log('No user in context - server');
          return {};
       },
    }));

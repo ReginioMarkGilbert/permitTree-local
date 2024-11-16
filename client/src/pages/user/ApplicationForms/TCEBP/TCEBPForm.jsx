@@ -1,5 +1,5 @@
 // TCEBP - Tree Cutting and/or Earth Balling Permit for National Government Agencies
-// 
+//
 // ISSUANCE OF TREE CUTTING AND/OR EARTH BALLING PERMIT FOR TREES AFFECTED BY PROJECTS OF NATIONAL GOVERNMENT AGENCIES (DPWH, DOTR, DepEd, DA, DOH, CHED, DOE, and NIA)
 // This Permit serves as proof of authorization for the removal/cutting and/or relocation of trees affected by projects of the National Government Agencies (DPWH, DOTR, DepEd, DA, DOH, CHED, DOE and NIA)
 
@@ -283,14 +283,19 @@ const TCEBPForm = () => {
                               name="requestType"
                               value={formData.requestType}
                               onValueChange={(value) => handleInputChange({ target: { name: 'requestType', value } })}
+                              className="space-y-4"
                            >
-                              <div className="flex items-center space-x-2">
+                              <div className="flex items-center space-x-2 p-4 rounded-lg border border-gray-200 bg-white">
                                  <RadioGroupItem value="Cutting" id="Cutting" />
-                                 <Label htmlFor="Cutting">Request for Cutting/Earth balling (NGA's)</Label>
+                                 <Label htmlFor="Cutting" className="flex-grow">
+                                    Request for Cutting/Earth balling (NGA's)
+                                 </Label>
                               </div>
-                              <div className="flex items-center space-x-2">
+                              <div className="flex items-center space-x-2 p-4 rounded-lg border border-gray-200 bg-white">
                                  <RadioGroupItem value="Inventory" id="Inventory" />
-                                 <Label htmlFor="Inventory">Request for Inventory for Cutting/Earth Balling (NGA'S)</Label>
+                                 <Label htmlFor="Inventory" className="flex-grow">
+                                    Request for Inventory for Cutting/Earth Balling (NGA'S)
+                                 </Label>
                               </div>
                            </RadioGroup>
                         </div>

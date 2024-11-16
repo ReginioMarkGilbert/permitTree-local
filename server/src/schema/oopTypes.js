@@ -5,7 +5,8 @@ const oopTypes = gql`
     _id: ID!
     userId: ID!
     billNo: String!
-    applicationId: String!
+    applicationId: ID!
+    applicationNumber: String!
     date: String!
     namePayee: String!
     address: String!
@@ -53,20 +54,21 @@ const oopTypes = gql`
     transactionId: String!
     paymentMethod: String!
     amount: Float!
-    timestamp: String!
+    timestamp: String
     referenceNumber: String!
-    payerDetails: PayerDetails!
-    status: String!
+    payerDetails: PayerDetails
+    status: String
   }
 
   type PayerDetails {
-    name: String!
-    email: String!
-    phoneNumber: String!
+    name: String
+    email: String
+    phoneNumber: String
   }
 
   input OOPInput {
-    applicationId: String!
+    applicationId: ID!
+    applicationNumber: String!
     namePayee: String!
     address: String!
     natureOfApplication: String!
@@ -122,6 +124,7 @@ const oopTypes = gql`
     createOOP(input: OOPInput!): OOP!
     updateOOPSignature(id: ID!, signatureType: String!, signatureImage: String!): OOP!
     approveOOP(id: ID!, notes: String, status: String!): OOP!
+    undoAccountantOOPApproval(id: ID!): OOP!
     forwardOOPToAccountant(id: ID!): OOP!
     undoApproval(paymentId: ID!): OOP!
     generateOR(Id: ID!, input: GenerateORInput!): OOP!

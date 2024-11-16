@@ -6,7 +6,7 @@ const certificateTypes = gql`
     certificateNumber: String!
     applicationId: ID!
     applicationType: String!
-    status: String!
+    certificateStatus: String!
     dateCreated: String!
     dateIssued: String
     expiryDate: String
@@ -46,7 +46,9 @@ const certificateTypes = gql`
   }
 
   type UploadedCertificate {
-    fileUrl: String
+    fileData: String
+    filename: String
+    contentType: String
     uploadDate: String
     metadata: CertificateMetadata
   }
@@ -87,7 +89,13 @@ const certificateTypes = gql`
   input UploadCertificateInput {
     applicationId: ID!
     applicationType: String!
-    fileUrl: String!
+    uploadedCertificate: UploadedCertificateInput!
+  }
+
+  input UploadedCertificateInput {
+    fileData: String!
+    filename: String!
+    contentType: String!
     metadata: CertificateMetadataInput!
   }
 

@@ -26,22 +26,7 @@ const TCEBPPermitSchema = new mongoose.Schema({
       pambClearance: [FileSchema]
    },
    dateOfSubmission: { type: Date, default: Date.now },
-   // status: { type: String, required: true, enum: ['Draft', 'Submitted', 'Returned', 'Accepted', 'Rejected', 'In Progress', 'Approved', 'Completed'] },
    applicantId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-   currentStage: {
-      type: String,
-      required: true,
-      enum: [
-         'Submitted',
-         'TechnicalStaffReview',
-         'ReturnedByTechnicalStaff',
-         'ForRecordByReceivingClerk',
-         'ChiefRPSReview',
-         'ForInspectionByTechnicalStaff',
-         'ApprovedByTechnicalStaff'
-      ],
-      default: 'Submitted'
-   }
 });
 
 const TCEBPPermit = Permit.discriminator('TCEBPPermit', TCEBPPermitSchema);

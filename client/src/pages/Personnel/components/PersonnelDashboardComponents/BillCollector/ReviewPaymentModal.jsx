@@ -92,13 +92,16 @@ const ReviewPaymentModal = ({ oop, isOpen, onClose, onReviewComplete }) => {
             <div className="space-y-6">
                {/* Application Details */}
                <div>
-                  <Label>Application Details</Label>
-                  <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
-                     <div>
-                        <span className="font-medium">Application No:</span> {oop.applicationId}
-                     </div>
+                  <Label className="text-md font-semibold">Application Details</Label>
+                  <div className="mt-2 space-y-2 text-sm">
                      <div>
                         <span className="font-medium">Bill No:</span> {oop.billNo}
+                     </div>
+                     <div>
+                        <span className="font-medium">Application No:</span> {oop.applicationNumber}
+                     </div>
+                     <div>
+                        <span className="font-medium">Application ID:</span> {oop.applicationId}
                      </div>
                      <div>
                         <span className="font-medium">Amount:</span> ₱{oop.totalAmount?.toFixed(2)}

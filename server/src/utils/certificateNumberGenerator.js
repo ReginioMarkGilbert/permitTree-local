@@ -6,9 +6,23 @@ const generateCertificateNumber = async (applicationType) => {
 
    switch (applicationType) {
       case 'Chainsaw Registration':
-         prefix = 'MR-MRQ';
+         prefix = 'CSAW';
          break;
-      // Add other application types here
+      case 'Certificate of Verification':
+         prefix = 'COV';
+         break;
+      case 'Private Tree Plantation Registration':
+         prefix = 'PTPR';
+         break;
+      case 'Public Land Tree Cutting Permit':
+         prefix = 'PLTCP';
+         break;
+      case 'Private Land Timber Permit':
+         prefix = 'PLTP';
+         break;
+      case 'Tree Cutting and/or Earth Balling Permit':
+         prefix = 'TCEBP';
+         break;
       default:
          prefix = 'CERT';
    }

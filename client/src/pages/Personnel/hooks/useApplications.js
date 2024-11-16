@@ -16,6 +16,7 @@ const GET_APPLICATIONS = gql`
     $reviewedByChief: Boolean
 
     $awaitingOOP: Boolean
+    $OOPCreated: Boolean
     $awaitingPermitCreation: Boolean
     $PermitCreated: Boolean
   ) {
@@ -36,6 +37,7 @@ const GET_APPLICATIONS = gql`
       awaitingOOP: $awaitingOOP
       awaitingPermitCreation: $awaitingPermitCreation
       PermitCreated: $PermitCreated
+      OOPCreated: $OOPCreated
     ) {
       ... on CSAWPermit {
         id

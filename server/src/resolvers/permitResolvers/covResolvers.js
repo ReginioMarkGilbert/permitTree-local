@@ -1,6 +1,8 @@
 const COVPermit = require('../../models/permits/COVPermit');
 const { COV_ApplicationNumber } = require('../../utils/customIdGenerator');
 const { Binary } = require('mongodb');
+const PersonnelNotificationService = require('../../services/personnelNotificationService');
+const Admin = require('../../models/admin');
 
 const covResolvers = {
    Query: {
@@ -38,7 +40,7 @@ const covResolvers = {
       },
    },
    Mutation: {
-      createCOVPermit: async (_, { input }, { user }) => {
+      createCOVPermit: async (_, { input }, { user, notes }) => {
          if (!user) {
             throw new Error('You must be logged in to create a permit');
          }
@@ -74,6 +76,19 @@ const covResolvers = {
             const newPermit = new COVPermit(permitData);
             const savedPermit = await newPermit.save();
             const plainPermit = savedPermit.toObject();
+
+            const technicalStaff = await Admin.findOne({ roles: 'Technical_Staff' });
+            if (technicalStaff) {
+               await PersonnelNotificationService.createApplicationPersonnelNotification({
+                  application: plainPermit,
+                  recipientId: technicalStaff._id,
+                  type: 'PENDING_TECHNICAL_REVIEW',
+                  stage: 'TechnicalStaffReview',
+                  // remarks: notes,
+                  priority: 'high'
+               });
+            }
+
             return {
                ...plainPermit,
                id: plainPermit._id.toString()

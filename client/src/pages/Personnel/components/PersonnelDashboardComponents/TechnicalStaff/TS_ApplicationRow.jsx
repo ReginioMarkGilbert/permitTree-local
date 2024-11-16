@@ -12,7 +12,7 @@ import {
 import TS_ViewModal from './TS_ViewModal';
 import TS_ReviewModal from './TS_ReviewModal';
 import TS_AuthenticityReviewModal from './TS_AuthenticityReviewModal';
-import GenerateCertificateModal from './GenerateCertificateModal';
+// import GenerateCertificateModal from './GenerateCertificateModal';
 import CertificateActionHandler from './CertificateActionHandler';
 import { getUserRoles } from '../../../../../utils/auth';
 import { useUndoApplicationApproval } from '../../../hooks/useApplications';
@@ -67,7 +67,8 @@ const UPDATE_PERMIT_STAGE = gql`
     $notes: String,
     $approvedByTechnicalStaff: Boolean,
     $awaitingPermitCreation: Boolean,
-    $acceptedByTechnicalStaff: Boolean
+    $acceptedByTechnicalStaff: Boolean,
+    $PermitCreated: Boolean
   ) {
     updatePermitStage(
       id: $id,
@@ -76,7 +77,8 @@ const UPDATE_PERMIT_STAGE = gql`
       notes: $notes,
       approvedByTechnicalStaff: $approvedByTechnicalStaff,
       awaitingPermitCreation: $awaitingPermitCreation,
-      acceptedByTechnicalStaff: $acceptedByTechnicalStaff
+      acceptedByTechnicalStaff: $acceptedByTechnicalStaff,
+      PermitCreated: $PermitCreated
     ) {
       id
       currentStage
@@ -84,6 +86,7 @@ const UPDATE_PERMIT_STAGE = gql`
       acceptedByTechnicalStaff
       awaitingPermitCreation
       approvedByTechnicalStaff
+      PermitCreated
     }
   }
 `;
@@ -127,6 +130,15 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
                status: 'Submitted',
                notes: 'Acceptance undone by Technical Staff',
                acceptedByTechnicalStaff: false
+            };
+         } else if (currentTab === 'Created Permits') {
+            variables = {
+               id: app.id,
+               currentStage: 'AuthenticityApprovedByTechnicalStaff',
+               status: 'In Progress',
+               notes: 'Permit creation undone by Technical Staff',
+               PermitCreated: false,
+               awaitingPermitCreation: true
             };
          }
 
@@ -177,22 +189,22 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
       );
 
       // Print action
-      if (userRoles.includes('Technical_Staff') && !userRoles.includes('Receiving_Clerk')) {
-         actions.push(
-            <TooltipProvider key="print-action">
-               <Tooltip delayDuration={200}>
-                  <TooltipTrigger asChild>
-                     <Button onClick={() => onPrint(app.id)} variant="outline" size="icon" className="h-8 w-8">
-                        <Printer className="h-4 w-4" />
-                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                     <p>Print Application</p>
-                  </TooltipContent>
-               </Tooltip>
-            </TooltipProvider>
-         );
-      }
+      // if (userRoles.includes('Technical_Staff') && !userRoles.includes('Receiving_Clerk')) {
+      //    actions.push(
+      //       <TooltipProvider key="print-action">
+      //          <Tooltip delayDuration={200}>
+      //             <TooltipTrigger asChild>
+      //                <Button onClick={() => onPrint(app.id)} variant="outline" size="icon" className="h-8 w-8">
+      //                   <Printer className="h-4 w-4" />
+      //                </Button>
+      //             </TooltipTrigger>
+      //             <TooltipContent>
+      //                <p>Print Application</p>
+      //             </TooltipContent>
+      //          </Tooltip>
+      //       </TooltipProvider>
+      //    );
+      // }
 
       // Review action
       if (app.status === 'Submitted' && userRoles.includes('Technical_Staff') && !userRoles.includes('Receiving_Clerk')) {
@@ -236,7 +248,7 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
       }
 
       // Undo button
-      if (currentTab === 'Approved Applications' || currentTab === 'Accepted Applications') {
+      if (currentTab === 'Approved Applications' || currentTab === 'Accepted Applications' || currentTab === 'Created Permits') {
          actions.push(
             <TooltipProvider key="undo-action">
                <Tooltip>
@@ -251,7 +263,7 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
                      </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                     <p>Undo {currentTab === 'Accepted Applications' ? 'Acceptance' : 'Approval'}</p>
+                     <p>Undo {currentTab === 'Accepted Applications' ? 'Acceptance' : currentTab === 'Created Permits' ? 'Permit Creation' : 'Approval'}</p>
                   </TooltipContent>
                </Tooltip>
             </TooltipProvider>

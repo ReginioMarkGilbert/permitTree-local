@@ -43,6 +43,7 @@ const userTypes = gql`
   input UpdateUserProfileInput {
     firstName: String
     lastName: String
+    username: String
     email: String
     phone: String
     company: String

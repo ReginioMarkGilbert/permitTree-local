@@ -269,8 +269,9 @@ const GenerateCSAWCertificateModal = ({ isOpen, onClose, application, onComplete
                   <Label>Application Details</Label>
                   <div className="text-sm">
                      <p><span className="font-medium">Application No:</span> {application.applicationNumber}</p>
-                     <p><span className="font-medium">Owner:</span> {application.ownerName}</p>
-                     <p><span className="font-medium">Chainsaw:</span> {application.chainsbrand} {application.model}</p>
+                     <p><span className="font-medium">Application Type:</span> {application.applicationType}</p>
+                     {/* <p><span className="font-medium">Owner:</span> {application.ownerName}</p>
+                     <p><span className="font-medium">Chainsaw:</span> {application.chainsbrand} {application.model}</p> */}
                   </div>
                </div>
             </div>

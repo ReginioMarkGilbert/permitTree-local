@@ -1,99 +1,129 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { toast } from 'react-toastify';
-import { Bell, X, AlertCircle, CheckCircle, Clock, FileText, RotateCcw, Mail } from 'lucide-react';
-import '../../components/ui/styles/customScrollBar.css';
-import { useNotification } from './contexts/UserNotificationContext';
-import { isAuthenticated } from '../../utils/auth';
-import './styles/UserNotification.css';
-import useDebounce from '../../hooks/useDebounce';
+import React from 'react';
+import NotificationList from '../../components/notifications/NotificationList';
+import { useUserNotifications } from './hooks/useUserNotifications';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
+import { Bell, BellRing } from 'lucide-react';
 
-function UserNotificationsPage() {
-   const { fetchUnreadCount, unreadCount } = useNotification();
-   const [notifications, setNotifications] = useState([]);
-   const [loading, setLoading] = useState(false);
-   const [selectedNotification, setSelectedNotification] = useState(null);
-   const [deletedNotification, setDeletedNotification] = useState(null);
-   const [showUndo, setShowUndo] = useState(false);
-   const [searchTerm, setSearchTerm] = useState('');
-   const debouncedSearchTerm = useDebounce(searchTerm, 300);
+const UserNotificationsPage = () => {
+   const {
+      notifications,
+      unreadNotifications,
+      loading,
+      markAsRead,
+      markAllAsRead
+   } = useUserNotifications();
 
-   const fetchNotifications = useCallback(async () => {
-      // Temporarily disabled
-      setNotifications([]);
-      setLoading(false);
-   }, [debouncedSearchTerm]);
+   const applicationNotifications = notifications?.filter(n =>
+      n.type.startsWith('APPLICATION_') || n.type.startsWith('PERMIT_')
+   );
 
-   useEffect(() => {
-      fetchNotifications();
-   }, [fetchNotifications]);
-
-   useEffect(() => {
-      let timer;
-      if (showUndo) {
-         timer = setTimeout(() => {
-            setShowUndo(false);
-            setDeletedNotification(null);
-         }, 5000);
-      }
-      return () => clearTimeout(timer);
-   }, [showUndo]);
-
-   const handleNotificationClick = useCallback(async (notification) => {
-      setSelectedNotification(notification);
-   }, []);
-
-   const handleDelete = useCallback(async (id) => {
-      // Temporarily disabled
-   }, []);
-
-   const handleUndo = useCallback(() => {
-      if (deletedNotification) {
-         setNotifications(prev => [...prev, deletedNotification]);
-         setShowUndo(false);
-         setDeletedNotification(null);
-      }
-   }, [deletedNotification]);
-
-   const handleMarkUnread = useCallback(async (id) => {
-      // Temporarily disabled
-   }, []);
-
-   const handleMarkAllAsRead = useCallback(async () => {
-      // Temporarily disabled
-   }, []);
-
-   const formatNotificationType = useMemo(() => (type) => {
-      return type.split('_')
-         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-         .join(' ');
-   }, []);
-
-   const getIcon = useMemo(() => (type) => {
-      const formattedType = formatNotificationType(type).toLowerCase();
-      switch (formattedType) {
-         case 'application returned': return <AlertCircle className="w-5 h-5 text-yellow-500" />;
-         case 'application accepted': return <CheckCircle className="w-5 h-5 text-green-500" />;
-         case 'application submitted': return <FileText className="w-5 h-5 text-blue-500" />;
-         default: return <Bell className="w-5 h-5 text-gray-500" />;
-      }
-   }, [formatNotificationType]);
+   const paymentNotifications = notifications?.filter(n =>
+      n.type.startsWith('OOP_') || n.type.startsWith('PAYMENT_') || n.type.startsWith('OR_')
+   );
 
    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 p-24">
-         <div className="max-w-3xl mx-auto">
-            <header className="flex items-center justify-between mb-8">
-               <h1 className="text-2xl font-bold text-green-800">Notifications</h1>
-               <div className="flex items-center space-x-4">
-                  <Bell className="w-6 h-6 text-green-600" />
-               </div>
-            </header>
-
-            <div className="bg-white rounded-lg shadow-md p-6">
-               <p>Notifications are currently unavailable.</p>
+      <div className="container mx-auto p-6 max-w-5xl pt-24">
+         <div className="flex justify-between items-center mb-8">
+            <div className="flex items-center gap-3">
+               <BellRing className="h-8 w-8 text-primary" />
+               <h1 className="text-3xl font-bold">My Notifications</h1>
+               {unreadNotifications?.length > 0 && (
+                  <Badge variant="destructive" className="ml-2">
+                     {unreadNotifications.length} new
+                  </Badge>
+               )}
             </div>
+            {unreadNotifications?.length > 0 && (
+               <button
+                  onClick={markAllAsRead}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+               >
+                  Mark all as read
+               </button>
+            )}
          </div>
+
+         <Card className="border-none shadow-lg min-h-[800px]">
+            <Tabs defaultValue="all" className="w-full">
+               <TabsList className="grid w-full grid-cols-4 mb-4">
+                  <TabsTrigger value="all">
+                     <span className="flex items-center gap-2">
+                        <Bell className="h-4 w-4" />
+                        All
+                        {notifications?.length > 0 && (
+                           <Badge variant="secondary">
+                              {notifications.length}
+                           </Badge>
+                        )}
+                     </span>
+                  </TabsTrigger>
+                  <TabsTrigger value="unread">
+                     <span className="flex items-center gap-2">
+                        <BellRing className="h-4 w-4" />
+                        Unread
+                        {unreadNotifications?.length > 0 && (
+                           <Badge variant="secondary">
+                              {unreadNotifications.length}
+                           </Badge>
+                        )}
+                     </span>
+                  </TabsTrigger>
+                  <TabsTrigger value="applications">
+                     Applications
+                     {applicationNotifications?.length > 0 && (
+                        <Badge variant="secondary" className="ml-2">
+                           {applicationNotifications.length}
+                        </Badge>
+                     )}
+                  </TabsTrigger>
+                  <TabsTrigger value="payments">
+                     Payments
+                     {paymentNotifications?.length > 0 && (
+                        <Badge variant="secondary" className="ml-2">
+                           {paymentNotifications.length}
+                        </Badge>
+                     )}
+                  </TabsTrigger>
+               </TabsList>
+
+               <TabsContent value="all">
+                  <NotificationList
+                     notifications={notifications}
+                     loading={loading}
+                     onMarkAsRead={markAsRead}
+                  />
+               </TabsContent>
+
+               <TabsContent value="unread">
+                  <NotificationList
+                     notifications={unreadNotifications}
+                     loading={loading}
+                     onMarkAsRead={markAsRead}
+                     unreadOnly
+                  />
+               </TabsContent>
+
+               <TabsContent value="applications">
+                  <NotificationList
+                     notifications={applicationNotifications}
+                     loading={loading}
+                     onMarkAsRead={markAsRead}
+                  />
+               </TabsContent>
+
+               <TabsContent value="payments">
+                  <NotificationList
+                     notifications={paymentNotifications}
+                     loading={loading}
+                     onMarkAsRead={markAsRead}
+                  />
+               </TabsContent>
+            </Tabs>
+         </Card>
       </div>
    );
-}
+};
 
-export default React.memo(UserNotificationsPage);
+export default UserNotificationsPage;

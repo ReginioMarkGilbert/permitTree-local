@@ -1,14 +1,17 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { MockedProvider } from '@apollo/client/testing';
 import { vi } from 'vitest';
 import RRC_ApplicationRow from '../../../../../pages/Personnel/components/PersonnelDashboardComponents/ReceivingReleasingClerk/RRC_ApplicationRow';
+import { gql } from '@apollo/client';
 
 // Mock the child components
 vi.mock('../../../../../pages/Personnel/components/PersonnelDashboardComponents/TechnicalStaff/TS_ViewModal', () => ({
   default: ({ isOpen, onClose }) => isOpen ? (
     <tr>
-      <td colSpan="6">
-        <div>Mock View Modal<button onClick={onClose}>Close</button></div>
+      <td colSpan={5} data-testid="mock-view-modal">
+        Mock View Modal
+        <button onClick={onClose}>Close</button>
       </td>
     </tr>
   ) : null
@@ -17,12 +20,40 @@ vi.mock('../../../../../pages/Personnel/components/PersonnelDashboardComponents/
 vi.mock('../../../../../pages/Personnel/components/PersonnelDashboardComponents/ReceivingReleasingClerk/RRC_RecordModal', () => ({
   default: ({ isOpen, onClose }) => isOpen ? (
     <tr>
-      <td colSpan="6">
-        <div>Mock Record Modal<button onClick={onClose}>Close</button></div>
+      <td colSpan={5} data-testid="mock-record-modal">
+        Mock Record Modal
+        <button onClick={onClose}>Close</button>
       </td>
     </tr>
   ) : null
 }));
+
+const UPDATE_PERMIT_STAGE = gql`
+  mutation UpdatePermitStage(
+    $id: ID!,
+    $currentStage: String!,
+    $status: String!,
+    $notes: String,
+    $recordedByReceivingClerk: Boolean
+  ) {
+    updatePermitStage(
+      id: $id,
+      currentStage: $currentStage,
+      status: $status,
+      notes: $notes,
+      recordedByReceivingClerk: $recordedByReceivingClerk
+    ) {
+      id
+      currentStage
+      status
+      recordedByReceivingClerk
+      history {
+        notes
+        timestamp
+      }
+    }
+  }
+`;
 
 describe('RRC_ApplicationRow', () => {
   const mockApp = {
@@ -38,15 +69,44 @@ describe('RRC_ApplicationRow', () => {
   const mockOnRecordComplete = vi.fn();
   const mockGetStatusColor = vi.fn().mockReturnValue('bg-yellow-100 text-yellow-800');
 
-  const renderRow = (app = mockApp) => {
+  const mocks = [
+    {
+      request: {
+        query: UPDATE_PERMIT_STAGE,
+        variables: {
+          id: '1',
+          currentStage: 'ForRecordByReceivingClerk',
+          status: 'In Progress',
+          notes: 'Record undone by Receiving Clerk',
+          recordedByReceivingClerk: false
+        }
+      },
+      result: {
+        data: {
+          updatePermitStage: {
+            id: '1',
+            currentStage: 'ForRecordByReceivingClerk',
+            status: 'In Progress',
+            recordedByReceivingClerk: false,
+            history: []
+          }
+        }
+      }
+    }
+  ];
+
+  const renderRow = (app = mockApp, currentTab = '') => {
     return render(
       <table>
         <tbody>
-          <RRC_ApplicationRow
-            app={app}
-            onRecordComplete={mockOnRecordComplete}
-            getStatusColor={mockGetStatusColor}
-          />
+          <MockedProvider mocks={mocks} addTypename={false}>
+            <RRC_ApplicationRow
+              app={app}
+              onRecordComplete={mockOnRecordComplete}
+              getStatusColor={mockGetStatusColor}
+              currentTab={currentTab}
+            />
+          </MockedProvider>
         </tbody>
       </table>
     );
@@ -66,7 +126,7 @@ describe('RRC_ApplicationRow', () => {
   it('shows view modal when clicking view button', () => {
     renderRow();
     fireEvent.click(screen.getByTestId('view-button'));
-    expect(screen.getByText('Mock View Modal')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-view-modal')).toBeInTheDocument();
   });
 
   it('shows record button for unrecorded applications in correct stage', () => {
@@ -89,6 +149,6 @@ describe('RRC_ApplicationRow', () => {
   it('shows record modal when clicking record button', () => {
     renderRow();
     fireEvent.click(screen.getByTestId('record-button'));
-    expect(screen.getByText('Mock Record Modal')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-record-modal')).toBeInTheDocument();
   });
 });

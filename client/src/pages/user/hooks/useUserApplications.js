@@ -407,6 +407,7 @@ const UNSUBMIT_PERMIT = gql`
     unsubmitPermit(id: $id) {
       id
       status
+      currentStage
     }
   }
 `;
@@ -416,6 +417,7 @@ const SUBMIT_PERMIT = gql`
     submitPermit(id: $id) {
       id
       status
+      currentStage
     }
   }
 `;

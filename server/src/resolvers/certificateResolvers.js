@@ -2,6 +2,7 @@ const Certificate = require('../models/Certificate');
 const Permit = require('../models/permits/Permit');
 const { UserInputError } = require('apollo-server-express');
 const { generateCertificateNumber } = require('../utils/certificateNumberGenerator');
+const { Binary } = require('mongodb');
 
 const certificateResolvers = {
    Query: {
@@ -46,7 +47,7 @@ const certificateResolvers = {
                certificateNumber,
                applicationId: input.applicationId,
                applicationType: input.applicationType,
-               status: 'Pending Signature',
+               certificateStatus: 'Pending Signature',
                dateCreated: new Date().toISOString(),
                certificateData: input.certificateData
             };
@@ -54,11 +55,14 @@ const certificateResolvers = {
             const certificate = new Certificate(certificateData);
             const savedCertificate = await certificate.save();
 
-            // Update permit status
+            // Update permit status with correct flags
             await Permit.findByIdAndUpdate(input.applicationId, {
                $set: {
                   certificateGenerated: true,
-                  certificateId: savedCertificate._id
+                  certificateId: savedCertificate._id,
+                  PermitCreated: true,
+                  awaitingPermitCreation: false
+                  // currentStage: 'AuthenticityApprovedByTechnicalStaff'
                }
             });
 
@@ -73,40 +77,50 @@ const certificateResolvers = {
          try {
             const certificateNumber = await generateCertificateNumber(input.applicationType);
 
+            // Convert base64 to Buffer
+            const fileBuffer = Buffer.from(input.uploadedCertificate.fileData, 'base64');
+
             const certificate = new Certificate({
                certificateNumber,
                applicationId: input.applicationId,
                applicationType: input.applicationType,
-               status: 'Pending Signature',
-               createdBy: input.createdBy,
+               certificateStatus: 'Pending Signature',
                uploadedCertificate: {
-                  fileUrl: input.fileUrl,
-                  uploadDate: new Date(),
+                  fileData: fileBuffer,
+                  filename: input.uploadedCertificate.filename,
+                  contentType: input.uploadedCertificate.contentType,
                   metadata: {
-                     ...input.metadata,
-                     issueDate: new Date(input.metadata.issueDate),
-                     expiryDate: new Date(input.metadata.expiryDate)
+                     ...input.uploadedCertificate.metadata,
+                     issueDate: new Date(input.uploadedCertificate.metadata.issueDate),
+                     expiryDate: new Date(input.uploadedCertificate.metadata.expiryDate)
                   }
-               },
-               history: [{
-                  action: 'UPLOADED',
-                  timestamp: new Date(),
-                  userId: input.createdBy,
-                  notes: 'Certificate uploaded by technical staff'
-               }]
+               }
             });
 
             const savedCertificate = await certificate.save();
 
-            // Update permit status
+            // Update permit status with correct flags
             await Permit.findByIdAndUpdate(input.applicationId, {
                $set: {
+                  certificateGenerated: true,
+                  certificateId: savedCertificate._id,
                   PermitCreated: true,
-                  awaitingPermitCreation: false
+                  awaitingPermitCreation: false,
+                  currentStage: 'AuthenticityApprovedByTechnicalStaff'
                }
             });
 
-            return savedCertificate;
+            // Convert Buffer back to base64 for response
+            const responseData = {
+               ...savedCertificate.toObject(),
+               id: savedCertificate._id.toString(),
+               uploadedCertificate: {
+                  ...savedCertificate.uploadedCertificate,
+                  fileData: savedCertificate.uploadedCertificate.fileData.toString('base64')
+               }
+            };
+
+            return responseData;
          } catch (error) {
             console.error('Error uploading certificate:', error);
             throw new Error(`Failed to upload certificate: ${error.message}`);
@@ -133,21 +147,14 @@ const certificateResolvers = {
          }
       },
 
-      signCertificate: async (_, { id, signature }) => {
+      signCertificate: async (_, { id }) => {
          try {
             const certificate = await Certificate.findById(id);
             if (!certificate) {
                throw new UserInputError('Certificate not found');
             }
 
-            certificate.signedBy = {
-               PENRO: {
-                  userId: input.createdBy,
-                  signature,
-                  dateSigned: new Date()
-               }
-            };
-            certificate.status = 'Signed';
+            certificate.certificateStatus = 'Signed';
             certificate.dateIssued = new Date();
             certificate.expiryDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year from now
 

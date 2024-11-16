@@ -390,17 +390,23 @@ const ChainsawRegistrationForm = () => {
                   <form onSubmit={handleSubmit}>
                      {currentStep === 0 && (
                         <div className="space-y-6 pb-4">
+                           <Label>Registration Type</Label>
                            <RadioGroup
                               onValueChange={(value) => handleSelectChange('registrationType', value)}
                               value={formData.registrationType}
+                              className="space-y-4"
                            >
-                              <div className="flex items-center space-x-2 pt-8">
-                                 <RadioGroupItem value="New" id="new" className="w-12 h-12" />
-                                 <Label htmlFor="new" className="text-lg font-semibold">New Registration</Label>
+                              <div className="flex items-center space-x-2 p-4 rounded-lg border border-gray-200 bg-white hover:bg-gray-50">
+                                 <RadioGroupItem value="New" id="new" />
+                                 <Label htmlFor="new" className="text-lg font-semibold">
+                                    New Registration
+                                 </Label>
                               </div>
-                              <div className="flex items-center space-x-2 pt-1">
-                                 <RadioGroupItem value="Renewal" id="renewal" className="w-12 h-12" />
-                                 <Label htmlFor="renewal" className="text-lg font-semibold">Renewal</Label>
+                              <div className="flex items-center space-x-2 p-4 rounded-lg border border-gray-200 bg-white hover:bg-gray-50">
+                                 <RadioGroupItem value="Renewal" id="renewal" />
+                                 <Label htmlFor="renewal" className="text-lg font-semibold">
+                                    Renewal
+                                 </Label>
                               </div>
                            </RadioGroup>
                         </div>

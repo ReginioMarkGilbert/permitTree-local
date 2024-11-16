@@ -7,6 +7,9 @@ const certificateTypes = require('./certificateTypes');
 const queryTypes = require('./queryTypes');
 const paymentTypes = require('./paymentTypes');
 const mutationTypes = require('./mutationTypes');
+const { notificationTypes } = require('./userNotificationTypes');
+const { personnelNotificationTypes } = require('./personnelNotificationTypes');
+const analyticsTypes = require('./analyticsTypes');
 
 const rootTypeDefs = gql`
   scalar Upload
@@ -34,5 +37,8 @@ module.exports = [
   certificateTypes,
   queryTypes,
   mutationTypes,
-  paymentTypes
+  paymentTypes,
+  notificationTypes,
+  personnelNotificationTypes,
+  analyticsTypes
 ];

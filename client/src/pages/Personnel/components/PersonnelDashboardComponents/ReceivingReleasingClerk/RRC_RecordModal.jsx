@@ -4,9 +4,21 @@ import { Button } from '@/components/ui/button';
 import { useMutation, gql } from '@apollo/client';
 import { toast } from 'sonner';
 
-const RECORD_APPLICATION = gql`
-  mutation RecordApplication($id: ID!, $currentStage: String!, $status: String!) {
-    recordApplication(id: $id, currentStage: $currentStage, status: $status) {
+const UPDATE_PERMIT_STAGE = gql`
+  mutation UpdatePermitStage(
+    $id: ID!,
+    $currentStage: String!,
+    $status: String!,
+    $notes: String,
+    $recordedByReceivingClerk: Boolean
+  ) {
+    updatePermitStage(
+      id: $id,
+      currentStage: $currentStage,
+      status: $status,
+      notes: $notes,
+      recordedByReceivingClerk: $recordedByReceivingClerk
+    ) {
       id
       currentStage
       status
@@ -20,7 +32,7 @@ const RECORD_APPLICATION = gql`
 `;
 
 const RRC_RecordModal = ({ isOpen, onClose, application, onRecordComplete }) => {
-   const [recordApplication] = useMutation(RECORD_APPLICATION);
+   const [updatePermitStage] = useMutation(UPDATE_PERMIT_STAGE);
 
    const handleRecord = async () => {
       try {
@@ -32,11 +44,13 @@ const RRC_RecordModal = ({ isOpen, onClose, application, onRecordComplete }) => 
             ? 'ChiefRPSReview'
             : 'CENRPENRReview';
 
-         const result = await recordApplication({
+         const result = await updatePermitStage({
             variables: {
                id: application.id,
                currentStage: nextStage,
-               status: 'In Progress'
+               status: 'In Progress',
+               notes: 'Application recorded by receiving clerk',
+               recordedByReceivingClerk: true
             }
          });
 
