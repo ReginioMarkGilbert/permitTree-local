@@ -1,97 +1,150 @@
-import axios from 'axios';
-import React, { useCallback, useMemo } from 'react';
-import { FaBell, FaClipboardList, FaFileAlt, FaHome, FaSignInAlt, FaUser } from 'react-icons/fa';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import { FaBell, FaClipboardList, FaFileAlt, FaHome, FaSignInAlt, FaUser, FaSignOutAlt } from 'react-icons/fa';
 import { NavLink, useNavigate } from 'react-router-dom';
 import permitTreeLogo from '../../assets/denr-logo.png';
-import { useNotification } from '../../pages/user/contexts/UserNotificationContext';
 import { isAuthenticated } from '../../utils/auth';
 import { removeToken } from '../../utils/tokenManager';
+import { gql, useMutation } from '@apollo/client';
 
-const Sidebar = React.memo(({ isOpen }) => {
-    const navigate = useNavigate();
-    const { unreadCount } = useNotification();
+const LOGOUT_MUTATION = gql`
+  mutation Logout {
+    logout
+  }
+`;
 
-    const handleLogout = useCallback(async () => {
-        try {
-            await axios.get('http://localhost:3000/api/logout');
-            removeToken();
-            navigate('/auth');
-            console.log('Logout successful!');
-        } catch (error) {
-            console.error('Logout failed:', error);
-        }
-    }, [navigate]);
+const Sidebar = React.memo(({ isOpen, onToggle }) => {
+   const navigate = useNavigate();
+   const [logout] = useMutation(LOGOUT_MUTATION);
+   const [showText, setShowText] = useState(false);
+   const [isAuth, setIsAuth] = useState(isAuthenticated());
 
-    React.useEffect(() => {
-        const authStatus = isAuthenticated();
-        if (!authStatus) {
-            navigate('/auth');
-        }
-    }, [navigate]);
+   useEffect(() => {
+      if (isOpen) {
+         const timer = setTimeout(() => setShowText(true), 150);
+         return () => clearTimeout(timer);
+      } else {
+         setShowText(false);
+      }
+   }, [isOpen]);
 
-    const sidebarContent = useMemo(() => (
-        <>
-            <div className="mt-6 ml-4">
-                <div className="mt-16">
-                    <div className="flex items-center justify-start mt-10 mr-5 pl-2">
-                        <img src={permitTreeLogo} alt="PermitTree Logo" className="h-12" />
-                        <span className="pl-2 text-xl font-semibold">PermitTree</span>
-                    </div>
-                    <div className="line" style={{ borderBottom: '1px solid #ffffff', marginTop: '20px', width: '190px' }}></div>
-                    <nav className="mt-7">
-                        <NavLink to="/home" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
-                            <span className="mr-3"><FaHome /></span>
-                            <span>Home</span>
-                        </NavLink>
-                        <NavLink to="/permits" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
-                            <span className="mr-3"><FaFileAlt /></span>
-                            <span>Apply</span>
-                        </NavLink>
-                        <NavLink to="/applicationsStatus" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
-                            <span className="mr-3"><FaClipboardList /></span>
-                            <span>Application Status</span>
-                        </NavLink>
-                        <NavLink to="/notifications" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2 relative">
-                            <div className="relative mr-3">
-                                {unreadCount > 0 && (
-                                    <span className="absolute -top-2 -left-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
-                                        {unreadCount}
-                                    </span>
-                                )}
-                                <FaBell className="text-xl" />
-                            </div>
-                            <span>Notifications</span>
-                        </NavLink>
-                    </nav>
-                </div>
+   const handleLogout = useCallback(async () => {
+      try {
+         await logout();
+         removeToken();
+         localStorage.removeItem('user');
+         setIsAuth(false);
+         if (isOpen) {
+            onToggle(); // Close the sidebar if it's open
+         }
+         navigate('/auth');
+         console.log('Logout successful!');
+      } catch (error) {
+         console.error('Logout failed:', error);
+      }
+   }, [logout, navigate, isOpen, onToggle]);
+
+   useEffect(() => {
+      const authStatus = isAuthenticated();
+      setIsAuth(authStatus);
+      if (!authStatus) {
+         if (isOpen) {
+            onToggle(); // Close the sidebar if it's open
+         }
+         navigate('/auth');
+      }
+   }, [navigate, isOpen, onToggle]);
+
+   const mainNavItems = useMemo(() => [
+      { to: '/home', icon: <FaHome />, text: 'Home' },
+      { to: '/permits', icon: <FaFileAlt />, text: 'Apply' },
+      { to: '/applicationsStatus', icon: <FaClipboardList />, text: 'Application Status' },
+      { to: '/notifications', icon: <FaBell />, text: 'Notifications' },
+   ], []);
+
+   const accountNavItems = useMemo(() => [
+      { to: '/profile', icon: <FaUser />, text: 'Profile' },
+      { to: '/auth', icon: <FaSignOutAlt />, text: 'Logout' }
+   ], []);
+
+   const renderNavItem = (item, index) => (
+      <NavLink
+         key={index}
+         to={item.to}
+         className={({ isActive }) => `
+            flex items-center py-2.5 px-3 rounded-md mt-1.5
+            ${isOpen ? '' : 'justify-center'}
+            transition-all duration-200 ease-in-out
+            ${isActive && item.to !== '/auth'
+               ? 'bg-green-700 text-white'
+               : 'hover:bg-green-700/50 hover:text-white'}
+            group
+         `}
+         onClick={item.to === '/auth' ? handleLogout : undefined}
+      >
+         <div className="relative w-6 h-6 flex items-center justify-center">
+            <span className="transition-transform duration-200 group-hover:scale-105">
+               {item.icon}
+            </span>
+            {item.badge > 0 && (
+               <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
+                  {item.badge}
+               </span>
+            )}
+         </div>
+         {isOpen && (
+            <span className={`ml-3 font-medium text-sm transition-opacity duration-300
+               ${showText ? 'opacity-100' : 'opacity-0'}`}>
+               {item.text}
+            </span>
+         )}
+      </NavLink>
+   );
+
+   if (!isAuth) {
+      return null;
+   }
+
+   return (
+      <div
+         className={`h-full bg-green-800 text-white flex flex-col fixed top-0 left-0
+            ${isOpen ? 'w-64' : 'w-16'} z-10 transition-all duration-300 ease-in-out
+            border-r border-green-700`}
+      >
+         <div className="flex flex-col flex-grow">
+            {/* Logo Section */}
+            <div className={`flex items-center p-4 mb-4 border-b border-green-700 h-16
+               ${isOpen ? 'justify-start' : 'justify-center'}`}>
+               <img
+                  src={permitTreeLogo}
+                  alt="PermitTree Logo"
+                  className={`transition-all duration-300
+                     ${isOpen ? 'w-8 h-8' : 'w-8 h-8'}`}
+               />
+               {isOpen && (
+                  <span className={`ml-3 font-semibold text-lg transition-opacity duration-300
+                     ${showText ? 'opacity-100' : 'opacity-0'}`}>
+                     PermitTree
+                  </span>
+               )}
             </div>
-            <div className="line ml-4" style={{ borderBottom: '1px solid #ffffff', marginTop: '22.5em', width: '190px' }}></div>
-            <div className="mb-10 ml-4">
-                <h2 className="px-4 text-sm text-white uppercase">Account Pages</h2>
-                <NavLink to="/profile" className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
-                    <span className="mr-3"><FaUser /></span>
-                    <span>Profile</span>
-                </NavLink>
-                <NavLink to="#" onClick={handleLogout} className="flex items-center py-2.5 px-4 hover:bg-gray-700 rounded-md mt-2">
-                    <span className="mr-3"><FaSignInAlt /></span>
-                    <span>Logout</span>
-                </NavLink>
+
+            {/* Main Navigation */}
+            <nav className="flex-grow px-3">
+               {mainNavItems.map((item, index) => renderNavItem(item, index))}
+            </nav>
+
+            {/* Account Navigation */}
+            <div className="mt-auto">
+               <div className="px-3 mb-8">
+                  <div className="border-t border-green-700 my-2"></div>
+                  {accountNavItems.map((item, index) => renderNavItem(item, index))}
+               </div>
             </div>
-        </>
-    ), [unreadCount, handleLogout]);
 
-    if (!isAuthenticated()) {
-        return null;
-    }
 
-    return (
-        <div
-            className={`h-full bg-green-800 text-white flex flex-col justify-between fixed top-0 left-0 w-56 md:w-64 z-10 transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
-            style={{ willChange: 'transform' }}
-        >
-            {sidebarContent}
-        </div>
-    );
+         </div>
+      </div>
+   );
 });
 
 export default Sidebar;

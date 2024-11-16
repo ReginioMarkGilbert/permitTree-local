@@ -42,6 +42,11 @@ const SA_AddUserModal = ({ isOpen, onClose, onAddUser }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Ensure all required fields are filled
+    if (!newUser.firstName || !newUser.lastName || !newUser.email || !newUser.password || !newUser.role || !newUser.userType) {
+      alert('Please fill all required fields');
+      return;
+    }
     onAddUser(newUser);
     onClose();
   };
@@ -138,15 +143,22 @@ const SA_AddUserModal = ({ isOpen, onClose, onAddUser }) => {
               </Label>
               <Select
                 onValueChange={(value) => handleSelectChange('role', value)}
-                defaultValue={newUser.role}
+                value={newUser.role}
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="user">User</SelectItem>
-                  <SelectItem value="ChiefRPS">Chief RPS</SelectItem>
+                  <SelectItem value="Chief_RPS">Chief RPS</SelectItem>
                   <SelectItem value="superadmin">Super Admin</SelectItem>
+                  <SelectItem value="Technical_Staff">Technical Staff</SelectItem>
+                  <SelectItem value="Chief_TSD">Chief TSD</SelectItem>
+                  <SelectItem value="Recieving_Clerk">Receiving Clerk</SelectItem>
+                  <SelectItem value="Releasing_Clerk">Releasing Clerk</SelectItem>
+                  <SelectItem value="Accountant">Accountant</SelectItem>
+                  <SelectItem value="Bill_Collector">Bill Collector</SelectItem>
+                  <SelectItem value="PENR_CENR_Officer">PENR/CENR Officer</SelectItem>
                 </SelectContent>
               </Select>
             </div>

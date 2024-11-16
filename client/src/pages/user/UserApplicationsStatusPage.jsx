@@ -1,512 +1,680 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Eye, Edit, Printer, Archive, ChevronUp, ChevronDown, Leaf, Undo, Trash2, RefreshCw, FileText, Send, CreditCard } from 'lucide-react';
-import ApplicationDetailsModal from '../../components/ui/ApplicationDetailsModal';
-import EditApplicationModal from '../../components/ui/EditApplicationModal';
-import ConfirmationModal from '../../components/ui/ConfirmationModal';
-import UserOOPviewModal from './components/UserOOPviewModal';
-import PaymentSimulationModal from './components/PaymentSimulationModal';
-import { toast } from 'react-toastify';
-import './styles/UserApplicationStatusPage.css';
-import { Button } from '@/components/ui/button';
+import React, { useState, useMemo, useEffect } from 'react';
+import { RefreshCw, Search, FileX, Loader2 } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import UserApplicationRow from './components/UserApplicationRow';
+import { useUserApplications } from './hooks/useUserApplications';
+import { toast } from 'sonner';
+import {
+   Dialog,
+   DialogContent,
+   DialogDescription,
+   DialogFooter,
+   DialogHeader,
+   DialogTitle,
+} from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useUserOrderOfPayments } from './hooks/useUserOrderOfPayments';
+import { getUserId } from '@/utils/auth';
+import UserOOPRow from './components/UserOOPRow';
+import { gql } from 'graphql-tag';
+import {
+   DeleteConfirmationDialog,
+   UnsubmitConfirmationDialog,
+   SubmitConfirmationDialog,
+   ResubmitConfirmationDialog
+} from './components/ConfirmationDialogs';
+import {
+   Select,
+   SelectContent,
+   SelectItem,
+   SelectTrigger,
+   SelectValue,
+} from "@/components/ui/select";
+import {
+   Popover,
+   PopoverContent,
+   PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { CalendarIcon, Filter } from "lucide-react";
+import { format } from "date-fns";
+import ApplicationFilters from './components/ApplicationFilters';
+import OOPFilters from './components/OOPFilters';
+
+const GET_OOP_DETAILS = gql`
+  query GetOOPDetails($id: ID!) {
+    getOOPById(id: $id) {
+      _id
+      billNo
+      applicationId
+      applicationNumber
+      namePayee
+      address
+      natureOfApplication
+      items {
+        legalBasis
+        description
+        amount
+      }
+      totalAmount
+      OOPstatus
+      OOPSignedByTwoSignatories
+      rpsSignatureImage
+      tsdSignatureImage
+      receivedDate
+      receivedTime
+      trackingNo
+      releasedDate
+      releasedTime
+      createdAt
+      updatedAt
+    }
+  }
+`;
 
 const UserApplicationsStatusPage = () => {
-    const [applications, setApplications] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [activeTab, setActiveTab] = useState('Submitted');
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filterType, setFilterType] = useState('');
-    const [dateRange, setDateRange] = useState('');
-    const [sortConfig, setSortConfig] = useState(null);
-    const [selectedApplication, setSelectedApplication] = useState(null);
-    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [selectedEditApplication, setSelectedEditApplication] = useState(null);
-    const [confirmationModal, setConfirmationModal] = useState({ isOpen: false, type: null, application: null });
-    const [notifications, setNotifications] = useState([]);
-    const [selectedOOP, setSelectedOOP] = useState(null);
-    const [isOOPModalOpen, setIsOOPModalOpen] = useState(false);
-    const [selectedApplicationId, setSelectedApplicationId] = useState(null);
-    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-    const [selectedPaymentApplication, setSelectedPaymentApplication] = useState(null);
+   const [searchTerm, setSearchTerm] = useState('');
+   const [activeMainTab, setActiveMainTab] = useState('Applications');
+   const [activeSubTab, setActiveSubTab] = useState('Draft');
+   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+   const [applicationToDelete, setApplicationToDelete] = useState(null);
+   const [unsubmitDialogOpen, setUnsubmitDialogOpen] = useState(false);
+   const [applicationToUnsubmit, setApplicationToUnsubmit] = useState(null);
+   const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
+   const [applicationToSubmit, setApplicationToSubmit] = useState(null);
+   const [resubmitDialogOpen, setResubmitDialogOpen] = useState(false);
+   const [applicationToResubmit, setApplicationToResubmit] = useState(null);
+   const [filters, setFilters] = useState({
+      applicationType: '',
+      dateRange: {
+         from: undefined,
+         to: undefined
+      }
+   });
 
-    useEffect(() => {
-        fetchApplications();
-        fetchNotifications();
-    }, [activeTab]);
+   const getQueryParamsForTab = (tab) => {
+      switch (tab) {
+         // Applications
+         case 'Draft': return { status: 'Draft' };
+         case 'Submitted': return { status: 'Submitted' };
+         case 'In Progress': return { status: 'In Progress' };
+         case 'Returned': return { status: 'Returned', currentStage: 'ReturnedByTechnicalStaff' };
+         case 'Accepted': return { status: 'Accepted' };
+         case 'Released': return { status: 'Released' };
+         case 'Expired': return { status: 'Expired' };
+         case 'Rejected': return { status: 'Rejected' };
+         // Order of Payments - Map to backend statuses
+         case 'Awaiting Payment': return { OOPstatus: 'Awaiting Payment' };
+         case 'Payment Proof Submitted': return { OOPstatus: 'Payment Proof Submitted' };
+         case 'Payment Proof Rejected': return { OOPstatus: 'Payment Proof Rejected' };
+         case 'Payment Proof Approved': return { OOPstatus: 'Payment Proof Approved' };
+         case 'Issued OR': return { OOPstatus: 'Issued OR' };
+         case 'Completed': return { OOPstatus: 'Completed OOP' };
+         // Renewals
+         case 'Renewed': return { status: 'Renewed', isRenewal: true };
+         default: return { status: 'Submitted' };
+      }
+   };
 
-    const fetchApplications = async () => {
-        try {
-            setLoading(true);
-            const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:3000/api/getAllApplications', {
-                params: { status: activeTab },
-                headers: { Authorization: token }
-            });
-            console.log('Fetched applications:', response.data);
-            setApplications(response.data);
-            setLoading(false);
-        } catch (error) {
-            console.error('Error fetching applications:', error);
-            setError('Failed to fetch applications');
-            setLoading(false);
-        }
-    };
+   const {
+      applications,
+      loading,
+      error,
+      refetch,
+      fetchUserApplications,
+      deletePermit,
+      updateCSAWPermit,
+      updateCOVPermit,
+      updatePLTCPPermit,
+      updatePTPRPermit,
+      updatePLTPPermit,
+      fetchCOVPermit,
+      fetchCSAWPermit,
+      fetchPLTCPPermit,
+      fetchPTPRPermit,
+      fetchPLTPPermit,
+      unsubmitPermit,
+      submitPermit,
+      updateTCEBPPermit,
+      fetchTCEBPPermit,
+      resubmitPermit,
+   } = useUserApplications(
+      getQueryParamsForTab(activeSubTab).status,
+      getQueryParamsForTab(activeSubTab).currentStage
+   );
 
-    const fetchNotifications = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:3000/api/user/notifications', {
-                headers: { Authorization: token }
-            });
-            setNotifications(response.data);
-        } catch (error) {
-            console.error('Error fetching notifications:', error);
-        }
-    };
+   const mainTabs = ['Applications', 'Order Of Payments', 'Renewals'];
+   const subTabs = {
+      'Applications': ['Draft', 'Submitted', 'In Progress', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected'],
+      'Order Of Payments': ['Awaiting Payment', 'Payment Proof Submitted', 'Payment Proof Rejected', 'Payment Proof Approved', 'Completed', 'Issued OR'],
+      'Renewals': ['Draft', 'Submitted', 'Returned', 'Renewed', 'Rejected']
+   };
 
-    const handleSort = (key) => {
-        let direction = 'asc';
-        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
-            direction = 'desc';
-        }
-        setSortConfig({ key, direction });
-    };
+   const filteredApplications = useMemo(() => {
+      return applications.filter(app => {
+         // Search term filter
+         const matchesSearch = app.applicationNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            app.applicationType.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const renderSortIcon = (key) => {
-        if (sortConfig?.key === key) {
-            return sortConfig.direction === 'asc' ? <ChevronUp className="inline w-4 h-4" /> : <ChevronDown className="inline w-4 h-4" />;
-        }
-        return null;
-    };
+         // Application type filter
+         const matchesType = !filters.applicationType ||
+            app.applicationType === filters.applicationType;
 
-    const handleAction = (action, application) => {
-        console.log(`Action: ${action}`, application);
-    };
+         // Date range filter
+         const appDate = new Date(app.dateOfSubmission);
+         const matchesDateRange = (!filters.dateRange.from || appDate >= filters.dateRange.from) &&
+            (!filters.dateRange.to || appDate <= filters.dateRange.to);
 
-    const handleView = async (id) => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get(`http://localhost:3000/api/csaw_getApplicationById/${id}`, {
-                headers: { Authorization: token }
-            });
-            setSelectedApplication(response.data);
-            setIsViewModalOpen(true);
-        } catch (error) {
-            console.error('Error fetching application details:', error);
-            toast.error('Failed to fetch application details');
-        }
-    };
+         return matchesSearch && matchesType && matchesDateRange;
+      });
+   }, [applications, searchTerm, filters]);
 
-    const handleEdit = (application) => {
-        setSelectedEditApplication(application);
-        setIsEditModalOpen(true);
-    };
+   useEffect(() => {
+      const { status, currentStage } = getQueryParamsForTab(activeSubTab);
+      fetchUserApplications(status, currentStage);
+   }, [fetchUserApplications, activeSubTab]);
 
-    const handleUpdateApplication = (updatedApplication) => {
-        setApplications(applications.map(app =>
-            app._id === updatedApplication._id ? updatedApplication : app
-        ));
-    };
+   const getStatusColor = (status) => {
+      switch (status.toLowerCase()) {
+         case 'draft': return 'bg-gray-100 text-gray-800';
+         case 'submitted': return 'bg-blue-100 text-blue-800';
+         case 'returned': return 'bg-yellow-100 text-yellow-800';
+         case 'accepted': return 'bg-green-100 text-green-800';
+         case 'released': return 'bg-indigo-100 text-indigo-800';
+         case 'expired': return 'bg-red-100 text-red-800';
+         case 'rejected': return 'bg-red-100 text-red-800';
+         default: return 'bg-gray-100 text-gray-800';
+      }
+   };
 
-    const handleSubmitDraft = (application) => {
-        setConfirmationModal({
-            isOpen: true,
-            type: 'submit',
-            application,
-            title: 'Submit Application',
-            message: "Are you sure you want to submit this draft application? Once submitted, you won't be able to edit it further."
-        });
-    };
+   useEffect(() => {
+      // console.log('UserApplicationsStatusPage useEffect triggered. ActiveSubTab:', activeSubTab);
+      refetch();
+   }, [activeSubTab, refetch]);
 
-    const handleUnsubmit = (application) => {
-        setConfirmationModal({
-            isOpen: true,
-            type: 'unsubmit',
-            application,
-            title: 'Unsubmit Application',
-            message: "Are you sure you want to unsubmit this application? It will be moved back to drafts."
-        });
-    };
+   // useEffect(() => {
+   //    console.log('Applications data changed:', applications);
+   // }, [applications]);
 
-    const handleDelete = (application) => {
-        setConfirmationModal({
-            isOpen: true,
-            type: 'delete',
-            application,
-            title: 'Delete Application',
-            message: "Are you sure you want to delete this draft application? This action cannot be undone."
-        });
-    };
+   const handleDeleteClick = (application) => {
+      console.log('Delete clicked for application:', application);
+      setApplicationToDelete(application);
+      setDeleteDialogOpen(true);
+   };
 
-    const handleConfirmAction = async () => {
-        const { type, application } = confirmationModal;
-        setConfirmationModal({ isOpen: false, type: null, application: null });
+   const handleDeleteConfirm = async () => {
+      console.log('Confirming delete for application:', applicationToDelete);
+      if (applicationToDelete) {
+         try {
+            await deletePermit(applicationToDelete.id);
+            console.log('Delete successful');
+            toast.success('Draft deleted successfully');
+            setDeleteDialogOpen(false);
+            setApplicationToDelete(null);
+            refetch();
+         } catch (error) {
+            console.error('Error deleting draft:', error);
+            toast.error(`Error deleting draft: ${error.message || 'Unknown error occurred'}`);
+         }
+      }
+   };
 
-        try {
-            const token = localStorage.getItem('token');
-            let response;
+   const handleEditApplication = async (id, editedData) => {
+      try {
+         console.log('Attempting to edit application:', id);
+         console.log('Edited data:', editedData);
 
-            if (type === 'submit') {
-                response = await axios.put(`http://localhost:3000/api/csaw_submitDraft/${application._id}`, {}, {
-                    headers: { Authorization: token }
-                });
-            } else if (type === 'resubmit') {
-                response = await axios.put(`http://localhost:3000/api/csaw_submitReturnedApplication/${application._id}`, {}, {
-                    headers: { Authorization: token }
-                });
+         if (!editedData.applicationType) {
+            console.error('Application type is undefined:', editedData);
+            throw new Error('Application type is undefined');
+         }
 
-                // Create notification for Chief RPS if resubmitting
-                if (response.data.success) {
-                    const userResponse = await axios.get('http://localhost:3000/api/user-details', {
-                        headers: { Authorization: token }
-                    });
-                    const user = userResponse.data.user;
+         let updateFunction;
+         switch (editedData.applicationType) {
+            case 'Chainsaw Registration':
+               updateFunction = updateCSAWPermit;
+               break;
+            case 'Certificate of Verification':
+               updateFunction = updateCOVPermit;
+               break;
+            case 'Private Tree Plantation Registration':
+               updateFunction = updatePTPRPermit;
+               break;
+            case 'Public Land Tree Cutting Permit':
+               updateFunction = updatePLTCPPermit;
+               break;
+            case 'Private Land Timber Permit':
+               updateFunction = updatePLTPPermit;
+               break;
+            case 'Tree Cutting and/or Earth Balling Permit':
+               updateFunction = updateTCEBPPermit;
+               break;
+            default:
+               console.error('Unsupported application type:', editedData.applicationType);
+               throw new Error(`Unsupported application type: ${editedData.applicationType}`);
+         }
 
-                    await axios.post('http://localhost:3000/api/admin/notifications', {
-                        message: `${user.firstName} ${user.lastName} has resubmitted their returned application (ID: ${application.customId}).`,
-                        applicationId: application._id,
-                        userId: application.userId,
-                        type: 'application_resubmitted'
-                    }, {
-                        headers: { Authorization: token }
-                    });
-                }
-            } else if (type === 'unsubmit') {
-                response = await axios.put(`http://localhost:3000/api/csaw_unsubmitApplication/${application._id}`, {}, {
-                    headers: { Authorization: token }
-                });
-            } else if (type === 'delete') {
-                response = await axios.delete(`http://localhost:3000/api/csaw_deleteApplication/${application._id}`, {
-                    headers: { Authorization: token }
-                });
+         await updateFunction(id, editedData);
+         toast.success('Application updated successfully');
+         refetch();
+      } catch (error) {
+         console.error('Error updating application:', error);
+         toast.error(`Error updating application: ${error.message || 'Unknown error occurred'}`);
+      }
+   };
+
+   const handleUnsubmitClick = (application) => {
+      setApplicationToUnsubmit(application);
+      setUnsubmitDialogOpen(true);
+   };
+
+   const handleUnsubmitConfirm = async () => {
+      if (applicationToUnsubmit) {
+         try {
+            await unsubmitPermit(applicationToUnsubmit.id);
+            toast.success('Application unsubmitted successfully');
+            setUnsubmitDialogOpen(false);
+            setApplicationToUnsubmit(null);
+            refetch(); // This should refresh the list and move the application to the Draft tab
+         } catch (error) {
+            console.error('Error unsubmitting application:', error);
+            toast.error(`Error unsubmitting application: ${error.message || 'Unknown error occurred'}`);
+         }
+      }
+   };
+
+   const handleSubmitClick = (application) => {
+      setApplicationToSubmit(application);
+      setSubmitDialogOpen(true);
+   };
+
+   const handleSubmitConfirm = async () => {
+      if (applicationToSubmit) {
+         try {
+            await submitPermit(applicationToSubmit.id);
+            toast.success('Application submitted successfully');
+            setSubmitDialogOpen(false);
+            setApplicationToSubmit(null);
+            refetch();
+         } catch (error) {
+            console.error('Error submitting application:', error);
+            toast.error(`Error submitting application: ${error.message || 'Unknown error occurred'}`);
+         }
+      }
+   };
+
+   const handleResubmitClick = (application) => {
+      setApplicationToResubmit(application);
+      setResubmitDialogOpen(true);
+   };
+
+   const handleResubmitConfirm = async () => {
+      if (applicationToResubmit) {
+         try {
+            await resubmitPermit(applicationToResubmit.id);
+            toast.success('Application resubmitted successfully');
+            setResubmitDialogOpen(false);
+            setApplicationToResubmit(null);
+            refetch();
+         } catch (error) {
+            console.error('Error resubmitting application:', error);
+            toast.error(`Error resubmitting application: ${error.message || 'Unknown error occurred'}`);
+         }
+      }
+   };
+
+   const userId = getUserId();
+
+   // Add OOPs data fetching
+   const {
+      oops,
+      loading: oopsLoading,
+      error: oopsError,
+      refetch: refetchOOPs
+   } = useUserOrderOfPayments(
+      userId,
+      activeMainTab === 'Order Of Payments' ? activeSubTab : null
+   );
+
+   // Combined refetch function
+   const handleRefetch = async () => {
+      if (activeMainTab === 'Order Of Payments') {
+         await refetchOOPs();
+      } else {
+         await refetch();
+      }
+   };
+
+   // Add polling for automatic updates
+   useEffect(() => {
+      const pollInterval = setInterval(handleRefetch, 5000); // Poll every 5 seconds
+      return () => clearInterval(pollInterval);
+   }, [activeMainTab]);
+
+   // Update tab change handler to trigger refetch
+   const handleTabChange = (tab) => {
+      setActiveMainTab(tab);
+      setActiveSubTab(subTabs[tab][0]);
+      setFilters({
+         searchTerm: '',
+         applicationType: '',
+         amountRange: '',
+         dateRange: { from: undefined, to: undefined }
+      });
+      handleRefetch();
+   };
+
+   const handleSubTabChange = (tab) => {
+      setActiveSubTab(tab);
+      handleRefetch();
+   };
+
+   const renderOrderOfPaymentsTable = () => {
+      if (loading) return <p className="text-center text-gray-500">Loading...</p>;
+      if (error) return <p className="text-center text-red-500">Error: {error.message}</p>;
+
+      const displayOOPs = filteredOOPs;
+
+      if (displayOOPs.length === 0) {
+         return (
+            <div className="bg-white rounded-lg shadow-sm p-6 text-center">
+               <FileX className="mx-auto h-12 w-12 text-gray-400" />
+               <h3 className="mt-2 text-sm font-medium text-gray-900">No orders of payment found</h3>
+               <p className="mt-1 text-sm text-gray-500">
+                  {filters.applicationType ?
+                     `No orders of payment found for ${filters.applicationType}` :
+                     'No orders of payment available for your applications'}
+               </p>
+            </div>
+         );
+      }
+
+      return (
+         <div className="bg-white rounded-lg shadow overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+               <thead className="bg-gray-50">
+                  <tr>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Application Number
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Bill Number
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Total Amount
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                     </th>
+                  </tr>
+               </thead>
+               <tbody className="bg-white divide-y divide-gray-200">
+                  {displayOOPs.map((oop) => (
+                     <UserOOPRow
+                        key={oop._id}
+                        oop={oop}
+                        onRefetch={handleRefetch}
+                     />
+                  ))}
+               </tbody>
+            </table>
+         </div>
+      );
+   };
+
+   const renderTable = () => {
+      if (activeMainTab === 'Order Of Payments') {
+         return renderOrderOfPaymentsTable();
+      }
+      if (loading) return <p className="text-center text-gray-500">Loading...</p>;
+      if (error) return <p className="text-center text-red-500">Error: {error.message}</p>;
+      if (filteredApplications.length === 0) {
+         return <p className="text-center text-gray-500">No applications found.</p>;
+      }
+
+      return (
+         <div className="bg-white rounded-lg shadow-sm">
+            <table className="min-w-full divide-y divide-gray-200">
+               <thead className="bg-gray-50">
+                  <tr>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        APPLICATION NUMBER
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        APPLICATION TYPE
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        DATE SUBMITTED
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        STATUS
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        ACTIONS
+                     </th>
+                  </tr>
+               </thead>
+               <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredApplications.map((app) => (
+                     <UserApplicationRow
+                        key={app.id}
+                        app={app}
+                        onEdit={handleEditApplication}
+                        onDelete={handleDeleteClick}
+                        onUnsubmit={handleUnsubmitClick}
+                        onSubmit={handleSubmitClick}
+                        onResubmit={handleResubmitClick}
+                        getStatusColor={getStatusColor}
+                        fetchCOVPermit={fetchCOVPermit}
+                        fetchCSAWPermit={fetchCSAWPermit}
+                        fetchPLTCPPermit={fetchPLTCPPermit}
+                        fetchPTPRPermit={fetchPTPRPermit}
+                        fetchPLTPPermit={fetchPLTPPermit}
+                        fetchTCEBPPermit={fetchTCEBPPermit}
+                        currentTab={activeSubTab}
+                     />
+                  ))}
+               </tbody>
+            </table>
+         </div>
+      );
+   };
+
+   const renderFilters = () => {
+      return activeMainTab === 'Order Of Payments' ? (
+         <OOPFilters filters={filters} setFilters={setFilters} />
+      ) : (
+         <ApplicationFilters filters={filters} setFilters={setFilters} />
+      );
+   };
+
+   // Update the filteredOOPs logic
+   const filteredOOPs = useMemo(() => {
+      return oops.filter(oop => {
+         // Search term filter
+         const matchesSearch =
+            (oop.billNo?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
+            (oop.applicationId?.toLowerCase().includes(searchTerm.toLowerCase()) || false);
+
+         // Nature of Application filter
+         const matchesType = !filters.applicationType ||
+            filters.applicationType === "all" ||
+            oop.natureOfApplication === filters.applicationType;
+
+         // Amount range filter
+         const matchesAmount = !filters.amountRange || (() => {
+            const amount = parseFloat(oop.totalAmount);
+            switch(filters.amountRange) {
+               case '0-1000': return amount >= 0 && amount <= 1000;
+               case '1001-5000': return amount > 1000 && amount <= 5000;
+               case '5001-10000': return amount > 5000 && amount <= 10000;
+               case '10001+': return amount > 10000;
+               default: return true;
+            }
+         })();
+
+         // Date range filter
+         const matchesDateRange = (() => {
+            if (!filters.dateRange.from && !filters.dateRange.to) return true;
+
+            // Convert createdAt timestamp to Date object
+            const oopDate = new Date(parseInt(oop.createdAt));
+            if (isNaN(oopDate.getTime())) {
+               console.warn('Invalid date:', oop.createdAt);
+               return true;
             }
 
-            if (response && response.data.success) {
-                toast.success(`Application ${type === 'delete' ? 'deleted' : type === 'submit' ? 'submitted' : type === 'resubmit' ? 'resubmitted' : 'unsubmitted'} successfully`);
-                fetchApplications();
-            } else {
-                toast.error(`Failed to ${type} application`);
-            }
-        } catch (error) {
-            console.error(`Error ${type}ing application:`, error);
-            toast.error(`Failed to ${type} application`);
-        }
-    };
+            // Set time to start of day for consistent comparison
+            oopDate.setHours(0, 0, 0, 0);
 
-    const formatDate = (dateString) => {
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        return new Date(dateString).toLocaleDateString(undefined, options);
-    };
+            const fromDate = filters.dateRange.from ? new Date(filters.dateRange.from) : null;
+            const toDate = filters.dateRange.to ? new Date(filters.dateRange.to) : null;
 
-    const handleViewOOP = (applicationId) => {
-        setSelectedApplicationId(applicationId);
-        setIsOOPModalOpen(true);
-    };
+            if (fromDate) fromDate.setHours(0, 0, 0, 0);
+            if (toDate) toDate.setHours(0, 0, 0, 0);
 
-    const handleSimulatePayment = (application) => {
-        setSelectedPaymentApplication(application);
-        setIsPaymentModalOpen(true);
-    };
+            // For debugging
+            console.log('OOP Date:', oopDate);
+            console.log('From Date:', fromDate);
+            console.log('To Date:', toDate);
 
-    const handlePaymentComplete = async (applicationId) => {
-        try {
-            const token = localStorage.getItem('token');
-            await axios.post(`http://localhost:3000/api/user/oop/${applicationId}/simulate-payment`, {}, {
-                headers: { Authorization: token }
-            });
-            toast.success('Payment simulation completed');
-            fetchApplications(); // Refresh the applications list
-            setIsPaymentModalOpen(false);
-        } catch (error) {
-            console.error('Error simulating payment:', error);
-            toast.error('Failed to simulate payment');
-        }
-    };
+            return (!fromDate || oopDate >= fromDate) && (!toDate || oopDate <= toDate);
+         })();
 
-    const renderTable = () => {
-        if (loading) {
-            return <p className="text-center text-gray-500">Loading applications...</p>;
-        }
+         return matchesSearch && matchesType && matchesAmount && matchesDateRange;
+      });
+   }, [oops, searchTerm, filters]);
 
-        if (error) {
-            return <p className="text-center text-red-500">{error}</p>;
-        }
+   return (
+      <div className="bg-green-50 min-h-screen pt-20 pb-8 px-4 sm:px-6 lg:px-8">
+         <div className="max-w-7xl mx-auto space-y-6">
+            {/* Header Section */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+               <div className="flex items-center justify-between mb-4">
+                  <h1 className="text-2xl font-semibold text-gray-900">My Applications</h1>
+                  <Button onClick={handleRefetch} variant="outline">
+                     <RefreshCw className="mr-2 h-4 w-4" />
+                     Refresh
+                  </Button>
+               </div>
 
-        if (applications.length === 0) {
-            return <p className="text-center text-gray-500">No applications found.</p>;
-        }
-
-        return (
-            <div className="bg-white rounded-lg shadow overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                        <tr>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSort('customId')}>
-                                APPLICATION NUMBER {renderSortIcon('customId')}
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
-                                APPLICATION TYPE
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hidden sm:table-cell" onClick={() => handleSort('dateOfSubmission')}>
-                                DATE  {renderSortIcon('dateOfSubmission')}
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Status
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Actions
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                        {applications.map((app) => (
-                            <tr key={app._id}>
-                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {app.customId}
-                                </td>
-                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 hidden sm:table-cell">
-                                    {app.applicationType}
-                                </td>
-                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 hidden sm:table-cell">
-                                    {new Date(app.dateOfSubmission).toLocaleDateString()}
-                                </td>
-                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(app.status)}`}>
-                                        {app.status}
-                                    </span>
-                                </td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium">
-                                    <div className="flex flex-wrap gap-1">
-                                        <Button
-                                            variant="outline"
-                                            size="icon"
-                                            className="h-6 w-6 text-green-600 hover:text-green-700 border-green-200 hover:bg-green-50"
-                                            onClick={() => handleView(app._id)}
-                                            title="View"
-                                        >
-                                            <Eye className="h-3 w-3" />
-                                        </Button>
-
-                                        {app.status === 'Awaiting Payment' && (
-                                            <>
-                                                <Button
-                                                    variant="outline"
-                                                    size="icon"
-                                                    className="h-6 w-6 text-purple-600 hover:text-purple-700 border-purple-200 hover:bg-purple-50"
-                                                    onClick={() => handleViewOOP(app.customId)}
-                                                    title="View OOP"
-                                                >
-                                                    <FileText className="h-3 w-3" />
-                                                </Button>
-                                                <Button
-                                                    variant="outline"
-                                                    size="icon"
-                                                    className="h-6 w-6 text-green-600 hover:text-green-700 border-green-200 hover:bg-green-50"
-                                                    onClick={() => handleSimulatePayment(app)}
-                                                    title="Simulate Payment"
-                                                >
-                                                    <CreditCard className="h-3 w-3" />
-                                                </Button>
-                                            </>
-                                        )}
-
-                                        {(app.status === 'Draft' || app.status === 'Returned') && (
-                                            <Button
-                                                variant="outline"
-                                                size="icon"
-                                                className="h-6 w-6 text-blue-600 hover:text-blue-700 border-blue-200 hover:bg-blue-50"
-                                                onClick={() => handleEdit(app)}
-                                                title="Edit"
-                                            >
-                                                <Edit className="h-3 w-3" />
-                                            </Button>
-                                        )}
-
-                                        {app.status === 'Draft' && (
-                                            <>
-                                                <Button
-                                                    variant="outline"
-                                                    size="icon"
-                                                    className="h-6 w-6 text-yellow-600 hover:text-yellow-700 border-yellow-200 hover:bg-yellow-50"
-                                                    onClick={() => handleSubmitDraft(app)}
-                                                    title="Submit"
-                                                >
-                                                    <Send className="h-3 w-3" />
-                                                </Button>
-                                                <Button
-                                                    variant="outline"
-                                                    size="icon"
-                                                    className="h-6 w-6 text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50"
-                                                    onClick={() => handleDelete(app)}
-                                                    title="Delete"
-                                                >
-                                                    <Trash2 className="h-3 w-3" />
-                                                </Button>
-                                            </>
-                                        )}
-
-                                        {app.status === 'Returned' && (
-                                            <Button
-                                                variant="outline"
-                                                size="icon"
-                                                className="h-6 w-6 text-yellow-600 hover:text-yellow-700 border-yellow-200 hover:bg-yellow-50"
-                                                onClick={() => handleSubmitReturned(app)}
-                                                title="Resubmit"
-                                            >
-                                                <Send className="h-3 w-3" />
-                                            </Button>
-                                        )}
-
-                                        {app.status === 'Submitted' && (
-                                            <Button
-                                                variant="outline"
-                                                size="icon"
-                                                className="h-6 w-6 text-orange-600 hover:text-orange-700 border-orange-200 hover:bg-orange-50"
-                                                onClick={() => handleUnsubmit(app)}
-                                                title="Unsubmit"
-                                            >
-                                                <Undo className="h-3 w-3" />
-                                            </Button>
-                                        )}
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        );
-    };
-
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'Draft': return 'bg-gray-100 text-gray-800';
-            case 'Submitted': return 'bg-blue-100 text-blue-800';
-            case 'Returned': return 'bg-yellow-100 text-yellow-800';
-            case 'Accepted': return 'bg-green-100 text-green-800';
-            case 'Awaiting Payment': return 'bg-purple-100 text-purple-800';
-            case 'Released': return 'bg-indigo-100 text-indigo-800';
-            case 'Expired': return 'bg-red-100 text-red-800';
-            case 'Rejected': return 'bg-red-100 text-red-800';
-            default: return 'bg-gray-100 text-gray-800';
-        }
-    };
-
-    const handleTabChange = (tab) => {
-        setActiveTab(tab);
-        // fetchApplications will be called automatically due to the useEffect dependency
-    };
-
-    const handleSubmitReturned = (application) => {
-        setConfirmationModal({
-            isOpen: true,
-            type: 'resubmit',
-            application,
-            title: 'Resubmit Application',
-            message: "Are you sure you want to resubmit this returned application? Make sure you've addressed all the issues mentioned in the return remarks."
-        });
-    };
-
-    const handleRefresh = () => {
-        fetchApplications();
-    };
-
-    return (
-        <div className="min-h-screen bg-green-50">
-            <nav className="bg-white shadow-md z-10 flex justify-between items-center p-4">
-                <div className="flex items-center space-x-2">
-                    <Leaf className="h-8 w-8 text-green-600" />
-                    <span className="text-2xl font-bold text-green-800">PermitTree</span>
-                </div>
-            </nav>
-
-            <div className="container mx-auto px-4 sm:px-6 py-8">
-                <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-3xl font-bold text-green-800">My Applications</h1>
-                    <Button onClick={handleRefresh} variant="outline">
-                        <RefreshCw className="mr-2 h-4 w-4" />
-                        Refresh
-                    </Button>
-                </div>
-                <div className="mb-6 overflow-x-auto">
-                    <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-                        {['Draft', 'Submitted', 'Returned', 'Accepted', 'Awaiting Payment', 'Released', 'Expired', 'Rejected'].map((tab) => (
-                            <button
-                                key={tab}
-                                onClick={() => handleTabChange(tab)}
-                                className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
-                            >
-                                {tab}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-                <div className="mb-6 flex flex-col sm:flex-row gap-4">
-                    <input
-                        type="text"
-                        placeholder="Search applications..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="border rounded-md p-2 w-full sm:w-auto"
-                    />
-                    <select
-                        value={filterType}
-                        onChange={(e) => setFilterType(e.target.value)}
-                        className="border rounded-md p-2 w-full sm:w-auto"
-                    >
-                        <option value="">All Types</option>
-                        {['Chainsaw Registration', 'Certificate of Verification', 'Private Tree Plantation Registration (PTPR)', 'Government Project Timber Permit', 'Private Land Timber Permit', 'Public Land Timber Permit'].map(type => (
-                            <option key={type} value={type}>{type}</option>
-                        ))}
-                    </select>
-                    <input
-                        type="date"
-                        value={dateRange}
-                        onChange={(e) => setDateRange(e.target.value)}
-                        className="border rounded-md p-2 w-full sm:w-auto"
-                    />
-                </div>
-                {renderTable()}
+               {/* Main Tabs */}
+               <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
+                     {mainTabs.map((tab) => (
+                        <button
+                           key={tab}
+                           onClick={() => handleTabChange(tab)}
+                           className={`px-4 py-2 rounded-md text-sm font-medium transition-colors
+                              ${activeMainTab === tab
+                                 ? 'bg-white text-green-800 shadow'
+                                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
+                        >
+                           {tab}
+                        </button>
+                     ))}
+                  </div>
+               </div>
             </div>
 
-            <ApplicationDetailsModal
-                isOpen={isViewModalOpen}
-                onClose={() => setIsViewModalOpen(false)}
-                application={selectedApplication}
-            />
+            {/* Sub Tabs and Search Section */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+               <div className="space-y-4">
+                  {/* Sub Tabs */}
+                  <div className="bg-gray-100 p-1 rounded-md inline-flex flex-wrap gap-1">
+                     {subTabs[activeMainTab].map((tab) => (
+                        <button
+                           key={tab}
+                           onClick={() => handleSubTabChange(tab)}
+                           className={`px-3 py-2 rounded-md text-sm font-medium transition-colors
+                              ${activeSubTab === tab
+                                 ? 'bg-white text-green-800 shadow'
+                                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
+                        >
+                           {tab}
+                        </button>
+                     ))}
+                  </div>
 
-            <EditApplicationModal
-                isOpen={isEditModalOpen}
-                onClose={() => setIsEditModalOpen(false)}
-                application={selectedEditApplication}
-                onUpdate={handleUpdateApplication}
-            />
+                  {renderFilters()}
+               </div>
+            </div>
 
-            <ConfirmationModal
-                isOpen={confirmationModal.isOpen}
-                onClose={() => setConfirmationModal({ isOpen: false, type: null, application: null })}
-                onConfirm={handleConfirmAction}
-                title={confirmationModal.title}
-                message={confirmationModal.message}
-            />
-
-            <UserOOPviewModal
-                isOpen={isOOPModalOpen}
-                onClose={() => setIsOOPModalOpen(false)}
-                applicationId={selectedApplicationId}
-            />
-
-            <PaymentSimulationModal
-                isOpen={isPaymentModalOpen}
-                onClose={() => setIsPaymentModalOpen(false)}
-                onPaymentComplete={handlePaymentComplete}
-                totalAmount={selectedPaymentApplication?.totalAmount || 0}
-                applicationId={selectedPaymentApplication?.customId}
-            />
-        </div>
-    );
+            {renderTable()}
+         </div>
+         <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <DialogContent>
+               <DialogHeader>
+                  <DialogTitle>Confirm Deletion</DialogTitle>
+                  <DialogDescription>
+                     Are you sure you want to delete this draft application? This action cannot be undone.
+                  </DialogDescription>
+               </DialogHeader>
+               <DialogFooter>
+                  <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+                     Cancel
+                  </Button>
+                  <Button variant="destructive" onClick={handleDeleteConfirm}>
+                     Delete
+                  </Button>
+               </DialogFooter>
+            </DialogContent>
+         </Dialog>
+         <AlertDialog open={unsubmitDialogOpen} onOpenChange={setUnsubmitDialogOpen}>
+            <AlertDialogContent>
+               <AlertDialogHeader>
+                  <AlertDialogTitle>Confirm Unsubmit</AlertDialogTitle>
+                  <AlertDialogDescription>
+                     Are you sure you want to unsubmit this application? It will be moved back to Draft status.
+                  </AlertDialogDescription>
+               </AlertDialogHeader>
+               <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleUnsubmitConfirm}>Unsubmit</AlertDialogAction>
+               </AlertDialogFooter>
+            </AlertDialogContent>
+         </AlertDialog>
+         <AlertDialog open={submitDialogOpen} onOpenChange={setSubmitDialogOpen}>
+            <AlertDialogContent>
+               <AlertDialogHeader>
+                  <AlertDialogTitle>Confirm Submission</AlertDialogTitle>
+                  <AlertDialogDescription>
+                     Are you sure you want to submit this application? You won't be able to edit it after submission.
+                  </AlertDialogDescription>
+               </AlertDialogHeader>
+               <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleSubmitConfirm}>Submit</AlertDialogAction>
+               </AlertDialogFooter>
+            </AlertDialogContent>
+         </AlertDialog>
+         <Dialog open={resubmitDialogOpen} onOpenChange={setResubmitDialogOpen}>
+            <DialogContent>
+               <DialogHeader>
+                  <DialogTitle>Confirm Resubmission</DialogTitle>
+                  <DialogDescription>
+                     Are you sure you want to resubmit this application? It will be moved back to Returned status.
+                  </DialogDescription>
+               </DialogHeader>
+               <DialogFooter>
+                  <Button variant="outline" onClick={() => setResubmitDialogOpen(false)}>
+                     Cancel
+                  </Button>
+                  <Button variant="destructive" onClick={handleResubmitConfirm}>
+                     Resubmit
+                  </Button>
+               </DialogFooter>
+            </DialogContent>
+         </Dialog>
+      </div>
+   );
 };
 
 export default UserApplicationsStatusPage;

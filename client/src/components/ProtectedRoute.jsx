@@ -1,19 +1,20 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { isAuthenticated, getUserRole } from '../utils/auth';
+import { isAuthenticated, getUserRoles } from '../utils/auth';
+import ErrorPage from './errorPage';
 
 const ProtectedRoute = ({ children, roles }) => {
-    if (!isAuthenticated()) {
-        return <Navigate to="/auth" />;
-    }
+   const userRoles = getUserRoles();
 
-    const userRole = getUserRole();
-    // console.log('ProtectedRoute - User role:', userRole);
-    if (roles && !roles.includes(userRole)) {
-        return <Navigate to="/unauthorized" />;
-    }
+   if (!isAuthenticated()) {
+      return <Navigate to="/auth" replace />;
+   }
 
-    return children;
+   if (roles && !roles.some(role => userRoles.includes(role))) {
+      return <ErrorPage status={403} />;
+   }
+
+   return children;
 };
 
 export default ProtectedRoute;

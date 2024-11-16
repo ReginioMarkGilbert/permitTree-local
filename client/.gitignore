@@ -31,4 +31,5 @@ dist-ssr
 *.sw?
 .next
 
+notes.txt
 .cursorrules
