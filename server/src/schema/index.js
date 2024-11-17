@@ -10,6 +10,7 @@ const mutationTypes = require('./mutationTypes');
 const { notificationTypes } = require('./userNotificationTypes');
 const { personnelNotificationTypes } = require('./personnelNotificationTypes');
 const analyticsTypes = require('./analyticsTypes');
+const gisTypes = require('./gisTypes');
 
 const rootTypeDefs = gql`
   scalar Upload
@@ -29,16 +30,17 @@ const rootTypeDefs = gql`
 `;
 
 module.exports = [
-  rootTypeDefs,
-  userTypes,
-  adminTypes,
-  permitTypes.permitTypes,
-  oopTypes,
-  certificateTypes,
-  queryTypes,
-  mutationTypes,
-  paymentTypes,
-  notificationTypes,
-  personnelNotificationTypes,
-  analyticsTypes
+   rootTypeDefs,
+   userTypes,
+   adminTypes,
+   permitTypes.permitTypes,
+   oopTypes,
+   certificateTypes,
+   queryTypes,
+   mutationTypes,
+   paymentTypes,
+   notificationTypes,
+   personnelNotificationTypes,
+   analyticsTypes,
+   gisTypes
 ];

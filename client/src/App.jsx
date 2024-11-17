@@ -51,6 +51,7 @@ import PersonnelDashboard from './pages/Personnel/PersonnelDashboard';
 import OOPPrintPage from './pages/user/OOPPrintPage';
 import PaymentPage from './pages/user/PaymentPage';
 import ORPrintPage from './pages/user/ORPrintPage';
+import GISDashboardPage from './pages/GIS/GISDashboardPage';
 
 const App = () => {
    const { sidebarToggle, toggleSidebar } = useSidebarToggle();
@@ -161,6 +162,14 @@ const App = () => {
                         element={
                            <ProtectedRoute roles={['user']}>
                               <PaymentPage />
+                           </ProtectedRoute>
+                        }
+                     />
+                     <Route
+                        path="/gis"
+                        element={
+                           <ProtectedRoute roles={PersonnelRoles}>
+                              <GISDashboardPage />
                            </ProtectedRoute>
                         }
                      />

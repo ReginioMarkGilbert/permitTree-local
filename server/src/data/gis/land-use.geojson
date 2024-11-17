@@ -1,0 +1,24 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Land Use Area 1",
+        "type": "agricultural"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [120.8842, 14.4995],
+            [120.9842, 14.4995],
+            [120.9842, 14.5995],
+            [120.8842, 14.5995],
+            [120.8842, 14.4995]
+          ]
+        ]
+      }
+    }
+  ]
+}

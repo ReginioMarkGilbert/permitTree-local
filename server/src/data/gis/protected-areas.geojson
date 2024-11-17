@@ -1,0 +1,24 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [120.9842, 14.5995],
+            [121.0842, 14.5995],
+            [121.0842, 14.6995],
+            [120.9842, 14.6995],
+            [120.9842, 14.5995]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Sample Protected Area 1",
+        "type": "National Park"
+      }
+    }
+  ]
+}

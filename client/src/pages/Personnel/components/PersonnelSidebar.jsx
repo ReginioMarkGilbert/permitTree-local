@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
-import { FaBell, FaChartLine, FaCog, FaFileInvoiceDollar, FaHome, FaSignOutAlt, FaTachometerAlt } from 'react-icons/fa';
+import { FaBell, FaChartLine, FaCog, FaFileInvoiceDollar, FaHome, FaSignOutAlt, FaTachometerAlt, FaMap } from 'react-icons/fa';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { removeToken } from '../../../utils/tokenManager';
 import { isAuthenticated, getUserRoles } from '../../../utils/auth';
@@ -87,6 +87,7 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
       ...(shouldShowOrderOfPayment() ? [{ to: "/personnel/order-of-payment", icon: <FaFileInvoiceDollar />, text: "Order of Payment" }] : []),
       { to: "/personnel/notifications", icon: <FaBell />, text: "Notifications" },
       { to: "/personnel/reports", icon: <FaChartLine />, text: "Reports" },
+      { to: "/gis", icon: <FaMap />, text: "GIS Maps" },
    ], [getDashboardLink, shouldShowOrderOfPayment]);
 
    const accountNavItems = useMemo(() => [

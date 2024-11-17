@@ -1,0 +1,24 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Coastal Area 1",
+        "type": "Mangrove"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [120.9342, 14.5495],
+            [121.0342, 14.5495],
+            [121.0342, 14.6495],
+            [120.9342, 14.6495],
+            [120.9342, 14.5495]
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Mining Site 1",
+        "type": "Active"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [121.0342, 14.5495]
+      }
+    }
+  ]
+}

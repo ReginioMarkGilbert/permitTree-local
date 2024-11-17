@@ -50,6 +50,9 @@ const queryTypes = gql`
     # Notification Queries
     getNotifications: [Notification!]!
     getUnreadNotifications: [Notification!]!
+
+    # GIS Query
+    getGISData: GISData!
   }
 `;
 
