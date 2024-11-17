@@ -12,6 +12,19 @@ const gisResolvers = {
         throw new Error('Failed to fetch GIS data');
       }
     }
+  },
+  Mutation: {
+    addProtectedArea: async (_, { input }) => {
+      try {
+        console.log('Adding protected area with input:', input);
+        const result = await GISService.addProtectedArea(input);
+        console.log('Protected area added:', result);
+        return result;
+      } catch (error) {
+        console.error('Error adding protected area:', error);
+        throw new Error('Failed to add protected area');
+      }
+    }
   }
 };
 

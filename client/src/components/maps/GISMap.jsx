@@ -16,21 +16,30 @@ const GISMap = ({ layers = [] }) => {
   const vectorLayers = useRef({});
 
   useEffect(() => {
+    console.log('Initializing map...');
     if (map.current) return;
 
-    // Initialize map
-    map.current = new Map({
-      target: mapContainer.current,
-      layers: [
-        new TileLayer({
-          source: new OSM()
+    try {
+      // Initialize map
+      map.current = new Map({
+        target: mapContainer.current,
+        layers: [
+          new TileLayer({
+            source: new OSM()
+          })
+        ],
+        view: new View({
+          center: fromLonLat([122.5, 12.8]), // Philippines center
+          zoom: 6,
+          maxZoom: 19,
+          minZoom: 4
         })
-      ],
-      view: new View({
-        center: fromLonLat([122.5, 12.8]), // Philippines center
-        zoom: 6
-      })
-    });
+      });
+
+      console.log('Map initialized successfully');
+    } catch (error) {
+      console.error('Error initializing map:', error);
+    }
 
     return () => {
       if (map.current) {
@@ -42,10 +51,16 @@ const GISMap = ({ layers = [] }) => {
 
   // Update layers when they change
   useEffect(() => {
-    if (!map.current) return;
+    if (!map.current) {
+      console.error('Map not initialized');
+      return;
+    }
+
+    console.log('Updating layers:', layers);
 
     // Remove old layers
     Object.values(vectorLayers.current).forEach(layer => {
+      console.log('Removing layer:', layer);
       map.current.removeLayer(layer);
     });
     vectorLayers.current = {};
@@ -54,11 +69,15 @@ const GISMap = ({ layers = [] }) => {
     layers.forEach(layer => {
       if (layer.type === 'geojson') {
         try {
+          console.log('Adding layer:', layer.id, layer.data);
+
           const vectorSource = new VectorSource({
             features: new GeoJSON().readFeatures(layer.data, {
               featureProjection: 'EPSG:3857'
             })
           });
+
+          console.log('Features loaded:', vectorSource.getFeatures().length);
 
           const style = new Style({
             fill: new Fill({
@@ -83,6 +102,14 @@ const GISMap = ({ layers = [] }) => {
 
           vectorLayers.current[layer.id] = vectorLayer;
           map.current.addLayer(vectorLayer);
+
+          // Fit view to layer extent
+          const extent = vectorSource.getExtent();
+          map.current.getView().fit(extent, {
+            padding: [50, 50, 50, 50],
+            maxZoom: 12
+          });
+
         } catch (error) {
           console.error(`Error adding layer ${layer.id}:`, error);
         }

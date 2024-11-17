@@ -3,21 +3,22 @@
   "features": [
     {
       "type": "Feature",
-      "properties": {
-        "name": "Forest Area 1",
-        "type": "Dense Forest"
-      },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
-            [121.0842, 14.5995],
-            [121.1842, 14.5995],
-            [121.1842, 14.6995],
-            [121.0842, 14.6995],
-            [121.0842, 14.5995]
+            [122.0, 13.4],
+            [122.1, 13.4],
+            [122.1, 13.5],
+            [122.0, 13.5],
+            [122.0, 13.4]
           ]
         ]
+      },
+      "properties": {
+        "name": "Marinduque Forest Area",
+        "type": "Dense Forest",
+        "area": "500 hectares"
       }
     }
   ]

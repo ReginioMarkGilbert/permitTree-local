@@ -59,6 +59,9 @@ const mutationTypes = gql`
     generateCertificate(input: GenerateCertificateInput!): Certificate!
     forwardCertificateForSignature(id: ID!): Certificate!
     signCertificate(id: ID!, signature: String!): Certificate!
+
+    # GIS Mutations
+    addProtectedArea(input: ProtectedAreaInput!): GeoJSONCollection!
   }
 `;
 

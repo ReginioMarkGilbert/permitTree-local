@@ -3,21 +3,22 @@
   "features": [
     {
       "type": "Feature",
-      "properties": {
-        "name": "Coastal Area 1",
-        "type": "Mangrove"
-      },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
-            [120.9342, 14.5495],
-            [121.0342, 14.5495],
-            [121.0342, 14.6495],
-            [120.9342, 14.6495],
-            [120.9342, 14.5495]
+            [121.95, 13.35],
+            [122.05, 13.35],
+            [122.05, 13.45],
+            [121.95, 13.45],
+            [121.95, 13.35]
           ]
         ]
+      },
+      "properties": {
+        "name": "Marinduque Coastal Area",
+        "type": "Mangrove",
+        "status": "Protected"
       }
     }
   ]

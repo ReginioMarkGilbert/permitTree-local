@@ -5,6 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from '@apollo/client';
 import { gql } from '@apollo/client';
 import { Skeleton } from "@/components/ui/skeleton";
+import ProtectedAreaForm from './components/ProtectedAreaForm';
+import { Button } from "@/components/ui/button";
 
 const GET_GIS_DATA = gql`
   query GetGISData {
@@ -55,13 +57,23 @@ const GET_GIS_DATA = gql`
 
 const GISDashboardPage = () => {
   const [activeLayer, setActiveLayer] = useState('protectedAreas');
-  const { loading, error, data } = useQuery(GET_GIS_DATA);
+  const [showForm, setShowForm] = useState(false);
+  const { loading, error, data, refetch } = useQuery(GET_GIS_DATA);
 
   if (loading) return <Skeleton className="w-full h-[600px]" />;
   if (error) {
     console.error('GIS data error:', error);
     return <p>Error loading GIS data: {error.message}</p>;
   }
+
+  const handleAreaAdded = () => {
+    refetch();
+    setShowForm(false);
+  };
+
+  console.log('Raw GIS data:', data);
+  console.log('Active layer:', activeLayer);
+  console.log('Layer data:', data?.getGISData?.[activeLayer]);
 
   const layerStyles = {
     protectedAreas: {
@@ -124,28 +136,46 @@ const GISDashboardPage = () => {
     style: layerStyles[activeLayer]
   }];
 
+  console.log('Prepared layers:', layers);
+
   return (
     <div className="min-h-screen bg-green-50 px-4 sm:px-6 py-6 sm:py-8">
       <div className="max-w-7xl mx-auto pt-16 sm:pt-24">
-        <h1 className="text-2xl sm:text-4xl font-bold text-green-700 mb-6">
-          GIS Dashboard
-        </h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl sm:text-4xl font-bold text-green-700">
+            GIS Dashboard
+          </h1>
+          {activeLayer === 'protectedAreas' && (
+            <Button
+              onClick={() => setShowForm(!showForm)}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {showForm ? 'Hide Form' : 'Add Protected Area'}
+            </Button>
+          )}
+        </div>
 
-        <Card className="p-6">
-          <Tabs defaultValue="protectedAreas" onValueChange={setActiveLayer}>
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="protectedAreas">Protected Areas</TabsTrigger>
-              <TabsTrigger value="forestCover">Forest Cover</TabsTrigger>
-              <TabsTrigger value="miningSites">Mining Sites</TabsTrigger>
-              <TabsTrigger value="coastalResources">Coastal Resources</TabsTrigger>
-              <TabsTrigger value="landUse">Land Use</TabsTrigger>
-            </TabsList>
+        <div className="space-y-6">
+          {showForm && activeLayer === 'protectedAreas' && (
+            <ProtectedAreaForm onAreaAdded={handleAreaAdded} />
+          )}
 
-            <TabsContent value={activeLayer} className="mt-6">
-              <GISMap layers={layers} />
-            </TabsContent>
-          </Tabs>
-        </Card>
+          <Card className="p-6">
+            <Tabs defaultValue="protectedAreas" onValueChange={setActiveLayer}>
+              <TabsList className="grid w-full grid-cols-5">
+                <TabsTrigger value="protectedAreas">Protected Areas</TabsTrigger>
+                <TabsTrigger value="forestCover">Forest Cover</TabsTrigger>
+                <TabsTrigger value="miningSites">Mining Sites</TabsTrigger>
+                <TabsTrigger value="coastalResources">Coastal Resources</TabsTrigger>
+                <TabsTrigger value="landUse">Land Use</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value={activeLayer} className="mt-6">
+                <GISMap layers={layers} />
+              </TabsContent>
+            </Tabs>
+          </Card>
+        </div>
       </div>
     </div>
   );

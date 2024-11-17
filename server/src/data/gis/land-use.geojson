@@ -3,21 +3,42 @@
   "features": [
     {
       "type": "Feature",
-      "properties": {
-        "name": "Land Use Area 1",
-        "type": "agricultural"
-      },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
-            [120.8842, 14.4995],
-            [120.9842, 14.4995],
-            [120.9842, 14.5995],
-            [120.8842, 14.5995],
-            [120.8842, 14.4995]
+            [121.98, 13.38],
+            [122.08, 13.38],
+            [122.08, 13.48],
+            [121.98, 13.48],
+            [121.98, 13.38]
           ]
         ]
+      },
+      "properties": {
+        "name": "Marinduque Agricultural Zone",
+        "type": "agricultural",
+        "area": "300 hectares"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [122.02, 13.36],
+            [122.12, 13.36],
+            [122.12, 13.46],
+            [122.02, 13.46],
+            [122.02, 13.36]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Marinduque Residential Zone",
+        "type": "residential",
+        "area": "200 hectares"
       }
     }
   ]

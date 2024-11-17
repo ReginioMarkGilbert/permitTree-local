@@ -3,13 +3,26 @@
   "features": [
     {
       "type": "Feature",
-      "properties": {
-        "name": "Mining Site 1",
-        "type": "Active"
-      },
       "geometry": {
         "type": "Point",
-        "coordinates": [121.0342, 14.5495]
+        "coordinates": [122.01, 13.38]
+      },
+      "properties": {
+        "name": "Marinduque Mining Site 1",
+        "type": "Active",
+        "mineral": "Copper"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [122.05, 13.42]
+      },
+      "properties": {
+        "name": "Marinduque Mining Site 2",
+        "type": "Active",
+        "mineral": "Gold"
       }
     }
   ]

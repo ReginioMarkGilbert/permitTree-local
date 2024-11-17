@@ -1,6 +1,19 @@
 const { gql } = require('graphql-tag');
 
 const gisTypes = gql`
+  scalar JSON
+
+  input ProtectedAreaInput {
+    name: String!
+    type: String!
+    geometry: GeometryInput!
+  }
+
+  input GeometryInput {
+    type: String!
+    coordinates: JSON!
+  }
+
   type GeoJSONFeature {
     type: String!
     geometry: JSON!
@@ -20,8 +33,8 @@ const gisTypes = gql`
     landUse: GeoJSONCollection!
   }
 
-  extend type Query {
-    getGISData: GISData!
+  extend type Mutation {
+    addProtectedArea(input: ProtectedAreaInput!): GeoJSONCollection!
   }
 `;
 
