@@ -51,7 +51,7 @@ import PersonnelDashboard from './pages/Personnel/PersonnelDashboard';
 import OOPPrintPage from './pages/user/OOPPrintPage';
 import PaymentPage from './pages/user/PaymentPage';
 import ORPrintPage from './pages/user/ORPrintPage';
-import GISDashboardPage from './pages/GIS/GISDashboardPage';
+import GISDashboardPage from './pages/Personnel/GISDashboardPage';
 
 const App = () => {
    const { sidebarToggle, toggleSidebar } = useSidebarToggle();
