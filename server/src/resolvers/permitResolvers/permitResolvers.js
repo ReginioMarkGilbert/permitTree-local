@@ -110,7 +110,6 @@ const permitResolvers = {
                } else if (roles.includes('OOP_Staff_Incharge')) {
                   query = {
                      $or: [
-                        { currentStage: 'AwaitingOOP' },
                         { awaitingOOP: true }
                      ]
                   };
@@ -794,7 +793,7 @@ const permitResolvers = {
          });
 
          // Notify PENR/CENR Officer
-         await NotificationService.notifyNextPersonnel('CENRPENRReview', permit);
+         // await NotificationService.notifyNextPersonnel('CENRPENRReview', permit);
 
          return permit;
       },
@@ -829,6 +828,53 @@ const permitResolvers = {
          await NotificationService.notifyNextPersonnel('ForInspectionByTechnicalStaff', permit);
 
          return permit;
+      },
+
+      scheduleInspection: async (_, {
+         permitId,
+         scheduledDate,
+         scheduledTime,
+         location
+      }, { user }) => {
+         try {
+            const permit = await Permit.findById(permitId);
+            if (!permit) throw new Error('Permit not found');
+
+            if (permit.currentStage !== 'ForInspectionByTechnicalStaff') {
+               throw new Error('Permit is not ready for inspection scheduling');
+            }
+
+            permit.inspectionSchedule = {
+               scheduledDate: new Date(scheduledDate),
+               scheduledTime,
+               location,
+               status: 'Pending'
+            };
+
+            // Add to history
+            permit.history.push({
+               stage: 'ForInspectionByTechnicalStaff',
+               status: 'Inspection Scheduled',
+               timestamp: new Date(),
+               notes: `Inspection scheduled for ${scheduledDate} at ${scheduledTime}`,
+               actionBy: user.id
+            });
+
+            await permit.save();
+
+            // Notify applicant
+            await NotificationService.createApplicationNotification({
+               application: permit,
+               recipientId: permit.applicantId,
+               type: 'INSPECTION_SCHEDULED',
+               stage: 'ForInspectionByTechnicalStaff',
+               remarks: `Your application inspection is scheduled for ${scheduledDate} at ${scheduledTime}. Location: ${location}`
+            });
+
+            return permit;
+         } catch (error) {
+            throw new Error(`Failed to schedule inspection: ${error.message}`);
+         }
       }
    },
    Permit: {

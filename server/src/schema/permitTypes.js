@@ -9,6 +9,13 @@ const permitTypes = gql`
     actionBy: ID
   }
 
+  type InspectionSchedule {
+    scheduledDate: String!
+    scheduledTime: String!
+    location: String!
+    status: String!
+  }
+
   interface Permit {
     id: ID!
     applicationNumber: String!
@@ -28,6 +35,7 @@ const permitTypes = gql`
     awaitingPermitCreation: Boolean!
     PermitCreated: Boolean!
     history: [HistoryEntry]
+    inspectionSchedule: InspectionSchedule
   }
 
   type COVPermit implements Permit {
@@ -61,6 +69,7 @@ const permitTypes = gql`
     destinationAddress: String!
     files: COVFiles
     certificate: Certificate
+    inspectionSchedule: InspectionSchedule
   }
 
   type CSAWPermit implements Permit {
@@ -103,6 +112,7 @@ const permitTypes = gql`
     isWPPHolder: Boolean!
     files: CSAWFiles
     certificate: Certificate
+    inspectionSchedule: InspectionSchedule
   }
 
   type PLTCPPermit implements Permit {
@@ -136,6 +146,7 @@ const permitTypes = gql`
     purpose: String!
     files: PLTCPFiles
     certificate: Certificate
+    inspectionSchedule: InspectionSchedule
   }
 
   type PTPRPermit implements Permit {
@@ -168,6 +179,7 @@ const permitTypes = gql`
     yearPlanted: Int!
     files: PTPRFiles
     certificate: Certificate
+    inspectionSchedule: InspectionSchedule
   }
 
   type PLTPPermit implements Permit {
@@ -204,6 +216,7 @@ const permitTypes = gql`
     purpose: String!
     files: PLTPFiles
     certificate: Certificate
+    inspectionSchedule: InspectionSchedule
   }
 
   type TCEBPPermit implements Permit {
@@ -233,6 +246,7 @@ const permitTypes = gql`
     requestType: String!
     files: TCEBPFiles
     certificate: Certificate
+    inspectionSchedule: InspectionSchedule
   }
 
   type COVFiles {
@@ -380,6 +394,12 @@ const permitTypes = gql`
     submitPermit(id: ID!): Permit!
     deletePermit(id: ID!): Boolean!
     unsubmitPermit(id: ID!): Permit!
+    scheduleInspection(
+      permitId: ID!
+      scheduledDate: String!
+      scheduledTime: String!
+      location: String!
+    ): Permit
   }
 
   input COVPermitInput {

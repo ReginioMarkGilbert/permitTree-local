@@ -33,24 +33,21 @@ const PermitSchema = new mongoose.Schema({
 
          'TechnicalStaffReview',
          'ReturnedByTechnicalStaff',
-         'AuthenticityApprovedByTechnicalStaff',
 
-         'ReceivingClerkReview',
-         'ReturnedByReceivingClerk',
          'ForRecordByReceivingClerk',
 
-         'CENRPENRReview',
-         'ReturnedByPENRCENROfficer',
-
          'ChiefRPSReview',
-
-         'AwaitingOOP',
+         'CENRPENRReview',
 
          'ForInspectionByTechnicalStaff',
+         'AuthenticityApprovedByTechnicalStaff',
          'ApprovedByTechnicalStaff',
 
          'PendingRelease',
-         'Released'
+         'Released',
+
+         'ReceivingClerkReview',
+         'ReturnedByReceivingClerk'
       ]
    },
    acceptedByTechnicalStaff: { type: Boolean, default: false },
@@ -80,7 +77,17 @@ const PermitSchema = new mongoose.Schema({
       }
    }],
    dateOfSubmission: { type: Date, default: Date.now },
-   lastUpdated: { type: Date, default: Date.now }
+   lastUpdated: { type: Date, default: Date.now },
+   inspectionSchedule: {
+      scheduledDate: Date,
+      scheduledTime: String,
+      location: String,
+      status: {
+         type: String,
+         enum: ['Pending', 'Completed', 'Rescheduled', 'Cancelled'],
+         default: 'Pending'
+      }
+   }
 }, { timestamps: true });
 
 // Add a pre-save hook to ensure history is always an array
