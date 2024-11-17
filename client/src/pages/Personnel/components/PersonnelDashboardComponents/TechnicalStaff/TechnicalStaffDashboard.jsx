@@ -367,13 +367,6 @@ const TechnicalStaffDashboard = () => {
                </div>
             </div>
 
-            {/* Tab Description */}
-            {renderTabDescription() && (
-               <div className="bg-white rounded-lg shadow-sm p-4">
-                  {renderTabDescription()}
-               </div>
-            )}
-
             {/* Table Section */}
             <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                {renderTable()}

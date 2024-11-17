@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
-import { FaBell, FaChartLine, FaCog, FaFileInvoiceDollar, FaHome, FaSignOutAlt, FaTachometerAlt, FaMap } from 'react-icons/fa';
+import { FaBell, FaChartLine, FaCog, FaFileInvoiceDollar, FaHome, FaSignOutAlt, FaTachometerAlt, FaMap, FaCalendarCheck } from 'react-icons/fa';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { removeToken } from '../../../utils/tokenManager';
 import { isAuthenticated, getUserRoles } from '../../../utils/auth';
@@ -84,11 +84,14 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
    const mainNavItems = useMemo(() => [
       { to: "/personnel/home", icon: <FaHome />, text: "Home" },
       { to: getDashboardLink(), icon: <FaTachometerAlt />, text: "Dashboard" },
+      ...(userRoles.includes('Technical_Staff') ? [
+         { to: "/personnel/inspection-scheduling", icon: <FaCalendarCheck />, text: "Inspection Schedule" }
+      ] : []),
       ...(shouldShowOrderOfPayment() ? [{ to: "/personnel/order-of-payment", icon: <FaFileInvoiceDollar />, text: "Order of Payment" }] : []),
       { to: "/personnel/notifications", icon: <FaBell />, text: "Notifications" },
       { to: "/personnel/reports", icon: <FaChartLine />, text: "Reports" },
       { to: "/gis", icon: <FaMap />, text: "GIS Maps" },
-   ], [getDashboardLink, shouldShowOrderOfPayment]);
+   ], [getDashboardLink, shouldShowOrderOfPayment, userRoles]);
 
    const accountNavItems = useMemo(() => [
       { to: "/personnel/settings", icon: <FaCog />, text: "Settings" },

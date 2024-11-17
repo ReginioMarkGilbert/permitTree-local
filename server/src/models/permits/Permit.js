@@ -78,16 +78,6 @@ const PermitSchema = new mongoose.Schema({
    }],
    dateOfSubmission: { type: Date, default: Date.now },
    lastUpdated: { type: Date, default: Date.now },
-   inspectionSchedule: {
-      scheduledDate: Date,
-      scheduledTime: String,
-      location: String,
-      status: {
-         type: String,
-         enum: ['Pending', 'Completed', 'Rescheduled', 'Cancelled'],
-         default: 'Pending'
-      }
-   }
 }, { timestamps: true });
 
 // Add a pre-save hook to ensure history is always an array

@@ -12,7 +12,6 @@ import {
 import TS_ViewModal from './TS_ViewModal';
 import TS_ReviewModal from './TS_ReviewModal';
 import TS_AuthenticityReviewModal from './TS_AuthenticityReviewModal';
-import TS_ScheduleInspectionModal from './TS_ScheduleInspectionModal';
 // import GenerateCertificateModal from './GenerateCertificateModal';
 import CertificateActionHandler from './CertificateActionHandler';
 import { getUserRoles } from '../../../../../utils/auth';
@@ -97,7 +96,6 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
    const [isAuthenticityModalOpen, setIsAuthenticityModalOpen] = useState(false);
    const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(false);
-   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
    // const { handleUndoApproval, handleUndoAcceptance } = useUndoApplicationApproval();
    const [updatePermitStage] = useMutation(UPDATE_PERMIT_STAGE);
 
@@ -229,25 +227,7 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
       // Authenticity approval action
       if (currentTab === 'For Inspection and Approval') {
          actions.push(
-            // Schedule Inspection button
-            <TooltipProvider key="schedule-inspection">
-               <Tooltip delayDuration={200}>
-                  <TooltipTrigger asChild>
-                     <Button
-                        onClick={() => setIsScheduleModalOpen(true)}
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 text-purple-600 hover:text-purple-800"
-                     >
-                        <Calendar className="h-4 w-4" />
-                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                     <p>Schedule Inspection</p>
-                  </TooltipContent>
-               </Tooltip>
-            </TooltipProvider>,
-            // Existing Authenticity approval button
+            // Only keep the Authenticity approval button
             <TooltipProvider key="authenticity-action">
                <Tooltip delayDuration={200}>
                   <TooltipTrigger asChild>
@@ -359,12 +339,6 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
             onClose={() => setIsAuthenticityModalOpen(false)}
             application={app}
             onReviewComplete={handleReviewComplete}
-         />
-         <TS_ScheduleInspectionModal
-            isOpen={isScheduleModalOpen}
-            onClose={() => setIsScheduleModalOpen(false)}
-            application={app}
-            onScheduleComplete={onReviewComplete}
          />
          <CertificateActionHandler
             isOpen={isCertificateModalOpen}

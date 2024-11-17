@@ -19,6 +19,7 @@ const oopResolvers = require('./oopResolvers');
 const personnelNotificationResolvers = require('./personnelNotificationResolvers');
 const analyticsResolvers = require('./analyticsResolvers');
 const gisResolvers = require('./gisResolvers');
+const inspectionResolvers = require('./inspectionResolvers');
 
 // Base resolvers with scalar types and type resolvers
 const baseResolvers = {
@@ -36,7 +37,8 @@ const baseResolvers = {
       ...notificationResolvers.Query,
       ...personnelNotificationResolvers.Query,
       ...analyticsResolvers.Query,
-      ...gisResolvers.Query
+      ...gisResolvers.Query,
+      ...inspectionResolvers.Query
    },
    Mutation: {
       ...userResolvers.Mutation,
@@ -47,7 +49,8 @@ const baseResolvers = {
       ...notificationResolvers.Mutation,
       ...personnelNotificationResolvers.Mutation,
       ...analyticsResolvers.Mutation,
-      ...gisResolvers.Mutation
+      ...gisResolvers.Mutation,
+      ...inspectionResolvers.Mutation
    },
    Subscription: {
       ...notificationResolvers.Subscription,
@@ -80,7 +83,8 @@ const resolvers = mergeResolvers([
    notificationResolvers,
    personnelNotificationResolvers,
    analyticsResolvers,
-   gisResolvers
+   gisResolvers,
+   inspectionResolvers
 ]);
 
 module.exports = resolvers;

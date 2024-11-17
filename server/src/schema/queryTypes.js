@@ -53,6 +53,12 @@ const queryTypes = gql`
 
     # GIS Query
     getGISData: GISData!
+
+    # Inspection Queries
+    getInspections: [Inspection!]!
+    getInspectionById(id: ID!): Inspection
+    getInspectionsByPermit(permitId: ID!): [Inspection!]!
+    getPendingInspections: [Inspection!]!
   }
 `;
 
