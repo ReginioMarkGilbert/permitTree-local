@@ -7,6 +7,7 @@ import { gql } from '@apollo/client';
 import { Skeleton } from "@/components/ui/skeleton";
 import ProtectedAreaForm from './components/ProtectedAreaForm';
 import { Button } from "@/components/ui/button";
+import ProtectedAreaList from './components/ProtectedAreaList';
 
 const GET_GIS_DATA = gql`
   query GetGISData {
@@ -14,6 +15,7 @@ const GET_GIS_DATA = gql`
       protectedAreas {
         type
         features {
+          id
           type
           geometry
           properties
@@ -22,6 +24,7 @@ const GET_GIS_DATA = gql`
       forestCover {
         type
         features {
+          id
           type
           geometry
           properties
@@ -30,6 +33,7 @@ const GET_GIS_DATA = gql`
       miningSites {
         type
         features {
+          id
           type
           geometry
           properties
@@ -38,6 +42,7 @@ const GET_GIS_DATA = gql`
       coastalResources {
         type
         features {
+          id
           type
           geometry
           properties
@@ -46,6 +51,7 @@ const GET_GIS_DATA = gql`
       landUse {
         type
         features {
+          id
           type
           geometry
           properties
@@ -158,6 +164,13 @@ const GISDashboardPage = () => {
         <div className="space-y-6">
           {showForm && activeLayer === 'protectedAreas' && (
             <ProtectedAreaForm onAreaAdded={handleAreaAdded} />
+          )}
+
+          {activeLayer === 'protectedAreas' && (
+            <ProtectedAreaList
+              areas={data?.getGISData?.protectedAreas?.features || []}
+              onUpdate={() => refetch()}
+            />
           )}
 
           <Card className="p-6">

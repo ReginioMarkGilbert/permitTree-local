@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { gql, useMutation } from '@apollo/client';
+import { toast } from 'sonner';
 
 const ADD_PROTECTED_AREA = gql`
   mutation AddProtectedArea($input: ProtectedAreaInput!) {
@@ -18,16 +19,24 @@ const ADD_PROTECTED_AREA = gql`
   }
 `;
 
-const ProtectedAreaForm = ({ onAreaAdded }) => {
-  const [name, setName] = useState('');
-  const [type, setType] = useState('');
-  const [coordinates, setCoordinates] = useState('');
+const ProtectedAreaForm = ({ onAreaAdded, initialData, onSubmit, isEditing }) => {
+  const [name, setName] = useState(initialData?.name || '');
+  const [type, setType] = useState(initialData?.type || '');
+  const [coordinates, setCoordinates] = useState(
+    initialData?.geometry ?
+    initialData.geometry.coordinates[0].map(coord => coord.join(',')).join(';')
+    : ''
+  );
   const [isDrawing, setIsDrawing] = useState(false);
 
   const [addProtectedArea] = useMutation(ADD_PROTECTED_AREA, {
     onCompleted: (data) => {
+      toast.success('Protected area added successfully!');
       onAreaAdded(data.addProtectedArea);
       resetForm();
+    },
+    onError: (error) => {
+      toast.error(`Failed to add protected area: ${error.message}`);
     }
   });
 
@@ -41,23 +50,36 @@ const ProtectedAreaForm = ({ onAreaAdded }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Convert coordinates string to array of coordinates
     const coordArray = coordinates.split(';').map(pair =>
       pair.split(',').map(num => parseFloat(num.trim()))
     );
 
-    addProtectedArea({
-      variables: {
-        input: {
-          name,
-          type,
-          geometry: {
-            type: "Polygon",
-            coordinates: [coordArray]
-          }
-        }
+    if (coordArray.length > 0) {
+      coordArray.push([...coordArray[0]]);
+    }
+
+    const data = {
+      name,
+      type,
+      geometry: {
+        type: "Polygon",
+        coordinates: [coordArray]
       }
-    });
+    };
+
+    console.log('Submitting data:', data);
+
+    if (isEditing) {
+      onSubmit(data);
+    } else {
+      addProtectedArea({
+        variables: {
+          input: data
+        }
+      }).catch(error => {
+        console.error('Mutation error:', error);
+      });
+    }
   };
 
   return (
@@ -118,7 +140,7 @@ const ProtectedAreaForm = ({ onAreaAdded }) => {
             type="submit"
             className="flex-1 bg-green-600 hover:bg-green-700"
           >
-            Add Protected Area
+            {isEditing ? 'Update Protected Area' : 'Add Protected Area'}
           </Button>
         </div>
       </form>

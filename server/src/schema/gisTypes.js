@@ -15,6 +15,7 @@ const gisTypes = gql`
   }
 
   type GeoJSONFeature {
+    id: ID!
     type: String!
     geometry: JSON!
     properties: JSON!
@@ -35,6 +36,9 @@ const gisTypes = gql`
 
   extend type Mutation {
     addProtectedArea(input: ProtectedAreaInput!): GeoJSONCollection!
+    updateProtectedArea(id: ID!, input: ProtectedAreaInput!): GeoJSONCollection!
+    deleteProtectedArea(id: ID!): Boolean!
+    deleteAllProtectedAreas: Boolean!
   }
 `;
 

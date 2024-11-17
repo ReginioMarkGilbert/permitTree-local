@@ -1,71 +1,38 @@
-const fs = require('fs').promises;
-const path = require('path');
+const GISFeature = require('../models/GISFeature');
 
 class GISService {
   async getGISData() {
     try {
-      console.log('Loading GIS data...');
+      const features = await GISFeature.find({});
 
-      // Load GeoJSON files
-      const protectedAreas = await this.loadGeoJSON('protected-areas.geojson');
-      const forestCover = await this.loadGeoJSON('forest-cover.geojson');
-      const miningSites = await this.loadGeoJSON('mining-sites.geojson');
-      const coastalResources = await this.loadGeoJSON('coastal-resources.geojson');
-      const landUse = await this.loadGeoJSON('land-use.geojson');
-
-      const data = {
-        protectedAreas,
-        forestCover,
-        miningSites,
-        coastalResources,
-        landUse
-      };
-
-      console.log('GIS data loaded successfully:', Object.keys(data));
-      return data;
-    } catch (error) {
-      console.error('Error loading GIS data:', error);
-      throw error;
-    }
-  }
-
-  async loadGeoJSON(filename) {
-    try {
-      const filePath = path.join(__dirname, '../data/gis', filename);
-      console.log('Loading GeoJSON file:', filePath);
-
-      const data = await fs.readFile(filePath, 'utf8');
-      const parsedData = JSON.parse(data);
-
-      console.log(`Loaded ${filename} with ${parsedData.features?.length || 0} features`);
-      return parsedData;
-    } catch (error) {
-      console.error(`Error loading ${filename}:`, error);
-      throw error;
-    }
-  }
-
-  async addProtectedArea(input) {
-    try {
-      const filePath = path.join(__dirname, '../data/gis/protected-areas.geojson');
-      const data = await fs.readFile(filePath, 'utf8');
-      const geojson = JSON.parse(data);
-
-      const newFeature = {
-        type: 'Feature',
-        geometry: input.geometry,
-        properties: {
-          name: input.name,
-          type: input.type
+      // Group features by layer type
+      const groupedFeatures = features.reduce((acc, feature) => {
+        if (!acc[feature.layerType]) {
+          acc[feature.layerType] = {
+            type: 'FeatureCollection',
+            features: []
+          };
         }
+
+        acc[feature.layerType].features.push({
+          id: feature._id,
+          type: feature.type,
+          geometry: feature.geometry,
+          properties: feature.properties
+        });
+
+        return acc;
+      }, {});
+
+      return {
+        protectedAreas: groupedFeatures.protectedAreas || { type: 'FeatureCollection', features: [] },
+        forestCover: groupedFeatures.forestCover || { type: 'FeatureCollection', features: [] },
+        miningSites: groupedFeatures.miningSites || { type: 'FeatureCollection', features: [] },
+        coastalResources: groupedFeatures.coastalResources || { type: 'FeatureCollection', features: [] },
+        landUse: groupedFeatures.landUse || { type: 'FeatureCollection', features: [] }
       };
-
-      geojson.features.push(newFeature);
-
-      await fs.writeFile(filePath, JSON.stringify(geojson, null, 2));
-      return geojson;
     } catch (error) {
-      console.error('Error adding protected area:', error);
+      console.error('Error fetching GIS data:', error);
       throw error;
     }
   }

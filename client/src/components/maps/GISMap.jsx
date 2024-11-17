@@ -20,7 +20,7 @@ const GISMap = ({ layers = [] }) => {
     if (map.current) return;
 
     try {
-      // Initialize map
+      // Initialize map centered on Marinduque
       map.current = new Map({
         target: mapContainer.current,
         layers: [
@@ -29,10 +29,10 @@ const GISMap = ({ layers = [] }) => {
           })
         ],
         view: new View({
-          center: fromLonLat([122.5, 12.8]), // Philippines center
-          zoom: 6,
+          center: fromLonLat([122.0, 13.4]), // Marinduque center
+          zoom: 10,
           maxZoom: 19,
-          minZoom: 4
+          minZoom: 8
         })
       });
 
@@ -67,7 +67,7 @@ const GISMap = ({ layers = [] }) => {
 
     // Add new layers
     layers.forEach(layer => {
-      if (layer.type === 'geojson') {
+      if (layer.type === 'geojson' && layer.data?.features?.length > 0) {
         try {
           console.log('Adding layer:', layer.id, layer.data);
 
@@ -103,12 +103,15 @@ const GISMap = ({ layers = [] }) => {
           vectorLayers.current[layer.id] = vectorLayer;
           map.current.addLayer(vectorLayer);
 
-          // Fit view to layer extent
+          // Only fit to extent if there are features
           const extent = vectorSource.getExtent();
-          map.current.getView().fit(extent, {
-            padding: [50, 50, 50, 50],
-            maxZoom: 12
-          });
+          if (extent && !isEmptyExtent(extent)) {
+            map.current.getView().fit(extent, {
+              padding: [50, 50, 50, 50],
+              maxZoom: 12,
+              duration: 1000 // Add smooth animation
+            });
+          }
 
         } catch (error) {
           console.error(`Error adding layer ${layer.id}:`, error);
@@ -116,6 +119,13 @@ const GISMap = ({ layers = [] }) => {
       }
     });
   }, [layers]);
+
+  // Helper function to check if extent is empty or invalid
+  const isEmptyExtent = (extent) => {
+    return !extent || extent.some(coord => !isFinite(coord)) ||
+           (extent[0] === Infinity && extent[1] === Infinity &&
+            extent[2] === -Infinity && extent[3] === -Infinity);
+  };
 
   return (
     <div className="relative w-full h-[600px] rounded-lg overflow-hidden">
