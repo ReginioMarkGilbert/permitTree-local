@@ -9,6 +9,8 @@ import useDebounce from '../../hooks/useDebounce';
 import { getUserRoles } from '../../utils/auth';
 import { usePersonnelNotifications } from './hooks/usePersonnelNotifications';
 import { useRecentApplications } from './hooks/useRecentApplications';
+import { useOrderOfPayments } from './hooks/useOrderOfPayments';
+import { format } from 'date-fns';
 
 const PersonnelHomePage = () => {
    const [loading, setLoading] = useState(true);
@@ -134,6 +136,17 @@ const PersonnelHomePage = () => {
       error: applicationsError
    } = useRecentApplications(7);
 
+   const formatDate = (timestamp) => {
+      const date = new Date(parseInt(timestamp));
+      return format(date, 'M/d/yyyy');
+   };
+
+   const {
+      recentOOPs,
+      recentOOPsLoading,
+      recentOOPsError
+   } = useOrderOfPayments();
+
    const getGreeting = () => {
       const hour = new Date().getHours();
 
@@ -146,6 +159,175 @@ const PersonnelHomePage = () => {
       } else {
          return "Working late tonight? Don't forget to rest!";
       }
+   };
+
+   const renderRecentApplicationsOrOOPs = () => {
+      if (userRoles.includes('Accountant') || userRoles.includes('Bill_Collector')) {
+         const status = userRoles.includes('Accountant') ? 'For Approval' : 'Payment Proof Submitted';
+         const title = userRoles.includes('Accountant') ? 'Pending Approval' : 'Pending Payment Verification';
+
+         return (
+            <Card className="lg:col-span-5 bg-white rounded-xl shadow-md hover:shadow-xl
+               transition-all duration-300 overflow-hidden">
+               <CardHeader className="border-b border-gray-100">
+                  <div className="flex items-center space-x-3">
+                     <div className="p-2 rounded-lg bg-green-50 text-green-600">
+                        <ClipboardList className="h-6 w-6" />
+                     </div>
+                     <CardTitle className="text-xl font-semibold text-gray-900">
+                        Recent Order of Payments {/* - {title} */}
+                     </CardTitle>
+                  </div>
+               </CardHeader>
+               <CardContent className="relative flex flex-col h-full pt-6">
+                  {recentOOPsLoading ? (
+                     <div className="flex items-center justify-center h-[365px]">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                     </div>
+                  ) : recentOOPsError ? (
+                     <div className="flex flex-col items-center justify-center h-[365px] text-gray-500">
+                        <AlertCircle className="h-12 w-12 mb-2 text-red-400" />
+                        <p className="text-red-500">Error loading order of payments</p>
+                     </div>
+                  ) : recentOOPs.length === 0 ? (
+                     <div className="flex flex-col items-center justify-center h-[365px] text-gray-500">
+                        <ClipboardList className="h-12 w-12 mb-2 text-gray-400" />
+                        <p>No pending order of payments</p>
+                     </div>
+                  ) : (
+                     <div className="space-y-4 h-[365px] overflow-y-auto custom-scrollbar pr-4">
+                        {recentOOPs.map((oop) => (
+                           <div
+                              key={oop._id}
+                              className="group flex items-center justify-between border-b border-gray-100 pb-4 last:border-b-0
+                                 hover:bg-gray-50 rounded-lg transition-all duration-200 -mx-2 px-4"
+                           >
+                              <div className="flex-grow">
+                                 <p className="font-semibold text-gray-900 group-hover:text-green-700
+                                    transition-colors duration-200">
+                                    {oop.natureOfApplication}
+                                 </p>
+                                 <div className="flex items-center gap-2 mt-1">
+                                    <p className="text-sm text-gray-500">Bill No: {oop.billNo}</p>
+                                    <span className="text-gray-300">•</span>
+                                    <p className="text-sm text-gray-500">
+                                       {formatDate(oop.createdAt)}
+                                    </p>
+                                 </div>
+                                 <p className="text-sm font-semibold text-green-600 mt-1">
+                                    Amount: ₱{oop.totalAmount.toLocaleString()}
+                                 </p>
+                              </div>
+                              <div>
+                                 <span className={`inline-block px-3 py-1 rounded-full text-sm
+                                    ${userRoles.includes('Accountant')
+                                       ? 'bg-yellow-100 text-yellow-800'
+                                       : 'bg-blue-100 text-blue-800'
+                                    }`}>
+                                    {oop.OOPstatus}
+                                 </span>
+                              </div>
+                           </div>
+                        ))}
+                     </div>
+                  )}
+               </CardContent>
+               <CardFooter className="border-t border-gray-100 pt-4">
+                  <Button
+                     className="w-full bg-gradient-to-r from-green-600 to-green-700
+                        hover:from-green-700 hover:to-green-800 text-white
+                        transform transition-all duration-300
+                        hover:translate-y-[-2px] active:translate-y-0
+                        focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+                     onClick={() => navigate(userRoles.includes('Accountant')
+                        ? '/personnel/accountant'
+                        : '/personnel/bill-collector')}
+                  >
+                     View All Order of Payments
+                  </Button>
+               </CardFooter>
+            </Card>
+         );
+      }
+
+      // Return the existing recent applications card for other roles
+      return (
+         <Card className="lg:col-span-5 bg-white rounded-xl shadow-md hover:shadow-xl
+            transition-all duration-300 overflow-hidden">
+            <CardHeader className="border-b border-gray-100">
+               <div className="flex items-center space-x-3">
+                  <div className="p-2 rounded-lg bg-green-50 text-green-600">
+                     <ClipboardList className="h-6 w-6" />
+                  </div>
+                  <CardTitle className="text-xl font-semibold text-gray-900">
+                     Recent Applications
+                  </CardTitle>
+               </div>
+            </CardHeader>
+            <CardContent className="relative flex flex-col h-full pt-6">
+               {applicationsLoading ? (
+                  <div className="flex items-center justify-center h-[365px]">
+                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                  </div>
+               ) : applicationsError ? (
+                  <div className="flex flex-col items-center justify-center h-[365px] text-gray-500">
+                     <AlertCircle className="h-12 w-12 mb-2 text-red-400" />
+                     <p className="text-red-500">Error loading applications</p>
+                     <p className="text-sm text-gray-400 mt-1">{applicationsError.message}</p>
+                  </div>
+               ) : recentApplications.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-[365px] text-gray-500">
+                     <ClipboardList className="h-12 w-12 mb-2 text-gray-400" />
+                     <p>No applications yet</p>
+                  </div>
+               ) : (
+                  <div className="space-y-4 h-[365px] overflow-y-auto custom-scrollbar pr-4">
+                     {recentApplications.map((app) => (
+                        <div
+                           key={app.id}
+                           className="group flex items-center border-b border-gray-100 pb-4 last:border-b-0
+                              hover:bg-gray-50 rounded-lg transition-all duration-200 -mx-2 px-4"
+                        >
+                           <div className="flex-grow">
+                              <p className="font-semibold text-gray-900 group-hover:text-green-700
+                                 transition-colors duration-200">
+                                 {app.applicationType}
+                              </p>
+                              <div className="flex items-center gap-2 mt-1">
+                                 <p className="text-sm text-gray-500">ID: {app.applicationNumber}</p>
+                                 <span className="text-gray-300">•</span>
+                                 <p className="text-sm text-gray-500">
+                                    {new Date(app.dateOfSubmission).toLocaleDateString()}
+                                 </p>
+                              </div>
+                           </div>
+                           <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${app.status === "Approved" ? "bg-green-100 text-green-800" :
+                              app.status === "Submitted" ? "bg-blue-100 text-blue-800" :
+                                 app.status === "In Progress" ? "bg-yellow-100 text-yellow-800" :
+                                    app.status === "Rejected" ? "bg-red-100 text-red-800" :
+                                       "bg-gray-100 text-gray-800"
+                              }`}>
+                              {app.status}
+                           </span>
+                        </div>
+                     ))}
+                  </div>
+               )}
+            </CardContent>
+            <CardFooter className="border-t border-gray-100 pt-4">
+               <Button
+                  className="w-full bg-gradient-to-r from-green-600 to-green-700
+                     hover:from-green-700 hover:to-green-800 text-white
+                     transform transition-all duration-300
+                     hover:translate-y-[-2px] active:translate-y-0
+                     focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+                  onClick={handleViewAllApplications}
+               >
+                  View All Applications
+               </Button>
+            </CardFooter>
+         </Card>
+      );
    };
 
    return (
@@ -198,82 +380,7 @@ const PersonnelHomePage = () => {
                </div>
 
                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                  {/* Recent Applications Card - spans 5 columns */}
-                  <Card className="lg:col-span-5 bg-white rounded-xl shadow-md hover:shadow-xl
-                     transition-all duration-300 overflow-hidden">
-                     <CardHeader className="border-b border-gray-100">
-                        <div className="flex items-center space-x-3">
-                           <div className="p-2 rounded-lg bg-green-50 text-green-600">
-                              <ClipboardList className="h-6 w-6" />
-                           </div>
-                           <CardTitle className="text-xl font-semibold text-gray-900">
-                              Recent Applications
-                           </CardTitle>
-                        </div>
-                     </CardHeader>
-                     <CardContent className="relative flex flex-col h-full pt-6">
-                        {applicationsLoading ? (
-                           <div className="flex items-center justify-center h-[365px]">
-                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-                           </div>
-                        ) : applicationsError ? (
-                           <div className="flex flex-col items-center justify-center h-[365px] text-gray-500">
-                              <AlertCircle className="h-12 w-12 mb-2 text-red-400" />
-                              <p className="text-red-500">Error loading applications</p>
-                              <p className="text-sm text-gray-400 mt-1">{applicationsError.message}</p>
-                           </div>
-                        ) : recentApplications.length === 0 ? (
-                           <div className="flex flex-col items-center justify-center h-[365px] text-gray-500">
-                              <ClipboardList className="h-12 w-12 mb-2 text-gray-400" />
-                              <p>No applications yet</p>
-                           </div>
-                        ) : (
-                           <div className="space-y-4 h-[365px] overflow-y-auto custom-scrollbar pr-4">
-                              {recentApplications.map((app) => (
-                                 <div
-                                    key={app.id}
-                                    className="group flex items-center border-b border-gray-100 pb-4 last:border-b-0
-                                       hover:bg-gray-50 rounded-lg transition-all duration-200 -mx-2 px-4"
-                                 >
-                                    <div className="flex-grow">
-                                       <p className="font-semibold text-gray-900 group-hover:text-green-700
-                                          transition-colors duration-200">
-                                          {app.applicationType}
-                                       </p>
-                                       <div className="flex items-center gap-2 mt-1">
-                                          <p className="text-sm text-gray-500">ID: {app.applicationNumber}</p>
-                                          <span className="text-gray-300">•</span>
-                                          <p className="text-sm text-gray-500">
-                                             {new Date(app.dateOfSubmission).toLocaleDateString()}
-                                          </p>
-                                       </div>
-                                    </div>
-                                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${app.status === "Approved" ? "bg-green-100 text-green-800" :
-                                          app.status === "Submitted" ? "bg-blue-100 text-blue-800" :
-                                             app.status === "In Progress" ? "bg-yellow-100 text-yellow-800" :
-                                                app.status === "Rejected" ? "bg-red-100 text-red-800" :
-                                                   "bg-gray-100 text-gray-800"
-                                       }`}>
-                                       {app.status}
-                                    </span>
-                                 </div>
-                              ))}
-                           </div>
-                        )}
-                     </CardContent>
-                     <CardFooter className="border-t border-gray-100 pt-4">
-                        <Button
-                           className="w-full bg-gradient-to-r from-green-600 to-green-700
-                              hover:from-green-700 hover:to-green-800 text-white
-                              transform transition-all duration-300
-                              hover:translate-y-[-2px] active:translate-y-0
-                              focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
-                           onClick={handleViewAllApplications}
-                        >
-                           View All Applications
-                        </Button>
-                     </CardFooter>
-                  </Card>
+                  {renderRecentApplicationsOrOOPs()}
 
                   {/* Notifications Card - spans 4 columns */}
                   <Card className="lg:col-span-4 bg-white rounded-xl shadow-md hover:shadow-xl

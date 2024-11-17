@@ -88,26 +88,12 @@ export const useRecentApplications = (limit = 7) => {
    const getQueryParamsForRole = () => {
       if (roles.includes('Technical_Staff')) {
          return {
-            // if (status: 'In Progress' && currentStage: 'ReturnedByTechnicalStaff' || currentStage: 'ForInspectionByTechnicalStaff') || status: 'Submitted' && currentStage: 'TechnicalStaffReview'
-            $or: [
-               {
-                  status: 'In Progress',
-                  currentStage: {
-                     $in: ['ReturnedByTechnicalStaff', 'ForInspectionByTechnicalStaff']
-                  }
-               },
-               {
-                  status: 'Submitted',
-                  currentStage: 'TechnicalStaffReview'
-               }
-            ]
-         };
+            currentStage: 'TechnicalStaffReview'
+         }
       }
       if (roles.includes('Receiving_Clerk')) {
          return {
-            currentStage: 'ReceivingClerkReview',
-            currentStage: 'ReturnedByReceivingClerk',
-            currentStage: 'ForRecordByReceivingClerk',
+            currentStage: 'ReceivingClerkReview'
          };
       }
       if (roles.includes('Chief_RPS') || roles.includes('Chief_TSD')) {
@@ -117,8 +103,7 @@ export const useRecentApplications = (limit = 7) => {
       }
       if (roles.includes('PENR_CENR_Officer')) {
          return {
-            currentStage: 'CENRPENRReview',
-            currentStage: 'ReturnedByPENRCENROfficer',
+            currentStage: 'CENRPENRReview'
          };
       }
       if (roles.includes('Accountant')) {
@@ -128,8 +113,8 @@ export const useRecentApplications = (limit = 7) => {
       }
       // Default case for other roles or no role
       return {
-         // status: 'Submitted'
-         status: 'In Progress'
+         status: 'Submitted',
+         currentStage: 'Initial'
       };
    };
 

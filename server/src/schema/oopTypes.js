@@ -118,6 +118,7 @@ const oopTypes = gql`
     getOOPsByApplicationId(applicationId: String!): [OOP!]!
     getApplicationsAwaitingOOP: [Permit!]!
     getOOPsByUserId(userId: ID!, status: String): [OOP!]!
+    getRecentOOPs(status: String, limit: Int): [OOP!]!
   }
 
   extend type Mutation {
