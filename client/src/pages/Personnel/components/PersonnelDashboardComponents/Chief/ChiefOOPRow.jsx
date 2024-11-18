@@ -12,6 +12,7 @@ import OOPAffixEsignModal from '../../OOPAffixEsignModal';
 import ViewOOPModal from '@/pages/user/components/ViewOOPModal';
 import { useMutation, gql, useQuery } from '@apollo/client';
 import { toast } from 'sonner';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 const GET_PERMIT_BY_APPLICATION_NUMBER = gql`
   query GetPermitByApplicationNumber($applicationNumber: String!) {
@@ -82,6 +83,7 @@ const ChiefOOPRow = ({ oop, onRefetch }) => {
    const [deleteOOP] = useMutation(DELETE_OOP);
    const [undoOOPCreation] = useMutation(UNDO_OOP_CREATION);
    const [isViewOOPModalOpen, setIsViewOOPModalOpen] = useState(false);
+   const isMobile = useMediaQuery('(max-width: 640px)');
 
    const { data: permitData } = useQuery(GET_PERMIT_BY_APPLICATION_NUMBER, {
       variables: { applicationNumber: oop.applicationId },
@@ -143,6 +145,41 @@ const ChiefOOPRow = ({ oop, onRefetch }) => {
          toast.error('Failed to undo OOP creation');
       }
    };
+
+   if (isMobile) {
+      return (
+         <div className="bg-white p-4 mb-4 rounded-lg shadow-sm border border-gray-200">
+            <div className="space-y-3">
+               <div className="flex justify-between items-start">
+                  <div className="space-y-1">
+                     <h3 className="font-medium text-gray-900">
+                        {oop.applicationNumber}
+                     </h3>
+                     <p className="text-sm text-gray-500">
+                        Bill No: {oop.billNo}
+                     </p>
+                  </div>
+                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(oop.OOPstatus)}`}>
+                     {oop.OOPstatus}
+                  </span>
+               </div>
+
+               <div className="flex flex-col space-y-1">
+                  <div className="text-sm text-gray-500">
+                     Date: {formatDate(oop.createdAt)}
+                  </div>
+               </div>
+
+               <div className="pt-3 flex flex-wrap gap-2">
+                  {renderActionButtons()}
+               </div>
+            </div>
+
+            {/* Modals */}
+            {/* ... existing modals ... */}
+         </div>
+      );
+   }
 
    return (
       <>

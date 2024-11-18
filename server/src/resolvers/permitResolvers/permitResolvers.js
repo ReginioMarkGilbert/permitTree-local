@@ -246,6 +246,7 @@ const permitResolvers = {
             throw new Error(`Failed to fetch permits: ${error.message}`);
          }
       },
+
       getApplicationsByCurrentStage: async (_, { currentStage }) => {
          try {
             const permits = await Permit.find({ currentStage })
@@ -263,6 +264,7 @@ const permitResolvers = {
             throw new Error(`Failed to fetch ${currentStage} permits: ${error.message}`);
          }
       },
+
       getApplicationsAwaitingOOP: async (_, __, { user }) => {
          if (!user) throw new AuthenticationError('Not authenticated');
 
@@ -277,6 +279,7 @@ const permitResolvers = {
             dateOfSubmission: permit.dateOfSubmission.toISOString()
          }));
       },
+
       getPermitByApplicationNumber: async (_, { applicationNumber }) => {
          try {
             const permit = await Permit.findOne({ applicationNumber });
@@ -464,6 +467,7 @@ const permitResolvers = {
             // const updatedPermit = await permit.save();
 
             // #region - Technical Staff Review
+            //* ACCEPTANCE NOTIFICATIONS
             if (currentStage === 'ForRecordByReceivingClerk' && acceptedByTechnicalStaff) {
                // Notify applicant
                await NotificationService.createApplicationNotification({
@@ -473,6 +477,7 @@ const permitResolvers = {
                   stage: currentStage,
                   remarks: notes
                });
+
                // Notify Receiving_Clerk
                const receivingClerk = await Admin.findOne({ roles: 'Receiving_Clerk' });
                if (receivingClerk) {
@@ -496,6 +501,30 @@ const permitResolvers = {
                   stage: currentStage,
                   remarks: notes
                });
+            }
+            //* INSPECTION NOTIFICATIONS
+            if (currentStage === 'ForInspectionByTechnicalStaff' && reviewedByChief) {
+               // Notify applicant
+               await NotificationService.createApplicationNotification({
+                  application: permit,
+                  recipientId: permit.applicantId,
+                  type: 'APPLICATION_REVIEWED_BY_CHIEF',
+                  stage: currentStage,
+                  remarks: notes
+               });
+
+               // Notify Technical Staff for inspection
+               const technicalStaff = await Admin.findOne({ roles: 'Technical_Staff' });
+               if (technicalStaff) {
+                  await PersonnelNotificationService.createApplicationPersonnelNotification({
+                     application: permit,
+                     recipientId: technicalStaff._id,
+                     type: 'PENDING_INSPECTION',
+                     stage: currentStage,
+                     remarks: notes,
+                     priority: 'high'
+                  });
+               }
             }
             // #endregion - Technical Staff Review
 
@@ -541,45 +570,23 @@ const permitResolvers = {
                      console.log('Chief TSD not found');
                   }
                }
-            } else if (currentStage === 'CENRPENRReview') {
-               // Notify PENR/CENR Officer
-               const penrCenrOfficer = await Admin.findOne({ roles: 'PENR_CENR_Officer' });
-               if (penrCenrOfficer) {
-                  await PersonnelNotificationService.createApplicationPersonnelNotification({
-                     application: permit,
-                     recipientId: penrCenrOfficer._id,
-                     type: 'PENDING_PENRCENR_APPROVAL',
-                     stage: currentStage,
-                     remarks: notes,
-                     priority: 'high'
-                  });
+               //* PENR/CENR Officer Approval Notifications
+               if (currentStage === 'CENRPENRReview') {
+                  // Notify PENR/CENR Officer
+                  const penrCenrOfficer = await Admin.findOne({ roles: 'PENR_CENR_Officer' });
+                  if (penrCenrOfficer) {
+                     await PersonnelNotificationService.createApplicationPersonnelNotification({
+                        application: permit,
+                        recipientId: penrCenrOfficer._id,
+                        type: 'PENDING_PENRCENR_APPROVAL',
+                        stage: currentStage,
+                        remarks: notes,
+                        priority: 'high'
+                     });
+                  }
                }
             }
             // #endregion - Receiving Clerk Record notifications
-
-            if (currentStage === 'ForInspectionByTechnicalStaff' && reviewedByChief) {
-               // Notify applicant
-               await NotificationService.createApplicationNotification({
-                  application: permit,
-                  recipientId: permit.applicantId,
-                  type: 'APPLICATION_REVIEWED_BY_CHIEF',
-                  stage: currentStage,
-                  remarks: notes
-               });
-
-               // Notify Technical Staff for inspection
-               const technicalStaff = await Admin.findOne({ roles: 'Technical_Staff' });
-               if (technicalStaff) {
-                  await PersonnelNotificationService.createApplicationPersonnelNotification({
-                     application: permit,
-                     recipientId: technicalStaff._id,
-                     type: 'PENDING_INSPECTION',
-                     stage: currentStage,
-                     remarks: notes,
-                     priority: 'high'
-                  });
-               }
-            }
 
             permit.history.push({
                stage: currentStage,
@@ -594,6 +601,96 @@ const permitResolvers = {
 
          } catch (error) {
             console.error('Error updating permit:', error);
+            throw error;
+         }
+      },
+
+      undoRecordApplication: async (_, {
+         id,
+         currentStage,
+         status,
+         notes,
+         acceptedByPENRCENROfficer,
+         reviewedByChief
+      }) => {
+         try {
+            const permit = await Permit.findById(id);
+            if (!permit) {
+               throw new Error('Permit not found');
+            }
+
+            if (acceptedByPENRCENROfficer !== undefined) {
+               permit.acceptedByPENRCENROfficer = acceptedByPENRCENROfficer;
+            }
+            if (reviewedByChief !== undefined) {
+               permit.reviewedByChief = reviewedByChief;
+            }
+
+            if (permit.acceptedByPENRCENROfficer) {
+               throw new Error('Application cannot be undone, already accepted by PENR/CENR Officer');
+            }
+            if (permit.reviewedByChief) {
+               throw new Error('Application cannot be undone, already reviewed by Chief RPS');
+            }
+
+            permit.currentStage = 'ForRecordByReceivingClerk';
+            permit.status = 'In Progress';
+            permit.recordedByReceivingClerk = false;
+
+            permit.history.push({
+               stage: currentStage,
+               status: status,
+               timestamp: new Date(),
+               notes: notes || ''
+            });
+
+            await permit.save();
+            return permit;
+
+         } catch (error) {
+            console.error('Error undoing record application:', error);
+            throw error;
+         }
+      },
+
+
+      undoAcceptanceCENRPENROfficer: async (_, {
+         id,
+         currentStage,
+         status,
+         notes,
+         reviewedByChief
+      }) => {
+         try {
+            const permit = await Permit.findById(id);
+            if (!permit) {
+               throw new Error('Permit not found');
+            }
+
+            if (reviewedByChief !== undefined) {
+               permit.reviewedByChief = reviewedByChief;
+            }
+
+            if (permit.reviewedByChief) {
+               throw new Error('Application cannot be undone, already reviewed by Chief RPS');
+            }
+
+            permit.currentStage = 'CENRPENRReview';
+            permit.status = 'In Progress';
+            permit.acceptedByPENRCENROfficer = false;
+
+            permit.history.push({
+               stage: currentStage,
+               status: status,
+               timestamp: new Date(),
+               notes: notes || ''
+            });
+
+            await permit.save();
+            return permit;
+
+         } catch (error) {
+            console.error('Error undoing record application:', error);
             throw error;
          }
       },
@@ -689,145 +786,6 @@ const permitResolvers = {
             id: permit._id.toString(),
             dateOfSubmission: permit.dateOfSubmission.toISOString()
          };
-      },
-
-      // Technical Staff Review
-      acceptApplication: async (_, { id, notes }, { user }) => {
-         const permit = await Permit.findById(id);
-         if (!permit) throw new Error('Permit not found');
-
-         permit.acceptedByTechnicalStaff = true;
-         permit.currentStage = 'ReceivingClerkReview';
-         permit.status = 'In Progress';
-
-         permit.history.push({
-            stage: 'TechnicalStaffReview',
-            status: 'Accepted',
-            timestamp: new Date(),
-            notes,
-            actionBy: user.id
-         });
-
-         await permit.save();
-
-         // User notification
-         await NotificationService.createApplicationNotification({
-            application: permit,
-            recipientId: permit.applicantId,
-            type: 'APPLICATION_ACCEPTED_BY_TECHNICAL',
-            stage: 'TechnicalStaffReview',
-            remarks: notes
-         });
-
-         // Personnel notification
-         const receivingClerk = await User.findOne({ roles: 'Receiving_Clerk' });
-         if (receivingClerk) {
-            await PersonnelNotificationService.createApplicationPersonnelNotification({
-               application: permit,
-               recipientId: receivingClerk._id,
-               type: 'PENDING_RECEIVING_CLERK_RECORD',
-               stage: 'ReceivingClerkReview',
-               remarks: notes
-            });
-         }
-
-         return permit;
-      },
-
-      // Receiving Clerk Record
-      recordApplication: async (_, { id, notes }, { user }) => {
-         const permit = await Permit.findById(id);
-         if (!permit) throw new Error('Permit not found');
-
-         permit.recordedByReceivingClerk = true;
-         permit.currentStage = 'ChiefRPSReview';
-
-         permit.history.push({
-            stage: 'ReceivingClerkReview',
-            status: 'Recorded',
-            timestamp: new Date(),
-            notes,
-            actionBy: user.id
-         });
-
-         await permit.save();
-
-         // Notify applicant
-         await NotificationService.createApplicationNotification({
-            application: permit,
-            recipientId: permit.applicantId,
-            type: 'APPLICATION_RECORDED',
-            stage: 'ReceivingClerkReview'
-         });
-
-         // Notify Chief RPS
-         await NotificationService.notifyNextPersonnel('ChiefRPSReview', permit);
-
-         return permit;
-      },
-
-      // Chief RPS Review
-      reviewByChief: async (_, { id, notes }, { user }) => {
-         const permit = await Permit.findById(id);
-         if (!permit) throw new Error('Permit not found');
-
-         permit.reviewedByChief = true;
-         permit.currentStage = 'CENRPENRReview';
-
-         permit.history.push({
-            stage: 'ChiefRPSReview',
-            status: 'Reviewed',
-            timestamp: new Date(),
-            notes,
-            actionBy: user.id
-         });
-
-         await permit.save();
-
-         // Notify applicant
-         await NotificationService.createApplicationNotification({
-            application: permit,
-            recipientId: permit.applicantId,
-            type: 'APPLICATION_REVIEWED_BY_CHIEF',
-            stage: 'ChiefRPSReview'
-         });
-
-         // Notify PENR/CENR Officer
-         // await NotificationService.notifyNextPersonnel('CENRPENRReview', permit);
-
-         return permit;
-      },
-
-      // PENR/CENR Officer Approval
-      approveByPENRCENR: async (_, { id, notes }, { user }) => {
-         const permit = await Permit.findById(id);
-         if (!permit) throw new Error('Permit not found');
-
-         permit.approvedByPENRCENROfficer = true;
-         permit.currentStage = 'ForInspectionByTechnicalStaff';
-
-         permit.history.push({
-            stage: 'CENRPENRReview',
-            status: 'Approved',
-            timestamp: new Date(),
-            notes,
-            actionBy: user.id
-         });
-
-         await permit.save();
-
-         // Notify applicant
-         await NotificationService.createApplicationNotification({
-            application: permit,
-            recipientId: permit.applicantId,
-            type: 'APPLICATION_APPROVED_BY_PENRCENR',
-            stage: 'CENRPENRReview'
-         });
-
-         // Notify Technical Staff for inspection
-         await NotificationService.notifyNextPersonnel('ForInspectionByTechnicalStaff', permit);
-
-         return permit;
       },
    },
    Permit: {

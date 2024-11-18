@@ -371,10 +371,9 @@ const permitTypes = gql`
       awaitingPermitCreation: Boolean
       PermitCreated: Boolean
     ): Permit!
-    acceptApplication(id: ID!, notes: String): Permit!
     recordApplication(id: ID!, notes: String): Permit!
-    reviewByChief(id: ID!, notes: String): Permit!
-    approveByPENRCENR(id: ID!, notes: String): Permit!
+    undoRecordApplication(id: ID!, approvedByPENRCENROfficer: Boolean): Permit!
+    undoAcceptanceCENRPENROfficer(id: ID!, reviewedByChief: Boolean): Permit!
 
     reviewApplication(id: ID!): Permit!
     submitPermit(id: ID!): Permit!

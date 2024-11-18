@@ -19,6 +19,7 @@ import { useUndoApplicationApproval } from '../../../hooks/useApplications';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { gql, useMutation } from '@apollo/client';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 const GET_APPLICATION_DETAILS = gql`
   query GetApplication($id: ID!) {
@@ -98,6 +99,7 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
    const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(false);
    // const { handleUndoApproval, handleUndoAcceptance } = useUndoApplicationApproval();
    const [updatePermitStage] = useMutation(UPDATE_PERMIT_STAGE);
+   const isMobile = useMediaQuery('(max-width: 640px)');
 
    const handleViewClick = () => setIsViewModalOpen(true);
    const handleReviewClick = () => setIsReviewModalOpen(true);
@@ -113,7 +115,7 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
       try {
          let variables;
 
-         if (currentTab === 'Approved Applications') {
+         if (currentTab === 'Approved Applications') { // after authenticity approval
             variables = {
                id: app.id,
                currentStage: 'ForInspectionByTechnicalStaff',
@@ -296,6 +298,53 @@ const TS_ApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
 
       return actions;
    };
+
+   if (isMobile) {
+      return (
+         <div className="bg-white p-4 rounded-lg shadow space-y-3">
+            <div className="flex justify-between items-start">
+               <div>
+                  <p className="font-medium text-gray-900">{app.applicationNumber}</p>
+                  <p className="text-sm text-gray-500">{app.applicationType}</p>
+               </div>
+               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(app.status)}`}>
+                  {app.status}
+               </span>
+            </div>
+            <div className="text-sm text-gray-500">
+               {new Date(app.dateOfSubmission).toLocaleDateString()}
+            </div>
+            <div className="flex flex-wrap gap-2">
+               {renderActionButtons()}
+            </div>
+
+            {/* Modals */}
+            <TS_ViewModal
+               isOpen={isViewModalOpen}
+               onClose={() => setIsViewModalOpen(false)}
+               application={app}
+            />
+            <TS_ReviewModal
+               isOpen={isReviewModalOpen}
+               onClose={() => setIsReviewModalOpen(false)}
+               application={app}
+               onReviewComplete={handleReviewComplete}
+            />
+            <TS_AuthenticityReviewModal
+               isOpen={isAuthenticityModalOpen}
+               onClose={() => setIsAuthenticityModalOpen(false)}
+               application={app}
+               onReviewComplete={handleReviewComplete}
+            />
+            <CertificateActionHandler
+               isOpen={isCertificateModalOpen}
+               onClose={() => setIsCertificateModalOpen(false)}
+               application={app}
+               onComplete={handleCertificateComplete}
+            />
+         </div>
+      );
+   }
 
    return (
       <>

@@ -5,7 +5,7 @@ import { useMutation, gql } from '@apollo/client';
 import { toast } from 'sonner';
 
 const REVIEW_APPLICATION = gql`
-  mutation ReviewApplication(
+  mutation UpdatePermitStage(
     $id: ID!,
     $currentStage: String!,
     $status: String!,
@@ -37,14 +37,14 @@ const REVIEW_APPLICATION = gql`
 const ChiefReviewModal = ({ isOpen, onClose, application, onReviewComplete }) => {
    const [isReturning, setIsReturning] = useState(false);
    const [remarks, setRemarks] = useState('');
-   const [reviewApplication] = useMutation(REVIEW_APPLICATION);
+   const [updatePermitStage] = useMutation(REVIEW_APPLICATION);
 
    const handleApprove = async () => {
       try {
          if (!application || !application.id) {
             throw new Error('Invalid application data');
          }
-         const result = await reviewApplication({
+         const result = await updatePermitStage({
             variables: {
                id: application.id,
                currentStage: 'ForInspectionByTechnicalStaff',

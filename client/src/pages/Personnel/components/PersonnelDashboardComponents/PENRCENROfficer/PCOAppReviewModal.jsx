@@ -48,9 +48,9 @@ const PCOAppReviewModal = ({ isOpen, onClose, application, onReviewComplete }) =
          await updatePermitStage({
             variables: {
                id: application.id,
-               currentStage: 'ForInspectionByTechnicalStaff',
+               currentStage: 'ChiefRPSReview',
                status: 'In Progress',
-               notes: 'Application accepted by PENR_CENR_Officer',
+               notes: 'Application accepted by PENR/CENR Officer',
                acceptedByPENRCENROfficer: true
                // approvedByPENRCENROfficer will be undefined
             }

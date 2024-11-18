@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import RRC_ApplicationRow from './RRC_ApplicationRow';
 import { useApplications } from '../../../hooks/useApplications';
 import RRCApplicationFilters from './RRCApplicationFilters';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 const ReceivingReleasingClerkDashboard = () => {
    const [filters, setFilters] = useState({
@@ -17,6 +19,12 @@ const ReceivingReleasingClerkDashboard = () => {
    });
    const [activeMainTab, setActiveMainTab] = useState('Applications');
    const [activeSubTab, setActiveSubTab] = useState('Applications For Review'); // set default tab
+   const isMobile = useMediaQuery('(max-width: 640px)');
+   const isChrome = useMemo(() => {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      const isBrave = navigator.brave !== undefined;
+      return userAgent.includes('chrome') && !userAgent.includes('edg') && !isBrave;
+   }, []);
 
    const getQueryParamsForTab = (tab) => {
       switch (tab) {
@@ -110,6 +118,125 @@ const ReceivingReleasingClerkDashboard = () => {
       return <RRCApplicationFilters filters={filters} setFilters={setFilters} />;
    };
 
+   const renderMobileTabSelectors = () => {
+      if (isChrome) {
+         return (
+            <div className="space-y-4">
+               <select
+                  value={activeMainTab}
+                  onChange={(e) => {
+                     setActiveMainTab(e.target.value);
+                     setActiveSubTab(subTabs[e.target.value][0]);
+                  }}
+                  className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
+               >
+                  {mainTabs.map((tab) => (
+                     <option key={tab} value={tab}>
+                        {tab}
+                     </option>
+                  ))}
+               </select>
+
+               <select
+                  value={activeSubTab}
+                  onChange={(e) => setActiveSubTab(e.target.value)}
+                  className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
+               >
+                  {subTabs[activeMainTab].map((tab) => (
+                     <option key={tab} value={tab}>
+                        {tab}
+                     </option>
+                  ))}
+               </select>
+            </div>
+         );
+      }
+
+      return (
+         <div className="space-y-4">
+            <Select value={activeMainTab} onValueChange={(tab) => {
+               setActiveMainTab(tab);
+               setActiveSubTab(subTabs[tab][0]);
+            }}>
+               <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select tab" />
+               </SelectTrigger>
+               <SelectContent>
+                  {mainTabs.map((tab) => (
+                     <SelectItem key={tab} value={tab}>
+                        {tab}
+                     </SelectItem>
+                  ))}
+               </SelectContent>
+            </Select>
+
+            <Select value={activeSubTab} onValueChange={setActiveSubTab}>
+               <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select status" />
+               </SelectTrigger>
+               <SelectContent>
+                  {subTabs[activeMainTab].map((tab) => (
+                     <SelectItem key={tab} value={tab}>
+                        {tab}
+                     </SelectItem>
+                  ))}
+               </SelectContent>
+            </Select>
+         </div>
+      );
+   };
+
+   const renderTabs = () => {
+      if (isMobile) {
+         return renderMobileTabSelectors();
+      }
+
+      return (
+         <div className="flex flex-col sm:flex-row gap-4">
+            <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap overflow-x-auto">
+               {mainTabs.map((tab) => (
+                  <button
+                     key={tab}
+                     onClick={() => {
+                        setActiveMainTab(tab);
+                        setActiveSubTab(subTabs[tab][0]);
+                     }}
+                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors
+                        ${activeMainTab === tab
+                           ? 'bg-white text-green-800 shadow'
+                           : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
+                  >
+                     {tab}
+                  </button>
+               ))}
+            </div>
+         </div>
+      );
+   };
+
+   const renderSubTabs = () => {
+      if (isMobile) {
+         return null;
+      }
+
+      return (
+         <div className="bg-gray-100 p-1 rounded-md inline-flex flex-wrap gap-1">
+            {subTabs[activeMainTab].map((tab) => (
+               <button
+                  key={tab}
+                  onClick={() => setActiveSubTab(tab)}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors
+                     ${activeSubTab === tab
+                        ? 'bg-white text-green-800 shadow'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
+               >
+                  {tab}
+               </button>
+            ))}
+         </div>
+      );
+   };
+
    const renderTable = () => {
       if (loading) return <p className="text-center text-gray-500">Loading applications...</p>;
       if (error) {
@@ -120,6 +247,25 @@ const ReceivingReleasingClerkDashboard = () => {
          return <p className="text-center text-gray-500">No applications found.</p>;
       }
 
+      // Mobile view
+      if (isMobile) {
+         return (
+            <div className="space-y-4">
+               {filteredApplications.map((app) => (
+                  <RRC_ApplicationRow
+                     key={app.id}
+                     app={app}
+                     onRecordComplete={handleRecordComplete}
+                     getStatusColor={getStatusColor}
+                     currentTab={activeSubTab}
+                     isMobile={true}
+                  />
+               ))}
+            </div>
+         );
+      }
+
+      // Desktop view
       return (
          <div className="bg-white rounded-lg shadow overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -140,6 +286,7 @@ const ReceivingReleasingClerkDashboard = () => {
                         onRecordComplete={handleRecordComplete}
                         getStatusColor={getStatusColor}
                         currentTab={activeSubTab}
+                        isMobile={false}
                      />
                   ))}
                </tbody>
@@ -155,68 +302,30 @@ const ReceivingReleasingClerkDashboard = () => {
             <div className="bg-white rounded-lg shadow-sm p-6">
                <div className="flex items-center justify-between mb-4">
                   <h1 className="text-2xl font-semibold text-gray-900">Receiving/Releasing Clerk Dashboard</h1>
-                  <Button onClick={refetch} variant="outline">
+                  <Button onClick={refetch} variant="outline" size="sm">
                      <RefreshCw className="mr-2 h-4 w-4" />
-                     Refresh
+                     {!isMobile && "Refresh"}
                   </Button>
                </div>
 
-               {/* Main Tabs */}
-               <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-                     {mainTabs.map((tab) => (
-                        <button
-                           key={tab}
-                           onClick={() => {
-                              setActiveMainTab(tab);
-                              setActiveSubTab(subTabs[tab][0]);
-                           }}
-                           className={`px-4 py-2 rounded-md text-sm font-medium transition-colors
-                              ${activeMainTab === tab
-                                 ? 'bg-white text-green-800 shadow'
-                                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
-                        >
-                           {tab}
-                        </button>
-                     ))}
-                  </div>
+               {/* Tabs Section */}
+               {isMobile ? renderMobileTabSelectors() : renderTabs()}
+
+               {/* Description */}
+               <div className="mt-6 text-sm text-gray-600">
+                  {renderTabDescription()}
                </div>
             </div>
 
             {/* Sub Tabs and Filters Section */}
             <div className="bg-white rounded-lg shadow-sm p-6">
                <div className="space-y-4">
-                  {/* Sub Tabs */}
-                  <div className="bg-gray-100 p-1 rounded-md inline-flex flex-wrap gap-1">
-                     {subTabs[activeMainTab].map((tab) => (
-                        <button
-                           key={tab}
-                           onClick={() => setActiveSubTab(tab)}
-                           className={`px-3 py-2 rounded-md text-sm font-medium transition-colors
-                              ${activeSubTab === tab
-                                 ? 'bg-white text-green-800 shadow'
-                                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
-                        >
-                           {tab}
-                        </button>
-                     ))}
-                  </div>
-
+                  {!isMobile && renderSubTabs()}
                   {renderFilters()}
-
-                  {renderTabDescription()}
-                  <div className="mb-6">
-                     <Input
-                        type="text"
-                        placeholder="Search applications..."
-                        value={filters.searchTerm}
-                        onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
-                        className="border rounded-md p-2 w-full"
-                     />
-                  </div>
-                  {renderTable()}
                </div>
             </div>
+
+            {renderTable()}
          </div>
       </div>
    );

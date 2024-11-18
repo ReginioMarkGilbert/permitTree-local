@@ -94,12 +94,25 @@ const UPDATE_PERMIT_STAGE = gql`
   }
 `;
 
-const PCOApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, currentTab }) => {
+const UNDO_ACCEPTANCE_CENRPENROFFICER = gql`
+  mutation UndoAcceptanceCENRPENROfficer($id: ID!, $reviewedByChief: Boolean) {
+    undoAcceptanceCENRPENROfficer(id: $id, reviewedByChief: $reviewedByChief) {
+      id
+      reviewedByChief
+      history {
+        notes
+        timestamp
+      }
+    }
+  }
+`;
+
+const PCOApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, isMobile }) => {
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
    // const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(false);
-   // const { handleUndoApproval, handleUndoAcceptance } = useUndoApplicationApproval();
    const [updatePermitStage] = useMutation(UPDATE_PERMIT_STAGE);
+   const [undoAcceptanceCENRPENROfficer] = useMutation(UNDO_ACCEPTANCE_CENRPENROFFICER);
 
    const handleViewClick = () => setIsViewModalOpen(true);
    const handleReviewClick = () => setIsReviewModalOpen(true);
@@ -113,37 +126,21 @@ const PCOApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
    // Accepted Applications tab, search handleUndoAcceptance for reference - TS_ReviewModal.jsx
    const handleUndo = async () => {
       try {
-         let variables;
 
-         if (currentTab === 'Accepted Applications') {
-            variables = {
-               id: app.id,
-               currentStage: 'CENRPENRReview',
-               status: 'In Progress',
-               notes: 'Acceptance undone by PENR/CENR Officer',
-               acceptedByPENRCENROfficer: false,
-               approvedByPENRCENROfficer: false
-            };
-         }
-         // } else if (currentTab === 'Approved Applications') {
-         //    // Existing undo logic for approved applications
-         //    variables = {
-         //       id: app.id,
-         //       currentStage: 'TechnicalStaffReview',
-         //       status: 'Submitted',
-         //       notes: 'Approval undone by PENR/CENR Officer',
-         //       approvedByPENRCENROfficer: false
-         //    };
-         // }
+         await undoAcceptanceCENRPENROfficer({
+            variables: {
+               id: app.id
+            }
+         });
 
-         await updatePermitStage({ variables });
          toast.success('Application status undone successfully');
          onReviewComplete();
       } catch (error) {
          console.error('Error undoing application status:', error);
-         toast.error('Failed to undo application status');
+         toast.error(error.message);
       }
    };
+
    // correct way to format date in application row
    const formatDate = (timestamp) => {
       // const date = new Date(timestamp);
@@ -183,26 +180,8 @@ const PCOApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
          </TooltipProvider>
       );
 
-      // Print action
-      if (userRoles.includes('PENR_CENR_Officer')) {
-         actions.push(
-            <TooltipProvider key="print-action">
-               <Tooltip delayDuration={200}>
-                  <TooltipTrigger asChild>
-                     <Button onClick={() => onPrint(app.id)} variant="outline" size="icon" className="h-8 w-8">
-                        <Printer className="h-4 w-4" />
-                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                     <p>Print Application</p>
-                  </TooltipContent>
-               </Tooltip>
-            </TooltipProvider>
-         );
-      }
-
-      // Review action
-      if ((currentTab === 'Applications for Review' || app.currentStage === 'CENRPENRReview') && userRoles.includes('PENR_CENR_Officer')) {
+      // Add other action buttons based on currentTab
+      if (currentTab === 'Pending Reviews') {
          actions.push(
             <TooltipProvider key="review-action">
                <Tooltip delayDuration={200}>
@@ -219,8 +198,8 @@ const PCOApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
          );
       }
 
-      // Undo button
-      if (currentTab === 'Accepted Applications') {
+      // Add undo button for specific tabs
+      if (currentTab === 'Approved Applications' || currentTab === 'Returned Applications') {
          actions.push(
             <TooltipProvider key="undo-action">
                <Tooltip>
@@ -235,83 +214,81 @@ const PCOApplicationRow = ({ app, onPrint, onReviewComplete, getStatusColor, cur
                      </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                     <p>Undo {currentTab === 'Accepted Applications' ? 'Acceptance' : 'Approval'}</p>
+                     <p>Undo {currentTab === 'Returned Applications' ? 'Return' : 'Approval'}</p>
                   </TooltipContent>
                </Tooltip>
             </TooltipProvider>
          );
       }
 
-      // Certificate generation/upload button
-      // if ((currentTab === 'Awaiting Permit Creation') && app.awaitingPermitCreation) {
-      //    actions.push(
-      //       <TooltipProvider key="generate-certificate-action">
-      //          <Tooltip>
-      //             <TooltipTrigger asChild>
-      //                <Button
-      //                   variant="outline"
-      //                   size="icon"
-      //                   className="h-8 w-8 text-green-600"
-      //                   onClick={() => setIsCertificateModalOpen(true)}
-      //                >
-      //                   <FileCheck2 className="h-4 w-4" />
-      //                </Button>
-      //             </TooltipTrigger>
-      //             <TooltipContent>
-      //                <p>{app.applicationType === 'Chainsaw Registration' ? 'Generate Certificate' : 'Upload Certificate'}</p>
-      //             </TooltipContent>
-      //          </Tooltip>
-      //       </TooltipProvider>
-      //    );
-      // }
-
       return actions;
    };
 
-   return (
-      <>
-         <tr>
-            <td className="px-4 py-3 whitespace-nowrap">
-               <div className="text-sm text-gray-900">{app.applicationNumber}</div>
-            </td>
-            <td className="px-4 py-3 whitespace-nowrap">
-               <div className="text-sm text-gray-900">{app.applicationType}</div>
-            </td>
-            <td className="px-4 py-3 whitespace-nowrap">
-               <div className="text-sm text-gray-900">
-                  {formatDate(app.dateOfSubmission)}
+   if (isMobile) {
+      return (
+         <div className="bg-white/60 backdrop-blur-xl p-4 rounded-xl shadow-sm border border-gray-100 space-y-2">
+            <div className="flex justify-between items-start">
+               <div className="space-y-1">
+                  <h3 className="font-medium text-gray-900">
+                     {app.applicationNumber}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                     {app.applicationType}
+                  </p>
                </div>
-            </td>
-            <td className="px-4 py-3 whitespace-nowrap">
-               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(app.status)}`}>
+               <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(app.status)}`}>
                   {app.status}
                </span>
-            </td>
-            <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-               <div className="flex items-center space-x-2">
-                  {renderActionButtons()}
-               </div>
-            </td>
-         </tr>
+            </div>
 
-         <TS_ViewModal
-            isOpen={isViewModalOpen}
-            onClose={() => setIsViewModalOpen(false)}
-            application={app}
-         />
-         <PCOAppReviewModal
-            isOpen={isReviewModalOpen}
-            onClose={() => setIsReviewModalOpen(false)}
-            application={app}
-            onReviewComplete={handleReviewComplete}
-         />
-         {/* <CertificateActionHandler
-            isOpen={isCertificateModalOpen}
-            onClose={() => setIsCertificateModalOpen(false)}
-            application={app}
-            onComplete={handleCertificateComplete}
-         /> */}
-      </>
+            <p className="text-sm text-gray-500">
+               {new Date(app.dateOfSubmission).toLocaleDateString()}
+            </p>
+
+            <div className="flex gap-2 pt-1">
+               {renderActionButtons()}
+            </div>
+
+            {/* Modals */}
+            <TS_ViewModal
+               isOpen={isViewModalOpen}
+               onClose={() => setIsViewModalOpen(false)}
+               application={app}
+            />
+            <PCOAppReviewModal
+               isOpen={isReviewModalOpen}
+               onClose={() => setIsReviewModalOpen(false)}
+               application={app}
+               onReviewComplete={handleReviewComplete}
+            />
+         </div>
+      );
+   }
+
+   return (
+      <tr className="border-b border-gray-200 transition-colors hover:bg-gray-50">
+         <td className="px-4 py-3 whitespace-nowrap">
+            <div className="text-sm text-gray-900">{app.applicationNumber}</div>
+         </td>
+         <td className="px-4 py-3 whitespace-nowrap">
+            <div className="text-sm text-gray-900">{app.applicationType}</div>
+         </td>
+         <td className="px-4 py-3 whitespace-nowrap">
+            <div className="text-sm text-gray-900">
+               {new Date(app.dateOfSubmission).toLocaleDateString()}
+            </div>
+         </td>
+         <td className="px-4 py-3 whitespace-nowrap">
+            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(app.status)}`}>
+               {app.status}
+            </span>
+         </td>
+         <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
+            <div className="flex items-center space-x-2">
+               {renderActionButtons()}
+            </div>
+         </td>
+      </tr>
    );
 };
 

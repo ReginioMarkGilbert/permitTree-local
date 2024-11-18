@@ -6,6 +6,8 @@ import { useApplications } from '../../../hooks/useApplications';
 import { useOrderOfPayments } from '../../../hooks/useOrderOfPayments';
 import ChiefOOPRow from './ChiefOOPRow';
 import ChiefApplicationFilters from './ChiefApplicationFilters';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 const ChiefDashboard = () => {
    const [searchTerm, setSearchTerm] = useState('');
@@ -91,17 +93,38 @@ const ChiefDashboard = () => {
    };
 
    const renderTabDescription = () => {
-      if (activeSubTab === 'Applications for Review') {
-         return <div className="mb-4 -mt-4">
-            <h1 className="text-sm text-green-800">This is the list of applications pending for your review.</h1>
-         </div>;
-      }
-      if (activeSubTab === 'Completed Reviews') {
-         return <div className="mb-4 -mt-4">
-            <h1 className="text-sm text-green-800">This is the list of applications that you have reviewed.</h1>
-         </div>;
-      }
-   }
+      const [text, setText] = useState('');
+      const descriptions = {
+         'Applications for Review': 'This is the list of applications pending for your review.',
+         'Completed Reviews': 'This is the list of applications that you have reviewed.',
+         'Pending Signature': 'This is the list of certificates/permits pending for your signature.',
+         'Signed Certificates': 'This is the list of certificates/permits that you have signed.',
+         'Order Of Payment': 'This is the list of Order of Payments.',
+      };
+
+      useEffect(() => {
+         setText(''); // Reset text when tab changes
+         const targetText = descriptions[activeSubTab] || '';
+         let currentIndex = 0;
+
+         const interval = setInterval(() => {
+            if (currentIndex <= targetText.length) { // if not done typing
+               setText(targetText.slice(0, currentIndex)); // add one character
+               currentIndex++; // increment index
+            } else {
+               clearInterval(interval); // if done typing, clear interval
+            }
+         }, 10); // speed ms
+
+         return () => clearInterval(interval);
+      }, [activeSubTab]);
+
+      return (
+         <div className="mb-4 -mt-4">
+            <h1 className="text-sm text-green-800">{text}</h1>
+         </div>
+      );
+   };
 
    const {
       oops,
@@ -188,9 +211,6 @@ const ChiefDashboard = () => {
    };
 
    const renderTable = () => {
-      if (activeMainTab === 'Order Of Payment') {
-         return renderOrderOfPaymentTable();
-      }
       if (loading) return <p className="text-center text-gray-500">Loading applications...</p>;
       if (error) {
          console.error('Error fetching applications:', error);
@@ -200,6 +220,25 @@ const ChiefDashboard = () => {
          return <p className="text-center text-gray-500">No applications found.</p>;
       }
 
+      // Mobile view
+      if (isMobile) {
+         return (
+            <div className="space-y-4">
+               {filteredApplications.map((app) => (
+                  <ChiefApplicationRow
+                     key={app.id}
+                     app={app}
+                     onReviewComplete={handleReviewComplete}
+                     getStatusColor={getStatusColor}
+                     currentTab={activeSubTab}
+                     isMobile={true}
+                  />
+               ))}
+            </div>
+         );
+      }
+
+      // Desktop view
       return (
          <div className="bg-white rounded-lg shadow overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -220,6 +259,7 @@ const ChiefDashboard = () => {
                         onReviewComplete={handleReviewComplete}
                         getStatusColor={getStatusColor}
                         currentTab={activeSubTab}
+                        isMobile={false}
                      />
                   ))}
                </tbody>
@@ -232,6 +272,134 @@ const ChiefDashboard = () => {
       return <ChiefApplicationFilters filters={filters} setFilters={setFilters} />;
    };
 
+   const isMobile = useMediaQuery('(max-width: 640px)');
+
+   const isChrome = useMemo(() => {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      const isBrave = navigator.brave !== undefined;
+      return userAgent.includes('chrome') && !userAgent.includes('edg') && !isBrave;
+   }, []);
+
+   const renderMobileTabSelectors = () => {
+      if (isChrome) {
+         return (
+            <div className="space-y-4">
+               <select
+                  value={activeMainTab}
+                  onChange={(e) => {
+                     setActiveMainTab(e.target.value);
+                     setActiveSubTab(subTabs[e.target.value][0]);
+                  }}
+                  className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
+               >
+                  {mainTabs.map((tab) => (
+                     <option key={tab} value={tab}>
+                        {tab}
+                     </option>
+                  ))}
+               </select>
+
+               <select
+                  value={activeSubTab}
+                  onChange={(e) => setActiveSubTab(e.target.value)}
+                  className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
+               >
+                  {subTabs[activeMainTab].map((tab) => (
+                     <option key={tab} value={tab}>
+                        {tab}
+                     </option>
+                  ))}
+               </select>
+            </div>
+         );
+      }
+
+      return (
+         <div className="space-y-4">
+            <Select value={activeMainTab} onValueChange={(tab) => {
+               setActiveMainTab(tab);
+               setActiveSubTab(subTabs[tab][0]);
+            }}>
+               <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select tab" />
+               </SelectTrigger>
+               <SelectContent>
+                  {mainTabs.map((tab) => (
+                     <SelectItem key={tab} value={tab}>
+                        {tab}
+                     </SelectItem>
+                  ))}
+               </SelectContent>
+            </Select>
+
+            <Select value={activeSubTab} onValueChange={setActiveSubTab}>
+               <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select status" />
+               </SelectTrigger>
+               <SelectContent>
+                  {subTabs[activeMainTab].map((tab) => (
+                     <SelectItem key={tab} value={tab}>
+                        {tab}
+                     </SelectItem>
+                  ))}
+               </SelectContent>
+            </Select>
+         </div>
+      );
+   };
+
+   const renderSubTabs = () => {
+      // Return null for mobile view since subtabs are handled in renderMobileTabSelectors
+      if (isMobile) {
+         return null;
+      }
+
+      return (
+         <div className="bg-gray-100 p-1 rounded-md inline-flex flex-wrap gap-1">
+            {subTabs[activeMainTab].map((tab) => (
+               <button
+                  key={tab}
+                  onClick={() => setActiveSubTab(tab)}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors
+                     ${activeSubTab === tab
+                        ? 'bg-white text-green-800 shadow'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
+               >
+                  {tab}
+               </button>
+            ))}
+         </div>
+      );
+   };
+
+   const renderTabs = () => {
+      if (isMobile) {
+         return renderMobileTabSelectors();
+      }
+
+      return (
+         <div className="flex flex-col sm:flex-row gap-4">
+            <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap overflow-x-auto">
+               {mainTabs.map((tab) => (
+                  <button
+                     key={tab}
+                     onClick={() => {
+                        setActiveMainTab(tab);
+                        setActiveSubTab(subTabs[tab][0]);
+                     }}
+                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors
+                        ${activeMainTab === tab
+                           ? 'bg-white text-green-800 shadow'
+                           : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
+                  >
+                     {tab}
+                  </button>
+               ))}
+            </div>
+         </div>
+      );
+   };
+
    return (
       <div className="bg-green-50 min-h-screen pt-20 pb-8 px-4 sm:px-6 lg:px-8">
          <div className="max-w-7xl mx-auto space-y-6">
@@ -239,54 +407,26 @@ const ChiefDashboard = () => {
             <div className="bg-white rounded-lg shadow-sm p-6">
                <div className="flex items-center justify-between mb-4">
                   <h1 className="text-2xl font-semibold text-gray-900">Chief RPS/TSD Dashboard</h1>
-                  <Button onClick={handleRefresh} variant="outline">
+                  <Button onClick={handleRefresh} variant="outline" size="sm">
                      <RefreshCw className="mr-2 h-4 w-4" />
-                     Refresh
+                     {!isMobile && "Refresh"}
                   </Button>
                </div>
 
-               {/* Main Tabs */}
-               <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-                     {mainTabs.map((tab) => (
-                        <button
-                           key={tab}
-                           onClick={() => {
-                              setActiveMainTab(tab);
-                              setActiveSubTab(subTabs[tab][0]);
-                           }}
-                           className={`px-4 py-2 rounded-md text-sm font-medium transition-colors
-                              ${activeMainTab === tab
-                                 ? 'bg-white text-green-800 shadow'
-                                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
-                        >
-                           {tab}
-                        </button>
-                     ))}
-                  </div>
+               {/* Tabs Section */}
+               {isMobile ? renderMobileTabSelectors() : renderTabs()}
+
+               {/* Description */}
+               <div className="mt-6 text-sm text-gray-600">
+                  {renderTabDescription()}
                </div>
             </div>
 
-            {/* Sub Tabs and Search Section */}
+            {/* Sub Tabs and Filters Section */}
             <div className="bg-white rounded-lg shadow-sm p-6">
-               <div className="space-y-4 relative">
-                  {/* Sub Tabs */}
-                  <div className="bg-gray-100 p-1 rounded-md inline-flex flex-wrap gap-1">
-                     {subTabs[activeMainTab].map((tab) => (
-                        <button
-                           key={tab}
-                           onClick={() => setActiveSubTab(tab)}
-                           className={`px-3 py-2 rounded-md text-sm font-medium transition-colors
-                              ${activeSubTab === tab
-                                 ? 'bg-white text-green-800 shadow'
-                                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
-                        >
-                           {tab}
-                        </button>
-                     ))}
-                  </div>
-
-                  {renderTabDescription()}
+               <div className="space-y-4">
+                  {/* Only render subtabs for desktop view */}
+                  {!isMobile && renderSubTabs()}
                   {renderFilters()}
                </div>
             </div>
@@ -296,5 +436,6 @@ const ChiefDashboard = () => {
       </div>
    );
 };
+
 
 export default ChiefDashboard;

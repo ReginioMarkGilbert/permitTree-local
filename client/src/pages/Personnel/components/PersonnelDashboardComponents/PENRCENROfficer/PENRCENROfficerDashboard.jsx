@@ -6,11 +6,20 @@ import ApplicationRow from './PCOApplicationRow';
 import { useApplications } from '../../../hooks/useApplications';
 import { toast } from 'sonner';
 import { gql } from '@apollo/client';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+import {
+   Select,
+   SelectContent,
+   SelectItem,
+   SelectTrigger,
+   SelectValue,
+} from "@/components/ui/select";
 
 const PENRCENROfficerDashboard = () => {
    const [searchTerm, setSearchTerm] = useState('');
    const [activeMainTab, setActiveMainTab] = useState('Applications');
    const [activeSubTab, setActiveSubTab] = useState('Applications for Review');
+   const isMobile = useMediaQuery('(max-width: 640px)');
 
    const getQueryParamsForTab = (tab) => {
       switch (tab) {
@@ -105,6 +114,45 @@ const PENRCENROfficerDashboard = () => {
       }
    };
 
+   const renderMobileTabSelectors = () => (
+      <div className="space-y-4">
+         <Select
+            value={activeMainTab}
+            onValueChange={(value) => {
+               setActiveMainTab(value);
+               setActiveSubTab(subTabs[value][0]);
+            }}
+         >
+            <SelectTrigger className="w-full">
+               <SelectValue placeholder="Select main tab" />
+            </SelectTrigger>
+            <SelectContent>
+               {mainTabs.map((tab) => (
+                  <SelectItem key={tab} value={tab}>
+                     {tab}
+                  </SelectItem>
+               ))}
+            </SelectContent>
+         </Select>
+
+         <Select
+            value={activeSubTab}
+            onValueChange={setActiveSubTab}
+         >
+            <SelectTrigger className="w-full">
+               <SelectValue placeholder="Select sub tab" />
+            </SelectTrigger>
+            <SelectContent>
+               {subTabs[activeMainTab].map((tab) => (
+                  <SelectItem key={tab} value={tab}>
+                     {tab}
+                  </SelectItem>
+               ))}
+            </SelectContent>
+         </Select>
+      </div>
+   );
+
    const renderTable = () => {
       if (loading) return <p className="text-center text-gray-500">Loading applications...</p>;
       if (error) {
@@ -115,6 +163,25 @@ const PENRCENROfficerDashboard = () => {
          return <p className="text-center text-gray-500">No applications found.</p>;
       }
 
+      // Mobile view
+      if (isMobile) {
+         return (
+            <div className="space-y-4">
+               {filteredApplications.map((app) => (
+                  <ApplicationRow
+                     key={app.id}
+                     app={app}
+                     onReviewComplete={handleReviewComplete}
+                     getStatusColor={getStatusColor}
+                     currentTab={activeSubTab}
+                     isMobile={true}
+                  />
+               ))}
+            </div>
+         );
+      }
+
+      // Desktop view
       return (
          <div className="bg-white rounded-lg shadow overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -132,11 +199,10 @@ const PENRCENROfficerDashboard = () => {
                      <ApplicationRow
                         key={app.id}
                         app={app}
-                        // onView={() => { }}
-                        // onPrint={() => { }}
                         onReviewComplete={handleReviewComplete}
                         getStatusColor={getStatusColor}
                         currentTab={activeSubTab}
+                        isMobile={false}
                      />
                   ))}
                </tbody>
@@ -152,55 +218,76 @@ const PENRCENROfficerDashboard = () => {
    return (
       <div className="min-h-screen bg-green-50">
          <div className="container mx-auto px-4 sm:px-6 py-8 pt-24">
-            <div className="flex justify-between items-center mb-6">
-               <h1 className="text-3xl font-bold text-green-800">PENR/CENR Officer Dashboard</h1>
-               <Button onClick={handleRefresh} variant="outline">
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Refresh
-               </Button>
-            </div>
-            {/* Main Tabs */}
-            <div className="mb-6 overflow-x-auto">
-               <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-                  {mainTabs.map((tab) => (
-                     <button
-                        key={tab}
-                        onClick={() => {
-                           setActiveMainTab(tab);
-                           setActiveSubTab(subTabs[tab][0]);
-                        }}
-                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeMainTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
-                     >
-                        {tab}
-                     </button>
-                  ))}
+            {/* Header Section */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+               <div className="flex justify-between items-center mb-4">
+                  <h1 className="text-2xl font-semibold text-gray-900">PENR/CENR Officer Dashboard</h1>
+                  <Button onClick={handleRefresh} variant="outline" size="sm">
+                     <RefreshCw className="mr-2 h-4 w-4" />
+                     {!isMobile && "Refresh"}
+                  </Button>
+               </div>
+
+               {/* Tabs Section */}
+               {isMobile ? renderMobileTabSelectors() : (
+                  <>
+                     {/* Main Tabs */}
+                     <div className="mb-6 overflow-x-auto">
+                        <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
+                           {mainTabs.map((tab) => (
+                              <button
+                                 key={tab}
+                                 onClick={() => {
+                                    setActiveMainTab(tab);
+                                    setActiveSubTab(subTabs[tab][0]);
+                                 }}
+                                 className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeMainTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
+                              >
+                                 {tab}
+                              </button>
+                           ))}
+                        </div>
+                     </div>
+                     {/* Subtabs */}
+                     <div className="mb-6 overflow-x-auto">
+                        <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
+                           {subTabs[activeMainTab].map((tab) => (
+                              <button
+                                 key={tab}
+                                 onClick={() => setActiveSubTab(tab)}
+                                 className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeSubTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
+                              >
+                                 {tab}
+                              </button>
+                           ))}
+                        </div>
+                     </div>
+                  </>
+               )}
+
+               {/* Description */}
+               <div className="mt-6 text-sm text-gray-600">
+                  {renderTabDescription()}
                </div>
             </div>
-            {/* Subtabs */}
-            <div className="mb-6 overflow-x-auto">
-               <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-                  {subTabs[activeMainTab].map((tab) => (
-                     <button
-                        key={tab}
-                        onClick={() => setActiveSubTab(tab)}
-                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeSubTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
-                     >
-                        {tab}
-                     </button>
-                  ))}
+
+            {/* Search Section */}
+            <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
+               <div className="space-y-4">
+                  <Input
+                     type="text"
+                     placeholder="Search applications..."
+                     value={searchTerm}
+                     onChange={(e) => setSearchTerm(e.target.value)}
+                     className="border rounded-md p-2 w-full"
+                  />
                </div>
             </div>
-            {renderTabDescription()}
-            <div className="mb-6">
-               <Input
-                  type="text"
-                  placeholder="Search applications..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="border rounded-md p-2 w-full"
-               />
+
+            {/* Table Section */}
+            <div className="mt-6">
+               {renderTable()}
             </div>
-            {renderTable()}
          </div>
       </div>
    );
