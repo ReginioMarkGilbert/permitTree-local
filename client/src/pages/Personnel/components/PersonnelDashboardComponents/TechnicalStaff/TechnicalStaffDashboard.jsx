@@ -7,6 +7,14 @@ import { useApplications } from '../../../hooks/useApplications';
 import { toast } from 'sonner';
 import { gql, useQuery } from '@apollo/client';
 import TechnicalStaffApplicationFilters from './TechnicalStaffApplicationFilters';
+import TS_CertificateRow from './TS_CertificateRow';
+import {
+   Dialog,
+   DialogContent,
+   DialogHeader,
+   DialogTitle,
+   DialogFooter,
+} from "@/components/ui/dialog";
 
 const GET_CERTIFICATES = gql`
   query GetCertificates($status: String) {
