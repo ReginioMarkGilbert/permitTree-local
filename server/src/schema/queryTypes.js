@@ -44,7 +44,7 @@ const queryTypes = gql`
     ): [Permit!]!
 
     # Certificate queries
-    getCertificates(status: String): [Certificate!]!
+    getCertificates(certificateStatus: String): [Certificate!]!
     getCertificatesByApplicationId(applicationId: ID!): [Certificate!]!
 
     # Notification Queries

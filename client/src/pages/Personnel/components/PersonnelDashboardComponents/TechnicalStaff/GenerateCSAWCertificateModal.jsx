@@ -36,7 +36,7 @@ const GENERATE_CERTIFICATE = gql`
     generateCertificate(input: $input) {
       id
       certificateNumber
-      status
+      certificateStatus
       dateCreated
       certificateData {
         registrationType
@@ -52,6 +52,7 @@ const GENERATE_CERTIFICATE = gql`
           countryOfOrigin
           purchasePrice
         }
+        purpose
       }
     }
   }
@@ -61,7 +62,7 @@ const FORWARD_CERTIFICATE = gql`
   mutation ForwardCertificateForSignature($id: ID!) {
     forwardCertificateForSignature(id: $id) {
       id
-      status
+      certificateStatus
     }
   }
 `;
