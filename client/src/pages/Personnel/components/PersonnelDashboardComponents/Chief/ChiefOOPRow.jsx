@@ -146,6 +146,101 @@ const ChiefOOPRow = ({ oop, onRefetch }) => {
       }
    };
 
+   const renderActionButtons = () => {
+      if (isMobile) {
+         return (
+            <>
+               <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleView}
+                  className="h-8 w-8"
+               >
+                  <Eye className="h-4 w-4" />
+               </Button>
+
+               <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handlePrint}
+                  className="h-8 w-8"
+               >
+                  <Printer className="h-4 w-4" />
+               </Button>
+
+               {oop.OOPstatus === 'Pending Signature' && (
+                  <>
+                     <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={handleAffixSign}
+                        className="h-8 w-8 text-blue-600"
+                     >
+                        <PenLine className="h-4 w-4" />
+                     </Button>
+
+                     <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={handleUndoOOP}
+                        className="h-8 w-8 text-yellow-600"
+                     >
+                        <RotateCcw className="h-4 w-4" />
+                     </Button>
+                  </>
+               )}
+            </>
+         );
+      }
+
+      // Desktop view remains the same
+      return (
+         <>
+            <Button
+               variant="outline"
+               size="sm"
+               onClick={handleView}
+            >
+               <Eye className="h-4 w-4 mr-1" />
+               View
+            </Button>
+
+            <Button
+               variant="outline"
+               size="sm"
+               onClick={handlePrint}
+            >
+               <Printer className="h-4 w-4 mr-1" />
+               Print
+            </Button>
+
+            {oop.OOPstatus === 'Pending Signature' && (
+               <>
+                  <Button
+                     variant="outline"
+                     size="sm"
+                     onClick={handleAffixSign}
+                     className="text-blue-600"
+                  >
+                     <PenLine className="h-4 w-4 mr-1" />
+                     Affix E-Sign
+                  </Button>
+
+                  <Button
+                     variant="outline"
+                     size="sm"
+                     onClick={handleUndoOOP}
+                     className="text-yellow-600"
+                  >
+                     <RotateCcw className="h-4 w-4 mr-1" />
+                     Undo
+                  </Button>
+               </>
+            )}
+         </>
+      );
+   };
+
    if (isMobile) {
       return (
          <div className="bg-white p-4 mb-4 rounded-lg shadow-sm border border-gray-200">
@@ -168,6 +263,9 @@ const ChiefOOPRow = ({ oop, onRefetch }) => {
                   <div className="text-sm text-gray-500">
                      Date: {formatDate(oop.createdAt)}
                   </div>
+                  <div className="text-sm font-medium">
+                     Amount: ₱{oop.totalAmount?.toFixed(2)}
+                  </div>
                </div>
 
                <div className="pt-3 flex flex-wrap gap-2">
@@ -176,22 +274,36 @@ const ChiefOOPRow = ({ oop, onRefetch }) => {
             </div>
 
             {/* Modals */}
-            {/* ... existing modals ... */}
+            <OOPAffixEsignModal
+               oop={oop}
+               isOpen={isModalOpen}
+               onClose={() => setIsModalOpen(false)}
+            />
+
+            <ViewOOPModal
+               isOpen={isViewOOPModalOpen}
+               onClose={() => setIsViewOOPModalOpen(false)}
+               oop={oop}
+            />
          </div>
       );
    }
 
+   // Desktop view remains the same
    return (
       <>
          <tr key={oop._id}>
             <td className="px-4 py-4 whitespace-nowrap">
-               {oop.applicationNumber || 'No application number'}
+               {oop.applicationNumber}
             </td>
             <td className="px-4 py-4 whitespace-nowrap">
                {oop.billNo}
             </td>
             <td className="px-4 py-4 whitespace-nowrap">
                {formatDate(oop.createdAt)}
+            </td>
+            <td className="px-4 py-4 whitespace-nowrap">
+               ₱{oop.totalAmount?.toFixed(2)}
             </td>
             <td className="px-4 py-4 whitespace-nowrap">
                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(oop.OOPstatus)}`}>

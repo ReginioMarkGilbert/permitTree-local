@@ -38,7 +38,8 @@ const ChiefDashboard = () => {
       }
    };
 
-   const { applications, loading, error, refetch } = useApplications(getQueryParamsForTab(activeSubTab));
+   const { applications, loading: appLoading, error: appError, refetch: refetchApps } = useApplications(getQueryParamsForTab(activeSubTab));
+   const { oops, loading: oopsLoading, error: oopsError, refetch: refetchOOPs } = useOrderOfPayments();
 
    const mainTabs = ['Applications', 'Applications Awaiting OOP', 'Order Of Payment', 'Certificates'];
    const subTabs = {
@@ -77,8 +78,8 @@ const ChiefDashboard = () => {
    }, [applications, filters]);
 
    useEffect(() => {
-      refetch();
-   }, [refetch, activeSubTab]);
+      refetchApps();
+   }, [refetchApps, activeSubTab]);
 
    const getStatusColor = (status) => {
       switch (status.toLowerCase()) {
@@ -89,7 +90,7 @@ const ChiefDashboard = () => {
    };
 
    const handleReviewComplete = () => {
-      refetch();
+      refetchApps();
    };
 
    const renderTabDescription = () => {
@@ -126,38 +127,79 @@ const ChiefDashboard = () => {
       );
    };
 
-   const {
-      oops,
-      oopsLoading,
-      oopsError,
-      refetch: refetchOOPs
-   } = useOrderOfPayments();
+   const filteredOOPs = useMemo(() => {
+      if (!oops) return [];
 
-   const renderOrderOfPaymentTable = () => {
-      if (oopsLoading) return <p className="text-center text-gray-500">Loading order of payments...</p>;
-      if (oopsError) {
-         console.error('Error fetching OOPs:', oopsError);
-         return <p className="text-center text-red-500">Error loading order of payments. Please try again later.</p>;
-      }
-      //  render based on active subtab
-      const filteredOOPs = oops.filter(oop => {
-         switch (activeSubTab) {
-            case 'Pending Signature':
+      return oops.filter(oop => {
+         // Filter by status based on activeSubTab
+         const matchesStatus = (() => {
+            if (activeSubTab === 'Pending Signature') {
                return oop.OOPstatus === 'Pending Signature';
-            case 'Signed Order Of Payment':
+            } else if (activeSubTab === 'Signed Order Of Payment') {
                return oop.OOPSignedByTwoSignatories === true;
-            default:
-               return true;
-         }
-      }).filter(oop =>
-         oop.applicationId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         oop.billNo.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+            }
+            return true;
+         })();
 
+         // Filter by search term
+         const matchesSearch = oop.applicationNumber.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+            oop.billNo.toLowerCase().includes(filters.searchTerm.toLowerCase());
+
+         // Filter by date range
+         const matchesDateRange = (() => {
+            if (!filters.dateRange.from && !filters.dateRange.to) return true;
+            const oopDate = new Date(parseInt(oop.createdAt));
+            oopDate.setHours(0, 0, 0, 0);
+            const fromDate = filters.dateRange.from ? new Date(filters.dateRange.from) : null;
+            const toDate = filters.dateRange.to ? new Date(filters.dateRange.to) : null;
+            if (fromDate) fromDate.setHours(0, 0, 0, 0);
+            if (toDate) toDate.setHours(0, 0, 0, 0);
+            return (!fromDate || oopDate >= fromDate) && (!toDate || oopDate <= toDate);
+         })();
+
+         return matchesStatus && matchesSearch && matchesDateRange;
+      });
+   }, [oops, filters, activeSubTab]);
+
+   const handleRefresh = () => {
+      if (activeMainTab === 'Order Of Payment') {
+         refetchOOPs();
+      } else {
+         refetchApps();
+      }
+   };
+
+   const renderTable = () => {
+      if (activeMainTab === 'Order Of Payment') {
+         return renderOOPTable();
+      }
+      return renderApplicationTable();
+   };
+
+   const renderOOPTable = () => {
+      if (oopsLoading) return <p className="text-center text-gray-500">Loading order of payments...</p>;
+      if (oopsError) return <p className="text-center text-red-500">Error loading order of payments</p>;
       if (filteredOOPs.length === 0) {
          return <p className="text-center text-gray-500">No order of payments found.</p>;
       }
 
+      // Mobile view
+      if (isMobile) {
+         return (
+            <div className="space-y-4">
+               {filteredOOPs.map((oop) => (
+                  <ChiefOOPRow
+                     key={oop._id}
+                     oop={oop}
+                     onRefetch={refetchOOPs}
+                     isMobile={true}
+                  />
+               ))}
+            </div>
+         );
+      }
+
+      // Desktop view
       return (
          <div className="bg-white rounded-lg shadow overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -173,6 +215,9 @@ const ChiefDashboard = () => {
                         Date
                      </th>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Amount
+                     </th>
+                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
                      </th>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -186,6 +231,7 @@ const ChiefDashboard = () => {
                         key={oop._id}
                         oop={oop}
                         onRefetch={refetchOOPs}
+                        isMobile={false}
                      />
                   ))}
                </tbody>
@@ -194,26 +240,10 @@ const ChiefDashboard = () => {
       );
    };
 
-   useEffect(() => {
-      if (activeMainTab === 'Order Of Payment') {
-         refetchOOPs();
-      } else {
-         refetch();
-      }
-   }, [activeMainTab, activeSubTab, refetch, refetchOOPs]);
-
-   const handleRefresh = () => {
-      if (activeMainTab === 'Order Of Payment') {
-         refetchOOPs();
-      } else {
-         refetch();
-      }
-   };
-
-   const renderTable = () => {
-      if (loading) return <p className="text-center text-gray-500">Loading applications...</p>;
-      if (error) {
-         console.error('Error fetching applications:', error);
+   const renderApplicationTable = () => {
+      if (appLoading) return <p className="text-center text-gray-500">Loading applications...</p>;
+      if (appError) {
+         console.error('Error fetching applications:', appError);
          return <p className="text-center text-red-500">Error loading applications. Please try again later.</p>;
       }
       if (filteredApplications.length === 0) {

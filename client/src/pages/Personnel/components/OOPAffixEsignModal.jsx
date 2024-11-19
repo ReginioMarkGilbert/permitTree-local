@@ -356,12 +356,12 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
                   >
                      Cancel
                   </Button>
-                  <Button
+                  {/* <Button
                      onClick={handleSaveChanges}
                      disabled={!signatures.rpsSignature && !signatures.tsdSignature}
                   >
                      Save Changes
-                  </Button>
+                  </Button> */}
                   <Button
                      onClick={handleForwardToAccountant}
                      disabled={!signatures.rpsSignature || !signatures.tsdSignature}
