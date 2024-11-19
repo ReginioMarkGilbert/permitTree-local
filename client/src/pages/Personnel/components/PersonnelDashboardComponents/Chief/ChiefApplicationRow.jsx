@@ -39,6 +39,7 @@ const UPDATE_PERMIT_STAGE = gql`
     $status: String!,
     $notes: String,
     $reviewedByChief: Boolean
+    $awaitingOOP: Boolean
   ) {
     updatePermitStage(
       id: $id,
@@ -46,11 +47,13 @@ const UPDATE_PERMIT_STAGE = gql`
       status: $status,
       notes: $notes,
       reviewedByChief: $reviewedByChief
+      awaitingOOP: $awaitingOOP
     ) {
       id
       currentStage
       status
       reviewedByChief
+      awaitingOOP
       history {
         notes
         timestamp
@@ -105,7 +108,8 @@ const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab
                   currentStage: 'ChiefRPSReview',
                   status: 'In Progress',
                   notes: 'Review undone by Chief RPS/TSD',
-                  reviewedByChief: false
+                  reviewedByChief: false,
+                  awaitingOOP: false,
                }
             });
             toast.success('Application review undone successfully');
