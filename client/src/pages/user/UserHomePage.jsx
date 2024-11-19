@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '../../components/ui/Card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '../../components/ui/card';
 import { Bell, ClipboardList, Users, Settings, TrendingUp, CheckCircle, XCircle, ClipboardCheck, RotateCcw, Info, AlertCircle, AlertTriangle } from "lucide-react";
 import { toast, ToastContainer } from 'react-toastify';
 import HomeFooter from '../../components/ui/HomeFooter';
@@ -110,15 +110,10 @@ const HomePage = ({ sidebarOpen }) => {
                {/* Quick Actions */}
                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-10">
                   {quickActions.map((action, index) => (
-                     <Card
-                        key={index}
-                        className="group bg-white rounded-xl shadow-md hover:shadow-xl
-                           transition-all duration-300 overflow-hidden"
-                     >
+                     <Card key={index} className="group hover:shadow-xl transition-all duration-300">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                            <div className="flex items-center space-x-3">
-                              <div className="p-2 rounded-lg bg-green-50 text-green-600
-                                 group-hover:bg-green-100 transition-colors duration-300">
+                              <div className="p-2 rounded-lg bg-green-50 text-green-600 group-hover:bg-green-100 transition-colors duration-300">
                                  {action.icon}
                               </div>
                               <CardTitle className="text-base font-semibold text-gray-900">
@@ -128,11 +123,7 @@ const HomePage = ({ sidebarOpen }) => {
                         </CardHeader>
                         <CardContent>
                            <Button
-                              className="w-full bg-gradient-to-r from-green-600 to-green-700
-                                 hover:from-green-700 hover:to-green-800 text-white
-                                 transform transition-all duration-300
-                                 hover:translate-y-[-2px] active:translate-y-0
-                                 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+                              className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
                               onClick={() => window.location.href = action.link}
                            >
                               Go to {action.title}
@@ -144,20 +135,17 @@ const HomePage = ({ sidebarOpen }) => {
 
                {/* Main Content Grid */}
                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 lg:gap-8">
-                  {/* Recent Applications Card - reduce span */}
-                  <Card className="lg:col-span-7 bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
-                     <CardHeader className="border-b border-gray-100">
+                  {/* Recent Applications Card */}
+                  <Card className="lg:col-span-7 hover:shadow-xl transition-all duration-300 flex flex-col">
+                     <CardHeader className="border-b border-gray-100 pb-3 sm:pb-4">
                         <div className="flex items-center space-x-3">
                            <div className="p-2 rounded-lg bg-green-50 text-green-600">
                               <ClipboardList className="h-5 w-5 sm:h-6 sm:w-6" />
                            </div>
-                           <CardTitle className="text-lg sm:text-xl font-semibold text-gray-900">
-                              Recent Applications
-                           </CardTitle>
+                           <CardTitle>Recent Applications</CardTitle>
                         </div>
                      </CardHeader>
-                     <CardContent className="relative flex flex-col h-full pt-4 sm:pt-6">
-                        {/* Content height adjustments */}
+                     <CardContent className="flex-1 pt-4 sm:pt-6">
                         <div className="h-[300px] sm:h-[365px] overflow-y-auto custom-scrollbar pr-2 sm:pr-4">
                            {applicationsLoading ? (
                               <div className="flex items-center justify-center h-[365px]">
@@ -169,7 +157,7 @@ const HomePage = ({ sidebarOpen }) => {
                                  <p>Error loading applications</p>
                               </div>
                            ) : recentApplications.length === 0 ? (
-                              <div className="h-[365px] flex flex-col items-center justify-center text-gray-500">
+                              <div className="flex flex-col items-center justify-center h-[365px] text-gray-500">
                                  <ClipboardList className="h-12 w-12 mb-3 text-gray-400" />
                                  <p className="text-lg">No recent applications</p>
                                  <p className="text-sm mt-2">Start by creating a new application</p>
@@ -187,7 +175,7 @@ const HomePage = ({ sidebarOpen }) => {
                                              transition-colors duration-200">
                                              {app.applicationType}
                                           </p>
-                                          <div className="flex items-center gap-2 mt-1">
+                                          <div className="flex items-center gap-3 mt-1">
                                              <p className="text-sm text-gray-500">ID: {app.applicationNumber}</p>
                                              <span className="text-gray-300">•</span>
                                              <p className="text-sm text-gray-500">
@@ -209,11 +197,7 @@ const HomePage = ({ sidebarOpen }) => {
                      </CardContent>
                      <CardFooter className="border-t border-gray-100 pt-4">
                         <Button
-                           className="w-full bg-gradient-to-r from-green-600 to-green-700
-                              hover:from-green-700 hover:to-green-800 text-white
-                              transform transition-all duration-300
-                              hover:translate-y-[-2px] active:translate-y-0
-                              focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+                           className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
                            onClick={() => window.location.href = '/applicationsStatus'}
                         >
                            View All Applications
@@ -221,46 +205,40 @@ const HomePage = ({ sidebarOpen }) => {
                      </CardFooter>
                   </Card>
 
-                  {/* Notifications Card - increase span */}
-                  <Card className="lg:col-span-5 bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
-                     <CardHeader className="flex flex-row items-center justify-between
-                        border-b border-gray-100 pb-3 sm:pb-4">
+                  {/* Notifications Card */}
+                  <Card className="lg:col-span-5 hover:shadow-xl transition-all duration-300 flex flex-col">
+                     <CardHeader className="border-b border-gray-100 pb-3 sm:pb-4">
                         <div className="flex items-center space-x-3">
                            <div className="p-2 rounded-lg bg-green-50 text-green-600 relative">
                               <Bell className="h-5 w-5 sm:h-6 sm:w-6" />
                               {unreadNotifications.length > 0 && (
-                                 <span className="absolute -top-1 -right-1 bg-red-500 text-white
-                                    text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[20px]
-                                    h-5 flex items-center justify-center">
+                                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[20px] h-5 flex items-center justify-center">
                                     {unreadNotifications.length}
                                  </span>
                               )}
                            </div>
-                           <CardTitle className="text-lg sm:text-xl font-semibold text-gray-900">
-                              Notifications
-                           </CardTitle>
+                           <CardTitle>Notifications</CardTitle>
                         </div>
                      </CardHeader>
-                     <CardContent className="relative flex flex-col h-full pt-4 sm:pt-6">
-                        {/* Content height adjustments */}
-                        <div className="h-[250px] sm:h-[21.5rem] overflow-y-auto custom-scrollbar pr-2 sm:pr-4">
+                     <CardContent className="flex-1 pt-4 sm:pt-6">
+                        <div className="h-[300px] sm:h-[365px] overflow-y-auto custom-scrollbar pr-2 sm:pr-4">
                            {notificationsLoading ? (
-                              <div className="flex items-center justify-center h-[21.5rem]">
+                              <div className="flex items-center justify-center h-[365px]">
                                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
                               </div>
                            ) : notificationsError ? (
-                              <div className="flex items-center justify-center h-[21.5rem] text-red-500">
+                              <div className="flex items-center justify-center h-[365px] text-red-500">
                                  <AlertCircle className="h-6 w-6 mr-2" />
                                  <p>Error loading notifications</p>
                               </div>
                            ) : notifications.length === 0 ? (
-                              <div className="flex flex-col items-center justify-center h-[21.5rem] text-gray-500">
+                              <div className="flex flex-col items-center justify-center h-[365px] text-gray-500">
                                  <Bell className="h-12 w-12 mb-3 text-gray-400" />
                                  <p className="text-lg">No notifications yet</p>
                                  <p className="text-sm mt-2">We'll notify you of important updates</p>
                               </div>
                            ) : (
-                              <div className="space-y-3 h-[21.5rem] overflow-y-auto custom-scrollbar pr-4">
+                              <div className="space-y-3 h-[365px] overflow-y-auto custom-scrollbar pr-4">
                                  {notifications.slice(0, 10).map((notification) => (
                                     <div
                                        key={notification.id}
@@ -306,11 +284,7 @@ const HomePage = ({ sidebarOpen }) => {
                      </CardContent>
                      <CardFooter className="border-t border-gray-100 pt-4">
                         <Button
-                           className="w-full bg-gradient-to-r from-green-600 to-green-700
-                              hover:from-green-700 hover:to-green-800 text-white
-                              transform transition-all duration-300
-                              hover:translate-y-[-2px] active:translate-y-0
-                              focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+                           className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
                            onClick={() => window.location.href = '/notifications'}
                         >
                            View All Notifications
