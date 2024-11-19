@@ -124,6 +124,10 @@ describe('UserAuthPage', () => {
    });
 
    describe('Login Flow', () => {
+      beforeEach(() => {
+         vi.clearAllMocks(); // Clear mock calls before each test
+      });
+
       it('renders login form by default', () => {
          renderComponent();
          expect(screen.getByTestId('login-username')).toBeInTheDocument();
@@ -137,8 +141,7 @@ describe('UserAuthPage', () => {
          fireEvent.click(signInButton);
 
          await waitFor(() => {
-            expect(screen.getByTestId('login-username')).toBeInvalid();
-            expect(screen.getByTestId('login-password')).toBeInvalid();
+            expect(sonner.toast.error).toHaveBeenCalledWith('Please fill in all required fields');
          });
       });
 

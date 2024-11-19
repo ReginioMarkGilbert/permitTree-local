@@ -14,6 +14,7 @@
     "test:permitForms": "vitest src/tests/pages/user/components/permitForms --silent",
     "test:components": "vitest src/tests/pages/user/components --silent",
     "test:userpages": "vitest src/tests/pages/user --silent",
+    "test:publicpages": "vitest src/tests/pages/public --silent",
     "test:newfile": "vitest src/tests/pages/user/PaymenPage.test.jsx --silent",
     "test:file": "vitest src/tests/pages/user/HomePage.test.jsx"
   },

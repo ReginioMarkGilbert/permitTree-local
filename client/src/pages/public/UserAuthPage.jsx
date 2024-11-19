@@ -110,7 +110,20 @@ const UserAuthPage = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (!loginUsername || !loginPassword) {
+
+    // Clear any existing validation errors
+    const errors = [];
+
+    // Validate required fields
+    if (!loginUsername) {
+      errors.push('Username is required');
+    }
+    if (!loginPassword) {
+      errors.push('Password is required');
+    }
+
+    // Show validation errors if any
+    if (errors.length > 0) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -225,6 +238,7 @@ const UserAuthPage = () => {
                   </Label>
                   <Input
                     id="loginUsername"
+                    data-testid="login-username"
                     type="text"
                     value={loginUsername}
                     onChange={(e) => setLoginUsername(e.target.value)}
@@ -239,6 +253,7 @@ const UserAuthPage = () => {
                   <div className="relative">
                     <Input
                       id="loginPassword"
+                      data-testid="login-password"
                       type={showPassword ? "text" : "password"}
                       value={loginPassword}
                       onChange={(e) => setLoginPassword(e.target.value)}
@@ -256,6 +271,7 @@ const UserAuthPage = () => {
                 </div>
                 <button
                   onClick={handleLogin}
+                  data-testid="signin-submit"
                   className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-2.5 px-4 rounded-lg font-medium
                     hover:from-green-700 hover:to-green-600 focus:ring-2 focus:ring-green-500 focus:ring-offset-2
                     transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
@@ -277,6 +293,7 @@ const UserAuthPage = () => {
                     </Label>
                     <Input
                       id="firstName"
+                      data-testid="first-name"
                       type="text"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
@@ -290,6 +307,7 @@ const UserAuthPage = () => {
                     </Label>
                     <Input
                       id="lastName"
+                      data-testid="last-name"
                       type="text"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
@@ -304,6 +322,7 @@ const UserAuthPage = () => {
                   </Label>
                   <Input
                     id="username"
+                    data-testid="username"
                     type="text"
                     value={username}
                     readOnly
@@ -318,6 +337,7 @@ const UserAuthPage = () => {
                   <div className="relative">
                     <Input
                       id="password"
+                      data-testid="signup-password"
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={handlePasswordChange}
@@ -344,6 +364,7 @@ const UserAuthPage = () => {
                   </Label>
                   <Input
                     id="confirmPassword"
+                    data-testid="confirm-password"
                     type={showPassword ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
@@ -353,6 +374,7 @@ const UserAuthPage = () => {
                 </div>
                 <button
                   onClick={handleSignup}
+                  data-testid="signup-submit"
                   className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-2.5 px-4 rounded-lg font-medium
                     hover:from-green-700 hover:to-green-600 focus:ring-2 focus:ring-green-500 focus:ring-offset-2
                     transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
