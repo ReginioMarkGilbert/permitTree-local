@@ -5,6 +5,8 @@ import { useOrderOfPayments } from '../../../hooks/useOrderOfPayments';
 import BillCollectorOOPRow from './BC_OOPRow';
 import { RefreshCw } from 'lucide-react';
 import { gql, useQuery } from '@apollo/client';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 const GET_OOPS = gql`
   query GetOOPs {
@@ -51,6 +53,12 @@ const GET_OOPS = gql`
 const BillCollectorDashboard = () => {
    const [searchTerm, setSearchTerm] = useState('');
    const [activeTab, setActiveTab] = useState('Payment Proof');
+   const isMobile = useMediaQuery('(max-width: 640px)');
+   const isChrome = useMemo(() => {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      const isBrave = navigator.brave !== undefined;
+      return userAgent.includes('chrome') && !userAgent.includes('edg') && !isBrave;
+   }, []);
 
    // Use direct query instead of hook
    const {
@@ -85,6 +93,39 @@ const BillCollectorDashboard = () => {
       );
    }, [oopsData, activeTab, searchTerm]);
 
+   const renderMobileTabSelector = () => {
+      if (isChrome) {
+         return (
+            <select
+               value={activeTab}
+               onChange={(e) => setActiveTab(e.target.value)}
+               className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
+            >
+               {tabs.map((tab) => (
+                  <option key={tab} value={tab}>
+                     {tab}
+                  </option>
+               ))}
+            </select>
+         );
+      }
+
+      return (
+         <Select value={activeTab} onValueChange={setActiveTab}>
+            <SelectTrigger className="w-full">
+               <SelectValue placeholder="Select status" />
+            </SelectTrigger>
+            <SelectContent>
+               {tabs.map((tab) => (
+                  <SelectItem key={tab} value={tab}>
+                     {tab}
+                  </SelectItem>
+               ))}
+            </SelectContent>
+         </Select>
+      );
+   };
+
    const renderTable = () => {
       if (oopsLoading) return <div className="text-center">Loading...</div>;
       if (oopsError) return <div className="text-center text-red-500">Error loading order of payments</div>;
@@ -92,6 +133,23 @@ const BillCollectorDashboard = () => {
          return <p className="text-center text-gray-500">No order of payments found.</p>;
       }
 
+      // Mobile view
+      if (isMobile) {
+         return (
+            <div className="space-y-4">
+               {filteredOOPs.map((oop) => (
+                  <BillCollectorOOPRow
+                     key={oop._id}
+                     oop={oop}
+                     onReviewComplete={refetchOOPs}
+                     isMobile={true}
+                  />
+               ))}
+            </div>
+         );
+      }
+
+      // Desktop view
       return (
          <div className="bg-white rounded-lg shadow overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -123,6 +181,7 @@ const BillCollectorDashboard = () => {
                         key={oop._id}
                         oop={oop}
                         onReviewComplete={refetchOOPs}
+                        isMobile={false}
                      />
                   ))}
                </tbody>
@@ -133,28 +192,39 @@ const BillCollectorDashboard = () => {
 
    return (
       <div className="min-h-screen bg-green-50">
-         <div className="container mx-auto px-4 sm:px-6 py-8 pt-24">
-            <div className="flex justify-between items-center mb-6">
-               <h1 className="text-3xl font-bold text-green-800">Bill Collector Dashboard</h1>
-               <Button onClick={refetchOOPs} variant="outline">
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Refresh
-               </Button>
-            </div>
-            <div className="mb-6 overflow-x-auto">
-               <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-                  {tabs.map((tab) => (
-                     <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
-                     >
-                        {tab}
-                     </button>
-                  ))}
+         <div className="container mx-auto px-4 sm:px-6 py-8 pt-20">
+            {/* Header Section */}
+            <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+               <div className="flex justify-between items-center mb-6">
+                  <h1 className="text-2xl font-bold text-green-800">Bill Collector Dashboard</h1>
+                  <Button onClick={refetchOOPs} variant="outline" size="sm">
+                     <RefreshCw className="mr-2 h-4 w-4" />
+                     {!isMobile && "Refresh"}
+                  </Button>
                </div>
+
+               {/* Tabs Section */}
+               {isMobile ? (
+                  renderMobileTabSelector()
+               ) : (
+                  <div className="mb-6 overflow-x-auto">
+                     <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
+                        {tabs.map((tab) => (
+                           <button
+                              key={tab}
+                              onClick={() => setActiveTab(tab)}
+                              className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
+                           >
+                              {tab}
+                           </button>
+                        ))}
+                     </div>
+                  </div>
+               )}
             </div>
-            <div className="mb-6">
+
+            {/* Search Section */}
+            <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
                <Input
                   type="text"
                   placeholder="Search order of payments..."
@@ -163,6 +233,8 @@ const BillCollectorDashboard = () => {
                   className="border rounded-md p-2 w-full"
                />
             </div>
+
+            {/* Table Section */}
             {renderTable()}
          </div>
       </div>

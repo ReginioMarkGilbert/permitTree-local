@@ -58,7 +58,7 @@ const GET_OOP_DETAILS = gql`
   }
 `;
 
-const BillCollectorOOPRow = ({ oop, onReviewComplete }) => {
+const BillCollectorOOPRow = ({ oop, onReviewComplete, isMobile }) => {
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
    const [isGenerateORModalOpen, setIsGenerateORModalOpen] = useState(false);
    const [isViewOOPModalOpen, setIsViewOOPModalOpen] = useState(false);
@@ -112,6 +112,90 @@ const BillCollectorOOPRow = ({ oop, onReviewComplete }) => {
       console.log('Payment proof data:', oop.paymentProof);
       setIsReviewModalOpen(true);
    };
+
+   if (isMobile) {
+      return (
+         <div className="bg-white p-4 mb-4 rounded-lg shadow-sm border border-gray-200">
+            <div className="space-y-3">
+               <div className="flex justify-between items-start">
+                  <div className="space-y-1">
+                     <h3 className="font-medium text-gray-900">
+                        {oop.applicationNumber}
+                     </h3>
+                     <p className="text-sm text-gray-500">
+                        Bill No: {oop.billNo}
+                     </p>
+                  </div>
+                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(oop.OOPstatus)}`}>
+                     {oop.OOPstatus}
+                  </span>
+               </div>
+
+               <div className="flex flex-col space-y-1">
+                  <div className="text-sm text-gray-500">
+                     Date: {formatDate(oop.createdAt)}
+                  </div>
+                  <div className="text-sm font-medium">
+                     Amount: ₱{oop.totalAmount?.toFixed(2)}
+                  </div>
+               </div>
+
+               <div className="pt-3 flex flex-wrap gap-2">
+                  <Button
+                     variant="outline"
+                     size="sm"
+                     onClick={handleViewOOP}
+                  >
+                     <Eye className="h-4 w-4 mr-1" />
+                     View
+                  </Button>
+
+                  <Button
+                     variant="outline"
+                     size="sm"
+                     onClick={() => console.log('Print OOP:', oop._id)}
+                  >
+                     <Printer className="h-4 w-4 mr-1" />
+                     Print OOP
+                  </Button>
+
+                  {oop.OOPstatus === 'Payment Proof Submitted' && (
+                     <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleReviewClick}
+                     >
+                        <FileText className="h-4 w-4 mr-1" />
+                        Review Payment
+                     </Button>
+                  )}
+
+                  {oop.OOPstatus === 'Completed OOP' && (
+                     <>
+                        <Button
+                           variant="outline"
+                           size="sm"
+                           onClick={() => setIsGenerateORModalOpen(true)}
+                        >
+                           <Receipt className="h-4 w-4 mr-1" />
+                           Generate OR
+                        </Button>
+
+                        <Button
+                           variant="outline"
+                           size="sm"
+                           onClick={handleUndoApproval}
+                        >
+                           <RotateCcw className="h-4 w-4 mr-1" />
+                           Undo Approval
+                        </Button>
+                     </>
+                  )}
+               </div>
+            </div>
+         </div>
+      );
+   }
 
    return (
       <>
