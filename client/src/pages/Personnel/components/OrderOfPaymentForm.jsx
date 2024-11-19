@@ -16,6 +16,7 @@ import "@/components/ui/styles/customScrollbar.css";
 import { useOrderOfPayments } from '../hooks/useOrderOfPayments';
 import { cn } from "@/lib/utils";
 import { ChevronDown } from 'lucide-react';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 const CustomSelect = ({ options, onSelect, placeholder }) => {
    const [isOpen, setIsOpen] = useState(false);
@@ -68,6 +69,7 @@ const CustomSelect = ({ options, onSelect, placeholder }) => {
 
 const OrderOfPaymentForm = ({ onClose }) => {
    const navigate = useNavigate();
+   const isMobile = useMediaQuery('(max-width: 640px)');
 
    const {
       applications,
@@ -274,30 +276,38 @@ const OrderOfPaymentForm = ({ onClose }) => {
                      />
                   )}
 
-                  <Label htmlFor="applicationId">Application Number</Label>
-                  <Input
-                     id="applicationNumber"
-                     name="applicationNumber"
-                     value={formData.applicationNumber}
-                     onChange={handleInputChange}
-                     disabled
-                  />
-                  <Label htmlFor="applicationId">Application ID</Label>
-                  <Input
-                     id="applicationId"
-                     name="applicationId"
-                     value={formData.applicationId}
-                     onChange={handleInputChange}
-                     disabled
-                  />
-                  <Label htmlFor="applicantName">Applicant Name</Label>
-                  <Input
-                     id="applicantName"
-                     name="applicantName"
-                     value={formData.applicantName}
-                     onChange={handleInputChange}
-                     disabled
-                  />
+                  <div className="space-y-4">
+                     <div>
+                        <Label htmlFor="applicationNumber">Application Number</Label>
+                        <Input
+                           id="applicationNumber"
+                           name="applicationNumber"
+                           value={formData.applicationNumber}
+                           onChange={handleInputChange}
+                           disabled
+                        />
+                     </div>
+                     <div>
+                        <Label htmlFor="applicationId">Application ID</Label>
+                        <Input
+                           id="applicationId"
+                           name="applicationId"
+                           value={formData.applicationId}
+                           onChange={handleInputChange}
+                           disabled
+                        />
+                     </div>
+                     <div>
+                        <Label htmlFor="applicantName">Applicant Name</Label>
+                        <Input
+                           id="applicantName"
+                           name="applicantName"
+                           value={formData.applicantName}
+                           onChange={handleInputChange}
+                           disabled
+                        />
+                     </div>
+                  </div>
                </div>
             );
          case 2:
