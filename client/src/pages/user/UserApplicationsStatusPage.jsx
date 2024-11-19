@@ -1,10 +1,5 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { RefreshCw, Search, FileX, Loader2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import UserApplicationRow from './components/UserApplicationRow';
-import { useUserApplications } from './hooks/useUserApplications';
-import { toast } from 'sonner';
 import {
    Dialog,
    DialogContent,
@@ -13,17 +8,6 @@ import {
    DialogHeader,
    DialogTitle,
 } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { useUserOrderOfPayments } from './hooks/useUserOrderOfPayments';
-import { getUserId } from '@/utils/auth';
-import UserOOPRow from './components/UserOOPRow';
-import { gql } from 'graphql-tag';
-import {
-   DeleteConfirmationDialog,
-   UnsubmitConfirmationDialog,
-   SubmitConfirmationDialog,
-   ResubmitConfirmationDialog
-} from './components/ConfirmationDialogs';
 import {
    Select,
    SelectContent,
@@ -31,17 +15,18 @@ import {
    SelectTrigger,
    SelectValue,
 } from "@/components/ui/select";
-import {
-   Popover,
-   PopoverContent,
-   PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Filter } from "lucide-react";
-import { format } from "date-fns";
-import ApplicationFilters from './components/ApplicationFilters';
-import OOPFilters from './components/OOPFilters';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { getUserId } from '@/utils/auth';
+import { gql } from 'graphql-tag';
+import { FileX, RefreshCw } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
+import ApplicationFilters from '../../components/DashboardFilters/ApplicationFilters';
+import OOPFilters from '../../components/DashboardFilters/OOPFilters';
+import UserApplicationRow from './components/UserApplicationRow';
+import UserOOPRow from './components/UserOOPRow';
+import { useUserApplications } from './hooks/useUserApplications';
+import { useUserOrderOfPayments } from './hooks/useUserOrderOfPayments';
 
 const GET_OOP_DETAILS = gql`
   query GetOOPDetails($id: ID!) {
@@ -373,6 +358,62 @@ const UserApplicationsStatusPage = () => {
       handleRefetch();
    };
 
+   const filteredOOPs = useMemo(() => {
+      return oops.filter(oop => {
+         // Search term filter
+         const matchesSearch =
+            (oop.billNo?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
+            (oop.applicationId?.toLowerCase().includes(searchTerm.toLowerCase()) || false);
+
+         // Nature of Application filter
+         const matchesType = !filters.applicationType ||
+            filters.applicationType === "all" ||
+            oop.natureOfApplication === filters.applicationType;
+
+         // Amount range filter
+         const matchesAmount = !filters.amountRange || (() => {
+            const amount = parseFloat(oop.totalAmount);
+            switch (filters.amountRange) {
+               case '0-1000': return amount >= 0 && amount <= 1000;
+               case '1001-5000': return amount > 1000 && amount <= 5000;
+               case '5001-10000': return amount > 5000 && amount <= 10000;
+               case '10001+': return amount > 10000;
+               default: return true;
+            }
+         })();
+
+         // Date range filter
+         const matchesDateRange = (() => {
+            if (!filters.dateRange.from && !filters.dateRange.to) return true;
+
+            // Convert createdAt timestamp to Date object
+            const oopDate = new Date(parseInt(oop.createdAt));
+            if (isNaN(oopDate.getTime())) {
+               console.warn('Invalid date:', oop.createdAt);
+               return true;
+            }
+
+            // Set time to start of day for consistent comparison
+            oopDate.setHours(0, 0, 0, 0);
+
+            const fromDate = filters.dateRange.from ? new Date(filters.dateRange.from) : null;
+            const toDate = filters.dateRange.to ? new Date(filters.dateRange.to) : null;
+
+            if (fromDate) fromDate.setHours(0, 0, 0, 0);
+            if (toDate) toDate.setHours(0, 0, 0, 0);
+
+            // For debugging
+            console.log('OOP Date:', oopDate);
+            console.log('From Date:', fromDate);
+            console.log('To Date:', toDate);
+
+            return (!fromDate || oopDate >= fromDate) && (!toDate || oopDate <= toDate);
+         })();
+
+         return matchesSearch && matchesType && matchesAmount && matchesDateRange;
+      });
+   }, [oops, searchTerm, filters]);
+
    const renderOrderOfPaymentsTable = () => {
       if (loading) return <p className="text-center text-gray-500">Loading...</p>;
       if (error) return <p className="text-center text-red-500">Error: {error.message}</p>;
@@ -446,16 +487,126 @@ const UserApplicationsStatusPage = () => {
       );
    };
 
-   const renderTable = () => {
+   const isChrome = useMemo(() => {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      const isBrave = navigator.brave !== undefined;
+      return userAgent.includes('chrome') && !userAgent.includes('edg') && !isBrave;
+   }, []);
+
+   const renderMobileTabSelectors = () => {
+      if (isChrome) {
+         return (
+            <div className="space-y-4">
+               <select
+                  value={activeMainTab}
+                  onChange={(e) => {
+                     handleTabChange(e.target.value);
+                  }}
+                  className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
+               >
+                  {mainTabs.map((tab) => (
+                     <option key={tab} value={tab}>
+                        {tab}
+                     </option>
+                  ))}
+               </select>
+
+               <select
+                  value={activeSubTab}
+                  onChange={(e) => handleSubTabChange(e.target.value)}
+                  className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
+               >
+                  {subTabs[activeMainTab].map((tab) => (
+                     <option key={tab} value={tab}>
+                        {tab}
+                     </option>
+                  ))}
+               </select>
+            </div>
+         );
+      }
+
+      return (
+         <div className="space-y-4">
+            <Select value={activeMainTab} onValueChange={handleTabChange}>
+               <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select tab" />
+               </SelectTrigger>
+               <SelectContent>
+                  {mainTabs.map((tab) => (
+                     <SelectItem key={tab} value={tab}>
+                        {tab}
+                     </SelectItem>
+                  ))}
+               </SelectContent>
+            </Select>
+
+            <Select value={activeSubTab} onValueChange={handleSubTabChange}>
+               <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select status" />
+               </SelectTrigger>
+               <SelectContent>
+                  {subTabs[activeMainTab].map((tab) => (
+                     <SelectItem key={tab} value={tab}>
+                        {tab}
+                     </SelectItem>
+                  ))}
+               </SelectContent>
+            </Select>
+         </div>
+      );
+   };
+
+   const renderTabs = () => {
+      if (isMobile) {
+         return renderMobileTabSelectors();
+      }
+
+      return (
+         <div className="flex flex-col sm:flex-row gap-4">
+            <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
+               {mainTabs.map((tab) => (
+                  <button
+                     key={tab}
+                     onClick={() => handleTabChange(tab)}
+                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors
+                        ${activeMainTab === tab
+                           ? 'bg-white text-green-800 shadow'
+                           : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
+                  >
+                     {tab}
+                  </button>
+               ))}
+            </div>
+         </div>
+      );
+   };
+
+   const renderContent = () => {
       if (activeMainTab === 'Order Of Payments') {
          return renderOrderOfPaymentsTable();
       }
-      if (loading) return <p className="text-center text-gray-500">Loading...</p>;
-      if (error) return <p className="text-center text-red-500">Error: {error.message}</p>;
+      return renderApplicationsTable();
+   };
+
+   const renderApplicationsTable = () => {
+      if (loading) return <p className="text-center text-gray-500">Loading applications...</p>;
+      if (error) return <p className="text-center text-red-500">Error loading applications</p>;
       if (filteredApplications.length === 0) {
-         return <p className="text-center text-gray-500">No applications found.</p>;
+         return (
+            <div className="bg-white rounded-lg shadow-sm p-6 text-center">
+               <FileX className="mx-auto h-12 w-12 text-gray-400" />
+               <h3 className="mt-2 text-sm font-medium text-gray-900">No applications found</h3>
+               <p className="mt-1 text-sm text-gray-500">
+                  {filters.applicationType ?
+                     `No applications found for ${filters.applicationType}` :
+                     'No applications available'}
+               </p>
+            </div>
+         );
       }
 
+      // Mobile view
       if (isMobile) {
          return (
             <div className="space-y-4">
@@ -482,25 +633,26 @@ const UserApplicationsStatusPage = () => {
          );
       }
 
+      // Desktop view
       return (
-         <div className="bg-white rounded-lg shadow-sm">
+         <div className="bg-white rounded-lg shadow overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
                <thead className="bg-gray-50">
                   <tr>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        APPLICATION NUMBER
+                        Application Number
                      </th>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        APPLICATION TYPE
+                        Application Type
                      </th>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        DATE SUBMITTED
+                        Date
                      </th>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        STATUS
+                        Status
                      </th>
                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        ACTIONS
+                        Actions
                      </th>
                   </tr>
                </thead>
@@ -538,116 +690,6 @@ const UserApplicationsStatusPage = () => {
       );
    };
 
-   // Update the filteredOOPs logic
-   const filteredOOPs = useMemo(() => {
-      return oops.filter(oop => {
-         // Search term filter
-         const matchesSearch =
-            (oop.billNo?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
-            (oop.applicationId?.toLowerCase().includes(searchTerm.toLowerCase()) || false);
-
-         // Nature of Application filter
-         const matchesType = !filters.applicationType ||
-            filters.applicationType === "all" ||
-            oop.natureOfApplication === filters.applicationType;
-
-         // Amount range filter
-         const matchesAmount = !filters.amountRange || (() => {
-            const amount = parseFloat(oop.totalAmount);
-            switch (filters.amountRange) {
-               case '0-1000': return amount >= 0 && amount <= 1000;
-               case '1001-5000': return amount > 1000 && amount <= 5000;
-               case '5001-10000': return amount > 5000 && amount <= 10000;
-               case '10001+': return amount > 10000;
-               default: return true;
-            }
-         })();
-
-         // Date range filter
-         const matchesDateRange = (() => {
-            if (!filters.dateRange.from && !filters.dateRange.to) return true;
-
-            // Convert createdAt timestamp to Date object
-            const oopDate = new Date(parseInt(oop.createdAt));
-            if (isNaN(oopDate.getTime())) {
-               console.warn('Invalid date:', oop.createdAt);
-               return true;
-            }
-
-            // Set time to start of day for consistent comparison
-            oopDate.setHours(0, 0, 0, 0);
-
-            const fromDate = filters.dateRange.from ? new Date(filters.dateRange.from) : null;
-            const toDate = filters.dateRange.to ? new Date(filters.dateRange.to) : null;
-
-            if (fromDate) fromDate.setHours(0, 0, 0, 0);
-            if (toDate) toDate.setHours(0, 0, 0, 0);
-
-            // For debugging
-            console.log('OOP Date:', oopDate);
-            console.log('From Date:', fromDate);
-            console.log('To Date:', toDate);
-
-            return (!fromDate || oopDate >= fromDate) && (!toDate || oopDate <= toDate);
-         })();
-
-         return matchesSearch && matchesType && matchesAmount && matchesDateRange;
-      });
-   }, [oops, searchTerm, filters]);
-
-   const renderTabs = () => {
-      if (isMobile) {
-         return (
-            <div className="space-y-4">
-               <Select value={activeMainTab} onValueChange={handleTabChange}>
-                  <SelectTrigger className="w-full">
-                     <SelectValue placeholder="Select tab" />
-                  </SelectTrigger>
-                  <SelectContent>
-                     {mainTabs.map((tab) => (
-                        <SelectItem key={tab} value={tab}>
-                           {tab}
-                        </SelectItem>
-                     ))}
-                  </SelectContent>
-               </Select>
-
-               <Select value={activeSubTab} onValueChange={handleSubTabChange}>
-                  <SelectTrigger className="w-full">
-                     <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                     {subTabs[activeMainTab].map((tab) => (
-                        <SelectItem key={tab} value={tab}>
-                           {tab}
-                        </SelectItem>
-                     ))}
-                  </SelectContent>
-               </Select>
-            </div>
-         );
-      }
-
-      return (
-         <div className="flex flex-col sm:flex-row gap-4">
-            <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-               {mainTabs.map((tab) => (
-                  <button
-                     key={tab}
-                     onClick={() => handleTabChange(tab)}
-                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors
-                        ${activeMainTab === tab
-                           ? 'bg-white text-green-800 shadow'
-                           : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
-                  >
-                     {tab}
-                  </button>
-               ))}
-            </div>
-         </div>
-      );
-   };
-
    return (
       <div className="bg-green-50 min-h-screen pt-20 pb-8 px-4 sm:px-6 lg:px-8">
          <div className="max-w-7xl mx-auto space-y-6">
@@ -665,10 +707,9 @@ const UserApplicationsStatusPage = () => {
                {renderTabs()}
             </div>
 
-            {/* Sub Tabs and Search Section */}
+            {/* Sub Tabs and Filters Section */}
             <div className="bg-white rounded-lg shadow-sm p-6">
                <div className="space-y-4">
-                  {/* Sub Tabs - Only show if not mobile */}
                   {!isMobile && (
                      <div className="bg-gray-100 p-1 rounded-md inline-flex flex-wrap gap-1">
                         {subTabs[activeMainTab].map((tab) => (
@@ -685,12 +726,11 @@ const UserApplicationsStatusPage = () => {
                         ))}
                      </div>
                   )}
-
                   {renderFilters()}
                </div>
             </div>
 
-            {renderTable()}
+            {renderContent()}
          </div>
          <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
             <DialogContent>

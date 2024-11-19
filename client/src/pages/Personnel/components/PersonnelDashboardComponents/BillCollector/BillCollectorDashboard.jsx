@@ -1,12 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { RefreshCw, FileX } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useOrderOfPayments } from '../../../hooks/useOrderOfPayments';
-import BillCollectorOOPRow from './BC_OOPRow';
-import { RefreshCw } from 'lucide-react';
-import { gql, useQuery } from '@apollo/client';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import BillCollectorOOPRow from './BC_OOPRow';
+import { gql, useQuery } from '@apollo/client';
+import OOPFilters from '../../../../../components/DashboardFilters/OOPFilters';
 
 const GET_OOPS = gql`
   query GetOOPs {
@@ -51,14 +50,18 @@ const GET_OOPS = gql`
 `;
 
 const BillCollectorDashboard = () => {
-   const [searchTerm, setSearchTerm] = useState('');
-   const [activeTab, setActiveTab] = useState('Payment Proof');
-   const isMobile = useMediaQuery('(max-width: 640px)');
-   const isChrome = useMemo(() => {
-      const userAgent = window.navigator.userAgent.toLowerCase();
-      const isBrave = navigator.brave !== undefined;
-      return userAgent.includes('chrome') && !userAgent.includes('edg') && !isBrave;
-   }, []);
+   const [activeMainTab, setActiveMainTab] = useState('Payment Proof');
+   const [filters, setFilters] = useState({
+      searchTerm: '',
+      applicationType: '',
+      amountRange: '',
+      dateRange: {
+         from: undefined,
+         to: undefined
+      }
+   });
+
+   const mainTabs = ['Awaiting Payment', 'Payment Proof', 'Completed Payments', 'Issued OR'];
 
    // Use direct query instead of hook
    const {
@@ -68,40 +71,91 @@ const BillCollectorDashboard = () => {
       refetch: refetchOOPs
    } = useQuery(GET_OOPS, {
       fetchPolicy: 'network-only',
-      pollInterval: 5000 // Poll every 5 seconds
    });
 
-   const tabs = ['Awaiting Payment', 'Payment Proof', 'Completed Payments', 'Issued OR'];
+   // Add polling for automatic updates
+   useEffect(() => {
+      const pollInterval = setInterval(refetchOOPs, 5000); // Poll every 5 seconds
+      return () => clearInterval(pollInterval);
+   }, []);
+
+   const handleTabChange = (tab) => {
+      setActiveMainTab(tab);
+      setFilters({
+         searchTerm: '',
+         applicationType: '',
+         amountRange: '',
+         dateRange: { from: undefined, to: undefined }
+      });
+      refetchOOPs();
+   };
 
    const filteredOOPs = useMemo(() => {
       const oops = oopsData?.getOOPs || [];
       return oops.filter(oop => {
          // Filter based on active tab
-         if (activeTab === 'Payment Proof') {
+         if (activeMainTab === 'Payment Proof') {
             return oop.OOPstatus === 'Payment Proof Submitted';
-         } else if (activeTab === 'Awaiting Payment') {
+         } else if (activeMainTab === 'Awaiting Payment') {
             return oop.OOPstatus === 'Awaiting Payment';
-         } else if (activeTab === 'Completed Payments') {
+         } else if (activeMainTab === 'Completed Payments') {
             return oop.OOPstatus === 'Payment Proof Approved' || oop.OOPstatus === 'Completed OOP';
-         } else if (activeTab === 'Issued OR') {
+         } else if (activeMainTab === 'Issued OR') {
             return oop.OOPstatus === 'Issued OR';
          }
          return true;
-      }).filter(oop =>
-         oop.applicationId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         oop.billNo.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-   }, [oopsData, activeTab, searchTerm]);
+      }).filter(oop => {
+         const matchesSearch = oop.applicationId.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+            oop.billNo.toLowerCase().includes(filters.searchTerm.toLowerCase());
 
-   const renderMobileTabSelector = () => {
+         const matchesType = !filters.applicationType ||
+            filters.applicationType === "all" ||
+            oop.natureOfApplication === filters.applicationType;
+
+         const matchesAmount = !filters.amountRange || (() => {
+            const amount = parseFloat(oop.totalAmount);
+            switch (filters.amountRange) {
+               case '0-1000': return amount >= 0 && amount <= 1000;
+               case '1001-5000': return amount > 1000 && amount <= 5000;
+               case '5001-10000': return amount > 5000 && amount <= 10000;
+               case '10001+': return amount > 10000;
+               default: return true;
+            }
+         })();
+
+         const matchesDateRange = (() => {
+            if (!filters.dateRange.from && !filters.dateRange.to) return true;
+            const oopDate = new Date(parseInt(oop.createdAt));
+            if (isNaN(oopDate.getTime())) return true;
+            oopDate.setHours(0, 0, 0, 0);
+            const fromDate = filters.dateRange.from ? new Date(filters.dateRange.from) : null;
+            const toDate = filters.dateRange.to ? new Date(filters.dateRange.to) : null;
+            if (fromDate) fromDate.setHours(0, 0, 0, 0);
+            if (toDate) toDate.setHours(0, 0, 0, 0);
+            return (!fromDate || oopDate >= fromDate) && (!toDate || oopDate <= toDate);
+         })();
+
+         return matchesSearch && matchesType && matchesAmount && matchesDateRange;
+      });
+   }, [oopsData, activeMainTab, filters]);
+
+   const isMobile = useMediaQuery('(max-width: 640px)');
+
+   const isChrome = useMemo(() => {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      const isBrave = navigator.brave !== undefined;
+      return userAgent.includes('chrome') && !userAgent.includes('edg') && !isBrave;
+   }, []);
+
+   const renderMobileTabSelectors = () => {
       if (isChrome) {
          return (
             <select
-               value={activeTab}
-               onChange={(e) => setActiveTab(e.target.value)}
+               value={activeMainTab}
+               onChange={(e) => handleTabChange(e.target.value)}
                className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
             >
-               {tabs.map((tab) => (
+               {mainTabs.map((tab) => (
                   <option key={tab} value={tab}>
                      {tab}
                   </option>
@@ -111,12 +165,12 @@ const BillCollectorDashboard = () => {
       }
 
       return (
-         <Select value={activeTab} onValueChange={setActiveTab}>
+         <Select value={activeMainTab} onValueChange={handleTabChange}>
             <SelectTrigger className="w-full">
                <SelectValue placeholder="Select status" />
             </SelectTrigger>
             <SelectContent>
-               {tabs.map((tab) => (
+               {mainTabs.map((tab) => (
                   <SelectItem key={tab} value={tab}>
                      {tab}
                   </SelectItem>
@@ -126,11 +180,46 @@ const BillCollectorDashboard = () => {
       );
    };
 
-   const renderTable = () => {
-      if (oopsLoading) return <div className="text-center">Loading...</div>;
-      if (oopsError) return <div className="text-center text-red-500">Error loading order of payments</div>;
+   const renderTabs = () => {
+      if (isMobile) {
+         return renderMobileTabSelectors();
+      }
+
+      return (
+         <div className="mb-6 overflow-x-auto">
+            <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
+               {mainTabs.map((tab) => (
+                  <button
+                     key={tab}
+                     onClick={() => handleTabChange(tab)}
+                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors
+                        ${activeMainTab === tab
+                           ? 'bg-white text-green-800 shadow'
+                           : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
+                  >
+                     {tab}
+                  </button>
+               ))}
+            </div>
+         </div>
+      );
+   };
+
+   const renderContent = () => {
+      if (oopsLoading) return <p className="text-center text-gray-500">Loading order of payments...</p>;
+      if (oopsError) return <p className="text-center text-red-500">Error loading order of payments</p>;
       if (filteredOOPs.length === 0) {
-         return <p className="text-center text-gray-500">No order of payments found.</p>;
+         return (
+            <div className="bg-white rounded-lg shadow-sm p-6 text-center">
+               <FileX className="mx-auto h-12 w-12 text-gray-400" />
+               <h3 className="mt-2 text-sm font-medium text-gray-900">No orders of payment found</h3>
+               <p className="mt-1 text-sm text-gray-500">
+                  {filters.applicationType ?
+                     `No orders of payment found for ${filters.applicationType}` :
+                     'No orders of payment available'}
+               </p>
+            </div>
+         );
       }
 
       // Mobile view
@@ -191,12 +280,12 @@ const BillCollectorDashboard = () => {
    };
 
    return (
-      <div className="min-h-screen bg-green-50">
-         <div className="container mx-auto px-4 sm:px-6 py-8 pt-20">
+      <div className="bg-green-50 min-h-screen pt-20 pb-8 px-4 sm:px-6 lg:px-8">
+         <div className="max-w-7xl mx-auto space-y-6">
             {/* Header Section */}
-            <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-               <div className="flex justify-between items-center mb-6">
-                  <h1 className="text-2xl font-bold text-green-800">Bill Collector Dashboard</h1>
+            <div className="bg-white rounded-lg shadow-sm p-6">
+               <div className="flex items-center justify-between mb-4">
+                  <h1 className="text-2xl font-semibold text-gray-900">Bill Collector Dashboard</h1>
                   <Button onClick={refetchOOPs} variant="outline" size="sm">
                      <RefreshCw className="mr-2 h-4 w-4" />
                      {!isMobile && "Refresh"}
@@ -204,38 +293,17 @@ const BillCollectorDashboard = () => {
                </div>
 
                {/* Tabs Section */}
-               {isMobile ? (
-                  renderMobileTabSelector()
-               ) : (
-                  <div className="mb-6 overflow-x-auto">
-                     <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-                        {tabs.map((tab) => (
-                           <button
-                              key={tab}
-                              onClick={() => setActiveTab(tab)}
-                              className={`px-3 py-2 rounded-md text-xs sm:text-sm font-medium ${activeTab === tab ? 'bg-white text-green-800 shadow' : 'text-black hover:bg-gray-200'}`}
-                           >
-                              {tab}
-                           </button>
-                        ))}
-                     </div>
-                  </div>
-               )}
+               {renderTabs()}
             </div>
 
-            {/* Search Section */}
-            <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-               <Input
-                  type="text"
-                  placeholder="Search order of payments..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="border rounded-md p-2 w-full"
-               />
+            {/* Filters Section */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+               <div className="space-y-4">
+                  <OOPFilters filters={filters} setFilters={setFilters} />
+               </div>
             </div>
 
-            {/* Table Section */}
-            {renderTable()}
+            {renderContent()}
          </div>
       </div>
    );
