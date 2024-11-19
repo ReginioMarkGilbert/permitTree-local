@@ -245,7 +245,6 @@ const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab
                {renderActionButtons()}
             </div>
 
-            {/* Modals */}
             <TS_ViewModal
                isOpen={isViewModalOpen}
                onClose={() => setIsViewModalOpen(false)}
@@ -262,29 +261,43 @@ const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab
    }
 
    return (
-      <tr className="border-b border-gray-200 transition-colors hover:bg-gray-50">
-         <td className="px-4 py-3 whitespace-nowrap">
-            <div className="text-sm text-gray-900">{app.applicationNumber}</div>
-         </td>
-         <td className="px-4 py-3 whitespace-nowrap">
-            <div className="text-sm text-gray-900">{app.applicationType}</div>
-         </td>
-         <td className="px-4 py-3 whitespace-nowrap">
-            <div className="text-sm text-gray-900">
-               {new Date(app.dateOfSubmission).toLocaleDateString()}
-            </div>
-         </td>
-         <td className="px-4 py-3 whitespace-nowrap">
-            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(app.status)}`}>
-               {app.status}
-            </span>
-         </td>
-         <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-            <div className="flex items-center space-x-2">
-               {renderActionButtons()}
-            </div>
-         </td>
-      </tr>
+      <>
+         <tr className="border-b border-gray-200 transition-colors hover:bg-gray-50">
+            <td className="px-4 py-3 whitespace-nowrap">
+               <div className="text-sm text-gray-900">{app.applicationNumber}</div>
+            </td>
+            <td className="px-4 py-3 whitespace-nowrap">
+               <div className="text-sm text-gray-900">{app.applicationType}</div>
+            </td>
+            <td className="px-4 py-3 whitespace-nowrap">
+               <div className="text-sm text-gray-900">
+                  {new Date(app.dateOfSubmission).toLocaleDateString()}
+               </div>
+            </td>
+            <td className="px-4 py-3 whitespace-nowrap">
+               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(app.status)}`}>
+                  {app.status}
+               </span>
+            </td>
+            <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
+               <div className="flex items-center space-x-2">
+                  {renderActionButtons()}
+               </div>
+            </td>
+         </tr>
+
+         <TS_ViewModal
+            isOpen={isViewModalOpen}
+            onClose={() => setIsViewModalOpen(false)}
+            application={app}
+         />
+         <ChiefReviewModal
+            isOpen={isReviewModalOpen}
+            onClose={() => setIsReviewModalOpen(false)}
+            application={app}
+            onReviewComplete={handleReviewComplete}
+         />
+      </>
    );
 };
 

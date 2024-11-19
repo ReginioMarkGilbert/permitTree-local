@@ -10,7 +10,7 @@ const NotificationService = require('../../services/userNotificationService');
 const PersonnelNotificationService = require('../../services/personnelNotificationService');
 const User = require('../../models/User');
 const Admin = require('../../models/admin');
-// ... import other permit types
+
 
 const permitResolvers = {
    Query: {
@@ -627,10 +627,10 @@ const permitResolvers = {
             }
 
             if (permit.acceptedByPENRCENROfficer) {
-               throw new Error('Application cannot be undone, already accepted by PENR/CENR Officer');
+               throw new Error('Cannot undo record: Application already accepted by PENR/CENR Officer');
             }
             if (permit.reviewedByChief) {
-               throw new Error('Application cannot be undone, already reviewed by Chief RPS');
+               throw new Error('Cannot undo record: Application already reviewed by Chief RPS/TSD');
             }
 
             permit.currentStage = 'ForRecordByReceivingClerk';
@@ -648,7 +648,6 @@ const permitResolvers = {
             return permit;
 
          } catch (error) {
-            console.error('Error undoing record application:', error);
             throw error;
          }
       },

@@ -40,6 +40,10 @@ const ChiefDashboard = () => {
             return { awaitingOOP: true };
          case 'Created OOP':
             return { OOPCreated: true, awaitingOOP: false };
+         case 'Pending Signature':
+            return { OOPstatus: 'For Approval' };
+         case 'Signed Order Of Payment':
+            return { OOPSignedByTwoSignatories: true };
          default:
             return { currentStage: 'ChiefRPSReview' };
       }
@@ -83,6 +87,10 @@ const ChiefDashboard = () => {
       handleRefetch();
    };
 
+   const handleReviewComplete = () => {
+      handleRefetch();
+   };
+
    const filteredApplications = useMemo(() => {
       return applications.filter(app => {
          const matchesSearch = app.applicationNumber.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
@@ -108,8 +116,16 @@ const ChiefDashboard = () => {
    }, [applications, filters]);
 
    const filteredOOPs = useMemo(() => {
-      // Similar to UserApplicationsStatusPage OOP filtering
       return oops.filter(oop => {
+         const matchesStatus = (() => {
+            if (activeSubTab === 'Pending Signature') {
+               return oop.OOPstatus === 'Pending Signature';
+            } else if (activeSubTab === 'Signed Order Of Payment') {
+               return oop.OOPSignedByTwoSignatories === true;
+            }
+            return true;
+         })();
+
          const matchesSearch = oop.billNo?.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
             oop.applicationId?.toLowerCase().includes(filters.searchTerm.toLowerCase());
 
@@ -140,9 +156,9 @@ const ChiefDashboard = () => {
             return (!fromDate || oopDate >= fromDate) && (!toDate || oopDate <= toDate);
          })();
 
-         return matchesSearch && matchesType && matchesAmount && matchesDateRange;
+         return matchesStatus && matchesSearch && matchesType && matchesAmount && matchesDateRange;
       });
-   }, [oops, filters]);
+   }, [oops, activeSubTab, filters]);
 
    const getStatusColor = (status) => {
       switch (status.toLowerCase()) {
