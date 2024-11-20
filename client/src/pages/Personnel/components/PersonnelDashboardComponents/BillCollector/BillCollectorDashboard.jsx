@@ -6,6 +6,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import BillCollectorOOPRow from './BC_OOPRow';
 import { gql, useQuery } from '@apollo/client';
 import OOPFilters from '../../../../../components/DashboardFilters/OOPFilters';
+import { useTypewriter } from '@/hooks/useTypewriter';
 
 const GET_OOPS = gql`
   query GetOOPs {
@@ -205,6 +206,23 @@ const BillCollectorDashboard = () => {
       );
    };
 
+   const renderTabDescription = () => {
+      const descriptions = {
+         'Payment Proof': 'This is the list of Order of Payments with submitted payment proofs pending verification.',
+         'Awaiting Payment': 'This is the list of Order of Payments awaiting payment from applicants.',
+         'Completed Payments': 'This is the list of Order of Payments with verified payments.',
+         'Issued OR': 'This is the list of Order of Payments with issued Official Receipts.'
+      };
+
+      const text = useTypewriter(descriptions[activeMainTab] || '');
+
+      return (
+         <div className="mb-4 -mt-4">
+            <h1 className="text-sm text-green-800 min-h-[20px]">{text}</h1>
+         </div>
+      );
+   };
+
    const renderContent = () => {
       if (oopsLoading) return <p className="text-center text-gray-500">Loading order of payments...</p>;
       if (oopsError) return <p className="text-center text-red-500">Error loading order of payments</p>;
@@ -302,6 +320,8 @@ const BillCollectorDashboard = () => {
                   <OOPFilters filters={filters} setFilters={setFilters} />
                </div>
             </div>
+
+            {renderTabDescription()}
 
             {renderContent()}
          </div>

@@ -8,6 +8,7 @@ import { useOrderOfPayments } from '../../../hooks/useOrderOfPayments';
 import AccountantOOPRow from './AccountantOOPRow';
 import AccountantApplicationRow from './AccountantApplicationRow';
 import AccountantFilters from './AccountantFilters';
+import { useTypewriter } from '@/hooks/useTypewriter';
 
 const AccountantDashboard = () => {
    const [filters, setFilters] = useState({
@@ -150,6 +151,26 @@ const AccountantDashboard = () => {
       />;
    };
 
+   const renderTabDescription = () => {
+      const descriptions = {
+         // Order Of Payment
+         'Pending Approval': 'This is the list of Order of Payments pending for your approval.',
+         'Approved OOP': 'This is the list of Order of Payments that you have approved.',
+
+         // Applications awaiting OOP
+         'Awaiting OOP': 'This is the list of applications waiting for Order of Payment creation.',
+         'Created OOP': 'This is the list of applications with created Order of Payments.'
+      };
+
+      const text = useTypewriter(descriptions[activeSubTab] || '');
+
+      return (
+         <div className="mb-4 -mt-4">
+            <h1 className="text-sm text-green-800 min-h-[20px]">{text}</h1>
+         </div>
+      );
+   };
+
    return (
       <div className="bg-green-50 min-h-screen pt-20 pb-8 px-4 sm:px-6 lg:px-8">
          <div className="max-w-7xl mx-auto space-y-6">
@@ -203,7 +224,10 @@ const AccountantDashboard = () => {
                         </button>
                      ))}
                   </div>
-
+                  {/* Description */}
+                  <div className="pt-2 text-sm text-gray-600">
+                     {renderTabDescription()}
+                  </div>
                   {renderFilters()}
                </div>
             </div>

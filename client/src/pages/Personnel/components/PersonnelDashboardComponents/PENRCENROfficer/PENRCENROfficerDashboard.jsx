@@ -8,6 +8,7 @@ import { useApplications } from '../../../hooks/useApplications';
 import { toast } from 'sonner';
 // import { gql } from '@apollo/client';
 import ApplicationFilters from '../../../../../components/DashboardFilters/ApplicationFilters';
+import { useTypewriter } from '@/hooks/useTypewriter';
 
 const PENRCENROfficerDashboard = () => {
    const [activeMainTab, setActiveMainTab] = useState('Applications');
@@ -300,15 +301,28 @@ const PENRCENROfficerDashboard = () => {
 
    const renderTabDescription = () => {
       const descriptions = {
-         'Applications for Review': 'This is the list of applications pending review to check for completeness and supporting documents.',
-         'Accepted Applications': 'This is the list of applications that have been accepted after review.',
-         'Pending Certification': 'This is the list of applications pending certification.',
-         'Certified Certificates': 'This is the list of certificates that have been certified.'
+         // Applications
+         'Applications for Review': 'This is the list of applications pending for your review.',
+         'Accepted Applications': 'This is the list of applications that you have accepted after review.',
+
+         // Applications Inspection Reports
+         'Reports for Review': 'This is the list of inspection reports that require your review and approval.',
+         'Reviewed Reports': 'This is the list of inspection reports that you have already reviewed.',
+
+         // Applications Awaiting OOP
+         'Awaiting OOP': 'This is the list of applications waiting for Order of Payment creation.',
+         'Created OOP': 'This is the list of applications with created Order of Payments.',
+
+         // Certificates/Permits
+         'Pending Certification': 'This is the list of permits/certificates pending for your certification.',
+         'Certified Certificates': 'This is the list of permits/certificates that you have certified.'
       };
+
+      const text = useTypewriter(descriptions[activeSubTab] || '');
 
       return (
          <div className="mb-4 -mt-4">
-            <h1 className="text-sm text-green-800">{descriptions[activeSubTab] || ''}</h1>
+            <h1 className="text-sm text-green-800 min-h-[20px]">{text}</h1>
          </div>
       );
    };
@@ -328,11 +342,6 @@ const PENRCENROfficerDashboard = () => {
 
                {/* Tabs Section */}
                {renderTabs()}
-
-               {/* Description */}
-               <div className="mt-6 text-sm text-gray-600">
-                  {renderTabDescription()}
-               </div>
             </div>
 
             {/* Sub Tabs and Filters Section */}
@@ -354,6 +363,10 @@ const PENRCENROfficerDashboard = () => {
                         ))}
                      </div>
                   )}
+                  {/* Description */}
+                  <div className="pt-2 text-sm text-gray-600">
+                     {renderTabDescription()}
+                  </div>
                   <ApplicationFilters filters={filters} setFilters={setFilters} />
                </div>
             </div>

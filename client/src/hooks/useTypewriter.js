@@ -1,22 +1,28 @@
 import { useState, useEffect } from 'react';
 
-export const useTypewriter = (text, speed = 10) => {
+/**
+ * A hook that creates a typewriter effect for text
+ * @param {string} text - The text to animate
+ * @param {number} [speed=10] - The speed of typing in milliseconds
+ * @returns {string} The currently displayed text
+ */
+export const useTypewriter = (text = '', speed = 10) => {
    const [displayedText, setDisplayedText] = useState('');
 
    useEffect(() => {
       setDisplayedText(''); // Reset text when input text changes
+      let currentIndex = 0;
 
-      let i = 0;
-      const timer = setInterval(() => {
-         if (i < text.length) {
-            setDisplayedText(prev => prev + text.charAt(i));
-            i++;
+      const interval = setInterval(() => {
+         if (currentIndex <= text.length) {
+            setDisplayedText(text.slice(0, currentIndex));
+            currentIndex++;
          } else {
-            clearInterval(timer);
+            clearInterval(interval);
          }
       }, speed);
 
-      return () => clearInterval(timer);
+      return () => clearInterval(interval);
    }, [text, speed]);
 
    return displayedText;

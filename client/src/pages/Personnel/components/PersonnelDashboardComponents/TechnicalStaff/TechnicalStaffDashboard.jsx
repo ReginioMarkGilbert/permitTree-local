@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { gql, useQuery } from '@apollo/client';
 import TS_CertificateRow from './TS_CertificateRow';
 import ApplicationFilters from '../../../../../components/DashboardFilters/ApplicationFilters';
+import { useTypewriter } from '@/hooks/useTypewriter';
 
 const GET_CERTIFICATES = gql`
   query GetCertificates($status: String) {
@@ -448,18 +449,29 @@ const TechnicalStaffDashboard = () => {
       );
    };
 
-   const renderTabDescription = () => {   
+   const renderTabDescription = () => {
       const descriptions = {
+         // Applications
          'Pending Reviews': 'This is the list of applications pending review to check for completeness and supporting documents.',
          'Returned Applications': 'This is the list of applications that were returned due to incomplete documents or other issues.',
          'Accepted Applications': 'This is the list of applications that have been accepted after review.',
-         'For Inspection and Approval': 'This is the list of applications (forwarded by the Chief RPS after review) that are pending inspection (e.g., chainsaws, etc.).',
-         'Approved Applications': 'This is the list of applications that have been approved for authenticity after inspection.'
+         'For Inspection and Approval': 'This is the list of applications that require physical inspection and authenticity verification.',
+         'Approved Applications': 'This is the list of applications that have been approved after inspection.',
+
+         // Application Awaiting Certificate/Permit Creation
+         'Awaiting Permit Creation': 'This is the list of applications waiting for permit/certificate creation after approval.',
+         'Created Permits': 'This is the list of applications with created permits/certificates.',
+
+         // Certificates/Permits
+         'Pending Signature': 'This is the list of permits/certificates pending for signature from authorized personnel.',
+         'Signed Certificates': 'This is the list of permits/certificates that have been completely signed.'
       };
+
+      const text = useTypewriter(descriptions[activeSubTab] || '');
 
       return (
          <div className="mb-4 -mt-4">
-            <h1 className="text-sm text-green-800">{descriptions[activeSubTab] || ''}</h1>
+            <h1 className="text-sm text-green-800 min-h-[20px]">{text}</h1>
          </div>
       );
    };
@@ -479,11 +491,6 @@ const TechnicalStaffDashboard = () => {
 
                {/* Tabs Section */}
                {renderTabs()}
-
-               {/* Description */}
-               <div className="mt-6 text-sm text-gray-600">
-                  {renderTabDescription()}
-               </div>
             </div>
 
             {/* Sub Tabs and Filters Section */}
@@ -505,6 +512,10 @@ const TechnicalStaffDashboard = () => {
                         ))}
                      </div>
                   )}
+                  {/* Description */}
+                  <div className="pt-2 text-sm text-gray-600">
+                     {renderTabDescription()}
+                  </div>
                   <ApplicationFilters filters={filters} setFilters={setFilters} />
                </div>
             </div>

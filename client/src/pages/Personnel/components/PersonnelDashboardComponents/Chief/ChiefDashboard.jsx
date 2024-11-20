@@ -9,6 +9,7 @@ import { useApplications } from '../../../hooks/useApplications';
 import { useOrderOfPayments } from '../../../hooks/useOrderOfPayments';
 import ApplicationFilters from '../../../../../components/DashboardFilters/ApplicationFilters';
 import OOPFilters from '../../../../../components/DashboardFilters/OOPFilters';
+import { useTypewriter } from '../../../../../hooks/useTypewriter';
 
 const ChiefDashboard = () => {
    const [activeMainTab, setActiveMainTab] = useState('Applications');
@@ -436,6 +437,38 @@ const ChiefDashboard = () => {
       );
    };
 
+   const renderTabDescription = () => {
+      const descriptions = {
+         // Applications
+         'Applications for Review': 'This is the list of applications pending for your review.',
+         'Completed Reviews': 'This is the list of applications that you have reviewed.',
+
+         // Applications Inspection Reports
+         'Reports for Review': 'This is the list of inspection reports that require your review and approval.',
+         'Reviewed Reports': 'This is the list of inspection reports that you have already reviewed.',
+
+         // Applications Awaiting OOP
+         'Awaiting OOP': 'This is the list of applications waiting for Order of Payment creation.',
+         'Created OOP': 'This is the list of applications with created Order of Payments.',
+
+         // Order Of Payment
+         'Pending Signature': 'This is the list of Order of Payments pending for your signature.',
+         'Signed Order Of Payment': 'This is the list of Order of Payments that you have signed.',
+
+         // Certificates
+         'Permit Pending Signature': 'This is the list of permits and certificates waiting for your signature.',
+         'Signed Permits': 'This is the list of permits and certificates that you have signed.'
+      };
+
+      const text = useTypewriter(descriptions[activeSubTab] || '');
+
+      return (
+         <div className="mb-4 -mt-4">
+            <h1 className="text-sm text-green-800">{text}</h1>
+         </div>
+      );
+   };
+
    return (
       <div className="bg-green-50 min-h-screen pt-20 pb-8 px-4 sm:px-6 lg:px-8">
          <div className="max-w-7xl mx-auto space-y-6">
@@ -472,6 +505,10 @@ const ChiefDashboard = () => {
                         ))}
                      </div>
                   )}
+                  {/* Description */}
+                  <div className="pt-2 text-sm text-gray-600">
+                     {renderTabDescription()}
+                  </div>
                   {renderFilters()}
                </div>
             </div>

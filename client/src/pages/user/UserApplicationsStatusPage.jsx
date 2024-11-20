@@ -27,6 +27,7 @@ import UserApplicationRow from './components/UserApplicationRow';
 import UserOOPRow from './components/UserOOPRow';
 import { useUserApplications } from './hooks/useUserApplications';
 import { useUserOrderOfPayments } from './hooks/useUserOrderOfPayments';
+import { useTypewriter } from '@/hooks/useTypewriter';
 
 const GET_OOP_DETAILS = gql`
   query GetOOPDetails($id: ID!) {
@@ -690,6 +691,39 @@ const UserApplicationsStatusPage = () => {
       );
    };
 
+   const renderTabDescription = () => {
+      const descriptions = {
+         // Applications
+         'Draft': 'This is the list of applications you have started but not yet submitted.',
+         'Submitted': 'This is the list of applications you have submitted and are pending initial review.',
+         'In Progress': 'This is the list of applications currently being processed by DENR personnel.',
+         'Returned': 'This is the list of applications returned to you for correction or additional requirements.',
+         'Accepted': 'This is the list of applications that have been accepted and are undergoing final processing.',
+         'Released': 'This is the list of applications with permits/certificates that have been released to you.',
+         'Expired': 'This is the list of applications with expired permits/certificates.',
+         'Rejected': 'This is the list of applications that were rejected.',
+
+         // Order Of Payments
+         'Awaiting Payment': 'This is the list of Order of Payments waiting for your payment.',
+         'Payment Proof Submitted': 'This is the list of Order of Payments where you have submitted payment proof.',
+         'Payment Proof Rejected': 'This is the list of Order of Payments where your payment proof was rejected.',
+         'Payment Proof Approved': 'This is the list of Order of Payments where your payment proof was approved.',
+         'Completed': 'This is the list of Order of Payments that have been completed.',
+         'Issued OR': 'This is the list of Order of Payments with issued Official Receipts.',
+
+         // Renewals
+         'Renewed': 'This is the list of applications that have been renewed.',
+      };
+
+      const text = useTypewriter(descriptions[activeSubTab] || '');
+
+      return (
+         <div className="mb-4 -mt-4">
+            <h1 className="text-sm text-green-800 min-h-[20px]">{text}</h1>
+         </div>
+      );
+   };
+
    return (
       <div className="bg-green-50 min-h-screen pt-20 pb-8 px-4 sm:px-6 lg:px-8">
          <div className="max-w-7xl mx-auto space-y-6">
@@ -726,6 +760,10 @@ const UserApplicationsStatusPage = () => {
                         ))}
                      </div>
                   )}
+                  {/* Description */}
+                  <div className="pt-2 text-sm text-gray-600">
+                     {renderTabDescription()}
+                  </div>
                   {renderFilters()}
                </div>
             </div>

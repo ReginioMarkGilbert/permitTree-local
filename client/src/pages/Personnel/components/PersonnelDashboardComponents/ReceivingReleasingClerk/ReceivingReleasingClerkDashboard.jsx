@@ -6,6 +6,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import RRC_ApplicationRow from './RRC_ApplicationRow';
 import { useApplications } from '../../../hooks/useApplications';
 import ApplicationFilters from '../../../../../components/DashboardFilters/ApplicationFilters';
+import { useTypewriter } from '@/hooks/useTypewriter';
 
 const ReceivingReleasingClerkDashboard = () => {
    const [activeMainTab, setActiveMainTab] = useState('Applications');
@@ -291,16 +292,26 @@ const ReceivingReleasingClerkDashboard = () => {
    };
 
    const renderTabDescription = () => {
-      if (activeSubTab === 'Pending Applications') {
-         return <div className="mb-4 -mt-4">
-            <h1 className="text-sm text-green-800">This is the list of applications pending for recording.</h1>
-         </div>;
-      }
-      if (activeSubTab === 'Recorded Applications') {
-         return <div className="mb-4 -mt-4">
-            <h1 className="text-sm text-green-800">This is the list of applications that have been recorded.</h1>
-         </div>;
-      }
+      const descriptions = {
+         // Applications
+         'Applications For Review': 'This is the list of applications pending initial review and encoding.',
+         'Returned Applications': 'This is the list of applications that were returned due to incomplete requirements.',
+         'Accepted Applications': 'This is the list of applications that have been accepted and encoded.',
+         'Applications For Recording': 'This is the list of applications pending for recording in the logbook.',
+         'Reviewed/Recorded Applications': 'This is the list of applications that have been recorded in the logbook.',
+
+         // Certificates
+         'Pending Release': 'This is the list of permits/certificates ready for release to applicants.',
+         'Released Certificates': 'This is the list of permits/certificates that have been released to applicants.'
+      };
+
+      const text = useTypewriter(descriptions[activeSubTab] || '');
+
+      return (
+         <div className="mb-4 -mt-4">
+            <h1 className="text-sm text-green-800 min-h-[20px]">{text}</h1>
+         </div>
+      );
    };
 
    return (
@@ -318,11 +329,6 @@ const ReceivingReleasingClerkDashboard = () => {
 
                {/* Tabs Section */}
                {renderTabs()}
-
-               {/* Description */}
-               <div className="mt-6 text-sm text-gray-600">
-                  {renderTabDescription()}
-               </div>
             </div>
 
             {/* Sub Tabs and Filters Section */}
@@ -344,6 +350,10 @@ const ReceivingReleasingClerkDashboard = () => {
                         ))}
                      </div>
                   )}
+                  {/* Description */}
+                  <div className="pt-2 text-sm text-gray-600">
+                     {renderTabDescription()}
+                  </div>
                   <ApplicationFilters filters={filters} setFilters={setFilters} />
                </div>
             </div>
