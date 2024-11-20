@@ -448,7 +448,7 @@ const TechnicalStaffDashboard = () => {
       );
    };
 
-   const renderTabDescription = () => {
+   const renderTabDescription = () => {   
       const descriptions = {
          'Pending Reviews': 'This is the list of applications pending review to check for completeness and supporting documents.',
          'Returned Applications': 'This is the list of applications that were returned due to incomplete documents or other issues.',
