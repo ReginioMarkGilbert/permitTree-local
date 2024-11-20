@@ -17,6 +17,11 @@ const GET_APPLICATIONS = gql`
 
     $awaitingOOP: Boolean
     $OOPCreated: Boolean
+
+   #  $hasInspectionReport: Boolean
+    $InspectionReportsReviewedByChief: Boolean
+    $InspectionReportsReviewedByPENRCENROfficer: Boolean
+
     $awaitingPermitCreation: Boolean
     $PermitCreated: Boolean
   ) {
@@ -35,9 +40,14 @@ const GET_APPLICATIONS = gql`
       reviewedByChief: $reviewedByChief
 
       awaitingOOP: $awaitingOOP
+      OOPCreated: $OOPCreated
+
+      # hasInspectionReport: $hasInspectionReport
+      InspectionReportsReviewedByChief: $InspectionReportsReviewedByChief
+      InspectionReportsReviewedByPENRCENROfficer: $InspectionReportsReviewedByPENRCENROfficer
+
       awaitingPermitCreation: $awaitingPermitCreation
       PermitCreated: $PermitCreated
-      OOPCreated: $OOPCreated
     ) {
       ... on CSAWPermit {
         id

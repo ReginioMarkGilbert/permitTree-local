@@ -1,6 +1,12 @@
 const { gql } = require('graphql-tag');
 
 const inspectionTypes = gql`
+  type InspectionFile {
+    filename: String!
+    contentType: String!
+    data: String!
+  }
+
   type Inspection {
     id: ID!
     permitId: ID!
@@ -9,7 +15,7 @@ const inspectionTypes = gql`
     scheduledDate: String!
     scheduledTime: String!
     location: String!
-    status: String!
+    inspectionStatus: String!
     inspectorId: ID!
     findings: InspectionFindings
     history: [InspectionHistory!]!
@@ -21,20 +27,7 @@ const inspectionTypes = gql`
     result: String
     observations: String
     recommendations: String
-    photos: [InspectionPhoto!]
-    attachments: [InspectionAttachment!]
-  }
-
-  type InspectionPhoto {
-    url: String!
-    caption: String
-    timestamp: String!
-  }
-
-  type InspectionAttachment {
-    url: String!
-    type: String!
-    description: String
+    attachments: [InspectionFile!]
   }
 
   type InspectionHistory {
@@ -42,6 +35,12 @@ const inspectionTypes = gql`
     timestamp: String!
     notes: String
     performedBy: ID
+  }
+
+  input InspectionFileInput {
+    filename: String!
+    contentType: String!
+    data: String!
   }
 
   input CreateInspectionInput {
@@ -55,26 +54,14 @@ const inspectionTypes = gql`
     scheduledDate: String
     scheduledTime: String
     location: String
-    status: String
+    inspectionStatus: String
   }
 
   input InspectionFindingsInput {
     result: String!
     observations: String!
     recommendations: String
-    photos: [InspectionPhotoInput!]
-    attachments: [InspectionAttachmentInput!]
-  }
-
-  input InspectionPhotoInput {
-    url: String!
-    caption: String
-  }
-
-  input InspectionAttachmentInput {
-    url: String!
-    type: String!
-    description: String
+    attachments: [InspectionFileInput!]
   }
 
   extend type Query {

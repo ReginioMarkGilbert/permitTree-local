@@ -15,7 +15,7 @@ const CREATE_INSPECTION = gql`
       scheduledDate
       scheduledTime
       location
-      status
+      inspectionStatus
     }
   }
 `;

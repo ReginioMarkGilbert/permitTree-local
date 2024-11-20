@@ -6,7 +6,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import ApplicationRow from './PCOApplicationRow';
 import { useApplications } from '../../../hooks/useApplications';
 import { toast } from 'sonner';
-import { gql } from '@apollo/client';
+// import { gql } from '@apollo/client';
 import ApplicationFilters from '../../../../../components/DashboardFilters/ApplicationFilters';
 
 const PENRCENROfficerDashboard = () => {
@@ -21,15 +21,20 @@ const PENRCENROfficerDashboard = () => {
       }
    });
 
-   const mainTabs = ['Applications', 'Applications Awaiting OOP', 'Certificates/Permits'];
+   const mainTabs = ['Applications', 'Applications Awaiting OOP', 'Applications Inspection Reports', 'Certificates/Permits'];
    const subTabs = {
       'Applications': ['Applications for Review', 'Accepted Applications'],
+      'Applications Inspection Reports': ['Reports for Review', 'Reviewed Reports'],
       'Applications Awaiting OOP': ['Awaiting OOP', 'Created OOP'],
       'Certificates/Permits': ['Pending Certification', 'Certified Certificates']
    };
 
    const getQueryParamsForTab = (tab) => {
       switch (tab) {
+         case 'Reports for Review':
+            return { currentStage: 'InspectionReportForReviewByPENRCENROfficer', hasInspectionReport: true };
+         case 'Reviewed Reports':
+            return { InspectionReportsReviewedByPENRCENROfficer: true };
          case 'Applications for Review':
             return { currentStage: 'CENRPENRReview' };
          case 'Accepted Applications':

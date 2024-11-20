@@ -22,9 +22,10 @@ const ChiefDashboard = () => {
       }
    });
 
-   const mainTabs = ['Applications', 'Applications Awaiting OOP', 'Order Of Payment', 'Certificates'];
+   const mainTabs = ['Applications', 'Applications Awaiting OOP', 'Order Of Payment', 'Applications Inspection Reports', 'Certificates'];
    const subTabs = {
       'Applications': ['Applications for Review', 'Completed Reviews'],
+      'Applications Inspection Reports': ['Reports for Review', 'Reviewed Reports'],
       'Applications Awaiting OOP': ['Awaiting OOP', 'Created OOP'],
       'Order Of Payment': ['Pending Signature', 'Signed Order Of Payment'],
       'Certificates': ['Permit Pending Signature', 'Signed Permits']
@@ -36,14 +37,22 @@ const ChiefDashboard = () => {
             return { currentStage: 'ChiefRPSReview', reviewedByChief: false };
          case 'Completed Reviews':
             return { reviewedByChief: true };
+
          case 'Awaiting OOP':
             return { awaitingOOP: true };
          case 'Created OOP':
             return { OOPCreated: true, awaitingOOP: false };
+
+         case 'Reports for Review':
+            return { currentStage: 'InspectionReportForReviewByChief', hasInspectionReport: true };
+         case 'Reviewed Reports':
+            return { InspectionReportsReviewedByChief: true };
+
          case 'Pending Signature':
             return { OOPstatus: 'For Approval' };
          case 'Signed Order Of Payment':
             return { OOPSignedByTwoSignatories: true };
+
          default:
             return { currentStage: 'ChiefRPSReview' };
       }

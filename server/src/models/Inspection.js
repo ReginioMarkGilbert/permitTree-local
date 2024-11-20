@@ -1,5 +1,11 @@
 const mongoose = require('mongoose');
 
+const FileSchema = new mongoose.Schema({
+   filename: String,
+   contentType: String,
+   data: Buffer
+});
+
 const InspectionSchema = new mongoose.Schema({
    permitId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -26,7 +32,7 @@ const InspectionSchema = new mongoose.Schema({
       type: String,
       required: true
    },
-   status: {
+   inspectionStatus: {
       type: String,
       enum: ['Pending', 'Completed', 'Rescheduled', 'Cancelled'],
       default: 'Pending'
@@ -43,16 +49,7 @@ const InspectionSchema = new mongoose.Schema({
       },
       observations: String,
       recommendations: String,
-      photos: [{
-         url: String,
-         caption: String,
-         timestamp: Date
-      }],
-      attachments: [{
-         url: String,
-         type: String,
-         description: String
-      }]
+      attachments: [FileSchema]
    },
    history: [{
       action: String,
@@ -65,15 +62,7 @@ const InspectionSchema = new mongoose.Schema({
          type: mongoose.Schema.Types.ObjectId,
          ref: 'Admin'
       }
-   }],
-   createdAt: {
-      type: Date,
-      default: Date.now
-   },
-   updatedAt: {
-      type: Date,
-      default: Date.now
-   }
+   }]
 }, { timestamps: true });
 
 module.exports = mongoose.model('Inspection', InspectionSchema);

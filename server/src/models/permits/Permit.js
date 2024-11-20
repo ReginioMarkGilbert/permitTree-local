@@ -43,6 +43,9 @@ const PermitSchema = new mongoose.Schema({
          'AuthenticityApprovedByTechnicalStaff',
          'ApprovedByTechnicalStaff',
 
+         'InspectionReportForReviewByChief',
+         'InspectionReportForReviewByPENRCENROfficer',
+
          'PendingRelease',
          'Released',
 
@@ -63,6 +66,10 @@ const PermitSchema = new mongoose.Schema({
 
    awaitingOOP: { type: Boolean, default: false },
    OOPCreated: { type: Boolean, default: false }, // for Created OOP tab in Chief/PENRCENROfficer/Accountant Dashboards
+
+   hasInspectionReport: { type: Boolean, default: false },
+   InspectionReportsReviewedByChief: { type: Boolean, default: false },
+   InspectionReportsReviewedByPENRCENROfficer: { type: Boolean, default: false },
 
    awaitingPermitCreation: { type: Boolean, default: false },
    PermitCreated: { type: Boolean, default: false },

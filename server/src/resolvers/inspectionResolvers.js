@@ -47,7 +47,7 @@ const inspectionResolvers = {
       },
 
       getPendingInspections: async () => {
-         const inspections = await Inspection.find({ status: 'Pending' })
+         const inspections = await Inspection.find({ inspectionStatus: 'Pending' })
             .sort({ scheduledDate: 1 })
             .lean();
 
@@ -87,7 +87,7 @@ const inspectionResolvers = {
                scheduledDate: input.scheduledDate,
                scheduledTime: input.scheduledTime,
                location: input.location,
-               status: 'Pending'
+               inspectionStatus: 'Pending'
             };
             await permit.save();
 
@@ -126,11 +126,11 @@ const inspectionResolvers = {
 
             await inspection.save();
 
-            // Update permit's inspection schedule if status changed
-            if (input.status) {
+            // Update permit's inspection schedule if inspectionStatus changed
+            if (input.inspectionStatus) {
                const permit = await Permit.findById(inspection.permitId);
                if (permit && permit.inspectionSchedule) {
-                  permit.inspectionSchedule.status = input.status;
+                  permit.inspectionSchedule.inspectionStatus = input.inspectionStatus;
                   await permit.save();
                }
             }
@@ -148,9 +148,22 @@ const inspectionResolvers = {
                throw new Error('Inspection not found');
             }
 
-            inspection.findings = findings;
-            inspection.status = 'Completed';
+            // Create new findings object with all fields
+            inspection.findings = {
+               result: findings.result,
+               observations: findings.observations || '',
+               recommendations: findings.recommendations || '',
+               attachments: findings.attachments.map(file => ({
+                  filename: file.filename,
+                  contentType: file.contentType,
+                  data: Buffer.from(file.data, 'base64')
+               }))
+            };
 
+            // Update inspection status
+            inspection.inspectionStatus = 'Completed';
+
+            // Add to history
             inspection.history.push({
                action: 'Completed',
                timestamp: new Date(),
@@ -163,7 +176,10 @@ const inspectionResolvers = {
             // Update permit status
             const permit = await Permit.findById(inspection.permitId);
             if (permit) {
-               permit.inspectionSchedule.status = 'Completed';
+               permit.inspectionSchedule = {
+                  ...permit.inspectionSchedule,
+                  inspectionStatus: 'Completed'
+               };
                await permit.save();
 
                // Notify applicant
@@ -176,8 +192,21 @@ const inspectionResolvers = {
                });
             }
 
-            return inspection;
+            // Convert Buffer back to base64 string for GraphQL response
+            const response = inspection.toObject();
+            response.id = inspection._id.toString();
+
+            if (response.findings && response.findings.attachments) {
+               response.findings.attachments = response.findings.attachments.map(file => ({
+                  filename: file.filename,
+                  contentType: file.contentType,
+                  data: file.data.toString('base64')
+               }));
+            }
+
+            return response;
          } catch (error) {
+            console.error('Error recording findings:', error);
             throw new Error(`Failed to record findings: ${error.message}`);
          }
       },
@@ -189,7 +218,7 @@ const inspectionResolvers = {
                throw new Error('Inspection not found');
             }
 
-            inspection.status = 'Cancelled';
+            inspection.inspectionStatus = 'Cancelled';
             inspection.history.push({
                action: 'Cancelled',
                timestamp: new Date(),
@@ -202,7 +231,7 @@ const inspectionResolvers = {
             // Update permit's inspection schedule
             const permit = await Permit.findById(inspection.permitId);
             if (permit && permit.inspectionSchedule) {
-               permit.inspectionSchedule.status = 'Cancelled';
+               permit.inspectionSchedule.inspectionStatus = 'Cancelled';
                await permit.save();
 
                // Notify applicant
@@ -230,7 +259,7 @@ const inspectionResolvers = {
 
             inspection.scheduledDate = new Date(newDate);
             inspection.scheduledTime = newTime;
-            inspection.status = 'Rescheduled';
+            inspection.inspectionStatus = 'Rescheduled';
 
             inspection.history.push({
                action: 'Rescheduled',
@@ -246,7 +275,7 @@ const inspectionResolvers = {
             if (permit && permit.inspectionSchedule) {
                permit.inspectionSchedule.scheduledDate = new Date(newDate);
                permit.inspectionSchedule.scheduledTime = newTime;
-               permit.inspectionSchedule.status = 'Rescheduled';
+               permit.inspectionSchedule.inspectionStatus = 'Rescheduled';
                await permit.save();
 
                // Notify applicant

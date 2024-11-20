@@ -51,6 +51,8 @@ const permitResolvers = {
                approvedByTechnicalStaff: permit.approvedByTechnicalStaff || false,
                acceptedByPENRCENROfficer: permit.acceptedByPENRCENROfficer || false,
                approvedByPENRCENROfficer: permit.approvedByPENRCENROfficer || false,
+               InspectionReportsReviewedByChief: permit.InspectionReportsReviewedByChief || false,
+               InspectionReportsReviewedByPENRCENROfficer: permit.InspectionReportsReviewedByPENRCENROfficer || false,
                awaitingPermitCreation: permit.awaitingPermitCreation || false,
                PermitCreated: permit.PermitCreated || false
             }));
@@ -178,47 +180,43 @@ const permitResolvers = {
          reviewedByChief,
          awaitingOOP,
          OOPCreated,
+
+         hasInspectionReport,
+         InspectionReportsReviewedByChief,
+         InspectionReportsReviewedByPENRCENROfficer,
+
          awaitingPermitCreation,
          PermitCreated
       }) => {
          try {
-            let query = {};
+            const query = Object.entries({
+               status,
+               currentStage,
 
-            if (status) query.status = status;
-            if (currentStage) query.currentStage = currentStage;
-            if (acceptedByTechnicalStaff !== undefined) {
-               query.acceptedByTechnicalStaff = acceptedByTechnicalStaff;
-            }
-            if (approvedByTechnicalStaff !== undefined) {
-               query.approvedByTechnicalStaff = approvedByTechnicalStaff;
-            }
-            if (acceptedByReceivingClerk !== undefined) {
-               query.acceptedByReceivingClerk = acceptedByReceivingClerk;
-            }
-            if (recordedByReceivingClerk !== undefined) {
-               query.recordedByReceivingClerk = recordedByReceivingClerk;
-            }
-            if (acceptedByPENRCENROfficer !== undefined) {
-               query.acceptedByPENRCENROfficer = acceptedByPENRCENROfficer;
-            }
-            if (approvedByPENRCENROfficer !== undefined) {
-               query.approvedByPENRCENROfficer = approvedByPENRCENROfficer;
-            }
-            if (reviewedByChief !== undefined) {
-               query.reviewedByChief = reviewedByChief;
-            }
-            if (awaitingOOP !== undefined) {
-               query.awaitingOOP = awaitingOOP;
-            }
-            if (awaitingPermitCreation !== undefined) {
-               query.awaitingPermitCreation = awaitingPermitCreation;
-            }
-            if (PermitCreated !== undefined) {
-               query.PermitCreated = PermitCreated;
-            }
-            if (OOPCreated !== undefined) {
-               query.OOPCreated = OOPCreated;
-            }
+               acceptedByTechnicalStaff,
+               approvedByTechnicalStaff,
+
+               acceptedByReceivingClerk,
+               recordedByReceivingClerk,
+
+               acceptedByPENRCENROfficer,
+               approvedByPENRCENROfficer,
+
+               reviewedByChief,
+
+               awaitingOOP,
+               OOPCreated,
+
+               hasInspectionReport,
+               InspectionReportsReviewedByChief,
+               InspectionReportsReviewedByPENRCENROfficer,
+
+               awaitingPermitCreation,
+               PermitCreated
+            }).reduce((acc, [key, value]) => {
+               if (value !== undefined) acc[key] = value;
+               return acc;
+            }, {});
 
             console.log('Query parameters:', query);
 
@@ -245,39 +243,6 @@ const permitResolvers = {
             console.error('Error fetching permits:', error);
             throw new Error(`Failed to fetch permits: ${error.message}`);
          }
-      },
-
-      getApplicationsByCurrentStage: async (_, { currentStage }) => {
-         try {
-            const permits = await Permit.find({ currentStage })
-               .sort({ dateOfSubmission: -1 })
-               .lean()
-               .exec();
-
-            return permits.map(permit => ({
-               ...permit,
-               id: permit._id.toString(),
-               dateOfSubmission: permit.dateOfSubmission.toISOString()
-            }));
-         } catch (error) {
-            console.error(`Error fetching ${currentStage} permits:`, error);
-            throw new Error(`Failed to fetch ${currentStage} permits: ${error.message}`);
-         }
-      },
-
-      getApplicationsAwaitingOOP: async (_, __, { user }) => {
-         if (!user) throw new AuthenticationError('Not authenticated');
-
-         const permits = await Permit.find({
-            status: 'Accepted',
-            awaitingOOP: true
-         }).lean();
-
-         return permits.map(permit => ({
-            ...permit,
-            id: permit._id.toString(),
-            dateOfSubmission: permit.dateOfSubmission.toISOString()
-         }));
       },
 
       getPermitByApplicationNumber: async (_, { applicationNumber }) => {
@@ -399,6 +364,7 @@ const permitResolvers = {
          currentStage,
          status,
          notes,
+
          acceptedByTechnicalStaff,
          approvedByTechnicalStaff,
 
@@ -412,6 +378,11 @@ const permitResolvers = {
 
          awaitingOOP,
          OOPCreated,
+
+         hasInspectionReport,
+         InspectionReportsReviewedByChief,
+         InspectionReportsReviewedByPENRCENROfficer,
+
          awaitingPermitCreation,
          PermitCreated
       }, { user }) => {
@@ -424,39 +395,34 @@ const permitResolvers = {
             permit.currentStage = currentStage;
             permit.status = status;
 
-            if (reviewedByChief !== undefined) {
-               permit.reviewedByChief = reviewedByChief;
-            }
-            if (awaitingOOP !== undefined) {
-               permit.awaitingOOP = awaitingOOP;
-            }
-            if (acceptedByTechnicalStaff !== undefined) {
-               permit.acceptedByTechnicalStaff = acceptedByTechnicalStaff;
-            }
-            if (acceptedByReceivingClerk !== undefined) {
-               permit.acceptedByReceivingClerk = acceptedByReceivingClerk;
-            }
-            if (recordedByReceivingClerk !== undefined) {
-               permit.recordedByReceivingClerk = recordedByReceivingClerk;
-            }
-            if (acceptedByPENRCENROfficer !== undefined) {
-               permit.acceptedByPENRCENROfficer = acceptedByPENRCENROfficer;
-            }
-            if (approvedByPENRCENROfficer !== undefined) {
-               permit.approvedByPENRCENROfficer = approvedByPENRCENROfficer;
-            }
-            if (approvedByTechnicalStaff !== undefined) {
-               permit.approvedByTechnicalStaff = approvedByTechnicalStaff;
-            }
-            if (awaitingPermitCreation !== undefined) {
-               permit.awaitingPermitCreation = awaitingPermitCreation;
-            }
-            if (PermitCreated !== undefined) {
-               permit.PermitCreated = PermitCreated;
-            }
-            if (OOPCreated !== undefined) {
-               permit.OOPCreated = OOPCreated;
-            }
+            const fields = {
+               acceptedByTechnicalStaff,
+               approvedByTechnicalStaff,
+
+               acceptedByReceivingClerk,
+               recordedByReceivingClerk,
+
+               acceptedByPENRCENROfficer,
+               approvedByPENRCENROfficer,
+
+               reviewedByChief,
+
+               awaitingOOP,
+               OOPCreated,
+
+               hasInspectionReport,
+               InspectionReportsReviewedByChief,
+               InspectionReportsReviewedByPENRCENROfficer,
+
+               awaitingPermitCreation,
+               PermitCreated
+            };
+            Object.entries(fields).forEach(([key, value]) => {
+               if (value !== undefined) {
+                  permit[key] = value;
+               }
+            });
+
             // permit.history.push({
             //    stage: currentStage,
             //    status: status,
@@ -836,20 +802,19 @@ const permitResolvers = {
       __isTypeOf(obj) {
          return obj.applicationType === 'Tree Cutting and/or Earth Balling Permit';
       }
-   },
-   // ... add other permit type resolvers
+   }
 };
 
 // Helper function to determine next personnel in workflow
-function getNextPersonnelRole(currentStage) {
-   const workflowMap = {
-      'TechnicalStaffReview': 'Technical_Staff',
-      'ReceivingClerkReview': 'Receiving_Clerk',
-      'ChiefRPSReview': 'Chief_RPS',
-      'CENRPENRReview': 'PENR_CENR_Officer',
-      // Add more mappings as needed
-   };
-   return workflowMap[currentStage];
-}
+// function getNextPersonnelRole(currentStage) {
+//    const workflowMap = {
+//       'TechnicalStaffReview': 'Technical_Staff',
+//       'ReceivingClerkReview': 'Receiving_Clerk',
+//       'ChiefRPSReview': 'Chief_RPS',
+//       'CENRPENRReview': 'PENR_CENR_Officer',
+//       // Add more mappings as needed
+//    };
+//    return workflowMap[currentStage];
+// }
 
 module.exports = permitResolvers;
