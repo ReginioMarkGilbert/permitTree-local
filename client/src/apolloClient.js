@@ -3,8 +3,8 @@ import { setContext } from '@apollo/client/link/context';
 // import { createUploadLink } from 'apollo-upload-client';
 import { onError } from "@apollo/client/link/error";
 
-// const API_URL = 'http://172.20.10.2:3001/graphql' || 'http://localhost:3001/graphql';
-const API_URL = 'http://localhost:3001/graphql';
+const API_URL = 'http://172.20.10.2:3001/graphql'
+// http://172.20.10.2:5174/
 const httpLink = createHttpLink({
    uri: API_URL,
 });

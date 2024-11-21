@@ -58,6 +58,22 @@ class NotificationService {
          'APPLICATION_REVIEWED_BY_CHIEF': {
             title: 'Application Reviewed by Chief',
             message: `Your application ${application.applicationNumber} has been reviewed by Chief RPS/TSD and is now proceeding to technical inspection.`
+         },
+         'INSPECTION_SCHEDULED': {
+            title: 'Inspection Scheduled',
+            message: `An inspection has been scheduled for your application ${application.applicationNumber}. ${remarks}`
+         },
+         'INSPECTION_CANCELLED': {
+            title: 'Inspection Cancelled',
+            message: `The inspection for your application ${application.applicationNumber} has been cancelled. Reason: ${remarks}`
+         },
+         'INSPECTION_RESCHEDULED': {
+            title: 'Inspection Rescheduled',
+            message: `The inspection for your application ${application.applicationNumber} has been rescheduled. ${remarks}`
+         },
+         'APPLICATION_INSPECTION_COMPLETE': {
+            title: 'Inspection Completed',
+            message: `Inspection for your application ${application.applicationNumber} has been completed. ${remarks}`
          }
       };
 

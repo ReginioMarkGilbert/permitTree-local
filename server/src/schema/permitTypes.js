@@ -25,6 +25,9 @@ const permitTypes = gql`
     reviewedByChief: Boolean!
     awaitingOOP: Boolean!
     OOPCreated: Boolean!
+    hasInspectionReport: Boolean!
+    InspectionReportsReviewedByChief: Boolean!
+    InspectionReportsReviewedByPENRCENROfficer: Boolean!
     awaitingPermitCreation: Boolean!
     PermitCreated: Boolean!
     history: [HistoryEntry]
@@ -45,6 +48,9 @@ const permitTypes = gql`
     reviewedByChief: Boolean!
     awaitingOOP: Boolean!
     OOPCreated: Boolean!
+    hasInspectionReport: Boolean!
+    InspectionReportsReviewedByChief: Boolean!
+    InspectionReportsReviewedByPENRCENROfficer: Boolean!
     awaitingPermitCreation: Boolean!
     PermitCreated: Boolean!
     dateOfSubmission: String!
@@ -78,6 +84,9 @@ const permitTypes = gql`
     reviewedByChief: Boolean!
     awaitingOOP: Boolean!
     OOPCreated: Boolean!
+    hasInspectionReport: Boolean!
+    InspectionReportsReviewedByChief: Boolean!
+    InspectionReportsReviewedByPENRCENROfficer: Boolean!
     awaitingPermitCreation: Boolean!
     PermitCreated: Boolean!
     dateOfSubmission: String!
@@ -120,6 +129,9 @@ const permitTypes = gql`
     reviewedByChief: Boolean!
     awaitingOOP: Boolean!
     OOPCreated: Boolean!
+    hasInspectionReport: Boolean!
+    InspectionReportsReviewedByChief: Boolean!
+    InspectionReportsReviewedByPENRCENROfficer: Boolean!
     awaitingPermitCreation: Boolean!
     PermitCreated: Boolean!
     dateOfSubmission: String!
@@ -153,6 +165,9 @@ const permitTypes = gql`
     reviewedByChief: Boolean!
     awaitingOOP: Boolean!
     OOPCreated: Boolean!
+    hasInspectionReport: Boolean!
+    InspectionReportsReviewedByChief: Boolean!
+    InspectionReportsReviewedByPENRCENROfficer: Boolean!
     awaitingPermitCreation: Boolean!
     PermitCreated: Boolean!
     dateOfSubmission: String!
@@ -185,6 +200,9 @@ const permitTypes = gql`
     reviewedByChief: Boolean!
     awaitingOOP: Boolean!
     OOPCreated: Boolean!
+    hasInspectionReport: Boolean!
+    InspectionReportsReviewedByChief: Boolean!
+    InspectionReportsReviewedByPENRCENROfficer: Boolean!
     awaitingPermitCreation: Boolean!
     PermitCreated: Boolean!
     dateOfSubmission: String!
@@ -221,6 +239,9 @@ const permitTypes = gql`
     reviewedByChief: Boolean!
     awaitingOOP: Boolean!
     OOPCreated: Boolean!
+    hasInspectionReport: Boolean!
+    InspectionReportsReviewedByChief: Boolean!
+    InspectionReportsReviewedByPENRCENROfficer: Boolean!
     awaitingPermitCreation: Boolean!
     PermitCreated: Boolean!
     dateOfSubmission: String!
@@ -313,19 +334,28 @@ const permitTypes = gql`
     getApplicationsByStatus(
       status: String,
       currentStage: String,
-      approvedByTechnicalStaff: Boolean,
       acceptedByTechnicalStaff: Boolean,
+      approvedByTechnicalStaff: Boolean,
+
       acceptedByReceivingClerk: Boolean,
       recordedByReceivingClerk: Boolean,
+
       acceptedByPENRCENROfficer: Boolean,
       approvedByPENRCENROfficer: Boolean,
+
       reviewedByChief: Boolean,
+
       awaitingOOP: Boolean,
       OOPCreated: Boolean,
+
+      hasInspectionReport: Boolean,
+      InspectionReportsReviewedByChief: Boolean,
+      InspectionReportsReviewedByPENRCENROfficer: Boolean,
+
       awaitingPermitCreation: Boolean,
       PermitCreated: Boolean
     ): [Permit!]!
-    getApplicationsByCurrentStage(currentStage: String!): [Permit!]!
+   #  getApplicationsByCurrentStage(currentStage: String!): [Permit!]!
     getPermitByApplicationNumber(applicationNumber: String!): Permit
     getRecentApplications(limit: Int!): [Permit!]!
   }
@@ -360,26 +390,43 @@ const permitTypes = gql`
       currentStage: String!
       status: String!
       notes: String
-      reviewedByChief: Boolean
-      awaitingOOP: Boolean
+
       acceptedByTechnicalStaff: Boolean
       approvedByTechnicalStaff: Boolean
+
       acceptedByReceivingClerk: Boolean
       recordedByReceivingClerk: Boolean
+
+      reviewedByChief: Boolean
+
       acceptedByPENRCENROfficer: Boolean
       approvedByPENRCENROfficer: Boolean
+
+      awaitingOOP: Boolean
+      OOPCreated: Boolean
+
+      hasInspectionReport: Boolean
+      InspectionReportsReviewedByChief: Boolean
+      InspectionReportsReviewedByPENRCENROfficer: Boolean
+
       awaitingPermitCreation: Boolean
       PermitCreated: Boolean
+
     ): Permit!
-    acceptApplication(id: ID!, notes: String): Permit!
     recordApplication(id: ID!, notes: String): Permit!
-    reviewByChief(id: ID!, notes: String): Permit!
-    approveByPENRCENR(id: ID!, notes: String): Permit!
+    undoRecordApplication(id: ID!, approvedByPENRCENROfficer: Boolean): Permit!
+    undoAcceptanceCENRPENROfficer(id: ID!, reviewedByChief: Boolean): Permit!
 
     reviewApplication(id: ID!): Permit!
     submitPermit(id: ID!): Permit!
     deletePermit(id: ID!): Boolean!
     unsubmitPermit(id: ID!): Permit!
+    scheduleInspection(
+      permitId: ID!
+      scheduledDate: String!
+      scheduledTime: String!
+      location: String!
+    ): Permit
   }
 
   input COVPermitInput {

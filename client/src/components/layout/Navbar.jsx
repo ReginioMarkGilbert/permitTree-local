@@ -1,6 +1,5 @@
 import React from 'react';
-import { FaBars, FaTimes } from 'react-icons/fa';
-import { Leaf } from 'lucide-react';
+import { FaBars, FaTimes, FaLeaf } from 'react-icons/fa';
 
 const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
     const handleToggle = () => {
@@ -8,7 +7,7 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
     };
 
     return (
-        <nav className="pl-2 bg-white border-b border-gray-200 shadow-sm z-10 fixed top-0 left-0 right-0">
+        <nav className="pl-2 bg-white backdrop-blur-sm border-b border-gray-200 shadow-sm z-10 fixed top-0 left-0 right-0">
             <div className="max-w-[2520px] mx-auto flex justify-between items-center px-4 h-16">
                 {/* Left Section */}
                 <div className="flex items-center gap-3">
@@ -31,9 +30,9 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
                             />
                         </div>
                     </button>
-                    <div className="flex items-center gap-2">
-                        <Leaf className="h-7 w-7 text-green-600" />
-                        <span className="text-xl font-semibold text-gray-800">
+                    <div className="flex items-center gap-2 group">
+                        <FaLeaf className="h-5 w-5 text-green-600 group-hover:text-green-700 transition-colors" />
+                        <span className="text-xl font-bold bg-gradient-to-r from-green-800 to-green-600 bg-clip-text text-transparent">
                             PermitTree
                         </span>
                     </div>
@@ -41,7 +40,7 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
 
                 {/* Right Section */}
                 <div className="flex items-center gap-4">
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm font-medium text-gray-600">
                         DENR Region 4B
                     </div>
                 </div>

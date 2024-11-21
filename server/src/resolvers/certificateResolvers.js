@@ -8,7 +8,7 @@ const certificateResolvers = {
    Query: {
       getCertificates: async (_, { status }) => {
          try {
-            const query = status ? { status } : {};
+            const query = status ? { certificateStatus: status } : {};
             return await Certificate.find(query).sort({ createdAt: -1 });
          } catch (error) {
             throw new Error(`Failed to fetch certificates: ${error.message}`);

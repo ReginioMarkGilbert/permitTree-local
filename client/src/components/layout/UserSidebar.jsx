@@ -5,6 +5,7 @@ import permitTreeLogo from '../../assets/denr-logo.png';
 import { isAuthenticated } from '../../utils/auth';
 import { removeToken } from '../../utils/tokenManager';
 import { gql, useMutation } from '@apollo/client';
+import { X } from 'lucide-react';
 
 const LOGOUT_MUTATION = gql`
   mutation Logout {
@@ -105,45 +106,69 @@ const Sidebar = React.memo(({ isOpen, onToggle }) => {
    }
 
    return (
-      <div
-         className={`h-full bg-green-800 text-white flex flex-col fixed top-0 left-0
-            ${isOpen ? 'w-64' : 'w-16'} z-10 transition-all duration-300 ease-in-out
-            border-r border-green-700`}
-      >
-         <div className="flex flex-col flex-grow">
-            {/* Logo Section */}
-            <div className={`flex items-center p-4 mb-4 border-b border-green-700 h-16
-               ${isOpen ? 'justify-start' : 'justify-center'}`}>
-               <img
-                  src={permitTreeLogo}
-                  alt="PermitTree Logo"
-                  className={`transition-all duration-300
-                     ${isOpen ? 'w-8 h-8' : 'w-8 h-8'}`}
-               />
-               {isOpen && (
-                  <span className={`ml-3 font-semibold text-lg transition-opacity duration-300
-                     ${showText ? 'opacity-100' : 'opacity-0'}`}>
-                     PermitTree
-                  </span>
-               )}
-            </div>
+      <>
+         {/* Backdrop - only shows on mobile when sidebar is open */}
+         {isOpen && (
+            <div
+               className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-20 transition-opacity"
+               onClick={onToggle}
+            />
+         )}
 
-            {/* Main Navigation */}
-            <nav className="flex-grow px-3">
-               {mainNavItems.map((item, index) => renderNavItem(item, index))}
-            </nav>
-
-            {/* Account Navigation */}
-            <div className="mt-auto">
-               <div className="px-3 mb-8">
-                  <div className="border-t border-green-700 my-2"></div>
-                  {accountNavItems.map((item, index) => renderNavItem(item, index))}
+         {/* Sidebar */}
+         <div
+            className={`h-full bg-green-800 text-white flex flex-col fixed top-0 left-0
+               ${isOpen ? 'w-64' : 'w-16'}
+               transition-all duration-300 ease-in-out
+               border-r border-green-700
+               lg:z-10 z-30
+               ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+         >
+            <div className="flex flex-col flex-grow">
+               {/* Logo Section with Close Button for Mobile */}
+               <div className={`flex items-center p-4 mb-4 border-b border-green-700 h-16
+                  ${isOpen ? 'justify-between' : 'justify-center'}`}>
+                  <div className="flex items-center">
+                     <img
+                        src={permitTreeLogo}
+                        alt="PermitTree Logo"
+                        className="w-8 h-8"
+                     />
+                     {isOpen && (
+                        <span className={`ml-3 font-semibold text-lg transition-opacity duration-300
+                           ${showText ? 'opacity-100' : 'opacity-0'}`}>
+                           PermitTree
+                        </span>
+                     )}
+                  </div>
+                  {/* Close button - only visible on mobile when sidebar is open */}
+                  {isOpen && (
+                     <button
+                        onClick={onToggle}
+                        className="lg:hidden p-1 rounded-lg hover:bg-green-700 transition-colors"
+                     >
+                        <X className="h-6 w-6" />
+                     </button>
+                  )}
                </div>
+
+               {/* Main Navigation */}
+               <nav className="flex-grow px-3">
+                  {mainNavItems.map((item, index) => renderNavItem(item, index))}
+               </nav>
+
+               {/* Account Navigation */}
+               <div className="mt-auto">
+                  <div className="px-3 mb-8">
+                     <div className="border-t border-green-700 my-2"></div>
+                     {accountNavItems.map((item, index) => renderNavItem(item, index))}
+                  </div>
+               </div>
+
+
             </div>
-
-
          </div>
-      </div>
+      </>
    );
 });
 

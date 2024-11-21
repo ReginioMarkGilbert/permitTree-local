@@ -154,9 +154,9 @@ class FinancialAnalyticsService {
    async updateFinancialMetricsOnPayment(oop) {
       try {
          // Fetch the corresponding payment
-         const payment = await Payment.findOne({ 
-            oopId: oop._id, 
-            status: 'COMPLETED' 
+         const payment = await Payment.findOne({
+            oopId: oop._id,
+            status: 'COMPLETED'
          });
 
          if (!payment) {
@@ -166,8 +166,8 @@ class FinancialAnalyticsService {
 
          // Update OOP status if not already updated
          if (oop.OOPstatus !== 'Completed OOP') {
-            await OOP.findByIdAndUpdate(oop._id, { 
-               OOPstatus: 'Completed OOP' 
+            await OOP.findByIdAndUpdate(oop._id, {
+               OOPstatus: 'Completed OOP'
             });
          }
 
@@ -191,7 +191,7 @@ class FinancialAnalyticsService {
    async recalculateFinancialAnalytics() {
       try {
          const startDate = moment().subtract(1, 'year').toDate();
-         const oops = await OOP.find({ 
+         const oops = await OOP.find({
             createdAt: { $gte: startDate },
             OOPstatus: 'Completed OOP'
          });

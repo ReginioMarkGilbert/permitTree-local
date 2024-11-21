@@ -1,7 +1,7 @@
 import { useQuery, useMutation } from '@apollo/client';
 import { gql } from '@apollo/client';
 import { useEffect } from 'react';
-
+import { getUserRoles } from '../../../utils/auth';
 // Queries
 export const GET_APPLICATIONS_AWAITING_OOP = gql`
   query GetApplicationsByStatus($awaitingOOP: Boolean) {
@@ -219,7 +219,30 @@ const FORWARD_OOP_TO_ACCOUNTANT = gql`
   }
 `;
 
+// Add this new query
+export const GET_RECENT_OOPS = gql`
+  query GetRecentOOPs($status: String, $limit: Int) {
+    getRecentOOPs(status: $status, limit: $limit) {
+      _id
+      billNo
+      applicationNumber
+      namePayee
+      totalAmount
+      OOPstatus
+      createdAt
+      natureOfApplication
+    }
+  }
+`;
+
 export const useOrderOfPayments = (userId = null) => {
+   const userRoles = getUserRoles();
+   const status = userRoles.includes('Accountant')
+      ? "For Approval"
+      : userRoles.includes('Bill_Collector')
+         ? "Awaiting Payment"
+         : null;
+
    // Query for applications awaiting OOP
    const {
       data: applicationsData,
@@ -231,7 +254,7 @@ export const useOrderOfPayments = (userId = null) => {
       fetchPolicy: 'network-only'
    });
 
-   // Add query for all OOPs
+   // Query for all OOPs
    const {
       data: oopsData,
       loading: oopsLoading,
@@ -251,6 +274,18 @@ export const useOrderOfPayments = (userId = null) => {
       variables: { userId },
       skip: !userId, // Skip this query if no userId is provided
       fetchPolicy: 'network-only'
+   });
+
+   // Add this new query hook
+   const {
+      data: recentOOPsData,
+      loading: recentOOPsLoading,
+      error: recentOOPsError,
+      refetch: refetchRecentOOPs
+   } = useQuery(GET_RECENT_OOPS, {
+      variables: { status, limit: 7 },
+      fetchPolicy: 'network-only',
+      skip: !status // Skip if no relevant status (not Accountant or Bill Collector)
    });
 
    // Log whenever applications change
@@ -378,6 +413,12 @@ export const useOrderOfPayments = (userId = null) => {
             console.error('Error fetching OOP with payment proof:', error);
             throw error;
          }
-      }
+      },
+
+      // Add these new fields
+      recentOOPs: recentOOPsData?.getRecentOOPs || [],
+      recentOOPsLoading,
+      recentOOPsError,
+      refetchRecentOOPs,
    };
 };

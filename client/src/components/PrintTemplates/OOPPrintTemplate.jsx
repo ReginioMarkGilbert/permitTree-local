@@ -5,6 +5,7 @@ import './printStyles.css';
 const OOPPrintTemplate = React.forwardRef((props, ref) => {
    const { oop } = props;
 
+   // correct way of  formatting OOP date
    const formatDate = (timestamp) => {
       const date = new Date(parseInt(timestamp));
       return format(date, 'M/d/yyyy');

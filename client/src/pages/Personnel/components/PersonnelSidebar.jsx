@@ -1,9 +1,11 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
-import { FaBell, FaChartLine, FaCog, FaFileInvoiceDollar, FaHome, FaSignOutAlt, FaTachometerAlt } from 'react-icons/fa';
+import { FaBell, FaChartLine, FaCog, FaFileInvoiceDollar, FaHome, FaSignOutAlt, FaTachometerAlt, FaMap, FaCalendarCheck } from 'react-icons/fa';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { removeToken } from '../../../utils/tokenManager';
 import { isAuthenticated, getUserRoles } from '../../../utils/auth';
 import { gql, useMutation } from '@apollo/client';
+import { X } from 'lucide-react';
+import permitTreeLogo from '../../../assets/denr-logo.png';
 
 const LOGOUT_MUTATION = gql`
   mutation Logout {
@@ -34,7 +36,7 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
          localStorage.removeItem('user');
          setIsAuth(false);
          if (isOpen) {
-            onToggle(); // Close the sidebar if it's open
+            onToggle();
          }
          navigate('/auth');
          console.log('Logout successful!');
@@ -48,7 +50,7 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
       setIsAuth(authStatus);
       if (!authStatus) {
          if (isOpen) {
-            onToggle(); // Close the sidebar if it's open
+            onToggle();
          }
          navigate('/auth');
       }
@@ -57,7 +59,7 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
    const getDashboardLink = () => {
       if (userRoles.includes('Receiving_Clerk') || userRoles.includes('Releasing_Clerk')) {
          return "/personnel/receiving-releasing";
-      } else if (userRoles.includes('Technical_Staff') || userRoles.includes('Receiving_Clerk') || userRoles.includes('Releasing_Clerk')) {
+      } else if (userRoles.includes('Technical_Staff')) {
          return "/personnel/technical-staff";
       } else if (userRoles.includes('Chief_RPS') || userRoles.includes('Chief_TSD')) {
          return "/personnel/chief";
@@ -82,10 +84,14 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
    const mainNavItems = useMemo(() => [
       { to: "/personnel/home", icon: <FaHome />, text: "Home" },
       { to: getDashboardLink(), icon: <FaTachometerAlt />, text: "Dashboard" },
+      ...(userRoles.includes('Technical_Staff') ? [
+         { to: "/personnel/inspection-scheduling", icon: <FaCalendarCheck />, text: "Inspection Schedule" }
+      ] : []),
       ...(shouldShowOrderOfPayment() ? [{ to: "/personnel/order-of-payment", icon: <FaFileInvoiceDollar />, text: "Order of Payment" }] : []),
       { to: "/personnel/notifications", icon: <FaBell />, text: "Notifications" },
       { to: "/personnel/reports", icon: <FaChartLine />, text: "Reports" },
-   ], [getDashboardLink, shouldShowOrderOfPayment]);
+      { to: "/gis", icon: <FaMap />, text: "GIS Maps" },
+   ], [getDashboardLink, shouldShowOrderOfPayment, userRoles]);
 
    const accountNavItems = useMemo(() => [
       { to: "/personnel/settings", icon: <FaCog />, text: "Settings" },
@@ -100,8 +106,8 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
             flex items-center py-2.5 px-3 rounded-md mt-1.5
             ${isOpen ? '' : 'justify-center'}
             transition-all duration-200 ease-in-out
-            ${isActive && item.to !== '/auth' 
-               ? 'bg-green-700 text-white' 
+            ${isActive && item.to !== '/auth'
+               ? 'bg-green-700 text-white'
                : 'hover:bg-green-700/50 hover:text-white'}
             group
          `}
@@ -113,7 +119,7 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
             </span>
          </div>
          {isOpen && (
-            <span className={`ml-3 font-medium text-sm transition-opacity duration-300 
+            <span className={`ml-3 font-medium text-sm transition-opacity duration-300
                ${showText ? 'opacity-100' : 'opacity-0'}`}>
                {item.text}
             </span>
@@ -126,41 +132,67 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
    }
 
    return (
-      <div
-         className={`h-full bg-green-800 text-white flex flex-col fixed top-0 left-0 
-            ${isOpen ? 'w-64' : 'w-16'} z-10 transition-all duration-300 ease-in-out
-            border-r border-green-700`}
-      >
-         <div className="flex flex-col flex-grow">
-            {/* Logo Section */}
-            <div className={`flex items-center p-4 mb-4 border-b border-green-700 h-16 
-               ${isOpen ? 'justify-start' : 'justify-center'}`}>
-               <div className={`transition-all duration-300 text-2xl font-bold
-                  ${isOpen ? 'w-8 h-8' : 'w-8 h-8'}`}>
-                  P
+      <>
+         {/* Backdrop - only shows on mobile when sidebar is open */}
+         {isOpen && (
+            <div
+               className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-20 transition-opacity"
+               onClick={onToggle}
+            />
+         )}
+
+         {/* Sidebar */}
+         <div
+            className={`h-full bg-green-800 text-white flex flex-col fixed top-0 left-0
+               ${isOpen ? 'w-64' : 'w-16'}
+               transition-all duration-300 ease-in-out
+               border-r border-green-700
+               lg:z-10 z-30
+               ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+         >
+            <div className="flex flex-col flex-grow">
+               {/* Logo Section with Close Button for Mobile */}
+               <div className={`flex items-center p-4 mb-4 border-b border-green-700 h-16
+                  ${isOpen ? 'justify-between' : 'justify-center'}`}>
+                  <div className="flex items-center">
+                     <img
+                        src={permitTreeLogo}
+                        alt="PermitTree Logo"
+                        className="w-8 h-8"
+                     />
+                     {isOpen && (
+                        <span className={`ml-3 font-semibold text-lg transition-opacity duration-300
+                           ${showText ? 'opacity-100' : 'opacity-0'}`}>
+                           Personnel
+                        </span>
+                     )}
+                  </div>
+                  {/* Close button - only visible on mobile when sidebar is open */}
+                  {isOpen && (
+                     <button
+                        onClick={onToggle}
+                        className="lg:hidden p-1 rounded-lg hover:bg-green-700 transition-colors"
+                     >
+                        <X className="h-6 w-6" />
+                     </button>
+                  )}
                </div>
-               {isOpen && (
-                  <span className={`ml-3 font-semibold text-lg transition-opacity duration-300 
-                     ${showText ? 'opacity-100' : 'opacity-0'}`}>
-                     Personnel
-                  </span>
-               )}
-            </div>
 
-            {/* Main Navigation */}
-            <nav className="flex-grow px-3">
-               {mainNavItems.map((item, index) => renderNavItem(item, index))}
-            </nav>
+               {/* Main Navigation */}
+               <nav className="flex-grow px-3">
+                  {mainNavItems.map((item, index) => renderNavItem(item, index))}
+               </nav>
 
-            {/* Account Navigation */}
-            <div className="mt-auto">
-               <div className="px-3 mb-8">
-                  <div className="border-t border-green-700 my-2"></div>
-                  {accountNavItems.map((item, index) => renderNavItem(item, index))}
+               {/* Account Navigation */}
+               <div className="mt-auto">
+                  <div className="px-3 mb-8">
+                     <div className="border-t border-green-700 my-2"></div>
+                     {accountNavItems.map((item, index) => renderNavItem(item, index))}
+                  </div>
                </div>
             </div>
          </div>
-      </div>
+      </>
    );
 });
 

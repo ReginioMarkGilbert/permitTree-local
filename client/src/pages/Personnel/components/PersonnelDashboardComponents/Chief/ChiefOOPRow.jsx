@@ -12,6 +12,7 @@ import OOPAffixEsignModal from '../../OOPAffixEsignModal';
 import ViewOOPModal from '@/pages/user/components/ViewOOPModal';
 import { useMutation, gql, useQuery } from '@apollo/client';
 import { toast } from 'sonner';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 const GET_PERMIT_BY_APPLICATION_NUMBER = gql`
   query GetPermitByApplicationNumber($applicationNumber: String!) {
@@ -82,6 +83,7 @@ const ChiefOOPRow = ({ oop, onRefetch }) => {
    const [deleteOOP] = useMutation(DELETE_OOP);
    const [undoOOPCreation] = useMutation(UNDO_OOP_CREATION);
    const [isViewOOPModalOpen, setIsViewOOPModalOpen] = useState(false);
+   const isMobile = useMediaQuery('(max-width: 640px)');
 
    const { data: permitData } = useQuery(GET_PERMIT_BY_APPLICATION_NUMBER, {
       variables: { applicationNumber: oop.applicationId },
@@ -144,17 +146,164 @@ const ChiefOOPRow = ({ oop, onRefetch }) => {
       }
    };
 
+   const renderActionButtons = () => {
+      if (isMobile) {
+         return (
+            <>
+               <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleView}
+                  className="h-8 w-8"
+               >
+                  <Eye className="h-4 w-4" />
+               </Button>
+
+               <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handlePrint}
+                  className="h-8 w-8"
+               >
+                  <Printer className="h-4 w-4" />
+               </Button>
+
+               {oop.OOPstatus === 'Pending Signature' && (
+                  <>
+                     <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={handleAffixSign}
+                        className="h-8 w-8 text-blue-600"
+                     >
+                        <PenLine className="h-4 w-4" />
+                     </Button>
+
+                     <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={handleUndoOOP}
+                        className="h-8 w-8 text-yellow-600"
+                     >
+                        <RotateCcw className="h-4 w-4" />
+                     </Button>
+                  </>
+               )}
+            </>
+         );
+      }
+
+      // Desktop view remains the same
+      return (
+         <>
+            <Button
+               variant="outline"
+               size="sm"
+               onClick={handleView}
+            >
+               <Eye className="h-4 w-4 mr-1" />
+               View
+            </Button>
+
+            <Button
+               variant="outline"
+               size="sm"
+               onClick={handlePrint}
+            >
+               <Printer className="h-4 w-4 mr-1" />
+               Print
+            </Button>
+
+            {oop.OOPstatus === 'Pending Signature' && (
+               <>
+                  <Button
+                     variant="outline"
+                     size="sm"
+                     onClick={handleAffixSign}
+                     className="text-blue-600"
+                  >
+                     <PenLine className="h-4 w-4 mr-1" />
+                     Affix E-Sign
+                  </Button>
+
+                  <Button
+                     variant="outline"
+                     size="sm"
+                     onClick={handleUndoOOP}
+                     className="text-yellow-600"
+                  >
+                     <RotateCcw className="h-4 w-4 mr-1" />
+                     Undo
+                  </Button>
+               </>
+            )}
+         </>
+      );
+   };
+
+   if (isMobile) {
+      return (
+         <div className="bg-white p-4 mb-4 rounded-lg shadow-sm border border-gray-200">
+            <div className="space-y-3">
+               <div className="flex justify-between items-start">
+                  <div className="space-y-1">
+                     <h3 className="font-medium text-gray-900">
+                        {oop.applicationNumber}
+                     </h3>
+                     <p className="text-sm text-gray-500">
+                        Bill No: {oop.billNo}
+                     </p>
+                  </div>
+                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(oop.OOPstatus)}`}>
+                     {oop.OOPstatus}
+                  </span>
+               </div>
+
+               <div className="flex flex-col space-y-1">
+                  <div className="text-sm text-gray-500">
+                     Date: {formatDate(oop.createdAt)}
+                  </div>
+                  <div className="text-sm font-medium">
+                     Amount: ₱{oop.totalAmount?.toFixed(2)}
+                  </div>
+               </div>
+
+               <div className="pt-3 flex flex-wrap gap-2">
+                  {renderActionButtons()}
+               </div>
+            </div>
+
+            {/* Modals */}
+            <OOPAffixEsignModal
+               oop={oop}
+               isOpen={isModalOpen}
+               onClose={() => setIsModalOpen(false)}
+            />
+
+            <ViewOOPModal
+               isOpen={isViewOOPModalOpen}
+               onClose={() => setIsViewOOPModalOpen(false)}
+               oop={oop}
+            />
+         </div>
+      );
+   }
+
+   // Desktop view remains the same
    return (
       <>
          <tr key={oop._id}>
             <td className="px-4 py-4 whitespace-nowrap">
-               {oop.applicationNumber || 'No application number'}
+               {oop.applicationNumber}
             </td>
             <td className="px-4 py-4 whitespace-nowrap">
                {oop.billNo}
             </td>
             <td className="px-4 py-4 whitespace-nowrap">
                {formatDate(oop.createdAt)}
+            </td>
+            <td className="px-4 py-4 whitespace-nowrap">
+               ₱{oop.totalAmount?.toFixed(2)}
             </td>
             <td className="px-4 py-4 whitespace-nowrap">
                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(oop.OOPstatus)}`}>

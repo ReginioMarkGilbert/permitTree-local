@@ -59,6 +59,16 @@ const mutationTypes = gql`
     generateCertificate(input: GenerateCertificateInput!): Certificate!
     forwardCertificateForSignature(id: ID!): Certificate!
     signCertificate(id: ID!, signature: String!): Certificate!
+
+    # GIS Mutations
+    addProtectedArea(input: ProtectedAreaInput!): GeoJSONCollection!
+
+    # Inspection mutations
+    createInspection(input: CreateInspectionInput!): Inspection!
+    updateInspection(id: ID!, input: UpdateInspectionInput!): Inspection!
+    recordInspectionFindings(id: ID!, findings: InspectionFindingsInput!): Inspection!
+    cancelInspection(id: ID!, reason: String!): Inspection!
+    rescheduleInspection(id: ID!, newDate: String!, newTime: String!): Inspection!
   }
 `;
 

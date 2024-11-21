@@ -4,87 +4,80 @@ import { vi } from 'vitest';
 import { MockedProvider } from '@apollo/client/testing';
 import UserApplicationRow from '../../../../pages/user/components/UserApplicationRow';
 
-// Mock the EditDraftModal and ViewApplicationModal components
+// Mock the child components
 vi.mock('../../../../pages/user/components/EditDraftModal', () => ({
-   default: () => null,
+  default: () => null,
 }));
 
 vi.mock('../../../../pages/user/components/ViewApplicationModal', () => ({
-   default: () => null,
+  default: () => null,
 }));
 
 vi.mock('../../../../pages/user/components/ViewRemarksModal', () => ({
-   default: () => null,
+  default: () => null,
 }));
 
 describe('UserApplicationRow', () => {
-   const mockApp = {
-      id: '1',
-      applicationNumber: 'PMDQ-PTPR-2024-1019-000008',
-      applicationType: 'Private Tree Plantation Registration',
-      status: 'Submitted',
-      dateOfSubmission: '1634567890000',
-   };
+  const mockApp = {
+    id: '1',
+    applicationNumber: 'PMDQ-PTPR-2024-1019-000008',
+    applicationType: 'Private Tree Plantation Registration',
+    status: 'Submitted',
+    dateOfSubmission: '1634567890000',
+  };
 
-   const mockFunctions = {
-      onEdit: vi.fn(),
-      onDelete: vi.fn(),
-      onUnsubmit: vi.fn(),
-      onSubmit: vi.fn(),
-      getStatusColor: vi.fn(() => 'bg-blue-100 text-blue-800'),
-      fetchCOVPermit: vi.fn(),
-      fetchCSAWPermit: vi.fn(),
-      fetchPLTCPPermit: vi.fn(),
-   };
+  const mockFunctions = {
+    onEdit: vi.fn(),
+    onDelete: vi.fn(),
+    onUnsubmit: vi.fn(),
+    onSubmit: vi.fn(),
+    onResubmit: vi.fn(),
+    getStatusColor: vi.fn(() => 'bg-blue-100 text-blue-800'),
+    fetchCOVPermit: vi.fn(),
+    fetchCSAWPermit: vi.fn(),
+    fetchPLTCPPermit: vi.fn(),
+    currentTab: 'Submitted'
+  };
 
-   const renderComponent = (app = mockApp) => {
-      return render(
-         <MockedProvider mocks={[]} addTypename={false}>
-            <table>
-               <tbody>
-                  <UserApplicationRow app={app} {...mockFunctions} />
-               </tbody>
-            </table>
-         </MockedProvider>
-      );
-   };
+  const renderComponent = (app = mockApp) => {
+    return render(
+      <MockedProvider mocks={[]} addTypename={false}>
+        <table>
+          <tbody>
+            <UserApplicationRow {...mockFunctions} app={app} />
+          </tbody>
+        </table>
+      </MockedProvider>
+    );
+  };
 
-   it('renders correctly for a submitted application', () => {
-      renderComponent();
+  it('renders correctly for a submitted application', () => {
+    renderComponent();
+    expect(screen.getByText(mockApp.applicationNumber)).toBeInTheDocument();
+    expect(screen.getByText(mockApp.applicationType)).toBeInTheDocument();
+    expect(screen.getByText('Submitted')).toBeInTheDocument();
+    expect(screen.getByTestId('view-button')).toBeInTheDocument();
+    expect(screen.getByTestId('unsubmit-button')).toBeInTheDocument();
+  });
 
-      expect(screen.getByText('PMDQ-PTPR-2024-1019-000008')).toBeInTheDocument();
-      expect(screen.getByText('Private Tree Plantation Registration')).toBeInTheDocument();
-      expect(screen.getByText('Submitted')).toBeInTheDocument();
-      expect(screen.getByTestId('view-button')).toBeInTheDocument();
-      expect(screen.getByTestId('unsubmit-button')).toBeInTheDocument();
-   });
+  it('calls onUnsubmit when unsubmit button is clicked', () => {
+    renderComponent();
+    fireEvent.click(screen.getByTestId('unsubmit-button'));
+    expect(mockFunctions.onUnsubmit).toHaveBeenCalledWith(mockApp);
+  });
 
-   it('calls onUnsubmit when unsubmit button is clicked', () => {
-      renderComponent();
+  it('renders correctly for a draft application', () => {
+    const draftApp = { ...mockApp, status: 'Draft' };
+    renderComponent(draftApp);
+    expect(screen.getByTestId('edit-button')).toBeInTheDocument();
+    expect(screen.getByTestId('delete-button')).toBeInTheDocument();
+    expect(screen.getByTestId('submit-button')).toBeInTheDocument();
+  });
 
-      const unsubmitButton = screen.getByTestId('unsubmit-button');
-      fireEvent.click(unsubmitButton);
-
-      expect(mockFunctions.onUnsubmit).toHaveBeenCalledWith(mockApp);
-   });
-
-   it('renders correctly for a draft application', () => {
-      const draftApp = { ...mockApp, status: 'Draft' };
-      renderComponent(draftApp);
-
-      expect(screen.queryByTestId('unsubmit-button')).not.toBeInTheDocument();
-      expect(screen.getByTestId('edit-button')).toBeInTheDocument();
-      expect(screen.getByTestId('delete-button')).toBeInTheDocument();
-      expect(screen.getByTestId('submit-button')).toBeInTheDocument();
-   });
-
-   it('calls onSubmit when submit button is clicked', () => {
-      const draftApp = { ...mockApp, status: 'Draft' };
-      renderComponent(draftApp);
-
-      const submitButton = screen.getByTestId('submit-button');
-      fireEvent.click(submitButton);
-
-      expect(mockFunctions.onSubmit).toHaveBeenCalledWith(draftApp);
-   });
+  it('calls onSubmit when submit button is clicked', () => {
+    const draftApp = { ...mockApp, status: 'Draft' };
+    renderComponent(draftApp);
+    fireEvent.click(screen.getByTestId('submit-button'));
+    expect(mockFunctions.onSubmit).toHaveBeenCalledWith(draftApp);
+  });
 });

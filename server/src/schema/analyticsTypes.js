@@ -28,6 +28,12 @@ const analyticsTypes = gql`
         statusData: [ApplicationTypeStats!]!
         processingTimeData: [ProcessingTimeSeries!]!
         successRateData: [SuccessRateStats!]!
+        weeklyVolume: [WeeklyVolumeData!]!
+    }
+
+    type WeeklyVolumeData {
+        day: String!
+        count: Int!
     }
 
     type RevenueStats {

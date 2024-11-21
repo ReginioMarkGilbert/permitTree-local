@@ -37,9 +37,9 @@ const oopResolvers = {
          return await OOP.find({ applicationId });
       },
 
-      getApplicationsAwaitingOOP: async () => {
-         return await Permit.find({ status: 'AwaitingOOP' });
-      },
+      // getApplicationsAwaitingOOP: async () => {
+      //    return await Permit.find({ status: 'AwaitingOOP' });
+      // },
 
       getOOPsByUserId: async (_, { userId, status }) => {
          try {
@@ -65,6 +65,24 @@ const oopResolvers = {
          } catch (error) {
             console.error('Error fetching user OOPs:', error);
             throw new Error('Failed to fetch user OOPs');
+         }
+      },
+
+      getRecentOOPs: async (_, { status, limit = 7 }) => {
+         try {
+            const query = {};
+            if (status) {
+               query.OOPstatus = status;
+            }
+
+            const oops = await OOP.find(query)
+               .sort({ createdAt: -1 })
+               .limit(limit);
+
+            return oops;
+         } catch (error) {
+            console.error('Error fetching recent OOPs:', error);
+            throw new Error('Failed to fetch recent OOPs');
          }
       }
    },

@@ -59,7 +59,7 @@ describe('RRC_RecordModal', () => {
             id: '1',
             currentStage: 'ChiefRPSReview',
             status: 'In Progress',
-            notes: 'Application recorded by receiving clerk',
+            notes: 'Application recorded by receiving clerk and forwarded to ChiefRPSReview',
             recordedByReceivingClerk: true
          }
       },
@@ -72,7 +72,7 @@ describe('RRC_RecordModal', () => {
                recordedByReceivingClerk: true,
                history: [
                   {
-                     notes: 'Application recorded by receiving clerk',
+                     notes: 'Application recorded by receiving clerk and forwarded to ChiefRPSReview',
                      timestamp: new Date().toISOString()
                   }
                ]
@@ -88,7 +88,7 @@ describe('RRC_RecordModal', () => {
             id: '1',
             currentStage: 'ChiefRPSReview',
             status: 'In Progress',
-            notes: 'Application recorded by receiving clerk',
+            notes: 'Application recorded by receiving clerk and forwarded to ChiefRPSReview',
             recordedByReceivingClerk: true
          }
       },

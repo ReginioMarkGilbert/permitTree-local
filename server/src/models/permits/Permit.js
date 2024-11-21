@@ -33,24 +33,24 @@ const PermitSchema = new mongoose.Schema({
 
          'TechnicalStaffReview',
          'ReturnedByTechnicalStaff',
-         'AuthenticityApprovedByTechnicalStaff',
 
-         'ReceivingClerkReview',
-         'ReturnedByReceivingClerk',
          'ForRecordByReceivingClerk',
 
-         'CENRPENRReview',
-         'ReturnedByPENRCENROfficer',
-
          'ChiefRPSReview',
-
-         'AwaitingOOP',
+         'CENRPENRReview',
 
          'ForInspectionByTechnicalStaff',
+         'AuthenticityApprovedByTechnicalStaff',
          'ApprovedByTechnicalStaff',
 
+         'InspectionReportForReviewByChief',
+         'InspectionReportForReviewByPENRCENROfficer',
+
          'PendingRelease',
-         'Released'
+         'Released',
+
+         'ReceivingClerkReview',
+         'ReturnedByReceivingClerk'
       ]
    },
    acceptedByTechnicalStaff: { type: Boolean, default: false },
@@ -67,6 +67,10 @@ const PermitSchema = new mongoose.Schema({
    awaitingOOP: { type: Boolean, default: false },
    OOPCreated: { type: Boolean, default: false }, // for Created OOP tab in Chief/PENRCENROfficer/Accountant Dashboards
 
+   hasInspectionReport: { type: Boolean, default: false },
+   InspectionReportsReviewedByChief: { type: Boolean, default: false },
+   InspectionReportsReviewedByPENRCENROfficer: { type: Boolean, default: false },
+
    awaitingPermitCreation: { type: Boolean, default: false },
    PermitCreated: { type: Boolean, default: false },
    history: [{
@@ -80,7 +84,7 @@ const PermitSchema = new mongoose.Schema({
       }
    }],
    dateOfSubmission: { type: Date, default: Date.now },
-   lastUpdated: { type: Date, default: Date.now }
+   lastUpdated: { type: Date, default: Date.now },
 }, { timestamps: true });
 
 // Add a pre-save hook to ensure history is always an array

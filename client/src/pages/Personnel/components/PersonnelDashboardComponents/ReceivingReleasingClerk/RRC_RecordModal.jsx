@@ -49,12 +49,11 @@ const RRC_RecordModal = ({ isOpen, onClose, application, onRecordComplete }) => 
                id: application.id,
                currentStage: nextStage,
                status: 'In Progress',
-               notes: 'Application recorded by receiving clerk',
+               notes: `Application recorded by receiving clerk and forwarded to ${nextStage}`,
                recordedByReceivingClerk: true
             }
          });
 
-         console.log('Result:', result);
          onRecordComplete();
          onClose();
          toast.success('Application recorded successfully');

@@ -53,7 +53,7 @@ const tcebpResolvers = {
             const technicalStaff = await Admin.findOne({ roles: 'Technical_Staff' });
             if (technicalStaff) {
                await PersonnelNotificationService.createApplicationPersonnelNotification({
-                  application: plainPermit,
+                  application: savedPermit,
                   recipientId: technicalStaff._id,
                   type: 'PENDING_TECHNICAL_REVIEW',
                   stage: 'TechnicalStaffReview',

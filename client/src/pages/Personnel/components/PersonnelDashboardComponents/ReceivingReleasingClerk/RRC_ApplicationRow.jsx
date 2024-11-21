@@ -18,19 +18,22 @@ const UPDATE_PERMIT_STAGE = gql`
     $currentStage: String!,
     $status: String!,
     $notes: String,
-    $recordedByReceivingClerk: Boolean
+    $recordedByReceivingClerk: Boolean,
+    $acceptedByPENRCENROfficer: Boolean
   ) {
     updatePermitStage(
       id: $id,
       currentStage: $currentStage,
       status: $status,
       notes: $notes,
-      recordedByReceivingClerk: $recordedByReceivingClerk
+      recordedByReceivingClerk: $recordedByReceivingClerk,
+      acceptedByPENRCENROfficer: $acceptedByPENRCENROfficer
     ) {
       id
       currentStage
       status
       recordedByReceivingClerk
+      acceptedByPENRCENROfficer
       history {
         notes
         timestamp
@@ -39,11 +42,25 @@ const UPDATE_PERMIT_STAGE = gql`
   }
 `;
 
-const RRC_ApplicationRow = ({ app, onRecordComplete, getStatusColor, currentTab }) => {
+const UNDO_RECORD_APPLICATION = gql`
+  mutation UndoRecordApplication($id: ID!, $approvedByPENRCENROfficer: Boolean) {
+    undoRecordApplication(id: $id, approvedByPENRCENROfficer: $approvedByPENRCENROfficer) {
+      id
+      acceptedByPENRCENROfficer
+      reviewedByChief
+      history {
+        notes
+        timestamp
+      }
+    }
+  }
+`;
+
+const RRC_ApplicationRow = ({ app, onRecordComplete, getStatusColor, currentTab, isMobile }) => {
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
    const [updatePermitStage] = useMutation(UPDATE_PERMIT_STAGE);
-
+   const [undoRecordApplication] = useMutation(UNDO_RECORD_APPLICATION);
    const handleViewClick = () => setIsViewModalOpen(true);
    const handleRecordClick = () => setIsRecordModalOpen(true);
 
@@ -54,24 +71,22 @@ const RRC_ApplicationRow = ({ app, onRecordComplete, getStatusColor, currentTab 
 
    const handleUndo = async () => {
       try {
-         let variables;
+         await undoRecordApplication({
+            variables: {
+               id: app.id
+            }
+         });
 
-         if (currentTab === 'Reviewed/Recorded Applications') {
-            variables = {
-               id: app.id,
-               currentStage: 'ForRecordByReceivingClerk',
-               status: 'In Progress',
-               notes: 'Record undone by Receiving Clerk',
-               recordedByReceivingClerk: false
-            };
-         }
-
-         await updatePermitStage({ variables });
          toast.success('Application status undone successfully');
          onRecordComplete();
       } catch (error) {
-         console.error('Error undoing application status:', error);
-         toast.error('Failed to undo application status');
+         if (error.message.includes('already accepted by PENR/CENR Officer')) {
+            toast.error('Cannot undo: Application already accepted by PENR/CENR Officer');
+         } else if (error.message.includes('already reviewed by Chief RPS/TSD')) {
+            toast.error('Cannot undo: Application already reviewed by Chief RPS/TSD');
+         } else {
+            toast.error('Failed to undo application status. Please try again later.');
+         }
       }
    };
 
@@ -148,6 +163,40 @@ const RRC_ApplicationRow = ({ app, onRecordComplete, getStatusColor, currentTab 
 
       return actions;
    };
+
+   if (isMobile) {
+      return (
+         <div className="bg-white p-4 rounded-lg shadow space-y-3">
+            <div className="flex justify-between items-start">
+               <div>
+                  <p className="font-medium text-gray-900">{app.applicationNumber}</p>
+                  <p className="text-sm text-gray-500">{app.applicationType}</p>
+               </div>
+               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(app.status)}`}>
+                  {app.status}
+               </span>
+            </div>
+            <div className="text-sm text-gray-500">
+               {new Date(app.dateOfSubmission).toLocaleDateString()}
+            </div>
+            <div className="flex flex-wrap gap-2">
+               {renderActions()}
+            </div>
+
+            <TS_ViewModal
+               isOpen={isViewModalOpen}
+               onClose={() => setIsViewModalOpen(false)}
+               application={app}
+            />
+            <RRC_RecordModal
+               isOpen={isRecordModalOpen}
+               onClose={() => setIsRecordModalOpen(false)}
+               application={app}
+               onRecordComplete={handleRecordComplete}
+            />
+         </div>
+      );
+   }
 
    return (
       <>

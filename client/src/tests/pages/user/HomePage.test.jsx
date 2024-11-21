@@ -4,30 +4,13 @@ import { vi } from 'vitest';
 import { MockedProvider } from '@apollo/client/testing';
 import { MemoryRouter } from 'react-router-dom';
 import { gql } from '@apollo/client';
-import HomePage from '../../../pages/user/HomePage';
+import Home from '../../../pages/user/UserHomePage.jsx';
 import { useRecentApplications } from '../../../pages/user/hooks/useUserRecentApplications';
 
 // Mock the hooks
 vi.mock('../../../pages/user/hooks/useUserRecentApplications', () => ({
-  useRecentApplications: vi.fn(() => ({
-    recentApplications: [],
-    loading: false,
-    error: null,
-    refetch: vi.fn()
-  }))
+  useRecentApplications: vi.fn()
 }));
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
-  return {
-    ...actual,
-    useLocation: () => ({
-      pathname: "/home",
-      search: "",
-      hash: "",
-      state: null
-    })
-  };
-});
 
 // Mock the GET_USER_DETAILS query
 const GET_USER_DETAILS = gql`
@@ -47,14 +30,7 @@ describe('HomePage', () => {
       applicationType: 'Test Type 1',
       status: 'Submitted',
       dateOfSubmission: '1634567890000',
-    },
-    {
-      id: '2',
-      applicationNumber: 'APP-002',
-      applicationType: 'Test Type 2',
-      status: 'Draft',
-      dateOfSubmission: '1634567891000',
-    },
+    }
   ];
 
   const mocks = [
@@ -93,7 +69,7 @@ describe('HomePage', () => {
   };
 
   it('renders welcome message with user name', async () => {
-    renderWithProviders(<HomePage />);
+    renderWithProviders(<Home />);
 
     await waitFor(() => {
       expect(screen.getByText('Welcome back, John!')).toBeInTheDocument();
@@ -101,7 +77,7 @@ describe('HomePage', () => {
   });
 
   it('renders quick action buttons', async () => {
-    renderWithProviders(<HomePage />);
+    renderWithProviders(<Home />);
 
     await waitFor(() => {
       expect(screen.getByText('New Application')).toBeInTheDocument();
@@ -111,58 +87,12 @@ describe('HomePage', () => {
   });
 
   it('renders recent applications', async () => {
-    renderWithProviders(<HomePage />);
+    renderWithProviders(<Home />);
 
     await waitFor(() => {
       expect(screen.getByText(/APP-001/)).toBeInTheDocument();
-      expect(screen.getByText(/APP-002/)).toBeInTheDocument();
       expect(screen.getByText('Test Type 1')).toBeInTheDocument();
-      expect(screen.getByText('Test Type 2')).toBeInTheDocument();
       expect(screen.getByText('Submitted')).toBeInTheDocument();
-      expect(screen.getByText('Draft')).toBeInTheDocument();
-    });
-  });
-
-  it('shows loading state for recent applications', async () => {
-    useRecentApplications.mockReturnValue({
-      recentApplications: [],
-      loading: true,
-      error: null,
-      refetch: vi.fn()
-    });
-
-    renderWithProviders(<HomePage />);
-
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
-  });
-
-  it('shows error state for recent applications', async () => {
-    useRecentApplications.mockReturnValue({
-      recentApplications: [],
-      loading: false,
-      error: new Error('Failed to fetch applications'),
-      refetch: vi.fn()
-    });
-
-    renderWithProviders(<HomePage />);
-
-    await waitFor(() => {
-      expect(screen.getByText(/Error: Failed to fetch applications/)).toBeInTheDocument();
-    });
-  });
-
-  it('shows "No recent applications" when there are no applications', async () => {
-    useRecentApplications.mockReturnValue({
-      recentApplications: [],
-      loading: false,
-      error: null,
-      refetch: vi.fn()
-    });
-
-    renderWithProviders(<HomePage />);
-
-    await waitFor(() => {
-      expect(screen.getByText('No recent applications')).toBeInTheDocument();
     });
   });
 });

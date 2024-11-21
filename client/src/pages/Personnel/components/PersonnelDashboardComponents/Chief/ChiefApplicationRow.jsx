@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 import TS_ViewModal from '../TechnicalStaff/TS_ViewModal';
 import ChiefReviewModal from './ChiefReviewModal';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 const DELETE_OOP = gql`
   mutation DeleteOOP($applicationId: String!) {
@@ -38,6 +39,7 @@ const UPDATE_PERMIT_STAGE = gql`
     $status: String!,
     $notes: String,
     $reviewedByChief: Boolean
+    $awaitingOOP: Boolean
   ) {
     updatePermitStage(
       id: $id,
@@ -45,11 +47,13 @@ const UPDATE_PERMIT_STAGE = gql`
       status: $status,
       notes: $notes,
       reviewedByChief: $reviewedByChief
+      awaitingOOP: $awaitingOOP
     ) {
       id
       currentStage
       status
       reviewedByChief
+      awaitingOOP
       history {
         notes
         timestamp
@@ -58,12 +62,13 @@ const UPDATE_PERMIT_STAGE = gql`
   }
 `;
 
-const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab }) => {
+const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, isMobile }) => {
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
    const [updatePermitStage] = useMutation(UPDATE_PERMIT_STAGE);
    const [undoOOPCreation] = useMutation(UNDO_OOP_CREATION);
    const [deleteOOP] = useMutation(DELETE_OOP);
+
    const handleViewClick = () => setIsViewModalOpen(true);
    const handleReviewClick = () => setIsReviewModalOpen(true);
 
@@ -72,21 +77,14 @@ const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab
       onReviewComplete();
    };
 
-   const handlePrint = () => {
-      // Implement print functionality
-      console.log('Print application:', app.id);
-   };
-
    const handleUndoOOP = async () => {
       try {
-         // First, delete the OOP document
          await deleteOOP({
             variables: {
-               applicationId: app.applicationNumber // Use applicationNumber here
+               applicationId: app.applicationNumber
             }
          });
 
-         // Then, update the permit status
          await undoOOPCreation({
             variables: {
                id: app.id
@@ -94,7 +92,7 @@ const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab
          });
 
          toast.success('OOP creation undone successfully');
-         onReviewComplete(); // Refresh the list
+         onReviewComplete();
       } catch (error) {
          console.error('Error undoing OOP creation:', error);
          toast.error('Failed to undo OOP creation');
@@ -110,7 +108,8 @@ const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab
                   currentStage: 'ChiefRPSReview',
                   status: 'In Progress',
                   notes: 'Review undone by Chief RPS/TSD',
-                  reviewedByChief: false
+                  reviewedByChief: false,
+                  awaitingOOP: false,
                }
             });
             toast.success('Application review undone successfully');
@@ -122,7 +121,7 @@ const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab
       }
    };
 
-   const renderActions = () => {
+   const renderActionButtons = () => {
       const actions = [];
 
       // View action
@@ -170,6 +169,8 @@ const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab
             </TooltipProvider>
          );
       }
+
+      // Undo OOP action
       if (currentTab === 'Created OOP') {
          actions.push(
             <TooltipProvider key="undo-oop-action">
@@ -190,9 +191,10 @@ const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab
                   </TooltipContent>
                </Tooltip>
             </TooltipProvider>
-         )
+         );
       }
-      // Undo action for completed reviews
+
+      // Undo review action
       if (currentTab === 'Completed Reviews') {
          actions.push(
             <TooltipProvider key="undo-action">
@@ -218,6 +220,46 @@ const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab
       return actions;
    };
 
+   if (isMobile) {
+      return (
+         <div className="bg-white/60 backdrop-blur-xl p-4 rounded-xl shadow-sm border border-gray-100 space-y-2">
+            <div className="flex justify-between items-start">
+               <div className="space-y-1">
+                  <h3 className="font-medium text-gray-900">
+                     {app.applicationNumber}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                     {app.applicationType}
+                  </p>
+               </div>
+               <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(app.status)}`}>
+                  {app.status}
+               </span>
+            </div>
+
+            <p className="text-sm text-gray-500">
+               {new Date(app.dateOfSubmission).toLocaleDateString()}
+            </p>
+
+            <div className="flex gap-2 pt-1">
+               {renderActionButtons()}
+            </div>
+
+            <TS_ViewModal
+               isOpen={isViewModalOpen}
+               onClose={() => setIsViewModalOpen(false)}
+               application={app}
+            />
+            <ChiefReviewModal
+               isOpen={isReviewModalOpen}
+               onClose={() => setIsReviewModalOpen(false)}
+               application={app}
+               onReviewComplete={handleReviewComplete}
+            />
+         </div>
+      );
+   }
+
    return (
       <>
          <tr className="border-b border-gray-200 transition-colors hover:bg-gray-50">
@@ -239,7 +281,7 @@ const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab
             </td>
             <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
                <div className="flex items-center space-x-2">
-                  {renderActions()}
+                  {renderActionButtons()}
                </div>
             </td>
          </tr>

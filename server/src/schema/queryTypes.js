@@ -44,12 +44,21 @@ const queryTypes = gql`
     ): [Permit!]!
 
     # Certificate queries
-    getCertificates(status: String): [Certificate!]!
+    getCertificates(certificateStatus: String): [Certificate!]!
     getCertificatesByApplicationId(applicationId: ID!): [Certificate!]!
 
     # Notification Queries
     getNotifications: [Notification!]!
     getUnreadNotifications: [Notification!]!
+
+    # GIS Query
+    getGISData: GISData!
+
+    # Inspection Queries
+    getInspections: [Inspection!]!
+    getInspectionById(id: ID!): Inspection
+    getInspectionsByPermit(permitId: ID!): [Inspection!]!
+    getPendingInspections: [Inspection!]!
   }
 `;
 
