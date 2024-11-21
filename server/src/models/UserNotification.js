@@ -52,7 +52,10 @@ const NotificationSchema = new mongoose.Schema({
          'PERMIT_RELEASED',
 
          'PAYMENT_PROOF_SUBMITTED',
-         'INSPECTION_SCHEDULED'
+         'INSPECTION_SCHEDULED',
+         'INSPECTION_CANCELLED',
+         'INSPECTION_RESCHEDULED',
+         'APPLICATION_INSPECTION_COMPLETE'
       ]
    },
    title: {

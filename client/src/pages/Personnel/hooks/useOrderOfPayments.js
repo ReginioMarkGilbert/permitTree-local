@@ -254,7 +254,7 @@ export const useOrderOfPayments = (userId = null) => {
       fetchPolicy: 'network-only'
    });
 
-   // Add query for all OOPs
+   // Query for all OOPs
    const {
       data: oopsData,
       loading: oopsLoading,

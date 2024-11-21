@@ -1,15 +1,34 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Calendar, FileCheck } from 'lucide-react';
+import { Calendar, FileCheck, Undo2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { gql, useMutation } from '@apollo/client';
+import { toast } from 'sonner';
+import { Input } from "@/components/ui/input";
 import {
    Tooltip,
    TooltipContent,
    TooltipProvider,
    TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+   AlertDialog,
+   AlertDialogAction,
+   AlertDialogCancel,
+   AlertDialogContent,
+   AlertDialogDescription,
+   AlertDialogFooter,
+   AlertDialogHeader,
+   AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import TS_ScheduleInspectionModal from './TS_ScheduleInspectionModal';
 import TS_InspectionReportModal from './TS_InspectionReportModal';
+
+const DELETE_INSPECTION = gql`
+   mutation DeleteInspection($id: ID!, $reason: String) {
+      deleteInspection(id: $id, reason: $reason)
+   }
+`;
 
 const InspectionApplicationRow = ({
    application,
@@ -21,6 +40,18 @@ const InspectionApplicationRow = ({
 }) => {
    const [showScheduleModal, setShowScheduleModal] = useState(false);
    const [showReportModal, setShowReportModal] = useState(false);
+   const [showUndoDialog, setShowUndoDialog] = useState(false);
+   const [cancellationReason, setCancellationReason] = useState('');
+
+   const [deleteInspection] = useMutation(DELETE_INSPECTION, {
+      onCompleted: () => {
+         toast.success('Inspection schedule cancelled successfully');
+         onRefetch();
+      },
+      onError: (error) => {
+         toast.error(`Error cancelling inspection: ${error.message}`);
+      }
+   });
 
    const handleSchedule = () => {
       setShowScheduleModal(true);
@@ -40,36 +71,73 @@ const InspectionApplicationRow = ({
       onRefetch();
    };
 
+   const handleUndo = () => {
+      setShowUndoDialog(true);
+   };
+
+   const handleUndoConfirm = async () => {
+      try {
+         await deleteInspection({
+            variables: {
+               id: inspection.id,
+               ...(cancellationReason.trim() && { reason: cancellationReason.trim() })
+            }
+         });
+         setShowUndoDialog(false);
+         setCancellationReason('');
+      } catch (error) {
+         console.error('Error deleting inspection:', error);
+      }
+   };
+
    const renderActionButtons = () => {
       const actions = [];
 
-      // Schedule/Reschedule action
-      actions.push(
-         <TooltipProvider key="schedule-action">
-            <Tooltip delayDuration={200}>
-               <TooltipTrigger asChild>
-                  <Button
-                     onClick={handleSchedule}
-                     variant="outline"
-                     size="icon"
-                     className="h-8 w-8"
-                     disabled={isScheduleDisabled(application.id)}
-                  >
-                     <Calendar className="h-4 w-4" />
-                  </Button>
-               </TooltipTrigger>
-               <TooltipContent>
-                  <p>
-                     {isScheduleDisabled(application.id)
-                        ? 'Inspection Scheduled'
-                        : inspection?.inspectionStatus === 'Completed'
-                           ? 'Reschedule Inspection'
-                           : 'Schedule Inspection'}
-                  </p>
-               </TooltipContent>
-            </Tooltip>
-         </TooltipProvider>
-      );
+      // Show Undo button if inspection exists and status is Pending
+      if (inspection && inspection.inspectionStatus === 'Pending') {
+         actions.push(
+            <TooltipProvider key="undo-action">
+               <Tooltip delayDuration={200}>
+                  <TooltipTrigger asChild>
+                     <Button
+                        onClick={handleUndo}
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 text-yellow-600 hover:text-yellow-800"
+                     >
+                        <Undo2 className="h-4 w-4" />
+                     </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                     <p>Cancel Schedule</p>
+                  </TooltipContent>
+               </Tooltip>
+            </TooltipProvider>
+         );
+      }
+
+      // Only show Schedule button if there's no inspection (For Schedule tab)
+      if (!inspection) {
+         actions.push(
+            <TooltipProvider key="schedule-action">
+               <Tooltip delayDuration={200}>
+                  <TooltipTrigger asChild>
+                     <Button
+                        onClick={handleSchedule}
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                     >
+                        <Calendar className="h-4 w-4" />
+                     </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                     <p>Schedule Inspection</p>
+                  </TooltipContent>
+               </Tooltip>
+            </TooltipProvider>
+         );
+      }
 
       // Complete inspection action
       if (inspection?.inspectionStatus === 'Pending') {
@@ -147,6 +215,39 @@ const InspectionApplicationRow = ({
                   onComplete={handleReportComplete}
                />
             )}
+
+            <AlertDialog open={showUndoDialog} onOpenChange={(open) => {
+               setShowUndoDialog(open);
+               if (!open) setCancellationReason('');
+            }}>
+               <AlertDialogContent>
+                  <AlertDialogHeader>
+                     <AlertDialogTitle>Cancel Inspection Schedule</AlertDialogTitle>
+                     <AlertDialogDescription>
+                        Are you sure you want to cancel this inspection schedule? This action cannot be undone.
+                     </AlertDialogDescription>
+                  </AlertDialogHeader>
+
+                  <div className="space-y-2 py-4">
+                     <label htmlFor="reason" className="text-sm font-medium text-gray-700">
+                        Reason for Cancellation
+                     </label>
+                     <Input
+                        id="reason"
+                        placeholder="Enter reason for cancellation"
+                        value={cancellationReason}
+                        onChange={(e) => setCancellationReason(e.target.value)}
+                     />
+                  </div>
+
+                  <AlertDialogFooter>
+                     <AlertDialogCancel>Cancel</AlertDialogCancel>
+                     <AlertDialogAction onClick={handleUndoConfirm}>
+                        Confirm
+                     </AlertDialogAction>
+                  </AlertDialogFooter>
+               </AlertDialogContent>
+            </AlertDialog>
          </>
       );
    }
@@ -200,6 +301,39 @@ const InspectionApplicationRow = ({
                onComplete={handleReportComplete}
             />
          )}
+
+         <AlertDialog open={showUndoDialog} onOpenChange={(open) => {
+            setShowUndoDialog(open);
+            if (!open) setCancellationReason('');
+         }}>
+            <AlertDialogContent>
+               <AlertDialogHeader>
+                  <AlertDialogTitle>Cancel Inspection Schedule</AlertDialogTitle>
+                  <AlertDialogDescription>
+                     Are you sure you want to cancel this inspection schedule? This action cannot be undone.
+                  </AlertDialogDescription>
+               </AlertDialogHeader>
+
+               <div className="space-y-2 py-4">
+                  <label htmlFor="reason" className="text-sm font-medium text-gray-700">
+                     Reason for Cancellation
+                  </label>
+                  <Input
+                     id="reason"
+                     placeholder="Enter reason for cancellation"
+                     value={cancellationReason}
+                     onChange={(e) => setCancellationReason(e.target.value)}
+                  />
+               </div>
+
+               <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleUndoConfirm}>
+                     Confirm
+                  </AlertDialogAction>
+               </AlertDialogFooter>
+            </AlertDialogContent>
+         </AlertDialog>
       </>
    );
 };

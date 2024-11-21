@@ -63,6 +63,14 @@ class NotificationService {
             title: 'Inspection Scheduled',
             message: `An inspection has been scheduled for your application ${application.applicationNumber}. ${remarks}`
          },
+         'INSPECTION_CANCELLED': {
+            title: 'Inspection Cancelled',
+            message: `The inspection for your application ${application.applicationNumber} has been cancelled. Reason: ${remarks}`
+         },
+         'INSPECTION_RESCHEDULED': {
+            title: 'Inspection Rescheduled',
+            message: `The inspection for your application ${application.applicationNumber} has been rescheduled. ${remarks}`
+         },
          'APPLICATION_INSPECTION_COMPLETE': {
             title: 'Inspection Completed',
             message: `Inspection for your application ${application.applicationNumber} has been completed. ${remarks}`

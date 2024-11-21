@@ -240,7 +240,7 @@ const inspectionResolvers = {
                   recipientId: permit.applicantId,
                   type: 'INSPECTION_CANCELLED',
                   stage: 'ForInspectionByTechnicalStaff',
-                  remarks: reason
+                  remarks: `The inspection for your application ${permit.applicationNumber} has been cancelled. ${reason}`
                });
             }
 
@@ -291,6 +291,37 @@ const inspectionResolvers = {
             return inspection;
          } catch (error) {
             throw new Error(`Failed to reschedule inspection: ${error.message}`);
+         }
+      },
+
+      deleteInspection: async (_, { id, reason = 'No reason provided' }, { user }) => {
+         try {
+            const inspection = await Inspection.findById(id);
+            if (!inspection) {
+               throw new Error('Inspection not found');
+            }
+
+            // Update permit's inspection schedule
+            const permit = await Permit.findById(inspection.permitId);
+            if (permit) {
+               permit.inspectionSchedule = undefined; // Remove the schedule
+               await permit.save();
+            }
+
+            // Notify applicant with the provided reason
+            await NotificationService.createApplicationNotification({
+               application: permit,
+               recipientId: permit.applicantId,
+               type: 'INSPECTION_CANCELLED',
+               stage: 'ForInspectionByTechnicalStaff',
+               remarks: reason // Use the default if no reason provided
+            });
+
+            await Inspection.findByIdAndDelete(id);
+            return true;
+         } catch (error) {
+            console.error('Error deleting inspection:', error);
+            throw new Error(`Failed to delete inspection: ${error.message}`);
          }
       }
    }

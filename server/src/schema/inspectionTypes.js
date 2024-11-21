@@ -77,6 +77,7 @@ const inspectionTypes = gql`
     recordInspectionFindings(id: ID!, findings: InspectionFindingsInput!): Inspection!
     cancelInspection(id: ID!, reason: String!): Inspection!
     rescheduleInspection(id: ID!, newDate: String!, newTime: String!): Inspection!
+    deleteInspection(id: ID!, reason: String): Boolean!
   }
 `;
 
