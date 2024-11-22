@@ -1,0 +1,37 @@
+.tabs-container {
+    width: 100%;
+}
+
+.tabs-list-container {
+    background-color: #e5e7eb;
+    /* Light gray background for the tab container */
+    display: flex;
+    justify-content: space-between;
+    border-radius: 8px;
+    /* Rounded corners for the tab container */
+    padding: 4px;
+}
+
+.tabs-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.875rem;
+    height: 27px;
+    padding: 0 10px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    background-color: transparent;
+}
+
+.tabs-trigger.active {
+    background-color: #10b981;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.tabs-content {
+    margin-top: 16px;
+}

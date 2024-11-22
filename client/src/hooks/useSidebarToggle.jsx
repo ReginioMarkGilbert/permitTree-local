@@ -1,15 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 
-export const useSidebarToggle = () => {
-    const [sidebarToggle, setSidebarToggle] = useState(false);
-    const location = useLocation();
+const useSidebarToggle = () => {
+   const [sidebarToggle, setSidebarToggle] = useState(false);
+   const location = useLocation();
 
-    useEffect(() => {
-        setSidebarToggle(false);
-    }, [location]);
+   //  useEffect(() => {
+   //      if (location.pathname === '/home') {
+   //          setSidebarToggle(true);
+   //      } else {
+   //          setSidebarToggle(false);
+   //      }
+   //  }, [location]);
 
-    const toggleSidebar = () => setSidebarToggle(!sidebarToggle);
+   const toggleSidebar = useCallback(() => {
+      setSidebarToggle(prev => !prev);
+   }, []);
 
-    return { sidebarToggle, toggleSidebar };
+   return { sidebarToggle, toggleSidebar };
 };
+
+export default useSidebarToggle;

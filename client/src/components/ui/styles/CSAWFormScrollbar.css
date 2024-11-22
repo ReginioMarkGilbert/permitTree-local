@@ -1,0 +1,91 @@
+.csaw-form-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #a0e4ce transparent;
+}
+
+.csaw-form-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.csaw-form-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.csaw-form-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(155, 155, 155, 0.7);
+    border-radius: 20px;
+    border: transparent;
+}
+
+.dropdown-width {
+    width: auto; /* Allow the width to adjust based on content */
+    min-width: 200px; /* Set a minimum width */
+    max-width: 300px; /* Set a maximum width to prevent it from being too wide */
+}
+
+.review-step-container {
+    max-height: calc(100% - 2rem); /* Subtract space for the heading */
+    overflow-y: auto;
+    padding-right: 16px; /* Add some padding to prevent content from touching the scrollbar */
+}
+
+.review-step-container.csaw-form-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #a0e4ce transparent;
+}
+
+.review-step-container.csaw-form-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.review-step-container.csaw-form-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.review-step-container.csaw-form-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(155, 155, 155, 0.7);
+    border-radius: 20px;
+    border: transparent;
+}
+
+@media (max-width: 640px) {
+    .card-footer-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .card-footer-buttons button {
+        margin-bottom: 0.5rem;
+    }
+}
+
+.upload-cards-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-right: 16px;
+}
+
+.upload-cards-container.csaw-form-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #a0e4ce transparent;
+}
+
+.upload-cards-container.csaw-form-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.upload-cards-container.csaw-form-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.upload-cards-container.csaw-form-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(155, 155, 155, 0.7);
+    border-radius: 20px;
+    border: transparent;
+}
+
+.step-3-container {
+    height: 600px; /* Match the height used in other steps */
+    display: flex;
+    flex-direction: column;
+}

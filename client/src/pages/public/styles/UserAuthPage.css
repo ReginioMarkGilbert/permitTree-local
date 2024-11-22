@@ -1,0 +1,45 @@
+.input-container {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.input-field {
+    width: 100%;
+    padding: 1rem 0.75rem 0.25rem 0.75rem;
+    /* Adjust padding to make space for the label */
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+    outline: none;
+    box-sizing: border-box;
+    /* Ensure padding is included in the width */
+}
+
+.input-label {
+    position: absolute;
+    top: -0.60rem;
+    left: 0.75rem;
+    padding: 0 0.25rem;
+    background: white;
+    font-weight: normal;
+    color: #666;
+    /* color: #aaa; */
+    font-size: 0.75rem;
+    transition: all 0.2s ease;
+    pointer-events: none;
+}
+
+.input-field:focus+.input-label,
+.input-field:not(:placeholder-shown)+.input-label {
+    top: -0.75rem;
+    left: 0.5rem;
+    color: #666;
+    font-size: 0.75rem;
+}
+
+button {
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #e6e6e6;
+}

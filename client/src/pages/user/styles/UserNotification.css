@@ -1,0 +1,19 @@
+.group {
+    position: relative;
+}
+
+.group:hover .group-hover\:block {
+    display: block;
+}
+
+.group-hover\:block {
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+    opacity: 0;
+    transform: translateY(-5px);
+    pointer-events: none;
+}
+
+.group:hover .group-hover\:block {
+    opacity: 1;
+    transform: translateY(0);
+}

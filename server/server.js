@@ -1,48 +1,97 @@
 const express = require('express');
+const { ApolloServer } = require('@apollo/server');
+const { expressMiddleware } = require('@apollo/server/express4');
+const { graphqlUploadExpress } = require('graphql-upload-minimal');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
 const cors = require('cors');
-const session = require('express-session');
-const passport = require('passport');
 require('dotenv').config();
-require('./config/passport');
+const jwt = require('jsonwebtoken');
+const User = require('./src/models/User');
+const Admin = require('./src/models/admin');
 
-const app = express();
+const { permitTypes } = require('./src/schema/permitTypes');
+const typeDefs = require('./src/schema');
+const resolvers = require('./src/resolvers');
 
-// Middleware
-app.use(bodyParser.json());
-app.use(cors());
+const startServer = async () => {
+   const app = express();
 
-// Session middleware
-app.use(session({
-    secret: process.env.SESSION_SECRET || 'default_session_secret',
-    resave: false,
-    saveUninitialized: true
-}));
+   // await mongoose.connect(process.env.MONGO_URI_NEW);
+   // console.log('MongoDB connected');
+   try {
+      await mongoose.connect(process.env.MONGO_URI_ONLINE, {
+         useNewUrlParser: true,
+         useUnifiedTopology: true,
+      });
+      console.log('MongoDB Atlas connected successfully');
+   } catch (error) {
+      console.error('MongoDB connection error:', error);
+      process.exit(1); // Exit process with failure
+   }
 
-// Passport middleware
-app.use(passport.initialize());
+   const server = new ApolloServer({
+      typeDefs,
+      resolvers,
+      context: async ({ req }) => {
+         const token = req.headers.authorization || '';
+         if (token) {
+            try {
+               const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
+               let user = await User.findById(decoded.id);
+               if (!user) {
+                  user = await Admin.findById(decoded.id);
+               }
+               if (user) {
+                  console.log('User found in context:', user.id, user.roles);
+                  return { user };
+               }
+            } catch (error) {
+               console.error('Error verifying token:', error);
+            }
+         }
+         console.log('No user in context');
+         return {};
+      },
+   });
 
-// MongoDB connection
-mongoose.connect('mongodb://localhost:27017/PermiTree-db')
-    .then(() => console.log('MongoDB connected...'))
-    .catch(err => console.log(err));
+   await server.start();
 
-// Routes
-const chainsawRoutes = require('./routes/chainsaw_Routes');
-app.use('/api', chainsawRoutes);
-// const adminRoutes = require('./routes/AdminRoutes/admin_routes');
-// const userProfileRoutes = require('./routes/userProfileRoutes');
-// app.use('/api', userProfileRoutes);
-const authRoutes = require('./routes/userAuthRoutes');
-app.use('/api', authRoutes);
-// const notificationRoutes = require('./routes/notificationRoutes');
-// app.use('/api', notificationRoutes);
-// const adminRoutes = require('./routes/AdminRoutes/admin_routes');
-// app.use('/api/admin', adminRoutes);
+   app.use(cors());
+   app.use(express.json({ limit: '50mb' }));
+   app.use(express.urlencoded({ limit: '50mb', extended: true }));
+   app.use(graphqlUploadExpress());
 
-// Start the server
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-});
+   app.use('/graphql', expressMiddleware(server, {
+      context: async ({ req }) => {
+         const token = req.headers.authorization || '';
+         if (token) {
+            try {
+               const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
+               let user = await User.findById(decoded.id);
+               if (!user) {
+                  user = await Admin.findById(decoded.id);
+               }
+               if (user) {
+                  console.log('User found in context:', user.id, user.roles);
+                  return { user };
+               }
+            } catch (error) {
+               console.error('Error verifying token:', error);
+            }
+         }
+         console.log('No user in context - server');
+         return {};
+      },
+   }));
+
+   // const PORT = process.env.PORT || 3001;
+   // const HOST = process.env.HOST || 'localhost';
+   // app.listen(PORT, HOST, () => {
+   //    console.log(`Server running on http://${HOST}:${PORT}/graphql`);
+   const PORT = process.env.PORT || 3001;
+   app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}/graphql`);
+   });
+};
+
+startServer();
