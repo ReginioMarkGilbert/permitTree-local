@@ -16,8 +16,18 @@ const resolvers = require('./src/resolvers');
 const startServer = async () => {
    const app = express();
 
-   await mongoose.connect(process.env.MONGO_URI_NEW);
-   console.log('MongoDB connected');
+   // await mongoose.connect(process.env.MONGO_URI_NEW);
+   // console.log('MongoDB connected');
+   try {
+      await mongoose.connect(process.env.MONGO_URI_ONLINE, {
+         useNewUrlParser: true,
+         useUnifiedTopology: true,
+      });
+      console.log('MongoDB Atlas connected successfully');
+   } catch (error) {
+      console.error('MongoDB connection error:', error);
+      process.exit(1); // Exit process with failure
+   }
 
    const server = new ApolloServer({
       typeDefs,
@@ -74,10 +84,13 @@ const startServer = async () => {
       },
    }));
 
+   // const PORT = process.env.PORT || 3001;
+   // const HOST = process.env.HOST || 'localhost';
+   // app.listen(PORT, HOST, () => {
+   //    console.log(`Server running on http://${HOST}:${PORT}/graphql`);
    const PORT = process.env.PORT || 3001;
-   const HOST = process.env.HOST || 'localhost';
-   app.listen(PORT, HOST, () => {
-      console.log(`Server running on http://${HOST}:${PORT}/graphql`);
+   app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}/graphql`);
    });
 };
 
