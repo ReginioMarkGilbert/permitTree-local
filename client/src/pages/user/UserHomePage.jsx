@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '../../components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Bell, ClipboardList, Users, Settings, TrendingUp, CheckCircle, XCircle, ClipboardCheck, RotateCcw, Info, AlertCircle, AlertTriangle } from "lucide-react";
 import { toast, ToastContainer } from 'react-toastify';
 import HomeFooter from '../../components/ui/HomeFooter';
