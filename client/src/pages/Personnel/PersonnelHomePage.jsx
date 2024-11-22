@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "../../components/ui/Button";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "../../components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Bell, ClipboardList, Users, Settings, TrendingUp, CheckCircle, XCircle, ClipboardCheck, RotateCcw, Info, AlertCircle, AlertTriangle } from "lucide-react";
 import { FaChartLine } from 'react-icons/fa';
 import '../../components/ui/styles/customScrollBar.css';
