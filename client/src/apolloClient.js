@@ -5,7 +5,7 @@ import { RetryLink } from "@apollo/client/link/retry";
 
 // const API_URL = 'http://172.20.10.2:3001/graphql' // local network
 // const API_URL = 'http://localhost:3001/graphql' // local
-const API_URL = 'https://permittree.vercel.app/graphql';
+const API_URL = 'https://permittree-backend.vercel.app/';
 
 const httpLink = createHttpLink({
    uri: API_URL,
