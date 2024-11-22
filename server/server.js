@@ -61,6 +61,10 @@ const startServer = async () => {
    app.use(express.urlencoded({ limit: '50mb', extended: true }));
    app.use(graphqlUploadExpress());
 
+   app.get('/', (req, res) => {
+      res.send('PermiTree API is running!');
+   });
+
    app.use('/graphql', expressMiddleware(server, {
       context: async ({ req }) => {
          const token = req.headers.authorization || '';
