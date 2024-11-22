@@ -58,15 +58,20 @@ const startServer = async () => {
 
    const corsOptions = {
       origin: [
-         'http://localhost:5174', // Alternative port
-         'https://permittree.vercel.app'
+         'http://localhost:5173',  // Default Vite port
+         'http://localhost:5174',  // Alternative port
+         'http://localhost:3000',  // Just in case
+         'https://permittree.vercel.app',
+         // Add any other allowed origins
       ],
       credentials: true,
-      methods: ['GET', 'POST', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'apollo-require-preflight'],
+      exposedHeaders: ['Access-Control-Allow-Origin']
    };
 
    app.use(cors(corsOptions));
+   app.options('*', cors(corsOptions));
    app.use(express.json({ limit: '50mb' }));
    app.use(express.urlencoded({ limit: '50mb', extended: true }));
    app.use(graphqlUploadExpress());

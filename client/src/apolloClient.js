@@ -12,6 +12,7 @@ const httpLink = createHttpLink({
    credentials: 'include',
    headers: {
       'Content-Type': 'application/json',
+      'apollo-require-preflight': 'true'
    }
 });
 
@@ -21,8 +22,8 @@ const authLink = setContext((_, { headers }) => {
       headers: {
          ...headers,
          authorization: token ? `Bearer ${token}` : "",
-      },
-      credentials: 'include'
+         'apollo-require-preflight': 'true'
+      }
    }
 });
 

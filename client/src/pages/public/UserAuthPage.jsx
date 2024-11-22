@@ -200,7 +200,7 @@ const UserAuthPage = () => {
         <div className="w-full max-w-[420px] p-6 sm:p-8 bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl">
           <div className="tabs-container w-full">
             <div
-              className="tabs-list-container bg-gray-100/80 p-1.5 rounded-xl flex justify-between mb-8"
+              className="tabs-list-container bg-gray-100/80 p-1 rounded-xl flex justify-between mb-8"
               role="tablist"
               aria-label="Authentication tabs"
             >
@@ -209,7 +209,7 @@ const UserAuthPage = () => {
                 aria-selected={activeTab === 'signin'}
                 aria-controls="signin-panel"
                 id="signin-tab"
-                className={`tabs-trigger py-2.5 px-6 transition-all duration-200 flex-1 rounded-lg text-sm sm:text-base font-medium
+                className={`tabs-trigger py-1 px-6 transition-all duration-200 flex-1 rounded-lg text-sm sm:text-base font-medium
                   ${activeTab === 'signin'
                     ? 'bg-white text-green-700 shadow-md'
                     : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'}`}
@@ -222,7 +222,7 @@ const UserAuthPage = () => {
                 aria-selected={activeTab === 'signup'}
                 aria-controls="signup-panel"
                 id="signup-tab"
-                className={`tabs-trigger py-2.5 px-6 transition-all duration-200 flex-1 rounded-lg text-sm sm:text-base font-medium
+                className={`tabs-trigger py-1 px-6 transition-all duration-200 flex-1 rounded-lg text-sm sm:text-base font-medium
                   ${activeTab === 'signup'
                     ? 'bg-white text-green-700 shadow-md'
                     : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'}`}
