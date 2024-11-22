@@ -57,13 +57,7 @@ const startServer = async () => {
 
 
    const corsOptions = {
-      origin: [
-         'http://localhost:5173',  // Default Vite port
-         'http://localhost:5174',  // Alternative port
-         'http://localhost:3000',  // Just in case
-         'https://permittree-backend.vercel.app',
-         // Add any other allowed origins
-      ],
+      origin: ['http://localhost:5174', 'https://permittree-backend.vercel.app'],
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'apollo-require-preflight'],
