@@ -57,7 +57,10 @@ const startServer = async () => {
    await server.start();
 
    const corsOptions = {
-      origin: ['http://localhost:5174', 'https://permittree.vercel.app'],
+      origin: [
+         'http://localhost:5174', // Alternative port
+         'https://permittree.vercel.app'
+      ],
       credentials: true,
       methods: ['GET', 'POST', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
