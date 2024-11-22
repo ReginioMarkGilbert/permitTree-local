@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from '@apollo/client';
+import { useQuery, useMutation, useApolloClient } from '@apollo/client';
 import { gql } from '@apollo/client';
 import { useEffect } from 'react';
 import { getUserRoles } from '../../../utils/auth';
@@ -236,6 +236,7 @@ export const GET_RECENT_OOPS = gql`
 `;
 
 export const useOrderOfPayments = (userId = null) => {
+   const client = useApolloClient();
    const userRoles = getUserRoles();
    const status = userRoles.includes('Accountant')
       ? "For Approval"

@@ -1,4 +1,4 @@
-import { gql, useQuery } from '@apollo/client';
+import { gql, useQuery, useApolloClient } from '@apollo/client';
 
 const GET_RECENT_APPLICATIONS = gql`
   query GetRecentApplications($limit: Int!) {
@@ -50,15 +50,16 @@ const GET_RECENT_APPLICATIONS = gql`
 `;
 
 export const useRecentApplications = (limit = 5) => {
-   const { data, loading, error, refetch } = useQuery(GET_RECENT_APPLICATIONS, {
-      variables: { limit: limit || 5 },
-      fetchPolicy: 'network-only'
-   });
+  const client = useApolloClient();
+  const { data, loading, error, refetch } = useQuery(GET_RECENT_APPLICATIONS, {
+    variables: { limit: limit || 5 },
+    fetchPolicy: 'network-only'
+  });
 
-   return {
-      recentApplications: data?.getRecentApplications || [],
-      loading,
-      error,
-      refetch
-   };
+  return {
+    recentApplications: data?.getRecentApplications || [],
+    loading,
+    error,
+    refetch
+  };
 };

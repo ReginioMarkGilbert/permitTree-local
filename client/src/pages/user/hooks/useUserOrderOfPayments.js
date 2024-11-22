@@ -1,4 +1,4 @@
-import { useQuery, gql } from '@apollo/client';
+import { useQuery, gql, useApolloClient } from '@apollo/client';
 
 const GET_USER_OOPS = gql`
   query GetOOPsByUserId($userId: ID!, $status: String) {
@@ -50,6 +50,7 @@ const GET_USER_OOPS = gql`
 `;
 
 export const useUserOrderOfPayments = (userId, status) => {
+   const client = useApolloClient();
    const { data, loading, error, refetch } = useQuery(GET_USER_OOPS, {
       variables: { userId, status },
       skip: !userId,

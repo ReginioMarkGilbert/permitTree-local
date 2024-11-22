@@ -7,7 +7,7 @@ import { FaLeaf, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { Input } from '../../components/ui/Input';
 import { Label } from '../../components/ui/Label';
 import './styles/UserAuthPage.css';
-import { gql, useMutation } from '@apollo/client';
+import { gql, useMutation, useApolloClient } from '@apollo/client';
 
 const REGISTER_USER = gql`
   mutation RegisterUser($firstName: String!, $lastName: String!, $username: String!, $password: String!) {
@@ -53,6 +53,7 @@ const UserAuthPage = () => {
   const navigate = useNavigate();
   const [registerUser] = useMutation(REGISTER_USER);
   const [loginUser] = useMutation(LOGIN_USER);
+  const client = useApolloClient();
 
   useEffect(() => {
     if (firstName && lastName) {
@@ -137,8 +138,14 @@ const UserAuthPage = () => {
       });
       if (data.login) {
         const { token, user } = data.login;
-        setToken(token);
+
+        // Set token in localStorage
+        localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
+
+        // Force Apollo Client to reset its store
+        await client.resetStore();
+
         toast.success('Login successful!');
 
         if (user.roles.includes('superadmin')) {

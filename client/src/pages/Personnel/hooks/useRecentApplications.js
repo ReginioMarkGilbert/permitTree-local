@@ -1,4 +1,4 @@
-import { gql, useQuery } from '@apollo/client';
+import { gql, useQuery, useApolloClient } from '@apollo/client';
 import { getUserRoles } from '../../../utils/auth';
 
 const GET_APPLICATIONS = gql`
@@ -83,6 +83,7 @@ const GET_APPLICATIONS = gql`
 `;
 
 export const useRecentApplications = (limit = 7) => {
+   const client = useApolloClient();
    const roles = getUserRoles();
 
    const getQueryParamsForRole = () => {

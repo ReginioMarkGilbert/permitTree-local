@@ -8,6 +8,7 @@ import { onError } from "@apollo/client/link/error";
 const API_URL = 'https://permittree.vercel.app/graphql' // online
 const httpLink = createHttpLink({
    uri: API_URL,
+   credentials: 'include'
 });
 
 const authLink = setContext((_, { headers }) => {
@@ -17,7 +18,8 @@ const authLink = setContext((_, { headers }) => {
       headers: {
          ...headers,
          authorization: token ? `Bearer ${token}` : "",
-      }
+      },
+      credentials: 'include'
    }
 });
 

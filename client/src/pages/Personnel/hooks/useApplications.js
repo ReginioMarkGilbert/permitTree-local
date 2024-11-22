@@ -1,4 +1,4 @@
-import { useQuery, useMutation, gql } from '@apollo/client';
+import { useQuery, useMutation, gql, useApolloClient } from '@apollo/client';
 
 const GET_APPLICATIONS = gql`
   query GetApplicationsByStatus(
@@ -112,6 +112,7 @@ const UNDO_APPROVAL = gql`
 `;
 
 export const useApplications = (params = {}) => {
+   const client = useApolloClient();
    const { data, loading, error, refetch } = useQuery(GET_APPLICATIONS, {
       variables: params,
       fetchPolicy: 'network-only'
