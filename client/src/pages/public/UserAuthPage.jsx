@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import 'react-toastify/dist/ReactToastify.css';
-import { setToken } from '@/utils/tokenManager';
+import { setToken } from '../../utils/tokenManager';
 import { FaLeaf, FaEye, FaEyeSlash } from 'react-icons/fa';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import '@/pages/public/styles/UserAuthPage.css';
+import { Input } from '@/components/ui/Input';
+import { Label } from '@/components/ui/Label';
+import './styles/UserAuthPage.css';
 import { gql, useMutation, useApolloClient } from '@apollo/client';
 
 const REGISTER_USER = gql`

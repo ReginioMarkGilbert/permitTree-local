@@ -12,7 +12,7 @@ import { format } from "date-fns";
 import { CalendarIcon, PlusIcon, MinusIcon, UploadIcon, ArrowLeft, X } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import "@/components/ui/styles/customScrollbar.css";
-import { useOrderOfPayments } from '@/hooks/useOrderOfPayments';
+import { useOrderOfPayments } from '../hooks/useOrderOfPayments';
 import { cn } from "@/lib/utils";
 import { ChevronDown } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';

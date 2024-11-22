@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { useMutation, gql } from '@apollo/client';
 import { toast } from 'sonner';
-import { GET_ALL_OOPS } from '@/hooks/useOrderOfPayments';
+import { GET_ALL_OOPS } from '../../../hooks/useOrderOfPayments';
 
 const APPROVE_OOP = gql`
   mutation ApproveOOP(

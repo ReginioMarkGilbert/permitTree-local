@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useMutation, gql } from '@apollo/client';
 import { toast } from 'sonner';
-import { UploadCard } from '@/pages/user/ApplicationForms/CSAWForm/CSAWFormUtils';
+import { UploadCard } from '../../../user/ApplicationForms/CSAWForm/CSAWFormUtils';
 
 const RECORD_INSPECTION_FINDINGS = gql`
   mutation RecordInspectionFindings($id: ID!, $findings: InspectionFindingsInput!) {

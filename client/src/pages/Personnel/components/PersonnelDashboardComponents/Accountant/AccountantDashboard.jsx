@@ -3,8 +3,8 @@
 import React, { useState, useMemo } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { Input } from '@/components/ui/input';
-import { useOrderOfPayments } from '@/hooks/useOrderOfPayments';
+import { Input } from "@/components/ui/input";
+import { useOrderOfPayments } from '../../../hooks/useOrderOfPayments';
 import AccountantOOPRow from './AccountantOOPRow';
 import AccountantApplicationRow from './AccountantApplicationRow';
 import AccountantFilters from './AccountantFilters';

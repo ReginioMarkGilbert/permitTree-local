@@ -37,7 +37,7 @@ const retryLink = new RetryLink({
       max: 5,
       retryIf: (error, _operation) => {
          return !(error.message?.includes('Failed to fetch') ||
-                 error.message?.includes('CORS'));
+            error.message?.includes('CORS'));
       },
    },
 });

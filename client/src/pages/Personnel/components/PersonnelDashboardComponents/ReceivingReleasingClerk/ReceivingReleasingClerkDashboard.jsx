@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import RRC_ApplicationRow from './RRC_ApplicationRow';
-import { useApplications } from '@/hooks/useApplications';
+import { useApplications } from '../../../hooks/useApplications';
 import ApplicationFilters from '@/components/DashboardFilters/ApplicationFilters';
 import { useTypewriter } from '@/hooks/useTypewriter';
 

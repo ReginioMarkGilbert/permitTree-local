@@ -2,8 +2,8 @@ import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { FaBell, FaClipboardList, FaFileAlt, FaHome, FaSignInAlt, FaUser, FaSignOutAlt } from 'react-icons/fa';
 import { NavLink, useNavigate } from 'react-router-dom';
 import permitTreeLogo from '@/assets/denr-logo.png';
-import { isAuthenticated } from '@/utils/auth';
-import { removeToken } from '@/utils/tokenManager';
+import { isAuthenticated } from '../../utils/auth';
+import { removeToken } from '../../utils/tokenManager';
 import { gql, useMutation } from '@apollo/client';
 import { X } from 'lucide-react';
 

@@ -81,6 +81,10 @@ const startServer = async () => {
       res.send('PermiTree API is running!');
    });
 
+   app.get('/favicon.ico', (req, res) => {
+      res.status(204).end(); // No content response
+   });
+
    app.use('/graphql', expressMiddleware(server, {
       context: async ({ req }) => {
          const token = req.headers.authorization || '';
