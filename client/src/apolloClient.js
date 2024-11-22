@@ -1,11 +1,12 @@
-import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
+import { ApolloClient, InMemoryCache, createHttpLink, from } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
-// import { createUploadLink } from 'apollo-upload-client';
 import { onError } from "@apollo/client/link/error";
+import { RetryLink } from "@apollo/client/link/retry";
 
 // const API_URL = 'http://172.20.10.2:3001/graphql' // local network
 // const API_URL = 'http://localhost:3001/graphql' // local
-const API_URL = 'https://permittree.vercel.app/graphql' // online
+const API_URL = 'https://permittree.vercel.app/graphql';
+
 const httpLink = createHttpLink({
    uri: API_URL,
    credentials: 'include'
@@ -13,7 +14,6 @@ const httpLink = createHttpLink({
 
 const authLink = setContext((_, { headers }) => {
    const token = localStorage.getItem('token');
-   // console.log('Token being sent:', token);
    return {
       headers: {
          ...headers,
@@ -23,45 +23,58 @@ const authLink = setContext((_, { headers }) => {
    }
 });
 
-const errorLink = onError(({ graphQLErrors, networkError }) => {
-   if (graphQLErrors)
-      graphQLErrors.forEach(({ message, locations, path }) =>
-         console.log(
-            `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
-         )
-      );
-   if (networkError) console.log(`[Network error]: ${networkError}`);
-});
-
-const client = new ApolloClient({
-   link: errorLink.concat(authLink.concat(httpLink)),
-   cache: new InMemoryCache(),
-   defaultOptions: {
-      watchQuery: {
-         fetchPolicy: 'cache-and-network',
+const retryLink = new RetryLink({
+   delay: {
+      initial: 300,
+      max: 3000,
+      jitter: true
+   },
+   attempts: {
+      max: 5,
+      retryIf: (error, _operation) => {
+         const doNotRetry = error?.message?.includes('Failed to fetch');
+         return !doNotRetry;
       },
    },
 });
 
-// Add this logging
-client.defaultOptions.watchQuery.onError = (error) => {
-   console.error('Apollo Client error:', error);
-};
+const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
+   if (graphQLErrors) {
+      graphQLErrors.forEach(({ message, locations, path }) => {
+         console.error(
+            `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+         );
+      });
+   }
+
+   if (networkError) {
+      console.error(`[Network error]: ${networkError}`);
+      // Handle token expiration
+      if (networkError.statusCode === 401) {
+         localStorage.removeItem('token');
+         window.location.href = '/auth';
+      }
+   }
+
+   return forward(operation);
+});
+
+const client = new ApolloClient({
+   link: from([retryLink, errorLink, authLink, httpLink]),
+   cache: new InMemoryCache(),
+   defaultOptions: {
+      watchQuery: {
+         fetchPolicy: 'network-only',
+         errorPolicy: 'all',
+      },
+      query: {
+         fetchPolicy: 'network-only',
+         errorPolicy: 'all',
+      },
+      mutate: {
+         errorPolicy: 'all',
+      },
+   },
+});
 
 export default client;
-// Function to handle file uploads
-// export const uploadFile = async (file) => {
-//   const formData = new FormData();
-//   formData.append('file', file);
-
-//   const response = await fetch('http://localhost:3000/upload', {
-//     method: 'POST',
-//     body: formData,
-//   });
-
-//   if (!response.ok) {
-//     throw new Error('File upload failed');
-//   }
-
-//   return response.json();
-// };
