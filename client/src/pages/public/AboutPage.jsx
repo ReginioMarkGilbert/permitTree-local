@@ -1,11 +1,11 @@
 import React from 'react';
 import { Leaf, Shield, TreePine, Eye, Target, Users, Recycle, FileText } from "lucide-react";
-import Header from '../../components/Header';
+import Header from '@/components/Header';
 import DENRHeader from './components/DENRHeader';
 import { Link } from 'react-router-dom';
 import { FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
 import { motion } from 'framer-motion';
-import { fadeIn, slideUp, staggerChildren } from '../../utils/animations';
+import { fadeIn, slideUp, staggerChildren } from '@/utils/animations';
 
 const AboutPage = () => {
     return (

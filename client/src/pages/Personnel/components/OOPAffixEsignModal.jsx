@@ -1,11 +1,11 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { format } from "date-fns";
 import { UploadIcon, X } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useOrderOfPayments } from '../hooks/useOrderOfPayments';
+import { useOrderOfPayments } from '@/hooks/useOrderOfPayments';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { gql, useMutation } from '@apollo/client';
 

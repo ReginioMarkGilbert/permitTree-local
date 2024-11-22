@@ -4,19 +4,19 @@
 // This Permit serves as proof of authorization for the removal/cutting and/or relocation of trees affected by projects of the National Government Agencies (DPWH, DOTR, DepEd, DA, DOH, CHED, DOE and NIA)
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '../../../../components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '../../../../components/ui/Input';
-import { Label } from '../../../../components/ui/Label';
-import { Textarea } from '../../../../components/ui/Textarea';
-import { RadioGroup, RadioGroupItem } from '../../../../components/ui/RadioGroup';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
-import Modal from '../../../../components/ui/Modal';
-import { UploadCard } from '../CSAWForm/CSAWFormUtils';
+import Modal from '@/components/ui/modal';
+import { UploadCard } from '@/pages/user/ApplicationForms/CSAWForm/CSAWFormUtils';
 import { gql, useMutation } from '@apollo/client';
-import { formatLabel, formatReviewValue } from '../CSAWForm/CSAWFormUtils';
-import '../../../../components/ui/styles/customScrollBar.css';
+import { formatLabel, formatReviewValue } from '@/pages/user/ApplicationForms/CSAWForm/CSAWFormUtils';
+import '@/components/ui/styles/customScrollBar.css';
 
 const CREATE_TCEBP_PERMIT = gql`
   mutation CreateTCEBPPermit($input: TCEBPPermitInput!) {

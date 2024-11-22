@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
-import { FileText } from 'lucide-react';
+// import { Button } from "@/components/ui/button";
+// import { FileText } from 'lucide-react';
 import OrderOfPaymentForm from './components/OrderOfPaymentForm';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 

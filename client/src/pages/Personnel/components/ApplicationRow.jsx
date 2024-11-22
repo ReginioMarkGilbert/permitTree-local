@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import { Eye, Printer, FileText, X } from 'lucide-react';
 
 const ApplicationRow = React.memo(({ app, onView, onPrint, onReview, onOrderOfPayment, onUndoStatus, getStatusColor }) => (

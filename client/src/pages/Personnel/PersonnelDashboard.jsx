@@ -6,7 +6,7 @@ import AccountantDashboard from './components/PersonnelDashboardComponents/Accou
 import BillCollectorDashboard from './components/PersonnelDashboardComponents/BillCollector/BillCollectorDashboard';
 import PENRCENROfficerDashboard from './components/PersonnelDashboardComponents/PENRCENROfficer/PENRCENROfficerDashboard';
 import InspectionTeamDashboard from './components/PersonnelDashboardComponents/InspectionTeamDashboard';
-import { getUserRoles } from '../../utils/auth';
+import { getUserRoles } from '@/utils/auth';
 
 const PersonnelDashboard = () => {
    const userRoles = getUserRoles();

@@ -1,9 +1,9 @@
 import React, { useCallback, useMemo } from 'react';
 import { FaChartLine, FaCog, FaHome, FaSignInAlt, FaTachometerAlt, FaUsers } from 'react-icons/fa';
 import { NavLink, useNavigate } from 'react-router-dom';
-import permitTreeLogo from '../../assets/denr-logo.png';
+import permitTreeLogo from '@/assets/denr-logo.png';
 import axios from 'axios';
-import { removeToken } from '../../utils/tokenManager';
+import { removeToken } from '@/utils/tokenManager';
 
 const SuperAdminSidebar = React.memo(({ isOpen }) => {
     const navigate = useNavigate();

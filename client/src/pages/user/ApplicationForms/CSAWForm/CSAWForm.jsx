@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from '../../../../components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '../../../../components/ui/Input';
-import { Label } from '../../../../components/ui/Label';
-import { RadioGroup, RadioGroupItem } from '../../../../components/ui/RadioGroup';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import Modal from '../../../../components/ui/Modal';
-// import '../../../../components/ui/styles/CSAWFormScrollbar.css';
-import '../../../../components/ui/styles/customScrollBar.css'
+import Modal from '@/components/ui/modal';
+// import '@/components/ui/styles/CSAWFormScrollbar.css';
+import '@/components/ui/styles/customScrollBar.css'
 import { CheckboxItem, UploadCard, CustomSelect, CustomDatePicker, formatLabel, formatReviewValue } from './CSAWFormUtils';
 import { gql, useMutation } from '@apollo/client';
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { vi } from 'vitest';
-import COVEditForm from '../../../../../pages/user/components/permitForms/COVEditForm';
+import COVEditForm from '@/pages/user/components/permitForms/COVEditForm';
 
 describe('COVEditForm', () => {
   const mockFormData = {

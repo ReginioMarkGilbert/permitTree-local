@@ -1,5 +1,5 @@
 import { gql, useQuery, useApolloClient } from '@apollo/client';
-import { getUserRoles } from '../../../utils/auth';
+import { getUserRoles } from '@/utils/auth';
 
 const GET_APPLICATIONS = gql`
   query GetApplicationsByStatus(

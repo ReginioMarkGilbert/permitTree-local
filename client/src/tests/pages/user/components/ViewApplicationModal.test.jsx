@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import ViewApplicationModal from '../../../../pages/user/components/ViewApplicationModal'
+import ViewApplicationModal from '@/pages/user/components/ViewApplicationModal'
 
 describe('ViewApplicationModal', () => {
    const mockApplication = {

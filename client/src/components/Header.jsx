@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaLeaf, FaBars, FaTimes } from 'react-icons/fa';
-import { Button } from '../components/ui/Button';
+import { Button } from '@/components/ui/button';
 
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);

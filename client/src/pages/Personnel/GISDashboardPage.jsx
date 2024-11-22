@@ -5,7 +5,7 @@ import { useQuery } from '@apollo/client';
 import { gql } from '@apollo/client';
 import { Skeleton } from "@/components/ui/skeleton";
 import ProtectedAreaForm from './components/ProtectedAreaForm';
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import ProtectedAreaList from './components/ProtectedAreaList';
 import { FaMapMarkedAlt, FaPlus } from 'react-icons/fa';
 

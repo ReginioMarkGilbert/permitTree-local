@@ -8,7 +8,7 @@ import {
    TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { format } from "date-fns";
-import OOPAffixEsignModal from '../../OOPAffixEsignModal';
+import OOPAffixEsignModal from '@/pages/user/components/OOPAffixEsignModal';
 import ViewOOPModal from '@/pages/user/components/ViewOOPModal';
 import { useMutation, gql, useQuery } from '@apollo/client';
 import { toast } from 'sonner';

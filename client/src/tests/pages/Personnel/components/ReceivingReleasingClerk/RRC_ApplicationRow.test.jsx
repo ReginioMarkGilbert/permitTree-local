@@ -2,11 +2,11 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MockedProvider } from '@apollo/client/testing';
 import { vi } from 'vitest';
-import RRC_ApplicationRow from '../../../../../pages/Personnel/components/PersonnelDashboardComponents/ReceivingReleasingClerk/RRC_ApplicationRow';
+import RRC_ApplicationRow from '@/pages/Personnel/components/PersonnelDashboardComponents/ReceivingReleasingClerk/RRC_ApplicationRow';
 import { gql } from '@apollo/client';
 
 // Mock the child components
-vi.mock('../../../../../pages/Personnel/components/PersonnelDashboardComponents/TechnicalStaff/TS_ViewModal', () => ({
+vi.mock('@/pages/Personnel/components/PersonnelDashboardComponents/TechnicalStaff/TS_ViewModal', () => ({
   default: ({ isOpen, onClose }) => isOpen ? (
     <tr>
       <td colSpan={5} data-testid="mock-view-modal">
@@ -17,7 +17,7 @@ vi.mock('../../../../../pages/Personnel/components/PersonnelDashboardComponents/
   ) : null
 }));
 
-vi.mock('../../../../../pages/Personnel/components/PersonnelDashboardComponents/ReceivingReleasingClerk/RRC_RecordModal', () => ({
+vi.mock('@/pages/Personnel/components/PersonnelDashboardComponents/ReceivingReleasingClerk/RRC_RecordModal', () => ({
   default: ({ isOpen, onClose }) => isOpen ? (
     <tr>
       <td colSpan={5} data-testid="mock-record-modal">

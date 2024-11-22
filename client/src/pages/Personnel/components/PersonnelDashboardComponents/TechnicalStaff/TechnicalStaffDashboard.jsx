@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import TS_ApplicationRow from './TS_ApplicationRow';
-import { useApplications } from '../../../hooks/useApplications';
+import { useApplications } from '@/hooks/useApplications';
 import { toast } from 'sonner';
 import { gql, useQuery } from '@apollo/client';
 import TS_CertificateRow from './TS_CertificateRow';
-import ApplicationFilters from '../../../../../components/DashboardFilters/ApplicationFilters';
+import ApplicationFilters from '@/components/DashboardFilters/ApplicationFilters';
 import { useTypewriter } from '@/hooks/useTypewriter';
 
 const GET_CERTIFICATES = gql`

@@ -9,9 +9,9 @@ import {
    TooltipProvider,
    TooltipTrigger,
 } from "@/components/ui/tooltip";
-import TS_ViewModal from '../TechnicalStaff/TS_ViewModal';
+import TS_ViewModal from '@/pages/Personnel/components/PersonnelDashboardComponents/TechnicalStaff/TS_ViewModal';
 import ChiefReviewModal from './ChiefReviewModal';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
+// import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 const DELETE_OOP = gql`
   mutation DeleteOOP($applicationId: String!) {

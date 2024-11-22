@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaTree, FaShieldAlt, FaFileAlt, FaMapMarkerAlt, FaTruck, FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
 import { motion } from 'framer-motion';
-import { Button } from '../../components/ui/Button';
-import Header from '../../components/Header';
+import { Button } from '@/components/ui/button';
+import Header from '@/components/Header';
 import DENRHeader from './components/DENRHeader';
-import ExpandableServiceCard from '../../components/ui/ExpandableServiceCard';
+import ExpandableServiceCard from '@/components/ui/ExpandableServiceCard';
 import './styles/LandingPage.css';
-import { fadeIn, slideUp, staggerChildren } from '../../utils/animations';
+import { fadeIn, slideUp, staggerChildren } from '@/utils/animations';
 
 const LandingPage = () => {
     const [expandedCard, setExpandedCard] = useState(null);

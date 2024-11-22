@@ -3,19 +3,19 @@
 // COV is a document to be presented when transporting planted trees within private lands not registered under the Private Tree Plantation Registration and/or non-premium trees, non-timber forest products (except rattan and bamboo)
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '../../../../components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '../../../../components/ui/Input';
-import { Label } from '../../../../components/ui/Label';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
-import Modal from '../../../../components/ui/Modal';
-import { UploadCard } from '../CSAWForm/CSAWFormUtils';
+import Modal from '@/components/ui/modal';
+import { UploadCard } from '@/pages/user/ApplicationForms/CSAWForm/CSAWFormUtils';
 import { gql, useMutation } from '@apollo/client';
-import { formatLabel, formatReviewValue } from '../CSAWForm/CSAWFormUtils';
-import '../../../../components/ui/styles/customScrollBar.css';  // Add this import
-import { Textarea } from '../../../../components/ui/Textarea';  // Add this import at the top of the file
+import { formatLabel, formatReviewValue } from '@/pages/user/ApplicationForms/CSAWForm/CSAWFormUtils';
+import '@/components/ui/styles/customScrollBar.css';  // Add this import
+import { Textarea } from '@/components/ui/textarea';  // Add this import at the top of the file
 
 const CREATE_COV_PERMIT = gql`
   mutation CreateCOVPermit($input: COVPermitInput!) {

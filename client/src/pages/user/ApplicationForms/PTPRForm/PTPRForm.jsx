@@ -4,18 +4,18 @@
 // is a process conducted separately from the inspection for PTPR per existing DENR policies, rules and regulations.
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '../../../../components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '../../../../components/ui/Input';
-import { Label } from '../../../../components/ui/Label';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
-import Modal from '../../../../components/ui/Modal';
-import { UploadCard } from '../CSAWForm/CSAWFormUtils';
+import Modal from '@/components/ui/modal';
+import { UploadCard } from '@/pages/user/ApplicationForms/CSAWForm/CSAWFormUtils';
 import { gql, useMutation } from '@apollo/client';
-import { formatLabel, formatReviewValue } from '../CSAWForm/CSAWFormUtils';
-import '../../../../components/ui/styles/customScrollBar.css';
+import { formatLabel, formatReviewValue } from '@/pages/user/ApplicationForms/CSAWForm/CSAWFormUtils';
+import '@/components/ui/styles/customScrollBar.css';
 
 const CREATE_PTPR_PERMIT = gql`
   mutation CreatePTPRPermit($input: PTPRPermitInput!) {

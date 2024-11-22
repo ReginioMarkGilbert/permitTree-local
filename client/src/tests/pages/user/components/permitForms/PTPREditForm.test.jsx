@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { vi } from 'vitest';
-import PTPREditForm from '../../../../../pages/user/components/permitForms/PTPREditForm';
+import PTPREditForm from '@/pages/user/components/permitForms/PTPREditForm';
 
 describe('PTPREditForm', () => {
   const mockFormData = {

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Card } from "@/components/ui/card";
+// import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { gql, useMutation } from '@apollo/client';
 import { toast } from 'sonner';
 import { FaTrash, FaEdit, FaMapMarkerAlt } from 'react-icons/fa';
-import ProtectedAreaForm from './ProtectedAreaForm';
+// import ProtectedAreaForm from './ProtectedAreaForm';
 
 const DELETE_PROTECTED_AREA = gql`
   mutation DeleteProtectedArea($id: ID!) {

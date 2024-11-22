@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from "../../components/ui/Button";
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Bell, ClipboardList, Users, Settings, TrendingUp, CheckCircle, XCircle, ClipboardCheck, RotateCcw, Info, AlertCircle, AlertTriangle } from "lucide-react";
 import { FaChartLine } from 'react-icons/fa';
-import '../../components/ui/styles/customScrollBar.css';
-import useDebounce from '../../hooks/useDebounce';
-import { getUserRoles } from '../../utils/auth';
+import '@/components/ui/styles/customScrollBar.css';
+import useDebounce from '@/hooks/useDebounce';
+import { getUserRoles } from '@/utils/auth';
 import { usePersonnelNotifications } from './hooks/usePersonnelNotifications';
 import { useRecentApplications } from './hooks/useRecentApplications';
 import { useOrderOfPayments } from './hooks/useOrderOfPayments';

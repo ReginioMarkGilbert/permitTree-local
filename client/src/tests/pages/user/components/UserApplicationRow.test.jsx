@@ -2,18 +2,18 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
 import { MockedProvider } from '@apollo/client/testing';
-import UserApplicationRow from '../../../../pages/user/components/UserApplicationRow';
+import UserApplicationRow from '@/pages/user/components/UserApplicationRow';
 
 // Mock the child components
-vi.mock('../../../../pages/user/components/EditDraftModal', () => ({
+vi.mock('@/pages/user/components/EditDraftModal', () => ({
   default: () => null,
 }));
 
-vi.mock('../../../../pages/user/components/ViewApplicationModal', () => ({
+vi.mock('@/pages/user/components/ViewApplicationModal', () => ({
   default: () => null,
 }));
 
-vi.mock('../../../../pages/user/components/ViewRemarksModal', () => ({
+vi.mock('@/pages/user/components/ViewRemarksModal', () => ({
   default: () => null,
 }));
 

@@ -10,12 +10,12 @@ import {
    TooltipProvider,
    TooltipTrigger,
 } from "@/components/ui/tooltip";
-import TS_ViewModal from '../TechnicalStaff/TS_ViewModal';
+import TS_ViewModal from '@/pages/Personnel/components/PersonnelDashboardComponents/TechnicalStaff/TS_ViewModal';
 import PCOAppReviewModal from './PCOAppReviewModal';
 // import GenerateCertificateModal from './GenerateCertificateModal';
 // import CertificateActionHandler from './CertificateActionHandler';
-import { getUserRoles } from '../../../../../utils/auth';
-import { useUndoApplicationApproval } from '../../../hooks/useApplications';
+import { getUserRoles } from '@/utils/auth';
+// import { useUndoApplicationApproval } from '../../../hooks/useApplications';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { gql, useMutation } from '@apollo/client';

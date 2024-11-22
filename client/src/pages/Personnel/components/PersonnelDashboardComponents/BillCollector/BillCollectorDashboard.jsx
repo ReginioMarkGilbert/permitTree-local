@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import BillCollectorOOPRow from './BC_OOPRow';
 import { gql, useQuery } from '@apollo/client';
-import OOPFilters from '../../../../../components/DashboardFilters/OOPFilters';
+import OOPFilters from '@/components/DashboardFilters/OOPFilters';
 import { useTypewriter } from '@/hooks/useTypewriter';
 
 const GET_OOPS = gql`
