@@ -1,27 +1,28 @@
-import path from "path";
-import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
-// https://vitejs.dev/config/
 export default defineConfig({
-   plugins: [react()],
-   resolve: {
-      alias: {
-         "@": path.resolve(__dirname, "./src"),
-      },
-   },
-   server: {
-      port: 5174,
-   },
-   optimizeDeps: {
-      include: ['react-hook-form'],
-   },
-   test: {
-      globals: true,
-      environment: 'jsdom',
-      setupFiles: './src/tests/setup.js',
-      include: [
-         'src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
-      ],
-   }
-});
+  plugins: [react()],
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          apollo: ['@apollo/client']
+        }
+      }
+    }
+  },
+  server: {
+    port: 5174,
+    proxy: {
+      '/graphql': {
+        target: 'https://permittree.vercel.app',
+        changeOrigin: true,
+        secure: false
+      }
+    }
+  }
+})
