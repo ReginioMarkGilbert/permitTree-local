@@ -56,12 +56,13 @@ const startServer = async () => {
 
    await server.start();
 
+
    const corsOptions = {
       origin: [
          'http://localhost:5173',  // Default Vite port
          'http://localhost:5174',  // Alternative port
          'http://localhost:3000',  // Just in case
-         'https://permittree-backend.vercel.app/',
+         'https://permittree.vercel.app',
          // Add any other allowed origins
       ],
       credentials: true,
