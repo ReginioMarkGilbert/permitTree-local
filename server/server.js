@@ -15,7 +15,6 @@ const resolvers = require('./src/resolvers');
 
 const startServer = async () => {
    const app = express();
-
    // await mongoose.connect(process.env.MONGO_URI_NEW);
    // console.log('MongoDB connected');
    try {
