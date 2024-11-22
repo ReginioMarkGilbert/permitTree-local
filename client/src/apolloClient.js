@@ -9,7 +9,10 @@ const API_URL = 'https://permittree.vercel.app/graphql';
 
 const httpLink = createHttpLink({
    uri: API_URL,
-   credentials: 'include'
+   credentials: 'include',
+   headers: {
+      'Content-Type': 'application/json',
+   }
 });
 
 const authLink = setContext((_, { headers }) => {
@@ -32,8 +35,8 @@ const retryLink = new RetryLink({
    attempts: {
       max: 5,
       retryIf: (error, _operation) => {
-         const doNotRetry = error?.message?.includes('Failed to fetch');
-         return !doNotRetry;
+         return !(error.message?.includes('Failed to fetch') ||
+                 error.message?.includes('CORS'));
       },
    },
 });
@@ -49,7 +52,6 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
 
    if (networkError) {
       console.error(`[Network error]: ${networkError}`);
-      // Handle token expiration
       if (networkError.statusCode === 401) {
          localStorage.removeItem('token');
          window.location.href = '/auth';
