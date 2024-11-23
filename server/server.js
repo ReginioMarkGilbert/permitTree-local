@@ -15,8 +15,7 @@ const resolvers = require('./src/resolvers');
 
 const startServer = async () => {
    const app = express();
-   // await mongoose.connect(process.env.MONGO_URI_NEW);
-   // console.log('MongoDB connected');
+
    try {
       await mongoose.connect(process.env.MONGO_URI_ONLINE, {
          useNewUrlParser: true,
@@ -55,20 +54,20 @@ const startServer = async () => {
 
    await server.start();
 
-
    const corsOptions = {
       origin: [
          'http://localhost:5174',
          'https://permittree-dev.vercel.app',
          // 'https://permittree-frontend.vercel.app',
-         'https://permittree-backend.vercel.app'
+         'https://permittree-backend.vercel.app',
       ],
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'apollo-require-preflight'],
-      exposedHeaders: ['Access-Control-Allow-Origin']
+      exposedHeaders: ['Access-Control-Allow-Origin'],
    };
 
+   // Apply CORS middleware before any other middleware
    app.use(cors(corsOptions));
    app.options('*', cors(corsOptions));
    app.use(express.json({ limit: '50mb' }));
@@ -83,33 +82,8 @@ const startServer = async () => {
       res.status(204).end(); // No content response
    });
 
-   app.use('/graphql', expressMiddleware(server, {
-      context: async ({ req }) => {
-         const token = req.headers.authorization || '';
-         if (token) {
-            try {
-               const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
-               let user = await User.findById(decoded.id);
-               if (!user) {
-                  user = await Admin.findById(decoded.id);
-               }
-               if (user) {
-                  console.log('User found in context:', user.id, user.roles);
-                  return { user };
-               }
-            } catch (error) {
-               console.error('Error verifying token:', error);
-            }
-         }
-         console.log('No user in context - server');
-         return {};
-      },
-   }));
+   app.use('/graphql', expressMiddleware(server));
 
-   // const PORT = process.env.PORT || 3001;
-   // const HOST = process.env.HOST || 'localhost';
-   // app.listen(PORT, HOST, () => {
-   //    console.log(`Server running on http://${HOST}:${PORT}/graphql`);
    const PORT = process.env.PORT || 3001;
    app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}/graphql`);
