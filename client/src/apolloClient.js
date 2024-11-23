@@ -14,7 +14,7 @@ const httpLink = createHttpLink({
    uri: API_URL,
    credentials: 'include',
    headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
    }
 });
 
@@ -24,8 +24,8 @@ const authLink = setContext((_, { headers }) => {
       headers: {
          ...headers,
          authorization: token ? `Bearer ${token}` : "",
-         'apollo-require-preflight': 'true'
-      }
+      },
+      credentials: 'include'
    }
 });
 
@@ -70,8 +70,7 @@ const client = new ApolloClient({
    defaultOptions: {
       watchQuery: {
          fetchPolicy: 'network-only',
-         nextFetchPolicy: 'cache-first',
-         notifyOnNetworkStatusChange: true,
+         errorPolicy: 'all',
       },
       query: {
          fetchPolicy: 'network-only',
