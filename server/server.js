@@ -57,7 +57,10 @@ const startServer = async () => {
 
 
    const corsOptions = {
-      origin: ['http://localhost:5174', 'https://permittree-backend.vercel.app', 'https://permittree-backend-mark-gilbert-reginios-projects.vercel.app'],
+      origin: [
+         'http://localhost:5174',
+         'https://permittree-backend.vercel.app'
+      ],
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'apollo-require-preflight'],
@@ -105,10 +108,10 @@ const startServer = async () => {
    // const HOST = process.env.HOST || 'localhost';
    // app.listen(PORT, HOST, () => {
    //    console.log(`Server running on http://${HOST}:${PORT}/graphql`);
-   // const PORT = process.env.PORT || 3001;
-   // app.listen(PORT, () => {
-   //    console.log(`Server running on http://localhost:${PORT}/graphql`);
-   // });
+   const PORT = process.env.PORT || 3001;
+   app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}/graphql`);
+   });
 };
 
 startServer();
