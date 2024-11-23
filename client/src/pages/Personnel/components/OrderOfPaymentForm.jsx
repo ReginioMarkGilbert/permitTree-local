@@ -11,7 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { CalendarIcon, PlusIcon, MinusIcon, UploadIcon, ArrowLeft, X } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import "@/components/ui/styles/customScrollbar.css";
+import "@/components/ui/styles/customScrollBar.css";
 import { useOrderOfPayments } from '../hooks/useOrderOfPayments';
 import { cn } from "@/lib/utils";
 import { ChevronDown } from 'lucide-react';

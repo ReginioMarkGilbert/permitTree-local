@@ -7,7 +7,7 @@ import PLTCPEditForm from './permitForms/PLTCPEditForm';
 import PTPREditForm from './permitForms/PTPREditForm';
 import PLTPEditForm from './permitForms/PLTPEditForm';
 import TCEBPEditForm from './permitForms/TCEBPEditForm';
-import '@/components/ui/styles/customScrollbar.css';
+import '@/components/ui/styles/customScrollBar.css';
 import { useUserApplications } from '@/pages/user/hooks/useUserApplications';
 
 // Utility function to safely format date
