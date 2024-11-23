@@ -1,13 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery, gql } from '@apollo/client';
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import { RefreshCw, FileX, Calendar, FileCheck } from 'lucide-react';
 import { format } from 'date-fns';
 import InspectionApplicationRow from './components/InspectionDashboardComponents/InspectionApplicationRow';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ApplicationFilters from '@/components/DashboardFilters/ApplicationFilters';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+// import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useTypewriter } from '@/hooks/useTypewriter';
 
 const GET_APPLICATIONS_AND_INSPECTIONS = gql`

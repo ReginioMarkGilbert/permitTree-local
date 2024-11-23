@@ -7,8 +7,8 @@ import ChiefApplicationRow from './ChiefApplicationRow';
 import ChiefOOPRow from './ChiefOOPRow';
 import { useApplications } from '../../../hooks/useApplications';
 import { useOrderOfPayments } from '../../../hooks/useOrderOfPayments';
-import ApplicationFilters from '../../../../../components/DashboardFilters/ApplicationFilters';
-import OOPFilters from '../../../../../components/DashboardFilters/OOPFilters';
+import ApplicationFilters from '@/components/DashboardFilters/ApplicationFilters';
+import OOPFilters from '@/components/DashboardFilters/OOPFilters';
 import { useTypewriter } from '../../../../../hooks/useTypewriter';
 
 const ChiefDashboard = () => {

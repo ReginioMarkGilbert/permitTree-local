@@ -1,6 +1,6 @@
 import React from 'react';
 import { Eye, Edit, Trash2 } from 'lucide-react';
-import '../../../components/ui/styles/customScrollBar.css';
+import '@/components/ui/styles/customScrollBar.css';
 
 const UserTable = ({ users, onViewUser, onEditUser, onDeleteUser }) => {
    const getUserTypeColor = (userType) => {

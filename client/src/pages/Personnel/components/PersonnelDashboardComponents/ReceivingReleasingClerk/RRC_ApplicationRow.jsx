@@ -7,7 +7,7 @@ import {
    TooltipProvider,
    TooltipTrigger,
 } from "@/components/ui/tooltip";
-import TS_ViewModal from '../TechnicalStaff/TS_ViewModal';
+import TS_ViewModal from '@/pages/Personnel/components/PersonnelDashboardComponents/TechnicalStaff/TS_ViewModal';
 import RRC_RecordModal from './RRC_RecordModal';
 import { gql, useMutation } from '@apollo/client';
 import { toast } from 'sonner';

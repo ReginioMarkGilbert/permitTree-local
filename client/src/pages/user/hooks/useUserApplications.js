@@ -1,4 +1,4 @@
-import { useQuery, useMutation, gql, useLazyQuery } from '@apollo/client';
+import { useQuery, useMutation, gql, useLazyQuery, useApolloClient } from '@apollo/client';
 
 const GET_USER_APPLICATIONS = gql`
   query GetUserApplications($status: String, $currentStage: String) {
@@ -492,6 +492,7 @@ const RESUBMIT_PERMIT = gql`
 `;
 
 export const useUserApplications = (status, currentStage) => {
+   const client = useApolloClient();
    const { loading, error, data, refetch } = useQuery(GET_USER_APPLICATIONS, {
       variables: { status, currentStage },
       fetchPolicy: 'network-only',

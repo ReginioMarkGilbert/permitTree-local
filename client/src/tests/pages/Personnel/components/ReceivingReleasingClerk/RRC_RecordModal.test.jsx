@@ -4,7 +4,7 @@ import { MockedProvider } from '@apollo/client/testing';
 import { vi } from 'vitest';
 import { toast } from 'sonner';
 import { gql } from '@apollo/client';
-import RRC_RecordModal from '../../../../../pages/Personnel/components/PersonnelDashboardComponents/ReceivingReleasingClerk/RRC_RecordModal';
+import RRC_RecordModal from '@/pages/Personnel/components/PersonnelDashboardComponents/ReceivingReleasingClerk/RRC_RecordModal';
 
 vi.mock('sonner', () => ({
    toast: {

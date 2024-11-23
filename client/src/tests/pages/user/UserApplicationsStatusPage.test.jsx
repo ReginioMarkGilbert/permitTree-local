@@ -1,16 +1,16 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { MockedProvider } from '@apollo/client/testing';
-import UserApplicationsStatusPage from '../../../pages/user/UserApplicationsStatusPage';
+import UserApplicationsStatusPage from '@/pages/user/UserApplicationsStatusPage';
 import { vi } from 'vitest';
 import { toast } from 'sonner';
 import { MemoryRouter } from 'react-router-dom';
-import { useUserApplications } from '../../../pages/user/hooks/useUserApplications';
-import { useUserOrderOfPayments } from '../../../pages/user/hooks/useUserOrderOfPayments';
+import { useUserApplications } from '@/pages/user/hooks/useUserApplications';
+import { useUserOrderOfPayments } from '@/pages/user/hooks/useUserOrderOfPayments';
 
 // Mock the hooks
-vi.mock('../../../pages/user/hooks/useUserApplications');
-vi.mock('../../../pages/user/hooks/useUserOrderOfPayments');
+vi.mock('@/pages/user/hooks/useUserApplications');
+vi.mock('@/pages/user/hooks/useUserOrderOfPayments');
 vi.mock('sonner');
 
 const mockApplications = [

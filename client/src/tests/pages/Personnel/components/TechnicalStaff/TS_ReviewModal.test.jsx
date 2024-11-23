@@ -4,7 +4,7 @@ import { MockedProvider } from '@apollo/client/testing';
 import { vi } from 'vitest';
 import { toast } from 'sonner';
 import { gql } from '@apollo/client';
-import TS_ReviewModal from '../../../../../pages/Personnel/components/PersonnelDashboardComponents/TechnicalStaff/TS_ReviewModal';
+import TS_ReviewModal from '@/pages/Personnel/components/PersonnelDashboardComponents/TechnicalStaff/TS_ReviewModal';
 
 // Mock the toast function
 vi.mock('sonner', () => ({

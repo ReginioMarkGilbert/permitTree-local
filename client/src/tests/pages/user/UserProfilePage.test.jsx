@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MockedProvider } from '@apollo/client/testing';
 import { gql } from '@apollo/client';
-import UserProfilePage from '../../../pages/user/UserProfilePage';
+import UserProfilePage from '@/pages/user/UserProfilePage';
 import { vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 

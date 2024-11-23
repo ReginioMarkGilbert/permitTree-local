@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { isAuthenticated, getUserRoles } from '../utils/auth';
+import { isAuthenticated, getUserRoles } from '@/utils/auth';
 import ErrorPage from './errorPage';
 
 const ProtectedRoute = ({ children, roles }) => {

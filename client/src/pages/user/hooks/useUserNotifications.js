@@ -1,4 +1,4 @@
-import { useQuery, useMutation, gql } from '@apollo/client';
+import { useQuery, useMutation, gql, useApolloClient } from '@apollo/client';
 
 // Queries
 export const GET_NOTIFICATIONS = gql`
@@ -78,6 +78,7 @@ export const MARK_ALL_NOTIFICATIONS_AS_READ = gql`
 `;
 
 export const useUserNotifications = () => {
+   const client = useApolloClient();
    const { data: allData, loading: allLoading, error: allError, refetch: refetchAll } = useQuery(GET_NOTIFICATIONS, {
       onError: (error) => {
          console.error('Error fetching notifications:', error);

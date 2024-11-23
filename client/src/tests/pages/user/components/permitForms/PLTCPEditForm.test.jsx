@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { vi } from 'vitest';
-import PLTCPEditForm from '../../../../../pages/user/components/permitForms/PLTCPEditForm';
+import PLTCPEditForm from '@/pages/user/components/permitForms/PLTCPEditForm';
 
 describe('PLTCPEditForm', () => {
    const mockFormData = {

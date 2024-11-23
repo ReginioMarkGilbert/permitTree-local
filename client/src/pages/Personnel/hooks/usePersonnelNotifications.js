@@ -1,4 +1,4 @@
-import { useQuery, useMutation, gql } from '@apollo/client';
+import { useQuery, useMutation, gql, useApolloClient } from '@apollo/client';
 
 // Queries
 export const GET_PERSONNEL_NOTIFICATIONS = gql`
@@ -85,6 +85,7 @@ export const MARK_ALL_PERSONNEL_NOTIFICATIONS_AS_READ = gql`
 `;
 
 export const usePersonnelNotifications = () => {
+  const client = useApolloClient();
   const { data: allData, loading: allLoading, error: allError, refetch: refetchAll } = useQuery(GET_PERSONNEL_NOTIFICATIONS);
 
   const { data: unreadData, loading: unreadLoading, error: unreadError, refetch: refetchUnread } = useQuery(GET_UNREAD_PERSONNEL_NOTIFICATIONS);

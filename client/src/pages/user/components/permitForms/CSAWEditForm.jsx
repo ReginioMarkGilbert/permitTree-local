@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { X, Upload } from 'lucide-react';
-import '@/components/ui/styles/customScrollbar.css';
+import '@/components/ui/styles/customScrollBar.css';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, parseISO, isValid, parse } from 'date-fns';

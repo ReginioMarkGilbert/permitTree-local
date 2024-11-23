@@ -2,17 +2,17 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { MockedProvider } from '@apollo/client/testing';
 import { gql } from '@apollo/client';
-import UserApplicationsStatusPage from '../../../pages/user/UserApplicationsStatusPage';
+import UserApplicationsStatusPage from '@/pages/user/UserApplicationsStatusPage';
 import { vi } from 'vitest';
 import { toast } from 'sonner';
 import { MemoryRouter } from 'react-router-dom';
 
 // Mock the hooks
-vi.mock('../../../pages/user/hooks/useUserApplications', () => ({
+vi.mock('@/pages/user/hooks/useUserApplications', () => ({
   useUserApplications: vi.fn()
 }));
 
-vi.mock('../../../pages/user/hooks/useUserOrderOfPayments', () => ({
+vi.mock('@/pages/user/hooks/useUserOrderOfPayments', () => ({
   useUserOrderOfPayments: vi.fn().mockReturnValue({
     oops: [],
     loading: false,
@@ -21,7 +21,7 @@ vi.mock('../../../pages/user/hooks/useUserOrderOfPayments', () => ({
 }));
 
 // Import the hook after mocking
-import { useUserApplications } from '../../../pages/user/hooks/useUserApplications';
+import { useUserApplications } from '@/pages/user/hooks/useUserApplications';
 
 // Mock toast
 vi.mock('sonner', () => ({

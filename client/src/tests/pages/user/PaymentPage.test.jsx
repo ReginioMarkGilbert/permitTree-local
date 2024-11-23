@@ -4,10 +4,10 @@ import { MockedProvider } from '@apollo/client/testing';
 import { gql } from '@apollo/client';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { vi } from 'vitest';
-import PaymentPage from '../../../pages/user/PaymentPage';
+import PaymentPage from '@/pages/user/PaymentPage';
 
 // Mock the hooks
-vi.mock('../../../pages/user/hooks/usePaymentProcess', () => ({
+vi.mock('@/pages/user/hooks/usePaymentProcess', () => ({
   usePaymentProcess: vi.fn(() => ({
     currentStep: 1,
     formData: {},

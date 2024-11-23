@@ -8,7 +8,7 @@ import { useApplications } from '../../../hooks/useApplications';
 import { toast } from 'sonner';
 import { gql, useQuery } from '@apollo/client';
 import TS_CertificateRow from './TS_CertificateRow';
-import ApplicationFilters from '../../../../../components/DashboardFilters/ApplicationFilters';
+import ApplicationFilters from '@/components/DashboardFilters/ApplicationFilters';
 import { useTypewriter } from '@/hooks/useTypewriter';
 
 const GET_CERTIFICATES = gql`

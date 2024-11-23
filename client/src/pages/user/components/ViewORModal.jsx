@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { format } from 'date-fns';
 import QRCode from 'react-qr-code';
 import { Printer } from 'lucide-react';
-import { useReactToPrint } from 'react-to-print';
-import { toast } from 'sonner';
+// import { useReactToPrint } from 'react-to-print';
+// import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
 const ViewORModal = ({ isOpen, onClose, oop }) => {

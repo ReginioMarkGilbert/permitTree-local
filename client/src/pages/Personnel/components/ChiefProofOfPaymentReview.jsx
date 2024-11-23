@@ -7,9 +7,9 @@ import {
     DialogTitle,
     DialogFooter,
     DialogDescription
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { toast } from 'react-toastify';
 import { Loader2, X, FileText } from 'lucide-react';
 

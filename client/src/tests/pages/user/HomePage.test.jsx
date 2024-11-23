@@ -4,11 +4,11 @@ import { vi } from 'vitest';
 import { MockedProvider } from '@apollo/client/testing';
 import { MemoryRouter } from 'react-router-dom';
 import { gql } from '@apollo/client';
-import Home from '../../../pages/user/UserHomePage.jsx';
-import { useRecentApplications } from '../../../pages/user/hooks/useUserRecentApplications';
+import Home from '@/pages/user/UserHomePage.jsx';
+import { useRecentApplications } from '@/pages/user/hooks/useUserRecentApplications';
 
 // Mock the hooks
-vi.mock('../../../pages/user/hooks/useUserRecentApplications', () => ({
+vi.mock('@/pages/user/hooks/useUserRecentApplications', () => ({
   useRecentApplications: vi.fn()
 }));
 

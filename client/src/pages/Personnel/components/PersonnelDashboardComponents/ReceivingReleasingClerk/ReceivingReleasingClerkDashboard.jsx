@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import RRC_ApplicationRow from './RRC_ApplicationRow';
 import { useApplications } from '../../../hooks/useApplications';
-import ApplicationFilters from '../../../../../components/DashboardFilters/ApplicationFilters';
+import ApplicationFilters from '@/components/DashboardFilters/ApplicationFilters';
 import { useTypewriter } from '@/hooks/useTypewriter';
 
 const ReceivingReleasingClerkDashboard = () => {

@@ -5,9 +5,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import ApplicationRow from './PCOApplicationRow';
 import { useApplications } from '../../../hooks/useApplications';
-import { toast } from 'sonner';
+// import { toast } from 'sonner';
 // import { gql } from '@apollo/client';
-import ApplicationFilters from '../../../../../components/DashboardFilters/ApplicationFilters';
+import ApplicationFilters from '@/components/DashboardFilters/ApplicationFilters';
 import { useTypewriter } from '@/hooks/useTypewriter';
 
 const PENRCENROfficerDashboard = () => {

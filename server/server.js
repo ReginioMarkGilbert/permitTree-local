@@ -15,7 +15,6 @@ const resolvers = require('./src/resolvers');
 
 const startServer = async () => {
    const app = express();
-
    // await mongoose.connect(process.env.MONGO_URI_NEW);
    // console.log('MongoDB connected');
    try {
@@ -56,10 +55,32 @@ const startServer = async () => {
 
    await server.start();
 
-   app.use(cors());
+
+   const corsOptions = {
+      origin: [
+         'http://localhost:5174',
+         'https://permittree-frontend.vercel.app',
+         'https://permittree-backend.vercel.app'
+      ],
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'apollo-require-preflight'],
+      exposedHeaders: ['Access-Control-Allow-Origin']
+   };
+
+   app.use(cors(corsOptions));
+   app.options('*', cors(corsOptions));
    app.use(express.json({ limit: '50mb' }));
    app.use(express.urlencoded({ limit: '50mb', extended: true }));
    app.use(graphqlUploadExpress());
+
+   app.get('/', (req, res) => {
+      res.send('PermiTree API is running!');
+   });
+
+   app.get('/favicon.ico', (req, res) => {
+      res.status(204).end(); // No content response
+   });
 
    app.use('/graphql', expressMiddleware(server, {
       context: async ({ req }) => {

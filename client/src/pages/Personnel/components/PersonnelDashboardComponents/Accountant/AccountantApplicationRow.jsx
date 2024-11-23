@@ -9,7 +9,7 @@ import {
    TooltipProvider,
    TooltipTrigger,
 } from "@/components/ui/tooltip";
-import TS_ViewModal from '../TechnicalStaff/TS_ViewModal';
+import TS_ViewModal from '@/pages/Personnel/components/PersonnelDashboardComponents/TechnicalStaff/TS_ViewModal';
 
 const UNDO_OOP_CREATION = gql`
   mutation UndoOOPCreation($id: ID!) {

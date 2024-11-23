@@ -1,5 +1,5 @@
 import React from 'react';
-import NotificationList from '../../components/notifications/NotificationList';
+import NotificationList from '@/components/notifications/NotificationList';
 import NotificationsLayout from '@/components/notifications/NotificationsLayout';
 import { useUserNotifications } from './hooks/useUserNotifications';
 import { TabsContent } from '@/components/ui/tabs';

@@ -2,7 +2,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 // import { Label } from "@/components/ui/label";
-import '../../../components/ui/styles/customScrollBar.css';
+import '@/components/ui/styles/customScrollBar.css';
 
 const ChiefOOPFormViewModal = ({ isOpen, onClose, orderOfPayment }) => {
    return (

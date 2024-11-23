@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Button } from '../../components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '../../components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Bell, ClipboardList, Users, Settings, TrendingUp, CheckCircle, XCircle, ClipboardCheck, RotateCcw, Info, AlertCircle, AlertTriangle } from "lucide-react";
 import { toast, ToastContainer } from 'react-toastify';
-import HomeFooter from '../../components/ui/HomeFooter';
-import '../../components/ui/styles/customScrollBar.css';
+import HomeFooter from '@/components/ui/HomeFooter';
+import '@/components/ui/styles/customScrollBar.css';
 import { gql, useQuery } from '@apollo/client';
 import { useRecentApplications } from './hooks/useUserRecentApplications';
 import { useUserNotifications } from './hooks/useUserNotifications';

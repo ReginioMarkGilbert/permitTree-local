@@ -1,6 +1,6 @@
 import React from 'react';
-import DENRLogo from '../../../assets/denr-logo.png';
-import BagongPilipinasLogo from '../../../assets/BAGONG-PILIPINAS-LOGO.png';
+import DENRLogo from '@/assets/denr-logo.png';
+import BagongPilipinasLogo from '@/assets/BAGONG-PILIPINAS-LOGO.png';
 
 const DENRHeader = () => {
     return (

@@ -5,7 +5,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon, Search, ChevronsUpDown } from 'lucide-react';
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
-import { Listbox, Transition } from '@headlessui/react';
+// import { Listbox, Transition } from '@headlessui/react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from "@/components/ui/select";
 
 const ChiefApplicationFilters = ({ filters, setFilters }) => {
@@ -119,9 +119,8 @@ const ChiefApplicationFilters = ({ filters, setFilters }) => {
             <PopoverTrigger asChild>
                <Button
                   variant="outline"
-                  className={`w-[200px] justify-start text-left font-normal ${
-                     filters.dateRange.from ? 'text-foreground' : 'text-muted-foreground'
-                  }`}
+                  className={`w-[200px] justify-start text-left font-normal ${filters.dateRange.from ? 'text-foreground' : 'text-muted-foreground'
+                     }`}
                >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {filters.dateRange.from ? (

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { gql, useMutation } from '@apollo/client';
+import { gql, useMutation, useApolloClient } from '@apollo/client';
 
 const INITIATE_PAYMENT = gql`
   mutation InitiatePayment($oopId: ID!, $method: String!, $paymentDetails: PaymentDetailsInput!) {
@@ -26,6 +26,7 @@ const CONFIRM_PAYMENT = gql`
 `;
 
 export const usePaymentProcess = (oopId) => {
+   const client = useApolloClient();
    const [currentStep, setCurrentStep] = useState(1);
    const [formData, setFormData] = useState({
       fullName: '',

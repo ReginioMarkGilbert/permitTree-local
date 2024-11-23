@@ -1,11 +1,11 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { FaBell, FaChartLine, FaCog, FaFileInvoiceDollar, FaHome, FaSignOutAlt, FaTachometerAlt, FaMap, FaCalendarCheck } from 'react-icons/fa';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { removeToken } from '../../../utils/tokenManager';
-import { isAuthenticated, getUserRoles } from '../../../utils/auth';
+import { removeToken } from '@/utils/tokenManager';
+import { isAuthenticated, getUserRoles } from '@/utils/auth';
 import { gql, useMutation } from '@apollo/client';
 import { X } from 'lucide-react';
-import permitTreeLogo from '../../../assets/denr-logo.png';
+import permitTreeLogo from '@/assets/denr-logo.png';
 
 const LOGOUT_MUTATION = gql`
   mutation Logout {

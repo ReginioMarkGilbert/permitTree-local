@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
-import CSAWEditForm from '../../../../../pages/user/components/permitForms/CSAWEditForm';
+import CSAWEditForm from '@/pages/user/components/permitForms/CSAWEditForm';
 
 describe('CSAWEditForm', () => {
    const mockFormData = {

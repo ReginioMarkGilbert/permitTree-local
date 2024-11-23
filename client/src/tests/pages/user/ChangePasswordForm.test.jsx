@@ -4,7 +4,7 @@ import { MockedProvider } from '@apollo/client/testing';
 import { vi } from 'vitest';
 import { toast } from 'sonner';
 import { gql } from '@apollo/client';
-import ChangePasswordForm from '../../../pages/user/components/ChangePasswordForm';
+import ChangePasswordForm from '@/pages/user/components/ChangePasswordForm';
 
 // Mock the toast function
 vi.mock('sonner', () => ({

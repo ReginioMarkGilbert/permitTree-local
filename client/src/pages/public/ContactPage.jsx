@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Input } from '../../components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { MapPin, Phone, Mail } from 'lucide-react';
-import Header from '../../components/Header';
+import Header from '@/components/Header';
 import { FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
