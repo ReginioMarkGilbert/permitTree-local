@@ -61,13 +61,39 @@ const startServer = async () => {
          'http://localhost:5174',
          'https://permittree-staging.vercel.app',
          'https://permittree-frontend.vercel.app',
+         'https://permittree.vercel.app',
          'https://permittree-backend.vercel.app'
       ],
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'apollo-require-preflight'],
+      allowedHeaders: [
+         'Content-Type',
+         'Authorization',
+         'apollo-require-preflight',
+         'Access-Control-Allow-Origin',
+         'Access-Control-Allow-Methods',
+         'Access-Control-Allow-Headers'
+      ],
       exposedHeaders: ['Access-Control-Allow-Origin']
    };
+
+   app.use((req, res, next) => {
+      const origin = req.headers.origin;
+
+      if (corsOptions.origin.includes(origin)) {
+         res.header('Access-Control-Allow-Origin', origin);
+      }
+
+      res.header('Access-Control-Allow-Methods', corsOptions.methods.join(','));
+      res.header('Access-Control-Allow-Headers', corsOptions.allowedHeaders.join(','));
+      res.header('Access-Control-Allow-Credentials', 'true');
+
+      if (req.method === 'OPTIONS') {
+         return res.status(200).end();
+      }
+
+      next();
+   });
 
    app.use(cors(corsOptions));
    app.options('*', cors(corsOptions));

@@ -7,7 +7,7 @@ import { RetryLink } from "@apollo/client/link/retry";
 // const API_URL = 'http://localhost:3001/graphql' // local
 // const API_URL = 'https://permittree-backend.vercel.app/';
 // const API_URL = 'http://localhost:3001/graphql' || 'https://permittree-backend.vercel.app';
-const API_URL = 'https://permittree-backend.vercel.app/graphql'; // online
+const API_URL = import.meta.env.VITE_API_URL || 'https://permittree-backend.vercel.app/graphql'; // online
 // const API_URL = import.meta.env.VITE_API_URL;
 
 const httpLink = createHttpLink({
@@ -15,6 +15,7 @@ const httpLink = createHttpLink({
    credentials: 'include',
    headers: {
       'Content-Type': 'application/json',
+      'apollo-require-preflight': 'true'
    }
 });
 
@@ -24,6 +25,7 @@ const authLink = setContext((_, { headers }) => {
       headers: {
          ...headers,
          authorization: token ? `Bearer ${token}` : "",
+         'apollo-require-preflight': 'true'
       },
       credentials: 'include'
    }
