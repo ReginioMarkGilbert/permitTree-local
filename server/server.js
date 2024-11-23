@@ -56,47 +56,33 @@ const startServer = async () => {
    await server.start();
 
    const corsOptions = {
-      origin: [
-         'http://localhost:5174',
-         'https://permittree-dev.vercel.app',
-         'https://permittree-staging.vercel.app',
-         'https://permittree-frontend.vercel.app',
-         'https://permittree.vercel.app',
-         'https://permittree-backend.vercel.app'
-      ],
+      origin: function(origin, callback) {
+         const allowedOrigins = [
+            'http://localhost:5174',
+            'https://permittree-dev.vercel.app',
+            'https://permittree-staging.vercel.app',
+            'https://permittree-frontend.vercel.app',
+            'https://permittree.vercel.app',
+            'https://permittree-backend.vercel.app'
+         ];
+
+         // Allow requests with no origin (like mobile apps or curl requests)
+         if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+         } else {
+            callback(new Error('Not allowed by CORS'));
+         }
+      },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: [
          'Content-Type',
          'Authorization',
-         'apollo-require-preflight',
-         'Access-Control-Allow-Origin',
-         'Access-Control-Allow-Methods',
-         'Access-Control-Allow-Headers'
-      ],
-      exposedHeaders: ['Access-Control-Allow-Origin']
+         'apollo-require-preflight'
+      ]
    };
 
-   app.use((req, res, next) => {
-      const origin = req.headers.origin;
-
-      if (corsOptions.origin.includes(origin)) {
-         res.header('Access-Control-Allow-Origin', origin);
-      }
-
-      res.header('Access-Control-Allow-Methods', corsOptions.methods.join(','));
-      res.header('Access-Control-Allow-Headers', corsOptions.allowedHeaders.join(','));
-      res.header('Access-Control-Allow-Credentials', 'true');
-
-      if (req.method === 'OPTIONS') {
-         return res.status(200).end();
-      }
-
-      next();
-   });
-
    app.use(cors(corsOptions));
-   app.options('*', cors(corsOptions));
    app.use(express.json({ limit: '50mb' }));
    app.use(express.urlencoded({ limit: '50mb', extended: true }));
    app.use(graphqlUploadExpress());

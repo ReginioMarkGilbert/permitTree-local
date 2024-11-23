@@ -14,7 +14,7 @@ const httpLink = createHttpLink({
    uri: API_URL,
    credentials: 'include',
    headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
    }
 });
 
