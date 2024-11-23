@@ -17,6 +17,7 @@ import { UploadCard } from '@/pages/user/ApplicationForms/CSAWForm/CSAWFormUtils
 import { gql, useMutation } from '@apollo/client';
 import { formatLabel, formatReviewValue } from '@/pages/user/ApplicationForms/CSAWForm/CSAWFormUtils';
 import '@/components/ui/styles/customScrollBar.css';
+import { Loader2 } from "lucide-react";
 
 const CREATE_TCEBP_PERMIT = gql`
   mutation CreateTCEBPPermit($input: TCEBPPermitInput!) {
@@ -92,6 +93,8 @@ const TCEBPForm = () => {
    const [modalContent, setModalContent] = useState({ title: '', message: '' });
    const [createTCEBPPermit] = useMutation(CREATE_TCEBP_PERMIT);
    const [saveTCEBPPermitDraft] = useMutation(SAVE_TCEBP_PERMIT_DRAFT);
+   const [isSubmitting, setIsSubmitting] = useState(false);
+   const [isSavingDraft, setIsSavingDraft] = useState(false);
 
    const handleInputChange = (e) => {
       const { name, value } = e.target;
@@ -130,6 +133,7 @@ const TCEBPForm = () => {
    };
 
    const handleSaveAsDraft = async () => {
+      setIsSavingDraft(true);
       try {
          const input = {
             name: formData.name,
@@ -176,11 +180,14 @@ const TCEBPForm = () => {
       } catch (error) {
          console.error('Error saving draft:', error);
          toast.error("Error saving draft: " + error.message);
+      } finally {
+         setIsSavingDraft(false);
       }
    };
 
    const handleSubmit = async (e) => {
       e.preventDefault();
+      setIsSubmitting(true);
       try {
          const input = {
             name: formData.name,
@@ -231,6 +238,8 @@ const TCEBPForm = () => {
       } catch (error) {
          console.error('Error submitting application:', error);
          toast.error("Error submitting application: " + error.message);
+      } finally {
+         setIsSubmitting(false);
       }
    };
 
@@ -440,6 +449,7 @@ const TCEBPForm = () => {
                            variant="outline"
                            onClick={handlePrevStep}
                            className="w-full sm:w-auto"
+                           disabled={isSubmitting || isSavingDraft}
                         >
                            Previous
                         </Button>
@@ -451,7 +461,7 @@ const TCEBPForm = () => {
                            type="button"
                            onClick={handleNextStep}
                            className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
-                           disabled={currentStep === 0 && !formData.requestType}
+                           disabled={isSubmitting || isSavingDraft}
                         >
                            Next
                         </Button>
@@ -462,15 +472,31 @@ const TCEBPForm = () => {
                               variant="outline"
                               onClick={handleSaveAsDraft}
                               className="w-full sm:w-auto"
+                              disabled={isSubmitting || isSavingDraft}
                            >
-                              Save as Draft
+                              {isSavingDraft ? (
+                                 <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Saving...
+                                 </>
+                              ) : (
+                                 'Save as Draft'
+                              )}
                            </Button>
                            <Button
                               type="submit"
                               onClick={handleSubmit}
                               className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
+                              disabled={isSubmitting || isSavingDraft}
                            >
-                              Submit Application
+                              {isSubmitting ? (
+                                 <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Submitting...
+                                 </>
+                              ) : (
+                                 'Submit Application'
+                              )}
                            </Button>
                         </>
                      )}

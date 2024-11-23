@@ -83,27 +83,20 @@ const UserApplicationsStatusPage = () => {
    const isMobile = useMediaQuery('(max-width: 640px)');
 
    const getQueryParamsForTab = (tab) => {
-      switch (tab) {
+      const params = {
          // Applications
-         case 'Draft': return { status: 'Draft' };
-         case 'Submitted': return { status: 'Submitted' };
-         case 'In Progress': return { status: 'In Progress' };
-         case 'Returned': return { status: 'Returned', currentStage: 'ReturnedByTechnicalStaff' };
-         case 'Accepted': return { status: 'Accepted' };
-         case 'Released': return { status: 'Released' };
-         case 'Expired': return { status: 'Expired' };
-         case 'Rejected': return { status: 'Rejected' };
-         // Order of Payments - Map to backend statuses
-         case 'Awaiting Payment': return { OOPstatus: 'Awaiting Payment' };
-         case 'Payment Proof Submitted': return { OOPstatus: 'Payment Proof Submitted' };
-         case 'Payment Proof Rejected': return { OOPstatus: 'Payment Proof Rejected' };
-         case 'Payment Proof Approved': return { OOPstatus: 'Payment Proof Approved' };
-         case 'Issued OR': return { OOPstatus: 'Issued OR' };
-         case 'Completed': return { OOPstatus: 'Completed OOP' };
-         // Renewals
-         case 'Renewed': return { status: 'Renewed', isRenewal: true };
-         default: return { status: 'Submitted' };
-      }
+         'Draft': { status: 'Draft' },
+         'Submitted': { status: 'Submitted' },
+         'In Progress': { status: 'In Progress' },
+         'Returned': { status: 'Returned', currentStage: 'ReturnedByTechnicalStaff' },
+         'Accepted': { status: 'Accepted' },
+         'Released': { status: 'Released' },
+         'Expired': { status: 'Expired' },
+         'Rejected': { status: 'Rejected' },
+      }[tab] || { status: 'Submitted' };
+
+      console.log('Query params for tab:', { tab, params });
+      return params;
    };
 
    const {
@@ -161,8 +154,9 @@ const UserApplicationsStatusPage = () => {
 
    useEffect(() => {
       const { status, currentStage } = getQueryParamsForTab(activeSubTab);
+      console.log('Fetching with params:', { status, currentStage });
       fetchUserApplications(status, currentStage);
-   }, [fetchUserApplications, activeSubTab]);
+   }, [activeSubTab]);
 
    const getStatusColor = (status) => {
       switch (status.toLowerCase()) {
@@ -335,11 +329,20 @@ const UserApplicationsStatusPage = () => {
       }
    };
 
-   // Add polling for automatic updates
-   useEffect(() => {
-      const pollInterval = setInterval(handleRefetch, 5000); // Poll every 5 seconds
-      return () => clearInterval(pollInterval);
-   }, [activeMainTab]);
+   // Update the refresh handler to explicitly trigger a refetch
+   const handleRefresh = async () => {
+      if (activeMainTab === 'Order Of Payments') {
+         await refetchOOPs();
+      } else {
+         const { status, currentStage } = getQueryParamsForTab(activeSubTab);
+         setIsLoading(true); // Add loading state for refresh
+         try {
+            await fetchUserApplications(status, currentStage);
+         } finally {
+            setIsLoading(false);
+         }
+      }
+   };
 
    // Update tab change handler to trigger refetch
    const handleTabChange = (tab) => {
@@ -591,17 +594,43 @@ const UserApplicationsStatusPage = () => {
    };
 
    const renderApplicationsTable = () => {
-      if (loading) return <p className="text-center text-gray-500">Loading applications...</p>;
-      if (error) return <p className="text-center text-red-500">Error loading applications</p>;
-      if (filteredApplications.length === 0) {
+      console.log('Render state:', { loading, error, applications, filteredApplications });
+
+      // Show loading state while fetching
+      if (loading) {
+         return (
+            <div className="bg-white rounded-lg shadow-sm p-6 text-center">
+               <div className="flex items-center justify-center">
+                  <RefreshCw className="h-8 w-8 animate-spin text-green-600" />
+               </div>
+               <p className="mt-2 text-sm text-gray-600">Loading your applications...</p>
+            </div>
+         );
+      }
+
+      if (error) {
+         console.error('Application loading error:', error);
+         return (
+            <div className="bg-white rounded-lg shadow-sm p-6 text-center text-red-500">
+               <p>Error loading applications: {error.message}</p>
+            </div>
+         );
+      }
+
+      // Show "No applications found" when we have finished loading and there are no applications
+      if (!loading && filteredApplications.length === 0) {
          return (
             <div className="bg-white rounded-lg shadow-sm p-6 text-center">
                <FileX className="mx-auto h-12 w-12 text-gray-400" />
                <h3 className="mt-2 text-sm font-medium text-gray-900">No applications found</h3>
                <p className="mt-1 text-sm text-gray-500">
-                  {filters.applicationType ?
-                     `No applications found for ${filters.applicationType}` :
-                     'No applications available'}
+                  {activeSubTab === 'In Progress' ? (
+                     'You have no applications currently in progress'
+                  ) : filters.applicationType ? (
+                     `No applications found for ${filters.applicationType}`
+                  ) : (
+                     `No ${activeSubTab.toLowerCase()} applications available`
+                  )}
                </p>
             </div>
          );
@@ -731,7 +760,7 @@ const UserApplicationsStatusPage = () => {
             <div className="bg-white rounded-lg shadow-sm p-6">
                <div className="flex items-center justify-between mb-4">
                   <h1 className="text-2xl font-semibold text-gray-900">My Applications</h1>
-                  <Button onClick={handleRefetch} variant="outline" size="sm">
+                  <Button onClick={handleRefresh} variant="outline" size="sm">
                      <RefreshCw className="mr-2 h-4 w-4" />
                      {!isMobile && "Refresh"}
                   </Button>

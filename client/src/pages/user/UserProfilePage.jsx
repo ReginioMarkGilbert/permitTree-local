@@ -16,6 +16,7 @@ import {
    DialogDescription
 } from "@/components/ui/dialog";
 import { formatDistanceToNow, format } from 'date-fns';
+import { Skeleton } from "@/components/ui/skeleton";
 
 const GET_USER_DETAILS = gql`
   query GetUserDetails {
@@ -134,43 +135,50 @@ export default function UserProfilePage() {
 
    const handleSubmit = async (e) => {
       e.preventDefault();
-      if (isEditing) {
-         try {
-            const nameParts = userInfo.fullName.trim().split(/\s+/);
-            const lastName = nameParts.pop();
-            const firstName = nameParts.join(' ');
-
-            const input = {
-               firstName,
-               lastName,
-               username: userInfo.username,
-               email: userInfo.email,
-               phone: userInfo.phone,
-               company: userInfo.company,
-               address: userInfo.address,
-               removeProfilePicture,
-            };
-
-            if (profilePicture) {
-               const reader = new FileReader();
-               reader.onloadend = async () => {
-                  input.profilePicture = {
-                     data: reader.result.split(',')[1], // Base64 data
-                     contentType: profilePicture.type
-                  };
-
-                  await updateProfile(input);
-               };
-               reader.readAsDataURL(profilePicture);
-            } else {
-               await updateProfile(input);
-            }
-         } catch (err) {
-            console.error('Error updating profile:', err);
-            toast.error('Failed to update profile.');
-         }
+      if (!isEditing) {
+         setIsEditing(true);
+         return;
       }
-      setIsEditing(!isEditing);
+
+      setIsLoading(true);
+      try {
+         const nameParts = userInfo.fullName.trim().split(/\s+/);
+         const lastName = nameParts.pop();
+         const firstName = nameParts.join(' ');
+
+         const input = {
+            firstName,
+            lastName,
+            username: userInfo.username,
+            email: userInfo.email,
+            phone: userInfo.phone,
+            company: userInfo.company,
+            address: userInfo.address,
+            removeProfilePicture,
+         };
+
+         if (profilePicture) {
+            const reader = new FileReader();
+            reader.onloadend = async () => {
+               input.profilePicture = {
+                  data: reader.result.split(',')[1],
+                  contentType: profilePicture.type
+               };
+
+               await updateProfile(input);
+            };
+            reader.readAsDataURL(profilePicture);
+         } else {
+            await updateProfile(input);
+         }
+
+         setIsEditing(false);
+      } catch (err) {
+         console.error('Error updating profile:', err);
+         toast.error('Failed to update profile.');
+      } finally {
+         setIsLoading(false);
+      }
    };
 
    const updateProfile = async (input) => {
@@ -185,6 +193,7 @@ export default function UserProfilePage() {
       } catch (err) {
          console.error('Error updating profile:', err);
          toast.error('Failed to update profile. File might be too large.');
+         throw err;
       }
    };
 
@@ -263,14 +272,85 @@ export default function UserProfilePage() {
 
    if (loading) {
       return (
-         <div className="flex items-center justify-center h-[calc(100vh-6rem)]">
-            <svg
-               data-testid="loading-spinner"
-               className="lucide lucide-loader-circle h-8 w-8 animate-spin text-green-600"
-               // ... rest of the svg props
-            >
-               <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-            </svg>
+         <div className="bg-green-50 pt-20 pb-8 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto space-y-8">
+               {/* Profile Header Skeleton */}
+               <div className="bg-white rounded-lg shadow-sm p-8">
+                  <div className="flex items-center justify-between mb-8">
+                     <Skeleton className="h-8 w-48" />
+                     <Skeleton className="h-10 w-32" />
+                  </div>
+                  <div className="flex items-center space-x-6">
+                     <Skeleton className="h-24 w-24 rounded-full" />
+                     <div className="space-y-2">
+                        <Skeleton className="h-6 w-48" />
+                        <Skeleton className="h-4 w-32" />
+                     </div>
+                  </div>
+               </div>
+
+               {/* Account Overview Skeleton */}
+               <div className="bg-white rounded-lg shadow-sm p-8">
+                  <Skeleton className="h-6 w-40 mb-4" />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                     {[...Array(3)].map((_, i) => (
+                        <div key={i} className="bg-gray-50 p-4 rounded-lg">
+                           <Skeleton className="h-4 w-32 mb-2" />
+                           <Skeleton className="h-8 w-16" />
+                        </div>
+                     ))}
+                  </div>
+               </div>
+
+               {/* Personal Information Skeleton */}
+               <div className="bg-white rounded-lg shadow-sm p-8">
+                  <Skeleton className="h-6 w-48 mb-6" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     {[...Array(5)].map((_, i) => (
+                        <div key={i} className="space-y-2">
+                           <Skeleton className="h-4 w-24" />
+                           <Skeleton className="h-10 w-full" />
+                        </div>
+                     ))}
+                  </div>
+
+                  {/* Address Skeleton */}
+                  <div className="mt-6">
+                     <Skeleton className="h-6 w-32 mb-6" />
+                     <Skeleton className="h-10 w-full" />
+                  </div>
+
+                  {/* Security Section Skeleton */}
+                  <div className="mt-6">
+                     <Skeleton className="h-6 w-48 mb-6" />
+                     <div className="bg-gray-50 p-4 rounded-lg">
+                        <div className="flex items-center justify-between">
+                           <div className="space-y-2">
+                              <Skeleton className="h-4 w-24" />
+                              <Skeleton className="h-4 w-32" />
+                           </div>
+                           <Skeleton className="h-9 w-32" />
+                        </div>
+                     </div>
+                  </div>
+
+                  {/* Recent Activity Skeleton */}
+                  <div className="mt-6">
+                     <Skeleton className="h-6 w-40 mb-6" />
+                     <div className="space-y-4">
+                        {[...Array(3)].map((_, i) => (
+                           <div key={i} className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                 <Skeleton className="h-2 w-2 rounded-full" />
+                                 <Skeleton className="h-4 w-32" />
+                              </div>
+                              <Skeleton className="h-4 w-24" />
+                           </div>
+                        ))}
+                     </div>
+                  </div>
+               </div>
+            </div>
          </div>
       );
    }

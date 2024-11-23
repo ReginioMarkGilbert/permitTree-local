@@ -16,6 +16,7 @@ import { gql, useMutation } from '@apollo/client';
 import { formatLabel, formatReviewValue } from '@/pages/user/ApplicationForms/CSAWForm/CSAWFormUtils';
 import '@/components/ui/styles/customScrollBar.css';
 import { Textarea } from '@/components/ui/textarea';
+import { Loader2 } from "lucide-react";
 
 const CREATE_COV_PERMIT = gql`
   mutation CreateCOVPermit($input: COVPermitInput!) {
@@ -90,6 +91,8 @@ const COVForm = () => {
    const [modalContent, setModalContent] = useState({ title: '', message: '' });
    const [createCOVPermit] = useMutation(CREATE_COV_PERMIT);
    const [saveCOVPermitDraft] = useMutation(SAVE_COV_PERMIT_DRAFT);
+   const [isSubmitting, setIsSubmitting] = useState(false);
+   const [isSavingDraft, setIsSavingDraft] = useState(false);
 
    const handleInputChange = (e) => {
       const { name, value } = e.target;
@@ -129,6 +132,7 @@ const COVForm = () => {
    };
 
    const handleSaveAsDraft = async () => {
+      setIsSavingDraft(true);
       try {
          const input = {
             name: formData.name,
@@ -156,7 +160,7 @@ const COVForm = () => {
                }));
             }
          }
-         // console.log('save as draft:', input)
+
          const token = localStorage.getItem('token');
          const { data } = await saveCOVPermitDraft({
             variables: { input },
@@ -181,11 +185,14 @@ const COVForm = () => {
       } catch (error) {
          console.error('Error saving draft:', error);
          toast.error("Error saving draft: " + error.message);
+      } finally {
+         setIsSavingDraft(false);
       }
    };
 
    const handleSubmit = async (e) => {
       e.preventDefault();
+      setIsSubmitting(true);
       try {
          const input = {
             name: formData.name,
@@ -240,6 +247,8 @@ const COVForm = () => {
       } catch (error) {
          console.error('Error submitting application:', error);
          toast.error("Error submitting application: " + error.message);
+      } finally {
+         setIsSubmitting(false);
       }
    };
 
@@ -456,6 +465,7 @@ const COVForm = () => {
                            variant="outline"
                            onClick={handlePrevStep}
                            className="w-full sm:w-auto"
+                           disabled={isSubmitting || isSavingDraft}
                         >
                            Previous
                         </Button>
@@ -467,6 +477,7 @@ const COVForm = () => {
                            type="button"
                            onClick={handleNextStep}
                            className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
+                           disabled={isSubmitting || isSavingDraft}
                         >
                            Next
                         </Button>
@@ -477,15 +488,31 @@ const COVForm = () => {
                               variant="outline"
                               onClick={handleSaveAsDraft}
                               className="w-full sm:w-auto"
+                              disabled={isSubmitting || isSavingDraft}
                            >
-                              Save as Draft
+                              {isSavingDraft ? (
+                                 <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Saving...
+                                 </>
+                              ) : (
+                                 'Save as Draft'
+                              )}
                            </Button>
                            <Button
                               type="submit"
                               onClick={handleSubmit}
                               className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
+                              disabled={isSubmitting || isSavingDraft}
                            >
-                              Submit Application
+                              {isSubmitting ? (
+                                 <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Submitting...
+                                 </>
+                              ) : (
+                                 'Submit Application'
+                              )}
                            </Button>
                         </>
                      )}
