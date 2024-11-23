@@ -14,8 +14,8 @@ import Modal from '@/components/ui/modal';
 import { UploadCard } from '@/pages/user/ApplicationForms/CSAWForm/CSAWFormUtils';
 import { gql, useMutation } from '@apollo/client';
 import { formatLabel, formatReviewValue } from '@/pages/user/ApplicationForms/CSAWForm/CSAWFormUtils';
-import '@/components/ui/styles/customScrollBar.css';  // Add this import
-import { Textarea } from '@/components/ui/textarea';  // Add this import at the top of the file
+import '@/components/ui/styles/customScrollBar.css';
+import { Textarea } from '@/components/ui/textarea';
 
 const CREATE_COV_PERMIT = gql`
   mutation CreateCOVPermit($input: COVPermitInput!) {

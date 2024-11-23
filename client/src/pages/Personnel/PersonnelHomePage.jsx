@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Bell, ClipboardList, Users, Settings, TrendingUp, CheckCircle, XCircle, ClipboardCheck, RotateCcw, Info, AlertCircle, AlertTriangle } from "lucide-react";
 import { FaChartLine } from 'react-icons/fa';
-import '../../components/ui/styles/customScrollBar.css';
+import '@/components/ui/styles/customScrollBar.css';
 import useDebounce from '../../hooks/useDebounce';
 import { getUserRoles } from '../../utils/auth';
 import { usePersonnelNotifications } from './hooks/usePersonnelNotifications';
