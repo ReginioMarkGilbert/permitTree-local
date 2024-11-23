@@ -55,34 +55,44 @@ const startServer = async () => {
 
    await server.start();
 
+   // Define allowed origins
+   const allowedOrigins = [
+      'http://localhost:5174',
+      'https://permittree-dev.vercel.app',
+      'https://permittree-staging.vercel.app',
+      'https://permittree-frontend.vercel.app',
+      'https://permittree.vercel.app',
+      'https://permittree-backend.vercel.app'
+   ];
+
    const corsOptions = {
       origin: function(origin, callback) {
-         const allowedOrigins = [
-            'http://localhost:5174',
-            'https://permittree-dev.vercel.app',
-            'https://permittree-staging.vercel.app',
-            'https://permittree-frontend.vercel.app',
-            'https://permittree.vercel.app',
-            'https://permittree-backend.vercel.app'
-         ];
-
-         // Allow requests with no origin (like mobile apps or curl requests)
-         if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
+         if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, origin);
          } else {
             callback(new Error('Not allowed by CORS'));
          }
       },
       credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
       allowedHeaders: [
          'Content-Type',
          'Authorization',
-         'apollo-require-preflight'
-      ]
+         'apollo-require-preflight',
+         'Origin',
+         'Accept'
+      ],
+      preflightContinue: false,
+      optionsSuccessStatus: 204
    };
 
+   // Apply CORS middleware before other middleware
    app.use(cors(corsOptions));
+
+   // Add OPTIONS handling for preflight requests
+   app.options('*', cors(corsOptions));
+
+   // Then add your other middleware
    app.use(express.json({ limit: '50mb' }));
    app.use(express.urlencoded({ limit: '50mb', extended: true }));
    app.use(graphqlUploadExpress());
@@ -95,28 +105,31 @@ const startServer = async () => {
       res.status(204).end(); // No content response
    });
 
-   app.use('/graphql', expressMiddleware(server, {
-      context: async ({ req }) => {
-         const token = req.headers.authorization || '';
-         if (token) {
-            try {
-               const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
-               let user = await User.findById(decoded.id);
-               if (!user) {
-                  user = await Admin.findById(decoded.id);
+   app.use('/graphql',
+      cors(corsOptions),
+      expressMiddleware(server, {
+         context: async ({ req }) => {
+            const token = req.headers.authorization || '';
+            if (token) {
+               try {
+                  const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
+                  let user = await User.findById(decoded.id);
+                  if (!user) {
+                     user = await Admin.findById(decoded.id);
+                  }
+                  if (user) {
+                     console.log('User found in context:', user.id, user.roles);
+                     return { user };
+                  }
+               } catch (error) {
+                  console.error('Error verifying token:', error);
                }
-               if (user) {
-                  console.log('User found in context:', user.id, user.roles);
-                  return { user };
-               }
-            } catch (error) {
-               console.error('Error verifying token:', error);
             }
-         }
-         console.log('No user in context - server');
-         return {};
-      },
-   }));
+            console.log('No user in context - server');
+            return {};
+         },
+      })
+   );
 
    // const PORT = process.env.PORT || 3001;
    // const HOST = process.env.HOST || 'localhost';
