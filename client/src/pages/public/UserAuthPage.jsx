@@ -5,7 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { setToken } from '../../utils/tokenManager';
 import { FaLeaf, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/Label';
+import { Label } from '@/components/ui/label';
 import './styles/UserAuthPage.css';
 import { gql, useMutation, useApolloClient } from '@apollo/client';
 
