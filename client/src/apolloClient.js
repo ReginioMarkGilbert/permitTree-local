@@ -3,12 +3,12 @@ import { setContext } from '@apollo/client/link/context';
 import { onError } from "@apollo/client/link/error";
 import { RetryLink } from "@apollo/client/link/retry";
 
-// const API_URL = 'http://172.20.10.2:3001/graphql' // local network
 // const API_URL = 'http://localhost:3001/graphql' // local
-// const API_URL = 'https://permittree-backend.vercel.app/';
-// const API_URL = 'http://localhost:3001/graphql' || 'https://permittree-backend.vercel.app';
 // const API_URL = 'https://permittree-backend.vercel.app/graphql'; // online
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = 'https://permittree-backend-dev.vercel.app/graphql'; // online
+
+// const API_URL = import.meta.env.VITE_API_URL;
+
 
 const httpLink = createHttpLink({
    uri: API_URL,
