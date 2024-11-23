@@ -4,14 +4,14 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import Modal from '@/components/ui/modal';
 // import '@/components/ui/styles/CSAWFormScrollbar.css';
 import '@/components/ui/styles/customScrollBar.css'
 import { CheckboxItem, UploadCard, CustomSelect, CustomDatePicker, formatLabel, formatReviewValue } from './CSAWFormUtils';
 import { gql, useMutation } from '@apollo/client';
+import { Loader2 } from "lucide-react";
 
 const CREATE_CSAW_PERMIT = gql`
   mutation CreateCSAWPermit($input: CSAWPermitInput!) {
@@ -98,6 +98,8 @@ const ChainsawRegistrationForm = () => {
    const [customStore, setCustomStore] = useState('');
    const [createCSAWPermit] = useMutation(CREATE_CSAW_PERMIT);
    const [saveCSAWPermitDraft] = useMutation(SAVE_CSAW_PERMIT_DRAFT);
+   const [isSubmitting, setIsSubmitting] = useState(false);
+   const [isSavingDraft, setIsSavingDraft] = useState(false);
 
    const chainsawStores = [
       { value: "Green Chainsaw Co.", label: "Green Chainsaw Co." },
@@ -184,6 +186,7 @@ const ChainsawRegistrationForm = () => {
    };
 
    const handleSaveAsDraft = async () => {
+      setIsSavingDraft(true);
       try {
          const input = {
             registrationType: formData.registrationType,
@@ -248,11 +251,14 @@ const ChainsawRegistrationForm = () => {
       } catch (error) {
          console.error('Error saving draft:', error);
          toast.error("Error saving draft: " + error.message);
+      } finally {
+         setIsSavingDraft(false);
       }
    };
 
    const handleSubmit = async (e) => {
       e.preventDefault();
+      setIsSubmitting(true);
       try {
          const input = {
             registrationType: formData.registrationType,
@@ -328,6 +334,8 @@ const ChainsawRegistrationForm = () => {
             }
          }
          toast.error("Error submitting application: " + error.message);
+      } finally {
+         setIsSubmitting(false);
       }
    };
 
@@ -392,7 +400,7 @@ const ChainsawRegistrationForm = () => {
                   <form onSubmit={handleSubmit}>
                      {currentStep === 0 && (
                         <div className="space-y-6 pb-4">
-                           <Label>Registration Type</Label>
+                           {/* <Label>Registration Type</Label> */}
                            <RadioGroup
                               onValueChange={(value) => handleSelectChange('registrationType', value)}
                               value={formData.registrationType}
@@ -739,6 +747,7 @@ const ChainsawRegistrationForm = () => {
                            variant="outline"
                            onClick={handlePrevStep}
                            className="w-full sm:w-auto px-4 py-2"
+                           disabled={isSubmitting || isSavingDraft}
                         >
                            Previous
                         </Button>
@@ -750,6 +759,7 @@ const ChainsawRegistrationForm = () => {
                            type="button"
                            onClick={handleNextStep}
                            className="w-full sm:w-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white"
+                           disabled={isSubmitting || isSavingDraft}
                         >
                            Next
                         </Button>
@@ -760,15 +770,31 @@ const ChainsawRegistrationForm = () => {
                               variant="outline"
                               onClick={handleSaveAsDraft}
                               className="w-full sm:w-auto px-4 py-2"
+                              disabled={isSubmitting || isSavingDraft}
                            >
-                              Save as Draft
+                              {isSavingDraft ? (
+                                 <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Saving...
+                                 </>
+                              ) : (
+                                 'Save as Draft'
+                              )}
                            </Button>
                            <Button
                               type="submit"
                               onClick={handleSubmit}
                               className="w-full sm:w-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white"
+                              disabled={isSubmitting || isSavingDraft}
                            >
-                              Submit Application
+                              {isSubmitting ? (
+                                 <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Submitting...
+                                 </>
+                              ) : (
+                                 'Submit Application'
+                              )}
                            </Button>
                         </>
                      )}

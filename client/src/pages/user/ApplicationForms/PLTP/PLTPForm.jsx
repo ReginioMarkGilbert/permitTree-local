@@ -16,6 +16,7 @@ import { UploadCard } from '@/pages/user/ApplicationForms/CSAWForm/CSAWFormUtils
 import { gql, useMutation } from '@apollo/client';
 import { formatLabel, formatReviewValue } from '@/pages/user/ApplicationForms/CSAWForm/CSAWFormUtils';
 import '@/components/ui/styles/customScrollBar.css';
+import { Loader2 } from "lucide-react";
 
 const CREATE_PLTP_PERMIT = gql`
   mutation CreatePLTPPermit($input: PLTPPermitInput!) {
@@ -92,6 +93,8 @@ const PLTPForm = () => {
    const [modalContent, setModalContent] = useState({ title: '', message: '' });
    const [createPLTPPermit] = useMutation(CREATE_PLTP_PERMIT);
    const [savePLTPPermitDraft] = useMutation(SAVE_PLTP_PERMIT_DRAFT);
+   const [isSubmitting, setIsSubmitting] = useState(false);
+   const [isSavingDraft, setIsSavingDraft] = useState(false);
 
    const handleInputChange = (e) => {
       const { name, value } = e.target;
@@ -134,6 +137,7 @@ const PLTPForm = () => {
    };
 
    const handleSaveAsDraft = async () => {
+      setIsSavingDraft(true);
       try {
          const input = {
             name: formData.name,
@@ -165,9 +169,6 @@ const PLTPForm = () => {
             }
          }
 
-         // Log the form data being saved as draft
-         console.log('Saving draft with input:', input);
-
          const token = localStorage.getItem('token');
          const { data } = await savePLTPPermitDraft({
             variables: { input },
@@ -192,11 +193,14 @@ const PLTPForm = () => {
       } catch (error) {
          console.error('Error saving draft:', error);
          toast.error("Error saving draft: " + error.message);
+      } finally {
+         setIsSavingDraft(false);
       }
    };
 
    const handleSubmit = async (e) => {
       e.preventDefault();
+      setIsSubmitting(true);
       try {
          const input = {
             name: formData.name,
@@ -254,6 +258,8 @@ const PLTPForm = () => {
       } catch (error) {
          console.error('Error submitting application:', error);
          toast.error("Error submitting application: " + error.message);
+      } finally {
+         setIsSubmitting(false);
       }
    };
 
@@ -515,6 +521,7 @@ const PLTPForm = () => {
                            variant="outline"
                            onClick={handlePrevStep}
                            className="w-full sm:w-auto"
+                           disabled={isSubmitting || isSavingDraft}
                         >
                            Previous
                         </Button>
@@ -526,6 +533,7 @@ const PLTPForm = () => {
                            type="button"
                            onClick={handleNextStep}
                            className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
+                           disabled={isSubmitting || isSavingDraft}
                         >
                            Next
                         </Button>
@@ -536,15 +544,31 @@ const PLTPForm = () => {
                               variant="outline"
                               onClick={handleSaveAsDraft}
                               className="w-full sm:w-auto"
+                              disabled={isSubmitting || isSavingDraft}
                            >
-                              Save as Draft
+                              {isSavingDraft ? (
+                                 <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Saving...
+                                 </>
+                              ) : (
+                                 'Save as Draft'
+                              )}
                            </Button>
                            <Button
                               type="submit"
                               onClick={handleSubmit}
                               className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
+                              disabled={isSubmitting || isSavingDraft}
                            >
-                              Submit Application
+                              {isSubmitting ? (
+                                 <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Submitting...
+                                 </>
+                              ) : (
+                                 'Submit Application'
+                              )}
                            </Button>
                         </>
                      )}

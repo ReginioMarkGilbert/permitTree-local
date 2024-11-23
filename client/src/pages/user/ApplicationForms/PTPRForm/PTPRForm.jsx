@@ -16,6 +16,7 @@ import { UploadCard } from '@/pages/user/ApplicationForms/CSAWForm/CSAWFormUtils
 import { gql, useMutation } from '@apollo/client';
 import { formatLabel, formatReviewValue } from '@/pages/user/ApplicationForms/CSAWForm/CSAWFormUtils';
 import '@/components/ui/styles/customScrollBar.css';
+import { Loader2 } from 'lucide-react';
 
 const CREATE_PTPR_PERMIT = gql`
   mutation CreatePTPRPermit($input: PTPRPermitInput!) {
@@ -82,6 +83,8 @@ const PTPRForm = () => {
    const [modalContent, setModalContent] = useState({ title: '', message: '' });
    const [createPTPRPermit] = useMutation(CREATE_PTPR_PERMIT);
    const [savePTPRPermitDraft] = useMutation(SAVE_PTPR_PERMIT_DRAFT);
+   const [isSubmitting, setIsSubmitting] = useState(false);
+   const [isSavingDraft, setIsSavingDraft] = useState(false);
 
    const handleInputChange = (e) => {
       const { name, value } = e.target;
@@ -420,6 +423,7 @@ const PTPRForm = () => {
                            variant="outline"
                            onClick={handlePrevStep}
                            className="w-full sm:w-auto"
+                           disabled={isSubmitting || isSavingDraft}
                         >
                            Previous
                         </Button>
@@ -431,6 +435,7 @@ const PTPRForm = () => {
                            type="button"
                            onClick={handleNextStep}
                            className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
+                           disabled={isSubmitting || isSavingDraft}
                         >
                            Next
                         </Button>
@@ -441,15 +446,31 @@ const PTPRForm = () => {
                               variant="outline"
                               onClick={handleSaveAsDraft}
                               className="w-full sm:w-auto"
+                              disabled={isSubmitting || isSavingDraft}
                            >
-                              Save as Draft
+                              {isSavingDraft ? (
+                                 <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Saving...
+                                 </>
+                              ) : (
+                                 'Save as Draft'
+                              )}
                            </Button>
                            <Button
                               type="submit"
                               onClick={handleSubmit}
                               className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
+                              disabled={isSubmitting || isSavingDraft}
                            >
-                              Submit Application
+                              {isSubmitting ? (
+                                 <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Submitting...
+                                 </>
+                              ) : (
+                                 'Submit Application'
+                              )}
                            </Button>
                         </>
                      )}

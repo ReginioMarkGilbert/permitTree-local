@@ -1,4 +1,5 @@
 import { useQuery, useMutation, gql, useLazyQuery, useApolloClient } from '@apollo/client';
+import { useState } from 'react';
 
 const GET_USER_APPLICATIONS = gql`
   query GetUserApplications($status: String, $currentStage: String) {
@@ -493,11 +494,23 @@ const RESUBMIT_PERMIT = gql`
 
 export const useUserApplications = (status, currentStage) => {
    const client = useApolloClient();
-   const { loading, error, data, refetch } = useQuery(GET_USER_APPLICATIONS, {
+   const [isLoading, setIsLoading] = useState(false);
+   const { data, error, refetch } = useQuery(GET_USER_APPLICATIONS, {
       variables: { status, currentStage },
-      fetchPolicy: 'network-only',
-      onError: (error) => console.error('Query error:', error),
+      fetchPolicy: 'cache-and-network',
+      nextFetchPolicy: 'cache-first',
+      onError: (error) => {
+         console.error('Query error:', error);
+         setIsLoading(false);
+      },
+      onCompleted: (data) => {
+         console.log('Query completed:', data);
+         setIsLoading(false);
+      },
    });
+
+   console.log('useUserApplications params:', { status, currentStage });
+   console.log('useUserApplications state:', { loading: isLoading, error, data });
 
    const [deletePermitMutation] = useMutation(DELETE_PERMIT);
    const [updateCOVPermitMutation] = useMutation(UPDATE_COV_PERMIT);
@@ -613,7 +626,7 @@ export const useUserApplications = (status, currentStage) => {
             powerOutput: input.powerOutput,
             maxLengthGuidebar: input.maxLengthGuidebar,
             countryOfOrigin: input.countryOfOrigin,
-            purchasePrice: parseFloat(input.purchasePrice), // Ensure this is a number
+            purchasePrice: parseFloat(input.purchasePrice),
             isOwner: Boolean(input.isOwner),
             isTenureHolder: Boolean(input.isTenureHolder),
             isBusinessOwner: Boolean(input.isBusinessOwner),
@@ -986,13 +999,22 @@ export const useUserApplications = (status, currentStage) => {
 
    const fetchUserApplications = async (status, currentStage) => {
       try {
+         setIsLoading(true);
+         console.log('Fetching applications with:', { status, currentStage });
          const { data } = await refetch({ status, currentStage });
+         console.log('Fetch result:', data);
+         setIsLoading(false);
          return data?.getUserApplications || [];
       } catch (error) {
          console.error('User side, Error fetching user applications:', error);
+         setIsLoading(false);
          throw error;
       }
-   }
+   };
+
+   // Update loading state calculation
+   const loading = isLoading || (!data && !error);
+
    return {
       applications: data?.getUserApplications || [],
       loading,
