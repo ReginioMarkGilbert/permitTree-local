@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
 import { format } from 'date-fns';
 import QRCode from 'react-qr-code';
-import DENRLogo from '@/assets/DENR-LOGO.png';
+import DENRLogo from '@/assets/denr-logo.png';
 import BagongPilipinasLogo from '@/assets/BAGONG-PILIPINAS-LOGO.png';
 
 const CSAWCertificateTemplate = forwardRef(({ certificate, application }, ref) => {
