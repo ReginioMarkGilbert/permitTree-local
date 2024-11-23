@@ -4,8 +4,8 @@ import { toast } from 'sonner';
 import 'react-toastify/dist/ReactToastify.css';
 import { setToken } from '../../utils/tokenManager';
 import { FaLeaf, FaEye, FaEyeSlash } from 'react-icons/fa';
-import { Input } from '@/components/ui/Input';
-import { Label } from '@/components/ui/Label';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/uilLabel';
 import './styles/UserAuthPage.css';
 import { gql, useMutation, useApolloClient } from '@apollo/client';
 
