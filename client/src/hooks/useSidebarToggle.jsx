@@ -1,17 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useState, useCallback } from 'react';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 const useSidebarToggle = () => {
-   const [sidebarToggle, setSidebarToggle] = useState(false);
-   const location = useLocation();
-
-   //  useEffect(() => {
-   //      if (location.pathname === '/home') {
-   //          setSidebarToggle(true);
-   //      } else {
-   //          setSidebarToggle(false);
-   //      }
-   //  }, [location]);
+   const isDesktop = useMediaQuery('(min-width: 1024px)');
+   const [sidebarToggle, setSidebarToggle] = useState(isDesktop);
 
    const toggleSidebar = useCallback(() => {
       setSidebarToggle(prev => !prev);

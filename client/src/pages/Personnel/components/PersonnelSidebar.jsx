@@ -1,11 +1,34 @@
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
-import { FaBell, FaChartLine, FaCog, FaFileInvoiceDollar, FaHome, FaSignOutAlt, FaTachometerAlt, FaMap, FaCalendarCheck } from 'react-icons/fa';
-import { NavLink, useNavigate } from 'react-router-dom';
+import React, { useCallback, useState, useEffect } from 'react';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { removeToken } from '@/utils/tokenManager';
 import { isAuthenticated, getUserRoles } from '@/utils/auth';
 import { gql, useMutation } from '@apollo/client';
-import { X } from 'lucide-react';
+import {
+   Home,
+   LayoutDashboard,
+   CalendarCheck,
+   Receipt,
+   Bell,
+   BarChart,
+   Map,
+   Settings,
+   LogOut,
+   ChevronLeft,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 import permitTreeLogo from '@/assets/denr-logo.png';
+import {
+   Sheet,
+   SheetContent,
+} from "@/components/ui/sheet";
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipProvider,
+   TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const LOGOUT_MUTATION = gql`
   mutation Logout {
@@ -15,19 +38,10 @@ const LOGOUT_MUTATION = gql`
 
 const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
    const navigate = useNavigate();
+   const location = useLocation();
    const [logout] = useMutation(LOGOUT_MUTATION);
    const userRoles = getUserRoles();
-   const [showText, setShowText] = useState(false);
    const [isAuth, setIsAuth] = useState(isAuthenticated());
-
-   useEffect(() => {
-      if (isOpen) {
-         const timer = setTimeout(() => setShowText(true), 150);
-         return () => clearTimeout(timer);
-      } else {
-         setShowText(false);
-      }
-   }, [isOpen]);
 
    const handleLogout = useCallback(async () => {
       try {
@@ -35,11 +49,8 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
          removeToken();
          localStorage.removeItem('user');
          setIsAuth(false);
-         if (isOpen) {
-            onToggle();
-         }
+         if (isOpen) onToggle();
          navigate('/auth');
-         console.log('Logout successful!');
       } catch (error) {
          console.error('Logout failed:', error);
       }
@@ -49,150 +60,160 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
       const authStatus = isAuthenticated();
       setIsAuth(authStatus);
       if (!authStatus) {
-         if (isOpen) {
-            onToggle();
-         }
+         if (isOpen) onToggle();
          navigate('/auth');
       }
    }, [navigate, isOpen, onToggle]);
 
    const getDashboardLink = () => {
-      if (userRoles.includes('Receiving_Clerk') || userRoles.includes('Releasing_Clerk')) {
-         return "/personnel/receiving-releasing";
-      } else if (userRoles.includes('Technical_Staff')) {
-         return "/personnel/technical-staff";
-      } else if (userRoles.includes('Chief_RPS') || userRoles.includes('Chief_TSD')) {
-         return "/personnel/chief";
-      } else if (userRoles.includes('Accountant') || userRoles.includes('OOP_Staff_Incharge')) {
-         return "/personnel/accountant";
-      } else if (userRoles.includes('Bill_Collector') || userRoles.includes('Credit_Officer')) {
-         return "/personnel/bill-collector";
-      } else if (userRoles.includes('PENR_CENR_Officer') || userRoles.includes('Deputy_CENR_Officer')) {
-         return "/personnel/penr-cenr-officer";
-      } else if (userRoles.includes('Inspection_Team')) {
-         return "/personnel/inspection-team";
-      } else {
-         console.log('No role found');
-         return "/personnel/dashboard";
-      }
+      const roleLinks = {
+         'Receiving_Clerk': "/personnel/receiving-releasing",
+         'Releasing_Clerk': "/personnel/receiving-releasing",
+         'Technical_Staff': "/personnel/technical-staff",
+         'Chief_RPS': "/personnel/chief",
+         'Chief_TSD': "/personnel/chief",
+         'Accountant': "/personnel/accountant",
+         'OOP_Staff_Incharge': "/personnel/accountant",
+         'Bill_Collector': "/personnel/bill-collector",
+         'Credit_Officer': "/personnel/bill-collector",
+         'PENR_CENR_Officer': "/personnel/penr-cenr-officer",
+         'Deputy_CENR_Officer': "/personnel/penr-cenr-officer",
+         'Inspection_Team': "/personnel/inspection-team"
+      };
+
+      return userRoles.reduce((link, role) => roleLinks[role] || link, "/personnel/dashboard");
    };
 
    const shouldShowOrderOfPayment = () => {
       return userRoles.includes('Chief_RPS') || userRoles.includes('Chief_TSD');
    };
 
-   const mainNavItems = useMemo(() => [
-      { to: "/personnel/home", icon: <FaHome />, text: "Home" },
-      { to: getDashboardLink(), icon: <FaTachometerAlt />, text: "Dashboard" },
+   const mainNavItems = [
+      { to: "/personnel/home", icon: Home, text: "Home" },
+      { to: getDashboardLink(), icon: LayoutDashboard, text: "Dashboard" },
       ...(userRoles.includes('Technical_Staff') ? [
-         { to: "/personnel/inspection-scheduling", icon: <FaCalendarCheck />, text: "Inspection Schedule" }
+         { to: "/personnel/inspection-scheduling", icon: CalendarCheck, text: "Inspection Schedule" }
       ] : []),
-      ...(shouldShowOrderOfPayment() ? [{ to: "/personnel/order-of-payment", icon: <FaFileInvoiceDollar />, text: "Order of Payment" }] : []),
-      { to: "/personnel/notifications", icon: <FaBell />, text: "Notifications" },
-      { to: "/personnel/reports", icon: <FaChartLine />, text: "Reports" },
-      { to: "/gis", icon: <FaMap />, text: "GIS Maps" },
-   ], [getDashboardLink, shouldShowOrderOfPayment, userRoles]);
+      ...(shouldShowOrderOfPayment() ? [
+         { to: "/personnel/order-of-payment", icon: Receipt, text: "Order of Payment" }
+      ] : []),
+      { to: "/personnel/notifications", icon: Bell, text: "Notifications" },
+      { to: "/personnel/reports", icon: BarChart, text: "Reports" },
+      { to: "/gis", icon: Map, text: "GIS Maps" },
+   ];
 
-   const accountNavItems = useMemo(() => [
-      { to: "/personnel/settings", icon: <FaCog />, text: "Settings" },
-      { to: "/auth", icon: <FaSignOutAlt />, text: "Logout" }
-   ], []);
+   const accountNavItems = [
+      { to: "/personnel/settings", icon: Settings, text: "Settings" },
+      { to: "/auth", icon: LogOut, text: "Logout", onClick: handleLogout }
+   ];
 
-   const renderNavItem = (item, index) => (
-      <NavLink
-         key={index}
-         to={item.to}
-         className={({ isActive }) => `
-            flex items-center py-2.5 px-3 rounded-md mt-1.5
-            ${isOpen ? '' : 'justify-center'}
-            transition-all duration-200 ease-in-out
-            ${isActive && item.to !== '/auth'
-               ? 'bg-green-700 text-white'
-               : 'hover:bg-green-700/50 hover:text-white'}
-            group
-         `}
-         onClick={item.to === '/auth' ? handleLogout : undefined}
-      >
-         <div className="relative w-6 h-6 flex items-center justify-center">
-            <span className="transition-transform duration-200 group-hover:scale-105">
-               {item.icon}
-            </span>
+   const SidebarItem = ({ item, isCollapsed }) => {
+      const isActive = location.pathname === item.to;
+      const content = (
+         <NavLink
+            to={item.to}
+            onClick={item.onClick}
+            className={cn(
+               "relative flex h-10 w-full items-center",
+               "hover:bg-accent rounded-lg transition-colors",
+               "px-3"
+            )}
+         >
+            <div className="flex items-center w-full">
+               <div className="w-[24px] flex items-center justify-center">
+                  <item.icon className={cn(
+                     "h-4 w-4",
+                     isActive ? "text-accent-foreground" : "text-muted-foreground"
+                  )} />
+               </div>
+               <span className={cn(
+                  "ml-2 text-[15px] absolute left-[48px]",
+                  "transition-all duration-300",
+                  isCollapsed ? "opacity-0 -translate-x-2" : "opacity-100 translate-x-0",
+                  isActive ? "text-accent-foreground" : "text-muted-foreground"
+               )}>
+                  {item.text}
+               </span>
+            </div>
+         </NavLink>
+      );
+
+      if (isCollapsed) {
+         return (
+            <TooltipProvider delayDuration={0}>
+               <Tooltip>
+                  <TooltipTrigger asChild>
+                     {content}
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="flex items-center">
+                     {item.text}
+                  </TooltipContent>
+               </Tooltip>
+            </TooltipProvider>
+         );
+      }
+
+      return content;
+   };
+
+   const SidebarContent = ({ isCollapsed = false }) => (
+      <div className="flex h-full flex-col">
+         <div className={cn(
+            "flex h-[12px] items-center",
+            isCollapsed ? "justify-center" : "px-4"
+         )}>
+            <NavLink to="/personnel/home" className="flex items-center gap-2"> </NavLink>
          </div>
-         {isOpen && (
-            <span className={`ml-3 font-medium text-sm transition-opacity duration-300
-               ${showText ? 'opacity-100' : 'opacity-0'}`}>
-               {item.text}
-            </span>
-         )}
-      </NavLink>
+         <ScrollArea className="flex-1">
+            <div className="space-y-1 px-2 pt-1">
+               {mainNavItems.map((item, i) => (
+                  <SidebarItem key={i} item={item} isCollapsed={isCollapsed} />
+               ))}
+            </div>
+         </ScrollArea>
+         <div className={cn(
+            "mt-auto border-t px-2 py-2"
+         )}>
+            {accountNavItems.map((item, i) => (
+               <SidebarItem key={i} item={item} isCollapsed={isCollapsed} />
+            ))}
+         </div>
+         <Button
+            variant="ghost"
+            className={cn(
+               "h-10 w-full border-t",
+               isCollapsed ? "px-2" : "px-4"
+            )}
+            onClick={onToggle}
+         >
+            <ChevronLeft className={cn(
+               "h-4 w-4 transition-all",
+               isOpen ? "rotate-0" : "rotate-180"
+            )} />
+         </Button>
+      </div>
    );
 
-   if (!isAuth) {
-      return null;
+   // Mobile view
+   if (window.innerWidth < 1024) {
+      return (
+         <Sheet open={isOpen} onOpenChange={onToggle}>
+            <SheetContent side="left" className="p-0 w-[270px]">
+               <SidebarContent />
+            </SheetContent>
+         </Sheet>
+      );
    }
 
+   // Desktop view
    return (
-      <>
-         {/* Backdrop - only shows on mobile when sidebar is open */}
-         {isOpen && (
-            <div
-               className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-20 transition-opacity"
-               onClick={onToggle}
-            />
-         )}
-
-         {/* Sidebar */}
-         <div
-            className={`h-full bg-green-800 text-white flex flex-col fixed top-0 left-0
-               ${isOpen ? 'w-64' : 'w-16'}
-               transition-all duration-300 ease-in-out
-               border-r border-green-700
-               lg:z-10 z-30
-               ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
-         >
-            <div className="flex flex-col flex-grow">
-               {/* Logo Section with Close Button for Mobile */}
-               <div className={`flex items-center p-4 mb-4 border-b border-green-700 h-16
-                  ${isOpen ? 'justify-between' : 'justify-center'}`}>
-                  <div className="flex items-center">
-                     <img
-                        src={permitTreeLogo}
-                        alt="PermitTree Logo"
-                        className="w-8 h-8"
-                     />
-                     {isOpen && (
-                        <span className={`ml-3 font-semibold text-lg transition-opacity duration-300
-                           ${showText ? 'opacity-100' : 'opacity-0'}`}>
-                           Personnel
-                        </span>
-                     )}
-                  </div>
-                  {/* Close button - only visible on mobile when sidebar is open */}
-                  {isOpen && (
-                     <button
-                        onClick={onToggle}
-                        className="lg:hidden p-1 rounded-lg hover:bg-green-700 transition-colors"
-                     >
-                        <X className="h-6 w-6" />
-                     </button>
-                  )}
-               </div>
-
-               {/* Main Navigation */}
-               <nav className="flex-grow px-3">
-                  {mainNavItems.map((item, index) => renderNavItem(item, index))}
-               </nav>
-
-               {/* Account Navigation */}
-               <div className="mt-auto">
-                  <div className="px-3 mb-8">
-                     <div className="border-t border-green-700 my-2"></div>
-                     {accountNavItems.map((item, index) => renderNavItem(item, index))}
-                  </div>
-               </div>
-            </div>
-         </div>
-      </>
+      <div className={cn(
+         "fixed top-16 left-0 z-20 h-[calc(100%-4rem)] border-r bg-background",
+         isOpen ? "w-[270px]" : "w-[64px]",
+         "transition-[width] duration-300 ease-in-out"
+      )}>
+         <SidebarContent isCollapsed={!isOpen} />
+      </div>
    );
 });
 

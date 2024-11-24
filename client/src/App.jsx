@@ -54,6 +54,8 @@ import ORPrintPage from './pages/user/ORPrintPage';
 import GISDashboardPage from './pages/Personnel/GISDashboardPage';
 import InspectionSchedulingPage from './pages/Personnel/InspectionSchedulingPage';
 
+import { cn } from './lib/utils';
+
 const App = () => {
    const { sidebarToggle, toggleSidebar } = useSidebarToggle();
    const navigate = useNavigate();
@@ -106,85 +108,102 @@ const App = () => {
 
    return (
       <ApolloProvider client={client}>
-         <div className="flex">
+         <div className="relative h-screen overflow-hidden">
             {isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/user/oop-print' && location.pathname !== '/user/or-print' && (
-               <>
+               <div className="flex h-full">
                   {getSidebar()}
-                  {showNavbar && <Navbar sidebarToggle={sidebarToggle} setSidebarToggle={toggleSidebar} />}
-               </>
+                  <div className={cn(
+                     "flex-1 min-w-0 flex flex-col",
+                     'transition-[padding] duration-300'
+                  )}>
+                     {showNavbar && <Navbar sidebarToggle={sidebarToggle} setSidebarToggle={toggleSidebar} />}
+                     <main className={cn(
+                        "flex-1 overflow-y-auto bg-background",
+                        "pt-16"
+                     )}>
+                        <Routes>
+                           <Route path="/" element={<LandingPage />} />
+                           <Route path="/auth" element={<UserAuthPage />} />
+                           <Route path="/home" element={<ProtectedRoute roles={['user']}><UserHomePage /></ProtectedRoute>} />
+                           <Route path="/permits" element={<ProtectedRoute roles={['user']}><PermitsPage /></ProtectedRoute>} />
+                           <Route path="/applicationsStatus" element={<ProtectedRoute roles={['user']}><UserApplicationsPage /></ProtectedRoute>} />
+                           <Route path="/apply/:formType" element={<ProtectedRoute roles={['user']}><ApplicationForm /></ProtectedRoute>} />
+                           {/* <Route path="/unauthorized" element={<div className="flex items-center justify-center min-h-screen text-center">Unauthorized Access</div>} /> */}
+
+                           <Route path="/about" element={<AboutPage />} />
+                           <Route path="/services" element={<ServicesPage />} />
+                           <Route path="/contact" element={<ContactPage />} />
+                           <Route path="/learnMore" element={<LearnMorePage />} />
+                           <Route path="/profile" element={<UserProfilePage />} />
+                           <Route path="/notifications" element={<ProtectedRoute roles={['user']}><UserNotificationsPage /></ProtectedRoute>} />
+
+                           <Route path="/personnel/home" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelHomePage /></ProtectedRoute>} />
+                           <Route path="/personnel/settings" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelSettingsPage /></ProtectedRoute>} />
+                           <Route path="/personnel/reports" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelReportsPage /></ProtectedRoute>} />
+                           <Route path="/personnel/notifications" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelNotificationPage /></ProtectedRoute>} />
+                           <Route path="/personnel/order-of-payment" element={<ProtectedRoute roles={['Chief_RPS', 'Accountant', 'PENR_CENR_Officer']}><OOPFormCreationPage /></ProtectedRoute>} />
+                           <Route path="/personnel/order-of-payment/:action" element={<ProtectedRoute roles={['Chief_RPS', 'Accountant', 'PENR_CENR_Officer']}><OOPFormCreationPage /></ProtectedRoute>} />
+
+                           {/* Dashboard Routes for Personnels */}
+                           <Route path="/personnel/dashboard" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelDashboard /></ProtectedRoute>} />
+                           <Route path="/personnel/:role" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelDashboard /></ProtectedRoute>} />
+
+                           <Route // oop creation page only accessible to Chief_RPS, PENR_CENR_Officer, and Accountant
+                              path="/personnel/create-oop"
+                              element={
+                                 <ProtectedRoute roles={['Chief_RPS', 'PENR_CENR_Officer', 'Accountant']}>
+                                    <OOPFormCreationPage />
+                                 </ProtectedRoute>
+                              }
+                           />
+
+                           <Route path="/superadmin/home" element={<ProtectedRoute roles={['superadmin']}><SuperAdminHomePage /></ProtectedRoute>} />
+                           <Route path="/superadmin/dashboard" element={<ProtectedRoute roles={['superadmin']}><SuperAdminDashboard /></ProtectedRoute>} />
+                           <Route path="/superadmin/manage-users" element={<ProtectedRoute roles={['superadmin']}><SuperAdminManageUsersPage /></ProtectedRoute>} />
+                           <Route path="/superadmin/reports" element={<ProtectedRoute roles={['superadmin']}><SuperAdminReportsPage /></ProtectedRoute>} />
+                           <Route path="/superadmin/settings" element={<ProtectedRoute roles={['superadmin']}><SuperAdminSettingsPage /></ProtectedRoute>} />
+                           <Route path="/user/oop-print" element={<OOPPrintPage />} />
+                           <Route path="/user/or-print" element={<ORPrintPage />} />
+                           <Route
+                              path="/payment/:oopId"
+                              element={
+                                 <ProtectedRoute roles={['user']}>
+                                    <PaymentPage />
+                                 </ProtectedRoute>
+                              }
+                           />
+                           <Route
+                              path="/gis"
+                              element={
+                                 <ProtectedRoute roles={PersonnelRoles}>
+                                    <GISDashboardPage />
+                                 </ProtectedRoute>
+                              }
+                           />
+                           <Route
+                              path="/personnel/inspection-scheduling"
+                              element={
+                                 <ProtectedRoute roles={['Technical_Staff']}>
+                                    <InspectionSchedulingPage />
+                                 </ProtectedRoute>
+                              }
+                           />
+                        </Routes>
+                     </main>
+                  </div>
+               </div>
             )}
-            <div className={`flex-1 transition-all duration-300 ${sidebarToggle && showNavbar ? 'ml-64' : 'ml-0'}`}>
-               <div className="p-0">
+            {/* For non-authenticated routes */}
+            {(!isAuthenticated() || location.pathname === '/' || location.pathname === '/auth' || location.pathname === '/user/oop-print' || location.pathname === '/user/or-print') && (
+               <main className="h-full overflow-y-auto bg-background">
                   <Routes>
                      <Route path="/" element={<LandingPage />} />
                      <Route path="/auth" element={<UserAuthPage />} />
-                     <Route path="/home" element={<ProtectedRoute roles={['user']}><UserHomePage /></ProtectedRoute>} />
-                     <Route path="/permits" element={<ProtectedRoute roles={['user']}><PermitsPage /></ProtectedRoute>} />
-                     <Route path="/applicationsStatus" element={<ProtectedRoute roles={['user']}><UserApplicationsPage /></ProtectedRoute>} />
-                     <Route path="/apply/:formType" element={<ProtectedRoute roles={['user']}><ApplicationForm /></ProtectedRoute>} />
-                     {/* <Route path="/unauthorized" element={<div className="flex items-center justify-center min-h-screen text-center">Unauthorized Access</div>} /> */}
-
-                     <Route path="/about" element={<AboutPage />} />
-                     <Route path="/services" element={<ServicesPage />} />
-                     <Route path="/contact" element={<ContactPage />} />
-                     <Route path="/learnMore" element={<LearnMorePage />} />
-                     <Route path="/profile" element={<UserProfilePage />} />
-                     <Route path="/notifications" element={<ProtectedRoute roles={['user']}><UserNotificationsPage /></ProtectedRoute>} />
-
-                     <Route path="/personnel/home" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelHomePage /></ProtectedRoute>} />
-                     <Route path="/personnel/settings" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelSettingsPage /></ProtectedRoute>} />
-                     <Route path="/personnel/reports" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelReportsPage /></ProtectedRoute>} />
-                     <Route path="/personnel/notifications" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelNotificationPage /></ProtectedRoute>} />
-                     <Route path="/personnel/order-of-payment" element={<ProtectedRoute roles={['Chief_RPS', 'Accountant', 'PENR_CENR_Officer']}><OOPFormCreationPage /></ProtectedRoute>} />
-                     <Route path="/personnel/order-of-payment/:action" element={<ProtectedRoute roles={['Chief_RPS', 'Accountant', 'PENR_CENR_Officer']}><OOPFormCreationPage /></ProtectedRoute>} />
-
-                     {/* Dashboard Routes for Personnels */}
-                     <Route path="/personnel/dashboard" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelDashboard /></ProtectedRoute>} />
-                     <Route path="/personnel/:role" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelDashboard /></ProtectedRoute>} />
-
-                     <Route // oop creation page only accessible to Chief_RPS, PENR_CENR_Officer, and Accountant
-                        path="/personnel/create-oop"
-                        element={
-                           <ProtectedRoute roles={['Chief_RPS', 'PENR_CENR_Officer', 'Accountant']}>
-                              <OOPFormCreationPage />
-                           </ProtectedRoute>
-                        }
-                     />
-
-                     <Route path="/superadmin/home" element={<ProtectedRoute roles={['superadmin']}><SuperAdminHomePage /></ProtectedRoute>} />
-                     <Route path="/superadmin/dashboard" element={<ProtectedRoute roles={['superadmin']}><SuperAdminDashboard /></ProtectedRoute>} />
-                     <Route path="/superadmin/manage-users" element={<ProtectedRoute roles={['superadmin']}><SuperAdminManageUsersPage /></ProtectedRoute>} />
-                     <Route path="/superadmin/reports" element={<ProtectedRoute roles={['superadmin']}><SuperAdminReportsPage /></ProtectedRoute>} />
-                     <Route path="/superadmin/settings" element={<ProtectedRoute roles={['superadmin']}><SuperAdminSettingsPage /></ProtectedRoute>} />
                      <Route path="/user/oop-print" element={<OOPPrintPage />} />
                      <Route path="/user/or-print" element={<ORPrintPage />} />
-                     <Route
-                        path="/payment/:oopId"
-                        element={
-                           <ProtectedRoute roles={['user']}>
-                              <PaymentPage />
-                           </ProtectedRoute>
-                        }
-                     />
-                     <Route
-                        path="/gis"
-                        element={
-                           <ProtectedRoute roles={PersonnelRoles}>
-                              <GISDashboardPage />
-                           </ProtectedRoute>
-                        }
-                     />
-                     <Route
-                        path="/personnel/inspection-scheduling"
-                        element={
-                           <ProtectedRoute roles={['Technical_Staff']}>
-                              <InspectionSchedulingPage />
-                           </ProtectedRoute>
-                        }
-                     />
                   </Routes>
-               </div>
-            </div>
+               </main>
+            )}
             <ToastContainer />
             <Toaster position="top-right" duration={3000} />
          </div>
