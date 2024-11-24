@@ -75,10 +75,19 @@ const analyticsTypes = gql`
         usersByStatus: [ApplicationTypeStats!]!
     }
 
+    type DashboardStats {
+        totalUsers: Int!
+        applicationsForReview: Int!
+        approvedToday: Int!
+        applicationsReturned: Int!
+        applicationIncrease: Float!
+    }
+
     extend type Query {
         getApplicationAnalytics(timeFilter: String!): ApplicationAnalytics!
         getFinancialAnalytics(timeFilter: String!): FinancialAnalytics!
         getUserAnalytics(timeFilter: String!): UserStats!
+        getDashboardStats: DashboardStats!
     }
 `;
 

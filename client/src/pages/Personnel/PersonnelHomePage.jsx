@@ -11,6 +11,7 @@ import { usePersonnelNotifications } from './hooks/usePersonnelNotifications';
 import { useRecentApplications } from './hooks/useRecentApplications';
 import { useOrderOfPayments } from './hooks/useOrderOfPayments';
 import { format } from 'date-fns';
+import { useDashboardStats } from './hooks/useDashboardStats';
 
 const PersonnelHomePage = () => {
    const [loading, setLoading] = useState(true);
@@ -19,14 +20,11 @@ const PersonnelHomePage = () => {
    const [refreshTrigger, setRefreshTrigger] = useState(0);
    const debouncedRefreshTrigger = useDebounce(refreshTrigger, 300);
 
-   // State for dashboard stats
-   const [dashboardStats, setDashboardStats] = useState({
-      totalUsers: 0,
-      applicationsForReview: 0,
-      approvedToday: 23,
-      applicationsReturned: 0,
-      applicationIncrease: 12
-   });
+   const {
+      dashboardStats,
+      loading: statsLoading,
+      error: statsError
+   } = useDashboardStats();
 
    const {
       notifications,
