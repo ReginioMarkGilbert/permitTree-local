@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Eye, Printer, ClipboardCheck, RotateCcw } from 'lucide-react';
+import { Eye, ClipboardCheck, RotateCcw } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { TableCell, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import {
    Tooltip,
    TooltipContent,
    TooltipProvider,
    TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Card } from "@/components/ui/card";
+import { format } from 'date-fns';
 import TS_ViewModal from '@/pages/Personnel/components/PersonnelDashboardComponents/TechnicalStaff/TS_ViewModal';
 import RRC_RecordModal from './RRC_RecordModal';
 import { gql, useMutation } from '@apollo/client';
@@ -61,9 +65,9 @@ const RRC_ApplicationRow = ({ app, onRecordComplete, getStatusColor, currentTab,
    const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
    const [updatePermitStage] = useMutation(UPDATE_PERMIT_STAGE);
    const [undoRecordApplication] = useMutation(UNDO_RECORD_APPLICATION);
+
    const handleViewClick = () => setIsViewModalOpen(true);
    const handleRecordClick = () => setIsRecordModalOpen(true);
-
    const handleRecordComplete = () => {
       setIsRecordModalOpen(false);
       onRecordComplete();
@@ -90,99 +94,78 @@ const RRC_ApplicationRow = ({ app, onRecordComplete, getStatusColor, currentTab,
       }
    };
 
-   const renderActions = () => {
-      const actions = [];
+   const renderActionButtons = () => {
+      const actions = [
+         {
+            icon: Eye,
+            label: "View Application",
+            onClick: handleViewClick,
+            variant: "outline"
+         },
+         // Add record action if applicable
+         app.currentStage === 'ForRecordByReceivingClerk' && !app.recordedByReceivingClerk && {
+            icon: ClipboardCheck,
+            label: "Record Application",
+            onClick: handleRecordClick,
+            variant: "outline",
+            className: "text-blue-600 hover:text-blue-800"
+         },
+         // Add undo action if applicable
+         currentTab === 'Reviewed/Recorded Applications' && {
+            icon: RotateCcw,
+            label: "Undo Record",
+            onClick: handleUndo,
+            variant: "outline",
+            className: "text-yellow-600 hover:text-yellow-800"
+         }
+      ].filter(Boolean);
 
-      // View action
-      actions.push(
-         <TooltipProvider key="view-action">
-            <Tooltip delayDuration={200}>
+      return actions.map((action, index) => (
+         <TooltipProvider key={index}>
+            <Tooltip>
                <TooltipTrigger asChild>
                   <Button
-                     onClick={handleViewClick}
-                     variant="outline"
+                     variant={action.variant}
                      size="icon"
-                     className="h-8 w-8"
-                     data-testid="view-button"
+                     onClick={action.onClick}
+                     className={action.className}
                   >
-                     <Eye className="h-4 w-4" />
+                     <action.icon className="h-4 w-4" />
                   </Button>
                </TooltipTrigger>
                <TooltipContent>
-                  <p>View Application</p>
+                  <p>{action.label}</p>
                </TooltipContent>
             </Tooltip>
          </TooltipProvider>
-      );
-
-      // Record action - for applications that need to be recorded
-      if (app.currentStage === 'ForRecordByReceivingClerk' && !app.recordedByReceivingClerk) {
-         actions.push(
-            <TooltipProvider key="record-action">
-               <Tooltip delayDuration={200}>
-                  <TooltipTrigger asChild>
-                     <Button
-                        onClick={handleRecordClick}
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 text-blue-600 hover:text-blue-800"
-                        data-testid="record-button"
-                     >
-                        <ClipboardCheck className="h-4 w-4" />
-                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                     <p>Record Application</p>
-                  </TooltipContent>
-               </Tooltip>
-            </TooltipProvider>
-         );
-      }
-      // Undo button
-      if (currentTab === 'Reviewed/Recorded Applications') {
-         actions.push(
-            <TooltipProvider key="undo-action">
-               <Tooltip>
-                  <TooltipTrigger asChild>
-                     <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 text-yellow-600"
-                        onClick={handleUndo}
-                     >
-                        <RotateCcw className="h-4 w-4" />
-                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                     <p>Undo Record</p>
-                  </TooltipContent>
-               </Tooltip>
-            </TooltipProvider>
-         );
-      }
-
-      return actions;
+      ));
    };
 
    if (isMobile) {
       return (
-         <div className="bg-white p-4 rounded-lg shadow space-y-3">
-            <div className="flex justify-between items-start">
-               <div>
-                  <p className="font-medium text-gray-900">{app.applicationNumber}</p>
-                  <p className="text-sm text-gray-500">{app.applicationType}</p>
+         <>
+            <Card className="p-4 space-y-3">
+               <div className="flex justify-between items-start">
+                  <div>
+                     <p className="font-medium">{app.applicationNumber}</p>
+                     <p className="text-sm text-muted-foreground">{app.applicationType}</p>
+                  </div>
+                  <Badge
+                     variant={getStatusVariant(app.status).variant}
+                     className={getStatusVariant(app.status).className}
+                  >
+                     {app.status}
+                  </Badge>
                </div>
-               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(app.status)}`}>
-                  {app.status}
-               </span>
-            </div>
-            <div className="text-sm text-gray-500">
-               {new Date(app.dateOfSubmission).toLocaleDateString()}
-            </div>
-            <div className="flex flex-wrap gap-2">
-               {renderActions()}
-            </div>
+               <p className="text-sm text-muted-foreground">
+                  {format(new Date(app.dateOfSubmission), 'MMM d, yyyy')}
+               </p>
+               <div className="flex gap-2">
+                  {renderActionButtons()}
+               </div>
+            </Card>
 
+            {/* Modals */}
             <TS_ViewModal
                isOpen={isViewModalOpen}
                onClose={() => setIsViewModalOpen(false)}
@@ -194,36 +177,32 @@ const RRC_ApplicationRow = ({ app, onRecordComplete, getStatusColor, currentTab,
                application={app}
                onRecordComplete={handleRecordComplete}
             />
-         </div>
+         </>
       );
    }
 
    return (
       <>
-         <tr>
-            <td className="px-4 py-3 whitespace-nowrap">
-               <div className="text-sm text-gray-900">{app.applicationNumber}</div>
-            </td>
-            <td className="px-4 py-3 whitespace-nowrap">
-               <div className="text-sm text-gray-900">{app.applicationType}</div>
-            </td>
-            <td className="px-4 py-3 whitespace-nowrap">
-               <div className="text-sm text-gray-900">
-                  {new Date(app.dateOfSubmission).toLocaleDateString()}
-               </div>
-            </td>
-            <td className="px-4 py-3 whitespace-nowrap">
-               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(app.status)}`}>
+         <TableRow>
+            <TableCell>{app.applicationNumber}</TableCell>
+            <TableCell>{app.applicationType}</TableCell>
+            <TableCell>{format(new Date(app.dateOfSubmission), 'MMM d, yyyy')}</TableCell>
+            <TableCell>
+               <Badge
+                  variant={getStatusVariant(app.status).variant}
+                  className={getStatusVariant(app.status).className}
+               >
                   {app.status}
-               </span>
-            </td>
-            <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-               <div className="flex items-center space-x-2">
-                  {renderActions()}
+               </Badge>
+            </TableCell>
+            <TableCell className="text-right">
+               <div className="flex justify-end gap-2">
+                  {renderActionButtons()}
                </div>
-            </td>
-         </tr>
+            </TableCell>
+         </TableRow>
 
+         {/* Modals */}
          <TS_ViewModal
             isOpen={isViewModalOpen}
             onClose={() => setIsViewModalOpen(false)}
@@ -237,6 +216,37 @@ const RRC_ApplicationRow = ({ app, onRecordComplete, getStatusColor, currentTab,
          />
       </>
    );
+};
+
+// Helper function to map status to badge variant and custom colors
+const getStatusVariant = (status) => {
+   switch (status.toLowerCase()) {
+      case 'pending':
+         return {
+            variant: 'warning',
+            className: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100/80'
+         };
+      case 'recorded':
+         return {
+            variant: 'default',
+            className: 'bg-blue-100 text-blue-800 hover:bg-blue-100/80'
+         };
+      case 'pending release':
+         return {
+            variant: 'warning',
+            className: 'bg-orange-100 text-orange-800 hover:bg-orange-100/80'
+         };
+      case 'released':
+         return {
+            variant: 'success',
+            className: 'bg-green-100 text-green-800 hover:bg-green-100/80'
+         };
+      default:
+         return {
+            variant: 'secondary',
+            className: 'bg-gray-100 text-gray-800 hover:bg-gray-100/80'
+         };
+   }
 };
 
 export default RRC_ApplicationRow;

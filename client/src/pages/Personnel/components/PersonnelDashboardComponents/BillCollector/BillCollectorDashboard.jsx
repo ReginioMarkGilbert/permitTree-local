@@ -1,12 +1,18 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { RefreshCw, FileX } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FileX } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import BillCollectorOOPRow from './BC_OOPRow';
 import { gql, useQuery } from '@apollo/client';
 import OOPFilters from '@/components/DashboardFilters/OOPFilters';
 import { useTypewriter } from '@/hooks/useTypewriter';
+import DashboardLayout from '@/components/layouts/DashboardLayout';
+import {
+   Table,
+   TableBody,
+   TableHead,
+   TableHeader,
+   TableRow,
+} from "@/components/ui/table";
 
 const GET_OOPS = gql`
   query GetOOPs {
@@ -63,8 +69,8 @@ const BillCollectorDashboard = () => {
    });
 
    const mainTabs = ['Awaiting Payment', 'Payment Proof', 'Completed Payments', 'Issued OR'];
+   const subTabs = {};
 
-   // Use direct query instead of hook
    const {
       data: oopsData,
       loading: oopsLoading,
@@ -74,9 +80,8 @@ const BillCollectorDashboard = () => {
       fetchPolicy: 'network-only',
    });
 
-   // Add polling for automatic updates
    useEffect(() => {
-      const pollInterval = setInterval(refetchOOPs, 5000); // Poll every 5 seconds
+      const pollInterval = setInterval(refetchOOPs, 5000);
       return () => clearInterval(pollInterval);
    }, []);
 
@@ -142,70 +147,6 @@ const BillCollectorDashboard = () => {
 
    const isMobile = useMediaQuery('(max-width: 640px)');
 
-   const isChrome = useMemo(() => {
-      const userAgent = window.navigator.userAgent.toLowerCase();
-      const isBrave = navigator.brave !== undefined;
-      return userAgent.includes('chrome') && !userAgent.includes('edg') && !isBrave;
-   }, []);
-
-   const renderMobileTabSelectors = () => {
-      if (isChrome) {
-         return (
-            <select
-               value={activeMainTab}
-               onChange={(e) => handleTabChange(e.target.value)}
-               className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
-            >
-               {mainTabs.map((tab) => (
-                  <option key={tab} value={tab}>
-                     {tab}
-                  </option>
-               ))}
-            </select>
-         );
-      }
-
-      return (
-         <Select value={activeMainTab} onValueChange={handleTabChange}>
-            <SelectTrigger className="w-full">
-               <SelectValue placeholder="Select status" />
-            </SelectTrigger>
-            <SelectContent>
-               {mainTabs.map((tab) => (
-                  <SelectItem key={tab} value={tab}>
-                     {tab}
-                  </SelectItem>
-               ))}
-            </SelectContent>
-         </Select>
-      );
-   };
-
-   const renderTabs = () => {
-      if (isMobile) {
-         return renderMobileTabSelectors();
-      }
-
-      return (
-         <div className="mb-6 overflow-x-auto">
-            <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-               {mainTabs.map((tab) => (
-                  <button
-                     key={tab}
-                     onClick={() => handleTabChange(tab)}
-                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors
-                        ${activeMainTab === tab
-                           ? 'bg-white text-green-800 shadow'
-                           : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
-                  >
-                     {tab}
-                  </button>
-               ))}
-            </div>
-         </div>
-      );
-   };
-
    const renderTabDescription = () => {
       const descriptions = {
          'Payment Proof': 'This is the list of Order of Payments with submitted payment proofs pending verification.',
@@ -218,20 +159,26 @@ const BillCollectorDashboard = () => {
 
       return (
          <div className="mb-4 -mt-4">
-            <h1 className="text-sm text-green-800 min-h-[20px]">{text}</h1>
+            <h1 className="text-sm min-h-[20px] text-black">{text}</h1>
          </div>
       );
    };
 
    const renderContent = () => {
-      if (oopsLoading) return <p className="text-center text-gray-500">Loading order of payments...</p>;
-      if (oopsError) return <p className="text-center text-red-500">Error loading order of payments</p>;
+      if (oopsLoading) {
+         return <div className="flex justify-center py-8">Loading order of payments...</div>;
+      }
+
+      if (oopsError) {
+         return <div className="text-destructive text-center py-8">Error loading order of payments</div>;
+      }
+
       if (filteredOOPs.length === 0) {
          return (
-            <div className="bg-white rounded-lg shadow-sm p-6 text-center">
-               <FileX className="mx-auto h-12 w-12 text-gray-400" />
-               <h3 className="mt-2 text-sm font-medium text-gray-900">No orders of payment found</h3>
-               <p className="mt-1 text-sm text-gray-500">
+            <div className="text-center py-8">
+               <FileX className="mx-auto h-12 w-12 text-muted-foreground" />
+               <h3 className="mt-2 text-lg font-semibold">No orders of payment found</h3>
+               <p className="text-sm text-muted-foreground">
                   {filters.applicationType ?
                      `No orders of payment found for ${filters.applicationType}` :
                      'No orders of payment available'}
@@ -240,7 +187,6 @@ const BillCollectorDashboard = () => {
          );
       }
 
-      // Mobile view
       if (isMobile) {
          return (
             <div className="space-y-4">
@@ -249,6 +195,7 @@ const BillCollectorDashboard = () => {
                      key={oop._id}
                      oop={oop}
                      onReviewComplete={refetchOOPs}
+                     currentTab={activeMainTab}
                      isMobile={true}
                   />
                ))}
@@ -256,77 +203,50 @@ const BillCollectorDashboard = () => {
          );
       }
 
-      // Desktop view
       return (
-         <div className="bg-white rounded-lg shadow overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-               <thead className="bg-gray-50">
-                  <tr>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Application Number
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Bill Number
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Date
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Amount
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                     </th>
-                  </tr>
-               </thead>
-               <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredOOPs.map((oop) => (
-                     <BillCollectorOOPRow
-                        key={oop._id}
-                        oop={oop}
-                        onReviewComplete={refetchOOPs}
-                        isMobile={false}
-                     />
-                  ))}
-               </tbody>
-            </table>
-         </div>
+         <Table>
+            <TableHeader>
+               <TableRow>
+                  <TableHead>Application Number</TableHead>
+                  <TableHead>Bill Number</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+               </TableRow>
+            </TableHeader>
+            <TableBody>
+               {filteredOOPs.map((oop) => (
+                  <BillCollectorOOPRow
+                     key={oop._id}
+                     oop={oop}
+                     onReviewComplete={refetchOOPs}
+                     currentTab={activeMainTab}
+                     isMobile={false}
+                  />
+               ))}
+            </TableBody>
+         </Table>
       );
    };
 
    return (
-      <div className="bg-green-50 min-h-screen pt-20 pb-8 px-4 sm:px-6 lg:px-8">
-         <div className="max-w-7xl mx-auto space-y-6">
-            {/* Header Section */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-               <div className="flex items-center justify-between mb-4">
-                  <h1 className="text-2xl font-semibold text-gray-900">Bill Collector Dashboard</h1>
-                  <Button onClick={refetchOOPs} variant="outline" size="sm">
-                     <RefreshCw className="mr-2 h-4 w-4" />
-                     {!isMobile && "Refresh"}
-                  </Button>
-               </div>
-
-               {/* Tabs Section */}
-               {renderTabs()}
-               <div className="text-sm text-gray-600 -mb-4"> {/* -mb-4 remove bottom space */}
-                  {renderTabDescription()}
-               </div>
-            </div>
-
-            {/* Filters Section */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-               <div className="space-y-4">
-                  <OOPFilters filters={filters} setFilters={setFilters} />
-               </div>
-            </div>
-
-            {renderContent()}
-         </div>
-      </div>
+      <DashboardLayout
+         title="Bill Collector Dashboard"
+         description="Manage and process order of payments"
+         onRefresh={refetchOOPs}
+         isMobile={isMobile}
+         mainTabs={mainTabs}
+         subTabs={subTabs}
+         activeMainTab={activeMainTab}
+         activeSubTab={activeMainTab}
+         onMainTabChange={handleTabChange}
+         onSubTabChange={handleTabChange}
+         tabDescription={renderTabDescription()}
+         filters={<OOPFilters filters={filters} setFilters={setFilters} />}
+      >
+         {renderContent()}
+      </DashboardLayout>
    );
 };
 

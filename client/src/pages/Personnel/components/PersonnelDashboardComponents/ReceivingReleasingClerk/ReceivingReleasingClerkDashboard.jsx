@@ -1,12 +1,18 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { RefreshCw, FileX } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FileX } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import RRC_ApplicationRow from './RRC_ApplicationRow';
 import { useApplications } from '../../../hooks/useApplications';
 import ApplicationFilters from '@/components/DashboardFilters/ApplicationFilters';
 import { useTypewriter } from '@/hooks/useTypewriter';
+import DashboardLayout from '@/components/layouts/DashboardLayout';
+import {
+   Table,
+   TableBody,
+   TableHead,
+   TableHeader,
+   TableRow,
+} from "@/components/ui/table";
 
 const ReceivingReleasingClerkDashboard = () => {
    const [activeMainTab, setActiveMainTab] = useState('Applications');
@@ -57,9 +63,8 @@ const ReceivingReleasingClerkDashboard = () => {
       refetchApps();
    }, [refetchApps, activeSubTab]);
 
-   // Add polling for automatic updates
    useEffect(() => {
-      const pollInterval = setInterval(handleRefetch, 5000); // Poll every 5 seconds
+      const pollInterval = setInterval(handleRefetch, 5000);
       return () => clearInterval(pollInterval);
    }, [activeMainTab]);
 
@@ -70,7 +75,6 @@ const ReceivingReleasingClerkDashboard = () => {
       setActiveMainTab(tab);
       setActiveSubTab(subTabs[tab][0]);
 
-      // Only reset filters when switching to or from Certificates tab
       if (isCurrentlyCertificates !== isTargetCertificates) {
          setFilters({
             searchTerm: '',
@@ -123,108 +127,41 @@ const ReceivingReleasingClerkDashboard = () => {
 
    const isMobile = useMediaQuery('(max-width: 640px)');
 
-   const isChrome = useMemo(() => {
-      const userAgent = window.navigator.userAgent.toLowerCase();
-      const isBrave = navigator.brave !== undefined;
-      return userAgent.includes('chrome') && !userAgent.includes('edg') && !isBrave;
-   }, []);
+   const renderTabDescription = () => {
+      const descriptions = {
+         'Applications For Review': 'This is the list of applications pending initial review and encoding.',
+         'Returned Applications': 'This is the list of applications that were returned due to incomplete requirements.',
+         'Accepted Applications': 'This is the list of applications that have been accepted and encoded.',
+         'Applications For Recording': 'This is the list of applications pending for recording in the logbook.',
+         'Reviewed/Recorded Applications': 'This is the list of applications that have been recorded in the logbook.',
+         'Pending Release': 'This is the list of permits/certificates ready for release to applicants.',
+         'Released Certificates': 'This is the list of permits/certificates that have been released to applicants.'
+      };
 
-   const renderMobileTabSelectors = () => {
-      if (isChrome) {
-         return (
-            <div className="space-y-4">
-               <select
-                  value={activeMainTab}
-                  onChange={(e) => handleTabChange(e.target.value)}
-                  className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
-               >
-                  {mainTabs.map((tab) => (
-                     <option key={tab} value={tab}>
-                        {tab}
-                     </option>
-                  ))}
-               </select>
-
-               <select
-                  value={activeSubTab}
-                  onChange={(e) => handleSubTabChange(e.target.value)}
-                  className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
-               >
-                  {subTabs[activeMainTab].map((tab) => (
-                     <option key={tab} value={tab}>
-                        {tab}
-                     </option>
-                  ))}
-               </select>
-            </div>
-         );
-      }
+      const text = useTypewriter(descriptions[activeSubTab] || '');
 
       return (
-         <div className="space-y-4">
-            <Select value={activeMainTab} onValueChange={handleTabChange}>
-               <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select tab" />
-               </SelectTrigger>
-               <SelectContent>
-                  {mainTabs.map((tab) => (
-                     <SelectItem key={tab} value={tab}>
-                        {tab}
-                     </SelectItem>
-                  ))}
-               </SelectContent>
-            </Select>
-
-            <Select value={activeSubTab} onValueChange={handleSubTabChange}>
-               <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select status" />
-               </SelectTrigger>
-               <SelectContent>
-                  {subTabs[activeMainTab].map((tab) => (
-                     <SelectItem key={tab} value={tab}>
-                        {tab}
-                     </SelectItem>
-                  ))}
-               </SelectContent>
-            </Select>
-         </div>
-      );
-   };
-
-   const renderTabs = () => {
-      if (isMobile) {
-         return renderMobileTabSelectors();
-      }
-
-      return (
-         <div className="flex flex-col sm:flex-row gap-4">
-            <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-               {mainTabs.map((tab) => (
-                  <button
-                     key={tab}
-                     onClick={() => handleTabChange(tab)}
-                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors
-                        ${activeMainTab === tab
-                           ? 'bg-white text-green-800 shadow'
-                           : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
-                  >
-                     {tab}
-                  </button>
-               ))}
-            </div>
+         <div className="mb-4 -mt-4">
+            <h1 className="text-sm min-h-[20px] text-black">{text}</h1>
          </div>
       );
    };
 
    const renderContent = () => {
-      if (appLoading) return <p className="text-center text-gray-500">Loading applications...</p>;
-      if (appError) return <p className="text-center text-red-500">Error loading applications</p>;
+      if (appLoading) {
+         return <div className="flex justify-center py-8">Loading applications...</div>;
+      }
+
+      if (appError) {
+         return <div className="text-destructive text-center py-8">Error loading applications</div>;
+      }
+
       if (filteredApplications.length === 0) {
          return (
-            <div className="bg-white rounded-lg shadow-sm p-6 text-center">
-               <FileX className="mx-auto h-12 w-12 text-gray-400" />
-               <h3 className="mt-2 text-sm font-medium text-gray-900">No applications found</h3>
-               <p className="mt-1 text-sm text-gray-500">
+            <div className="text-center py-8">
+               <FileX className="mx-auto h-12 w-12 text-muted-foreground" />
+               <h3 className="mt-2 text-lg font-semibold">No applications found</h3>
+               <p className="text-sm text-muted-foreground">
                   {filters.applicationType ?
                      `No applications found for ${filters.applicationType}` :
                      'No applications available'}
@@ -233,7 +170,6 @@ const ReceivingReleasingClerkDashboard = () => {
          );
       }
 
-      // Mobile view
       if (isMobile) {
          return (
             <div className="space-y-4">
@@ -251,116 +187,50 @@ const ReceivingReleasingClerkDashboard = () => {
          );
       }
 
-      // Desktop view
       return (
-         <div className="bg-white rounded-lg shadow overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-               <thead className="bg-gray-50">
-                  <tr>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Application Number
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Application Type
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Date
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                     </th>
-                  </tr>
-               </thead>
-               <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredApplications.map((app) => (
-                     <RRC_ApplicationRow
-                        key={app.id}
-                        app={app}
-                        onRecordComplete={handleRefetch}
-                        getStatusColor={getStatusColor}
-                        currentTab={activeSubTab}
-                        isMobile={false}
-                     />
-                  ))}
-               </tbody>
-            </table>
-         </div>
-      );
-   };
-
-   const renderTabDescription = () => {
-      const descriptions = {
-         // Applications
-         'Applications For Review': 'This is the list of applications pending initial review and encoding.',
-         'Returned Applications': 'This is the list of applications that were returned due to incomplete requirements.',
-         'Accepted Applications': 'This is the list of applications that have been accepted and encoded.',
-         'Applications For Recording': 'This is the list of applications pending for recording in the logbook.',
-         'Reviewed/Recorded Applications': 'This is the list of applications that have been recorded in the logbook.',
-
-         // Certificates
-         'Pending Release': 'This is the list of permits/certificates ready for release to applicants.',
-         'Released Certificates': 'This is the list of permits/certificates that have been released to applicants.'
-      };
-
-      const text = useTypewriter(descriptions[activeSubTab] || '');
-
-      return (
-         <div className="mb-4 -mt-4">
-            <h1 className="text-sm text-green-800 min-h-[20px]">{text}</h1>
-         </div>
+         <Table>
+            <TableHeader>
+               <TableRow>
+                  <TableHead>Application Number</TableHead>
+                  <TableHead>Application Type</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+               </TableRow>
+            </TableHeader>
+            <TableBody>
+               {filteredApplications.map((app) => (
+                  <RRC_ApplicationRow
+                     key={app.id}
+                     app={app}
+                     onRecordComplete={handleRefetch}
+                     getStatusColor={getStatusColor}
+                     currentTab={activeSubTab}
+                     isMobile={false}
+                  />
+               ))}
+            </TableBody>
+         </Table>
       );
    };
 
    return (
-      <div className="bg-green-50 min-h-screen pt-20 pb-8 px-4 sm:px-6 lg:px-8">
-         <div className="max-w-7xl mx-auto space-y-6">
-            {/* Header Section */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-               <div className="flex items-center justify-between mb-4">
-                  <h1 className="text-2xl font-semibold text-gray-900">Receiving/Releasing Clerk Dashboard</h1>
-                  <Button onClick={handleRefetch} variant="outline" size="sm">
-                     <RefreshCw className="mr-2 h-4 w-4" />
-                     {!isMobile && "Refresh"}
-                  </Button>
-               </div>
-
-               {/* Tabs Section */}
-               {renderTabs()}
-            </div>
-
-            {/* Sub Tabs and Filters Section */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-               <div className="space-y-4">
-                  {!isMobile && (
-                     <div className="bg-gray-100 p-1 rounded-md inline-flex flex-wrap gap-1">
-                        {subTabs[activeMainTab].map((tab) => (
-                           <button
-                              key={tab}
-                              onClick={() => handleSubTabChange(tab)}
-                              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors
-                                 ${activeSubTab === tab
-                                    ? 'bg-white text-green-800 shadow'
-                                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
-                           >
-                              {tab}
-                           </button>
-                        ))}
-                     </div>
-                  )}
-                  {/* Description */}
-                  <div className="pt-2 text-sm text-gray-600">
-                     {renderTabDescription()}
-                  </div>
-                  <ApplicationFilters filters={filters} setFilters={setFilters} />
-               </div>
-            </div>
-
-            {renderContent()}
-         </div>
-      </div>
+      <DashboardLayout
+         title="Receiving/Releasing Clerk Dashboard"
+         description="Manage and process applications and certificates"
+         onRefresh={handleRefetch}
+         isMobile={isMobile}
+         mainTabs={mainTabs}
+         subTabs={subTabs}
+         activeMainTab={activeMainTab}
+         activeSubTab={activeSubTab}
+         onMainTabChange={handleTabChange}
+         onSubTabChange={handleSubTabChange}
+         tabDescription={renderTabDescription()}
+         filters={<ApplicationFilters filters={filters} setFilters={setFilters} />}
+      >
+         {renderContent()}
+      </DashboardLayout>
    );
 };
 

@@ -1,348 +1,207 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { Eye, FileCheck2, RotateCcw, FileText } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { Eye, Printer, FileText, RotateCcw, Receipt } from "lucide-react";
+import { TableCell, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import {
    Tooltip,
    TooltipContent,
    TooltipProvider,
    TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { format } from "date-fns";
+import { Card } from "@/components/ui/card";
+import { format } from 'date-fns';
+import ViewOOPModal from '@/pages/user/components/ViewOOPModal';
 import ReviewPaymentModal from './ReviewPaymentModal';
 import GenerateORModal from './GenerateORModal';
-import ViewOOPModal from '@/pages/user/components/ViewOOPModal';
-import { gql, useMutation } from '@apollo/client';
 import { toast } from 'sonner';
 
-const UNDO_APPROVAL = gql`
-   mutation UndoApproval($paymentId: ID!) {
-      undoApproval(paymentId: $paymentId) {
-         _id
-         OOPstatus
-      }
-   }
-`;
-
-// Add query for OOP details with payment proof
-const GET_OOP_DETAILS = gql`
-  query GetOOPDetails($id: ID!) {
-    getOOPById(id: $id) {
-      _id
-      billNo
-      applicationId
-      namePayee
-      address
-      natureOfApplication
-      totalAmount
-      OOPstatus
-      createdAt
-      items {
-        legalBasis
-        description
-        amount
-      }
-      paymentProof {
-        transactionId
-        paymentMethod
-        amount
-        timestamp
-        referenceNumber
-        payerDetails {
-          name
-          email
-          phoneNumber
-        }
-        status
-      }
-    }
-  }
-`;
-
-const BillCollectorOOPRow = ({ oop, onReviewComplete, isMobile }) => {
+const BC_OOPRow = ({ oop, onReviewComplete, currentTab, isMobile }) => {
+   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
    const [isGenerateORModalOpen, setIsGenerateORModalOpen] = useState(false);
-   const [isViewOOPModalOpen, setIsViewOOPModalOpen] = useState(false);
-   const [undoApproval] = useMutation(UNDO_APPROVAL);
-   const formatDate = (timestamp) => {
-      const date = new Date(parseInt(timestamp));
-      return format(date, 'M/d/yyyy');
+
+   const handleViewClick = () => setIsViewModalOpen(true);
+   const handleReviewClick = () => setIsReviewModalOpen(true);
+   const handleGenerateOR = () => setIsGenerateORModalOpen(true);
+
+   const handleReviewComplete = () => {
+      setIsReviewModalOpen(false);
+      onReviewComplete();
    };
 
-   const getStatusColor = (status) => {
-      switch (status) {
-         case 'Payment Proof Submitted':
-            return 'bg-yellow-100 text-yellow-800';
-         case 'Payment Proof Approved':
-            return 'bg-green-100 text-green-800';
-         case 'Payment Proof Rejected':
-            return 'bg-red-100 text-red-800';
-         case 'Awaiting Payment':
-            return 'bg-blue-100 text-blue-800';
-         default:
-            return 'bg-gray-100 text-gray-800';
-      }
-   };
-   // undo payment approval
-   const handleUndoApproval = async () => {
-      try {
-         await undoApproval({
-            variables: {
-               paymentId: oop._id
-            }
-         });
-         toast.success('Payment approval undone successfully');
-         onReviewComplete();
-      } catch (error) {
-         console.error('Error undoing approval:', error);
-         toast.error('Failed to undo approval');
-      }
+   const handleORComplete = () => {
+      setIsGenerateORModalOpen(false);
+      onReviewComplete();
    };
 
-   const handleViewOOP = () => {
-      setIsViewOOPModalOpen(true);
-   };
+   const renderActionButtons = () => {
+      const actions = [
+         {
+            icon: Eye,
+            label: "View OOP",
+            onClick: handleViewClick,
+            variant: "outline"
+         },
+         // Add review action if applicable
+         currentTab === 'Payment Proof' && {
+            icon: FileCheck2,
+            label: "Review Payment",
+            onClick: handleReviewClick,
+            variant: "outline",
+            className: "text-blue-600 hover:text-blue-800"
+         },
+         // Add generate OR action if applicable
+         currentTab === 'Completed Payments' && {
+            icon: FileText,
+            label: "Generate OR",
+            onClick: handleGenerateOR,
+            variant: "outline",
+            className: "text-green-600 hover:text-green-800"
+         }
+      ].filter(Boolean);
 
-   useEffect(() => {
-      console.log('OOP data in BC_OOPRow:', oop);
-      console.log('Payment Proof:', oop?.paymentProof);
-   }, [oop]);
-
-   const handleReviewClick = () => {
-      console.log('Opening review modal for OOP:', oop);
-      console.log('Payment proof data:', oop.paymentProof);
-      setIsReviewModalOpen(true);
+      return actions.map((action, index) => (
+         <TooltipProvider key={index}>
+            <Tooltip>
+               <TooltipTrigger asChild>
+                  <Button
+                     variant={action.variant}
+                     size="icon"
+                     onClick={action.onClick}
+                     className={action.className}
+                  >
+                     <action.icon className="h-4 w-4" />
+                  </Button>
+               </TooltipTrigger>
+               <TooltipContent>
+                  <p>{action.label}</p>
+               </TooltipContent>
+            </Tooltip>
+         </TooltipProvider>
+      ));
    };
 
    if (isMobile) {
       return (
-         <div className="bg-white p-4 mb-4 rounded-lg shadow-sm border border-gray-200">
-            <div className="space-y-3">
+         <>
+            <Card className="p-4 space-y-3">
                <div className="flex justify-between items-start">
-                  <div className="space-y-1">
-                     <h3 className="font-medium text-gray-900">
-                        {oop.applicationNumber}
-                     </h3>
-                     <p className="text-sm text-gray-500">
-                        Bill No: {oop.billNo}
-                     </p>
+                  <div>
+                     <p className="font-medium">{oop.applicationId}</p>
+                     <p className="text-sm text-muted-foreground">Bill No: {oop.billNo}</p>
                   </div>
-                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(oop.OOPstatus)}`}>
+                  <Badge
+                     variant={getStatusVariant(oop.OOPstatus).variant}
+                     className={getStatusVariant(oop.OOPstatus).className}
+                  >
                      {oop.OOPstatus}
-                  </span>
+                  </Badge>
                </div>
-
-               <div className="flex flex-col space-y-1">
-                  <div className="text-sm text-gray-500">
-                     Date: {formatDate(oop.createdAt)}
-                  </div>
-                  <div className="text-sm font-medium">
-                     Amount: ₱{oop.totalAmount?.toFixed(2)}
-                  </div>
+               <p className="text-sm text-muted-foreground">
+                  {format(new Date(parseInt(oop.createdAt)), 'MMM d, yyyy')}
+               </p>
+               <p className="text-sm font-medium">₱ {oop.totalAmount.toFixed(2)}</p>
+               <div className="flex gap-2">
+                  {renderActionButtons()}
                </div>
+            </Card>
 
-               <div className="pt-3 flex flex-wrap gap-2">
-                  <Button
-                     variant="outline"
-                     size="sm"
-                     onClick={handleViewOOP}
-                  >
-                     <Eye className="h-4 w-4 mr-1" />
-                     View
-                  </Button>
-
-                  <Button
-                     variant="outline"
-                     size="sm"
-                     onClick={() => console.log('Print OOP:', oop._id)}
-                  >
-                     <Printer className="h-4 w-4 mr-1" />
-                     Print OOP
-                  </Button>
-
-                  {oop.OOPstatus === 'Payment Proof Submitted' && (
-                     <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleReviewClick}
-                     >
-                        <FileText className="h-4 w-4 mr-1" />
-                        Review Payment
-                     </Button>
-                  )}
-
-                  {oop.OOPstatus === 'Completed OOP' && (
-                     <>
-                        <Button
-                           variant="outline"
-                           size="sm"
-                           onClick={() => setIsGenerateORModalOpen(true)}
-                        >
-                           <Receipt className="h-4 w-4 mr-1" />
-                           Generate OR
-                        </Button>
-
-                        <Button
-                           variant="outline"
-                           size="sm"
-                           onClick={handleUndoApproval}
-                        >
-                           <RotateCcw className="h-4 w-4 mr-1" />
-                           Undo Approval
-                        </Button>
-                     </>
-                  )}
-               </div>
-            </div>
-         </div>
+            {/* Modals */}
+            <ViewOOPModal
+               isOpen={isViewModalOpen}
+               onClose={() => setIsViewModalOpen(false)}
+               oop={oop}
+            />
+            <ReviewPaymentModal
+               isOpen={isReviewModalOpen}
+               onClose={() => setIsReviewModalOpen(false)}
+               oop={oop}
+               onReviewComplete={handleReviewComplete}
+            />
+            <GenerateORModal
+               isOpen={isGenerateORModalOpen}
+               onClose={() => setIsGenerateORModalOpen(false)}
+               oop={oop}
+               onComplete={handleORComplete}
+            />
+         </>
       );
    }
 
    return (
       <>
-         <tr key={oop._id}>
-            <td className="px-4 py-4 whitespace-nowrap">
-               {oop.applicationNumber}
-            </td>
-            <td className="px-4 py-4 whitespace-nowrap">
-               {oop.billNo}
-            </td>
-            <td className="px-4 py-4 whitespace-nowrap">
-               {formatDate(oop.createdAt)}
-            </td>
-            <td className="px-4 py-4 whitespace-nowrap">
-               ₱{oop.totalAmount?.toFixed(2)}
-            </td>
-            <td className="px-4 py-4 whitespace-nowrap">
-               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(oop.OOPstatus)}`}>
+         <TableRow>
+            <TableCell>{oop.applicationId}</TableCell>
+            <TableCell>{oop.billNo}</TableCell>
+            <TableCell>{format(new Date(parseInt(oop.createdAt)), 'MMM d, yyyy')}</TableCell>
+            <TableCell>₱ {oop.totalAmount.toFixed(2)}</TableCell>
+            <TableCell>
+               <Badge
+                  variant={getStatusVariant(oop.OOPstatus).variant}
+                  className={getStatusVariant(oop.OOPstatus).className}
+               >
                   {oop.OOPstatus}
-               </span>
-            </td>
-            <td className="px-4 py-4 whitespace-nowrap text-sm">
-               <div className="flex items-center space-x-2">
-                  <TooltipProvider>
-                     <Tooltip delayDuration={250}>
-                        <TooltipTrigger asChild>
-                           <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={handleViewOOP}
-                           >
-                              <Eye className="h-4 w-4" />
-                           </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                           <p>View OOP</p>
-                        </TooltipContent>
-                     </Tooltip>
-                  </TooltipProvider>
-
-                  <TooltipProvider>
-                     <Tooltip>
-                        <TooltipTrigger asChild>
-                           <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => console.log('Print OOP:', oop._id)}
-                           >
-                              <Printer className="h-4 w-4" />
-                           </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                           <p>Print OOP</p>
-                        </TooltipContent>
-                     </Tooltip>
-                  </TooltipProvider>
-
-                  {oop.OOPstatus === 'Payment Proof Submitted' && (
-                     <TooltipProvider>
-                        <Tooltip>
-                           <TooltipTrigger asChild>
-                              <Button
-                                 variant="outline"
-                                 size="icon"
-                                 className="h-8 w-8 text-green-500"
-                                 onClick={handleReviewClick}
-                              >
-                                 <FileText className="h-4 w-4" />
-                              </Button>
-                           </TooltipTrigger>
-                           <TooltipContent>
-                              <p>Review Payment</p>
-                           </TooltipContent>
-                        </Tooltip>
-                     </TooltipProvider>
-                  )}
-
-                  {oop.OOPstatus === 'Completed OOP' && (
-                     <>
-                        <TooltipProvider>
-                           <Tooltip>
-                              <TooltipTrigger asChild>
-                                 <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-8 w-8 text-green-600"
-                                    onClick={() => setIsGenerateORModalOpen(true)}
-                                 >
-                                    <Receipt className="h-4 w-4" />
-                                 </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                 <p>Generate OR</p>
-                              </TooltipContent>
-                           </Tooltip>
-                        </TooltipProvider>
-
-                        <TooltipProvider>
-                           <Tooltip>
-                              <TooltipTrigger asChild>
-                                 <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-8 w-8 text-yellow-600"
-                                    onClick={handleUndoApproval}
-                                 >
-                                    <RotateCcw className="h-4 w-4" />
-                                 </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                 <p>Undo Approval</p>
-                              </TooltipContent>
-                           </Tooltip>
-                        </TooltipProvider>
-                     </>
-                  )}
+               </Badge>
+            </TableCell>
+            <TableCell className="text-right">
+               <div className="flex justify-end gap-2">
+                  {renderActionButtons()}
                </div>
-            </td>
-         </tr>
+            </TableCell>
+         </TableRow>
 
+         {/* Modals */}
          <ViewOOPModal
-            isOpen={isViewOOPModalOpen}
-            onClose={() => setIsViewOOPModalOpen(false)}
+            isOpen={isViewModalOpen}
+            onClose={() => setIsViewModalOpen(false)}
             oop={oop}
          />
-
-         {isReviewModalOpen && (
-            <ReviewPaymentModal
-               oop={oop}
-               isOpen={isReviewModalOpen}
-               onClose={() => setIsReviewModalOpen(false)}
-               onReviewComplete={onReviewComplete}
-            />
-         )}
-
-         {isGenerateORModalOpen && (
-            <GenerateORModal
-               oop={oop}
-               isOpen={isGenerateORModalOpen}
-               onClose={() => setIsGenerateORModalOpen(false)}
-               onComplete={onReviewComplete}
-            />
-         )}
+         <ReviewPaymentModal
+            isOpen={isReviewModalOpen}
+            onClose={() => setIsReviewModalOpen(false)}
+            oop={oop}
+            onReviewComplete={handleReviewComplete}
+         />
+         <GenerateORModal
+            isOpen={isGenerateORModalOpen}
+            onClose={() => setIsGenerateORModalOpen(false)}
+            oop={oop}
+            onComplete={handleORComplete}
+         />
       </>
    );
 };
 
-export default BillCollectorOOPRow;
+// Helper function to map status to badge variant and custom colors
+const getStatusVariant = (status) => {
+   switch (status.toLowerCase()) {
+      case 'payment proof submitted':
+         return {
+            variant: 'warning',
+            className: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100/80'
+         };
+      case 'payment proof approved':
+         return {
+            variant: 'success',
+            className: 'bg-green-100 text-green-800 hover:bg-green-100/80'
+         };
+      case 'awaiting payment':
+         return {
+            variant: 'default',
+            className: 'bg-blue-100 text-blue-800 hover:bg-blue-100/80'
+         };
+      case 'issued or':
+         return {
+            variant: 'success',
+            className: 'bg-green-100 text-green-800 hover:bg-green-100/80'
+         };
+      default:
+         return {
+            variant: 'secondary',
+            className: 'bg-gray-100 text-gray-800 hover:bg-gray-100/80'
+         };
+   }
+};
+
+export default BC_OOPRow;

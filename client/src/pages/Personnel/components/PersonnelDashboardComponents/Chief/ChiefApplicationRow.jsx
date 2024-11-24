@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Eye, Printer, ClipboardCheck, RotateCcw } from 'lucide-react';
-import { useMutation, gql } from '@apollo/client';
-import { toast } from 'sonner';
+import { Eye, ClipboardCheck, RotateCcw } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { TableCell, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import {
    Tooltip,
    TooltipContent,
    TooltipProvider,
    TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Card } from "@/components/ui/card";
+import { format } from 'date-fns';
 import TS_ViewModal from '@/pages/Personnel/components/PersonnelDashboardComponents/TechnicalStaff/TS_ViewModal';
 import ChiefReviewModal from './ChiefReviewModal';
-// import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { gql, useMutation } from '@apollo/client';
+import { toast } from 'sonner';
 
 const DELETE_OOP = gql`
   mutation DeleteOOP($applicationId: String!) {
@@ -62,7 +65,7 @@ const UPDATE_PERMIT_STAGE = gql`
   }
 `;
 
-const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, isMobile }) => {
+const ChiefApplicationRow = ({ app, onReviewComplete, currentTab, isMobile }) => {
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
    const [updatePermitStage] = useMutation(UPDATE_PERMIT_STAGE);
@@ -71,7 +74,6 @@ const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab
 
    const handleViewClick = () => setIsViewModalOpen(true);
    const handleReviewClick = () => setIsReviewModalOpen(true);
-
    const handleReviewComplete = () => {
       setIsReviewModalOpen(false);
       onReviewComplete();
@@ -122,129 +124,85 @@ const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab
    };
 
    const renderActionButtons = () => {
-      const actions = [];
+      const actions = [
+         {
+            icon: Eye,
+            label: "View Application",
+            onClick: handleViewClick,
+            variant: "outline"
+         },
+         // Add review action if applicable
+         app.currentStage === 'ChiefRPSReview' && !app.reviewedByChief && {
+            icon: ClipboardCheck,
+            label: "Review Application",
+            onClick: handleReviewClick,
+            variant: "outline",
+            className: "text-blue-600 hover:text-blue-800"
+         },
+         // Add undo action if applicable
+         currentTab === 'Completed Reviews' && {
+            icon: RotateCcw,
+            label: "Undo Review",
+            onClick: handleUndo,
+            variant: "outline",
+            className: "text-yellow-600 hover:text-yellow-800"
+         },
+         // Add undo OOP action if applicable
+         currentTab === 'Created OOP' && {
+            icon: RotateCcw,
+            label: "Undo OOP Creation",
+            onClick: handleUndoOOP,
+            variant: "outline",
+            className: "text-yellow-600 hover:text-yellow-800"
+         }
+      ].filter(Boolean);
 
-      // View action
-      actions.push(
-         <TooltipProvider key="view-action">
-            <Tooltip delayDuration={200}>
+      return actions.map((action, index) => (
+         <TooltipProvider key={index}>
+            <Tooltip>
                <TooltipTrigger asChild>
                   <Button
-                     onClick={handleViewClick}
-                     variant="outline"
+                     variant={action.variant}
                      size="icon"
-                     className="h-8 w-8"
-                     data-testid="view-button"
+                     onClick={action.onClick}
+                     className={action.className}
                   >
-                     <Eye className="h-4 w-4" />
+                     <action.icon className="h-4 w-4" />
                   </Button>
                </TooltipTrigger>
                <TooltipContent>
-                  <p>View Application</p>
+                  <p>{action.label}</p>
                </TooltipContent>
             </Tooltip>
          </TooltipProvider>
-      );
-
-      // Review action
-      if (app.currentStage === 'ChiefRPSReview' && !app.reviewedByChief) {
-         actions.push(
-            <TooltipProvider key="review-action">
-               <Tooltip delayDuration={200}>
-                  <TooltipTrigger asChild>
-                     <Button
-                        onClick={handleReviewClick}
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 text-blue-600 hover:text-blue-800"
-                        data-testid="review-button"
-                     >
-                        <ClipboardCheck className="h-4 w-4" />
-                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                     <p>Review Application</p>
-                  </TooltipContent>
-               </Tooltip>
-            </TooltipProvider>
-         );
-      }
-
-      // Undo OOP action
-      if (currentTab === 'Created OOP') {
-         actions.push(
-            <TooltipProvider key="undo-oop-action">
-               <Tooltip delayDuration={200}>
-                  <TooltipTrigger asChild>
-                     <Button
-                        onClick={handleUndoOOP}
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 text-yellow-600 hover:text-yellow-800"
-                        data-testid="undo-oop-button"
-                     >
-                        <RotateCcw className="h-4 w-4" />
-                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                     <p>Undo OOP Creation</p>
-                  </TooltipContent>
-               </Tooltip>
-            </TooltipProvider>
-         );
-      }
-
-      // Undo review action
-      if (currentTab === 'Completed Reviews') {
-         actions.push(
-            <TooltipProvider key="undo-action">
-               <Tooltip>
-                  <TooltipTrigger asChild>
-                     <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 text-yellow-600"
-                        onClick={handleUndo}
-                     >
-                        <RotateCcw className="h-4 w-4" />
-                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                     <p>Undo Review</p>
-                  </TooltipContent>
-               </Tooltip>
-            </TooltipProvider>
-         );
-      }
-
-      return actions;
+      ));
    };
 
    if (isMobile) {
       return (
-         <div className="bg-white/60 backdrop-blur-xl p-4 rounded-xl shadow-sm border border-gray-100 space-y-2">
-            <div className="flex justify-between items-start">
-               <div className="space-y-1">
-                  <h3 className="font-medium text-gray-900">
-                     {app.applicationNumber}
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                     {app.applicationType}
-                  </p>
+         <>
+            <Card className="p-4 space-y-3">
+               <div className="flex justify-between items-start">
+                  <div>
+                     <p className="font-medium">{app.applicationNumber}</p>
+                     <p className="text-sm text-muted-foreground">{app.applicationType}</p>
+                  </div>
+                  <Badge
+                     variant={getStatusVariant(app.status).variant}
+                     className={getStatusVariant(app.status).className}
+                  >
+                     {app.status}
+                  </Badge>
                </div>
-               <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(app.status)}`}>
-                  {app.status}
-               </span>
-            </div>
+               <p className="text-sm text-muted-foreground">
+                  {format(new Date(app.dateOfSubmission), 'MMM d, yyyy')}
+               </p>
+               <div className="flex gap-2">
+                  {renderActionButtons()}
+               </div>
+            </Card>
 
-            <p className="text-sm text-gray-500">
-               {new Date(app.dateOfSubmission).toLocaleDateString()}
-            </p>
-
-            <div className="flex gap-2 pt-1">
-               {renderActionButtons()}
-            </div>
-
+            {/* Modals */}
             <TS_ViewModal
                isOpen={isViewModalOpen}
                onClose={() => setIsViewModalOpen(false)}
@@ -256,36 +214,32 @@ const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab
                application={app}
                onReviewComplete={handleReviewComplete}
             />
-         </div>
+         </>
       );
    }
 
    return (
       <>
-         <tr className="border-b border-gray-200 transition-colors hover:bg-gray-50">
-            <td className="px-4 py-3 whitespace-nowrap">
-               <div className="text-sm text-gray-900">{app.applicationNumber}</div>
-            </td>
-            <td className="px-4 py-3 whitespace-nowrap">
-               <div className="text-sm text-gray-900">{app.applicationType}</div>
-            </td>
-            <td className="px-4 py-3 whitespace-nowrap">
-               <div className="text-sm text-gray-900">
-                  {new Date(app.dateOfSubmission).toLocaleDateString()}
-               </div>
-            </td>
-            <td className="px-4 py-3 whitespace-nowrap">
-               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(app.status)}`}>
+         <TableRow>
+            <TableCell>{app.applicationNumber}</TableCell>
+            <TableCell>{app.applicationType}</TableCell>
+            <TableCell>{format(new Date(app.dateOfSubmission), 'MMM d, yyyy')}</TableCell>
+            <TableCell>
+               <Badge
+                  variant={getStatusVariant(app.status).variant}
+                  className={getStatusVariant(app.status).className}
+               >
                   {app.status}
-               </span>
-            </td>
-            <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-               <div className="flex items-center space-x-2">
+               </Badge>
+            </TableCell>
+            <TableCell className="text-right">
+               <div className="flex justify-end gap-2">
                   {renderActionButtons()}
                </div>
-            </td>
-         </tr>
+            </TableCell>
+         </TableRow>
 
+         {/* Modals */}
          <TS_ViewModal
             isOpen={isViewModalOpen}
             onClose={() => setIsViewModalOpen(false)}
@@ -299,6 +253,38 @@ const ChiefApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab
          />
       </>
    );
+};
+
+// Helper function to map status to badge variant and custom colors
+const getStatusVariant = (status) => {
+   switch (status.toLowerCase()) {
+      case 'submitted':
+         return {
+            variant: 'default',
+            className: 'bg-blue-100 text-blue-800 hover:bg-blue-100/80'
+         };
+      case 'returned':
+         return {
+            variant: 'warning',
+            className: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100/80'
+         };
+      case 'accepted':
+      case 'approved':
+         return {
+            variant: 'success',
+            className: 'bg-green-100 text-green-800 hover:bg-green-100/80'
+         };
+      case 'in progress':
+         return {
+            variant: 'secondary',
+            className: 'bg-gray-100 text-gray-800 hover:bg-gray-100/80'
+         };
+      default:
+         return {
+            variant: 'secondary',
+            className: 'bg-gray-100 text-gray-800 hover:bg-gray-100/80'
+         };
+   }
 };
 
 export default ChiefApplicationRow;

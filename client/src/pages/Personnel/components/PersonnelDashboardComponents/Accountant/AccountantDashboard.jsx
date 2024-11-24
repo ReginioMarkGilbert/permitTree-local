@@ -1,14 +1,22 @@
 // Accountant and OOP Staff Incharge Dashboard
 
 import React, { useState, useMemo } from 'react';
-import { RefreshCw } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { FileX } from 'lucide-react';
 import { useOrderOfPayments } from '../../../hooks/useOrderOfPayments';
 import AccountantOOPRow from './AccountantOOPRow';
 import AccountantApplicationRow from './AccountantApplicationRow';
 import AccountantFilters from './AccountantFilters';
 import { useTypewriter } from '@/hooks/useTypewriter';
+import DashboardLayout from '@/components/layouts/DashboardLayout';
+import {
+   Table,
+   TableBody,
+   TableCell,
+   TableHead,
+   TableHeader,
+   TableRow,
+} from "@/components/ui/table";
+import { useApplications } from '../../../hooks/useApplications';
 
 const AccountantDashboard = () => {
    const [filters, setFilters] = useState({
@@ -29,6 +37,31 @@ const AccountantDashboard = () => {
       'Applications awaiting OOP': ['Awaiting OOP', 'Created OOP']
    };
 
+   const getQueryParamsForTab = (tab) => {
+      switch (tab) {
+         case 'Awaiting OOP':
+            return {
+               currentStage: 'AuthenticityApprovedByTechnicalStaff',
+               awaitingOOP: true,
+               OOPCreated: false
+            };
+         case 'Created OOP':
+            return {
+               OOPCreated: true,
+               awaitingOOP: false
+            };
+         default:
+            return {};
+      }
+   };
+
+   const {
+      applications,
+      loading: appLoading,
+      error: appError,
+      refetch: refetchApps
+   } = useApplications(getQueryParamsForTab(activeSubTab));
+
    const {
       oops,
       oopsLoading,
@@ -38,6 +71,31 @@ const AccountantDashboard = () => {
 
    const handleReviewComplete = () => {
       refetchOOPs();
+   };
+
+   const handleTabChange = (tab) => {
+      setActiveMainTab(tab);
+      setActiveSubTab(subTabs[tab][0]);
+      setFilters({
+         searchTerm: '',
+         applicationType: '',
+         amountRange: '',
+         dateRange: { from: undefined, to: undefined }
+      });
+      refetchOOPs();
+   };
+
+   const handleSubTabChange = (tab) => {
+      setActiveSubTab(tab);
+      refetchOOPs();
+   };
+
+   const handleRefetch = () => {
+      if (activeMainTab === 'Order Of Payment') {
+         refetchOOPs();
+      } else {
+         refetchApps();
+      }
    };
 
    const filteredOOPs = useMemo(() => {
@@ -87,77 +145,138 @@ const AccountantDashboard = () => {
       });
    }, [oops, filters, activeSubTab]);
 
-   const renderOrderOfPaymentTable = () => {
-      if (oopsLoading) return <p className="text-center text-gray-500">Loading order of payments...</p>;
-      if (oopsError) {
-         console.error('Error fetching OOPs:', oopsError);
-         return <p className="text-center text-red-500">Error loading order of payments. Please try again later.</p>;
-      }
+   const filteredApplications = useMemo(() => {
+      if (!applications) return [];
 
+      return applications.filter(app => {
+         const matchesSearch = app.applicationNumber.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+            app.applicationType.toLowerCase().includes(filters.searchTerm.toLowerCase());
+
+         const matchesType = !filters.applicationType ||
+            filters.applicationType === "all" ||
+            app.applicationType === filters.applicationType;
+
+         const matchesDateRange = (() => {
+            if (!filters.dateRange.from && !filters.dateRange.to) return true;
+            const appDate = new Date(app.dateOfSubmission);
+            appDate.setHours(0, 0, 0, 0);
+            const fromDate = filters.dateRange.from ? new Date(filters.dateRange.from) : null;
+            const toDate = filters.dateRange.to ? new Date(filters.dateRange.to) : null;
+            if (fromDate) fromDate.setHours(0, 0, 0, 0);
+            if (toDate) toDate.setHours(0, 0, 0, 0);
+            return (!fromDate || appDate >= fromDate) && (!toDate || appDate <= toDate);
+         })();
+
+         return matchesSearch && matchesType && matchesDateRange;
+      });
+   }, [applications, filters]);
+
+   const renderOrderOfPaymentTable = () => {
+      if (oopsLoading) return <div className="flex justify-center py-8">Loading order of payments...</div>;
+      if (oopsError) return <div className="text-destructive text-center py-8">Error loading order of payments</div>;
       if (filteredOOPs.length === 0) {
-         return <p className="text-center text-gray-500">No order of payments found.</p>;
+         return (
+            <div className="text-center py-8">
+               <FileX className="mx-auto h-12 w-12 text-muted-foreground" />
+               <h3 className="mt-2 text-lg font-semibold">No order of payments found</h3>
+               <p className="text-sm text-muted-foreground">
+                  {filters.applicationType ?
+                     `No order of payments found for ${filters.applicationType}` :
+                     'No order of payments available'}
+               </p>
+            </div>
+         );
       }
 
       return (
-         <div className="bg-white rounded-lg shadow overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-               <thead className="bg-gray-50">
-                  <tr>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Application Number
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Bill Number
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Date
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Amount
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                     </th>
-                  </tr>
-               </thead>
-               <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredOOPs.map((oop) => (
-                     <AccountantOOPRow
-                        key={oop._id}
-                        oop={oop}
-                        onReviewComplete={handleReviewComplete}
-                        currentTab={activeSubTab}
-                     />
-                  ))}
-               </tbody>
-            </table>
-         </div>
+         <Table>
+            <TableHeader>
+               <TableRow>
+                  <TableHead>Application Number</TableHead>
+                  <TableHead>Bill Number</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+               </TableRow>
+            </TableHeader>
+            <TableBody>
+               {filteredOOPs.map((oop) => (
+                  <AccountantOOPRow
+                     key={oop._id}
+                     oop={oop}
+                     onReviewComplete={handleReviewComplete}
+                     currentTab={activeSubTab}
+                  />
+               ))}
+            </TableBody>
+         </Table>
       );
    };
 
    const renderApplicationTable = () => {
-      // Implement logic to fetch and render applications awaiting OOP
-      // Similar to renderOrderOfPaymentTable
-   };
+      if (appLoading) return <div className="flex justify-center py-8">Loading applications...</div>;
+      if (appError) return <div className="text-destructive text-center py-8">Error loading applications</div>;
+      if (filteredApplications.length === 0) {
+         return (
+            <div className="text-center py-8">
+               <FileX className="mx-auto h-12 w-12 text-muted-foreground" />
+               <h3 className="mt-2 text-lg font-semibold">No applications found</h3>
+               <p className="text-sm text-muted-foreground">
+                  {filters.applicationType ?
+                     `No applications found for ${filters.applicationType}` :
+                     'No applications available'}
+               </p>
+            </div>
+         );
+      }
 
-   const renderFilters = () => {
-      return <AccountantFilters
-         filters={filters}
-         setFilters={setFilters}
-         activeMainTab={activeMainTab}
-      />;
+      if (isMobile) {
+         return (
+            <div className="space-y-4">
+               {filteredApplications.map((app) => (
+                  <AccountantApplicationRow
+                     key={app.id}
+                     app={app}
+                     onReviewComplete={handleReviewComplete}
+                     currentTab={activeSubTab}
+                     isMobile={true}
+                  />
+               ))}
+            </div>
+         );
+      }
+
+      return (
+         <Table>
+            <TableHeader>
+               <TableRow>
+                  <TableHead>Application Number</TableHead>
+                  <TableHead>Application Type</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+               </TableRow>
+            </TableHeader>
+            <TableBody>
+               {filteredApplications.map((app) => (
+                  <AccountantApplicationRow
+                     key={app.id}
+                     app={app}
+                     onReviewComplete={handleReviewComplete}
+                     currentTab={activeSubTab}
+                     isMobile={false}
+                  />
+               ))}
+            </TableBody>
+         </Table>
+      );
    };
 
    const renderTabDescription = () => {
       const descriptions = {
-         // Order Of Payment
          'Pending Approval': 'This is the list of Order of Payments pending for your approval.',
          'Approved OOP': 'This is the list of Order of Payments that you have approved.',
-
-         // Applications awaiting OOP
          'Awaiting OOP': 'This is the list of applications waiting for Order of Payment creation.',
          'Created OOP': 'This is the list of applications with created Order of Payments.'
       };
@@ -166,76 +285,37 @@ const AccountantDashboard = () => {
 
       return (
          <div className="mb-4 -mt-4">
-            <h1 className="text-sm text-green-800 min-h-[20px]">{text}</h1>
+            <h1 className="text-sm min-h-[20px] text-black">{text}</h1>
          </div>
       );
    };
 
    return (
-      <div className="bg-green-50 min-h-screen pt-20 pb-8 px-4 sm:px-6 lg:px-8">
-         <div className="max-w-7xl mx-auto space-y-6">
-            {/* Header Section */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-               <div className="flex items-center justify-between mb-4">
-                  <h1 className="text-2xl font-semibold text-gray-900">Accountant Dashboard</h1>
-                  <Button onClick={refetchOOPs} variant="outline">
-                     <RefreshCw className="mr-2 h-4 w-4" />
-                     Refresh
-                  </Button>
-               </div>
-
-               {/* Main Tabs */}
-               <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="bg-gray-100 p-1 rounded-md inline-flex whitespace-nowrap">
-                     {mainTabs.map((tab) => (
-                        <button
-                           key={tab}
-                           onClick={() => {
-                              setActiveMainTab(tab);
-                              setActiveSubTab(subTabs[tab][0]);
-                           }}
-                           className={`px-4 py-2 rounded-md text-sm font-medium transition-colors
-                              ${activeMainTab === tab
-                                 ? 'bg-white text-green-800 shadow'
-                                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
-                        >
-                           {tab}
-                        </button>
-                     ))}
-                  </div>
-               </div>
-            </div>
-
-            {/* Sub Tabs and Filters Section */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-               <div className="space-y-4">
-                  {/* Sub Tabs */}
-                  <div className="bg-gray-100 p-1 rounded-md inline-flex flex-wrap gap-1">
-                     {subTabs[activeMainTab].map((tab) => (
-                        <button
-                           key={tab}
-                           onClick={() => setActiveSubTab(tab)}
-                           className={`px-3 py-2 rounded-md text-sm font-medium transition-colors
-                              ${activeSubTab === tab
-                                 ? 'bg-white text-green-800 shadow'
-                                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
-                        >
-                           {tab}
-                        </button>
-                     ))}
-                  </div>
-                  {/* Description */}
-                  <div className="pt-2 text-sm text-gray-600">
-                     {renderTabDescription()}
-                  </div>
-                  {renderFilters()}
-               </div>
-            </div>
-
-            {/* Content Section */}
-            {activeMainTab === 'Order Of Payment' ? renderOrderOfPaymentTable() : renderApplicationTable()}
-         </div>
-      </div>
+      <DashboardLayout
+         title="Accountant Dashboard"
+         description="Manage and process order of payments"
+         onRefresh={handleRefetch}
+         isMobile={false} // Add mobile handling if needed
+         mainTabs={mainTabs}
+         subTabs={subTabs}
+         activeMainTab={activeMainTab}
+         activeSubTab={activeSubTab}
+         onMainTabChange={handleTabChange}
+         onSubTabChange={handleSubTabChange}
+         tabDescription={renderTabDescription()}
+         filters={
+            <AccountantFilters
+               filters={filters}
+               setFilters={setFilters}
+               activeMainTab={activeMainTab}
+            />
+         }
+      >
+         {activeMainTab === 'Order Of Payment' ?
+            renderOrderOfPaymentTable() :
+            renderApplicationTable()
+         }
+      </DashboardLayout>
    );
 };
 

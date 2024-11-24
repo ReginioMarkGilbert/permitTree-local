@@ -1,176 +1,173 @@
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Eye, Printer, ClipboardCheck, RotateCcw } from 'lucide-react';
-import { useMutation, gql } from '@apollo/client';
-import { toast } from 'sonner';
+import { Eye, FileCheck2 } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { TableCell, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import {
    Tooltip,
    TooltipContent,
    TooltipProvider,
    TooltipTrigger,
 } from "@/components/ui/tooltip";
-import TS_ViewModal from '@/pages/Personnel/components/PersonnelDashboardComponents/TechnicalStaff/TS_ViewModal';
+import { Card } from "@/components/ui/card";
+import { format } from 'date-fns';
+import ViewApplicationModal from '@/components/ui/ApplicationDetailsModal';
+import OrderOfPaymentForm from '../../OrderOfPaymentForm';
+import { toast } from 'sonner';
 
-const UNDO_OOP_CREATION = gql`
-  mutation UndoOOPCreation($id: ID!) {
-    undoOOPCreation(id: $id) {
-      id
-      awaitingOOP
-      OOPCreated
-    }
-  }
-`;
-
-const AccountantApplicationRow = ({ app, onReviewComplete, getStatusColor }) => {
+const AccountantApplicationRow = ({ app, onReviewComplete, currentTab, isMobile }) => {
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-   const [undoOOPCreation] = useMutation(UNDO_OOP_CREATION);
+   const [isOOPFormOpen, setIsOOPFormOpen] = useState(false);
 
    const handleViewClick = () => setIsViewModalOpen(true);
-   const handleReviewClick = () => setIsReviewModalOpen(true);
+   const handleCreateOOP = () => setIsOOPFormOpen(true);
 
-   const handleReviewComplete = () => {
-      setIsReviewModalOpen(false);
+   const handleOOPComplete = () => {
+      setIsOOPFormOpen(false);
+      toast.success('Order of Payment created successfully');
       onReviewComplete();
    };
 
-   const handlePrint = () => {
-      // Implement print functionality
-      console.log('Print application:', app.id);
+   const renderActionButtons = () => {
+      const actions = [
+         {
+            icon: Eye,
+            label: "View Application",
+            onClick: handleViewClick,
+            variant: "outline"
+         },
+         // Add OOP creation action if applicable
+         currentTab === 'Awaiting OOP' && {
+            icon: FileCheck2,
+            label: "Create Order of Payment",
+            onClick: handleCreateOOP,
+            variant: "outline",
+            className: "text-green-600 hover:text-green-800"
+         }
+      ].filter(Boolean);
+
+      return actions.map((action, index) => (
+         <TooltipProvider key={index}>
+            <Tooltip>
+               <TooltipTrigger asChild>
+                  <Button
+                     variant={action.variant}
+                     size="icon"
+                     onClick={action.onClick}
+                     className={action.className}
+                  >
+                     <action.icon className="h-4 w-4" />
+                  </Button>
+               </TooltipTrigger>
+               <TooltipContent>
+                  <p>{action.label}</p>
+               </TooltipContent>
+            </Tooltip>
+         </TooltipProvider>
+      ));
    };
 
-   const handleUndoOOP = async () => {
-      try {
-         await undoOOPCreation({
-            variables: {
-               id: app.id
-            }
-         });
-         toast.success('OOP creation undone successfully');
-         onReviewComplete(); // Refresh the list
-      } catch (error) {
-         console.error('Error undoing OOP creation:', error);
-         toast.error('Failed to undo OOP creation');
-      }
-   };
+   if (isMobile) {
+      return (
+         <>
+            <Card className="p-4 space-y-3">
+               <div className="flex justify-between items-start">
+                  <div>
+                     <p className="font-medium">{app.applicationNumber}</p>
+                     <p className="text-sm text-muted-foreground">{app.applicationType}</p>
+                  </div>
+                  <Badge
+                     variant={getStatusVariant(app.status).variant}
+                     className={getStatusVariant(app.status).className}
+                  >
+                     {app.status}
+                  </Badge>
+               </div>
+               <p className="text-sm text-muted-foreground">
+                  {format(new Date(app.dateOfSubmission), 'MMM d, yyyy')}
+               </p>
+               <div className="flex gap-2">
+                  {renderActionButtons()}
+               </div>
+            </Card>
+
+            {/* Modals */}
+            <ViewApplicationModal
+               isOpen={isViewModalOpen}
+               onClose={() => setIsViewModalOpen(false)}
+               application={app}
+            />
+            <OrderOfPaymentForm
+               isOpen={isOOPFormOpen}
+               onClose={() => setIsOOPFormOpen(false)}
+               application={app}
+               onComplete={handleOOPComplete}
+            />
+         </>
+      );
+   }
 
    return (
       <>
-         <tr>
-            <td className="px-4 py-3 whitespace-nowrap">
-               <div className="text-sm text-gray-900">{app.applicationNumber}</div>
-            </td>
-            <td className="px-4 py-3 whitespace-nowrap">
-               <div className="text-sm text-gray-900">{app.applicationType}</div>
-            </td>
-            <td className="px-4 py-3 whitespace-nowrap">
-               <div className="text-sm text-gray-900">
-                  {new Date(app.dateOfSubmission).toLocaleDateString()}
-               </div>
-            </td>
-            <td className="px-4 py-3 whitespace-nowrap">
-               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(app.status)}`}>
+         <TableRow>
+            <TableCell>{app.applicationNumber}</TableCell>
+            <TableCell>{app.applicationType}</TableCell>
+            <TableCell>{format(new Date(app.dateOfSubmission), 'MMM d, yyyy')}</TableCell>
+            <TableCell>
+               <Badge
+                  variant={getStatusVariant(app.status).variant}
+                  className={getStatusVariant(app.status).className}
+               >
                   {app.status}
-               </span>
-            </td>
-            <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-               <div className="flex items-center space-x-2">
-                  <TooltipProvider>
-                     <Tooltip delayDuration={200}>
-                        <TooltipTrigger asChild>
-                           <Button
-                              onClick={handleViewClick}
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                              data-testid="view-button"
-                           >
-                              <Eye className="h-4 w-4" />
-                           </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                           <p>View Application</p>
-                        </TooltipContent>
-                     </Tooltip>
-                  </TooltipProvider>
-
-                  <TooltipProvider>
-                     <Tooltip delayDuration={200}>
-                        <TooltipTrigger asChild>
-                           <Button
-                              onClick={handlePrint}
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                              data-testid="print-button"
-                           >
-                              <Printer className="h-4 w-4" />
-                           </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                           <p>Print Application</p>
-                        </TooltipContent>
-                     </Tooltip>
-                  </TooltipProvider>
-
-                  {app.currentStage === 'ChiefRPSReview' && !app.reviewedByChief && (
-                     <TooltipProvider>
-                        <Tooltip delayDuration={200}>
-                           <TooltipTrigger asChild>
-                              <Button
-                                 onClick={handleReviewClick}
-                                 variant="outline"
-                                 size="icon"
-                                 className="h-8 w-8 text-blue-600 hover:text-blue-800"
-                                 data-testid="review-button"
-                              >
-                                 <ClipboardCheck className="h-4 w-4" />
-                              </Button>
-                           </TooltipTrigger>
-                           <TooltipContent>
-                              <p>Review Application</p>
-                           </TooltipContent>
-                        </Tooltip>
-                     </TooltipProvider>
-                  )}
-
-                  {!app.awaitingOOP && ( // if awaitingOOP is false, means OOP is created
-                     <TooltipProvider>
-                        <Tooltip delayDuration={200}>
-                           <TooltipTrigger asChild>
-                              <Button
-                                 onClick={handleUndoOOP}
-                                 variant="outline"
-                                 size="icon"
-                                 className="h-8 w-8 text-yellow-600 hover:text-yellow-800"
-                                 data-testid="undo-oop-button"
-                              >
-                                 <RotateCcw className="h-4 w-4" />
-                              </Button>
-                           </TooltipTrigger>
-                           <TooltipContent>
-                              <p>Undo OOP Creation</p>
-                           </TooltipContent>
-                        </Tooltip>
-                     </TooltipProvider>
-                  )}
+               </Badge>
+            </TableCell>
+            <TableCell className="text-right">
+               <div className="flex justify-end gap-2">
+                  {renderActionButtons()}
                </div>
-            </td>
-         </tr>
+            </TableCell>
+         </TableRow>
 
-         <TS_ViewModal
+         {/* Modals */}
+         <ViewApplicationModal
             isOpen={isViewModalOpen}
             onClose={() => setIsViewModalOpen(false)}
             application={app}
          />
-         <ChiefReviewModal
-            isOpen={isReviewModalOpen}
-            onClose={() => setIsReviewModalOpen(false)}
+         <OrderOfPaymentForm
+            isOpen={isOOPFormOpen}
+            onClose={() => setIsOOPFormOpen(false)}
             application={app}
-            onReviewComplete={handleReviewComplete}
+            onComplete={handleOOPComplete}
          />
       </>
    );
+};
+
+// Helper function to map status to badge variant and custom colors
+const getStatusVariant = (status) => {
+   switch (status.toLowerCase()) {
+      case 'submitted':
+         return {
+            variant: 'default',
+            className: 'bg-blue-100 text-blue-800 hover:bg-blue-100/80'
+         };
+      case 'approved':
+         return {
+            variant: 'success',
+            className: 'bg-green-100 text-green-800 hover:bg-green-100/80'
+         };
+      case 'awaiting oop':
+         return {
+            variant: 'warning',
+            className: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100/80'
+         };
+      default:
+         return {
+            variant: 'secondary',
+            className: 'bg-gray-100 text-gray-800 hover:bg-gray-100/80'
+         };
+   }
 };
 
 export default AccountantApplicationRow;

@@ -2,23 +2,22 @@
 // Technical Staff Application Row
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Eye, Printer, ClipboardCheck, FileCheck, RotateCcw, FileText, CheckCircle, XCircle, FileCheck2 } from 'lucide-react';
+import { Eye, ClipboardCheck, RotateCcw } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { TableCell, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import {
    Tooltip,
    TooltipContent,
    TooltipProvider,
    TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Card } from "@/components/ui/card";
+import { format } from 'date-fns';
 import TS_ViewModal from '@/pages/Personnel/components/PersonnelDashboardComponents/TechnicalStaff/TS_ViewModal';
 import PCOAppReviewModal from './PCOAppReviewModal';
-// import GenerateCertificateModal from './GenerateCertificateModal';
-// import CertificateActionHandler from './CertificateActionHandler';
-import { getUserRoles } from '@/utils/auth';
-// import { useUndoApplicationApproval } from '../../../hooks/useApplications';
-import { toast } from 'sonner';
-import { format } from 'date-fns';
 import { gql, useMutation } from '@apollo/client';
+import { toast } from 'sonner';
 
 const GET_APPLICATION_DETAILS = gql`
   query GetApplication($id: ID!) {
@@ -110,29 +109,22 @@ const UNDO_ACCEPTANCE_CENRPENROFFICER = gql`
 const PCOApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, isMobile }) => {
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-   // const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(false);
-   const [updatePermitStage] = useMutation(UPDATE_PERMIT_STAGE);
    const [undoAcceptanceCENRPENROfficer] = useMutation(UNDO_ACCEPTANCE_CENRPENROFFICER);
 
    const handleViewClick = () => setIsViewModalOpen(true);
    const handleReviewClick = () => setIsReviewModalOpen(true);
-   const handleAuthenticityClick = () => setIsAuthenticityModalOpen(true);
-
    const handleReviewComplete = () => {
       setIsReviewModalOpen(false);
       onReviewComplete();
    };
-   // Approved Applications tab, search handleApproveAuthenticity for reference - TS_AuthenticityReviewModal.jsx
-   // Accepted Applications tab, search handleUndoAcceptance for reference - TS_ReviewModal.jsx
+
    const handleUndo = async () => {
       try {
-
          await undoAcceptanceCENRPENROfficer({
             variables: {
                id: app.id
             }
          });
-
          toast.success('Application status undone successfully');
          onReviewComplete();
       } catch (error) {
@@ -141,113 +133,76 @@ const PCOApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
       }
    };
 
-   // correct way to format date in application row
-   const formatDate = (timestamp) => {
-      // const date = new Date(timestamp);
-      // return date.toLocaleDateString();
-      return new Date(timestamp).toLocaleDateString();
-   };
-
-   const showGenerateCertificateButton =
-      currentTab === 'Awaiting Permit Creation' &&
-      app.currentStage === 'AuthenticityApprovedByTechnicalStaff' &&
-      app.applicationType === 'Chainsaw Registration' &&
-      !app.PermitCreated;
-
-   const userRoles = getUserRoles();
-   console.log(userRoles);
-   const handleCertificateComplete = () => {
-      setIsCertificateModalOpen(false);
-      onReviewComplete();
-   };
-
    const renderActionButtons = () => {
-      const actions = [];
+      const actions = [
+         {
+            icon: Eye,
+            label: "View Application",
+            onClick: handleViewClick,
+            variant: "outline"
+         },
+         // Add review action if applicable
+         currentTab === 'Applications for Review' && {
+            icon: ClipboardCheck,
+            label: "Review Application",
+            onClick: handleReviewClick,
+            variant: "outline",
+            className: "text-blue-600 hover:text-blue-800"
+         },
+         // Add undo action if applicable
+         (currentTab === 'Approved Applications' || currentTab === 'Returned Applications') && {
+            icon: RotateCcw,
+            label: `Undo ${currentTab === 'Returned Applications' ? 'Return' : 'Approval'}`,
+            onClick: handleUndo,
+            variant: "outline",
+            className: "text-yellow-600 hover:text-yellow-800"
+         }
+      ].filter(Boolean);
 
-      // View action
-      actions.push(
-         <TooltipProvider key="view-action">
-            <Tooltip delayDuration={200}>
+      return actions.map((action, index) => (
+         <TooltipProvider key={index}>
+            <Tooltip>
                <TooltipTrigger asChild>
-                  <Button onClick={handleViewClick} variant="outline" size="icon" className="h-8 w-8">
-                     <Eye className="h-4 w-4" />
+                  <Button
+                     variant={action.variant}
+                     size="icon"
+                     onClick={action.onClick}
+                     className={action.className}
+                  >
+                     <action.icon className="h-4 w-4" />
                   </Button>
                </TooltipTrigger>
                <TooltipContent>
-                  <p>View Application</p>
+                  <p>{action.label}</p>
                </TooltipContent>
             </Tooltip>
          </TooltipProvider>
-      );
-
-      // Add other action buttons based on currentTab
-      if (currentTab === 'Pending Reviews') {
-         actions.push(
-            <TooltipProvider key="review-action">
-               <Tooltip delayDuration={200}>
-                  <TooltipTrigger asChild>
-                     <Button onClick={handleReviewClick} variant="outline" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-800">
-                        <ClipboardCheck className="h-4 w-4" />
-                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                     <p>Review Application</p>
-                  </TooltipContent>
-               </Tooltip>
-            </TooltipProvider>
-         );
-      }
-
-      // Add undo button for specific tabs
-      if (currentTab === 'Approved Applications' || currentTab === 'Returned Applications') {
-         actions.push(
-            <TooltipProvider key="undo-action">
-               <Tooltip>
-                  <TooltipTrigger asChild>
-                     <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 text-yellow-600"
-                        onClick={handleUndo}
-                     >
-                        <RotateCcw className="h-4 w-4" />
-                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                     <p>Undo {currentTab === 'Returned Applications' ? 'Return' : 'Approval'}</p>
-                  </TooltipContent>
-               </Tooltip>
-            </TooltipProvider>
-         );
-      }
-
-      return actions;
+      ));
    };
 
    if (isMobile) {
       return (
-         <div className="bg-white/60 backdrop-blur-xl p-4 rounded-xl shadow-sm border border-gray-100 space-y-2">
-            <div className="flex justify-between items-start">
-               <div className="space-y-1">
-                  <h3 className="font-medium text-gray-900">
-                     {app.applicationNumber}
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                     {app.applicationType}
-                  </p>
+         <>
+            <Card className="p-4 space-y-3">
+               <div className="flex justify-between items-start">
+                  <div>
+                     <p className="font-medium">{app.applicationNumber}</p>
+                     <p className="text-sm text-muted-foreground">{app.applicationType}</p>
+                  </div>
+                  <Badge
+                     variant={getStatusVariant(app.status).variant}
+                     className={getStatusVariant(app.status).className}
+                  >
+                     {app.status}
+                  </Badge>
                </div>
-               <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(app.status)}`}>
-                  {app.status}
-               </span>
-            </div>
-
-            <p className="text-sm text-gray-500">
-               {new Date(app.dateOfSubmission).toLocaleDateString()}
-            </p>
-
-            <div className="flex gap-2 pt-1">
-               {renderActionButtons()}
-            </div>
+               <p className="text-sm text-muted-foreground">
+                  {format(new Date(app.dateOfSubmission), 'MMM d, yyyy')}
+               </p>
+               <div className="flex gap-2">
+                  {renderActionButtons()}
+               </div>
+            </Card>
 
             {/* Modals */}
             <TS_ViewModal
@@ -261,35 +216,66 @@ const PCOApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
                application={app}
                onReviewComplete={handleReviewComplete}
             />
-         </div>
+         </>
       );
    }
 
    return (
-      <tr className="border-b border-gray-200 transition-colors hover:bg-gray-50">
-         <td className="px-4 py-3 whitespace-nowrap">
-            <div className="text-sm text-gray-900">{app.applicationNumber}</div>
-         </td>
-         <td className="px-4 py-3 whitespace-nowrap">
-            <div className="text-sm text-gray-900">{app.applicationType}</div>
-         </td>
-         <td className="px-4 py-3 whitespace-nowrap">
-            <div className="text-sm text-gray-900">
-               {new Date(app.dateOfSubmission).toLocaleDateString()}
-            </div>
-         </td>
-         <td className="px-4 py-3 whitespace-nowrap">
-            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(app.status)}`}>
-               {app.status}
-            </span>
-         </td>
-         <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-            <div className="flex items-center space-x-2">
-               {renderActionButtons()}
-            </div>
-         </td>
-      </tr>
+      <>
+         <TableRow>
+            <TableCell>{app.applicationNumber}</TableCell>
+            <TableCell>{app.applicationType}</TableCell>
+            <TableCell>{format(new Date(app.dateOfSubmission), 'MMM d, yyyy')}</TableCell>
+            <TableCell>
+               <Badge
+                  variant={getStatusVariant(app.status).variant}
+                  className={getStatusVariant(app.status).className}
+               >
+                  {app.status}
+               </Badge>
+            </TableCell>
+            <TableCell className="text-right">
+               <div className="flex justify-end gap-2">
+                  {renderActionButtons()}
+               </div>
+            </TableCell>
+         </TableRow>
+
+         {/* Modals */}
+         <TS_ViewModal
+            isOpen={isViewModalOpen}
+            onClose={() => setIsViewModalOpen(false)}
+            application={app}
+         />
+         <PCOAppReviewModal
+            isOpen={isReviewModalOpen}
+            onClose={() => setIsReviewModalOpen(false)}
+            application={app}
+            onReviewComplete={handleReviewComplete}
+         />
+      </>
    );
+};
+
+// Helper function to map status to badge variant and custom colors
+const getStatusVariant = (status) => {
+   switch (status.toLowerCase()) {
+      case 'pending review':
+         return {
+            variant: 'warning',
+            className: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100/80'
+         };
+      case 'approved':
+         return {
+            variant: 'success',
+            className: 'bg-green-100 text-green-800 hover:bg-green-100/80'
+         };
+      default:
+         return {
+            variant: 'secondary',
+            className: 'bg-gray-100 text-gray-800 hover:bg-gray-100/80'
+         };
+   }
 };
 
 export default PCOApplicationRow;

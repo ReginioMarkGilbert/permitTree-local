@@ -14,6 +14,7 @@ import ViewOOPModal from '@/pages/user/components/ViewOOPModal';
 import { gql } from 'graphql-tag';
 import { useMutation } from '@apollo/client';
 import { toast } from 'sonner';
+import { TableCell, TableRow } from "@/components/ui/table";
 
 const UPDATE_OOP_TRACKING = gql`
   mutation UpdateOOPTracking($id: ID!, $tracking: OOPTrackingInput!) {
@@ -141,20 +142,12 @@ const AccountantOOPRow = ({ oop, onReviewComplete, currentTab }) => {
 
    return (
       <>
-         <tr key={oop._id}>
-            <td className="px-4 py-4 whitespace-nowrap">
-               {oop.applicationNumber}
-            </td>
-            <td className="px-4 py-4 whitespace-nowrap">
-               {oop.billNo}
-            </td>
-            <td className="px-4 py-4 whitespace-nowrap">
-               {formatDate(oop.createdAt)}
-            </td>
-            <td className="px-4 py-4 whitespace-nowrap">
-               ₱ {oop.totalAmount.toFixed(2)}
-            </td>
-            <td className="px-4 py-4 whitespace-nowrap">
+         <TableRow>
+            <TableCell>{oop.applicationId}</TableCell>
+            <TableCell>{oop.billNo}</TableCell>
+            <TableCell>{formatDate(oop.createdAt)}</TableCell>
+            <TableCell>₱ {oop.totalAmount.toFixed(2)}</TableCell>
+            <TableCell>
                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${oop.OOPstatus === 'For Approval' ? 'bg-yellow-100 text-yellow-800' :
                   oop.OOPstatus === 'Awaiting Payment' ? 'bg-green-100 text-green-800' :
                      oop.OOPstatus === 'Rejected' ? 'bg-red-100 text-red-800' :
@@ -162,8 +155,8 @@ const AccountantOOPRow = ({ oop, onReviewComplete, currentTab }) => {
                   }`}>
                   {oop.OOPstatus}
                </span>
-            </td>
-            <td className="px-4 py-4 whitespace-nowrap text-sm">
+            </TableCell>
+            <TableCell className="text-right">
                <div className="flex items-center space-x-2">
                   <TooltipProvider>
                      <Tooltip delayDuration={250}>
@@ -241,8 +234,8 @@ const AccountantOOPRow = ({ oop, onReviewComplete, currentTab }) => {
                      </TooltipProvider>
                   )}
                </div>
-            </td>
-         </tr>
+            </TableCell>
+         </TableRow>
 
          <ViewOOPModal
             isOpen={isViewOOPModalOpen}
