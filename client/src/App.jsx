@@ -114,12 +114,14 @@ const App = () => {
                   {getSidebar()}
                   <div className={cn(
                      "flex-1 min-w-0 flex flex-col",
+                     // sidebarToggle ? 'lg:pl-[270px]' : 'lg:pl-[50px]',
                      'transition-[padding] duration-300'
                   )}>
                      {showNavbar && <Navbar sidebarToggle={sidebarToggle} setSidebarToggle={toggleSidebar} />}
                      <main className={cn(
                         "flex-1 overflow-y-auto bg-background",
-                        "pt-16"
+                        sidebarToggle ? 'lg:pl-[260px]' : 'lg:pl-[60px]',
+                        'transition-[padding] duration-300'
                      )}>
                         <Routes>
                            <Route path="/" element={<LandingPage />} />
