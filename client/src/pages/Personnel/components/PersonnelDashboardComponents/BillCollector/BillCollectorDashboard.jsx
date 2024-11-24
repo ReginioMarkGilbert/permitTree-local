@@ -312,6 +312,9 @@ const BillCollectorDashboard = () => {
 
                {/* Tabs Section */}
                {renderTabs()}
+               <div className="text-sm text-gray-600 -mb-4"> {/* -mb-4 remove bottom space */}
+                  {renderTabDescription()}
+               </div>
             </div>
 
             {/* Filters Section */}
@@ -320,8 +323,6 @@ const BillCollectorDashboard = () => {
                   <OOPFilters filters={filters} setFilters={setFilters} />
                </div>
             </div>
-
-            {renderTabDescription()}
 
             {renderContent()}
          </div>

@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { BellRing } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import NotificationSearch from './NotificationSearch';
 
 const NotificationsLayout = ({
    title,
@@ -12,7 +13,9 @@ const NotificationsLayout = ({
    unreadNotifications,
    loading,
    markAllAsRead,
-   children
+   children,
+   searchQuery,
+   onSearchChange
 }) => {
    const isMobile = useMediaQuery('(max-width: 640px)');
 
@@ -51,9 +54,16 @@ const NotificationsLayout = ({
             )}
          </div>
 
+         <div className="mb-6">
+            <NotificationSearch
+               searchQuery={searchQuery}
+               onSearchChange={onSearchChange}
+            />
+         </div>
+
          <Card className="border-none shadow-lg min-h-[600px] sm:min-h-[800px] bg-white/50 backdrop-blur-sm p-4 sm:p-6">
-            <Tabs defaultValue={tabs[0].value} className="w-full">
-               <TabsList className="flex flex-wrap sm:grid sm:grid-cols-4 w-full gap-2 sm:gap-0 mb-6 p-1 bg-gray-100/80">
+            <Tabs defaultValue={tabs[0].value} className="w-full space-y-6">
+               <TabsList className="h-12 p-1 w-full">
                   {tabs.map(tab => (
                      <TabsTrigger
                         key={tab.value}
