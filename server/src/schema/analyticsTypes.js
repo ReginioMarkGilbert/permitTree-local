@@ -68,9 +68,17 @@ const analyticsTypes = gql`
         permitTypeRevenue: [PermitTypeRevenue!]!
     }
 
+    type UserStats {
+        totalUsers: Int!
+        activeUsers: Int!
+        newUsers: [WeeklyVolumeData!]!
+        usersByStatus: [ApplicationTypeStats!]!
+    }
+
     extend type Query {
         getApplicationAnalytics(timeFilter: String!): ApplicationAnalytics!
         getFinancialAnalytics(timeFilter: String!): FinancialAnalytics!
+        getUserAnalytics(timeFilter: String!): UserStats!
     }
 `;
 

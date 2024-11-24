@@ -17,10 +17,17 @@ const UserSchema = new mongoose.Schema({
    roles: [{
       type: String,
       required: true,
-      enum: ['user'], // Add other roles as needed
+      enum: ['user'],
       default: 'user'
    }],
-   lastPasswordChange: { type: Date, default: Date.now }
+   lastPasswordChange: { type: Date, default: Date.now },
+   // for analytics
+   isActive: { type: Boolean, default: true },
+   lastLoginDate: { type: Date, default: Date.now },
+   createdAt: { type: Date },
+   updatedAt: { type: Date }
+}, {
+   timestamps: true // This will automatically manage createdAt and updatedAt
 });
 
 UserSchema.pre('save', async function (next) {
@@ -35,7 +42,7 @@ UserSchema.pre('save', async function (next) {
    }
 });
 
-UserSchema.methods.comparePassword = async function(candidatePassword) {
+UserSchema.methods.comparePassword = async function (candidatePassword) {
    try {
       return await bcrypt.compare(candidatePassword, this.password);
    } catch (error) {

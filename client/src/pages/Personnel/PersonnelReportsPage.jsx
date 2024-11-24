@@ -6,6 +6,7 @@ import { gql } from '@apollo/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ApplicationAnalytics from './components/ApplicationAnalytics';
 import FinancialAnalytics from './components/FinancialAnalytics';
+import UserAnalytics from './components/UserAnalytics';
 
 const GET_APPLICATION_ANALYTICS = gql`
     query GetApplicationAnalytics($timeFilter: String!) {
@@ -41,6 +42,24 @@ const GET_FINANCIAL_ANALYTICS = gql`
     }
 `;
 
+const GET_USER_ANALYTICS = gql`
+    query GetUserAnalytics($timeFilter: String!) {
+        getUserAnalytics(timeFilter: $timeFilter) {
+            totalUsers
+            activeUsers
+            newUsers {
+                day
+                count
+            }
+            usersByStatus {
+                id
+                label
+                value
+            }
+        }
+    }
+`;
+
 export default function PersonnelReportsPage() {
    const [timeFilter, setTimeFilter] = useState('week');
    const [activeTab, setActiveTab] = useState('applications');
@@ -53,15 +72,15 @@ export default function PersonnelReportsPage() {
       variables: { timeFilter }
    });
 
-   if (appLoading || financialLoading) return <Skeleton className="w-full h-[500px]" />;
-   if (appError) return <p>Error loading application analytics: {appError.message}</p>;
-   if (financialError) return <p>Error loading financial analytics: {financialError.message}</p>;
+   const { loading: userLoading, error: userError, data: userData } = useQuery(GET_USER_ANALYTICS, {
+      variables: { timeFilter }
+   });
 
-   const financialAnalyticsData = {
-      revenueStats: financialData?.getFinancialAnalytics?.revenueStats || {
-         total: 0, paid: 0, pending: 0, overdue: 0
-      }
-   };
+   if (appLoading || financialLoading || userLoading)
+      return <Skeleton className="w-full h-[500px]" />;
+
+   if (appError || financialError || userError)
+      return <p>Error loading analytics data</p>;
 
    return (
       <div className="min-h-screen bg-green-50 px-4 sm:px-6 py-6 sm:py-8">
@@ -82,9 +101,10 @@ export default function PersonnelReportsPage() {
             </div>
 
             <Tabs defaultValue="applications" className="space-y-4">
-               <TabsList className="grid w-full grid-cols-2">
+               <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="applications">Application Analytics</TabsTrigger>
                   <TabsTrigger value="financial">Financial Analytics</TabsTrigger>
+                  <TabsTrigger value="users">User Analytics</TabsTrigger>
                </TabsList>
 
                <TabsContent value="applications">
@@ -92,7 +112,11 @@ export default function PersonnelReportsPage() {
                </TabsContent>
 
                <TabsContent value="financial">
-                  <FinancialAnalytics data={financialAnalyticsData} />
+                  <FinancialAnalytics data={financialData.getFinancialAnalytics} />
+               </TabsContent>
+
+               <TabsContent value="users">
+                  <UserAnalytics data={userData.getUserAnalytics} />
                </TabsContent>
             </Tabs>
          </div>
