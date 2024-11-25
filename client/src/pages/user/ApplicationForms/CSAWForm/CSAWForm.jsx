@@ -387,34 +387,33 @@ const ChainsawRegistrationForm = () => {
    }, []);
 
    return (
-      <div className="min-h-screen bg-green-50 flex flex-col justify-between pt-[83px]">
+      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-300 flex flex-col justify-between pt-[83px]">
          <div className="container mx-auto">
-            <h1 className="text-2xl sm:text-3xl font-[700] text-green-800 mb-4 text-center">
+            <h1 className="text-2xl sm:text-3xl font-[700] text-green-800 dark:text-green-500 mb-4 text-center">
                Chainsaw Registration Application
             </h1>
-            <Card className="max-w-2xl mx-auto shadow-lg">
+            <Card className="max-w-2xl mx-auto shadow-lg bg-background">
                <CardHeader className="p-4 sm:p-6">
-                  <CardTitle className="text-lg sm:text-xl">{steps[currentStep].title}</CardTitle>
+                  <CardTitle className="text-lg sm:text-xl text-foreground">{steps[currentStep].title}</CardTitle>
                </CardHeader>
                <CardContent className="p-4 sm:p-6">
                   <form onSubmit={handleSubmit}>
                      {currentStep === 0 && (
                         <div className="space-y-6 pb-4">
-                           {/* <Label>Registration Type</Label> */}
                            <RadioGroup
                               onValueChange={(value) => handleSelectChange('registrationType', value)}
                               value={formData.registrationType}
                               className="space-y-4"
                            >
-                              <div className="flex items-center space-x-2 p-4 rounded-lg border border-gray-200 bg-white hover:bg-gray-50">
+                              <div className="flex items-center space-x-2 p-4 rounded-lg border border-input bg-background hover:bg-accent">
                                  <RadioGroupItem value="New" id="new" />
-                                 <Label htmlFor="new" className="text-lg font-semibold">
+                                 <Label htmlFor="new" className="text-lg font-semibold text-foreground">
                                     New Registration
                                  </Label>
                               </div>
-                              <div className="flex items-center space-x-2 p-4 rounded-lg border border-gray-200 bg-white hover:bg-gray-50">
+                              <div className="flex items-center space-x-2 p-4 rounded-lg border border-input bg-background hover:bg-accent">
                                  <RadioGroupItem value="Renewal" id="renewal" />
-                                 <Label htmlFor="renewal" className="text-lg font-semibold">
+                                 <Label htmlFor="renewal" className="text-lg font-semibold text-foreground">
                                     Renewal
                                  </Label>
                               </div>
@@ -424,7 +423,7 @@ const ChainsawRegistrationForm = () => {
 
                      {currentStep === 1 && (
                         <div className="space-y-4 pt-2">
-                           <p className="text-sm text-gray-700 mb-3 font-semibold">
+                           <p className="text-sm text-muted-foreground mb-3 font-semibold">
                               Please select the store where you purchased your chainsaw. If your store is not listed, please enter it manually.
                            </p>
                            <CustomSelect
@@ -434,7 +433,7 @@ const ChainsawRegistrationForm = () => {
                            />
                            {formData.chainsawStore === "other" && (
                               <div className="mt-4">
-                                 <Label htmlFor="customStore">Enter Chainsaw Store Name</Label>
+                                 <Label htmlFor="customStore" className="text-foreground">Enter Chainsaw Store Name</Label>
                                  <Input
                                     id="customStore"
                                     name="customStore"
@@ -442,6 +441,7 @@ const ChainsawRegistrationForm = () => {
                                     onChange={(e) => setCustomStore(e.target.value)}
                                     placeholder="Enter the name of the store"
                                     required
+                                    className="bg-background"
                                  />
                               </div>
                            )}
@@ -450,7 +450,7 @@ const ChainsawRegistrationForm = () => {
 
                      {currentStep === 2 && (
                         <div className="space-y-4">
-                           <p className="text-sm text-gray-700 mb-4 font-semibold">
+                           <p className="text-sm text-muted-foreground mb-4 font-semibold">
                               Please check the boxes that apply to you. In the next step, you will be required to upload the corresponding documents.
                            </p>
                            <div className="space-y-2">
@@ -485,7 +485,7 @@ const ChainsawRegistrationForm = () => {
 
                      {currentStep === 3 && (
                         <div className="step-3-container">
-                           <p className="text-sm text-gray-700 mb-4 font-semibold">
+                           <p className="text-sm text-muted-foreground mb-4 font-semibold dark:text-gray-300">
                               Please upload the required documents.
                            </p>
                            <div className="upload-cards-container custom-scrollbar h-[600px] overflow-y-auto pr-2">
@@ -704,31 +704,31 @@ const ChainsawRegistrationForm = () => {
                                  {Object.entries(formData)
                                     .filter(([key]) => key !== 'status' && key !== 'dateOfSubmission' && key !== 'files')
                                     .map(([key, value]) => (
-                                       <div key={key} className="bg-white p-3 rounded-lg shadow">
-                                          <h4 className="font-semibold text-green-600 mb-1 text-sm">{formatLabel(key)}</h4>
-                                          <p className="text-gray-700 text-sm break-words">
+                                       <div key={key} className="bg-background border rounded-lg p-3">
+                                          <h4 className="font-semibold text-green-600 dark:text-green-500 mb-1 text-sm">{formatLabel(key)}</h4>
+                                          <p className="text-foreground text-sm break-words">
                                              {formatReviewValue(key, value)}
                                           </p>
                                        </div>
                                     ))}
                               </div>
 
-                              <div className="bg-white p-3 rounded-lg shadow mt-4">
-                                 <h4 className="font-semibold text-green-600 mb-2 text-sm">Uploaded Files</h4>
+                              <div className="bg-background border rounded-lg p-3 mt-4">
+                                 <h4 className="font-semibold text-green-600 dark:text-green-500 mb-2 text-sm">Uploaded Files</h4>
                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     {Object.entries(formData.files).map(([docType, files]) => (
-                                       <div key={docType} className="border-b pb-2">
-                                          <h5 className="font-medium text-gray-700 mb-1 text-xs">{formatLabel(docType)}</h5>
+                                       <div key={docType} className="border-b dark:border-gray-700 pb-2">
+                                          <h5 className="font-medium text-foreground mb-1 text-xs">{formatLabel(docType)}</h5>
                                           {files.length > 0 ? (
                                              <ul className="list-disc list-inside">
                                                 {files.map((file, index) => (
-                                                   <li key={index} className="text-xs text-gray-600 truncate">
+                                                   <li key={index} className="text-xs text-muted-foreground truncate">
                                                       {file.name}
                                                    </li>
                                                 ))}
                                              </ul>
                                           ) : (
-                                             <p className="text-xs text-gray-500">No files uploaded</p>
+                                             <p className="text-xs text-muted-foreground">No files uploaded</p>
                                           )}
                                        </div>
                                     ))}
@@ -802,17 +802,6 @@ const ChainsawRegistrationForm = () => {
                </CardFooter>
             </Card>
          </div>
-         {/* <ToastContainer
-            position="top-right"
-            autoClose={5000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-         /> */}
          <Modal
             isOpen={modalOpen}
             title={modalContent.title}

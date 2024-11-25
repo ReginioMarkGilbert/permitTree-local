@@ -267,28 +267,51 @@ const PTPRForm = () => {
    }, []);
 
    return (
-      <div className="min-h-screen bg-green-50 flex flex-col justify-between pt-[83px]">
+      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-300 flex flex-col justify-between pt-[83px]">
          <div className="container mx-auto px-4 flex-grow">
-            <h1 className="text-3xl font-[700] text-green-800 mb-6 text-center">Private Tree Plantation Registration</h1>
-            <Card className="max-w-2xl mx-auto shadow-lg">
+            <h1 className="text-3xl font-[700] text-green-800 dark:text-green-500 mb-6 text-center">
+               Private Tree Plantation Registration
+            </h1>
+            <Card className="max-w-2xl mx-auto shadow-lg bg-background">
                <CardHeader>
-                  <CardTitle>{steps[currentStep].title}</CardTitle>
+                  <CardTitle className="text-foreground">{steps[currentStep].title}</CardTitle>
                </CardHeader>
                <CardContent>
                   <form onSubmit={handleSubmit}>
                      {currentStep === 0 && (
                         <div className="space-y-4">
                            <div>
-                              <Label htmlFor="ownerName">Name of Lot Owner</Label>
-                              <Input id="ownerName" name="ownerName" value={formData.ownerName} onChange={handleInputChange} required />
+                              <Label htmlFor="ownerName" className="text-foreground">Name of Lot Owner</Label>
+                              <Input
+                                 id="ownerName"
+                                 name="ownerName"
+                                 value={formData.ownerName}
+                                 onChange={handleInputChange}
+                                 required
+                                 className="bg-background"
+                              />
                            </div>
                            <div>
-                              <Label htmlFor="address">Address</Label>
-                              <Input id="address" name="address" value={formData.address} onChange={handleInputChange} required />
+                              <Label htmlFor="address" className="text-foreground">Address</Label>
+                              <Input
+                                 id="address"
+                                 name="address"
+                                 value={formData.address}
+                                 onChange={handleInputChange}
+                                 required
+                                 className="bg-background"
+                              />
                            </div>
                            <div>
-                              <Label htmlFor="contactNumber">Contact Number</Label>
-                              <Input id="contactNumber" name="contactNumber" value={formData.contactNumber} onChange={handleInputChange} required />
+                              <Label htmlFor="contactNumber" className="text-foreground">Contact Number</Label>
+                              <Input
+                                 id="contactNumber"
+                                 name="contactNumber"
+                                 value={formData.contactNumber}
+                                 onChange={handleInputChange}
+                                 required
+                                 className="bg-background"
+                              />
                            </div>
                         </div>
                      )}
@@ -296,23 +319,34 @@ const PTPRForm = () => {
                      {currentStep === 1 && (
                         <div className="space-y-4">
                            <div>
-                              <Label htmlFor="lotArea">Lot area devoted to plantation (in hectares)</Label>
+                              <Label htmlFor="lotArea" className="text-foreground">Lot area devoted to plantation (in hectares)</Label>
                               <Input
                                  id="lotArea"
                                  name="lotArea"
                                  type="number"
-                                 step="0.01" // Allow decimal numbers
+                                 step="0.01"
                                  value={formData.lotArea}
                                  onChange={handleInputChange}
                                  required
+                                 className="bg-background"
                               />
                            </div>
                            <div>
-                              <Label htmlFor="treeSpecies">Tree Species Planted (comma-separated)</Label>
-                              <Input id="treeSpecies" name="treeSpecies" value={formData.treeSpecies.join(', ')} onChange={(e) => setFormData(prev => ({ ...prev, treeSpecies: e.target.value.split(',').map(s => s.trim()) }))} required />
+                              <Label htmlFor="treeSpecies" className="text-foreground">Tree Species Planted (comma-separated)</Label>
+                              <Input
+                                 id="treeSpecies"
+                                 name="treeSpecies"
+                                 value={formData.treeSpecies.join(', ')}
+                                 onChange={(e) => setFormData(prev => ({
+                                    ...prev,
+                                    treeSpecies: e.target.value.split(',').map(s => s.trim())
+                                 }))}
+                                 required
+                                 className="bg-background"
+                              />
                            </div>
                            <div>
-                              <Label htmlFor="totalTrees">Total No. of Trees Planted</Label>
+                              <Label htmlFor="totalTrees" className="text-foreground">Total No. of Trees Planted</Label>
                               <Input
                                  id="totalTrees"
                                  name="totalTrees"
@@ -320,14 +354,22 @@ const PTPRForm = () => {
                                  value={formData.totalTrees}
                                  onChange={handleInputChange}
                                  required
+                                 className="bg-background"
                               />
                            </div>
                            <div>
-                              <Label htmlFor="treeSpacing">Spacing of trees</Label>
-                              <Input id="treeSpacing" name="treeSpacing" value={formData.treeSpacing} onChange={handleInputChange} required />
+                              <Label htmlFor="treeSpacing" className="text-foreground">Spacing of trees</Label>
+                              <Input
+                                 id="treeSpacing"
+                                 name="treeSpacing"
+                                 value={formData.treeSpacing}
+                                 onChange={handleInputChange}
+                                 required
+                                 className="bg-background"
+                              />
                            </div>
                            <div>
-                              <Label htmlFor="yearPlanted">Year Planted</Label>
+                              <Label htmlFor="yearPlanted" className="text-foreground">Year Planted</Label>
                               <Input
                                  id="yearPlanted"
                                  name="yearPlanted"
@@ -335,6 +377,7 @@ const PTPRForm = () => {
                                  value={formData.yearPlanted}
                                  onChange={handleInputChange}
                                  required
+                                 className="bg-background"
                               />
                            </div>
                         </div>
@@ -342,7 +385,7 @@ const PTPRForm = () => {
 
                      {currentStep === 2 && (
                         <div className="space-y-4">
-                           <div className="h-[500px] overflow-y-auto pr-4 custom-scrollbar"> {/* Add this wrapper div with custom-scrollbar class */}
+                           <div className="h-[500px] overflow-y-auto pr-4 custom-scrollbar">
                               <UploadCard
                                  label="Letter Request"
                                  documentLabel="Upload Letter Request (1 original, 1 photocopy)"
@@ -382,29 +425,37 @@ const PTPRForm = () => {
                                  {Object.entries(formData)
                                     .filter(([key]) => key !== 'status' && key !== 'dateOfSubmission' && key !== 'files')
                                     .map(([key, value]) => (
-                                       <div key={key} className="bg-white p-3 rounded-lg shadow">
-                                          <h4 className="font-semibold text-green-600 mb-1 text-sm">{formatLabel(key)}</h4>
-                                          <p className="text-gray-700 text-sm">
+                                       <div key={key} className="bg-background border rounded-lg p-3">
+                                          <h4 className="font-semibold text-green-600 dark:text-green-500 mb-1 text-sm">
+                                             {formatLabel(key)}
+                                          </h4>
+                                          <p className="text-foreground text-sm">
                                              {formatReviewValue(key, value)}
                                           </p>
                                        </div>
                                     ))}
                               </div>
 
-                              <div className="bg-white p-3 rounded-lg shadow mt-4">
-                                 <h4 className="font-semibold text-green-600 mb-2 text-sm">Uploaded Files</h4>
+                              <div className="bg-background border rounded-lg p-3 mt-4">
+                                 <h4 className="font-semibold text-green-600 dark:text-green-500 mb-2 text-sm">
+                                    Uploaded Files
+                                 </h4>
                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                     {Object.entries(formData.files).map(([docType, files]) => (
-                                       <div key={docType} className="border-b pb-2">
-                                          <h5 className="font-medium text-gray-700 mb-1 text-xs">{formatLabel(docType)}</h5>
+                                       <div key={docType} className="border-b dark:border-gray-700 pb-2">
+                                          <h5 className="font-medium text-foreground mb-1 text-xs">
+                                             {formatLabel(docType)}
+                                          </h5>
                                           {files.length > 0 ? (
                                              <ul className="list-disc list-inside">
                                                 {files.map((file, index) => (
-                                                   <li key={index} className="text-xs text-gray-600">{file.name}</li>
+                                                   <li key={index} className="text-xs text-muted-foreground">
+                                                      {file.name}
+                                                   </li>
                                                 ))}
                                              </ul>
                                           ) : (
-                                             <p className="text-xs text-gray-500">No files uploaded</p>
+                                             <p className="text-xs text-muted-foreground">No files uploaded</p>
                                           )}
                                        </div>
                                     ))}

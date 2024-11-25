@@ -44,15 +44,16 @@ const CustomSelect = ({ options, onSelect, placeholder }) => {
          </button>
 
          {isOpen && (
-            <div className="absolute z-50 w-full mt-1 bg-white rounded-md shadow-lg border border-gray-200">
+            <div className="absolute z-50 w-full mt-1 bg-background rounded-md shadow-lg border">
                <div className="py-1 max-h-60 overflow-auto">
                   {options.map((option) => (
                      <button
                         key={option.id}
                         type="button"
                         className={cn(
-                           "w-full px-3 py-2 text-left text-sm hover:bg-gray-100",
-                           selected?.id === option.id && "bg-gray-100"
+                           "w-full px-3 py-2 text-left text-sm hover:bg-accent",
+                           "text-foreground",
+                           selected?.id === option.id && "bg-accent"
                         )}
                         onClick={() => handleSelect(option)}
                      >
@@ -284,6 +285,7 @@ const OrderOfPaymentForm = ({ onClose }) => {
                            value={formData.applicationNumber}
                            onChange={handleInputChange}
                            disabled
+                           className="bg-muted dark:bg-gray-800"
                         />
                      </div>
                      <div>
@@ -294,6 +296,7 @@ const OrderOfPaymentForm = ({ onClose }) => {
                            value={formData.applicationId}
                            onChange={handleInputChange}
                            disabled
+                           className="bg-muted dark:bg-gray-800"
                         />
                      </div>
                      <div>
@@ -304,6 +307,7 @@ const OrderOfPaymentForm = ({ onClose }) => {
                            value={formData.applicantName}
                            onChange={handleInputChange}
                            disabled
+                           className="bg-muted dark:bg-gray-800"
                         />
                      </div>
                   </div>
@@ -317,7 +321,7 @@ const OrderOfPaymentForm = ({ onClose }) => {
                         <div className="grid grid-cols-2 gap-4">
                            <div>
                               <Label htmlFor="billNo">Bill No.</Label>
-                              <div className="h-10 flex items-center px-3 border rounded-md bg-gray-50">
+                              <div className="h-10 flex items-center px-3 border rounded-md bg-muted dark:bg-gray-800">
                                  Auto-generated
                               </div>
                            </div>
@@ -377,10 +381,10 @@ const OrderOfPaymentForm = ({ onClose }) => {
                            <Table>
                               <TableHeader>
                                  <TableRow>
-                                    <TableHead>Legal Basis (DAO/SEC)</TableHead>
-                                    <TableHead>Description</TableHead>
-                                    <TableHead>Amount</TableHead>
-                                    <TableHead></TableHead>
+                                    <TableHead className="text-foreground">Legal Basis</TableHead>
+                                    <TableHead className="text-foreground">Description</TableHead>
+                                    <TableHead className="text-foreground">Amount</TableHead>
+                                    <TableHead className="w-[50px]"></TableHead>
                                  </TableRow>
                               </TableHeader>
                               <TableBody>
@@ -431,7 +435,7 @@ const OrderOfPaymentForm = ({ onClose }) => {
                               </Button>
                               <div className="flex items-center">
                                  <Label className="mr-2">Total:</Label>
-                                 <div className="w-32 px-3 py-2 border rounded-md bg-gray-50">
+                                 <div className="w-32 px-3 py-2 border rounded-md bg-accent">
                                     ₱ {formData.fees.reduce((sum, fee) => sum + Number(fee.amount || 0), 0).toFixed(2)}
                                  </div>
                               </div>
@@ -441,7 +445,7 @@ const OrderOfPaymentForm = ({ onClose }) => {
                         {/* Signature section */}
                         <div className="grid grid-cols-2 gap-8 mt-8">
                            <div className="text-center">
-                              <div className="relative h-24 mb-4 border-2 border-dashed rounded-md flex items-center justify-center">
+                              <div className="relative h-24 mb-4 border-2 border-dashed rounded-md flex items-center justify-center bg-accent/50">
                                  {formData.rpsSignature ? (
                                     <>
                                        <img
@@ -459,11 +463,11 @@ const OrderOfPaymentForm = ({ onClose }) => {
                                        </Button>
                                     </>
                                  ) : (
-                                    <p className="text-gray-400">RPS Signature</p>
+                                    <p className="text-muted-foreground">RPS Signature</p>
                                  )}
                               </div>
-                              <p className="font-semibold">SIMEON R. DIAZ</p>
-                              <p className="text-xs text-gray-600">SVEMS/Chief, RPS</p>
+                              <p className="font-semibold text-foreground">SIMEON R. DIAZ</p>
+                              <p className="text-xs text-muted-foreground">SVEMS/Chief, RPS</p>
                               <input
                                  type="file"
                                  ref={rpsFileInputRef}
@@ -483,7 +487,7 @@ const OrderOfPaymentForm = ({ onClose }) => {
                            </div>
 
                            <div className="text-center">
-                              <div className="relative h-24 mb-4 border-2 border-dashed rounded-md flex items-center justify-center">
+                              <div className="relative h-24 mb-4 border-2 border-dashed rounded-md flex items-center justify-center bg-accent/50">
                                  {formData.tsdSignature ? (
                                     <>
                                        <img
@@ -501,11 +505,11 @@ const OrderOfPaymentForm = ({ onClose }) => {
                                        </Button>
                                     </>
                                  ) : (
-                                    <p className="text-gray-400">TSD Signature</p>
+                                    <p className="text-muted-foreground">TSD Signature</p>
                                  )}
                               </div>
-                              <p className="font-semibold">Engr. CYNTHIA U. LOZANO</p>
-                              <p className="text-xs text-gray-600">Chief, Technical Services Division</p>
+                              <p className="font-semibold text-foreground">Engr. CYNTHIA U. LOZANO</p>
+                              <p className="text-xs text-muted-foreground">Chief, Technical Services Division</p>
                               <input
                                  type="file"
                                  ref={tsdFileInputRef}
@@ -535,7 +539,7 @@ const OrderOfPaymentForm = ({ onClose }) => {
 
    if (applicationsError) {
       return (
-         <div className="p-4 text-red-600 bg-red-50 rounded-md">
+         <div className="p-4 text-destructive bg-destructive/10 rounded-md">
             Error loading applications: {applicationsError.message}
          </div>
       );
@@ -543,13 +547,13 @@ const OrderOfPaymentForm = ({ onClose }) => {
 
    return (
       <div className="container mx-auto px-4 py-8 mt-16">
-         <div className="bg-white shadow-md rounded-lg p-6">
+         <div className="bg-background border rounded-lg p-6 shadow-md">
             <div className="flex justify-between items-center mb-6">
                <Button variant="ghost" onClick={handleBack} className="flex items-center">
                   <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Dashboard
+                  <span className="text-foreground">Back to Dashboard</span>
                </Button>
-               <h2 className="text-2xl font-bold">Create Order of Payment</h2>
+               <h2 className="text-2xl font-bold text-foreground">Create Order of Payment</h2>
             </div>
             <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
                {renderStep()}

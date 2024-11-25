@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
 import { Eye, Edit, Trash2, RotateCcw, Send, MessageSquare } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { TableCell, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import {
    Tooltip,
    TooltipContent,
@@ -11,6 +14,7 @@ import EditDraftModal from './EditDraftModal';
 import ViewApplicationModal from './ViewApplicationModal';
 import ViewRemarksModal from './ViewRemarksModal';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { format } from 'date-fns';
 
 const UserApplicationRow = ({
    app,
@@ -33,11 +37,6 @@ const UserApplicationRow = ({
    const [isRemarksModalOpen, setIsRemarksModalOpen] = useState(false);
    const isMobile = useMediaQuery('(max-width: 640px)');
 
-   const formatDate = (timestamp) => {
-      const date = new Date(parseInt(timestamp));
-      return date.toLocaleDateString();
-   };
-
    const handleEditClick = () => setIsEditModalOpen(true);
    const handleViewClick = () => setIsViewModalOpen(true);
    const handleViewRemarks = () => setIsRemarksModalOpen(true);
@@ -47,180 +46,111 @@ const UserApplicationRow = ({
       setIsEditModalOpen(false);
    };
 
-   const renderActions = () => (
-      <div className="flex items-center space-x-2">
-         <TooltipProvider>
-            <Tooltip delayDuration={200}>
+   const renderActionButtons = () => {
+      const actions = [
+         {
+            icon: Eye,
+            label: "View Application",
+            onClick: handleViewClick,
+            variant: "outline"
+         },
+         // Edit action for Draft status
+         app.status === 'Draft' && {
+            icon: Edit,
+            label: "Edit Application",
+            onClick: handleEditClick,
+            variant: "outline"
+         },
+         // Delete action for Draft status
+         app.status === 'Draft' && {
+            icon: Trash2,
+            label: "Delete Draft",
+            onClick: () => onDelete(app),
+            variant: "outline",
+            className: "text-red-600 hover:text-red-800"
+         },
+         // Submit action for Draft status
+         app.status === 'Draft' && {
+            icon: Send,
+            label: "Submit Application",
+            onClick: () => onSubmit(app),
+            variant: "outline",
+            className: "text-green-600 hover:text-green-800"
+         },
+         // Actions for Returned status
+         app.status === 'Returned' && {
+            icon: Edit,
+            label: "Edit Application",
+            onClick: handleEditClick,
+            variant: "outline"
+         },
+         app.status === 'Returned' && {
+            icon: MessageSquare,
+            label: "View Remarks",
+            onClick: handleViewRemarks,
+            variant: "outline"
+         },
+         app.status === 'Returned' && {
+            icon: Send,
+            label: "Resubmit Application",
+            onClick: () => onResubmit(app),
+            variant: "outline",
+            className: "text-green-600 hover:text-green-800"
+         },
+         // Unsubmit action for Submitted status
+         app.status === 'Submitted' && {
+            icon: RotateCcw,
+            label: "Unsubmit Application",
+            onClick: () => onUnsubmit(app),
+            variant: "outline",
+            className: "text-yellow-600 hover:text-yellow-800"
+         }
+      ].filter(Boolean);
+
+      return actions.map((action, index) => (
+         <TooltipProvider key={index}>
+            <Tooltip>
                <TooltipTrigger asChild>
                   <Button
-                     onClick={handleViewClick}
-                     variant="outline"
+                     variant={action.variant}
                      size="icon"
-                     className="h-8 w-8"
-                     data-testid="view-button"
+                     onClick={action.onClick}
+                     className={action.className}
                   >
-                     <Eye className="h-4 w-4" />
+                     <action.icon className="h-4 w-4" />
                   </Button>
                </TooltipTrigger>
                <TooltipContent>
-                  <p>View Application</p>
+                  <p>{action.label}</p>
                </TooltipContent>
             </Tooltip>
          </TooltipProvider>
-
-         {app.status === 'Draft' && (
-            <>
-               <TooltipProvider>
-                  <Tooltip delayDuration={200}>
-                     <TooltipTrigger asChild>
-                        <Button
-                           onClick={handleEditClick}
-                           variant="outline"
-                           size="icon"
-                           className="h-8 w-8"
-                           data-testid="edit-button"
-                        >
-                           <Edit className="h-4 w-4" />
-                        </Button>
-                     </TooltipTrigger>
-                     <TooltipContent>
-                        <p>Edit Application</p>
-                     </TooltipContent>
-                  </Tooltip>
-               </TooltipProvider>
-
-               <TooltipProvider>
-                  <Tooltip delayDuration={200}>
-                     <TooltipTrigger asChild>
-                        <Button
-                           onClick={() => onDelete(app)}
-                           variant="outline"
-                           size="icon"
-                           className="h-8 w-8 text-red-600 hover:text-red-800"
-                           data-testid="delete-button"
-                        >
-                           <Trash2 className="h-4 w-4" />
-                        </Button>
-                     </TooltipTrigger>
-                     <TooltipContent>
-                        <p>Delete Draft</p>
-                     </TooltipContent>
-                  </Tooltip>
-               </TooltipProvider>
-
-               <TooltipProvider>
-                  <Tooltip delayDuration={200}>
-                     <TooltipTrigger asChild>
-                        <Button
-                           onClick={() => onSubmit(app)}
-                           variant="outline"
-                           size="icon"
-                           className="h-8 w-8 text-green-600 hover:text-green-800"
-                           data-testid="submit-button"
-                        >
-                           <Send className="h-4 w-4" />
-                        </Button>
-                     </TooltipTrigger>
-                     <TooltipContent>
-                        <p>Submit Application</p>
-                     </TooltipContent>
-                  </Tooltip>
-               </TooltipProvider>
-            </>
-         )}
-         {app.status === 'Returned' && (
-            <>
-               <TooltipProvider>
-                  <Tooltip delayDuration={200}>
-                     <TooltipTrigger asChild>
-                        <Button
-                           onClick={handleEditClick}
-                           variant="outline"
-                           size="icon"
-                           className="h-8 w-8"
-                           data-testid="edit-button"
-                        >
-                           <Edit className="h-4 w-4" />
-                        </Button>
-                     </TooltipTrigger>
-                     <TooltipContent>
-                        <p>Edit Application</p>
-                     </TooltipContent>
-                  </Tooltip>
-               </TooltipProvider>
-
-               <TooltipProvider>
-                  <Tooltip delayDuration={200}>
-                     <TooltipTrigger asChild>
-                        <Button onClick={handleViewRemarks} variant="outline" size="icon" className="h-8 w-8">
-                           <MessageSquare className="h-4 w-4" />
-                        </Button>
-                     </TooltipTrigger>
-                     <TooltipContent>
-                        <p>View Remarks</p>
-                     </TooltipContent>
-                  </Tooltip>
-               </TooltipProvider>
-
-               <TooltipProvider>
-                  <Tooltip delayDuration={200}>
-                     <TooltipTrigger asChild>
-                        <Button onClick={() => onResubmit(app)} variant="outline" size="icon" className="h-8 w-8 text-green-600 hover:text-green-800">
-                           <Send className="h-4 w-4" />
-                        </Button>
-                     </TooltipTrigger>
-                     <TooltipContent>
-                        <p>Resubmit Application</p>
-                     </TooltipContent>
-                  </Tooltip>
-               </TooltipProvider>
-            </>
-         )}
-         {app.status === 'Submitted' && ( // only show unsubmit if the application is not yet in progress
-            <TooltipProvider>
-               <Tooltip delayDuration={200}>
-                  <TooltipTrigger asChild>
-                     <Button
-                        onClick={() => onUnsubmit(app)}
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 text-yellow-600 hover:text-yellow-800"
-                        data-testid="unsubmit-button"
-                     >
-                        <RotateCcw className="h-4 w-4" />
-                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                     <p>Unsubmit Application</p>
-                  </TooltipContent>
-               </Tooltip>
-            </TooltipProvider>
-         )}
-      </div>
-   );
+      ));
+   };
 
    if (isMobile) {
       return (
          <>
-            <div className="bg-white p-4 mb-4 rounded-lg shadow-sm border border-gray-200">
-               <div className="space-y-2">
-                  <div className="flex justify-between items-start">
-                     <div>
-                        <h3 className="font-medium text-gray-900">{app.applicationNumber}</h3>
-                        <p className="text-sm text-gray-500">{app.applicationType}</p>
-                     </div>
-                     <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(app.status)}`}>
-                        {app.status}
-                     </span>
+            <Card className="p-4 space-y-3">
+               <div className="flex justify-between items-start">
+                  <div>
+                     <p className="font-medium">{app.applicationNumber}</p>
+                     <p className="text-sm text-muted-foreground">{app.applicationType}</p>
                   </div>
-                  <div className="text-sm text-gray-500">
-                     Submitted: {new Date(app.dateOfSubmission).toLocaleDateString()}
-                  </div>
-                  <div className="pt-2 flex flex-wrap gap-2">
-                     {renderActions()}
-                  </div>
+                  <Badge
+                     variant={getStatusVariant(app.status).variant}
+                     className={getStatusVariant(app.status).className}
+                  >
+                     {app.status}
+                  </Badge>
                </div>
-            </div>
+               <p className="text-sm text-muted-foreground">
+                  {format(new Date(app.dateOfSubmission), 'MMM d, yyyy')}
+               </p>
+               <div className="flex gap-2">
+                  {renderActionButtons()}
+               </div>
+            </Card>
 
             {/* Modals */}
             <EditDraftModal
@@ -251,29 +181,24 @@ const UserApplicationRow = ({
 
    return (
       <>
-         <tr className="border-b border-gray-200 transition-colors hover:bg-gray-50">
-            <td className="px-4 py-3 whitespace-nowrap">
-               <div className="text-sm text-gray-900">{app.applicationNumber}</div>
-            </td>
-            <td className="px-4 py-3 whitespace-nowrap">
-               <div className="text-sm text-gray-900">{app.applicationType}</div>
-            </td>
-            <td className="px-4 py-3 whitespace-nowrap">
-               <div className="text-sm text-gray-900">
-                  {new Date(app.dateOfSubmission).toLocaleDateString()}
-               </div>
-            </td>
-            <td className="px-4 py-3 whitespace-nowrap">
-               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(app.status)}`}>
+         <TableRow>
+            <TableCell>{app.applicationNumber}</TableCell>
+            <TableCell>{app.applicationType}</TableCell>
+            <TableCell>{format(new Date(app.dateOfSubmission), 'MMM d, yyyy')}</TableCell>
+            <TableCell>
+               <Badge
+                  variant={getStatusVariant(app.status).variant}
+                  className={getStatusVariant(app.status).className}
+               >
                   {app.status}
-               </span>
-            </td>
-            <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-               <div className="flex items-center space-x-2">
-                  {renderActions()}
+               </Badge>
+            </TableCell>
+            <TableCell className="text-right">
+               <div className="flex justify-end gap-2">
+                  {renderActionButtons()}
                </div>
-            </td>
-         </tr>
+            </TableCell>
+         </TableRow>
 
          {/* Modals */}
          <EditDraftModal
@@ -300,6 +225,48 @@ const UserApplicationRow = ({
          />
       </>
    );
+};
+
+// Helper function to map status to badge variant and custom colors
+const getStatusVariant = (status) => {
+   switch (status.toLowerCase()) {
+      case 'draft':
+         return {
+            variant: 'secondary',
+            className: 'bg-gray-100 text-gray-800 hover:bg-gray-100/80'
+         };
+      case 'submitted':
+         return {
+            variant: 'default',
+            className: 'bg-blue-100 text-blue-800 hover:bg-blue-100/80'
+         };
+      case 'returned':
+         return {
+            variant: 'warning',
+            className: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100/80'
+         };
+      case 'accepted':
+         return {
+            variant: 'success',
+            className: 'bg-green-100 text-green-800 hover:bg-green-100/80'
+         };
+      case 'released':
+         return {
+            variant: 'default',
+            className: 'bg-indigo-100 text-indigo-800 hover:bg-indigo-100/80'
+         };
+      case 'expired':
+      case 'rejected':
+         return {
+            variant: 'destructive',
+            className: 'bg-red-100 text-red-800 hover:bg-red-100/80'
+         };
+      default:
+         return {
+            variant: 'secondary',
+            className: 'bg-gray-100 text-gray-800 hover:bg-gray-100/80'
+         };
+   }
 };
 
 export default UserApplicationRow;

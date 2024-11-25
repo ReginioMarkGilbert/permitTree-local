@@ -2,37 +2,53 @@ import React from 'react';
 import { Card } from "@/components/ui/card";
 import { ResponsivePie } from '@nivo/pie';
 import { ResponsiveBar } from '@nivo/bar';
+import { useTheme } from '@/components/ThemeProvider';
 
 const ApplicationAnalytics = ({ data }) => {
+   const { theme } = useTheme();
+   const isDark = theme === 'dark';
+
    const {
       applicationTypes,
       statusData,
       weeklyVolume
    } = data;
 
+   const commonPieProps = {
+      margin: { top: 40, right: 80, bottom: 100, left: 80 },
+      innerRadius: 0.5,
+      padAngle: 0.7,
+      cornerRadius: 3,
+      activeOuterRadiusOffset: 8,
+      borderWidth: 1,
+      arcLinkLabelsSkipAngle: 10,
+      arcLinkLabelsTextColor: isDark ? "#ffffff" : "#333333",
+      arcLabelsSkipAngle: 10,
+      theme: {
+         legends: {
+            text: {
+               fill: isDark ? "#ffffff" : "#999999"
+            }
+         },
+         tooltip: {
+            container: {
+               background: isDark ? "#1f2937" : "#ffffff",
+               color: isDark ? "#ffffff" : "#333333",
+            }
+         }
+      }
+   };
+
    return (
       <div className="space-y-6">
          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="p-6 shadow-lg">
-               <h2 className="text-xl font-semibold text-green-700 mb-4">Applications by Type</h2>
+               <h2 className="text-xl font-semibold text-foreground mb-4">Applications by Type</h2>
                <div className="h-[400px]">
                   <ResponsivePie
+                     {...commonPieProps}
                      data={applicationTypes}
-                     margin={{ top: 40, right: 80, bottom: 100, left: 80 }}
-                     innerRadius={0.5}
-                     padAngle={0.7}
-                     cornerRadius={3}
-                     activeOuterRadiusOffset={8}
                      colors={{ scheme: 'nivo' }}
-                     borderWidth={1}
-                     borderColor={{
-                        from: 'color',
-                        modifiers: [['darker', 0.2]]
-                     }}
-                     enableArcLinkLabels={true}
-                     arcLinkLabelsSkipAngle={10}
-                     arcLinkLabelsTextColor="#333333"
-                     arcLabelsSkipAngle={10}
                      legends={[
                         {
                            anchor: 'bottom',
@@ -43,7 +59,6 @@ const ApplicationAnalytics = ({ data }) => {
                            itemsSpacing: 20,
                            itemWidth: 160,
                            itemHeight: 18,
-                           itemTextColor: '#999',
                            itemDirection: 'left-to-right',
                            itemOpacity: 1,
                            symbolSize: 18,
@@ -52,7 +67,7 @@ const ApplicationAnalytics = ({ data }) => {
                               {
                                  on: 'hover',
                                  style: {
-                                    itemTextColor: '#000'
+                                    itemTextColor: isDark ? '#ffffff' : '#000000'
                                  }
                               }
                            ]
@@ -63,19 +78,12 @@ const ApplicationAnalytics = ({ data }) => {
             </Card>
 
             <Card className="p-6 shadow-lg">
-               <h2 className="text-xl font-semibold text-green-700 mb-4">Application Status Distribution</h2>
+               <h2 className="text-xl font-semibold text-foreground mb-4">Application Status Distribution</h2>
                <div className="h-[400px]">
                   <ResponsivePie
+                     {...commonPieProps}
                      data={statusData}
-                     margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
-                     innerRadius={0.5}
-                     padAngle={0.7}
-                     cornerRadius={3}
-                     activeOuterRadiusOffset={8}
                      colors={{ scheme: 'category10' }}
-                     arcLinkLabelsSkipAngle={10}
-                     arcLinkLabelsTextColor="#333333"
-                     arcLabelsSkipAngle={10}
                      legends={[
                         {
                            anchor: 'bottom',
@@ -93,7 +101,7 @@ const ApplicationAnalytics = ({ data }) => {
          </div>
 
          <Card className="p-6 shadow-lg">
-            <h2 className="text-xl font-semibold text-green-700 mb-4">Weekly Application Volume</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">Weekly Application Volume</h2>
             <div className="h-[400px]">
                <ResponsiveBar
                   data={weeklyVolume}
@@ -105,12 +113,28 @@ const ApplicationAnalytics = ({ data }) => {
                   indexScale={{ type: 'band', round: true }}
                   colors="#22c55e"
                   borderRadius={4}
-                  borderColor={{
-                     from: 'color',
-                     modifiers: [['darker', 1.6]]
-                  }}
                   axisTop={null}
                   axisRight={null}
+                  theme={{
+                     axis: {
+                        ticks: {
+                           text: {
+                              fill: isDark ? "#ffffff" : "#333333"
+                           }
+                        },
+                        legend: {
+                           text: {
+                              fill: isDark ? "#ffffff" : "#333333"
+                           }
+                        }
+                     },
+                     tooltip: {
+                        container: {
+                           background: isDark ? "#1f2937" : "#ffffff",
+                           color: isDark ? "#ffffff" : "#333333",
+                        }
+                     }
+                  }}
                   axisBottom={{
                      tickSize: 5,
                      tickPadding: 5,
@@ -129,10 +153,7 @@ const ApplicationAnalytics = ({ data }) => {
                   }}
                   labelSkipWidth={12}
                   labelSkipHeight={12}
-                  labelTextColor={{
-                     from: 'color',
-                     modifiers: [['darker', 1.6]]
-                  }}
+                  labelTextColor={isDark ? "#ffffff" : "#000000"}
                   animate={true}
                />
             </div>

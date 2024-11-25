@@ -119,7 +119,7 @@ const App = () => {
                   )}>
                      {showNavbar && <Navbar sidebarToggle={sidebarToggle} setSidebarToggle={toggleSidebar} />}
                      <main className={cn(
-                        "flex-1 overflow-y-auto bg-background",
+                        "flex-1 overflow-y-auto bg-background transition-colors duration-300",
                         sidebarToggle ? 'lg:pl-[260px]' : 'lg:pl-[60px]',
                         'transition-[padding] duration-300'
                      )}>

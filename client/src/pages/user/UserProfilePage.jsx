@@ -356,32 +356,52 @@ export default function UserProfilePage() {
    }
 
    return (
-      <div className="bg-green-50 pt-20 pb-8 px-4 sm:px-6 lg:px-8">
+      <div className="bg-gradient-to-b from-green-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-300 pt-20 pb-8 px-4 sm:px-6 lg:px-8">
          <div className="max-w-4xl mx-auto space-y-8">
             {/* Header Section */}
-            <div className="bg-white rounded-lg shadow-sm p-8">
+            <div className="bg-background border rounded-lg shadow-sm p-8">
                <div className="flex items-center justify-between mb-8">
-                  <h1 className="text-2xl font-semibold text-gray-900">Profile Settings</h1>
-                  <Button
-                     onClick={() => setIsEditing(!isEditing)}
-                     variant={isEditing ? "destructive" : "outline"}
-                  >
-                     {isEditing ? (
-                        "Cancel"
-                     ) : (
-                        <>
-                           <Pencil className="h-4 w-4 mr-2" />
-                           Edit Profile
-                        </>
-                     )}
-                  </Button>
+                  <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Profile Settings</h1>
+                  {isEditing ? (
+                     <div className="flex gap-3">
+                        <Button
+                           variant="outline"
+                           onClick={handleCancel}
+                        >
+                           Cancel
+                        </Button>
+                        <Button
+                           onClick={handleSubmit}
+                           disabled={isLoading}
+                           className="bg-white text-black hover:bg-gray-100"
+                        >
+                           {isLoading ? (
+                              <>
+                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                 Saving...
+                              </>
+                           ) : (
+                              'Save Changes'
+                           )}
+                        </Button>
+                     </div>
+                  ) : (
+                     <Button
+                        onClick={() => setIsEditing(true)}
+                        variant="outline"
+                        className="bg-white text-black hover:bg-gray-100"
+                     >
+                        <Pencil className="h-4 w-4 mr-2" />
+                        Edit Profile
+                     </Button>
+                  )}
                </div>
 
                {/* Profile Picture Section */}
                <div className="flex items-center space-x-6">
                   <div className="relative">
                      <div
-                        className={`h-24 w-24 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center text-2xl text-gray-600 border-2 ${isEditing ? 'border-green-500 cursor-pointer' : 'border-transparent'}`}
+                        className={`h-24 w-24 rounded-full overflow-hidden bg-muted flex items-center justify-center text-2xl text-muted-foreground border-2 ${isEditing ? 'border-green-500 cursor-pointer' : 'border-transparent'}`}
                         onClick={() => isEditing && setShowPhotoOptions(true)}
                      >
                         {userInfo.profilePicture ? (
@@ -411,119 +431,119 @@ export default function UserProfilePage() {
                      )}
                   </div>
                   <div>
-                     <h2 className="text-xl font-semibold">{userInfo.fullName}</h2>
-                     <p className="text-sm text-gray-500">Permit Applicant</p>
+                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{userInfo.fullName}</h2>
+                     <p className="text-sm text-muted-foreground">Permit Applicant</p>
                   </div>
                </div>
             </div>
 
             {/* Account Overview Section */}
-            <div className="bg-white rounded-lg shadow-sm p-8">
-               <h3 className="text-lg font-medium mb-4">Account Overview</h3>
-               <Separator className="mb-4" />
+            <div className="bg-background border rounded-lg shadow-sm p-8">
+               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Account Overview</h3>
+               <Separator className="mb-4 dark:border-gray-700" />
                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                     <h4 className="text-sm font-medium text-gray-500">Total Applications</h4>
-                     <p className="text-2xl font-semibold mt-1">{userStats.totalApplications}</p>
+                  <div className="bg-muted/50 p-4 rounded-lg">
+                     <h4 className="text-sm font-medium text-muted-foreground">Total Applications</h4>
+                     <p className="text-2xl font-semibold text-gray-900 dark:text-white mt-1">{userStats.totalApplications}</p>
                   </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                     <h4 className="text-sm font-medium text-gray-500">Active Permits</h4>
-                     <p className="text-2xl font-semibold mt-1">{userStats.activePermits}</p>
+                  <div className="bg-muted/50 p-4 rounded-lg">
+                     <h4 className="text-sm font-medium text-muted-foreground">Active Permits</h4>
+                     <p className="text-2xl font-semibold text-gray-900 dark:text-white mt-1">{userStats.activePermits}</p>
                   </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                     <h4 className="text-sm font-medium text-gray-500">Pending Payments</h4>
-                     <p className="text-2xl font-semibold mt-1">{userStats.pendingPayments}</p>
+                  <div className="bg-muted/50 p-4 rounded-lg">
+                     <h4 className="text-sm font-medium text-muted-foreground">Pending Payments</h4>
+                     <p className="text-2xl font-semibold text-gray-900 dark:text-white mt-1">{userStats.pendingPayments}</p>
                   </div>
                </div>
             </div>
 
             {/* Personal Information Form */}
-            <div className="bg-white rounded-lg shadow-sm p-8">
+            <div className="bg-background border rounded-lg shadow-sm p-8">
                <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
-                     <h3 className="text-lg font-medium mb-4">Personal Information</h3>
-                     <Separator className="mb-4" />
+                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Personal Information</h3>
+                     <Separator className="mb-4 dark:border-gray-700" />
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                           <Label htmlFor="fullName">Full Name</Label>
+                           <Label htmlFor="fullName" className="text-foreground">Full Name</Label>
                            <Input
                               id="fullName"
                               value={userInfo.fullName}
                               onChange={handleInputChange}
                               disabled={!isEditing}
-                              className={!isEditing ? 'bg-gray-50' : ''}
+                              className={!isEditing ? 'bg-muted dark:bg-gray-800' : ''}
                            />
                         </div>
                         <div className="space-y-2">
-                           <Label htmlFor="username">Username</Label>
+                           <Label htmlFor="username" className="text-foreground">Username</Label>
                            <Input
                               id="username"
                               value={userInfo.username}
                               onChange={handleInputChange}
                               disabled={!isEditing}
-                              className={!isEditing ? 'bg-gray-50' : ''}
+                              className={!isEditing ? 'bg-muted dark:bg-gray-800' : ''}
                            />
                         </div>
                         <div className="space-y-2">
-                           <Label htmlFor="email">Email</Label>
+                           <Label htmlFor="email" className="text-foreground">Email</Label>
                            <Input
                               id="email"
                               type="email"
                               value={userInfo.email}
                               onChange={handleInputChange}
                               disabled={!isEditing}
-                              className={!isEditing ? 'bg-gray-50' : ''}
+                              className={!isEditing ? 'bg-muted dark:bg-gray-800' : ''}
                            />
                         </div>
                         <div className="space-y-2">
-                           <Label htmlFor="phone">Phone</Label>
+                           <Label htmlFor="phone" className="text-foreground">Phone</Label>
                            <Input
                               id="phone"
                               value={userInfo.phone}
                               onChange={handleInputChange}
                               disabled={!isEditing}
-                              className={!isEditing ? 'bg-gray-50' : ''}
+                              className={!isEditing ? 'bg-muted dark:bg-gray-800' : ''}
                            />
                         </div>
                         <div className="space-y-2">
-                           <Label htmlFor="company">Company</Label>
+                           <Label htmlFor="company" className="text-foreground">Company</Label>
                            <Input
                               id="company"
                               value={userInfo.company}
                               onChange={handleInputChange}
                               disabled={!isEditing}
-                              className={!isEditing ? 'bg-gray-50' : ''}
+                              className={!isEditing ? 'bg-muted dark:bg-gray-800' : ''}
                            />
                         </div>
                      </div>
                   </div>
 
                   <div>
-                     <h3 className="text-lg font-medium mb-4">Address</h3>
-                     <Separator className="mb-4" />
+                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Address</h3>
+                     <Separator className="mb-4 dark:border-gray-700" />
                      <div className="space-y-2">
-                        <Label htmlFor="address">Complete Address</Label>
+                        <Label htmlFor="address" className="text-foreground">Complete Address</Label>
                         <Input
                            id="address"
                            value={userInfo.address}
                            onChange={handleInputChange}
                            disabled={!isEditing}
-                           className={!isEditing ? 'bg-gray-50' : ''}
+                           className={!isEditing ? 'bg-muted dark:bg-gray-800' : ''}
                         />
                      </div>
                   </div>
 
                   {/* Account Security Section */}
                   <div>
-                     <h3 className="text-lg font-medium mb-4">Account Security</h3>
-                     <Separator className="mb-4" />
-                     <div className="bg-gray-50 p-4 rounded-lg">
+                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Account Security</h3>
+                     <Separator className="mb-4 dark:border-gray-700" />
+                     <div className="bg-muted/50 p-4 rounded-lg">
                         <div className="flex items-center justify-between">
                            <div>
                               <h4 className="font-medium">Password</h4>
                               <p className="text-sm text-gray-500">{getPasswordChangeText()}</p>
                            </div>
-                           <Button variant="outline" size="sm" onClick={() => setIsChangePasswordOpen(true)}>
+                           <Button variant="outline" size="sm" onClick={() => setIsChangePasswordOpen(true)} className="bg-white text-black hover:bg-gray-100">
                               Change Password
                            </Button>
                         </div>
@@ -532,51 +552,25 @@ export default function UserProfilePage() {
 
                   {/* Account Activity Section */}
                   <div>
-                     <h3 className="text-lg font-medium mb-4">Recent Activity</h3>
-                     <Separator className="mb-4" />
+                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Recent Activity</h3>
+                     <Separator className="mb-4 dark:border-gray-700" />
                      <div className="space-y-4">
                         {activities.map((activity) => (
                            <div key={activity.id} className="flex items-center justify-between text-sm">
                               <div className="flex items-center space-x-2">
                                  {getActivityIcon(activity.type)}
-                                 <span>{getActivityText(activity.type)}</span>
+                                 <span className="text-gray-900 dark:text-white">{getActivityText(activity.type)}</span>
                               </div>
-                              <span className="text-gray-500">
+                              <span className="text-muted-foreground">
                                  {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
                               </span>
                            </div>
                         ))}
                         {activities.length === 0 && (
-                           <p className="text-gray-500 text-center">No recent activity</p>
+                           <p className="text-muted-foreground text-center">No recent activity</p>
                         )}
                      </div>
                   </div>
-
-                  {isEditing && (
-                     <div className="flex justify-end space-x-4">
-                        <Button
-                           type="button"
-                           variant="outline"
-                           onClick={handleCancel}
-                        >
-                           Cancel
-                        </Button>
-                        <Button
-                           type="submit"
-                           className="bg-green-600 hover:bg-green-700"
-                           disabled={isLoading}
-                        >
-                           {isLoading ? (
-                              <>
-                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                 Saving...
-                              </>
-                           ) : (
-                              'Save Changes'
-                           )}
-                        </Button>
-                     </div>
-                  )}
                </form>
 
                <input

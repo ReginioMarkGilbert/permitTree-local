@@ -159,7 +159,7 @@ const BillCollectorDashboard = () => {
 
       return (
          <div className="mb-4 -mt-4">
-            <h1 className="text-sm min-h-[20px] text-black">{text}</h1>
+            <h1 className="text-sm min-h-[20px] text-black dark:text-gray-300">{text}</h1>
          </div>
       );
    };

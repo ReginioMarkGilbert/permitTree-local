@@ -12,7 +12,7 @@ const NotificationList = ({ notifications, loading, onMarkAsRead }) => {
             </div>
          ) : notifications?.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
-               <Bell className="h-12 w-12 mb-2" />
+               <Bell className="h-12 w-12 mb-2 dark:text-gray-400" />
                <p>No notifications</p>
             </div>
          ) : (

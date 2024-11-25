@@ -276,33 +276,35 @@ const TCEBPForm = () => {
    }, []);
 
    return (
-      <div className="min-h-screen bg-green-50 flex flex-col justify-between pt-[83px]">
+      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-300 flex flex-col justify-between pt-[83px]">
          <div className="container mx-auto px-4 flex-grow">
-            <h1 className="text-3xl font-[700] text-green-800 mb-6 text-center">Tree Cutting and/or Earth Balling Permit Application</h1>
-            <Card className="max-w-2xl mx-auto shadow-lg">
+            <h1 className="text-3xl font-[700] text-green-800 dark:text-green-500 mb-6 text-center">
+               Tree Cutting and/or Earth Balling Permit Application
+            </h1>
+            <Card className="max-w-2xl mx-auto shadow-lg bg-background">
                <CardHeader>
-                  <CardTitle>{steps[currentStep].title}</CardTitle>
+                  <CardTitle className="text-foreground">{steps[currentStep].title}</CardTitle>
                </CardHeader>
                <CardContent>
                   <form onSubmit={handleSubmit}>
                      {currentStep === 0 && (
                         <div className="space-y-4">
-                           <Label>Select Request Type</Label>
+                           <Label className="text-foreground">Select Request Type</Label>
                            <RadioGroup
                               name="requestType"
                               value={formData.requestType}
                               onValueChange={(value) => handleInputChange({ target: { name: 'requestType', value } })}
                               className="space-y-4"
                            >
-                              <div className="flex items-center space-x-2 p-4 rounded-lg border border-gray-200 bg-white">
+                              <div className="flex items-center space-x-2 p-4 rounded-lg border border-input bg-background hover:bg-accent">
                                  <RadioGroupItem value="Cutting" id="Cutting" />
-                                 <Label htmlFor="Cutting" className="flex-grow">
+                                 <Label htmlFor="Cutting" className="flex-grow text-foreground">
                                     Request for Cutting/Earth balling (NGA's)
                                  </Label>
                               </div>
-                              <div className="flex items-center space-x-2 p-4 rounded-lg border border-gray-200 bg-white">
+                              <div className="flex items-center space-x-2 p-4 rounded-lg border border-input bg-background hover:bg-accent">
                                  <RadioGroupItem value="Inventory" id="Inventory" />
-                                 <Label htmlFor="Inventory" className="flex-grow">
+                                 <Label htmlFor="Inventory" className="flex-grow text-foreground">
                                     Request for Inventory for Cutting/Earth Balling (NGA'S)
                                  </Label>
                               </div>
@@ -313,26 +315,47 @@ const TCEBPForm = () => {
                      {currentStep === 1 && (
                         <div className="space-y-4">
                            <div>
-                              <Label htmlFor="name">Name</Label>
-                              <Input id="name" name="name" value={formData.name} onChange={handleInputChange} required />
+                              <Label htmlFor="name" className="text-foreground">Name</Label>
+                              <Input
+                                 id="name"
+                                 name="name"
+                                 value={formData.name}
+                                 onChange={handleInputChange}
+                                 required
+                                 className="bg-background"
+                              />
                            </div>
                            <div>
-                              <Label htmlFor="address">Address</Label>
-                              <Input id="address" name="address" value={formData.address} onChange={handleInputChange} required />
+                              <Label htmlFor="address" className="text-foreground">Address</Label>
+                              <Input
+                                 id="address"
+                                 name="address"
+                                 value={formData.address}
+                                 onChange={handleInputChange}
+                                 required
+                                 className="bg-background"
+                              />
                            </div>
                            <div>
-                              <Label htmlFor="contactNumber">Contact Number</Label>
-                              <Input id="contactNumber" name="contactNumber" value={formData.contactNumber} onChange={handleInputChange} required />
+                              <Label htmlFor="contactNumber" className="text-foreground">Contact Number</Label>
+                              <Input
+                                 id="contactNumber"
+                                 name="contactNumber"
+                                 value={formData.contactNumber}
+                                 onChange={handleInputChange}
+                                 required
+                                 className="bg-background"
+                              />
                            </div>
                            <div>
-                              <Label htmlFor="purpose">Purpose</Label>
+                              <Label htmlFor="purpose" className="text-foreground">Purpose</Label>
                               <Textarea
                                  id="purpose"
                                  name="purpose"
                                  value={formData.purpose}
                                  onChange={handleInputChange}
                                  required
-                                 className="min-h-[100px]"
+                                 className="min-h-[100px] bg-background"
                               />
                            </div>
                         </div>
@@ -408,29 +431,37 @@ const TCEBPForm = () => {
                                  {Object.entries(formData)
                                     .filter(([key]) => key !== 'status' && key !== 'dateOfSubmission' && key !== 'files')
                                     .map(([key, value]) => (
-                                       <div key={key} className="bg-white p-3 rounded-lg shadow">
-                                          <h4 className="font-semibold text-green-600 mb-1 text-sm">{formatLabel(key)}</h4>
-                                          <p className="text-gray-700 text-sm">
+                                       <div key={key} className="bg-background border rounded-lg p-3">
+                                          <h4 className="font-semibold text-green-600 dark:text-green-500 mb-1 text-sm">
+                                             {formatLabel(key)}
+                                          </h4>
+                                          <p className="text-foreground text-sm">
                                              {formatReviewValue(key, value)}
                                           </p>
                                        </div>
                                     ))}
                               </div>
 
-                              <div className="bg-white p-3 rounded-lg shadow mt-4">
-                                 <h4 className="font-semibold text-green-600 mb-2 text-sm">Uploaded Files</h4>
+                              <div className="bg-background border rounded-lg p-3 mt-4">
+                                 <h4 className="font-semibold text-green-600 dark:text-green-500 mb-2 text-sm">
+                                    Uploaded Files
+                                 </h4>
                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                     {Object.entries(formData.files).map(([docType, files]) => (
-                                       <div key={docType} className="border-b pb-2">
-                                          <h5 className="font-medium text-gray-700 mb-1 text-xs">{formatLabel(docType)}</h5>
+                                       <div key={docType} className="border-b dark:border-gray-700 pb-2">
+                                          <h5 className="font-medium text-foreground mb-1 text-xs">
+                                             {formatLabel(docType)}
+                                          </h5>
                                           {files.length > 0 ? (
                                              <ul className="list-disc list-inside">
                                                 {files.map((file, index) => (
-                                                   <li key={index} className="text-xs text-gray-600">{file.name}</li>
+                                                   <li key={index} className="text-xs text-muted-foreground">
+                                                      {file.name}
+                                                   </li>
                                                 ))}
                                              </ul>
                                           ) : (
-                                             <p className="text-xs text-gray-500">No files uploaded</p>
+                                             <p className="text-xs text-muted-foreground">No files uploaded</p>
                                           )}
                                        </div>
                                     ))}

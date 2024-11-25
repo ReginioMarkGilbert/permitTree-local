@@ -107,65 +107,56 @@ const ProtectedAreaForm = ({ onAreaAdded, onDrawingStateChange, initialData, onS
    return (
       <form id="protected-area-form" onSubmit={handleSubmit} className="p-6 space-y-6">
          <div className="flex items-center gap-2 mb-6">
-            <FaPencilAlt className="w-5 h-5 text-green-600" />
-            <h2 className="text-xl font-semibold text-gray-800">
+            <FaPencilAlt className="w-5 h-5 text-green-600 dark:text-green-400" />
+            <h2 className="text-xl font-semibold text-foreground">
                {isEditing ? 'Edit Protected Area' : 'Add Protected Area'}
             </h2>
          </div>
 
          <div className="space-y-4">
             <div>
-               <Label htmlFor="name" className="text-sm font-medium text-gray-700">
-                  Area Name
-               </Label>
+               <Label htmlFor="name" className="text-foreground">Area Name</Label>
                <Input
                   id="name"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
-                     focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                  className="mt-1"
                   placeholder="Enter area name"
                   required
                />
             </div>
 
             <div>
-               <Label htmlFor="type" className="text-sm font-medium text-gray-700">
-                  Area Type
-               </Label>
+               <Label htmlFor="type" className="text-foreground">Area Type</Label>
                <Input
                   id="type"
                   type="text"
                   value={type}
                   onChange={(e) => setType(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
-                     focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                  className="mt-1"
                   placeholder="Enter area type"
                   required
                />
             </div>
 
             <div>
-               <Label htmlFor="coordinates" className="text-sm font-medium text-gray-700">
-                  Coordinates
-               </Label>
+               <Label htmlFor="coordinates" className="text-foreground">Coordinates</Label>
                <div className="mt-1 relative">
                   <Input
                      id="coordinates"
                      type="text"
                      value={coordinates}
                      onChange={(e) => setCoordinates(e.target.value)}
-                     className="block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
-                        focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                     className="bg-muted"
                      placeholder="Draw on map to set coordinates"
                      readOnly
                   />
                   <Button
                      type="button"
                      onClick={startDrawing}
-                     className={`mt-2 w-full bg-green-50 border border-green-200 hover:bg-green-100 text-green-700
-                        ${isDrawing ? 'bg-green-100' : ''} transition-colors duration-200`}
+                     variant="outline"
+                     className={`mt-2 w-full ${isDrawing ? 'bg-accent' : ''}`}
                   >
                      <FaDrawPolygon className="w-4 h-4 mr-2" />
                      {isDrawing ? 'Drawing Mode Active' : 'Draw on Map'}
@@ -174,16 +165,14 @@ const ProtectedAreaForm = ({ onAreaAdded, onDrawingStateChange, initialData, onS
             </div>
          </div>
 
-         <div className="pt-4">
-            <Button
-               type="submit"
-               className="w-full bg-green-600 hover:bg-green-700 text-white transition-colors duration-200 flex items-center justify-center gap-2"
-               disabled={!coordinates || isDrawing}
-            >
-               <FaCheck className="w-4 h-4" />
-               {isEditing ? 'Update Area' : 'Add Area'}
-            </Button>
-         </div>
+         <Button
+            type="submit"
+            className="w-full"
+            disabled={!coordinates || isDrawing}
+         >
+            <FaCheck className="w-4 h-4 mr-2" />
+            {isEditing ? 'Update Area' : 'Add Area'}
+         </Button>
       </form>
    );
 };

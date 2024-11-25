@@ -17,14 +17,14 @@ const PTPREditForm = ({ formData, handleInputChange, handleFileChange, removeFil
 
       return fileTypes.filter(fileType => fileType.condition).map(({ type, label }) => (
          <div key={type} className="mb-4">
-            <Label htmlFor={type} className="block mb-2">
+            <Label htmlFor={type} className="block mb-2 text-foreground">
                {label}
             </Label>
             <div>
                {formData.files && formData.files[type] && formData.files[type].length > 0 ? (
                   formData.files[type].map((file, index) => (
-                     <div key={index} className="flex items-center justify-between mb-2 bg-gray-100 p-2 rounded">
-                        <span className="text-sm text-gray-600 truncate">{file.filename}</span>
+                     <div key={index} className="flex items-center justify-between mb-2 bg-muted/50 p-2 rounded">
+                        <span className="text-sm text-muted-foreground truncate">{file.filename}</span>
                         <Button
                            type="button"
                            variant="ghost"
@@ -36,8 +36,8 @@ const PTPREditForm = ({ formData, handleInputChange, handleFileChange, removeFil
                      </div>
                   ))
                ) : (
-                  <div className="mb-2 bg-gray-100 p-2 rounded">
-                     <span className="text-sm text-gray-500">No uploaded file</span>
+                  <div className="mb-2 bg-muted/50 p-2 rounded">
+                     <span className="text-sm text-muted-foreground">No uploaded file</span>
                   </div>
                )}
                <div className="flex items-center mt-2">
@@ -48,7 +48,10 @@ const PTPREditForm = ({ formData, handleInputChange, handleFileChange, removeFil
                      onChange={(e) => handleFileChange(e, type)}
                      className="hidden"
                   />
-                  <Label htmlFor={`${type}-${formData.files?.[type]?.length || 0}`} className="cursor-pointer flex items-center justify-center w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+                  <Label
+                     htmlFor={`${type}-${formData.files?.[type]?.length || 0}`}
+                     className="cursor-pointer flex items-center justify-center w-full px-4 py-2 bg-green-600 dark:bg-green-700 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-800 transition-colors"
+                  >
                      <Upload className="mr-2 h-4 w-4" />
                      {formData.files && formData.files[type] && formData.files[type].length > 0
                         ? `Add Another ${label}`
@@ -81,37 +84,40 @@ const PTPREditForm = ({ formData, handleInputChange, handleFileChange, removeFil
    return (
       <div className="pl-2 space-y-4 custom-scrollbar pr-4" style={{ maxHeight: 'calc(80vh - 200px)', overflowY: 'auto' }}>
          <div>
-            <Label htmlFor="ownerName">Name of Lot Owner</Label>
+            <Label htmlFor="ownerName" className="text-foreground">Name of Lot Owner</Label>
             <Input
                id="ownerName"
                name="ownerName"
                value={formData.ownerName || ''}
                onChange={handleInputChange}
                required
+               className="bg-background"
             />
          </div>
          <div>
-            <Label htmlFor="address">Address</Label>
+            <Label htmlFor="address" className="text-foreground">Address</Label>
             <Input
                id="address"
                name="address"
                value={formData.address || ''}
                onChange={handleInputChange}
                required
+               className="bg-background"
             />
          </div>
          <div>
-            <Label htmlFor="contactNumber">Contact Number</Label>
+            <Label htmlFor="contactNumber" className="text-foreground">Contact Number</Label>
             <Input
                id="contactNumber"
                name="contactNumber"
                value={formData.contactNumber || ''}
                onChange={handleInputChange}
                required
+               className="bg-background"
             />
          </div>
          <div>
-            <Label htmlFor="lotArea">Lot area devoted to plantation (in hectares)</Label>
+            <Label htmlFor="lotArea" className="text-foreground">Lot area devoted to plantation (in hectares)</Label>
             <Input
                id="lotArea"
                name="lotArea"
@@ -120,10 +126,11 @@ const PTPREditForm = ({ formData, handleInputChange, handleFileChange, removeFil
                value={formData.lotArea || ''}
                onChange={handleInputChange}
                required
+               className="bg-background"
             />
          </div>
          <div>
-            <Label htmlFor="treeSpecies">Tree Species Planted (comma-separated)</Label>
+            <Label htmlFor="treeSpecies" className="text-foreground">Tree Species Planted (comma-separated)</Label>
             <Input
                id="treeSpecies"
                name="treeSpecies"
@@ -135,10 +142,11 @@ const PTPREditForm = ({ formData, handleInputChange, handleFileChange, removeFil
                   }
                })}
                required
+               className="bg-background"
             />
          </div>
          <div>
-            <Label htmlFor="totalTrees">Total No. of Trees Planted</Label>
+            <Label htmlFor="totalTrees" className="text-foreground">Total No. of Trees Planted</Label>
             <Input
                id="totalTrees"
                name="totalTrees"
@@ -146,20 +154,22 @@ const PTPREditForm = ({ formData, handleInputChange, handleFileChange, removeFil
                value={formData.totalTrees || ''}
                onChange={handleInputChange}
                required
+               className="bg-background"
             />
          </div>
          <div>
-            <Label htmlFor="treeSpacing">Spacing of trees</Label>
+            <Label htmlFor="treeSpacing" className="text-foreground">Spacing of trees</Label>
             <Input
                id="treeSpacing"
                name="treeSpacing"
                value={formData.treeSpacing || ''}
                onChange={handleInputChange}
                required
+               className="bg-background"
             />
          </div>
          <div>
-            <Label htmlFor="yearPlanted">Year Planted</Label>
+            <Label htmlFor="yearPlanted" className="text-foreground">Year Planted</Label>
             <Input
                id="yearPlanted"
                name="yearPlanted"
@@ -167,11 +177,12 @@ const PTPREditForm = ({ formData, handleInputChange, handleFileChange, removeFil
                value={formData.yearPlanted || ''}
                onChange={handleInputChange}
                required
+               className="bg-background"
             />
          </div>
 
-         <div className="border-t border-gray-200 pt-4 mt-4">
-            <h3 className="text-lg font-semibold mb-4">Documents</h3>
+         <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+            <h3 className="text-lg font-semibold mb-4 text-foreground">Documents</h3>
             {renderFileInputs()}
          </div>
       </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { Bell, ClipboardList, Users, Settings, TrendingUp, CheckCircle, XCircle, ClipboardCheck, RotateCcw, Info, AlertCircle, AlertTriangle } from "lucide-react";
 import { FaChartLine } from 'react-icons/fa';
 import '@/components/ui/styles/customScrollBar.css';
@@ -79,49 +79,49 @@ const PersonnelHomePage = () => {
       if (userRoles.includes('Technical_Staff')) {
          return (
             <div className="">
-               <h1>Technical Staff</h1>
+               <h1 className="text-gray-900 dark:text-white">Technical Staff</h1>
             </div>
          )
       }
       if (userRoles.includes('Chief_RPS') || userRoles.includes('Chief_TSD')) {
          return (
             <div className="">
-               <h1>Chief RPS/TSD</h1>
+               <h1 className="text-gray-900 dark:text-white">Chief RPS/TSD</h1>
             </div>
          )
       }
       if (userRoles.includes('Receiving_Clerk') || userRoles.includes('Releasing_Clerk')) {
          return (
             <div className="">
-               <h1>Receiving/Releasing Clerk</h1>
+               <h1 className="text-gray-900 dark:text-white">Receiving/Releasing Clerk</h1>
             </div>
          )
       }
       if (userRoles.includes('Bill_Collector') || userRoles.includes('Credit_Officer')) {
          return (
             <div className="">
-               <h1>Bill Collector/Credit Officer</h1>
+               <h1 className="text-gray-900 dark:text-white">Bill Collector/Credit Officer</h1>
             </div>
          )
       }
       if (userRoles.includes('Accountant') || userRoles.includes('OOP_Staff_Incharge')) {
          return (
             <div className="">
-               <h1>Accountant/OOP Staff Incharge</h1>
+               <h1 className="text-gray-900 dark:text-white">Accountant/OOP Staff Incharge</h1>
             </div>
          )
       }
       if (userRoles.includes('PENR_CENR_Officer') || userRoles.includes('Deputy_CENR_Officer')) {
          return (
             <div className="">
-               <h1>PENR/CENR Officer</h1>
+               <h1 className="text-gray-900 dark:text-white">PENR/CENR Officer</h1>
             </div>
          )
       }
       if (userRoles.includes('Inspection_Team')) {
          return (
             <div className="">
-               <h1>Inspection Team</h1>
+               <h1 className="text-gray-900 dark:text-white">Inspection Team</h1>
             </div>
          )
       }
@@ -166,12 +166,17 @@ const PersonnelHomePage = () => {
 
          return (
             <Card className="lg:col-span-5 hover:shadow-xl transition-all duration-300 flex flex-col">
-               <CardHeader className="border-b border-gray-100 pb-3 sm:pb-4">
+               <CardHeader className="border-b border-gray-100 dark:border-gray-800 pb-3 sm:pb-4">
                   <div className="flex items-center space-x-3">
-                     <div className="p-2 rounded-lg bg-green-50 text-green-600">
+                     <div className="p-2 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-500">
                         <ClipboardList className="h-5 w-5 sm:h-6 sm:w-6" />
                      </div>
-                     <CardTitle>Recent Order of Payments</CardTitle>
+                     <CardTitle className="text-foreground">
+                        {userRoles.includes('Accountant') || userRoles.includes('Bill_Collector')
+                           ? 'Recent Order of Payments'
+                           : 'Recent Applications'
+                        }
+                     </CardTitle>
                   </div>
                </CardHeader>
                <CardContent className="flex-1 pt-4 sm:pt-6">
@@ -195,18 +200,18 @@ const PersonnelHomePage = () => {
                            {recentOOPs.map((oop) => (
                               <div
                                  key={oop._id}
-                                 className="group flex items-center justify-between border-b border-gray-100 pb-4 last:border-b-0
+                                 className="group flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4 last:border-b-0
                                     hover:bg-gray-50 rounded-lg transition-all duration-200 -mx-2 px-4"
                               >
                                  <div className="flex-grow">
-                                    <p className="font-semibold text-gray-900 group-hover:text-green-700
+                                    <p className="font-semibold text-gray-900 dark:text-white group-hover:text-green-700
                                        transition-colors duration-200">
                                        {oop.natureOfApplication}
                                     </p>
                                     <div className="flex items-center gap-2 mt-1">
-                                       <p className="text-sm text-gray-500">Bill No: {oop.billNo}</p>
+                                       <p className="text-sm text-gray-500 dark:text-gray-300">Bill No: {oop.billNo}</p>
                                        <span className="text-gray-300">•</span>
-                                       <p className="text-sm text-gray-500">
+                                       <p className="text-sm text-gray-500 dark:text-gray-300">
                                           {formatDate(oop.createdAt)}
                                        </p>
                                     </div>
@@ -229,7 +234,7 @@ const PersonnelHomePage = () => {
                      )}
                   </div>
                </CardContent>
-               <CardFooter className="border-t border-gray-100 pt-4">
+               <CardFooter className="border-t border-gray-100 dark:border-gray-800 pt-4">
                   <Button
                      className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
                      onClick={() => navigate(userRoles.includes('Accountant')
@@ -245,12 +250,17 @@ const PersonnelHomePage = () => {
 
       return (
          <Card className="lg:col-span-5 hover:shadow-xl transition-all duration-300 flex flex-col">
-            <CardHeader className="border-b border-gray-100 pb-3 sm:pb-4">
+            <CardHeader className="border-b border-gray-100 dark:border-gray-800 pb-3 sm:pb-4">
                <div className="flex items-center space-x-3">
-                  <div className="p-2 rounded-lg bg-green-50 text-green-600">
+                  <div className="p-2 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-500">
                      <ClipboardList className="h-5 w-5 sm:h-6 sm:w-6" />
                   </div>
-                  <CardTitle>Recent Applications</CardTitle>
+                  <CardTitle className="text-foreground">
+                     {userRoles.includes('Accountant') || userRoles.includes('Bill_Collector')
+                        ? 'Recent Order of Payments'
+                        : 'Recent Applications'
+                     }
+                  </CardTitle>
                </div>
             </CardHeader>
             <CardContent className="flex-1 pt-4 sm:pt-6">
@@ -275,18 +285,18 @@ const PersonnelHomePage = () => {
                         {recentApplications.map((app) => (
                            <div
                               key={app.id}
-                              className="group flex items-center border-b border-gray-100 pb-4 last:border-b-0
+                              className="group flex items-center border-b border-gray-100 dark:border-gray-800 pb-4 last:border-b-0
                                  hover:bg-gray-50 rounded-lg transition-all duration-200 -mx-2 px-4"
                            >
                               <div className="flex-grow">
-                                 <p className="font-semibold text-gray-900 group-hover:text-green-700
+                                 <p className="font-semibold text-gray-900 dark:text-white group-hover:text-green-700
                                     transition-colors duration-200">
                                     {app.applicationType}
                                  </p>
                                  <div className="flex items-center gap-2 mt-1">
-                                    <p className="text-sm text-gray-500">ID: {app.applicationNumber}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-300">ID: {app.applicationNumber}</p>
                                     <span className="text-gray-300">•</span>
-                                    <p className="text-sm text-gray-500">
+                                    <p className="text-sm text-gray-500 dark:text-gray-300">
                                        {new Date(app.dateOfSubmission).toLocaleDateString()}
                                     </p>
                                  </div>
@@ -305,7 +315,7 @@ const PersonnelHomePage = () => {
                   )}
                </div>
             </CardContent>
-            <CardFooter className="border-t border-gray-100 pt-4">
+            <CardFooter className="border-t border-gray-100 dark:border-gray-800 pt-4">
                <Button
                   className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
                   onClick={handleViewAllApplications}
@@ -318,15 +328,15 @@ const PersonnelHomePage = () => {
    };
 
    return (
-      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex flex-col pt-16">
+      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-300 pt-20 pb-8 px-4 sm:px-6 lg:px-8">
          <main className="container mx-auto px-4 py-8 flex-grow max-w-[1600px]">
             <div className="w-full mx-auto">
                {/* Welcome Section */}
                <div className="text-center mb-12">
-                  <div className="text-2xl font-semibold text-gray-900 mb-3">
+                  <div className="text-2xl font-semibold text-gray-900 dark:text-white mb-3">
                      {renderRole()}
                   </div>
-                  <p className="text-lg text-gray-600">
+                  <p className="text-lg text-gray-600 dark:text-gray-300">
                      {getGreeting()}
                   </p>
                </div>
@@ -337,10 +347,10 @@ const PersonnelHomePage = () => {
                      <Card key={index} className="group hover:shadow-xl transition-all duration-300">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                            <div className="flex items-center space-x-3">
-                              <div className="p-2 rounded-lg bg-green-50 text-green-600 group-hover:bg-green-100 transition-colors duration-300">
+                              <div className="p-2 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-500 group-hover:bg-green-100 dark:group-hover:bg-green-900/30 transition-colors duration-300">
                                  {action.icon}
                               </div>
-                              <CardTitle className="text-base font-semibold text-gray-900">
+                              <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">
                                  {action.title}
                               </CardTitle>
                            </div>
@@ -362,9 +372,9 @@ const PersonnelHomePage = () => {
 
                   {/* Notifications Card */}
                   <Card className="lg:col-span-4 hover:shadow-xl transition-all duration-300 flex flex-col">
-                     <CardHeader className="border-b border-gray-100 pb-3 sm:pb-4">
+                     <CardHeader className="border-b border-gray-100 dark:border-gray-800 pb-3 sm:pb-4">
                         <div className="flex items-center space-x-3">
-                           <div className="p-2 rounded-lg bg-green-50 text-green-600 relative">
+                           <div className="p-2 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-500 relative">
                               <Bell className="h-5 w-5 sm:h-6 sm:w-6" />
                               {notifications.length > 0 && (
                                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[20px] h-5 flex items-center justify-center">
@@ -372,7 +382,7 @@ const PersonnelHomePage = () => {
                                  </span>
                               )}
                            </div>
-                           <CardTitle>Notifications</CardTitle>
+                           <CardTitle className="text-foreground">Notifications</CardTitle>
                         </div>
                      </CardHeader>
                      <CardContent className="flex-1 pt-4 sm:pt-6">
@@ -396,10 +406,11 @@ const PersonnelHomePage = () => {
                                  {notifications.slice(0, 7).map((notification) => (
                                     <div
                                        key={notification.id}
-                                       className={`group relative rounded-lg p-4 transition-all duration-200 ${!notification.read
-                                          ? 'bg-green-50 hover:bg-green-100'
-                                          : 'bg-gray-50 hover:bg-gray-100'
-                                          } cursor-pointer`}
+                                       className={`group relative rounded-lg p-4 transition-all duration-200 cursor-pointer transform hover:translate-x-1 ${
+                                          !notification.read
+                                             ? 'bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30'
+                                             : 'bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800/70'
+                                       }`}
                                        onClick={() => markAsRead(notification.id)}
                                     >
                                        <div className="flex items-start gap-3">
@@ -413,14 +424,14 @@ const PersonnelHomePage = () => {
                                              )}
                                           </div>
                                           <div className="flex-1 min-w-0">
-                                             <p className="text-sm font-semibold text-gray-900 mb-1">
+                                             <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-green-700 dark:group-hover:text-green-500 transition-colors duration-200">
                                                 {notification.title}
                                              </p>
-                                             <p className="text-sm text-gray-600 line-clamp-2">
+                                             <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
                                                 {notification.message}
                                              </p>
                                              <div className="flex items-center gap-2 mt-2">
-                                                <span className="text-xs text-gray-500">
+                                                <span className="text-xs text-gray-500 dark:text-gray-400">
                                                    {new Date(notification.createdAt).toLocaleDateString()} at{' '}
                                                    {new Date(notification.createdAt).toLocaleTimeString([], {
                                                       hour: '2-digit',
@@ -447,7 +458,7 @@ const PersonnelHomePage = () => {
                            )}
                         </div>
                      </CardContent>
-                     <CardFooter className="border-t border-gray-100 pt-4">
+                     <CardFooter className="border-t border-gray-100 dark:border-gray-800 pt-4">
                         <Button
                            className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
                            onClick={() => navigate('/personnel/notifications')}
@@ -459,53 +470,54 @@ const PersonnelHomePage = () => {
 
                   {/* Quick Stats Card */}
                   <Card className="lg:col-span-3 hover:shadow-xl transition-all duration-300 flex flex-col">
-                     <CardHeader className="border-b border-gray-100 pb-3 sm:pb-4">
-                        <CardTitle>Quick Stats</CardTitle>
+                     <CardHeader className="border-b border-gray-100 dark:border-gray-800 pb-3 sm:pb-4">
+                        <CardTitle className="text-foreground">Quick Stats</CardTitle>
+                        <CardDescription className="text-muted-foreground">Overview of your system</CardDescription>
                      </CardHeader>
                      <CardContent className="flex-1 pt-4 sm:pt-6">
                         <div className="space-y-6">
                            <div className="grid grid-cols-2 gap-4">
-                              <div className="bg-green-100 p-4 rounded-lg">
+                              <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
                                  <div className="flex items-center justify-between">
-                                    <Users className="h-6 w-6 text-green-600" />
-                                    <span className="text-2xl font-bold text-green-800">{dashboardStats.totalUsers}</span>
+                                    <Users className="h-6 w-6 text-green-600 dark:text-green-500" />
+                                    <span className="text-2xl font-bold text-green-800 dark:text-green-500">{dashboardStats.totalUsers}</span>
                                  </div>
-                                 <p className="text-sm text-green-600 mt-2">Total Users</p>
+                                 <p className="text-sm text-green-600 dark:text-green-500 mt-2">Total Users</p>
                               </div>
-                              <div className="bg-yellow-100 p-4 rounded-lg">
+                              <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
                                  <div className="flex items-center justify-between">
-                                    <ClipboardCheck className="h-6 w-6 text-yellow-600" />
-                                    <span className="text-2xl font-bold text-yellow-800">{dashboardStats.applicationsForReview}</span>
+                                    <ClipboardCheck className="h-6 w-6 text-yellow-600 dark:text-yellow-500" />
+                                    <span className="text-2xl font-bold text-yellow-800 dark:text-yellow-500">{dashboardStats.applicationsForReview}</span>
                                  </div>
-                                 <p className="text-sm text-yellow-600 mt-2">Applications for Review</p>
+                                 <p className="text-sm text-yellow-600 dark:text-yellow-500 mt-2">Applications for Review</p>
                               </div>
                            </div>
                            <div className="grid grid-cols-2 gap-4">
-                              <div className="bg-blue-100 p-4 rounded-lg">
+                              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
                                  <div className="flex items-center justify-between">
-                                    <CheckCircle className="h-6 w-6 text-blue-600" />
-                                    <span className="text-2xl font-bold text-blue-800">{dashboardStats.approvedToday}</span>
+                                    <CheckCircle className="h-6 w-6 text-blue-600 dark:text-blue-500" />
+                                    <span className="text-2xl font-bold text-blue-800 dark:text-blue-500">{dashboardStats.approvedToday}</span>
                                  </div>
-                                 <p className="text-sm text-blue-600 mt-2">Approved Today</p>
+                                 <p className="text-sm text-blue-600 dark:text-blue-500 mt-2">Approved Today</p>
                               </div>
-                              <div className="bg-orange-100 p-4 rounded-lg">
+                              <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg">
                                  <div className="flex items-center justify-between">
-                                    <RotateCcw className="h-6 w-6 text-orange-600" />
-                                    <span className="text-2xl font-bold text-orange-800">{dashboardStats.applicationsReturned}</span>
+                                    <RotateCcw className="h-6 w-6 text-orange-600 dark:text-orange-500" />
+                                    <span className="text-2xl font-bold text-orange-800 dark:text-orange-500">{dashboardStats.applicationsReturned}</span>
                                  </div>
-                                 <p className="text-sm text-orange-600 mt-2">Applications Returned</p>
+                                 <p className="text-sm text-orange-600 dark:text-orange-500 mt-2">Applications Returned</p>
                               </div>
                            </div>
-                           <div className="bg-purple-100 p-4 rounded-lg">
+                           <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
                               <div className="flex items-center justify-between">
-                                 <TrendingUp className="h-6 w-6 text-purple-600" />
-                                 <span className="text-2xl font-bold text-purple-800">{dashboardStats.applicationIncrease}%</span>
+                                 <TrendingUp className="h-6 w-6 text-purple-600 dark:text-purple-500" />
+                                 <span className="text-2xl font-bold text-purple-800 dark:text-purple-500">{dashboardStats.applicationIncrease}%</span>
                               </div>
-                              <p className="text-sm text-purple-600 mt-2">Application Increase (Last 30 days)</p>
+                              <p className="text-sm text-purple-600 dark:text-purple-500 mt-2">Application Increase (Last 30 days)</p>
                            </div>
                         </div>
                      </CardContent>
-                     <CardFooter className="border-t border-gray-100 pt-4">
+                     <CardFooter className="border-t border-gray-100 dark:border-gray-800 pt-4">
                         <Button
                            className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
                            onClick={handleViewDetailedAnalytics}

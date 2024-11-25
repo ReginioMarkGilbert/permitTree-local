@@ -88,8 +88,8 @@ const ProtectedAreaList = ({ areas, onUpdate }) => {
       <div>
          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-               <FaMapMarkerAlt className="text-green-600 w-5 h-5" />
-               <h3 className="text-lg font-semibold text-gray-800">Protected Areas</h3>
+               <FaMapMarkerAlt className="text-green-600 dark:text-green-400 w-5 h-5" />
+               <h3 className="text-lg font-semibold text-foreground">Protected Areas</h3>
             </div>
             {areas.length > 0 && (
                <Button
@@ -105,12 +105,12 @@ const ProtectedAreaList = ({ areas, onUpdate }) => {
 
          <div className="space-y-3">
             {areas.length === 0 ? (
-               <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
-                  <FaMapMarkerAlt className="mx-auto h-8 w-8 text-gray-400" />
-                  <p className="mt-2 text-sm font-medium text-gray-500">
+               <div className="text-center py-8 bg-muted rounded-lg border-2 border-dashed border-border">
+                  <FaMapMarkerAlt className="mx-auto h-8 w-8 text-muted-foreground" />
+                  <p className="mt-2 text-sm font-medium text-muted-foreground">
                      No protected areas added yet
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                      Use the form above to add protected areas
                   </p>
                </div>
@@ -118,31 +118,29 @@ const ProtectedAreaList = ({ areas, onUpdate }) => {
                areas.map((area) => (
                   <div
                      key={area.id || `area-${area.properties.name}`}
-                     className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200"
+                     className="bg-card rounded-lg border border-border shadow-sm hover:shadow-md transition-shadow duration-200"
                   >
                      <div className="p-4">
                         <div className="flex justify-between items-start">
                            <div>
-                              <h4 className="text-base font-semibold text-gray-900">
+                              <h4 className="text-base font-semibold text-foreground">
                                  {area.properties.name}
                               </h4>
                               <div className="mt-1 flex items-center gap-2">
-                                 <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                 <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-accent text-accent-foreground">
                                     {area.properties.type}
                                  </span>
                               </div>
                            </div>
-                           <div className="flex gap-2">
-                              <Button
-                                 size="sm"
-                                 variant="outline"
-                                 onClick={() => handleDelete(area)}
-                                 className="h-8 w-8 p-0"
-                                 title="Delete area"
-                              >
-                                 <FaTrash className="h-4 w-4 text-red-500" />
-                              </Button>
-                           </div>
+                           <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDelete(area)}
+                              className="h-8 w-8 p-0"
+                              title="Delete area"
+                           >
+                              <FaTrash className="h-4 w-4 text-destructive" />
+                           </Button>
                         </div>
                      </div>
                   </div>

@@ -57,14 +57,14 @@ const PermitsPage = () => {
    ];
 
    return (
-      <div className="bg-gradient-to-b from-green-50 to-white min-h-screen flex flex-col pt-16">
+      <div className="bg-gradient-to-b from-green-50 to-white dark:from-gray-900 dark:to-gray-800 min-h-screen flex flex-col pt-16 transition-colors duration-300">
          <main className="container mx-auto px-6 py-8 flex-grow">
             <div className="max-w-7xl mx-auto">
                <div className="text-center mb-12">
-                  <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                  <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
                      Permit Applications
                   </h1>
-                  <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                  <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
                      Choose from our range of environmental permits and start your application process today.
                   </p>
                </div>
@@ -75,7 +75,7 @@ const PermitsPage = () => {
                      return (
                         <div
                            key={index}
-                           className="group relative bg-white rounded-xl shadow-md hover:shadow-xl
+                           className="group relative bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl
                               transition-all duration-300 overflow-hidden min-w-[280px]"
                         >
                            {/* Gradient Background */}
@@ -87,12 +87,12 @@ const PermitsPage = () => {
                               <div className="flex items-center mb-4">
                                  <Icon className={`w-8 h-8 bg-gradient-to-br ${permit.color}
                                     rounded-lg p-1.5 text-white shadow-md`}/>
-                                 <h3 className="ml-3 text-lg font-semibold text-gray-900">
+                                 <h3 className="ml-3 text-lg font-semibold text-gray-900 dark:text-white">
                                     {permit.title}
                                  </h3>
                               </div>
 
-                              <p className="text-gray-600 mb-6 text-sm">
+                              <p className="text-gray-600 dark:text-gray-300 mb-6 text-sm">
                                  {permit.description}
                               </p>
 
@@ -102,7 +102,8 @@ const PermitsPage = () => {
                                     hover:from-green-700 hover:to-green-800 text-white font-medium
                                     py-2.5 px-4 rounded-lg transition-all duration-300
                                     transform hover:translate-y-[-2px] active:translate-y-0
-                                    focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+                                    focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50
+                                    dark:focus:ring-green-400"
                               >
                                  Apply Now
                               </button>

@@ -83,10 +83,10 @@ export default function PersonnelReportsPage() {
       return <p>Error loading analytics data</p>;
 
    return (
-      <div className="min-h-screen bg-green-50 px-4 sm:px-6 py-6 sm:py-8">
-         <div className="max-w-7xl mx-auto pt-16 sm:pt-24">
+      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-300 pt-20 pb-8 px-4 sm:px-6 lg:px-8">
+         <div className="max-w-7xl mx-auto">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-10">
-               <h1 className="text-2xl sm:text-4xl font-bold text-green-700">Analytics Dashboard</h1>
+               <h1 className="text-2xl sm:text-4xl font-bold text-green-700 dark:text-white">Analytics Dashboard</h1>
                <Select value={timeFilter} onValueChange={setTimeFilter}>
                   <SelectTrigger className="w-[180px]">
                      <SelectValue placeholder="Select time period" />

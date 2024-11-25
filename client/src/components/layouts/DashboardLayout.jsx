@@ -22,14 +22,14 @@ const DashboardLayout = ({
    const hasSubTabs = subTabs && Object.keys(subTabs).length > 0;
 
    return (
-      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white pt-20 pb-8 px-4 sm:px-6 lg:px-8">
-         <div className="max-w-7xl mx-auto space-y-6">
+      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-gray-800 dark:to-gray-900 transition-colors duration-300 pt-20 pb-8 px-4 sm:px-6 lg:px-8">
+         <div className="max-w-7xl mx-auto space-y-6 pt-10">
             {/* Header Card */}
             <Card>
                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                   <div>
-                     <CardTitle className="text-2xl font-bold">{title}</CardTitle>
-                     <CardDescription>{description}</CardDescription>
+                     <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">{title}</CardTitle>
+                     <CardDescription className="text-gray-600 dark:text-gray-300">{description}</CardDescription>
                   </div>
                   <Button onClick={onRefresh} variant="outline" size="sm">
                      <RefreshCw className="mr-2 h-4 w-4" />
@@ -43,7 +43,7 @@ const DashboardLayout = ({
                         <select
                            value={activeMainTab}
                            onChange={(e) => onMainTabChange(e.target.value)}
-                           className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
+                           className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm dark:text-white"
                         >
                            {mainTabs.map((tab) => (
                               <option key={tab} value={tab}>{tab}</option>
@@ -53,7 +53,7 @@ const DashboardLayout = ({
                            <select
                               value={activeSubTab}
                               onChange={(e) => onSubTabChange(e.target.value)}
-                              className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
+                              className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm dark:text-white"
                            >
                               {subTabs[activeMainTab].map((tab) => (
                                  <option key={tab} value={tab}>{tab}</option>
@@ -66,7 +66,7 @@ const DashboardLayout = ({
                         <Tabs value={activeMainTab} onValueChange={onMainTabChange}>
                            <TabsList>
                               {mainTabs.map((tab) => (
-                                 <TabsTrigger key={tab} value={tab}>
+                                 <TabsTrigger key={tab} value={tab} className="dark:text-white">
                                     {tab}
                                  </TabsTrigger>
                               ))}
@@ -80,7 +80,7 @@ const DashboardLayout = ({
                                     <TabsTrigger
                                        key={tab}
                                        value={tab}
-                                       className="data-[state=active]:bg-background"
+                                       className="data-[state=active]:bg-background dark:text-white"
                                     >
                                        {tab}
                                     </TabsTrigger>
@@ -92,7 +92,7 @@ const DashboardLayout = ({
                   )}
 
                   {/* Tab Description */}
-                  <div className="text-sm text-muted-foreground pt-3 pl-1">
+                  <div className="text-sm text-muted-foreground pt-3 pl-1 dark:text-gray-300">
                      {tabDescription}
                   </div>
                   <div className="border-t pt-6">

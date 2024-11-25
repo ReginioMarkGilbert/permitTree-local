@@ -1,14 +1,21 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FaBars, FaTimes, FaLeaf } from 'react-icons/fa';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
+   // Browser detection
+   const isChrome = useMemo(() => {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      const isBrave = navigator.brave !== undefined;
+      return userAgent.includes('chrome') && !userAgent.includes('edg') && !isBrave;
+   }, []);
+
    const handleToggle = () => {
       setSidebarToggle(!sidebarToggle);
    };
 
    return (
-      <nav className="fixed top-0 left-0 right-0 z-20 bg-background border-b shadow-sm">
+      <nav className={`fixed top-0 ${isChrome ? '-left-8' : 'left-0'} right-0 z-20 bg-background border-b shadow-sm`}>
          <div className="max-w-[2520px] mx-auto flex justify-between items-center px-4 h-16">
             {/* Left Section */}
             <div className="flex items-center gap-4">

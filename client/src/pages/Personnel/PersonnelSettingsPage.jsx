@@ -54,27 +54,27 @@ const PersonnelSettingsPage = () => {
    };
 
    return (
-      <div className="min-h-screen bg-green-50/30 p-6 lg:p-8">
+      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-300 p-6 lg:p-8">
          <div className="max-w-6xl mx-auto space-y-8 pt-20">
             {/* Header Section */}
             <div className="flex flex-col gap-1">
-               <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-               <p className="text-muted-foreground">
+               <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Settings</h1>
+               <p className="text-gray-600 dark:text-gray-300">
                   Manage your application preferences and configurations.
                </p>
             </div>
 
             <div className="grid gap-6">
                {/* Notifications Section */}
-               <Card>
+               <Card className="dark:bg-black">
                   <CardContent className="p-6">
                      <div className="flex items-center gap-4 mb-6">
-                        <div className="p-2 rounded-md bg-green-100">
-                           <Bell className="h-5 w-5 text-green-700" />
+                        <div className="p-2 rounded-md bg-green-100 dark:bg-green-900">
+                           <Bell className="h-5 w-5 text-green-700 dark:text-green-300" />
                         </div>
                         <div>
-                           <h2 className="text-xl font-semibold">Notifications</h2>
-                           <p className="text-sm text-muted-foreground">
+                           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Notifications</h2>
+                           <p className="text-sm text-gray-600 dark:text-gray-300">
                               Configure how you want to receive notifications.
                            </p>
                         </div>
@@ -83,10 +83,10 @@ const PersonnelSettingsPage = () => {
                      <div className="grid gap-6">
                         <div className="flex items-center justify-between">
                            <div className="flex items-center gap-3">
-                              <Mail className="h-5 w-5 text-gray-500" />
+                              <Mail className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                               <div>
-                                 <Label className="font-medium">Email Notifications</Label>
-                                 <p className="text-sm text-muted-foreground">Receive updates via email</p>
+                                 <Label className="font-medium text-gray-900 dark:text-white">Email Notifications</Label>
+                                 <p className="text-sm text-gray-600 dark:text-gray-300">Receive updates via email</p>
                               </div>
                            </div>
                            <Switch
@@ -96,14 +96,14 @@ const PersonnelSettingsPage = () => {
                            />
                         </div>
 
-                        <Separator />
+                        <Separator className="dark:border-gray-700" />
 
                         <div className="flex items-center justify-between">
                            <div className="flex items-center gap-3">
-                              <Bell className="h-5 w-5 text-gray-500" />
+                              <Bell className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                               <div>
-                                 <Label className="font-medium">In-App Notifications</Label>
-                                 <p className="text-sm text-muted-foreground">Receive updates within the app</p>
+                                 <Label className="font-medium text-gray-900 dark:text-white">In-App Notifications</Label>
+                                 <p className="text-sm text-gray-600 dark:text-gray-300">Receive updates within the app</p>
                               </div>
                            </div>
                            <Switch
@@ -113,14 +113,14 @@ const PersonnelSettingsPage = () => {
                            />
                         </div>
 
-                        <Separator />
+                        <Separator className="dark:border-gray-700" />
 
                         <div className="flex items-center justify-between">
                            <div className="flex items-center gap-3">
-                              <MessageSquare className="h-5 w-5 text-gray-500" />
+                              <MessageSquare className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                               <div>
-                                 <Label className="font-medium">SMS Notifications</Label>
-                                 <p className="text-sm text-muted-foreground">Receive updates via SMS</p>
+                                 <Label className="font-medium text-gray-900 dark:text-white">SMS Notifications</Label>
+                                 <p className="text-sm text-gray-600 dark:text-gray-300">Receive updates via SMS</p>
                               </div>
                            </div>
                            <Switch
@@ -134,15 +134,15 @@ const PersonnelSettingsPage = () => {
                </Card>
 
                {/* Application Settings Section */}
-               <Card>
+               <Card className="dark:bg-black">
                   <CardContent className="p-6">
                      <div className="flex items-center gap-4 mb-6">
-                        <div className="p-2 rounded-md bg-green-100">
-                           <FileCheck className="h-5 w-5 text-green-700" />
+                        <div className="p-2 rounded-md bg-green-100 dark:bg-green-900">
+                           <FileCheck className="h-5 w-5 text-green-700 dark:text-green-300" />
                         </div>
                         <div>
-                           <h2 className="text-xl font-semibold">Application Settings</h2>
-                           <p className="text-sm text-muted-foreground">
+                           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Application Settings</h2>
+                           <p className="text-sm text-gray-600 dark:text-gray-300">
                               Configure application processing preferences.
                            </p>
                         </div>
@@ -151,32 +151,32 @@ const PersonnelSettingsPage = () => {
                      <div className="grid gap-6">
                         <div className="space-y-4">
                            <div>
-                              <Label className="font-medium">Review Deadline</Label>
-                              <p className="text-sm text-muted-foreground mb-2">Set the default review period for applications</p>
+                              <Label className="font-medium text-gray-900 dark:text-white">Review Deadline</Label>
+                              <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">Set the default review period for applications</p>
                               <div className="flex items-center gap-2">
-                                 <Clock className="h-5 w-5 text-gray-500" />
+                                 <Clock className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                                  <Input
                                     type="number"
                                     name="applicationReviewDeadline"
                                     value={settings.applicationReviewDeadline}
                                     onChange={handleInputChange}
-                                    className="max-w-[200px]"
+                                    className="max-w-[200px] dark:bg-gray-700 dark:border-gray-600"
                                  />
-                                 <span className="text-sm text-muted-foreground">days</span>
+                                 <span className="text-sm text-gray-600 dark:text-gray-300">days</span>
                               </div>
                            </div>
 
-                           <Separator />
+                           <Separator className="dark:border-gray-700" />
 
                            <div>
-                              <Label className="font-medium">Default Status</Label>
-                              <p className="text-sm text-muted-foreground mb-2">Set the initial status for new applications</p>
+                              <Label className="font-medium text-gray-900 dark:text-white">Default Status</Label>
+                              <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">Set the initial status for new applications</p>
                               <Select
                                  name="defaultApplicationStatus"
                                  value={settings.defaultApplicationStatus}
                                  onValueChange={(value) => handleInputChange({ target: { name: 'defaultApplicationStatus', value } })}
                               >
-                                 <SelectTrigger className="max-w-[200px]">
+                                 <SelectTrigger className="max-w-[200px] dark:bg-gray-700 dark:border-gray-600">
                                     <SelectValue placeholder="Select status" />
                                  </SelectTrigger>
                                  <SelectContent>
@@ -188,14 +188,14 @@ const PersonnelSettingsPage = () => {
                               </Select>
                            </div>
 
-                           <Separator />
+                           <Separator className="dark:border-gray-700" />
 
                            <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
-                                 <Workflow className="h-5 w-5 text-gray-500" />
+                                 <Workflow className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                                  <div>
-                                    <Label className="font-medium">Auto Assignment</Label>
-                                    <p className="text-sm text-muted-foreground">Automatically assign applications to available staff</p>
+                                    <Label className="font-medium text-gray-900 dark:text-white">Auto Assignment</Label>
+                                    <p className="text-sm text-gray-600 dark:text-gray-300">Automatically assign applications to available staff</p>
                                  </div>
                               </div>
                               <Switch
@@ -210,15 +210,15 @@ const PersonnelSettingsPage = () => {
                </Card>
 
                {/* Signature Upload Section */}
-               <Card>
+               <Card className="dark:bg-black">
                   <CardContent className="p-6">
                      <div className="flex items-center gap-4 mb-6">
-                        <div className="p-2 rounded-md bg-green-100">
-                           <Upload className="h-5 w-5 text-green-700" />
+                        <div className="p-2 rounded-md bg-green-100 dark:bg-green-900">
+                           <Upload className="h-5 w-5 text-green-700 dark:text-green-300" />
                         </div>
                         <div>
-                           <h2 className="text-xl font-semibold">Digital Signature</h2>
-                           <p className="text-sm text-muted-foreground">
+                           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Digital Signature</h2>
+                           <p className="text-sm text-gray-600 dark:text-gray-300">
                               Upload your signature for official documents.
                            </p>
                         </div>
@@ -226,11 +226,11 @@ const PersonnelSettingsPage = () => {
 
                      <div className="grid gap-4">
                         <div className="flex items-center justify-center w-full">
-                           <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50">
+                           <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-600">
                               <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                 <Upload className="h-8 w-8 text-gray-400 mb-2" />
-                                 <p className="text-sm text-gray-500">Click to upload signature</p>
-                                 <p className="text-xs text-gray-400">PNG, JPG up to 2MB</p>
+                                 <Upload className="h-8 w-8 text-gray-400 dark:text-gray-500 mb-2" />
+                                 <p className="text-sm text-gray-500 dark:text-gray-400">Click to upload signature</p>
+                                 <p className="text-xs text-gray-400 dark:text-gray-500">PNG, JPG up to 2MB</p>
                               </div>
                               <Input
                                  type="file"
@@ -241,7 +241,7 @@ const PersonnelSettingsPage = () => {
                            </label>
                         </div>
                         {settings.signatureImage && (
-                           <p className="text-sm text-gray-500 text-center">
+                           <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
                               Current: {settings.signatureImage}
                            </p>
                         )}
@@ -253,7 +253,7 @@ const PersonnelSettingsPage = () => {
                <div className="flex justify-end">
                   <Button
                      onClick={saveSettings}
-                     className="bg-green-600 hover:bg-green-700 text-white gap-2"
+                     className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white gap-2"
                   >
                      <Save className="h-4 w-4" />
                      Save Changes

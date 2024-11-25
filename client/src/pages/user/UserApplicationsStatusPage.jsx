@@ -28,6 +28,15 @@ import UserOOPRow from './components/UserOOPRow';
 import { useUserApplications } from './hooks/useUserApplications';
 import { useUserOrderOfPayments } from './hooks/useUserOrderOfPayments';
 import { useTypewriter } from '@/hooks/useTypewriter';
+import DashboardLayout from '@/components/layouts/DashboardLayout';
+import {
+   Table,
+   TableBody,
+   TableCell,
+   TableHead,
+   TableHeader,
+   TableRow,
+} from "@/components/ui/table";
 
 const GET_OOP_DETAILS = gql`
   query GetOOPDetails($id: ID!) {
@@ -335,11 +344,10 @@ const UserApplicationsStatusPage = () => {
          await refetchOOPs();
       } else {
          const { status, currentStage } = getQueryParamsForTab(activeSubTab);
-         setIsLoading(true); // Add loading state for refresh
          try {
             await fetchUserApplications(status, currentStage);
-         } finally {
-            setIsLoading(false);
+         } catch (error) {
+            console.error('Error refreshing:', error);
          }
       }
    };
@@ -594,36 +602,29 @@ const UserApplicationsStatusPage = () => {
    };
 
    const renderApplicationsTable = () => {
-      console.log('Render state:', { loading, error, applications, filteredApplications });
-
-      // Show loading state while fetching
       if (loading) {
          return (
-            <div className="bg-white rounded-lg shadow-sm p-6 text-center">
-               <div className="flex items-center justify-center">
-                  <RefreshCw className="h-8 w-8 animate-spin text-green-600" />
-               </div>
-               <p className="mt-2 text-sm text-gray-600">Loading your applications...</p>
+            <div className="flex justify-center py-8">
+               <RefreshCw className="h-8 w-8 animate-spin text-green-600" />
+               <p className="ml-2 text-muted-foreground">Loading applications...</p>
             </div>
          );
       }
 
       if (error) {
-         console.error('Application loading error:', error);
          return (
-            <div className="bg-white rounded-lg shadow-sm p-6 text-center text-red-500">
+            <div className="text-center py-8 text-destructive">
                <p>Error loading applications: {error.message}</p>
             </div>
          );
       }
 
-      // Show "No applications found" when we have finished loading and there are no applications
-      if (!loading && filteredApplications.length === 0) {
+      if (filteredApplications.length === 0) {
          return (
-            <div className="bg-white rounded-lg shadow-sm p-6 text-center">
-               <FileX className="mx-auto h-12 w-12 text-gray-400" />
-               <h3 className="mt-2 text-sm font-medium text-gray-900">No applications found</h3>
-               <p className="mt-1 text-sm text-gray-500">
+            <div className="text-center py-8">
+               <FileX className="mx-auto h-12 w-12 text-muted-foreground" />
+               <h3 className="mt-2 text-lg font-semibold">No applications found</h3>
+               <p className="text-sm text-muted-foreground">
                   {activeSubTab === 'In Progress' ? (
                      'You have no applications currently in progress'
                   ) : filters.applicationType ? (
@@ -636,7 +637,6 @@ const UserApplicationsStatusPage = () => {
          );
       }
 
-      // Mobile view
       if (isMobile) {
          return (
             <div className="space-y-4">
@@ -663,52 +663,39 @@ const UserApplicationsStatusPage = () => {
          );
       }
 
-      // Desktop view
       return (
-         <div className="bg-white rounded-lg shadow overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-               <thead className="bg-gray-50">
-                  <tr>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Application Number
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Application Type
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Date
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                     </th>
-                  </tr>
-               </thead>
-               <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredApplications.map((app) => (
-                     <UserApplicationRow
-                        key={app.id}
-                        app={app}
-                        onEdit={handleEditApplication}
-                        onDelete={handleDeleteClick}
-                        onUnsubmit={handleUnsubmitClick}
-                        onSubmit={handleSubmitClick}
-                        onResubmit={handleResubmitClick}
-                        getStatusColor={getStatusColor}
-                        fetchCOVPermit={fetchCOVPermit}
-                        fetchCSAWPermit={fetchCSAWPermit}
-                        fetchPLTCPPermit={fetchPLTCPPermit}
-                        fetchPTPRPermit={fetchPTPRPermit}
-                        fetchPLTPPermit={fetchPLTPPermit}
-                        fetchTCEBPPermit={fetchTCEBPPermit}
-                        currentTab={activeSubTab}
-                     />
-                  ))}
-               </tbody>
-            </table>
-         </div>
+         <Table>
+            <TableHeader>
+               <TableRow>
+                  <TableHead>Application Number</TableHead>
+                  <TableHead>Application Type</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+               </TableRow>
+            </TableHeader>
+            <TableBody>
+               {filteredApplications.map((app) => (
+                  <UserApplicationRow
+                     key={app.id}
+                     app={app}
+                     onEdit={handleEditApplication}
+                     onDelete={handleDeleteClick}
+                     onUnsubmit={handleUnsubmitClick}
+                     onSubmit={handleSubmitClick}
+                     onResubmit={handleResubmitClick}
+                     getStatusColor={getStatusColor}
+                     fetchCOVPermit={fetchCOVPermit}
+                     fetchCSAWPermit={fetchCSAWPermit}
+                     fetchPLTCPPermit={fetchPLTCPPermit}
+                     fetchPTPRPermit={fetchPTPRPermit}
+                     fetchPLTPPermit={fetchPLTPPermit}
+                     fetchTCEBPPermit={fetchTCEBPPermit}
+                     currentTab={activeSubTab}
+                  />
+               ))}
+            </TableBody>
+         </Table>
       );
    };
 
@@ -720,150 +707,64 @@ const UserApplicationsStatusPage = () => {
       );
    };
 
-   const renderTabDescription = () => {
-      const descriptions = {
-         // Applications
-         'Draft': 'This is the list of applications you have started but not yet submitted.',
-         'Submitted': 'This is the list of applications you have submitted and are pending initial review.',
-         'In Progress': 'This is the list of applications currently being processed by DENR personnel.',
-         'Returned': 'This is the list of applications returned to you for correction or additional requirements.',
-         'Accepted': 'This is the list of applications that have been accepted and are undergoing final processing.',
-         'Released': 'This is the list of applications with permits/certificates that have been released to you.',
-         'Expired': 'This is the list of applications with expired permits/certificates.',
-         'Rejected': 'This is the list of applications that were rejected.',
+   // Define descriptions object at the component level
+   const descriptions = {
+      // Applications
+      'Draft': 'This is the list of applications you have started but not yet submitted.',
+      'Submitted': 'This is the list of applications you have submitted and are pending initial review.',
+      'In Progress': 'This is the list of applications currently being processed by DENR personnel.',
+      'Returned': 'This is the list of applications returned to you for correction or additional requirements.',
+      'Accepted': 'This is the list of applications that have been accepted and are undergoing final processing.',
+      'Released': 'This is the list of applications with permits/certificates that have been released to you.',
+      'Expired': 'This is the list of applications with expired permits/certificates.',
+      'Rejected': 'This is the list of applications that were rejected.',
 
-         // Order Of Payments
-         'Awaiting Payment': 'This is the list of Order of Payments waiting for your payment.',
-         'Payment Proof Submitted': 'This is the list of Order of Payments where you have submitted payment proof.',
-         'Payment Proof Rejected': 'This is the list of Order of Payments where your payment proof was rejected.',
-         'Payment Proof Approved': 'This is the list of Order of Payments where your payment proof was approved.',
-         'Completed': 'This is the list of Order of Payments that have been completed.',
-         'Issued OR': 'This is the list of Order of Payments with issued Official Receipts.',
+      // Order Of Payments
+      'Awaiting Payment': 'This is the list of Order of Payments waiting for your payment.',
+      'Payment Proof Submitted': 'This is the list of Order of Payments where you have submitted payment proof.',
+      'Payment Proof Rejected': 'This is the list of Order of Payments where your payment proof was rejected.',
+      'Payment Proof Approved': 'This is the list of Order of Payments where your payment proof was approved.',
+      'Completed': 'This is the list of Order of Payments that have been completed.',
+      'Issued OR': 'This is the list of Order of Payments with issued Official Receipts.',
 
-         // Renewals
-         'Renewed': 'This is the list of applications that have been renewed.',
-      };
+      // Renewals
+      'Renewed': 'This is the list of applications that have been renewed.',
+   };
 
-      const text = useTypewriter(descriptions[activeSubTab] || '');
+   // Use the typewriter hook
+   const typewriterText = useTypewriter(descriptions[activeSubTab] || '');
 
-      return (
-         <div className="mb-4 -mt-4">
-            <h1 className="text-sm text-green-800 min-h-[20px]">{text}</h1>
-         </div>
-      );
+   // Render the main content based on active tab
+   const renderMainContent = () => {
+      if (activeMainTab === 'Order Of Payments') {
+         return renderOrderOfPaymentsTable();
+      }
+      return renderApplicationsTable();
    };
 
    return (
-      <div className="bg-green-50 min-h-screen pt-20 pb-8 px-4 sm:px-6 lg:px-8">
-         <div className="max-w-7xl mx-auto space-y-6">
-            {/* Header Section */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-               <div className="flex items-center justify-between mb-4">
-                  <h1 className="text-2xl font-semibold text-gray-900">My Applications</h1>
-                  <Button onClick={handleRefresh} variant="outline" size="sm">
-                     <RefreshCw className="mr-2 h-4 w-4" />
-                     {!isMobile && "Refresh"}
-                  </Button>
-               </div>
-
-               {/* Tabs Section */}
-               {renderTabs()}
-            </div>
-
-            {/* Sub Tabs and Filters Section */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-               <div className="space-y-4">
-                  {!isMobile && (
-                     <div className="bg-gray-100 p-1 rounded-md inline-flex flex-wrap gap-1">
-                        {subTabs[activeMainTab].map((tab) => (
-                           <button
-                              key={tab}
-                              onClick={() => handleSubTabChange(tab)}
-                              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors
-                                 ${activeSubTab === tab
-                                    ? 'bg-white text-green-800 shadow'
-                                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'}`}
-                           >
-                              {tab}
-                           </button>
-                        ))}
-                     </div>
-                  )}
-                  {/* Description */}
-                  <div className="pt-2 text-sm text-gray-600">
-                     {renderTabDescription()}
-                  </div>
-                  {renderFilters()}
-               </div>
-            </div>
-
-            {renderContent()}
-         </div>
-         <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-            <DialogContent>
-               <DialogHeader>
-                  <DialogTitle>Confirm Deletion</DialogTitle>
-                  <DialogDescription>
-                     Are you sure you want to delete this draft application? This action cannot be undone.
-                  </DialogDescription>
-               </DialogHeader>
-               <DialogFooter>
-                  <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
-                     Cancel
-                  </Button>
-                  <Button variant="destructive" onClick={handleDeleteConfirm}>
-                     Delete
-                  </Button>
-               </DialogFooter>
-            </DialogContent>
-         </Dialog>
-         <AlertDialog open={unsubmitDialogOpen} onOpenChange={setUnsubmitDialogOpen}>
-            <AlertDialogContent>
-               <AlertDialogHeader>
-                  <AlertDialogTitle>Confirm Unsubmit</AlertDialogTitle>
-                  <AlertDialogDescription>
-                     Are you sure you want to unsubmit this application? It will be moved back to Draft status.
-                  </AlertDialogDescription>
-               </AlertDialogHeader>
-               <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleUnsubmitConfirm}>Unsubmit</AlertDialogAction>
-               </AlertDialogFooter>
-            </AlertDialogContent>
-         </AlertDialog>
-         <AlertDialog open={submitDialogOpen} onOpenChange={setSubmitDialogOpen}>
-            <AlertDialogContent>
-               <AlertDialogHeader>
-                  <AlertDialogTitle>Confirm Submission</AlertDialogTitle>
-                  <AlertDialogDescription>
-                     Are you sure you want to submit this application? You won't be able to edit it after submission.
-                  </AlertDialogDescription>
-               </AlertDialogHeader>
-               <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleSubmitConfirm}>Submit</AlertDialogAction>
-               </AlertDialogFooter>
-            </AlertDialogContent>
-         </AlertDialog>
-         <Dialog open={resubmitDialogOpen} onOpenChange={setResubmitDialogOpen}>
-            <DialogContent>
-               <DialogHeader>
-                  <DialogTitle>Confirm Resubmission</DialogTitle>
-                  <DialogDescription>
-                     Are you sure you want to resubmit this application? It will be moved back to Returned status.
-                  </DialogDescription>
-               </DialogHeader>
-               <DialogFooter>
-                  <Button variant="outline" onClick={() => setResubmitDialogOpen(false)}>
-                     Cancel
-                  </Button>
-                  <Button variant="destructive" onClick={handleResubmitConfirm}>
-                     Resubmit
-                  </Button>
-               </DialogFooter>
-            </DialogContent>
-         </Dialog>
-      </div>
+      <DashboardLayout
+         title="My Applications"
+         description="Manage and track all your applications"
+         onRefresh={handleRefresh}
+         isMobile={isMobile}
+         mainTabs={mainTabs}
+         subTabs={subTabs}
+         activeMainTab={activeMainTab}
+         activeSubTab={activeSubTab}
+         onMainTabChange={handleTabChange}
+         onSubTabChange={handleSubTabChange}
+         tabDescription={typewriterText} // Use the typewriter text here instead of direct description
+         filters={
+            activeMainTab === 'Order Of Payments' ? (
+               <OOPFilters filters={filters} setFilters={setFilters} />
+            ) : (
+               <ApplicationFilters filters={filters} setFilters={setFilters} />
+            )
+         }
+      >
+         {renderMainContent()}
+      </DashboardLayout>
    );
 };
 

@@ -91,7 +91,7 @@ const HomePage = ({ sidebarOpen }) => {
    const { firstName, lastName } = userData?.me || {};
 
    return (
-      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex flex-col pt-16">
+      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-gray-900 dark:to-gray-800 flex flex-col pt-16 transition-colors duration-300">
          <ToastContainer />
          <main className={`flex-grow transition-all duration-300 mx-auto w-full max-w-[90rem] px-4 sm:px-6 lg:px-8 py-8
             ${sidebarOpen ? 'lg:ml-64' : ''}`}
@@ -99,10 +99,10 @@ const HomePage = ({ sidebarOpen }) => {
             <div className="max-w-[85rem] mx-auto">
                {/* Welcome Section */}
                <div className="text-center mb-8 sm:mb-12">
-                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 sm:mb-3">
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3">
                      {isNewUser ? "Welcome" : "Welcome back"}, {firstName}!
                   </h1>
-                  <p className="text-base sm:text-lg text-gray-600">
+                  <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300">
                      Manage your environmental permits and applications all in one place.
                   </p>
                </div>
@@ -113,10 +113,10 @@ const HomePage = ({ sidebarOpen }) => {
                      <Card key={index} className="group hover:shadow-xl transition-all duration-300">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                            <div className="flex items-center space-x-3">
-                              <div className="p-2 rounded-lg bg-green-50 text-green-600 group-hover:bg-green-100 transition-colors duration-300">
+                              <div className="p-2 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-500 group-hover:bg-green-100 dark:group-hover:bg-green-900/30 transition-colors duration-300">
                                  {action.icon}
                               </div>
-                              <CardTitle className="text-base font-semibold text-gray-900">
+                              <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">
                                  {action.title}
                               </CardTitle>
                            </div>
@@ -139,7 +139,7 @@ const HomePage = ({ sidebarOpen }) => {
                   <Card className="lg:col-span-7 hover:shadow-xl transition-all duration-300 flex flex-col">
                      <CardHeader className="border-b border-gray-100 pb-3 sm:pb-4">
                         <div className="flex items-center space-x-3">
-                           <div className="p-2 rounded-lg bg-green-50 text-green-600">
+                           <div className="p-2 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-500">
                               <ClipboardList className="h-5 w-5 sm:h-6 sm:w-6" />
                            </div>
                            <CardTitle>Recent Applications</CardTitle>
@@ -157,28 +157,28 @@ const HomePage = ({ sidebarOpen }) => {
                                  <p>Error loading applications</p>
                               </div>
                            ) : recentApplications.length === 0 ? (
-                              <div className="flex flex-col items-center justify-center h-[365px] text-gray-500">
+                              <div className="flex flex-col items-center justify-center h-[365px] text-gray-500 dark:text-gray-400">
                                  <ClipboardList className="h-12 w-12 mb-3 text-gray-400" />
-                                 <p className="text-lg">No recent applications</p>
-                                 <p className="text-sm mt-2">Start by creating a new application</p>
+                                 <p className="text-lg text-gray-500 dark:text-gray-400">No recent applications</p>
+                                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Start by creating a new application</p>
                               </div>
                            ) : (
                               <div className="space-y-4 h-[365px] overflow-y-auto custom-scrollbar pr-4">
                                  {recentApplications.slice(0, 7).map((app, index) => (
                                     <div
                                        key={index}
-                                       className="group flex items-center border-b border-gray-100 pb-4 last:border-b-0
-                                          hover:bg-gray-50 rounded-lg transition-all duration-200 -mx-2 px-4"
+                                       className="group flex items-center border-b border-gray-100 dark:border-gray-800 pb-4 last:border-b-0
+                                          hover:bg-accent hover:bg-opacity-50 dark:hover:bg-accent/20 rounded-lg transition-all duration-200 -mx-2 px-4"
                                     >
                                        <div className="flex-grow">
-                                          <p className="font-semibold text-gray-900 group-hover:text-green-700
+                                          <p className="font-semibold text-gray-900 dark:text-white group-hover:text-green-700 dark:group-hover:text-green-500
                                              transition-colors duration-200">
                                              {app.applicationType}
                                           </p>
                                           <div className="flex items-center gap-3 mt-1">
-                                             <p className="text-sm text-gray-500">ID: {app.applicationNumber}</p>
-                                             <span className="text-gray-300">•</span>
-                                             <p className="text-sm text-gray-500">
+                                             <p className="text-sm text-gray-500 dark:text-gray-400">ID: {app.applicationNumber}</p>
+                                             <span className="text-gray-300 dark:text-gray-600">•</span>
+                                             <p className="text-sm text-gray-500 dark:text-gray-400">
                                                 {formatDate(app.dateOfSubmission)}
                                              </p>
                                           </div>
@@ -209,7 +209,7 @@ const HomePage = ({ sidebarOpen }) => {
                   <Card className="lg:col-span-5 hover:shadow-xl transition-all duration-300 flex flex-col">
                      <CardHeader className="border-b border-gray-100 pb-3 sm:pb-4">
                         <div className="flex items-center space-x-3">
-                           <div className="p-2 rounded-lg bg-green-50 text-green-600 relative">
+                           <div className="p-2 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-500 relative">
                               <Bell className="h-5 w-5 sm:h-6 sm:w-6" />
                               {unreadNotifications.length > 0 && (
                                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[20px] h-5 flex items-center justify-center">
@@ -232,10 +232,10 @@ const HomePage = ({ sidebarOpen }) => {
                                  <p>Error loading notifications</p>
                               </div>
                            ) : notifications.length === 0 ? (
-                              <div className="flex flex-col items-center justify-center h-[365px] text-gray-500">
+                              <div className="flex flex-col items-center justify-center h-[365px] text-gray-500 dark:text-gray-400">
                                  <Bell className="h-12 w-12 mb-3 text-gray-400" />
-                                 <p className="text-lg">No notifications yet</p>
-                                 <p className="text-sm mt-2">We'll notify you of important updates</p>
+                                 <p className="text-lg text-gray-500 dark:text-gray-400">No notifications yet</p>
+                                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">We'll notify you of important updates</p>
                               </div>
                            ) : (
                               <div className="space-y-3 h-[365px] overflow-y-auto custom-scrollbar pr-4">
@@ -246,8 +246,8 @@ const HomePage = ({ sidebarOpen }) => {
                                        className={`group relative rounded-lg p-4 transition-all duration-200
                                           cursor-pointer transform hover:translate-x-1
                                           ${!notification.read
-                                             ? 'bg-green-50 hover:bg-green-100'
-                                             : 'bg-gray-50 hover:bg-gray-100'
+                                             ? 'bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30'
+                                             : 'bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800/70'
                                           }`}
                                     >
                                        <div className="flex items-start gap-3">
@@ -261,14 +261,14 @@ const HomePage = ({ sidebarOpen }) => {
                                              )}
                                           </div>
                                           <div className="flex-1 min-w-0">
-                                             <p className="text-sm font-semibold text-gray-900 group-hover:text-green-700
+                                             <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-green-700
                                                 transition-colors duration-200">
                                                 {notification.title}
                                              </p>
-                                             <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                                             <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">
                                                 {notification.message}
                                              </p>
-                                             <p className="text-xs text-gray-500 mt-2">
+                                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                                                 {formatDate(notification.createdAt)}
                                              </p>
                                           </div>
