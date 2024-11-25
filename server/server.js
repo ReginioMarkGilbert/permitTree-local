@@ -28,30 +28,9 @@ const startServer = async () => {
    const server = new ApolloServer({
       typeDefs,
       resolvers,
-      context: async ({ req }) => {
-         const token = req.headers.authorization || '';
-         if (token) {
-            try {
-               const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
-               let user = await User.findById(decoded.id);
-               if (!user) {
-                  user = await Admin.findById(decoded.id);
-               }
-               if (user) {
-                  console.log('User found in context:', user.id, user.roles);
-                  return { user };
-               }
-            } catch (error) {
-               console.error('Error verifying token:', error);
-            }
-         }
-         console.log('No user in context');
-         return {};
-      },
    });
 
    await server.start();
-
 
    const corsOptions = {
       origin: [
