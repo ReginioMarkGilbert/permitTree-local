@@ -165,7 +165,7 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
             <NavLink to="/personnel/home" className="flex items-center gap-2"> </NavLink>
          </div>
          <ScrollArea className="flex-1">
-            <div className="space-y-1 px-2 pt-1">
+            <div className="space-y-1 px-2 pt-1 font-medium">
                {mainNavItems.map((item, i) => (
                   <SidebarItem key={i} item={item} isCollapsed={isCollapsed} />
                ))}
@@ -208,7 +208,7 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
    // Desktop view
    return (
       <div className={cn(
-         "fixed top-16 left-0 z-20 h-[calc(100%-4rem)] border-r bg-background",
+         "fixed top-16 left-0 z-30 h-[calc(100%-4rem)] border-r bg-background",
          isOpen ? "w-[270px]" : "w-[64px]",
          "transition-[width] duration-300 ease-in-out"
       )}>

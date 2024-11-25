@@ -22,7 +22,7 @@ const DashboardLayout = ({
    const hasSubTabs = subTabs && Object.keys(subTabs).length > 0;
 
    return (
-      <div className="min-h-screen bg-background pt-20 pb-8 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white pt-20 pb-8 px-4 sm:px-6 lg:px-8">
          <div className="max-w-7xl mx-auto space-y-6">
             {/* Header Card */}
             <Card>

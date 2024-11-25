@@ -1,11 +1,32 @@
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
-import { FaBell, FaClipboardList, FaFileAlt, FaHome, FaSignInAlt, FaUser, FaSignOutAlt } from 'react-icons/fa';
-import { NavLink, useNavigate } from 'react-router-dom';
-import permitTreeLogo from '@/assets/denr-logo.png';
-import { isAuthenticated } from '@/utils/auth';
+import React, { useCallback, useState, useEffect } from 'react';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { removeToken } from '@/utils/tokenManager';
+import { isAuthenticated } from '@/utils/auth';
 import { gql, useMutation } from '@apollo/client';
-import { X } from 'lucide-react';
+import {
+   Home,
+   FileText,
+   ClipboardList,
+   Bell,
+   User,
+   Settings,
+   LogOut,
+   ChevronLeft,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
+import permitTreeLogo from '@/assets/denr-logo.png';
+import {
+   Sheet,
+   SheetContent,
+} from "@/components/ui/sheet";
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipProvider,
+   TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const LOGOUT_MUTATION = gql`
   mutation Logout {
@@ -13,20 +34,11 @@ const LOGOUT_MUTATION = gql`
   }
 `;
 
-const Sidebar = React.memo(({ isOpen, onToggle }) => {
+const UserSidebar = React.memo(({ isOpen, onToggle }) => {
    const navigate = useNavigate();
+   const location = useLocation();
    const [logout] = useMutation(LOGOUT_MUTATION);
-   const [showText, setShowText] = useState(false);
    const [isAuth, setIsAuth] = useState(isAuthenticated());
-
-   useEffect(() => {
-      if (isOpen) {
-         const timer = setTimeout(() => setShowText(true), 150);
-         return () => clearTimeout(timer);
-      } else {
-         setShowText(false);
-      }
-   }, [isOpen]);
 
    const handleLogout = useCallback(async () => {
       try {
@@ -34,11 +46,8 @@ const Sidebar = React.memo(({ isOpen, onToggle }) => {
          removeToken();
          localStorage.removeItem('user');
          setIsAuth(false);
-         if (isOpen) {
-            onToggle(); // Close the sidebar if it's open
-         }
+         if (isOpen) onToggle();
          navigate('/auth');
-         console.log('Logout successful!');
       } catch (error) {
          console.error('Logout failed:', error);
       }
@@ -48,128 +57,129 @@ const Sidebar = React.memo(({ isOpen, onToggle }) => {
       const authStatus = isAuthenticated();
       setIsAuth(authStatus);
       if (!authStatus) {
-         if (isOpen) {
-            onToggle(); // Close the sidebar if it's open
-         }
+         if (isOpen) onToggle();
          navigate('/auth');
       }
    }, [navigate, isOpen, onToggle]);
 
-   const mainNavItems = useMemo(() => [
-      { to: '/home', icon: <FaHome />, text: 'Home' },
-      { to: '/permits', icon: <FaFileAlt />, text: 'Apply' },
-      { to: '/applicationsStatus', icon: <FaClipboardList />, text: 'Application Status' },
-      { to: '/notifications', icon: <FaBell />, text: 'Notifications' },
-   ], []);
+   const mainNavItems = [
+      { to: "/home", icon: Home, text: "Home" },
+      { to: "/permits", icon: FileText, text: "Apply" },
+      { to: "/applicationsStatus", icon: ClipboardList, text: "Application Status" },
+      { to: "/notifications", icon: Bell, text: "Notifications" },
+   ];
 
-   const accountNavItems = useMemo(() => [
-      { to: '/profile', icon: <FaUser />, text: 'Profile' },
-      { to: '/auth', icon: <FaSignOutAlt />, text: 'Logout' }
-   ], []);
+   const accountNavItems = [
+      { to: "/profile", icon: User, text: "Profile" },
+      { to: "/auth", icon: LogOut, text: "Logout", onClick: handleLogout }
+   ];
 
-   const renderNavItem = (item, index) => (
-      <NavLink
-         key={index}
-         to={item.to}
-         className={({ isActive }) => `
-            flex items-center py-2.5 px-3 rounded-md mt-1.5
-            ${isOpen ? '' : 'justify-center'}
-            transition-all duration-200 ease-in-out
-            ${isActive && item.to !== '/auth'
-               ? 'bg-green-700 text-white'
-               : 'hover:bg-green-700/50 hover:text-white'}
-            group
-         `}
-         onClick={item.to === '/auth' ? handleLogout : undefined}
-      >
-         <div className="relative w-6 h-6 flex items-center justify-center">
-            <span className="transition-transform duration-200 group-hover:scale-105">
-               {item.icon}
-            </span>
-            {item.badge > 0 && (
-               <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
-                  {item.badge}
-               </span>
+   const SidebarItem = ({ item, isCollapsed }) => {
+      const isActive = location.pathname === item.to;
+      const content = (
+         <NavLink
+            to={item.to}
+            onClick={item.onClick}
+            className={cn(
+               "relative flex h-10 w-full items-center",
+               "hover:bg-accent rounded-lg transition-colors",
+               "px-3"
             )}
+         >
+            <div className="flex items-center w-full">
+               <div className="w-[24px] flex items-center justify-center">
+                  <item.icon className={cn(
+                     "h-4 w-4",
+                     isActive ? "text-accent-foreground" : "text-muted-foreground"
+                  )} />
+               </div>
+               <span className={cn(
+                  "ml-2 text-[15px] absolute left-[48px]",
+                  "transition-all duration-300",
+                  isCollapsed ? "opacity-0 -translate-x-2" : "opacity-100 translate-x-0",
+                  isActive ? "text-accent-foreground" : "text-muted-foreground"
+               )}>
+                  {item.text}
+               </span>
+            </div>
+         </NavLink>
+      );
+
+      if (isCollapsed) {
+         return (
+            <TooltipProvider delayDuration={0}>
+               <Tooltip>
+                  <TooltipTrigger asChild>
+                     {content}
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="flex items-center">
+                     {item.text}
+                  </TooltipContent>
+               </Tooltip>
+            </TooltipProvider>
+         );
+      }
+
+      return content;
+   };
+
+   const SidebarContent = ({ isCollapsed = false }) => (
+      <div className="flex h-full flex-col">
+         <div className={cn(
+            "flex h-[12px] items-center",
+            isCollapsed ? "justify-center" : "px-4"
+         )}>
+            <NavLink to="/home" className="flex items-center gap-2"> </NavLink>
          </div>
-         {isOpen && (
-            <span className={`ml-3 font-medium text-sm transition-opacity duration-300
-               ${showText ? 'opacity-100' : 'opacity-0'}`}>
-               {item.text}
-            </span>
-         )}
-      </NavLink>
+         <ScrollArea className="flex-1">
+            <div className="space-y-1 px-2 pt-1 font-medium">
+               {mainNavItems.map((item, i) => (
+                  <SidebarItem key={i} item={item} isCollapsed={isCollapsed} />
+               ))}
+            </div>
+         </ScrollArea>
+         <div className={cn(
+            "mt-auto border-t px-2 py-2"
+         )}>
+            {accountNavItems.map((item, i) => (
+               <SidebarItem key={i} item={item} isCollapsed={isCollapsed} />
+            ))}
+         </div>
+         <Button
+            variant="ghost"
+            className={cn(
+               "h-10 w-full border-t",
+               isCollapsed ? "px-2" : "px-4"
+            )}
+            onClick={onToggle}
+         >
+            <ChevronLeft className={cn(
+               "h-4 w-4 transition-all",
+               isOpen ? "rotate-0" : "rotate-180"
+            )} />
+         </Button>
+      </div>
    );
 
-   if (!isAuth) {
-      return null;
+   if (window.innerWidth < 1024) {
+      return (
+         <Sheet open={isOpen} onOpenChange={onToggle}>
+            <SheetContent side="left" className="p-0 w-[270px]">
+               <SidebarContent />
+            </SheetContent>
+         </Sheet>
+      );
    }
 
    return (
-      <>
-         {/* Backdrop - only shows on mobile when sidebar is open */}
-         {isOpen && (
-            <div
-               className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-20 transition-opacity"
-               onClick={onToggle}
-            />
-         )}
-
-         {/* Sidebar */}
-         <div
-            className={`h-full bg-green-800 text-white flex flex-col fixed top-0 left-0
-               ${isOpen ? 'w-64' : 'w-16'}
-               transition-all duration-300 ease-in-out
-               border-r border-green-700
-               lg:z-10 z-30
-               ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
-         >
-            <div className="flex flex-col flex-grow">
-               {/* Logo Section with Close Button for Mobile */}
-               <div className={`flex items-center p-4 mb-4 border-b border-green-700 h-16
-                  ${isOpen ? 'justify-between' : 'justify-center'}`}>
-                  <div className="flex items-center">
-                     <img
-                        src={permitTreeLogo}
-                        alt="PermitTree Logo"
-                        className="w-8 h-8"
-                     />
-                     {isOpen && (
-                        <span className={`ml-3 font-semibold text-lg transition-opacity duration-300
-                           ${showText ? 'opacity-100' : 'opacity-0'}`}>
-                           PermitTree
-                        </span>
-                     )}
-                  </div>
-                  {/* Close button - only visible on mobile when sidebar is open */}
-                  {isOpen && (
-                     <button
-                        onClick={onToggle}
-                        className="lg:hidden p-1 rounded-lg hover:bg-green-700 transition-colors"
-                     >
-                        <X className="h-6 w-6" />
-                     </button>
-                  )}
-               </div>
-
-               {/* Main Navigation */}
-               <nav className="flex-grow px-3">
-                  {mainNavItems.map((item, index) => renderNavItem(item, index))}
-               </nav>
-
-               {/* Account Navigation */}
-               <div className="mt-auto">
-                  <div className="px-3 mb-8">
-                     <div className="border-t border-green-700 my-2"></div>
-                     {accountNavItems.map((item, index) => renderNavItem(item, index))}
-                  </div>
-               </div>
-
-
-            </div>
-         </div>
-      </>
+      <div className={cn(
+         "fixed top-16 left-0 z-30 h-[calc(100%-4rem)] border-r bg-background",
+         isOpen ? "w-[270px]" : "w-[64px]",
+         "transition-[width] duration-300 ease-in-out"
+      )}>
+         <SidebarContent isCollapsed={!isOpen} />
+      </div>
    );
 });
 
-export default Sidebar;
+export default UserSidebar;
