@@ -56,6 +56,8 @@ const startServer = async () => {
    const corsOptions = {
       origin: [
          'http://localhost:5174',
+         'https://permittree-frontend-dev.vercel.app',
+         'https://permittree-backend-dev.vercel.app',
          'https://permittree-staging.vercel.app',
          'https://permittree-frontend.vercel.app',
          'https://permittree-backend.vercel.app'
