@@ -18,7 +18,10 @@ const startServer = async () => {
    // await mongoose.connect(process.env.MONGO_URI_NEW);
    // console.log('MongoDB connected');
    try {
-      await mongoose.connect(process.env.MONGO_URI_ONLINE);
+      await mongoose.connect(process.env.MONGO_URI_ONLINE, {
+         useNewUrlParser: true,
+         useUnifiedTopology: true,
+      });
       console.log('MongoDB Atlas connected successfully');
    } catch (error) {
       console.error('MongoDB connection error:', error);
