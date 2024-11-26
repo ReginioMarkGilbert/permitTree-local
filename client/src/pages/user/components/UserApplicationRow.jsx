@@ -54,50 +54,52 @@ const UserApplicationRow = ({
             onClick: handleViewClick,
             variant: "outline"
          },
-         // Edit action for Draft status
-         app.status === 'Draft' && {
-            icon: Edit,
-            label: "Edit Application",
-            onClick: handleEditClick,
-            variant: "outline"
-         },
-         // Delete action for Draft status
-         app.status === 'Draft' && {
-            icon: Trash2,
-            label: "Delete Draft",
-            onClick: () => onDelete(app),
-            variant: "outline",
-            className: "text-red-600 hover:text-red-800"
-         },
-         // Submit action for Draft status
-         app.status === 'Draft' && {
-            icon: Send,
-            label: "Submit Application",
-            onClick: () => onSubmit(app),
-            variant: "outline",
-            className: "text-green-600 hover:text-green-800"
-         },
-         // Actions for Returned status
-         app.status === 'Returned' && {
-            icon: Edit,
-            label: "Edit Application",
-            onClick: handleEditClick,
-            variant: "outline"
-         },
-         app.status === 'Returned' && {
-            icon: MessageSquare,
-            label: "View Remarks",
-            onClick: handleViewRemarks,
-            variant: "outline"
-         },
-         app.status === 'Returned' && {
-            icon: Send,
-            label: "Resubmit Application",
-            onClick: () => onResubmit(app),
-            variant: "outline",
-            className: "text-green-600 hover:text-green-800"
-         },
-         // Unsubmit action for Submitted status
+
+         app.status === 'Draft' && [
+            {
+               icon: Edit,
+               label: "Edit Application",
+               onClick: handleEditClick,
+               variant: "outline"
+            },
+            {
+               icon: Trash2,
+               label: "Delete Draft",
+               onClick: () => onDelete(app),
+               variant: "outline",
+               className: "text-red-600 hover:text-red-800"
+            },
+            {
+               icon: Send,
+               label: "Submit Application",
+               onClick: () => onSubmit(app),
+               variant: "outline",
+               className: "text-green-600 hover:text-green-800"
+            }
+         ],
+
+         app.status === 'Returned' && [
+            {
+               icon: Edit,
+               label: "Edit Application",
+               onClick: handleEditClick,
+               variant: "outline"
+            },
+            {
+               icon: MessageSquare,
+               label: "View Remarks",
+               onClick: handleViewRemarks,
+               variant: "outline"
+            },
+            {
+               icon: Send,
+               label: "Resubmit Application",
+               onClick: () => onResubmit(app),
+               variant: "outline",
+               className: "text-green-600 hover:text-green-800"
+            }
+         ],
+
          app.status === 'Submitted' && {
             icon: RotateCcw,
             label: "Unsubmit Application",
@@ -105,17 +107,18 @@ const UserApplicationRow = ({
             variant: "outline",
             className: "text-yellow-600 hover:text-yellow-800"
          }
-      ].filter(Boolean);
+      ].flat().filter(Boolean);
 
       return actions.map((action, index) => (
          <TooltipProvider key={index}>
-            <Tooltip>
+            <Tooltip delayDuration={200}>
                <TooltipTrigger asChild>
                   <Button
                      variant={action.variant}
                      size="icon"
                      onClick={action.onClick}
-                     className={action.className}
+                     className={`h-8 w-8 ${action.className || ''}`}
+                     data-testid={`${action.label.toLowerCase().replace(/\s+/g, '-')}-button`}
                   >
                      <action.icon className="h-4 w-4" />
                   </Button>
