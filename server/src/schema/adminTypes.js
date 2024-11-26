@@ -8,6 +8,7 @@ const adminTypes = gql`
     firstName: String!
     lastName: String!
     roles: [String!]!
+    themePreference: String!
   }
 
   input CreateAdminInput {
@@ -16,6 +17,7 @@ const adminTypes = gql`
     roles: [String!]!
     firstName: String
     lastName: String
+    themePreference: String
   }
 
   input UpdateAdminInput {
@@ -24,17 +26,20 @@ const adminTypes = gql`
     roles: [String!]
     firstName: String
     lastName: String
+    themePreference: String
   }
 
   extend type Query {
     getAdmin(id: ID!): Admin
     getAllAdmins: [Admin!]!
+    getCurrentAdmin: Admin
   }
 
   extend type Mutation {
     createAdmin(input: CreateAdminInput!): Admin!
     updateAdmin(id: ID!, input: UpdateAdminInput!): Admin!
     deleteAdmin(id: ID!): Boolean!
+    updateAdminThemePreference(theme: String!): Admin!
   }
 `;
 

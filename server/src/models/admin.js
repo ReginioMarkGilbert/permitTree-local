@@ -25,7 +25,12 @@ const AdminSchema = new mongoose.Schema({
       ]
    }],
    firstName: { type: String },
-   lastName: { type: String }
+   lastName: { type: String },
+   themePreference: {
+      type: String,
+      enum: ['light', 'dark', 'system'],
+      default: 'system'
+   }
 });
 
 AdminSchema.pre('save', async function (next) {

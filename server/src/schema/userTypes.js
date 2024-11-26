@@ -35,6 +35,7 @@ const userTypes = gql`
     company: String
     address: String
     profilePicture: ProfilePicture
+    themePreference: String!
     lastPasswordChange: String
     recentActivities: [UserActivity!]!
     stats: UserStats!
@@ -50,6 +51,11 @@ const userTypes = gql`
     address: String
     removeProfilePicture: Boolean
     profilePicture: ProfilePictureInput
+    themePreference: String
+  }
+
+  input UpdateThemeInput {
+    theme: String!
   }
 
   type AuthPayload {
@@ -76,6 +82,7 @@ const userTypes = gql`
       password: String!
     ): AuthPayload!
     updateUserProfile(input: UpdateUserProfileInput!): User!
+    updateThemePreference(theme: String!): User!
     login(username: String!, password: String!): AuthPayload!
     logout: Boolean!
     changePassword(input: ChangePasswordInput!): Boolean!

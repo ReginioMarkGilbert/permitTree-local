@@ -59,6 +59,8 @@ const queryTypes = gql`
     getInspectionById(id: ID!): Inspection
     getInspectionsByPermit(permitId: ID!): [Inspection!]!
     getPendingInspections: [Inspection!]!
+
+    getCurrentUser: User
   }
 `;
 

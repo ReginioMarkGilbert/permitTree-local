@@ -7,10 +7,84 @@ import {
    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useTheme } from "@/components/ThemeProvider"
-import { useMemo } from "react"
+import { useMemo, useEffect } from "react"
+import { useQuery, useMutation } from "@apollo/client"
+import { gql } from "@apollo/client"
+
+// Add these GraphQL operations
+const UPDATE_USER_THEME = gql`
+  mutation UpdateUserTheme($theme: String!) {
+    updateThemePreference(theme: $theme) {
+      id
+      themePreference
+    }
+  }
+`;
+
+const UPDATE_ADMIN_THEME = gql`
+  mutation UpdateAdminTheme($theme: String!) {
+    updateAdminThemePreference(theme: $theme) {
+      id
+      themePreference
+    }
+  }
+`;
+
+const GET_CURRENT_USER = gql`
+  query GetCurrentUser {
+    getCurrentUser {
+      id
+      themePreference
+    }
+  }
+`;
+
+const GET_CURRENT_ADMIN = gql`
+  query GetCurrentAdmin {
+    getCurrentAdmin {
+      id
+      themePreference
+    }
+  }
+`;
 
 export function ThemeToggle() {
    const { theme, setTheme } = useTheme()
+   const { data: userData } = useQuery(GET_CURRENT_USER, {
+      onError: () => {} // Silently handle error
+   });
+   const { data: adminData } = useQuery(GET_CURRENT_ADMIN, {
+      onError: () => {} // Silently handle error
+   });
+   const [updateUserTheme] = useMutation(UPDATE_USER_THEME);
+   const [updateAdminTheme] = useMutation(UPDATE_ADMIN_THEME);
+
+   useEffect(() => {
+      const savedTheme = userData?.getCurrentUser?.themePreference ||
+                        adminData?.getCurrentAdmin?.themePreference;
+
+      if (savedTheme) {
+         setTheme(savedTheme);
+      }
+   }, [userData, adminData, setTheme]);
+
+   const handleThemeChange = async (newTheme) => {
+      setTheme(newTheme);
+
+      try {
+         if (userData?.getCurrentUser) {
+            await updateUserTheme({
+               variables: { theme: newTheme }
+            });
+         } else if (adminData?.getCurrentAdmin) {
+            await updateAdminTheme({
+               variables: { theme: newTheme }
+            });
+         }
+      } catch (error) {
+         console.error('Failed to update theme preference:', error);
+      }
+   };
 
    // Browser detection
    const isChrome = useMemo(() => {
@@ -24,7 +98,7 @@ export function ThemeToggle() {
          <div className="relative inline-flex items-center">
             <button
                type="button"
-               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+               onClick={() => handleThemeChange(theme === 'dark' ? 'light' : 'dark')}
                className={`
                   relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent
                   transition-colors duration-200 ease-in-out focus:outline-none
@@ -76,13 +150,13 @@ export function ThemeToggle() {
             </Button>
          </DropdownMenuTrigger>
          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setTheme("light")}>
+            <DropdownMenuItem onClick={() => handleThemeChange("light")}>
                Light
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("dark")}>
+            <DropdownMenuItem onClick={() => handleThemeChange("dark")}>
                Dark
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("system")}>
+            <DropdownMenuItem onClick={() => handleThemeChange("system")}>
                System
             </DropdownMenuItem>
          </DropdownMenuContent>

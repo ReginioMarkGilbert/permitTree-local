@@ -10,6 +10,29 @@ const adminResolvers = {
     getAllAdmins: async () => {
       return await Admin.find();
     },
+    getCurrentAdmin: async (_, __, context) => {
+      if (!context.admin) {
+        return null;
+      }
+      try {
+        const admin = await Admin.findById(context.admin.id);
+        if (!admin) {
+          return null;
+        }
+        return {
+          id: admin._id,
+          adminId: admin.adminId,
+          username: admin.username,
+          firstName: admin.firstName,
+          lastName: admin.lastName,
+          roles: admin.roles,
+          themePreference: admin.themePreference
+        };
+      } catch (error) {
+        console.error('Error fetching current admin:', error);
+        return null;
+      }
+    }
   },
   Mutation: {
     createAdmin: async (_, { input }, context) => {
@@ -62,6 +85,27 @@ const adminResolvers = {
       const result = await Admin.findByIdAndDelete(id);
       return !!result;
     },
+    updateAdminThemePreference: async (_, { theme }, context) => {
+      if (!context.admin) {
+        throw new Error('Not authenticated');
+      }
+
+      if (!['light', 'dark', 'system'].includes(theme)) {
+        throw new Error('Invalid theme preference');
+      }
+
+      const updatedAdmin = await Admin.findByIdAndUpdate(
+        context.admin.id,
+        { themePreference: theme },
+        { new: true }
+      );
+
+      if (!updatedAdmin) {
+        throw new Error('Admin not found');
+      }
+
+      return updatedAdmin;
+    }
   }
 };
 

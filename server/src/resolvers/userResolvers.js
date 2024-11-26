@@ -78,11 +78,32 @@ const userResolvers = {
             } : null
          };
       },
-      getCurrentUser: async (_, __, { req }) => {
-         if (!req.user) {
-            throw new Error('Not authenticated');
+      getCurrentUser: async (_, __, context) => {
+         if (!context.user) {
+            return null;
          }
-         return await User.findById(req.user._id);
+         try {
+            const user = await User.findById(context.user.id);
+            if (!user) {
+               return null;
+            }
+            return {
+               id: user._id,
+               username: user.username,
+               firstName: user.firstName,
+               lastName: user.lastName,
+               email: user.email,
+               roles: user.roles,
+               themePreference: user.themePreference,
+               profilePicture: user.profilePicture && user.profilePicture.data ? {
+                  data: user.profilePicture.data.toString('base64'),
+                  contentType: user.profilePicture.contentType
+               } : null
+            };
+         } catch (error) {
+            console.error('Error fetching current user:', error);
+            return null;
+         }
       },
       getUserActivities: async (_, { limit = 10 }, context) => {
          if (!context.user) {
@@ -174,7 +195,7 @@ const userResolvers = {
          }
          try {
             const userId = context.user.id;
-            const { firstName, lastName, username, email, phone, company, address, removeProfilePicture, profilePicture } = input;
+            const { firstName, lastName, username, email, phone, company, address, removeProfilePicture, profilePicture, themePreference, ...otherInputs } = input;
 
             // Add username validation
             if (username) {
@@ -194,7 +215,8 @@ const userResolvers = {
                email,
                phone,
                company,
-               address
+               address,
+               ...(themePreference && { themePreference })
             };
 
             if (removeProfilePicture) {
@@ -282,6 +304,27 @@ const userResolvers = {
             console.error('Error changing password:', error);
             throw new Error(error.message || 'Failed to change password');
          }
+      },
+      updateThemePreference: async (_, { theme }, context) => {
+         if (!context.user) {
+            throw new Error('Not authenticated');
+         }
+
+         if (!['light', 'dark', 'system'].includes(theme)) {
+            throw new Error('Invalid theme preference');
+         }
+
+         const updatedUser = await User.findByIdAndUpdate(
+            context.user.id,
+            { themePreference: theme },
+            { new: true }
+         );
+
+         if (!updatedUser) {
+            throw new Error('User not found');
+         }
+
+         return updatedUser;
       },
    }
 };
