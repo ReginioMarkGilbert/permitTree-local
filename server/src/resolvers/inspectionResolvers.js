@@ -2,6 +2,7 @@ const Inspection = require('../models/Inspection');
 const Permit = require('../models/permits/Permit');
 const NotificationService = require('../services/userNotificationService');
 const PersonnelNotificationService = require('../services/personnelNotificationService');
+const { format } = require('date-fns');
 
 const inspectionResolvers = {
    Query: {
@@ -69,8 +70,31 @@ const inspectionResolvers = {
                throw new Error('Permit not found');
             }
 
+            // Parse the date and time
+            const [year, month, day] = input.scheduledDate.split('-').map(Number);
+            const [hours, minutes] = input.scheduledTime.split(':').map(Number);
+
+            // Create date object preserving the local time
+            const scheduledDate = new Date(
+               year,
+               month - 1,
+               day,
+               hours,
+               minutes,
+               0,
+               0
+            );
+
+            console.log('Creating inspection with date:', {
+               input_date: input.scheduledDate,
+               input_time: input.scheduledTime,
+               created_date: scheduledDate.toISOString(),
+               local_time: scheduledDate.toString()
+            });
+
             const inspection = await Inspection.create({
                ...input,
+               scheduledDate,
                applicationNumber: permit.applicationNumber,
                applicationType: permit.applicationType,
                inspectorId: user.id,
@@ -82,9 +106,9 @@ const inspectionResolvers = {
                }]
             });
 
-            // Update permit's inspection schedule
+            // Update permit with the exact same date object
             permit.inspectionSchedule = {
-               scheduledDate: input.scheduledDate,
+               scheduledDate,
                scheduledTime: input.scheduledTime,
                location: input.location,
                inspectionStatus: 'Pending'
@@ -97,7 +121,7 @@ const inspectionResolvers = {
                recipientId: permit.applicantId,
                type: 'INSPECTION_SCHEDULED',
                stage: 'ForInspectionByTechnicalStaff',
-               remarks: `Inspection scheduled for ${input.scheduledDate} at ${input.scheduledTime}. Location: ${input.location}`
+               remarks: `Inspection scheduled for ${format(scheduledDate, 'PPP')} at ${input.scheduledTime}. Location: ${input.location}`
             });
 
             return inspection;
