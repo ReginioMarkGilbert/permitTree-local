@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery, gql } from '@apollo/client';
-import { FileX } from 'lucide-react';
+import { FileX, LayoutGrid, Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -20,6 +20,7 @@ import {
    TableRow,
 } from "@/components/ui/table";
 import InspectionEventModal from './components/InspectionDashboardComponents/InspectionEventModal';
+import { Button } from "@/components/ui/button";
 
 const GET_APPLICATIONS_AND_INSPECTIONS = gql`
   query GetApplicationsAndInspections {
@@ -55,11 +56,12 @@ const InspectionSchedulingPage = () => {
    const [activeMainTab, setActiveMainTab] = useState('For Schedule');
    const [view, setView] = useState('table');
    const [selectedEvent, setSelectedEvent] = useState(null);
+   const [viewMode, setViewMode] = useState('dashboard');
 
    const { data, loading, error, refetch } = useQuery(GET_APPLICATIONS_AND_INSPECTIONS);
    const isMobile = useMediaQuery('(max-width: 640px)');
 
-   const mainTabs = ['For Schedule', 'Scheduled Inspection', 'Completed Inspection', 'Calendar'];
+   const mainTabs = ['For Schedule', 'Scheduled Inspection', 'Completed Inspection'];
 
    const getInspectionStatus = useMemo(() => (applicationId) => {
       if (!data?.getInspections) return null;
@@ -116,14 +118,21 @@ const InspectionSchedulingPage = () => {
       });
    }, [data?.getApplicationsByStatus, activeMainTab, filters, getInspectionStatus]);
 
-   const descriptions = {
-      'For Schedule': 'This is the list of applications that need to be scheduled for inspection.',
-      'Scheduled Inspection': 'This is the list of applications with pending inspections.',
-      'Completed Inspection': 'This is the list of applications with completed inspections.'
-   };
+   const renderTabDescription = () => {
+      const descriptions = {
+         'For Schedule': 'This is the list of applications that need to be scheduled for inspection.',
+         'Scheduled Inspection': 'This is the list of applications with pending inspections.',
+         'Completed Inspection': 'This is the list of applications with completed inspections.'
+      };
 
-   const currentDescription = descriptions[activeMainTab] || '';
-   const animatedText = useTypewriter(currentDescription, 10);
+      const text = useTypewriter(descriptions[activeMainTab] || '');
+
+      return (
+         <div className="mb-4 -mt-4">
+            <h1 className="text-sm min-h-[20px] text-black dark:text-gray-300">{text}</h1>
+         </div>
+      );
+   };
 
    const calendarEvents = useMemo(() => {
       if (!data?.getInspections) return [];
@@ -155,69 +164,7 @@ const InspectionSchedulingPage = () => {
       setSelectedEvent(clickInfo.event);
    };
 
-   const renderContent = () => {
-      if (loading) return <div className="text-center">Loading applications...</div>;
-      if (error) return <div className="text-center text-destructive">Error: {error.message}</div>;
-
-      if (activeMainTab === 'Calendar') {
-         return (
-            <div className="space-y-4">
-               <div className="h-[700px] bg-background rounded-lg shadow p-4">
-                  <FullCalendar
-                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-                     initialView="timeGridWeek"
-                     headerToolbar={{
-                        left: 'prev,next today',
-                        center: 'title',
-                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                     }}
-                     events={calendarEvents}
-                     eventClick={handleEventClick}
-                     slotMinTime="06:00:00"
-                     slotMaxTime="18:00:00"
-                     allDaySlot={false}
-                     height="100%"
-                     eventColor="#2563eb"
-                     eventClassNames="cursor-pointer"
-                     slotLabelFormat={{
-                        hour: 'numeric',
-                        minute: '2-digit',
-                        meridiem: 'short'
-                     }}
-                     nowIndicator={true}
-                     scrollTime={`${new Date().getHours()}:00:00`}
-                     eventTimeFormat={{
-                        hour: 'numeric',
-                        minute: '2-digit',
-                        meridiem: 'short'
-                     }}
-                     dayHeaderFormat={{
-                        weekday: 'short',
-                        month: 'numeric',
-                        day: 'numeric',
-                        omitCommas: true
-                     }}
-                     eventContent={(eventInfo) => (
-                        <div className="p-1">
-                           <div className="font-medium text-xs">
-                              {eventInfo.event.title}
-                           </div>
-                           <div className="text-xs opacity-75">
-                              {eventInfo.event.extendedProps.applicationType}
-                           </div>
-                        </div>
-                     )}
-                  />
-               </div>
-               <InspectionEventModal
-                  isOpen={!!selectedEvent}
-                  onClose={() => setSelectedEvent(null)}
-                  event={selectedEvent}
-               />
-            </div>
-         );
-      }
-
+   const renderDashboardContent = () => {
       if (filteredApplications.length === 0) {
          return (
             <div className="text-center py-8">
@@ -276,18 +223,104 @@ const InspectionSchedulingPage = () => {
       );
    };
 
+   const renderContent = () => {
+      if (loading) return <div className="text-center">Loading applications...</div>;
+      if (error) return <div className="text-center text-destructive">Error: {error.message}</div>;
+
+      if (viewMode === 'calendar') {
+         return (
+            <div className="space-y-4">
+               <div className="h-[700px] bg-background rounded-lg shadow p-4">
+                  <FullCalendar
+                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                     initialView="timeGridWeek"
+                     headerToolbar={{
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                     }}
+                     events={calendarEvents}
+                     eventClick={handleEventClick}
+                     slotMinTime="06:00:00"
+                     slotMaxTime="18:00:00"
+                     allDaySlot={false}
+                     height="100%"
+                     eventColor="#2563eb"
+                     eventClassNames="cursor-pointer"
+                     slotLabelFormat={{
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        meridiem: 'short'
+                     }}
+                     nowIndicator={true}
+                     scrollTime={`${new Date().getHours()}:00:00`}
+                     eventTimeFormat={{
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        meridiem: 'short'
+                     }}
+                     dayHeaderFormat={{
+                        weekday: 'short',
+                        month: 'numeric',
+                        day: 'numeric',
+                        omitCommas: true
+                     }}
+                     eventContent={(eventInfo) => (
+                        <div className="p-1">
+                           <div className="font-medium text-xs">
+                              {eventInfo.event.title}
+                           </div>
+                           <div className="text-xs opacity-75">
+                              {eventInfo.event.extendedProps.applicationType}
+                           </div>
+                        </div>
+                     )}
+                  />
+               </div>
+               <InspectionEventModal
+                  isOpen={!!selectedEvent}
+                  onClose={() => setSelectedEvent(null)}
+                  event={selectedEvent}
+               />
+            </div>
+         );
+      }
+
+      return renderDashboardContent();
+   };
+
    return (
       <DashboardLayout
          title="Inspection Management"
          description="Schedule and manage inspections for permit applications"
          onRefresh={refetch}
          isMobile={isMobile}
-         mainTabs={mainTabs}
-         activeMainTab={activeMainTab}
-         onMainTabChange={setActiveMainTab}
-         tabDescription={animatedText}
-         filters={<ApplicationFilters filters={filters} setFilters={setFilters} />}
+         mainTabs={viewMode === 'dashboard' ? mainTabs : null}
+         activeMainTab={viewMode === 'dashboard' ? activeMainTab : null}
+         onMainTabChange={viewMode === 'dashboard' ? setActiveMainTab : null}
+         tabDescription={viewMode === 'dashboard' ? renderTabDescription() : null}
+         filters={viewMode === 'dashboard' && <ApplicationFilters filters={filters} setFilters={setFilters} />}
       >
+         <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+               <Button
+                  variant={viewMode === 'dashboard' ? 'default' : 'outline'}
+                  onClick={() => setViewMode('dashboard')}
+                  className="flex items-center gap-2"
+               >
+                  <LayoutGrid className="h-4 w-4" />
+                  <span>List View</span>
+               </Button>
+               <Button
+                  variant={viewMode === 'calendar' ? 'default' : 'outline'}
+                  onClick={() => setViewMode('calendar')}
+                  className="flex items-center gap-2"
+               >
+                  <CalendarIcon className="h-4 w-4" />
+                  <span>Calendar View</span>
+               </Button>
+            </div>
+         </div>
          {renderContent()}
       </DashboardLayout>
    );

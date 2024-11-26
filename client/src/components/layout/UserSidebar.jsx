@@ -39,6 +39,16 @@ const UserSidebar = React.memo(({ isOpen, onToggle }) => {
    const location = useLocation();
    const [logout] = useMutation(LOGOUT_MUTATION);
    const [isAuth, setIsAuth] = useState(isAuthenticated());
+   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+   useEffect(() => {
+      const handleResize = () => {
+         setIsMobile(window.innerWidth < 1024);
+      };
+
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+   }, []);
 
    const handleLogout = useCallback(async () => {
       try {
@@ -161,11 +171,16 @@ const UserSidebar = React.memo(({ isOpen, onToggle }) => {
       </div>
    );
 
-   if (window.innerWidth < 1024) {
+   if (isMobile) {
       return (
          <Sheet open={isOpen} onOpenChange={onToggle}>
-            <SheetContent side="left" className="p-0 w-[270px]">
-               <SidebarContent />
+            <SheetContent side="left" className="p-0 w-[270px] flex flex-col">
+               <div className="h-16 border-b flex items-center px-6">
+                  <h2 className="text-lg font-semibold">Menu</h2>
+               </div>
+               <div className="flex-1 overflow-auto">
+                  <SidebarContent />
+               </div>
             </SheetContent>
          </Sheet>
       );
