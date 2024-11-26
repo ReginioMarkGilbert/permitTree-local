@@ -1,5 +1,7 @@
 const PersonnelNotification = require('../models/PersonnelNotification');
 const { pubsub } = require('../config/pubsub');
+const Admin = require('../models/admin');
+const emailService = require('./emailService');
 
 class PersonnelNotificationService {
    static async createPersonnelNotification({
@@ -19,6 +21,37 @@ class PersonnelNotificationService {
             metadata,
             priority
          });
+
+         // Get admin's notification preferences
+         const admin = await Admin.findById(recipient);
+
+         // Send email if enabled and email is configured
+         if (admin?.notificationPreferences?.email && admin.email) {
+            console.log('Sending email notification to:', admin.email);
+
+            const emailText = `
+               ${message}
+
+               Priority: ${priority}
+
+               Please login to PermiTree to view more details and take necessary actions.
+
+               Best regards,
+               PermiTree System
+            `;
+
+            const emailSent = await emailService.sendNotificationEmail(
+               admin.email,
+               title,
+               emailText
+            );
+
+            if (emailSent) {
+               console.log('Email notification sent successfully');
+            } else {
+               console.log('Failed to send email notification');
+            }
+         }
 
          // Publish notification for real-time updates
          pubsub.publish('PERSONNEL_NOTIFICATION_CREATED', {

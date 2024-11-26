@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from '@/components/ui/button';
@@ -8,19 +8,67 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Bell, Mail, MessageSquare, Upload, Clock, FileCheck, Workflow, Save } from 'lucide-react';
 import { toast } from 'sonner';
+import { useMutation, gql, useQuery } from '@apollo/client';
+
+const GET_ADMIN_SETTINGS = gql`
+  query GetCurrentAdmin {
+    getCurrentAdmin {
+      id
+      email
+      notificationPreferences {
+        email
+        inApp
+        sms
+      }
+    }
+  }
+`;
+
+const UPDATE_NOTIFICATION_SETTINGS = gql`
+  mutation UpdateNotificationSettings($preferences: NotificationPreferencesInput!, $email: String) {
+    updateNotificationSettings(preferences: $preferences, email: $email) {
+      id
+      email
+      notificationPreferences {
+        email
+        inApp
+        sms
+      }
+    }
+  }
+`;
 
 const PersonnelSettingsPage = () => {
+   const { data: adminData, loading } = useQuery(GET_ADMIN_SETTINGS);
    const [settings, setSettings] = useState({
       notificationPreferences: {
-         email: true,
+         email: false,
          inApp: true,
          sms: false,
       },
+      email: '',
       applicationReviewDeadline: 7,
       defaultApplicationStatus: 'pending',
       autoAssignApplications: false,
       signatureImage: null,
    });
+
+   useEffect(() => {
+      if (adminData?.getCurrentAdmin) {
+         const admin = adminData.getCurrentAdmin;
+         setSettings(prev => ({
+            ...prev,
+            email: admin.email || '',
+            notificationPreferences: {
+               email: admin.notificationPreferences?.email ?? false,
+               inApp: admin.notificationPreferences?.inApp ?? true,
+               sms: admin.notificationPreferences?.sms ?? false
+            }
+         }));
+      }
+   }, [adminData]);
+
+   const [updateNotificationSettings] = useMutation(UPDATE_NOTIFICATION_SETTINGS);
 
    const handleNotificationChange = (type) => {
       setSettings(prev => ({
@@ -48,9 +96,24 @@ const PersonnelSettingsPage = () => {
       setSettings(prev => ({ ...prev, signatureImage: file.name }));
    };
 
-   const saveSettings = () => {
-      // Here you would typically send the settings to your backend
-      toast.success('Settings saved successfully');
+   const saveSettings = async () => {
+      try {
+         if (settings.notificationPreferences.email && !settings.email) {
+            return toast.error('Please enter an email address for email notifications');
+         }
+
+         await updateNotificationSettings({
+            variables: {
+               preferences: settings.notificationPreferences,
+               email: settings.email
+            }
+         });
+
+         toast.success('Settings saved successfully');
+      } catch (error) {
+         console.error('Error saving settings:', error);
+         toast.error('Failed to save settings');
+      }
    };
 
    return (
@@ -84,9 +147,18 @@ const PersonnelSettingsPage = () => {
                         <div className="flex items-center justify-between">
                            <div className="flex items-center gap-3">
                               <Mail className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                              <div>
+                              <div className="flex-grow">
                                  <Label className="font-medium text-gray-900 dark:text-white">Email Notifications</Label>
                                  <p className="text-sm text-gray-600 dark:text-gray-300">Receive updates via email</p>
+                                 {settings.notificationPreferences.email && (
+                                    <Input
+                                       type="email"
+                                       value={settings.email}
+                                       onChange={(e) => setSettings(prev => ({ ...prev, email: e.target.value }))}
+                                       placeholder="Enter your email"
+                                       className="mt-2 w-full max-w-md dark:bg-gray-700 dark:border-gray-600"
+                                    />
+                                 )}
                               </div>
                            </div>
                            <Switch

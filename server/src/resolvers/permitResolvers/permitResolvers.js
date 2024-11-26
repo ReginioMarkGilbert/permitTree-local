@@ -313,6 +313,7 @@ const permitResolvers = {
 
          return permit;
       },
+      // for resubmitting in Draft tab
       submitPermit: async (_, { id }, { user }) => {
          if (!user) {
             throw new Error('You must be logged in to submit a permit');
@@ -352,7 +353,7 @@ const permitResolvers = {
                recipientId: technicalStaff._id,
                type: 'PENDING_TECHNICAL_REVIEW',
                stage: 'TechnicalStaffReview',
-               remarks: notes,
+               remarks: '',
                priority: 'high'
             });
          }

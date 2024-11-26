@@ -69,6 +69,14 @@ const mutationTypes = gql`
     recordInspectionFindings(id: ID!, findings: InspectionFindingsInput!): Inspection!
     cancelInspection(id: ID!, reason: String!): Inspection!
     rescheduleInspection(id: ID!, newDate: String!, newTime: String!): Inspection!
+
+    updateNotificationSettings(preferences: NotificationPreferencesInput!, email: String): Admin!
+  }
+
+  input NotificationPreferencesInput {
+    email: Boolean!
+    inApp: Boolean!
+    sms: Boolean!
   }
 `;
 

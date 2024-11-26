@@ -3,8 +3,9 @@ const mongoose = require('mongoose');
 const PersonnelNotificationSchema = new mongoose.Schema({
    recipient: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
+      ref: 'Admin',
+      required: true,
+      index: true
    },
    type: {
       type: String,
@@ -12,26 +13,16 @@ const PersonnelNotificationSchema = new mongoose.Schema({
       enum: [
          'PENDING_TECHNICAL_REVIEW',
          'PENDING_RECEIVING_CLERK_RECORD',
-
          'PENDING_CHIEF_REVIEW',
          'PENDING_PENRCENR_APPROVAL',
-
          'PENDING_INSPECTION',
-
-         'PENDING_PERMIT_CREATION',
-         'PENDING_PERMIT_SIGNING',
-         'PENDING_PERMIT_RELEASE',
-
          'APPLICATION_RETURNED',
          'APPLICATION_APPROVED',
-
-         'OOP_PENDING_APPROVAL', // for Accountant
-         'OOP_PENDING_SIGNATURE', // for Chief TSD
+         'OOP_PENDING_APPROVAL',
+         'OOP_PENDING_SIGNATURE',
          'PAYMENT_PENDING_VERIFICATION',
-
          'APPLICATION_RECORDED',
          'APPLICATION_READY_FOR_INSPECTION',
-
          'PAYMENT_PROOF_SUBMITTED'
       ]
    },
@@ -64,12 +55,20 @@ const PersonnelNotificationSchema = new mongoose.Schema({
    },
    read: {
       type: Boolean,
-      default: false
+      default: false,
+      index: true
    },
    createdAt: {
       type: Date,
-      default: Date.now
+      default: Date.now,
+      index: true
    }
+}, {
+   timestamps: true,
+   toJSON: { virtuals: true },
+   toObject: { virtuals: true }
 });
+
+PersonnelNotificationSchema.index({ recipient: 1, read: 1, createdAt: -1 });
 
 module.exports = mongoose.model('PersonnelNotification', PersonnelNotificationSchema);

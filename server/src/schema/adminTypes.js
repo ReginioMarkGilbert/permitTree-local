@@ -1,14 +1,28 @@
 const { gql } = require('graphql-tag');
 
 const adminTypes = gql`
+  type NotificationPreferences {
+    email: Boolean!
+    inApp: Boolean!
+    sms: Boolean!
+  }
+
+  input NotificationPreferencesInput {
+    email: Boolean!
+    inApp: Boolean!
+    sms: Boolean!
+  }
+
   type Admin {
     id: ID!
     adminId: Int!
     username: String!
     firstName: String!
     lastName: String!
+    email: String
     roles: [String!]!
     themePreference: String!
+    notificationPreferences: NotificationPreferences!
   }
 
   input CreateAdminInput {
@@ -18,6 +32,7 @@ const adminTypes = gql`
     firstName: String
     lastName: String
     themePreference: String
+    email: String
   }
 
   input UpdateAdminInput {
@@ -27,6 +42,8 @@ const adminTypes = gql`
     firstName: String
     lastName: String
     themePreference: String
+    email: String
+    notificationPreferences: NotificationPreferencesInput
   }
 
   extend type Query {
@@ -39,6 +56,7 @@ const adminTypes = gql`
     createAdmin(input: CreateAdminInput!): Admin!
     updateAdmin(id: ID!, input: UpdateAdminInput!): Admin!
     deleteAdmin(id: ID!): Boolean!
+    updateNotificationSettings(preferences: NotificationPreferencesInput!, email: String): Admin!
     updateAdminThemePreference(theme: String!): Admin!
   }
 `;

@@ -1,4 +1,5 @@
-import { useQuery, useMutation, gql, useApolloClient } from '@apollo/client';
+import { useQuery, useMutation, gql } from '@apollo/client';
+import { toast } from 'sonner';
 
 // Queries
 export const GET_PERSONNEL_NOTIFICATIONS = gql`
@@ -85,13 +86,46 @@ export const MARK_ALL_PERSONNEL_NOTIFICATIONS_AS_READ = gql`
 `;
 
 export const usePersonnelNotifications = () => {
-  const client = useApolloClient();
-  const { data: allData, loading: allLoading, error: allError, refetch: refetchAll } = useQuery(GET_PERSONNEL_NOTIFICATIONS);
+  const {
+    data: allData,
+    loading: allLoading,
+    error: allError,
+    refetch: refetchAll,
+    networkStatus
+  } = useQuery(GET_PERSONNEL_NOTIFICATIONS, {
+    notifyOnNetworkStatusChange: true,
+    fetchPolicy: 'network-only', // Don't use cache
+    onError: (error) => {
+      console.error('Error fetching notifications:', error);
+      toast.error('Failed to load notifications');
+    }
+  });
 
-  const { data: unreadData, loading: unreadLoading, error: unreadError, refetch: refetchUnread } = useQuery(GET_UNREAD_PERSONNEL_NOTIFICATIONS);
+  const {
+    data: unreadData,
+    loading: unreadLoading,
+    error: unreadError,
+    refetch: refetchUnread
+  } = useQuery(GET_UNREAD_PERSONNEL_NOTIFICATIONS, {
+    fetchPolicy: 'network-only', // Don't use cache
+    onError: (error) => {
+      console.error('Error fetching unread notifications:', error);
+    }
+  });
 
-  const [markAsRead] = useMutation(MARK_PERSONNEL_NOTIFICATION_AS_READ);
-  const [markAllAsRead] = useMutation(MARK_ALL_PERSONNEL_NOTIFICATIONS_AS_READ);
+  const [markAsRead] = useMutation(MARK_PERSONNEL_NOTIFICATION_AS_READ, {
+    onError: (error) => {
+      console.error('Error marking notification as read:', error);
+      toast.error('Failed to mark notification as read');
+    }
+  });
+
+  const [markAllAsRead] = useMutation(MARK_ALL_PERSONNEL_NOTIFICATIONS_AS_READ, {
+    onError: (error) => {
+      console.error('Error marking all notifications as read:', error);
+      toast.error('Failed to mark all notifications as read');
+    }
+  });
 
   const handleMarkAsRead = async (notificationId) => {
     try {
@@ -115,16 +149,24 @@ export const usePersonnelNotifications = () => {
           { query: GET_UNREAD_PERSONNEL_NOTIFICATIONS }
         ]
       });
+      toast.success('All notifications marked as read');
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
     }
   };
 
+  const isLoading = allLoading || unreadLoading || networkStatus === 4;
+  const error = allError || unreadError;
+
+  if (error) {
+    console.error('Notifications error:', error);
+  }
+
   return {
     notifications: allData?.getPersonnelNotifications || [],
     unreadNotifications: unreadData?.getPersonnelNotifications || [],
-    loading: allLoading || unreadLoading,
-    error: allError || unreadError,
+    loading: isLoading,
+    error,
     markAsRead: handleMarkAsRead,
     markAllAsRead: handleMarkAllAsRead,
     refetchAll,

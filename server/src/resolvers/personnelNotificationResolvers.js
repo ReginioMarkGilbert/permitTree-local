@@ -1,18 +1,18 @@
 const PersonnelNotification = require('../models/PersonnelNotification');
 const { withFilter } = require('graphql-subscriptions');
 const { pubsub } = require('../config/pubsub');
-const Admin = require('../models/admin');
 
 const personnelNotificationResolvers = {
    Query: {
-      getPersonnelNotifications: async (_, { unreadOnly }, { user }) => {
+      getPersonnelNotifications: async (_, { unreadOnly }, { admin }) => {
          try {
-            if (!user) {
-               console.log('No user found in context');
-               return [];
+            if (!admin) {
+               console.log('No admin found in context');
+               throw new Error('Not authenticated as admin');
             }
 
-            const query = { recipient: user.id };
+            console.log('Fetching notifications for admin:', admin.id);
+            const query = { recipient: admin.id };
             if (unreadOnly) {
                query.read = false;
             }
@@ -22,69 +22,80 @@ const personnelNotificationResolvers = {
                .limit(50)
                .lean();
 
-            if (!notifications) {
-               console.log('No notifications found');
-               return [];
-            }
+            console.log(`Found ${notifications.length} notifications`);
 
             return notifications.map(notification => ({
-               //  ...notification,
-               //  id: notification._id.toString()
                id: notification._id.toString(),
                recipient: notification.recipient.toString(),
                type: notification.type,
                title: notification.title,
                message: notification.message,
-               metadata: notification.metadata,
+               metadata: notification.metadata || {},
+               priority: notification.priority,
                read: notification.read,
                createdAt: notification.createdAt.toISOString()
             }));
          } catch (error) {
             console.error('Error fetching personnel notifications:', error);
-            return [];
+            throw error;
          }
       },
 
-      getUnreadPersonnelNotifications: async (_, __, { user }) => {
-         if (!user) return [];
+      getUnreadPersonnelNotifications: async (_, __, { admin }) => {
+         if (!admin) {
+            throw new Error('Not authenticated as admin');
+         }
 
-         const notifications = await PersonnelNotification.find({
-            recipient: user.id,
-            read: false
-         })
-            .sort({ createdAt: -1 })
-            .lean();
+         try {
+            const notifications = await PersonnelNotification.find({
+               recipient: admin.id,
+               read: false
+            })
+               .sort({ createdAt: -1 })
+               .lean();
 
-         return notifications.map(notification => ({
-            ...notification,
-            id: notification._id.toString()
-         }));
+            return notifications.map(notification => ({
+               ...notification,
+               id: notification._id.toString(),
+               recipient: notification.recipient.toString()
+            }));
+         } catch (error) {
+            console.error('Error fetching unread notifications:', error);
+            throw error;
+         }
       }
    },
 
    Mutation: {
-      markPersonnelNotificationAsRead: async (_, { id }, { user }) => {
-         if (!user) throw new Error('Not authenticated');
+      markPersonnelNotificationAsRead: async (_, { id }, { admin }) => {
+         if (!admin) {
+            throw new Error('Not authenticated as admin');
+         }
 
          const notification = await PersonnelNotification.findOneAndUpdate(
-            { _id: id, recipient: user.id },
+            { _id: id, recipient: admin.id },
             { read: true },
             { new: true, lean: true }
          );
 
-         if (!notification) throw new Error('Notification not found');
+         if (!notification) {
+            throw new Error('Notification not found');
+         }
 
          return {
             ...notification,
-            id: notification._id.toString()
+            id: notification._id.toString(),
+            recipient: notification.recipient.toString()
          };
       },
 
-      markAllPersonnelNotificationsAsRead: async (_, __, { user }) => {
-         if (!user) throw new Error('Not authenticated');
+      markAllPersonnelNotificationsAsRead: async (_, __, { admin }) => {
+         if (!admin) {
+            throw new Error('Not authenticated as admin');
+         }
 
          await PersonnelNotification.updateMany(
-            { recipient: user.id, read: false },
+            { recipient: admin.id, read: false },
             { read: true }
          );
 
@@ -96,7 +107,7 @@ const personnelNotificationResolvers = {
       personnelNotificationCreated: {
          subscribe: withFilter(
             () => pubsub.asyncIterator(['PERSONNEL_NOTIFICATION_CREATED']),
-            (payload, variables) => {
+            (payload, variables, { admin }) => {
                return payload.personnelNotificationCreated.recipient.toString() === variables.recipientId;
             }
          )

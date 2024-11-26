@@ -10,40 +10,26 @@ const adminResolvers = {
       getAllAdmins: async () => {
          return await Admin.find();
       },
-      getCurrentAdmin: async (_, __, context) => {
-         console.log('getCurrentAdmin context:', context);
-
-         if (!context.admin) {
-            console.log('No admin in context');
-            return null;
+      getCurrentAdmin: async (_, __, { admin }) => {
+         if (!admin) {
+            throw new Error('Not authenticated');
          }
 
-         try {
-            const admin = await Admin.findById(context.admin.id);
-            if (!admin) {
-               console.log('Admin not found in database');
-               return null;
-            }
+         const currentAdmin = await Admin.findById(admin.id);
+         if (!currentAdmin) {
+            throw new Error('Admin not found');
+         }
 
-            console.log('Found admin:', {
-               id: admin._id,
-               roles: admin.roles,
-               themePreference: admin.themePreference
-            });
-
-            return {
-               id: admin._id,
-               adminId: admin.adminId,
-               username: admin.username,
-               firstName: admin.firstName,
-               lastName: admin.lastName,
-               roles: admin.roles,
-               themePreference: admin.themePreference
+         if (!currentAdmin.notificationPreferences) {
+            currentAdmin.notificationPreferences = {
+               email: false,
+               inApp: true,
+               sms: false
             };
-         } catch (error) {
-            console.error('Error in getCurrentAdmin:', error);
-            return null;
+            await currentAdmin.save();
          }
+
+         return currentAdmin;
       }
    },
    Mutation: {
@@ -148,6 +134,28 @@ const adminResolvers = {
             console.error('Error updating admin theme:', error);
             throw new Error(`Failed to update theme: ${error.message}`);
          }
+      },
+      updateNotificationSettings: async (_, { preferences, email }, { admin }) => {
+         if (!admin) {
+            throw new Error('Not authenticated');
+         }
+
+         const updatedAdmin = await Admin.findByIdAndUpdate(
+            admin.id,
+            {
+               $set: {
+                  notificationPreferences: preferences,
+                  email: email || ''
+               }
+            },
+            { new: true, runValidators: true }
+         );
+
+         if (!updatedAdmin) {
+            throw new Error('Admin not found');
+         }
+
+         return updatedAdmin;
       }
    }
 };
