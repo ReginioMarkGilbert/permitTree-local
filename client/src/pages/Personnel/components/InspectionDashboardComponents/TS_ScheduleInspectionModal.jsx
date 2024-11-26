@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,38 +34,52 @@ const CREATE_INSPECTION = gql`
 
 const TS_ScheduleInspectionModal = ({ isOpen, onClose, application, onScheduleComplete }) => {
   const [createInspection] = useMutation(CREATE_INSPECTION);
+  const [isChrome, setIsChrome] = useState(false);
   const [scheduleData, setScheduleData] = useState({
-    date: new Date(),
+    date: format(new Date(), "yyyy-MM-dd"),
+    time: format(new Date(), "HH:mm"),
     location: "",
     additionalNotes: "",
   });
 
-  const handleDateTimeChange = (newDate) => {
-    console.log("DateTimePicker selected:", newDate);
+  // Detect Chrome browser
+  useEffect(() => {
+    const isChromeBrowser = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+    setIsChrome(isChromeBrowser);
+  }, []);
+
+  const handleDateChange = (e) => {
     setScheduleData(prev => ({
       ...prev,
-      date: newDate
+      date: e.target.value
+    }));
+  };
+
+  const handleTimeChange = (e) => {
+    setScheduleData(prev => ({
+      ...prev,
+      time: e.target.value
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!scheduleData.date || !scheduleData.location) {
+    if (!scheduleData.date || !scheduleData.time || !scheduleData.location) {
       toast.error("Please fill in all required fields");
       return;
     }
 
     try {
-      const selectedDate = new Date(scheduleData.date);
+      // Combine date and time strings
+      const dateTimeStr = `${scheduleData.date}T${scheduleData.time}`;
+      const selectedDate = new Date(dateTimeStr);
 
-      // Format date as YYYY-MM-DD
       const formattedDate = format(selectedDate, "yyyy-MM-dd");
-      // Format time as HH:mm (24-hour format)
       const formattedTime = format(selectedDate, "HH:mm");
 
       console.log("Selected in modal:", {
-        rawDate: scheduleData.date,
+        dateTimeStr,
         selectedDate,
         formattedDate,
         formattedTime
@@ -105,24 +119,59 @@ const TS_ScheduleInspectionModal = ({ isOpen, onClose, application, onScheduleCo
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Date and Time</Label>
-              <DateTimePicker
-                date={scheduleData.date}
-                setDate={handleDateTimeChange}
-              />
-            </div>
+            {isChrome ? (
+              // Native date and time inputs for Chrome
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="date">Date</Label>
+                  <Input
+                    type="date"
+                    id="date"
+                    value={scheduleData.date}
+                    onChange={handleDateChange}
+                    min={format(new Date(), "yyyy-MM-dd")}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="time">Time</Label>
+                  <Input
+                    type="time"
+                    id="time"
+                    value={scheduleData.time}
+                    onChange={handleTimeChange}
+                    required
+                  />
+                </div>
+              </div>
+            ) : (
+              // ShadCN DateTimePicker for other browsers
+              <div className="space-y-2">
+                <Label>Date and Time</Label>
+                <DateTimePicker
+                  date={new Date(`${scheduleData.date}T${scheduleData.time}`)}
+                  setDate={(newDate) => {
+                    setScheduleData(prev => ({
+                      ...prev,
+                      date: format(newDate, "yyyy-MM-dd"),
+                      time: format(newDate, "HH:mm")
+                    }));
+                  }}
+                />
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="location">Location</Label>
               <Input
                 id="location"
                 value={scheduleData.location}
-                onChange={(e) => setScheduleData({
-                  ...scheduleData,
+                onChange={(e) => setScheduleData(prev => ({
+                  ...prev,
                   location: e.target.value
-                })}
+                }))}
                 placeholder="Enter inspection location"
+                required
               />
             </div>
 
@@ -131,10 +180,10 @@ const TS_ScheduleInspectionModal = ({ isOpen, onClose, application, onScheduleCo
               <Textarea
                 id="notes"
                 value={scheduleData.additionalNotes}
-                onChange={(e) => setScheduleData({
-                  ...scheduleData,
+                onChange={(e) => setScheduleData(prev => ({
+                  ...prev,
                   additionalNotes: e.target.value
-                })}
+                }))}
                 placeholder="Any additional notes or instructions..."
               />
             </div>
