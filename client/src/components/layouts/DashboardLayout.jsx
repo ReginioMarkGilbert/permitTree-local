@@ -30,7 +30,7 @@ const DashboardLayout = ({
                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                   <div>
                      <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">{title}</CardTitle>
-                     <CardDescription className="text-gray-600 dark:text-gray-300">{description}</CardDescription>
+                     <CardDescription className="text-gray-600 dark:text-gray-300 pt-1">{description}</CardDescription>
                   </div>
                   <Button onClick={onRefresh} variant="outline" size="sm">
                      <RefreshCw className="mr-2 h-4 w-4" />
@@ -68,7 +68,11 @@ const DashboardLayout = ({
                            <Tabs value={activeMainTab} onValueChange={onMainTabChange}>
                               <TabsList>
                                  {mainTabs.map((tab) => (
-                                    <TabsTrigger key={tab} value={tab} className="dark:text-white">
+                                    <TabsTrigger
+                                       key={tab}
+                                       value={tab}
+                                       className="dark:text-white data-[state=active]:bg-white data-[state=active]:text-black dark:data-[state=active]:text-black hover:text-black dark:hover:text-black dark:hover:bg-white"
+                                    >
                                        {tab}
                                     </TabsTrigger>
                                  ))}
@@ -82,7 +86,7 @@ const DashboardLayout = ({
                                        <TabsTrigger
                                           key={tab}
                                           value={tab}
-                                          className="data-[state=active]:bg-background dark:text-white"
+                                          className="dark:text-white data-[state=active]:bg-white data-[state=active]:text-black dark:data-[state=active]:text-black hover:text-black dark:hover:text-black dark:hover:bg-white"
                                        >
                                           {tab}
                                        </TabsTrigger>

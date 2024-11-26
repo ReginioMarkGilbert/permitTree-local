@@ -706,32 +706,38 @@ const UserApplicationsStatusPage = () => {
       );
    };
 
-   // Define descriptions object at the component level
-   const descriptions = {
-      // Applications
-      'Draft': 'This is the list of applications you have started but not yet submitted.',
-      'Submitted': 'This is the list of applications you have submitted and are pending initial review.',
-      'In Progress': 'This is the list of applications currently being processed by DENR personnel.',
-      'Returned': 'This is the list of applications returned to you for correction or additional requirements.',
-      'Accepted': 'This is the list of applications that have been accepted and are undergoing final processing.',
-      'Released': 'This is the list of applications with permits/certificates that have been released to you.',
-      'Expired': 'This is the list of applications with expired permits/certificates.',
-      'Rejected': 'This is the list of applications that were rejected.',
+   const renderTabDescription = () => {
+      const descriptions = {
+         // Applications
+         'Draft': 'This is the list of applications you have started but not yet submitted.',
+         'Submitted': 'This is the list of applications you have submitted and are pending initial review.',
+         'In Progress': 'This is the list of applications currently being processed by DENR personnel.',
+         'Returned': 'This is the list of applications returned to you for correction or additional requirements.',
+         'Accepted': 'This is the list of applications that have been accepted and are undergoing final processing.',
+         'Released': 'This is the list of applications with permits/certificates that have been released to you.',
+         'Expired': 'This is the list of applications with expired permits/certificates.',
+         'Rejected': 'This is the list of applications that were rejected.',
 
-      // Order Of Payments
-      'Awaiting Payment': 'This is the list of Order of Payments waiting for your payment.',
-      'Payment Proof Submitted': 'This is the list of Order of Payments where you have submitted payment proof.',
-      'Payment Proof Rejected': 'This is the list of Order of Payments where your payment proof was rejected.',
-      'Payment Proof Approved': 'This is the list of Order of Payments where your payment proof was approved.',
-      'Completed': 'This is the list of Order of Payments that have been completed.',
-      'Issued OR': 'This is the list of Order of Payments with issued Official Receipts.',
+         // Order Of Payments
+         'Awaiting Payment': 'This is the list of Order of Payments waiting for your payment.',
+         'Payment Proof Submitted': 'This is the list of Order of Payments where you have submitted payment proof.',
+         'Payment Proof Rejected': 'This is the list of Order of Payments where your payment proof was rejected.',
+         'Payment Proof Approved': 'This is the list of Order of Payments where your payment proof was approved.',
+         'Completed': 'This is the list of Order of Payments that have been completed.',
+         'Issued OR': 'This is the list of Order of Payments with issued Official Receipts.',
 
-      // Renewals
-      'Renewed': 'This is the list of applications that have been renewed.',
+         // Renewals
+         'Renewed': 'This is the list of applications that have been renewed.',
+      };
+
+      const text = useTypewriter(descriptions[activeSubTab] || '');
+
+      return (
+         <div className="mb-4 -mt-4">
+            <h1 className="text-sm min-h-[20px] text-black dark:text-gray-300">{text}</h1>
+         </div>
+      );
    };
-
-   // Use the typewriter hook
-   const typewriterText = useTypewriter(descriptions[activeSubTab] || '');
 
    // Render the main content based on active tab
    const renderMainContent = () => {
@@ -753,7 +759,7 @@ const UserApplicationsStatusPage = () => {
          activeSubTab={activeSubTab}
          onMainTabChange={handleTabChange}
          onSubTabChange={handleSubTabChange}
-         tabDescription={typewriterText} // Use the typewriter text here instead of direct description
+         tabDescription={renderTabDescription()}
          filters={
             activeMainTab === 'Order Of Payments' ? (
                <OOPFilters filters={filters} setFilters={setFilters} />
