@@ -66,19 +66,25 @@ const startServer = async () => {
          if (token) {
             try {
                const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
-               let user = await User.findById(decoded.id);
-               if (!user) {
-                  user = await Admin.findById(decoded.id);
+
+               // First check if it's an admin
+               let admin = await Admin.findById(decoded.id);
+               if (admin) {
+                  console.log('Admin found in context:', admin.id, admin.roles);
+                  return { admin }; // Return admin context
                }
+
+               // If not admin, check if it's a regular user
+               let user = await User.findById(decoded.id);
                if (user) {
                   console.log('User found in context:', user.id, user.roles);
-                  return { user };
+                  return { user }; // Return user context
                }
             } catch (error) {
                console.error('Error verifying token:', error);
             }
          }
-         console.log('No user in context - server');
+         console.log('No user/admin in context - server');
          return {};
       },
    }));
