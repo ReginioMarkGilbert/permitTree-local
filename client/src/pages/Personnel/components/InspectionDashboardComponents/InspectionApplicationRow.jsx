@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
-import { Eye, Calendar } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { Calendar, FileCheck, Undo2 } from 'lucide-react';
+import { format } from 'date-fns';
+import { gql, useMutation } from '@apollo/client';
+import { toast } from 'sonner';
+import { Input } from "@/components/ui/input";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -10,57 +14,157 @@ import {
    TooltipProvider,
    TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { format } from 'date-fns';
-import InspectionScheduleModal from './TS_ScheduleInspectionModal';
-import ViewApplicationModal from './TS_InspectionReportModal';
+import {
+   AlertDialog,
+   AlertDialogAction,
+   AlertDialogCancel,
+   AlertDialogContent,
+   AlertDialogDescription,
+   AlertDialogFooter,
+   AlertDialogHeader,
+   AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import TS_ScheduleInspectionModal from './TS_ScheduleInspectionModal';
+import TS_InspectionReportModal from './TS_InspectionReportModal';
+
+const DELETE_INSPECTION = gql`
+   mutation DeleteInspection($id: ID!, $reason: String) {
+      deleteInspection(id: $id, reason: $reason)
+   }
+`;
 
 const InspectionApplicationRow = ({
-  application,
-  inspection,
-  formatInspectionStatus,
-  isScheduleDisabled,
-  isMobile,
-  onRefetch
+   application,
+   inspection,
+   formatInspectionStatus,
+   isScheduleDisabled,
+   isMobile,
+   onRefetch
 }) => {
-   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+   const [showScheduleModal, setShowScheduleModal] = useState(false);
+   const [showReportModal, setShowReportModal] = useState(false);
+   const [showUndoDialog, setShowUndoDialog] = useState(false);
+   const [cancellationReason, setCancellationReason] = useState('');
+
+   const [deleteInspection] = useMutation(DELETE_INSPECTION, {
+      onCompleted: () => {
+         toast.success('Inspection schedule cancelled successfully');
+         onRefetch();
+      },
+      onError: (error) => {
+         toast.error(`Error cancelling inspection: ${error.message}`);
+      }
+   });
+
+   const handleSchedule = () => {
+      setShowScheduleModal(true);
+   };
+
+   const handleComplete = () => {
+      setShowReportModal(true);
+   };
+
+   const handleScheduleComplete = () => {
+      setShowScheduleModal(false);
+      onRefetch();
+   };
+
+   const handleReportComplete = () => {
+      setShowReportModal(false);
+      onRefetch();
+   };
+
+   const handleUndo = () => {
+      setShowUndoDialog(true);
+   };
+
+   const handleUndoConfirm = async () => {
+      try {
+         await deleteInspection({
+            variables: {
+               id: inspection.id,
+               ...(cancellationReason.trim() && { reason: cancellationReason.trim() })
+            }
+         });
+         setShowUndoDialog(false);
+         setCancellationReason('');
+      } catch (error) {
+         console.error('Error deleting inspection:', error);
+      }
+   };
 
    const renderActionButtons = () => {
-      const actions = [
-         {
-            icon: Eye,
-            label: "View Application",
-            onClick: () => setIsViewModalOpen(true),
-            variant: "outline"
-         },
-         {
-            icon: Calendar,
-            label: "Schedule Inspection",
-            onClick: () => setIsScheduleModalOpen(true),
-            variant: "outline",
-            disabled: isScheduleDisabled(application.id)
-         }
-      ];
+      const actions = [];
 
-      return actions.map((action, index) => (
-         <TooltipProvider key={index}>
-            <Tooltip>
-               <TooltipTrigger asChild>
-                  <Button
-                     variant={action.variant}
-                     size="icon"
-                     onClick={action.onClick}
-                     disabled={action.disabled}
-                  >
-                     <action.icon className="h-4 w-4" />
-                  </Button>
-               </TooltipTrigger>
-               <TooltipContent>
-                  <p>{action.label}</p>
-               </TooltipContent>
-            </Tooltip>
-         </TooltipProvider>
-      ));
+      // Show Undo button if inspection exists and status is Pending
+      if (inspection && inspection.inspectionStatus === 'Pending') {
+         actions.push(
+            <TooltipProvider key="undo-action">
+               <Tooltip>
+                  <TooltipTrigger asChild>
+                     <Button
+                        onClick={handleUndo}
+                        variant="outline"
+                        size="icon"
+                        className="text-yellow-600 hover:text-yellow-800"
+                     >
+                        <Undo2 className="h-4 w-4" />
+                     </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                     <p>Cancel Schedule</p>
+                  </TooltipContent>
+               </Tooltip>
+            </TooltipProvider>
+         );
+      }
+
+      // Only show Schedule button if there's no inspection
+      if (!inspection) {
+         actions.push(
+            <TooltipProvider key="schedule-action">
+               <Tooltip>
+                  <TooltipTrigger asChild>
+                     <Button
+                        onClick={handleSchedule}
+                        variant="outline"
+                        size="icon"
+                     >
+                        <Calendar className="h-4 w-4" />
+                     </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                     <p>Schedule Inspection</p>
+                  </TooltipContent>
+               </Tooltip>
+            </TooltipProvider>
+         );
+      }
+
+      // Complete inspection action
+      if (inspection?.inspectionStatus === 'Pending') {
+         actions.push(
+            <TooltipProvider key="complete-action">
+               <Tooltip>
+                  <TooltipTrigger asChild>
+                     <Button
+                        onClick={handleComplete}
+                        variant="outline"
+                        size="icon"
+                        className="text-blue-600 hover:text-blue-800"
+                     >
+                        <FileCheck className="h-4 w-4" />
+                     </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                     <p>Complete Inspection</p>
+                  </TooltipContent>
+               </Tooltip>
+            </TooltipProvider>
+         );
+      }
+
+      return actions;
    };
 
    if (isMobile) {
@@ -69,10 +173,13 @@ const InspectionApplicationRow = ({
             <Card className="p-4 space-y-3">
                <div className="flex justify-between items-start">
                   <div>
-                     <p className="font-medium text-foreground">{application.applicationNumber}</p>
+                     <p className="font-medium">{application.applicationNumber}</p>
                      <p className="text-sm text-muted-foreground">{application.applicationType}</p>
                   </div>
-                  <Badge variant="outline" className="text-foreground">
+                  <Badge
+                     variant={getStatusVariant(inspection?.inspectionStatus).variant}
+                     className={getStatusVariant(inspection?.inspectionStatus).className}
+                  >
                      {formatInspectionStatus(inspection)}
                   </Badge>
                </div>
@@ -85,17 +192,57 @@ const InspectionApplicationRow = ({
             </Card>
 
             {/* Modals */}
-            <ViewApplicationModal
-               isOpen={isViewModalOpen}
-               onClose={() => setIsViewModalOpen(false)}
-               application={application}
-            />
-            <InspectionScheduleModal
-               isOpen={isScheduleModalOpen}
-               onClose={() => setIsScheduleModalOpen(false)}
-               application={application}
-               onScheduled={onRefetch}
-            />
+            {showScheduleModal && (
+               <TS_ScheduleInspectionModal
+                  isOpen={showScheduleModal}
+                  onClose={() => setShowScheduleModal(false)}
+                  application={application}
+                  onScheduleComplete={handleScheduleComplete}
+               />
+            )}
+
+            {showReportModal && (
+               <TS_InspectionReportModal
+                  isOpen={showReportModal}
+                  onClose={() => setShowReportModal(false)}
+                  inspection={inspection}
+                  application={application}
+                  onComplete={handleReportComplete}
+               />
+            )}
+
+            <AlertDialog open={showUndoDialog} onOpenChange={(open) => {
+               setShowUndoDialog(open);
+               if (!open) setCancellationReason('');
+            }}>
+               <AlertDialogContent>
+                  <AlertDialogHeader>
+                     <AlertDialogTitle>Cancel Inspection Schedule</AlertDialogTitle>
+                     <AlertDialogDescription>
+                        Are you sure you want to cancel this inspection schedule? This action cannot be undone.
+                     </AlertDialogDescription>
+                  </AlertDialogHeader>
+
+                  <div className="space-y-2 py-4">
+                     <label htmlFor="reason" className="text-sm font-medium">
+                        Reason for Cancellation
+                     </label>
+                     <Input
+                        id="reason"
+                        placeholder="Enter reason for cancellation"
+                        value={cancellationReason}
+                        onChange={(e) => setCancellationReason(e.target.value)}
+                     />
+                  </div>
+
+                  <AlertDialogFooter>
+                     <AlertDialogCancel>Cancel</AlertDialogCancel>
+                     <AlertDialogAction onClick={handleUndoConfirm}>
+                        Confirm
+                     </AlertDialogAction>
+                  </AlertDialogFooter>
+               </AlertDialogContent>
+            </AlertDialog>
          </>
       );
    }
@@ -103,11 +250,14 @@ const InspectionApplicationRow = ({
    return (
       <>
          <TableRow>
-            <TableCell className="font-medium">{application.applicationNumber}</TableCell>
+            <TableCell>{application.applicationNumber}</TableCell>
             <TableCell>{application.applicationType}</TableCell>
             <TableCell>{format(new Date(application.dateOfSubmission), 'MMM d, yyyy')}</TableCell>
             <TableCell>
-               <Badge variant="outline">
+               <Badge
+                  variant={getStatusVariant(inspection?.inspectionStatus).variant}
+                  className={getStatusVariant(inspection?.inspectionStatus).className}
+               >
                   {formatInspectionStatus(inspection)}
                </Badge>
             </TableCell>
@@ -119,19 +269,84 @@ const InspectionApplicationRow = ({
          </TableRow>
 
          {/* Modals */}
-         <ViewApplicationModal
-            isOpen={isViewModalOpen}
-            onClose={() => setIsViewModalOpen(false)}
-            application={application}
-         />
-         <InspectionScheduleModal
-            isOpen={isScheduleModalOpen}
-            onClose={() => setIsScheduleModalOpen(false)}
-            application={application}
-            onScheduled={onRefetch}
-         />
+         {showScheduleModal && (
+            <TS_ScheduleInspectionModal
+               isOpen={showScheduleModal}
+               onClose={() => setShowScheduleModal(false)}
+               application={application}
+               onScheduleComplete={handleScheduleComplete}
+            />
+         )}
+
+         {showReportModal && (
+            <TS_InspectionReportModal
+               isOpen={showReportModal}
+               onClose={() => setShowReportModal(false)}
+               inspection={inspection}
+               application={application}
+               onComplete={handleReportComplete}
+            />
+         )}
+
+         <AlertDialog open={showUndoDialog} onOpenChange={(open) => {
+            setShowUndoDialog(open);
+            if (!open) setCancellationReason('');
+         }}>
+            <AlertDialogContent>
+               <AlertDialogHeader>
+                  <AlertDialogTitle>Cancel Inspection Schedule</AlertDialogTitle>
+                  <AlertDialogDescription>
+                     Are you sure you want to cancel this inspection schedule? This action cannot be undone.
+                  </AlertDialogDescription>
+               </AlertDialogHeader>
+
+               <div className="space-y-2 py-4">
+                  <label htmlFor="reason" className="text-sm font-medium">
+                     Reason for Cancellation
+                  </label>
+                  <Input
+                     id="reason"
+                     placeholder="Enter reason for cancellation"
+                     value={cancellationReason}
+                     onChange={(e) => setCancellationReason(e.target.value)}
+                  />
+               </div>
+
+               <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleUndoConfirm}>
+                     Confirm
+                  </AlertDialogAction>
+               </AlertDialogFooter>
+            </AlertDialogContent>
+         </AlertDialog>
       </>
    );
+};
+
+const getStatusVariant = (status) => {
+   switch (status?.toLowerCase()) {
+      case 'pending':
+         return {
+            variant: 'warning',
+            className: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100/80'
+         };
+      case 'completed':
+         return {
+            variant: 'success',
+            className: 'bg-green-100 text-green-800 hover:bg-green-100/80'
+         };
+      case 'cancelled':
+         return {
+            variant: 'destructive',
+            className: 'bg-red-100 text-red-800 hover:bg-red-100/80'
+         };
+      default:
+         return {
+            variant: 'secondary',
+            className: 'bg-gray-100 text-gray-800 hover:bg-gray-100/80'
+         };
+   }
 };
 
 export default InspectionApplicationRow;
