@@ -1,14 +1,31 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { FaBars, FaTimes, FaLeaf } from 'react-icons/fa';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { Slider } from "@/components/ui/slider";
+import { Sun } from "lucide-react";
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipProvider,
+   TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
+   const [brightness, setBrightness] = useState(100);
+   
    // Browser detection
    const isChrome = useMemo(() => {
       const userAgent = window.navigator.userAgent.toLowerCase();
       const isBrave = navigator.brave !== undefined;
       return userAgent.includes('chrome') && !userAgent.includes('edg') && !isBrave;
    }, []);
+
+   useEffect(() => {
+      document.documentElement.style.filter = `brightness(${brightness}%)`;
+      return () => {
+         document.documentElement.style.filter = 'brightness(100%)';
+      };
+   }, [brightness]);
 
    const handleToggle = () => {
       setSidebarToggle(!sidebarToggle);
@@ -48,6 +65,28 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
 
             {/* Right Section */}
             <div className="flex items-center gap-4">
+               {/* Brightness Slider */}
+               <TooltipProvider>
+                  <Tooltip>
+                     <TooltipTrigger asChild>
+                        <div className="flex items-center gap-2">
+                           <Sun className="h-4 w-4" />
+                           <Slider
+                              defaultValue={[100]}
+                              max={100}
+                              min={30}
+                              step={1}
+                              className="w-[100px]"
+                              onValueChange={([value]) => setBrightness(value)}
+                           />
+                        </div>
+                     </TooltipTrigger>
+                     <TooltipContent>
+                        <p>Adjust brightness</p>
+                     </TooltipContent>
+                  </Tooltip>
+               </TooltipProvider>
+
                <ThemeToggle />
                <div className="text-sm font-medium text-foreground">
                   DENR Region 4B
