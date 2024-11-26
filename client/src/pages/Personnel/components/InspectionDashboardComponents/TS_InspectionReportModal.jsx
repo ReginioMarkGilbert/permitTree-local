@@ -165,7 +165,7 @@ const TS_InspectionReportModal = ({ isOpen, onClose, inspection, application, on
          await updatePermitStage({
             variables: {
                id: permitId,
-               currentStage: 'InspectionReportForReviewByChief',
+               // currentStage: 'InspectionReportForReviewByChief',
                status: 'In Progress',
                notes: `Inspection completed with result: ${findings.result}`
             }

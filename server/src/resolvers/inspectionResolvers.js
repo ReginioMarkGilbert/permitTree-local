@@ -227,7 +227,7 @@ const inspectionResolvers = {
                inspectionStatus: 'Completed'
             };
             permit.hasInspectionReport = true;
-            permit.currentStage = 'InspectionReportForReviewByChief';
+            // permit.currentStage = 'InspectionReportForReviewByChief';
             await permit.save();
 
             // Format response
