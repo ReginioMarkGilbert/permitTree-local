@@ -1,27 +1,29 @@
 import React from 'react';
-import { FaTimes } from 'react-icons/fa';
+import { X } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 const Modal = ({ isOpen, title, message, onClose, onHome, onApplications }) => {
-   if (!isOpen) return null;
-
    return (
-      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-         <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full relative">
-            <button onClick={onClose} className="absolute top-2 right-2 text-gray-600 hover:text-gray-800">
-               <FaTimes />
-            </button>
-            <h2 className="text-xl font-semibold mb-4">{title}</h2>
-            <p className="mb-6">{message}</p>
-            <div className="flex justify-end space-x-4">
-               <button onClick={onHome} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
+      <Dialog open={isOpen} onOpenChange={onClose}>
+         <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+               <DialogTitle>{title}</DialogTitle>
+               <DialogDescription>{message}</DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-end space-x-4 mt-6">
+               <Button variant="outline" onClick={onHome}>
                   Go to Home
-               </button>
-               <button onClick={onApplications} className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+               </Button>
+               <Button
+                  className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
+                  onClick={onApplications}
+               >
                   Go to Applications page
-               </button>
+               </Button>
             </div>
-         </div>
-      </div>
+         </DialogContent>
+      </Dialog>
    );
 };
 
