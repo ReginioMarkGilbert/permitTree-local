@@ -61,6 +61,7 @@ const queryTypes = gql`
     getPendingInspections: [Inspection!]!
 
     getCurrentUser: User
+    getCurrentAdmin: Admin
   }
 `;
 

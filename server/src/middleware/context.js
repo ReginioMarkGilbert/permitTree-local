@@ -10,20 +10,29 @@ const context = async ({ req }) => {
    }
 
    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default_secret');
 
-      // Check if it's an admin token
-      if (decoded.roles && decoded.roles.some(role =>
-         ['Chief_RPS', 'superadmin', 'Technical_Staff', 'Chief_TSD',
-          'Receiving_Clerk', 'Releasing_Clerk', 'Accountant',
-          'OOP_Staff_Incharge', 'Bill_Collector', 'Credit_Officer',
-          'PENR_CENR_Officer', 'Deputy_CENR_Officer',
-          'Inspection_Team'].includes(role))) {
+      // Check if it's an admin token by checking roles
+      if (decoded.roles?.some(role => [
+         'Chief_RPS',
+         'superadmin',
+         'Technical_Staff',
+         'Chief_TSD',
+         'Receiving_Clerk',
+         'Releasing_Clerk',
+         'Accountant',
+         'OOP_Staff_Incharge',
+         'Bill_Collector',
+         'Credit_Officer',
+         'PENR_CENR_Officer',
+         'Deputy_CENR_Officer',
+         'Inspection_Team'
+      ].includes(role))) {
          const admin = await Admin.findById(decoded.id);
          return { admin, user: null };
       }
 
-      // Otherwise, it's a regular user token
+      // Regular user token
       const user = await User.findById(decoded.id);
       return { user, admin: null };
 

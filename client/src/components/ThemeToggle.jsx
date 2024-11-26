@@ -22,9 +22,14 @@ const UPDATE_USER_THEME = gql`
 `;
 
 const UPDATE_ADMIN_THEME = gql`
-  mutation UpdateAdminTheme($theme: String!) {
+  mutation UpdateAdminThemePreference($theme: String!) {
     updateAdminThemePreference(theme: $theme) {
       id
+      adminId
+      username
+      firstName
+      lastName
+      roles
       themePreference
     }
   }
@@ -43,6 +48,11 @@ const GET_CURRENT_ADMIN = gql`
   query GetCurrentAdmin {
     getCurrentAdmin {
       id
+      adminId
+      username
+      firstName
+      lastName
+      roles
       themePreference
     }
   }
@@ -50,39 +60,101 @@ const GET_CURRENT_ADMIN = gql`
 
 export function ThemeToggle() {
    const { theme, setTheme } = useTheme()
-   const { data: userData } = useQuery(GET_CURRENT_USER, {
-      onError: () => {} // Silently handle error
-   });
-   const { data: adminData } = useQuery(GET_CURRENT_ADMIN, {
-      onError: () => {} // Silently handle error
-   });
-   const [updateUserTheme] = useMutation(UPDATE_USER_THEME);
-   const [updateAdminTheme] = useMutation(UPDATE_ADMIN_THEME);
 
+   // Add loading and error states to the queries
+   const {
+      data: userData,
+      loading: userLoading,
+      error: userError,
+      refetch: refetchUser
+   } = useQuery(GET_CURRENT_USER, {
+      fetchPolicy: 'network-only', // Force network request
+      onCompleted: (data) => console.log('User query completed:', data),
+      onError: (error) => console.error('User query error:', error)
+   });
+
+   const {
+      data: adminData,
+      loading: adminLoading,
+      error: adminError,
+      refetch: refetchAdmin
+   } = useQuery(GET_CURRENT_ADMIN, {
+      fetchPolicy: 'network-only', // Force network request
+      onCompleted: (data) => console.log('Admin query completed:', data),
+      onError: (error) => console.error('Admin query error:', error)
+   });
+
+   const [updateUserTheme] = useMutation(UPDATE_USER_THEME, {
+      onCompleted: (data) => console.log('User theme updated:', data),
+      onError: (error) => console.error('User theme update error:', error)
+   });
+
+   const [updateAdminTheme] = useMutation(UPDATE_ADMIN_THEME, {
+      onCompleted: (data) => console.log('Admin theme updated:', data),
+      onError: (error) => console.error('Admin theme update error:', error)
+   });
+
+   // Debug authentication state
    useEffect(() => {
-      const savedTheme = userData?.getCurrentUser?.themePreference ||
-                        adminData?.getCurrentAdmin?.themePreference;
-
-      if (savedTheme) {
-         setTheme(savedTheme);
-      }
-   }, [userData, adminData, setTheme]);
+      const token = localStorage.getItem('token');
+      console.log('Auth State:', {
+         hasToken: !!token,
+         adminData: adminData?.getCurrentAdmin,
+         userData: userData?.getCurrentUser,
+         adminLoading,
+         userLoading,
+         adminError: adminError?.message,
+         userError: userError?.message
+      });
+   }, [adminData, userData, adminLoading, userLoading, adminError, userError]);
 
    const handleThemeChange = async (newTheme) => {
-      setTheme(newTheme);
+      console.log('Starting theme change:', {
+         newTheme,
+         currentTheme: theme,
+         adminData,
+         userData,
+         adminLoading,
+         userLoading
+      });
 
       try {
-         if (userData?.getCurrentUser) {
-            await updateUserTheme({
-               variables: { theme: newTheme }
+         if (adminLoading || userLoading) {
+            console.log('Still loading auth state...');
+            return;
+         }
+
+         if (adminData?.getCurrentAdmin) {
+            console.log('Updating as admin:', adminData.getCurrentAdmin);
+            const result = await updateAdminTheme({
+               variables: { theme: newTheme },
+               refetchQueries: [{ query: GET_CURRENT_ADMIN }],
+               awaitRefetchQueries: true
             });
-         } else if (adminData?.getCurrentAdmin) {
-            await updateAdminTheme({
-               variables: { theme: newTheme }
+            console.log('Admin theme update result:', result);
+            setTheme(newTheme);
+         } else if (userData?.getCurrentUser) {
+            console.log('Updating as user:', userData.getCurrentUser);
+            const result = await updateUserTheme({
+               variables: { theme: newTheme },
+               refetchQueries: [{ query: GET_CURRENT_USER }],
+               awaitRefetchQueries: true
             });
+            console.log('User theme update result:', result);
+            setTheme(newTheme);
+         } else {
+            console.log('No authenticated user/admin found');
+            if (adminError) console.error('Admin Error:', adminError);
+            if (userError) console.error('User Error:', userError);
+            setTheme(newTheme);
          }
       } catch (error) {
-         console.error('Failed to update theme preference:', error);
+         console.error('Theme update failed:', {
+            error,
+            message: error.message,
+            graphQLErrors: error.graphQLErrors,
+            networkError: error.networkError
+         });
       }
    };
 

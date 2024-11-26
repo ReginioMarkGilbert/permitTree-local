@@ -314,18 +314,28 @@ const userResolvers = {
             throw new Error('Invalid theme preference');
          }
 
-         const updatedUser = await User.findByIdAndUpdate(
-            context.user.id,
-            { themePreference: theme },
-            { new: true }
-         );
+         try {
+            const updatedUser = await User.findByIdAndUpdate(
+               context.user.id,
+               { themePreference: theme },
+               { new: true, runValidators: true }
+            );
 
-         if (!updatedUser) {
-            throw new Error('User not found');
+            if (!updatedUser) {
+               throw new Error('User not found');
+            }
+
+            console.log('Updated user theme preference:', {
+               userId: updatedUser._id,
+               theme: updatedUser.themePreference
+            });
+
+            return updatedUser;
+         } catch (error) {
+            console.error('Error updating theme preference:', error);
+            throw new Error(`Failed to update theme: ${error.message}`);
          }
-
-         return updatedUser;
-      },
+      }
    }
 };
 

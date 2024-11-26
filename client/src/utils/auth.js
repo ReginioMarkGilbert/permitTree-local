@@ -13,6 +13,11 @@ export const getUserId = () => {
    return user ? user.id : null;
 };
 
+export const getAdminId = () => {
+   const admin = JSON.parse(localStorage.getItem('admin'));
+   return admin ? admin.id : null;
+};
+
 // export const getUserRole = () => {
 //    const token = getToken();
 //    if (!token) return null;
@@ -40,8 +45,16 @@ export const getUserRole = () => {
 };
 
 export const logout = () => {
+   // Clear all auth-related data
    removeToken();
-   console.log('Token has expired. Logging out...');
+   localStorage.removeItem('user');
+
+   // Reset theme to system default
+   document.documentElement.classList.remove('dark');
+   localStorage.removeItem('theme');
+
+   // Redirect to auth page
+   console.log('Logging out...');
    window.location.href = '/auth';
 };
 
