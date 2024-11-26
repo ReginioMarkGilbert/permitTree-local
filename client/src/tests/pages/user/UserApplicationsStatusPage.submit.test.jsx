@@ -42,7 +42,6 @@ const mockApplications = [
   }
 ];
 
-// Add renderWithProviders helper function
 const renderWithProviders = (ui) => {
   return render(
     <MemoryRouter>

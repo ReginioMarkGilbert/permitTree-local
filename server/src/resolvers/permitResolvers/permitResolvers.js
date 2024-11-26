@@ -707,7 +707,6 @@ const permitResolvers = {
                }
             }
 
-            // Add to history
             permit.history.push({
                stage: currentStage,
                status: status,

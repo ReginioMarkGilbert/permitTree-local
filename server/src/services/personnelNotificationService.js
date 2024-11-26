@@ -69,7 +69,7 @@ class PersonnelNotificationService {
                title: 'PENR/CENR Approval Required',
                message: `Application ${application.applicationNumber} requires PENR/CENR Officer approval.`
             },
-            // Add new notification type for Technical Staff
+
             'APPLICATION_READY_FOR_INSPECTION': {
                title: 'Application Ready for Inspection',
                message: `Application ${application.applicationNumber} has been reviewed by Chief RPS/TSD and is ready for inspection.`

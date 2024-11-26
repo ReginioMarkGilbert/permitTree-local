@@ -74,7 +74,6 @@ export const GET_OOP = gql`
   }
 `;
 
-// Add query to get all OOPs
 export const GET_ALL_OOPS = gql`
   query GetOOPs {
     getOOPs {
@@ -107,7 +106,6 @@ export const GET_ALL_OOPS = gql`
   }
 `;
 
-// Add query for user's OOPs
 export const GET_USER_OOPS = gql`
   query GetUserOOPs($OOPstatus: String) {
     getUserOOPs(OOPstatus: $OOPstatus) {
@@ -136,7 +134,6 @@ export const GET_USER_OOPS = gql`
   }
 `;
 
-// Add payment proof related queries
 const GET_OOP_WITH_PAYMENT_PROOF = gql`
   query GetOOPWithPaymentProof($id: ID!) {
     getOOPById(id: $id) {
@@ -199,7 +196,6 @@ const UPDATE_OOP_SIGNATURE = gql`
   }
 `;
 
-// Add the mutation
 const FORWARD_OOP_TO_ACCOUNTANT = gql`
   mutation ForwardOOPToAccountant($id: ID!) {
     forwardOOPToAccountant(id: $id) {
@@ -219,7 +215,6 @@ const FORWARD_OOP_TO_ACCOUNTANT = gql`
   }
 `;
 
-// Add this new query
 export const GET_RECENT_OOPS = gql`
   query GetRecentOOPs($status: String, $limit: Int) {
     getRecentOOPs(status: $status, limit: $limit) {
@@ -273,11 +268,10 @@ export const useOrderOfPayments = (userId = null) => {
       refetch: refetchUserOOPs
    } = useQuery(GET_USER_OOPS, {
       variables: { userId },
-      skip: !userId, // Skip this query if no userId is provided
+      skip: !userId,
       fetchPolicy: 'network-only'
    });
 
-   // Add this new query hook
    const {
       data: recentOOPsData,
       loading: recentOOPsLoading,
@@ -320,7 +314,6 @@ export const useOrderOfPayments = (userId = null) => {
             }))
          };
 
-         // Add optional fields
          if (oopData.rpsSignatureImage) {
             input.rpsSignatureImage = oopData.rpsSignatureImage;
          }
@@ -380,28 +373,23 @@ export const useOrderOfPayments = (userId = null) => {
    };
 
    return {
-      // Applications data
       applications: applicationsData?.getApplicationsByStatus || [],
       applicationsLoading,
       applicationsError,
 
-      // OOPs data
       oops: oopsData?.getOOPs || [],
       oopsLoading,
       oopsError,
 
-      // User's OOPs data - return empty array if no data
       userOops: userOopsData?.getUserOOPs || [],
       userOopsLoading,
       userOopsError,
 
-      // Mutations and refetch
       createOOP: handleCreateOOP,
       updateSignature: handleUpdateSignature,
       forwardOOPToAccountant: handleForwardToAccountant,
       refetch: refetchAll,
 
-      // Add these new fields
       getOOPWithPaymentProof: async (id) => {
          try {
             const { data } = await client.query({
@@ -416,7 +404,6 @@ export const useOrderOfPayments = (userId = null) => {
          }
       },
 
-      // Add these new fields
       recentOOPs: recentOOPsData?.getRecentOOPs || [],
       recentOOPsLoading,
       recentOOPsError,

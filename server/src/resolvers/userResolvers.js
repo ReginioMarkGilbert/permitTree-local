@@ -5,7 +5,6 @@ const Permit = require('../models/permits/Permit');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
-// Add this function at the top of the file
 const generateToken = (user) => {
    return jwt.sign(
       { id: user.id, username: user.username, roles: user.roles },
@@ -197,7 +196,6 @@ const userResolvers = {
             const userId = context.user.id;
             const { firstName, lastName, username, email, phone, company, address, removeProfilePicture, profilePicture, themePreference, ...otherInputs } = input;
 
-            // Add username validation
             if (username) {
                const existingUser = await User.findOne({
                   username,

@@ -194,7 +194,7 @@ const TCEBPForm = () => {
             address: formData.address,
             contactNumber: formData.contactNumber,
             purpose: formData.purpose,
-            requestType: formData.requestType, // Add this line
+            requestType: formData.requestType,
             files: {}
          };
 

@@ -140,7 +140,6 @@ const inspectionResolvers = {
             // Update inspection details
             Object.assign(inspection, input);
 
-            // Add to history
             inspection.history.push({
                action: 'Updated',
                timestamp: new Date(),
@@ -187,7 +186,6 @@ const inspectionResolvers = {
             // Update inspection status
             inspection.inspectionStatus = 'Completed';
 
-            // Add to history
             inspection.history.push({
                action: 'Completed',
                timestamp: new Date(),

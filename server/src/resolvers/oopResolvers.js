@@ -14,7 +14,6 @@ const oopResolvers = {
          try {
             const oops = await OOP.find().sort({ createdAt: -1 });
 
-            // Add debug log
             console.log('OOPs from database:', oops);
 
             return oops.map(oop => ({
@@ -298,7 +297,6 @@ const oopResolvers = {
             permit.awaitingOOP = true;
             permit.OOPCreated = false;
 
-            // Add to history
             // permit.history.push({
             //    stage: permit.currentStage,
             //    status: permit.status,

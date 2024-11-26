@@ -87,7 +87,7 @@ const PermitSchema = new mongoose.Schema({
    lastUpdated: { type: Date, default: Date.now },
 }, { timestamps: true });
 
-// Add a pre-save hook to ensure history is always an array
+// Initialize history as an array if missing before save
 PermitSchema.pre('save', function (next) {
    if (!this.history) {
       this.history = [];

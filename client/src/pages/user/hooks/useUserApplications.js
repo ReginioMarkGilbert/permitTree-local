@@ -672,7 +672,7 @@ export const useUserApplications = (status, currentStage) => {
    const fetchCSAWPermit = async (id) => {
       try {
          const { data } = await getCSAWPermit({ variables: { id } });
-         // console.log('Fetched CSAW permit data:', data.getCSAWPermitById); // Add this line
+         // console.log('Fetched CSAW permit data:', data.getCSAWPermitById);
          return data.getCSAWPermitById;
       } catch (error) {
          console.error('Error fetching CSAW permit:', error);

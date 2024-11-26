@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TreePine, Shield, FileText, MapPin, Truck, Phone, Mail, ChevronDown, ChevronUp } from "lucide-react";
 import Header from '@/components/Header';
-import DENRHeader from './components/DENRHeader'; // Add this import
+import DENRHeader from './components/DENRHeader';
 import { Link } from 'react-router-dom';
 import { FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
 import { motion } from 'framer-motion';

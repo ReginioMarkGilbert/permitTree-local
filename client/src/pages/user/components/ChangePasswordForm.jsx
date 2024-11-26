@@ -15,11 +15,9 @@ const ChangePasswordForm = ({ onClose }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { changePassword, loading } = useChangePassword();
 
-  // Add state for form validity
   const [isValid, setIsValid] = useState(false);
   const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
 
-  // Add validation states
   const [validations, setValidations] = useState({
     length: false,
     uppercase: false,
@@ -45,7 +43,7 @@ const ChangePasswordForm = ({ onClose }) => {
     );
   }, [currentPassword, newPassword, confirmPassword, validations]);
 
-  // Add onFocus handler
+  // onFocus handler
   const handleNewPasswordFocus = () => {
     setShowPasswordRequirements(true);
   };

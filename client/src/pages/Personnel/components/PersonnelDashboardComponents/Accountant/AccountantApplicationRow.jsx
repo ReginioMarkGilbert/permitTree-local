@@ -36,7 +36,7 @@ const AccountantApplicationRow = ({ app, onReviewComplete, currentTab, isMobile 
             onClick: handleViewClick,
             variant: "outline"
          },
-         // Add OOP creation action if applicable
+
          currentTab === 'Awaiting OOP' && {
             icon: FileCheck2,
             label: "Create Order of Payment",

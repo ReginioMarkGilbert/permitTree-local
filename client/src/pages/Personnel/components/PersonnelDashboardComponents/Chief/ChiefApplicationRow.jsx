@@ -131,7 +131,7 @@ const ChiefApplicationRow = ({ app, onReviewComplete, currentTab, isMobile }) =>
             onClick: handleViewClick,
             variant: "outline"
          },
-         // Add review action if applicable
+
          app.currentStage === 'ChiefRPSReview' && !app.reviewedByChief && {
             icon: ClipboardCheck,
             label: "Review Application",
@@ -139,7 +139,7 @@ const ChiefApplicationRow = ({ app, onReviewComplete, currentTab, isMobile }) =>
             variant: "outline",
             className: "text-blue-600 hover:text-blue-800"
          },
-         // Add undo action if applicable
+
          currentTab === 'Completed Reviews' && {
             icon: RotateCcw,
             label: "Undo Review",
@@ -147,7 +147,7 @@ const ChiefApplicationRow = ({ app, onReviewComplete, currentTab, isMobile }) =>
             variant: "outline",
             className: "text-yellow-600 hover:text-yellow-800"
          },
-         // Add undo OOP action if applicable
+
          currentTab === 'Created OOP' && {
             icon: RotateCcw,
             label: "Undo OOP Creation",

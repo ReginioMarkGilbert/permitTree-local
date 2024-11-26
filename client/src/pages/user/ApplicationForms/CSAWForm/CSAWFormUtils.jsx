@@ -103,7 +103,7 @@ const CustomSelect = ({ value, onChange, options }) => {
          const longestOption = options.reduce((a, b) => a.label.length > b.label.length ? a : b);
          measureRef.current.textContent = longestOption.label;
          const width = measureRef.current.offsetWidth;
-         setWidth(`${width + 40}px`); // Add some padding
+         setWidth(`${width + 40}px`);
       }
    }, [options]);
 

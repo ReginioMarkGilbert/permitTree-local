@@ -141,7 +141,7 @@ const PCOApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
             onClick: handleViewClick,
             variant: "outline"
          },
-         // Add review action if applicable
+
          currentTab === 'Applications for Review' && {
             icon: ClipboardCheck,
             label: "Review Application",
@@ -149,7 +149,7 @@ const PCOApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
             variant: "outline",
             className: "text-blue-600 hover:text-blue-800"
          },
-         // Add undo action if applicable
+
          (currentTab === 'Approved Applications' || currentTab === 'Returned Applications') && {
             icon: RotateCcw,
             label: `Undo ${currentTab === 'Returned Applications' ? 'Return' : 'Approval'}`,

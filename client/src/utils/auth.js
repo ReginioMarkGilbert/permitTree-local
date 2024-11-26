@@ -50,9 +50,9 @@ export const logout = () => {
    localStorage.removeItem('user');
    localStorage.removeItem('admin');
 
-   // Reset theme to system default
+   // Reset theme to light mode in auth page
    document.documentElement.classList.remove('dark');
-   localStorage.removeItem('theme');
+   localStorage.setItem('theme', 'light'); // Set to light instead of removing
 
    // Redirect to auth page
    console.log('Logging out...');

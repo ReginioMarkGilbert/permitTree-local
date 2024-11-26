@@ -318,7 +318,6 @@ const UserApplicationsStatusPage = () => {
 
    const userId = getUserId();
 
-   // Add OOPs data fetching
    const {
       oops,
       loading: oopsLoading,

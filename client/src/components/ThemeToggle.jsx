@@ -11,7 +11,6 @@ import { useMemo, useEffect } from "react"
 import { useQuery, useMutation } from "@apollo/client"
 import { gql } from "@apollo/client"
 
-// Add these GraphQL operations
 const UPDATE_USER_THEME = gql`
   mutation UpdateUserTheme($theme: String!) {
     updateThemePreference(theme: $theme) {
@@ -61,7 +60,6 @@ const GET_CURRENT_ADMIN = gql`
 export function ThemeToggle() {
    const { theme, setTheme } = useTheme()
 
-   // Add loading and error states to the queries
    const {
       data: userData,
       loading: userLoading,
@@ -108,7 +106,6 @@ export function ThemeToggle() {
       });
    }, [adminData, userData, adminLoading, userLoading, adminError, userError]);
 
-   // Add this new effect to initialize theme on login
    useEffect(() => {
       if (adminData?.getCurrentAdmin) {
          console.log('Initializing admin theme:', adminData.getCurrentAdmin.themePreference);

@@ -81,7 +81,6 @@ const ChiefDashboard = () => {
       refetchApps();
    }, [refetchApps, activeSubTab]);
 
-   // Add polling for automatic updates
    useEffect(() => {
       const pollInterval = setInterval(handleRefetch, 5000); // Poll every 5 seconds
       return () => clearInterval(pollInterval);

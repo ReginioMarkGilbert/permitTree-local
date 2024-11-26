@@ -58,7 +58,6 @@ class FinancialAnalyticsService {
          return acc;
       }, { total: 0, paid: 0, pending: 0, overdue: 0 });
 
-      // Add completed payments to paid amount
       const additionalPaid = completedPayments.reduce((total, payment) => total + payment.amount, 0);
       stats.paid += additionalPaid;
       stats.total += additionalPaid;
@@ -78,7 +77,6 @@ class FinancialAnalyticsService {
          return acc;
       }, {});
 
-      // Add completed payments to monthly revenue
       completedPayments.forEach(payment => {
          const month = moment(payment.createdAt).format('MMM YYYY');
          if (!monthlyData[month]) {
@@ -105,7 +103,6 @@ class FinancialAnalyticsService {
          return acc;
       }, {});
 
-      // Add completed payments to payment status stats
       statusStats['COMPLETED'] = {
          count: completedPayments.length,
          amount: completedPayments.reduce((total, payment) => total + payment.amount, 0)
@@ -131,7 +128,6 @@ class FinancialAnalyticsService {
          return acc;
       }, {});
 
-      // Add completed payments to permit type revenue
       completedPayments.forEach(async payment => {
          const oop = await OOP.findById(payment.oopId).populate('applicationId');
          if (oop && oop.applicationId) {

@@ -295,7 +295,7 @@ const AccountantDashboard = () => {
          title="Accountant Dashboard"
          description="Manage and process order of payments"
          onRefresh={handleRefetch}
-         isMobile={false} // Add mobile handling if needed
+         isMobile={false}
          mainTabs={mainTabs}
          subTabs={subTabs}
          activeMainTab={activeMainTab}

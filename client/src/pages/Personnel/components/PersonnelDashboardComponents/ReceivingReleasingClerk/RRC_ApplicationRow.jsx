@@ -102,7 +102,7 @@ const RRC_ApplicationRow = ({ app, onRecordComplete, getStatusColor, currentTab,
             onClick: handleViewClick,
             variant: "outline"
          },
-         // Add record action if applicable
+
          app.currentStage === 'ForRecordByReceivingClerk' && !app.recordedByReceivingClerk && {
             icon: ClipboardCheck,
             label: "Record Application",
@@ -110,7 +110,7 @@ const RRC_ApplicationRow = ({ app, onRecordComplete, getStatusColor, currentTab,
             variant: "outline",
             className: "text-blue-600 hover:text-blue-800"
          },
-         // Add undo action if applicable
+
          currentTab === 'Reviewed/Recorded Applications' && {
             icon: RotateCcw,
             label: "Undo Record",

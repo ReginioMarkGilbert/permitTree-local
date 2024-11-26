@@ -16,7 +16,7 @@ import { gql, useMutation } from '@apollo/client';
 import { toast } from 'sonner';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
-// Add the mutation
+
 const UNDO_PAYMENT_PROOF = gql`
   mutation UndoPaymentProof($oopId: ID!) {
     undoPaymentProof(oopId: $oopId) {

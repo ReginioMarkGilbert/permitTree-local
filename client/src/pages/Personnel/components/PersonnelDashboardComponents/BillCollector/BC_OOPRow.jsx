@@ -43,7 +43,7 @@ const BC_OOPRow = ({ oop, onReviewComplete, currentTab, isMobile }) => {
             onClick: handleViewClick,
             variant: "outline"
          },
-         // Add review action if applicable
+
          currentTab === 'Payment Proof' && {
             icon: FileCheck2,
             label: "Review Payment",
@@ -51,7 +51,7 @@ const BC_OOPRow = ({ oop, onReviewComplete, currentTab, isMobile }) => {
             variant: "outline",
             className: "text-blue-600 hover:text-blue-800"
          },
-         // Add generate OR action if applicable
+
          currentTab === 'Completed Payments' && {
             icon: FileText,
             label: "Generate OR",

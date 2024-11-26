@@ -117,7 +117,7 @@ const LandingPage = () => {
             <Header />
             <DENRHeader />
             <motion.main
-                className="flex-1 pt-4" // Added padding-top
+                className="flex-1 pt-4"
                 initial="hidden"
                 animate="visible"
                 variants={fadeIn}

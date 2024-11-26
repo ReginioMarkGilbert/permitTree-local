@@ -73,12 +73,12 @@ const GISFeatureSchema = new mongoose.Schema({
   }
 });
 
-// Add virtual for id field
+// virtual for id field
 GISFeatureSchema.virtual('id').get(function() {
   return this._id.toHexString();
 });
 
-// Ensure virtual fields are included when converting to JSON
+// Include virtual properties when document is converted to JSON/Object
 GISFeatureSchema.set('toJSON', { virtuals: true });
 GISFeatureSchema.set('toObject', { virtuals: true });
 

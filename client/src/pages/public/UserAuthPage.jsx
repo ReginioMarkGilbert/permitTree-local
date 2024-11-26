@@ -57,6 +57,12 @@ const UserAuthPage = () => {
    const client = useApolloClient();
 
    useEffect(() => {
+      // Force light mode for auth page
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+   }, []);
+
+   useEffect(() => {
       if (firstName && lastName) {
          const formattedFirstName = firstName.trim().toLowerCase().replace(/\s+/g, '_');
          const formattedLastName = lastName.trim().toLowerCase();

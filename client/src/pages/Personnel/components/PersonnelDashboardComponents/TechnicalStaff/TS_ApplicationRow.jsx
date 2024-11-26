@@ -180,7 +180,7 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
             onClick: handleViewClick,
             variant: "outline"
          },
-         // Add review action if applicable
+
          app.status === 'Submitted' && {
             icon: ClipboardCheck,
             label: "Review Application",
@@ -188,7 +188,7 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
             variant: "outline",
             className: "text-blue-600 hover:text-blue-800"
          },
-         // Add authenticity action if applicable
+
          currentTab === 'For Inspection and Approval' && {
             icon: FileCheck,
             label: "Approve Application Authenticity",
@@ -196,7 +196,7 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
             variant: "outline",
             className: "text-green-600 hover:text-green-800"
          },
-         // Add undo action if applicable
+
          (currentTab === 'Approved Applications' ||
           currentTab === 'Accepted Applications' ||
           currentTab === 'Created Permits') && {
@@ -208,7 +208,7 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
             variant: "outline",
             className: "text-yellow-600 hover:text-yellow-800"
          },
-         // Add certificate generation action if applicable
+
          currentTab === 'Awaiting Permit Creation' && {
             icon: FileCheck2,
             label: app.applicationType === 'Chainsaw Registration' ?
