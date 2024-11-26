@@ -63,8 +63,14 @@ const inspectionResolvers = {
    },
 
    Mutation: {
-      createInspection: async (_, { input }, { user }) => {
+      createInspection: async (_, { input }, context) => {
          try {
+            // Check for either admin or user authentication
+            const inspector = context.admin || context.user;
+            if (!inspector) {
+               throw new Error('Authentication required');
+            }
+
             const permit = await Permit.findById(input.permitId);
             if (!permit) {
                throw new Error('Permit not found');
@@ -85,9 +91,10 @@ const inspectionResolvers = {
                0
             );
 
-            console.log('Creating inspection with date:', {
+            console.log('Creating inspection:', {
                input_date: input.scheduledDate,
                input_time: input.scheduledTime,
+               inspector: inspector.id,
                created_date: scheduledDate.toISOString(),
                local_time: scheduledDate.toString()
             });
@@ -97,12 +104,12 @@ const inspectionResolvers = {
                scheduledDate,
                applicationNumber: permit.applicationNumber,
                applicationType: permit.applicationType,
-               inspectorId: user.id,
+               inspectorId: inspector.id,
                history: [{
                   action: 'Created',
                   timestamp: new Date(),
                   notes: 'Inspection scheduled',
-                  performedBy: user.id
+                  performedBy: inspector.id
                }]
             });
 
@@ -126,6 +133,7 @@ const inspectionResolvers = {
 
             return inspection;
          } catch (error) {
+            console.error('Inspection creation error:', error);
             throw new Error(`Failed to create inspection: ${error.message}`);
          }
       },

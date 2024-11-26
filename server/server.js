@@ -17,7 +17,7 @@ const startServer = async () => {
    const app = express();
    // await mongoose.connect(process.env.MONGO_URI_NEW);
    try {
-      await mongoose.connect(process.env.MONGO_URI_ONLINE, {
+      await mongoose.connect(process.env.MONGO_URI_NEW, {
          useNewUrlParser: true,
          useUnifiedTopology: true,
       });
@@ -38,7 +38,10 @@ const startServer = async () => {
       origin: [
          'http://localhost:5174',
          'https://permittree-frontend-dev.vercel.app',
-         'https://permittree-backend-dev.vercel.app'
+         'https://permittree-backend-dev.vercel.app',
+         'https://permittree-staging.vercel.app',
+         'https://permittree-frontend.vercel.app',
+         'https://permittree-backend.vercel.app'
       ],
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
