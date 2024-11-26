@@ -100,7 +100,7 @@ const DashboardLayout = ({
 
                   {/* Tab Description */}
                   {tabDescription && (
-                     <div className="text-sm text-muted-foreground pt-3 pl-1 dark:text-gray-300">
+                     <div className="text-gray-600 text-sm text-muted-foreground pt-2 pl-1 dark:text-gray-300">
                         {tabDescription}
                      </div>
                   )}

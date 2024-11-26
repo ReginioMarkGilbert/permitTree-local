@@ -20,6 +20,9 @@ import permitTreeLogo from '@/assets/denr-logo.png';
 import {
    Sheet,
    SheetContent,
+   SheetHeader,
+   SheetTitle,
+   SheetDescription,
 } from "@/components/ui/sheet";
 import {
    Tooltip,
@@ -48,6 +51,12 @@ const UserSidebar = React.memo(({ isOpen, onToggle }) => {
 
       window.addEventListener('resize', handleResize);
       return () => window.removeEventListener('resize', handleResize);
+   }, []);
+
+   useEffect(() => {
+      if (isOpen) {
+         onToggle(false);
+      }
    }, []);
 
    const handleLogout = useCallback(async () => {
@@ -86,10 +95,21 @@ const UserSidebar = React.memo(({ isOpen, onToggle }) => {
 
    const SidebarItem = ({ item, isCollapsed }) => {
       const isActive = location.pathname === item.to;
+
+      const handleClick = (e) => {
+         if (item.onClick) {
+            item.onClick(e);
+         }
+         // Close sidebar if on mobile
+         if (isMobile) {
+            onToggle(false);
+         }
+      };
+
       const content = (
          <NavLink
             to={item.to}
-            onClick={item.onClick}
+            onClick={handleClick}
             className={cn(
                "relative flex h-10 w-full items-center",
                "hover:bg-accent rounded-lg transition-colors",
@@ -175,9 +195,14 @@ const UserSidebar = React.memo(({ isOpen, onToggle }) => {
       return (
          <Sheet open={isOpen} onOpenChange={onToggle}>
             <SheetContent side="left" className="p-0 w-[270px] flex flex-col">
-               <div className="h-16 border-b flex items-center px-6">
-                  <h2 className="text-lg font-semibold">Menu</h2>
-               </div>
+               <SheetHeader className="h-16 border-b">
+                  <div className="flex items-center h-full px-6">
+                     <SheetTitle className="text-left">Menu</SheetTitle>
+                     <SheetDescription className="sr-only">
+                        Navigation menu for user dashboard
+                     </SheetDescription>
+                  </div>
+               </SheetHeader>
                <div className="flex-1 overflow-auto">
                   <SidebarContent />
                </div>

@@ -40,10 +40,10 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
    };
 
    return (
-      <nav className={`fixed top-0 ${isChrome ? '-left-8' : 'left-0'} right-0 z-20 bg-background border-b shadow-sm`}>
-         <div className="max-w-[2520px] mx-auto flex justify-between items-center px-4 h-16">
-            {/* Left Section */}
-            <div className="flex items-center gap-4">
+      <nav className="fixed top-0 left-0 right-0 z-20 bg-background border-b shadow-sm">
+         <div className="flex justify-between items-center h-16">
+            {/* Left Section - align with sidebar */}
+            <div className="flex items-center gap-4 pl-4">
                <button
                   onClick={handleToggle}
                   className="text-foreground hover:text-green-700 p-2 rounded-lg
@@ -72,7 +72,7 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
             </div>
 
             {/* Right Section */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 pr-4">
                {/* Brightness Slider */}
                <TooltipProvider>
                   <Tooltip>

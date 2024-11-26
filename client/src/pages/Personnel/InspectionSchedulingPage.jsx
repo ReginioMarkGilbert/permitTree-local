@@ -137,18 +137,21 @@ const InspectionSchedulingPage = () => {
       });
    }, [applications, inspectionData, activeMainTab, filters, getInspectionStatus]);
 
+   const descriptions = {
+      'For Schedule': 'This is the list of applications that need to be scheduled for inspection.',
+      'Scheduled Inspection': 'This is the list of applications with pending inspections.',
+      'Completed Inspection': 'This is the list of applications with completed inspections.'
+   };
+
+   const currentDescription = descriptions[activeMainTab] || '';
+   const typewriterText = useTypewriter(currentDescription);
+
    const renderTabDescription = () => {
-      const descriptions = {
-         'For Schedule': 'This is the list of applications that need to be scheduled for inspection.',
-         'Scheduled Inspection': 'This is the list of applications with pending inspections.',
-         'Completed Inspection': 'This is the list of applications with completed inspections.'
-      };
-
-      const text = useTypewriter(descriptions[activeMainTab] || '');
-
       return (
          <div className="mb-4 -mt-4">
-            <h1 className="text-sm min-h-[20px] text-black dark:text-gray-300">{text}</h1>
+            <h1 className="text-sm min-h-[20px] text-black dark:text-gray-300">
+               {typewriterText}
+            </h1>
          </div>
       );
    };

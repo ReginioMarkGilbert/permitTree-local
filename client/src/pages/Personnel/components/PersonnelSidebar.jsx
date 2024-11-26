@@ -22,6 +22,9 @@ import permitTreeLogo from '@/assets/denr-logo.png';
 import {
    Sheet,
    SheetContent,
+   SheetHeader,
+   SheetTitle,
+   SheetDescription,
 } from "@/components/ui/sheet";
 import {
    Tooltip,
@@ -42,6 +45,14 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
    const [logout] = useMutation(LOGOUT_MUTATION);
    const userRoles = getUserRoles();
    const [isAuth, setIsAuth] = useState(isAuthenticated());
+   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+   // Add effect to close sidebar on initial load
+   useEffect(() => {
+      if (isOpen) {
+         onToggle(false);
+      }
+   }, []);
 
    const handleLogout = useCallback(async () => {
       try {
@@ -109,10 +120,21 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
 
    const SidebarItem = ({ item, isCollapsed }) => {
       const isActive = location.pathname === item.to;
+
+      const handleClick = (e) => {
+         if (item.onClick) {
+            item.onClick(e);
+         }
+         // Close sidebar if on mobile
+         if (isMobile) {
+            onToggle(false);
+         }
+      };
+
       const content = (
          <NavLink
             to={item.to}
-            onClick={item.onClick}
+            onClick={handleClick}
             className={cn(
                "relative flex h-10 w-full items-center",
                "hover:bg-accent rounded-lg transition-colors",
@@ -195,8 +217,6 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
    );
 
    // Add useEffect to handle window resize
-   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
-
    useEffect(() => {
       const handleResize = () => {
          setIsMobile(window.innerWidth < 1024);
@@ -211,9 +231,14 @@ const PersonnelSidebar = React.memo(({ isOpen, onToggle }) => {
       return (
          <Sheet open={isOpen} onOpenChange={onToggle}>
             <SheetContent side="left" className="p-0 w-[270px] flex flex-col">
-               <div className="h-16 border-b flex items-center px-6">
-                  <h2 className="text-lg font-semibold">Menu</h2>
-               </div>
+               <SheetHeader className="h-16 border-b">
+                  <div className="flex items-center h-full px-6">
+                     <SheetTitle className="text-left">Menu</SheetTitle>
+                     <SheetDescription className="sr-only">
+                        Navigation menu for personnel dashboard
+                     </SheetDescription>
+                  </div>
+               </SheetHeader>
                <div className="flex-1 overflow-auto">
                   <SidebarContent />
                </div>

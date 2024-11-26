@@ -1,9 +1,16 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { BellRing } from 'lucide-react';
+import { BellRing, ChevronDown } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import {
+   Select,
+   SelectContent,
+   SelectItem,
+   SelectTrigger,
+   SelectValue,
+} from "@/components/ui/select";
 import NotificationSearch from './NotificationSearch';
 
 const NotificationsLayout = ({
@@ -18,6 +25,28 @@ const NotificationsLayout = ({
    onSearchChange
 }) => {
    const isMobile = useMediaQuery('(max-width: 640px)');
+   const [activeTab, setActiveTab] = useState(tabs[0].value);
+
+   // Browser detection
+   const isChrome = useMemo(() => {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      const isBrave = navigator.brave !== undefined;
+      return userAgent.includes('chrome') && !userAgent.includes('edg') && !isBrave;
+   }, []);
+
+   const handleTabChange = (value) => {
+      setActiveTab(value);
+   };
+
+   const renderTabContent = () => {
+      // Map through children to find and render the active tab content
+      return React.Children.map(children, child => {
+         if (React.isValidElement(child) && child.props.value === activeTab) {
+            return child;
+         }
+         return null;
+      });
+   };
 
    if (loading) {
       return (
@@ -26,6 +55,66 @@ const NotificationsLayout = ({
          </div>
       );
    }
+
+   const renderMobileSelect = () => {
+      if (isChrome) {
+         return (
+            <div className="relative w-[120px] mb-4">
+               <select
+                  value={activeTab}
+                  onChange={(e) => handleTabChange(e.target.value)}
+                  className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
+               >
+                  {tabs.map(tab => (
+                     <option key={tab.value} value={tab.value}>
+                        {tab.label} {tab.count > 0 && `(${tab.count})`}
+                     </option>
+                  ))}
+               </select>
+            </div>
+         );
+      }
+
+      return (
+         <Select value={activeTab} onValueChange={handleTabChange}>
+            <SelectTrigger className="w-[120px] mb-4 bg-background/50 dark:bg-gray-900/50">
+               <div className="flex items-center gap-2">
+                  <span className="truncate">
+                     {tabs.find(tab => tab.value === activeTab)?.label}
+                  </span>
+                  <Badge
+                     variant="secondary"
+                     className="ml-auto text-xs px-1.5 py-0.5"
+                  >
+                     {tabs.find(tab => tab.value === activeTab)?.count || 0}
+                  </Badge>
+               </div>
+            </SelectTrigger>
+            <SelectContent className="w-[160px]">
+               {tabs.map(tab => (
+                  <SelectItem
+                     key={tab.value}
+                     value={tab.value}
+                     className="py-1.5"
+                  >
+                     <div className="flex items-center gap-2">
+                        {tab.icon}
+                        <span>{tab.label}</span>
+                        {tab.count > 0 && (
+                           <Badge
+                              variant="secondary"
+                              className="ml-auto text-xs px-1.5 py-0.5"
+                           >
+                              {tab.count}
+                           </Badge>
+                        )}
+                     </div>
+                  </SelectItem>
+               ))}
+            </SelectContent>
+         </Select>
+      );
+   };
 
    return (
       <div className="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-gray-800 dark:to-gray-900 transition-colors duration-300">
@@ -63,32 +152,29 @@ const NotificationsLayout = ({
             </div>
 
             <Card className="border-none shadow-lg min-h-[600px] sm:min-h-[800px] bg-white/50 dark:bg-black backdrop-blur-sm p-4 sm:p-6">
-               <Tabs defaultValue={tabs[0].value} className="w-full space-y-6">
-                  <TabsList className="h-12 p-1 w-full bg-muted/50 dark:bg-gray-800">
-                     {tabs.map(tab => (
-                        <TabsTrigger
-                           key={tab.value}
-                           value={tab.value}
-                           className="flex-1 min-w-[120px] data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 dark:text-gray-200"
-                        >
-                           <span className="flex items-center gap-2 text-sm sm:text-base">
-                              {!isMobile && tab.icon}
-                              <span className={isMobile ? 'text-xs' : ''}>
-                                 {isMobile ? tab.label.split(' ')[0] : tab.label}
-                              </span>
-                              {tab.count > 0 && (
-                                 <Badge
-                                    variant="secondary"
-                                    className="text-xs px-2 py-0.5 min-w-[20px] dark:bg-gray-800"
-                                 >
-                                    {tab.count}
-                                 </Badge>
-                              )}
-                           </span>
-                        </TabsTrigger>
-                     ))}
-                  </TabsList>
-                  {children}
+               <Tabs defaultValue={tabs[0].value} value={activeTab} onValueChange={handleTabChange} className="w-full space-y-6">
+                  {isMobile ? renderMobileSelect() : (
+                     <TabsList className="h-auto p-1 w-full bg-muted/50 dark:bg-gray-800 flex">
+                        {tabs.map(tab => (
+                           <TabsTrigger
+                              key={tab.value}
+                              value={tab.value}
+                              className="flex-1 py-2.5 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 dark:text-gray-200"
+                           >
+                              <div className="flex items-center gap-2">
+                                 {tab.icon}
+                                 <span>{tab.label}</span>
+                                 {tab.count > 0 && (
+                                    <Badge variant="secondary">
+                                       {tab.count}
+                                    </Badge>
+                                 )}
+                              </div>
+                           </TabsTrigger>
+                        ))}
+                     </TabsList>
+                  )}
+                  {renderTabContent()}
                </Tabs>
             </Card>
          </div>

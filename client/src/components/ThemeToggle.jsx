@@ -7,7 +7,7 @@ import {
    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useTheme } from "@/components/ThemeProvider"
-import { useMemo, useEffect } from "react"
+import { useMemo, useEffect, useState } from "react"
 import { useQuery, useMutation } from "@apollo/client"
 import { gql } from "@apollo/client"
 
@@ -59,110 +59,81 @@ const GET_CURRENT_ADMIN = gql`
 
 export function ThemeToggle() {
    const { theme, setTheme } = useTheme()
+   const [isPersonnel, setIsPersonnel] = useState(false)
 
-   const {
-      data: userData,
-      loading: userLoading,
-      error: userError,
-      refetch: refetchUser
-   } = useQuery(GET_CURRENT_USER, {
-      fetchPolicy: 'network-only', // Force network request
-      onCompleted: (data) => console.log('User query completed:', data),
-      onError: (error) => console.error('User query error:', error)
-   });
+   // Determine user type on component mount
+   useEffect(() => {
+      const user = JSON.parse(localStorage.getItem('user'));
+      const personnelRoles = [
+         'Chief_RPS', 'Chief_TSD', 'Technical_Staff',
+         'Receiving_Clerk', 'Releasing_Clerk', 'Accountant',
+         'OOP_Staff_Incharge', 'Bill_Collector', 'Credit_Officer',
+         'PENR_CENR_Officer', 'Deputy_CENR_Officer', 'Inspection_Team',
+         'superadmin'
+      ];
+      setIsPersonnel(user?.roles.some(role => personnelRoles.includes(role)));
+   }, []);
 
+   // Only query admin data if user is personnel
    const {
       data: adminData,
       loading: adminLoading,
-      error: adminError,
-      refetch: refetchAdmin
+      error: adminError
    } = useQuery(GET_CURRENT_ADMIN, {
-      fetchPolicy: 'network-only', // Force network request
-      onCompleted: (data) => console.log('Admin query completed:', data),
-      onError: (error) => console.error('Admin query error:', error)
+      skip: !isPersonnel,
+      fetchPolicy: 'network-only',
+      onError: (error) => {
+         if (!error.message.includes('Store reset while query was in flight')) {
+            console.error('Admin query error:', error);
+         }
+      }
    });
 
-   const [updateUserTheme] = useMutation(UPDATE_USER_THEME, {
-      onCompleted: (data) => console.log('User theme updated:', data),
-      onError: (error) => console.error('User theme update error:', error)
+   // Only query user data if user is not personnel
+   const {
+      data: userData,
+      loading: userLoading,
+      error: userError
+   } = useQuery(GET_CURRENT_USER, {
+      skip: isPersonnel,
+      fetchPolicy: 'network-only',
+      onError: (error) => {
+         if (!error.message.includes('Store reset while query was in flight')) {
+            console.error('User query error:', error);
+         }
+      }
    });
 
-   const [updateAdminTheme] = useMutation(UPDATE_ADMIN_THEME, {
-      onCompleted: (data) => console.log('Admin theme updated:', data),
-      onError: (error) => console.error('Admin theme update error:', error)
-   });
+   const [updateUserTheme] = useMutation(UPDATE_USER_THEME);
+   const [updateAdminTheme] = useMutation(UPDATE_ADMIN_THEME);
 
-   // Debug authentication state
+   // Initialize theme based on user type
    useEffect(() => {
-      const token = localStorage.getItem('token');
-      console.log('Auth State:', {
-         hasToken: !!token,
-         adminData: adminData?.getCurrentAdmin,
-         userData: userData?.getCurrentUser,
-         adminLoading,
-         userLoading,
-         adminError: adminError?.message,
-         userError: userError?.message
-      });
-   }, [adminData, userData, adminLoading, userLoading, adminError, userError]);
-
-   useEffect(() => {
-      if (adminData?.getCurrentAdmin) {
-         console.log('Initializing admin theme:', adminData.getCurrentAdmin.themePreference);
+      if (isPersonnel && adminData?.getCurrentAdmin?.themePreference) {
          setTheme(adminData.getCurrentAdmin.themePreference);
-      } else if (userData?.getCurrentUser) {
-         console.log('Initializing user theme:', userData.getCurrentUser.themePreference);
+      } else if (!isPersonnel && userData?.getCurrentUser?.themePreference) {
          setTheme(userData.getCurrentUser.themePreference);
       }
-   }, [adminData?.getCurrentAdmin, userData?.getCurrentUser]);
+   }, [adminData?.getCurrentAdmin, userData?.getCurrentUser, isPersonnel]);
 
    const handleThemeChange = async (newTheme) => {
-      console.log('Starting theme change:', {
-         newTheme,
-         currentTheme: theme,
-         adminData,
-         userData,
-         adminLoading,
-         userLoading
-      });
-
       try {
-         if (adminLoading || userLoading) {
-            console.log('Still loading auth state...');
-            return;
-         }
-
-         if (adminData?.getCurrentAdmin) {
-            console.log('Updating as admin:', adminData.getCurrentAdmin);
-            const result = await updateAdminTheme({
+         if (isPersonnel) {
+            await updateAdminTheme({
                variables: { theme: newTheme },
-               refetchQueries: [{ query: GET_CURRENT_ADMIN }],
-               awaitRefetchQueries: true
+               refetchQueries: [{ query: GET_CURRENT_ADMIN }]
             });
-            console.log('Admin theme update result:', result);
-            setTheme(newTheme);
-         } else if (userData?.getCurrentUser) {
-            console.log('Updating as user:', userData.getCurrentUser);
-            const result = await updateUserTheme({
-               variables: { theme: newTheme },
-               refetchQueries: [{ query: GET_CURRENT_USER }],
-               awaitRefetchQueries: true
-            });
-            console.log('User theme update result:', result);
-            setTheme(newTheme);
          } else {
-            console.log('No authenticated user/admin found');
-            if (adminError) console.error('Admin Error:', adminError);
-            if (userError) console.error('User Error:', userError);
-            setTheme(newTheme);
+            await updateUserTheme({
+               variables: { theme: newTheme },
+               refetchQueries: [{ query: GET_CURRENT_USER }]
+            });
          }
+         setTheme(newTheme);
       } catch (error) {
-         console.error('Theme update failed:', {
-            error,
-            message: error.message,
-            graphQLErrors: error.graphQLErrors,
-            networkError: error.networkError
-         });
+         console.error('Theme update failed:', error);
+         // Update theme locally even if server update fails
+         setTheme(newTheme);
       }
    };
 
@@ -172,6 +143,11 @@ export function ThemeToggle() {
       const isBrave = navigator.brave !== undefined;
       return userAgent.includes('chrome') && !userAgent.includes('edg') && !isBrave;
    }, []);
+
+   // Show loading state or fallback
+   if ((isPersonnel && adminLoading) || (!isPersonnel && userLoading)) {
+      return null; // Or a loading spinner if preferred
+   }
 
    if (isChrome) {
       return (
