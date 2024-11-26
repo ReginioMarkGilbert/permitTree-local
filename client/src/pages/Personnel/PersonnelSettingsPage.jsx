@@ -18,7 +18,6 @@ const GET_ADMIN_SETTINGS = gql`
       notificationPreferences {
         email
         inApp
-        sms
       }
     }
   }
@@ -32,7 +31,6 @@ const UPDATE_NOTIFICATION_SETTINGS = gql`
       notificationPreferences {
         email
         inApp
-        sms
       }
     }
   }
@@ -44,7 +42,6 @@ const PersonnelSettingsPage = () => {
       notificationPreferences: {
          email: false,
          inApp: true,
-         sms: false,
       },
       email: '',
       applicationReviewDeadline: 7,
@@ -62,7 +59,6 @@ const PersonnelSettingsPage = () => {
             notificationPreferences: {
                email: admin.notificationPreferences?.email ?? false,
                inApp: admin.notificationPreferences?.inApp ?? true,
-               sms: admin.notificationPreferences?.sms ?? false
             }
          }));
       }
@@ -187,7 +183,7 @@ const PersonnelSettingsPage = () => {
 
                         <Separator className="dark:border-gray-700" />
 
-                        <div className="flex items-center justify-between">
+                        {/* <div className="flex items-center justify-between">
                            <div className="flex items-center gap-3">
                               <MessageSquare className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                               <div>
@@ -200,13 +196,13 @@ const PersonnelSettingsPage = () => {
                               onCheckedChange={() => handleNotificationChange('sms')}
                               className="data-[state=checked]:bg-green-600"
                            />
-                        </div>
+                        </div> */}
                      </div>
                   </CardContent>
                </Card>
 
                {/* Application Settings Section */}
-               <Card className="dark:bg-black">
+               {/* <Card className="dark:bg-black">
                   <CardContent className="p-6">
                      <div className="flex items-center gap-4 mb-6">
                         <div className="p-2 rounded-md bg-green-100 dark:bg-green-900">
@@ -279,7 +275,7 @@ const PersonnelSettingsPage = () => {
                         </div>
                      </div>
                   </CardContent>
-               </Card>
+               </Card> */}
 
                {/* Signature Upload Section */}
                <Card className="dark:bg-black">

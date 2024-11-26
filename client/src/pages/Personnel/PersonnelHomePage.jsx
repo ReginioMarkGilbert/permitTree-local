@@ -415,13 +415,7 @@ const PersonnelHomePage = () => {
                                     >
                                        <div className="flex items-start gap-3">
                                           <div className="flex-shrink-0">
-                                             {notification.priority === 'high' ? (
-                                                <AlertCircle className="h-5 w-5 text-red-500" />
-                                             ) : notification.priority === 'medium' ? (
-                                                <AlertTriangle className="h-5 w-5 text-yellow-500" />
-                                             ) : (
-                                                <Info className="h-5 w-5 text-green-500" />
-                                             )}
+                                             <Info className="h-5 w-5 text-green-500" />
                                           </div>
                                           <div className="flex-1 min-w-0">
                                              <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-green-700 dark:group-hover:text-green-500 transition-colors duration-200">
@@ -437,14 +431,6 @@ const PersonnelHomePage = () => {
                                                       hour: '2-digit',
                                                       minute: '2-digit'
                                                    })}
-                                                </span>
-                                                <span className={`px-2 py-0.5 rounded-full text-xs ${notification.priority === 'high'
-                                                   ? 'bg-red-100 text-red-800'
-                                                   : notification.priority === 'medium'
-                                                      ? 'bg-yellow-100 text-yellow-800'
-                                                      : 'bg-green-100 text-green-800'
-                                                   }`}>
-                                                   {notification.priority}
                                                 </span>
                                              </div>
                                           </div>
