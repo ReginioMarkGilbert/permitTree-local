@@ -11,8 +11,6 @@ import {
 } from "@/components/ui/tooltip";
 
 const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
-   // Persist brightness value in localStorage
-   // commit: feat(Navbar): Persist brightness setting across page refreshes
    const [brightness, setBrightness] = useState(() => {
       const savedBrightness = localStorage.getItem('brightness');
       return savedBrightness ? parseInt(savedBrightness, 10) : 100;
@@ -26,8 +24,6 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
    }, []);
 
    useEffect(() => {
-      // Apply brightness filter and save to localStorage
-      // commit: feat(Navbar): Apply and save brightness setting
       document.documentElement.style.filter = `brightness(${brightness}%)`;
       localStorage.setItem('brightness', brightness.toString());
       return () => {
@@ -39,8 +35,6 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
       setSidebarToggle(!sidebarToggle);
    };
 
-   // Handle brightness change
-   // commit: feat(Navbar): Update brightness on slider change
    const handleBrightnessChange = ([value]) => {
       setBrightness(value);
    };
