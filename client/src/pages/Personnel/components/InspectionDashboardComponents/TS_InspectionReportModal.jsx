@@ -48,6 +48,9 @@ const UPDATE_PERMIT_STAGE = gql`
 `;
 
 const TS_InspectionReportModal = ({ isOpen, onClose, inspection, application, onComplete }) => {
+   console.log('Inspection prop:', inspection);
+   console.log('Application prop:', application);
+
    const [findings, setFindings] = useState({
       result: '',
       observations: '',
@@ -55,7 +58,13 @@ const TS_InspectionReportModal = ({ isOpen, onClose, inspection, application, on
       attachments: []
    });
 
-   const [recordInspectionFindings] = useMutation(RECORD_INSPECTION_FINDINGS);
+   const [recordInspectionFindings] = useMutation(RECORD_INSPECTION_FINDINGS, {
+      onError: (error) => {
+         console.error('Mutation error:', error);
+         toast.error(`Failed to submit report: ${error.message}`);
+      }
+   });
+
    const [updatePermitStage] = useMutation(UPDATE_PERMIT_STAGE);
 
    // Chrome detection for select input
@@ -107,12 +116,22 @@ const TS_InspectionReportModal = ({ isOpen, onClose, inspection, application, on
             return;
          }
 
-         if (!inspection?.id) {
-            throw new Error('Inspection ID is required');
+         console.log('Inspection object:', inspection);
+         console.log('Inspection ID:', inspection?._id || inspection?.id);
+         console.log('Permit ID:', application?.id);
+
+         // Validate inspection ID
+         const inspectionId = inspection?._id || inspection?.id;
+         if (!inspectionId) {
+            toast.error('Inspection ID is missing');
+            return;
          }
 
-         if (!application?.id) {
-            throw new Error('Application ID is required');
+         // Validate permit ID
+         const permitId = application?.id;
+         if (!permitId) {
+            toast.error('Application ID is missing');
+            return;
          }
 
          // Process files
@@ -128,7 +147,7 @@ const TS_InspectionReportModal = ({ isOpen, onClose, inspection, application, on
          // Record inspection findings
          const { data: inspectionData } = await recordInspectionFindings({
             variables: {
-               id: inspection.id,
+               id: inspectionId,
                findings: {
                   result: findings.result,
                   observations: findings.observations || '',
@@ -138,10 +157,14 @@ const TS_InspectionReportModal = ({ isOpen, onClose, inspection, application, on
             }
          });
 
+         if (!inspectionData?.recordInspectionFindings) {
+            throw new Error('Failed to record inspection findings');
+         }
+
          // Update permit stage
          await updatePermitStage({
             variables: {
-               id: application.id,
+               id: permitId,
                currentStage: 'InspectionReportForReviewByChief',
                status: 'In Progress',
                notes: `Inspection completed with result: ${findings.result}`
@@ -153,7 +176,7 @@ const TS_InspectionReportModal = ({ isOpen, onClose, inspection, application, on
          onClose();
       } catch (error) {
          console.error('Error submitting inspection report:', error);
-         toast.error(`Error submitting report: ${error.message}`);
+         toast.error(`Failed to submit report: ${error.message}`);
       }
    };
 

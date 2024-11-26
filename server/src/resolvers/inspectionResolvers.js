@@ -3,6 +3,7 @@ const Permit = require('../models/permits/Permit');
 const NotificationService = require('../services/userNotificationService');
 const PersonnelNotificationService = require('../services/personnelNotificationService');
 const { format } = require('date-fns');
+const mongoose = require('mongoose');
 
 const inspectionResolvers = {
    Query: {
@@ -174,59 +175,67 @@ const inspectionResolvers = {
 
       recordInspectionFindings: async (_, { id, findings }, { user }) => {
          try {
-            const inspection = await Inspection.findById(id);
-            if (!inspection) {
-               throw new Error('Inspection not found');
+            console.log('Recording findings for inspection:', id);
+            console.log('User context:', user);
+            console.log('Findings:', findings);
+
+            // Validate inspection ID
+            if (!mongoose.Types.ObjectId.isValid(id)) {
+               throw new Error('Invalid inspection ID format');
             }
 
-            // Create new findings object with all fields
+            // Find inspection
+            const inspection = await Inspection.findById(id);
+            if (!inspection) {
+               throw new Error(`Inspection not found with ID: ${id}`);
+            }
+
+            // Find permit
+            const permit = await Permit.findById(inspection.permitId);
+            if (!permit) {
+               throw new Error('Associated permit not found');
+            }
+
+            // Update inspection findings
             inspection.findings = {
                result: findings.result,
                observations: findings.observations || '',
                recommendations: findings.recommendations || '',
-               attachments: findings.attachments.map(file => ({
+               attachments: findings.attachments?.map(file => ({
                   filename: file.filename,
                   contentType: file.contentType,
                   data: Buffer.from(file.data, 'base64')
-               }))
+               })) || []
             };
 
-            // Update inspection status
+            // Update status
             inspection.inspectionStatus = 'Completed';
 
+            // Add history entry - use inspector ID from inspection if user context is unavailable
             inspection.history.push({
                action: 'Completed',
                timestamp: new Date(),
                notes: `Inspection completed with result: ${findings.result}`,
-               performedBy: user.id
+               performedBy: inspection.inspectorId // Use inspector ID from inspection
             });
 
             await inspection.save();
 
-            // Update permit status
-            const permit = await Permit.findById(inspection.permitId);
-            if (permit) {
-               permit.inspectionSchedule = {
-                  ...permit.inspectionSchedule,
-                  inspectionStatus: 'Completed'
-               };
-               await permit.save();
+            // Update permit
+            permit.inspectionSchedule = {
+               ...permit.inspectionSchedule,
+               inspectionStatus: 'Completed'
+            };
+            permit.hasInspectionReport = true;
+            permit.currentStage = 'InspectionReportForReviewByChief';
+            await permit.save();
 
-               // Notify applicant
-               await NotificationService.createApplicationNotification({
-                  application: permit,
-                  recipientId: permit.applicantId,
-                  type: 'APPLICATION_INSPECTION_COMPLETE',
-                  stage: 'ForInspectionByTechnicalStaff',
-                  remarks: `Inspection completed with result: ${findings.result}`
-               });
-            }
-
-            // Convert Buffer back to base64 string for GraphQL response
+            // Format response
             const response = inspection.toObject();
             response.id = inspection._id.toString();
 
-            if (response.findings && response.findings.attachments) {
+            // Convert attachments to base64
+            if (response.findings?.attachments) {
                response.findings.attachments = response.findings.attachments.map(file => ({
                   filename: file.filename,
                   contentType: file.contentType,
@@ -236,7 +245,7 @@ const inspectionResolvers = {
 
             return response;
          } catch (error) {
-            console.error('Error recording findings:', error);
+            console.error('Error in recordInspectionFindings:', error);
             throw new Error(`Failed to record findings: ${error.message}`);
          }
       },
@@ -352,6 +361,56 @@ const inspectionResolvers = {
          } catch (error) {
             console.error('Error deleting inspection:', error);
             throw new Error(`Failed to delete inspection: ${error.message}`);
+         }
+      },
+
+      undoInspectionReport: async (_, { id }, context) => {
+         try {
+            // Check for authentication
+            const user = context.admin || context.user;
+            if (!user) {
+               throw new Error('Authentication required');
+            }
+
+            const inspection = await Inspection.findById(id);
+            if (!inspection) {
+               throw new Error('Inspection not found');
+            }
+
+            // Reset inspection findings and status
+            inspection.findings = undefined;
+            inspection.inspectionStatus = 'Pending';
+
+            // Add to history
+            inspection.history.push({
+               action: 'Report Undone',
+               timestamp: new Date(),
+               notes: 'Inspection report has been undone',
+               performedBy: user._id // Use _id instead of id
+            });
+
+            await inspection.save();
+
+            // Update permit status
+            const permit = await Permit.findById(inspection.permitId);
+            if (permit) {
+               permit.hasInspectionReport = false;
+               permit.currentStage = 'ForInspectionByTechnicalStaff';
+               if (permit.inspectionSchedule) {
+                  permit.inspectionSchedule.inspectionStatus = 'Pending';
+               }
+               await permit.save();
+            }
+
+            // Return formatted inspection data
+            const response = inspection.toObject();
+            response.id = inspection._id.toString();
+            response.scheduledDate = inspection.scheduledDate.toISOString();
+
+            return response;
+         } catch (error) {
+            console.error('Error undoing inspection report:', error);
+            throw new Error(`Failed to undo inspection report: ${error.message}`);
          }
       }
    }

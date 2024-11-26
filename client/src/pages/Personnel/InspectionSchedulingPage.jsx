@@ -21,16 +21,10 @@ import {
 } from "@/components/ui/table";
 import InspectionEventModal from './components/InspectionDashboardComponents/InspectionEventModal';
 import { Button } from "@/components/ui/button";
+import { useApplications } from './hooks/useApplications';
 
-const GET_APPLICATIONS_AND_INSPECTIONS = gql`
-  query GetApplicationsAndInspections {
-    getApplicationsByStatus(currentStage: "ForInspectionByTechnicalStaff") {
-      id
-      applicationNumber
-      applicationType
-      dateOfSubmission
-      status
-    }
+const GET_INSPECTIONS = gql`
+  query GetInspections {
     getInspections {
       id
       permitId
@@ -40,6 +34,13 @@ const GET_APPLICATIONS_AND_INSPECTIONS = gql`
       scheduledTime
       location
       inspectionStatus
+      findings {
+        result
+        observations
+        recommendations
+      }
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -57,16 +58,29 @@ const InspectionSchedulingPage = () => {
    const [view, setView] = useState('table');
    const [selectedEvent, setSelectedEvent] = useState(null);
    const [viewMode, setViewMode] = useState('dashboard');
-
-   const { data, loading, error, refetch } = useQuery(GET_APPLICATIONS_AND_INSPECTIONS);
    const isMobile = useMediaQuery('(max-width: 640px)');
+
+   const { applications, loading: appLoading, refetch: refetchApps } = useApplications({
+      currentStage: activeMainTab === 'For Schedule' ? 'ForInspectionByTechnicalStaff' : undefined,
+      hasInspectionReport: activeMainTab === 'Completed Inspection' ? true : undefined
+   });
+
+   const { data: inspectionData, loading: inspLoading, error: inspError, refetch: refetchInsp } = useQuery(GET_INSPECTIONS);
+
+   const loading = appLoading || inspLoading;
+   const error = inspError;
+
+   const refetch = () => {
+      refetchApps();
+      refetchInsp();
+   };
 
    const mainTabs = ['For Schedule', 'Scheduled Inspection', 'Completed Inspection'];
 
    const getInspectionStatus = useMemo(() => (applicationId) => {
-      if (!data?.getInspections) return null;
-      return data.getInspections.find(insp => insp.permitId === applicationId);
-   }, [data?.getInspections]);
+      if (!inspectionData?.getInspections) return null;
+      return inspectionData.getInspections.find(insp => insp.permitId === applicationId);
+   }, [inspectionData?.getInspections]);
 
    const formatInspectionStatus = useMemo(() => (inspection) => {
       if (!inspection) return 'Not Scheduled';
@@ -80,20 +94,25 @@ const InspectionSchedulingPage = () => {
    }, [getInspectionStatus]);
 
    const filteredApplications = useMemo(() => {
-      const applications = data?.getApplicationsByStatus || [];
+      const inspections = inspectionData?.getInspections || [];
 
       return applications.filter(app => {
          const inspection = getInspectionStatus(app.id);
 
-         // Filter based on active tab
-         if (activeMainTab === 'For Schedule') {
-            return !inspection;
-         } else if (activeMainTab === 'Scheduled Inspection') {
-            return inspection?.inspectionStatus === 'Pending';
-         } else if (activeMainTab === 'Completed Inspection') {
-            return inspection?.inspectionStatus === 'Completed';
+         switch (activeMainTab) {
+            case 'For Schedule':
+               return !inspection || inspection.inspectionStatus === 'Cancelled';
+
+            case 'Scheduled Inspection':
+               return inspection?.inspectionStatus === 'Pending' ||
+                      inspection?.inspectionStatus === 'Rescheduled';
+
+            case 'Completed Inspection':
+               return inspection?.inspectionStatus === 'Completed';
+
+            default:
+               return true;
          }
-         return true;
       }).filter(app => {
          // Apply search and other filters
          const matchesSearch = app.applicationNumber.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
@@ -116,7 +135,7 @@ const InspectionSchedulingPage = () => {
 
          return matchesSearch && matchesType && matchesDateRange;
       });
-   }, [data?.getApplicationsByStatus, activeMainTab, filters, getInspectionStatus]);
+   }, [applications, inspectionData, activeMainTab, filters, getInspectionStatus]);
 
    const renderTabDescription = () => {
       const descriptions = {
@@ -135,9 +154,9 @@ const InspectionSchedulingPage = () => {
    };
 
    const calendarEvents = useMemo(() => {
-      if (!data?.getInspections) return [];
+      if (!inspectionData?.getInspections) return [];
 
-      return data.getInspections
+      return inspectionData.getInspections
          .filter(inspection => inspection.inspectionStatus === 'Pending')
          .map(inspection => {
             const dateObj = new Date(inspection.scheduledDate);
@@ -158,7 +177,7 @@ const InspectionSchedulingPage = () => {
                classNames: ['inspection-event']
             };
          });
-   }, [data]);
+   }, [inspectionData]);
 
    const handleEventClick = (clickInfo) => {
       setSelectedEvent(clickInfo.event);

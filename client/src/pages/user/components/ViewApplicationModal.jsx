@@ -10,6 +10,7 @@ import {
 const ViewApplicationModal = ({ isOpen, onClose, application }) => {
    if (!application) return null;
 
+   // correct way to format date in view modal
    const formatDate = (timestamp) => {
       // const date = new Date(timestamp);
       // return date.toLocaleDateString();

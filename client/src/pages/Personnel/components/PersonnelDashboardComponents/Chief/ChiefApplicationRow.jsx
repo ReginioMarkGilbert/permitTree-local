@@ -15,6 +15,7 @@ import TS_ViewModal from '@/pages/Personnel/components/PersonnelDashboardCompone
 import ChiefReviewModal from './ChiefReviewModal';
 import { gql, useMutation } from '@apollo/client';
 import { toast } from 'sonner';
+import InspectionReportReviewModal from '../../InspectionDashboardComponents/InspectionReportReviewModal';
 
 const DELETE_OOP = gql`
   mutation DeleteOOP($applicationId: String!) {
@@ -68,6 +69,7 @@ const UPDATE_PERMIT_STAGE = gql`
 const ChiefApplicationRow = ({ app, onReviewComplete, currentTab, isMobile }) => {
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+   const [isInspectionModalOpen, setIsInspectionModalOpen] = useState(false);
    const [updatePermitStage] = useMutation(UPDATE_PERMIT_STAGE);
    const [undoOOPCreation] = useMutation(UNDO_OOP_CREATION);
    const [deleteOOP] = useMutation(DELETE_OOP);
@@ -138,6 +140,14 @@ const ChiefApplicationRow = ({ app, onReviewComplete, currentTab, isMobile }) =>
             onClick: handleReviewClick,
             variant: "outline",
             className: "text-blue-600 hover:text-blue-800"
+         },
+
+         currentTab === 'Reports for Review' && {
+            icon: ClipboardCheck,
+            label: "View Inspection Report",
+            onClick: () => setIsInspectionModalOpen(true),
+            variant: "outline",
+            className: "text-purple-600 hover:text-purple-800"
          },
 
          currentTab === 'Completed Reviews' && {
@@ -214,6 +224,11 @@ const ChiefApplicationRow = ({ app, onReviewComplete, currentTab, isMobile }) =>
                application={app}
                onReviewComplete={handleReviewComplete}
             />
+            <InspectionReportReviewModal
+               isOpen={isInspectionModalOpen}
+               onClose={() => setIsInspectionModalOpen(false)}
+               application={app}
+            />
          </>
       );
    }
@@ -250,6 +265,11 @@ const ChiefApplicationRow = ({ app, onReviewComplete, currentTab, isMobile }) =>
             onClose={() => setIsReviewModalOpen(false)}
             application={app}
             onReviewComplete={handleReviewComplete}
+         />
+         <InspectionReportReviewModal
+            isOpen={isInspectionModalOpen}
+            onClose={() => setIsInspectionModalOpen(false)}
+            application={app}
          />
       </>
    );

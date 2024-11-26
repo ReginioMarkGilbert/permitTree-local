@@ -3,9 +3,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { useQuery, gql } from '@apollo/client';
 import { Download, Eye, Loader2 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipProvider,
+   TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const GET_INSPECTION_DETAILS = gql`
   query GetInspectionsByPermit($permitId: ID!) {
@@ -39,6 +45,28 @@ const InspectionReportReviewModal = ({ isOpen, onClose, application }) => {
       variables: { permitId: application?.id },
       skip: !application?.id
    });
+
+   const formatDate = (timestamp) => {
+      if (!timestamp) return 'Not scheduled';
+      try {
+         const date = parseISO(timestamp);
+         if (isNaN(date.getTime())) {
+            return 'Invalid date';
+         }
+         return format(date, 'MMM d, yyyy');
+      } catch (error) {
+         return 'Invalid date';
+      }
+   };
+
+   const formatTime = (time) => {
+      if (!time) return 'Not specified';
+      const [hours, minutes] = time.split(':');
+      const parsedHours = parseInt(hours, 10);
+      const ampm = parsedHours >= 12 ? 'PM' : 'AM';
+      const formattedHours = parsedHours % 12 || 12;
+      return `${formattedHours}:${minutes} ${ampm}`;
+   };
 
    const handleDownload = (file) => {
       const byteCharacters = atob(file.data);
@@ -78,6 +106,19 @@ const InspectionReportReviewModal = ({ isOpen, onClose, application }) => {
             return 'bg-red-100 text-red-800';
          case 'Needs Modification':
             return 'bg-yellow-100 text-yellow-800';
+         default:
+            return 'bg-gray-100 text-gray-800';
+      }
+   };
+
+   const getStatusBadgeColor = (status) => {
+      switch (status) {
+         case 'Scheduled':
+            return 'bg-blue-100 text-blue-800';
+         case 'Completed':
+            return 'bg-green-100 text-green-800';
+         case 'Cancelled':
+            return 'bg-red-100 text-red-800';
          default:
             return 'bg-gray-100 text-gray-800';
       }
@@ -128,19 +169,27 @@ const InspectionReportReviewModal = ({ isOpen, onClose, application }) => {
                         <div>
                            <p className="text-sm text-gray-500">Date</p>
                            <p className="font-medium">
-                              {format(new Date(inspection.scheduledDate), 'MMMM d, yyyy')}
+                              {formatDate(inspection.scheduledDate)}
                            </p>
                         </div>
                         <div>
                            <p className="text-sm text-gray-500">Time</p>
-                           <p className="font-medium">{inspection.scheduledTime}</p>
+                           <p className="font-medium">
+                              {formatTime(inspection.scheduledTime)}
+                           </p>
                         </div>
                         <div>
                            <p className="text-sm text-gray-500">Location</p>
                            <p className="font-medium">{inspection.location}</p>
                         </div>
                         <div>
-                           <p className="text-sm text-gray-500">Status</p>
+                           <p className="text-sm text-gray-500">Inspection Status</p>
+                           <Badge variant="outline" className={getStatusBadgeColor(inspection.inspectionStatus)}>
+                              {inspection.inspectionStatus}
+                           </Badge>
+                        </div>
+                        <div>
+                           <p className="text-sm text-gray-500">Result</p>
                            <Badge variant="outline" className={getResultBadgeColor(inspection.findings?.result)}>
                               {inspection.findings?.result || 'Pending'}
                            </Badge>
@@ -183,22 +232,38 @@ const InspectionReportReviewModal = ({ isOpen, onClose, application }) => {
                               >
                                  <span className="text-sm text-gray-600">{file.filename}</span>
                                  <div className="flex gap-2">
-                                    <Button
-                                       size="sm"
-                                       variant="outline"
-                                       onClick={() => handlePreview(file)}
-                                    >
-                                       <Eye className="h-4 w-4 mr-1" />
-                                       Preview
-                                    </Button>
-                                    <Button
-                                       size="sm"
-                                       variant="outline"
-                                       onClick={() => handleDownload(file)}
-                                    >
-                                       <Download className="h-4 w-4 mr-1" />
-                                       Download
-                                    </Button>
+                                    <TooltipProvider delayDuration={250}>
+                                       <Tooltip>
+                                          <TooltipTrigger asChild>
+                                             <Button
+                                                size="icon"
+                                                variant="outline"
+                                                onClick={() => handlePreview(file)}
+                                             >
+                                                <Eye className="h-4 w-4" />
+                                             </Button>
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                             <p>Preview</p>
+                                          </TooltipContent>
+                                       </Tooltip>
+                                    </TooltipProvider>
+                                    <TooltipProvider delayDuration={250}>
+                                       <Tooltip>
+                                          <TooltipTrigger asChild>
+                                             <Button
+                                                size="icon"
+                                                variant="outline"
+                                                onClick={() => handleDownload(file)}
+                                             >
+                                                <Download className="h-4 w-4" />
+                                             </Button>
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                             <p>Download</p>
+                                          </TooltipContent>
+                                       </Tooltip>
+                                    </TooltipProvider>
                                  </div>
                               </div>
                            ))}
@@ -210,15 +275,15 @@ const InspectionReportReviewModal = ({ isOpen, onClose, application }) => {
 
                   {/* History */}
                   <Separator />
-                  <div>
+                  {/* <div>
                      <h3 className="text-lg font-semibold mb-2">History</h3>
                      <div className="space-y-2">
-                        {inspection.history.map((entry, index) => (
+                        {inspection.history?.map((entry, index) => (
                            <div key={index} className="bg-gray-50 p-3 rounded-lg">
                               <div className="flex justify-between text-sm">
                                  <span className="font-medium">{entry.action}</span>
                                  <span className="text-gray-500">
-                                    {format(new Date(entry.timestamp), 'MMM d, yyyy h:mm a')}
+                                    {formatDate(entry.timestamp)}
                                  </span>
                               </div>
                               {entry.notes && (
@@ -227,7 +292,7 @@ const InspectionReportReviewModal = ({ isOpen, onClose, application }) => {
                            </div>
                         ))}
                      </div>
-                  </div>
+                  </div> */}
                </div>
             ) : (
                <div className="text-center py-6 text-gray-500">

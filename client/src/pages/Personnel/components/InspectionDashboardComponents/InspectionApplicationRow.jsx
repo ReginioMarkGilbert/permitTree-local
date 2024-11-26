@@ -33,6 +33,25 @@ const DELETE_INSPECTION = gql`
    }
 `;
 
+const UNDO_INSPECTION_REPORT = gql`
+   mutation UndoInspectionReport($id: ID!) {
+      undoInspectionReport(id: $id) {
+         id
+         inspectionStatus
+         findings {
+            result
+            observations
+            recommendations
+         }
+         permitId
+         applicationNumber
+         scheduledDate
+         scheduledTime
+         location
+      }
+   }
+`;
+
 const InspectionApplicationRow = ({
    application,
    inspection,
@@ -53,6 +72,16 @@ const InspectionApplicationRow = ({
       },
       onError: (error) => {
          toast.error(`Error cancelling inspection: ${error.message}`);
+      }
+   });
+
+   const [undoInspectionReport] = useMutation(UNDO_INSPECTION_REPORT, {
+      onCompleted: () => {
+         toast.success('Inspection report has been undone');
+         onRefetch?.();
+      },
+      onError: (error) => {
+         toast.error(`Error undoing inspection report: ${error.message}`);
       }
    });
 
@@ -90,6 +119,19 @@ const InspectionApplicationRow = ({
          setCancellationReason('');
       } catch (error) {
          console.error('Error deleting inspection:', error);
+      }
+   };
+
+   const handleUndoReport = async () => {
+      try {
+         await undoInspectionReport({
+            variables: {
+               id: inspection.id
+            }
+         });
+      } catch (error) {
+         console.error('Error undoing inspection report:', error);
+         toast.error(`Failed to undo inspection report: ${error.message}`);
       }
    };
 
@@ -158,6 +200,29 @@ const InspectionApplicationRow = ({
                   </TooltipTrigger>
                   <TooltipContent>
                      <p>Complete Inspection</p>
+                  </TooltipContent>
+               </Tooltip>
+            </TooltipProvider>
+         );
+      }
+
+      // Add undo report button for completed inspections
+      if (inspection?.inspectionStatus === 'Completed') {
+         actions.push(
+            <TooltipProvider key="undo-report-action">
+               <Tooltip>
+                  <TooltipTrigger asChild>
+                     <Button
+                        onClick={handleUndoReport}
+                        variant="outline"
+                        size="icon"
+                        className="text-yellow-600 hover:text-yellow-800"
+                     >
+                        <Undo2 className="h-4 w-4" />
+                     </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                     <p>Undo Inspection Report</p>
                   </TooltipContent>
                </Tooltip>
             </TooltipProvider>
