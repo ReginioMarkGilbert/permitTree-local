@@ -2,6 +2,10 @@ import React, { useState, useMemo } from 'react';
 import { useQuery, gql } from '@apollo/client';
 import { FileX } from 'lucide-react';
 import { format } from 'date-fns';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
 import InspectionApplicationRow from './components/InspectionDashboardComponents/InspectionApplicationRow';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import ApplicationFilters from '@/components/DashboardFilters/ApplicationFilters';
@@ -15,6 +19,7 @@ import {
    TableHeader,
    TableRow,
 } from "@/components/ui/table";
+import InspectionEventModal from './components/InspectionDashboardComponents/InspectionEventModal';
 
 const GET_APPLICATIONS_AND_INSPECTIONS = gql`
   query GetApplicationsAndInspections {
@@ -28,6 +33,8 @@ const GET_APPLICATIONS_AND_INSPECTIONS = gql`
     getInspections {
       id
       permitId
+      applicationNumber
+      applicationType
       scheduledDate
       scheduledTime
       location
@@ -46,11 +53,13 @@ const InspectionSchedulingPage = () => {
       }
    });
    const [activeMainTab, setActiveMainTab] = useState('For Schedule');
+   const [view, setView] = useState('table');
+   const [selectedEvent, setSelectedEvent] = useState(null);
 
    const { data, loading, error, refetch } = useQuery(GET_APPLICATIONS_AND_INSPECTIONS);
    const isMobile = useMediaQuery('(max-width: 640px)');
 
-   const mainTabs = ['For Schedule', 'Scheduled Inspection', 'Completed Inspection'];
+   const mainTabs = ['For Schedule', 'Scheduled Inspection', 'Completed Inspection', 'Calendar'];
 
    const getInspectionStatus = useMemo(() => (applicationId) => {
       if (!data?.getInspections) return null;
@@ -116,9 +125,98 @@ const InspectionSchedulingPage = () => {
    const currentDescription = descriptions[activeMainTab] || '';
    const animatedText = useTypewriter(currentDescription, 10);
 
+   const calendarEvents = useMemo(() => {
+      if (!data?.getInspections) return [];
+
+      return data.getInspections
+         .filter(inspection => inspection.inspectionStatus === 'Pending')
+         .map(inspection => {
+            const dateObj = new Date(inspection.scheduledDate);
+            const eventDate = dateObj.toISOString().split('T')[0];
+            const eventTime = inspection.scheduledTime.padStart(5, '0');
+
+            return {
+               id: inspection.id,
+               title: `${inspection.applicationNumber}`,
+               start: `${eventDate}T${eventTime}:00`,
+               end: `${eventDate}T${eventTime}:00`,
+               location: inspection.location,
+               extendedProps: {
+                  applicationType: inspection.applicationType,
+                  applicationNumber: inspection.applicationNumber,
+                  location: inspection.location
+               },
+               classNames: ['inspection-event']
+            };
+         });
+   }, [data]);
+
+   const handleEventClick = (clickInfo) => {
+      setSelectedEvent(clickInfo.event);
+   };
+
    const renderContent = () => {
       if (loading) return <div className="text-center">Loading applications...</div>;
       if (error) return <div className="text-center text-destructive">Error: {error.message}</div>;
+
+      if (activeMainTab === 'Calendar') {
+         return (
+            <div className="space-y-4">
+               <div className="h-[700px] bg-background rounded-lg shadow p-4">
+                  <FullCalendar
+                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                     initialView="timeGridWeek"
+                     headerToolbar={{
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                     }}
+                     events={calendarEvents}
+                     eventClick={handleEventClick}
+                     slotMinTime="06:00:00"
+                     slotMaxTime="18:00:00"
+                     allDaySlot={false}
+                     height="100%"
+                     eventColor="#2563eb"
+                     eventClassNames="cursor-pointer"
+                     slotLabelFormat={{
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        meridiem: 'short'
+                     }}
+                     nowIndicator={true}
+                     scrollTime={`${new Date().getHours()}:00:00`}
+                     eventTimeFormat={{
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        meridiem: 'short'
+                     }}
+                     dayHeaderFormat={{
+                        weekday: 'short',
+                        month: 'numeric',
+                        day: 'numeric',
+                        omitCommas: true
+                     }}
+                     eventContent={(eventInfo) => (
+                        <div className="p-1">
+                           <div className="font-medium text-xs">
+                              {eventInfo.event.title}
+                           </div>
+                           <div className="text-xs opacity-75">
+                              {eventInfo.event.extendedProps.applicationType}
+                           </div>
+                        </div>
+                     )}
+                  />
+               </div>
+               <InspectionEventModal
+                  isOpen={!!selectedEvent}
+                  onClose={() => setSelectedEvent(null)}
+                  event={selectedEvent}
+               />
+            </div>
+         );
+      }
 
       if (filteredApplications.length === 0) {
          return (
