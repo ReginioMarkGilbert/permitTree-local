@@ -48,6 +48,7 @@ export const logout = () => {
    // Clear all auth-related data
    removeToken();
    localStorage.removeItem('user');
+   localStorage.removeItem('admin');
 
    // Reset theme to system default
    document.documentElement.classList.remove('dark');
@@ -61,4 +62,15 @@ export const logout = () => {
 export const getUserRoles = () => {
    const user = JSON.parse(localStorage.getItem('user'));
    return user ? user.roles : [];
+};
+
+export const initializeUserTheme = async (userData) => {
+   if (userData?.themePreference) {
+      localStorage.setItem('theme', userData.themePreference);
+      if (userData.themePreference === 'dark') {
+         document.documentElement.classList.add('dark');
+      } else {
+         document.documentElement.classList.remove('dark');
+      }
+   }
 };

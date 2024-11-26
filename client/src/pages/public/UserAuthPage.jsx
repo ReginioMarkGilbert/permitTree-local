@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import './styles/UserAuthPage.css';
 import { gql, useMutation, useApolloClient } from '@apollo/client';
+import { initializeUserTheme } from '@/utils/auth';
 
 const REGISTER_USER = gql`
   mutation RegisterUser($firstName: String!, $lastName: String!, $username: String!, $password: String!) {
@@ -142,6 +143,71 @@ const UserAuthPage = () => {
             // Set token in localStorage
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
+
+            // Initialize theme based on user preferences
+            try {
+               // Query for user/admin theme preference
+               const themeQuery = user.roles.some(role => [
+                  'Chief_RPS',
+                  'Chief_TSD',
+                  'Technical_Staff',
+                  'Receiving_Clerk',
+                  'Releasing_Clerk',
+                  'Accountant',
+                  'OOP_Staff_Incharge',
+                  'Bill_Collector',
+                  'Credit_Officer',
+                  'PENR_CENR_Officer',
+                  'Deputy_CENR_Officer',
+                  'Inspection_Team'
+               ].includes(role))
+                  ? await client.query({
+                     query: gql`
+                        query GetCurrentAdmin {
+                           getCurrentAdmin {
+                              themePreference
+                           }
+                        }
+                     `
+                  })
+                  : await client.query({
+                     query: gql`
+                        query GetCurrentUser {
+                           getCurrentUser {
+                              themePreference
+                           }
+                        }
+                     `
+                  });
+
+               const themePreference = user.roles.some(role => [
+                  'Chief_RPS',
+                  'Chief_TSD',
+                  'Technical_Staff',
+                  'Receiving_Clerk',
+                  'Releasing_Clerk',
+                  'Accountant',
+                  'OOP_Staff_Incharge',
+                  'Bill_Collector',
+                  'Credit_Officer',
+                  'PENR_CENR_Officer',
+                  'Deputy_CENR_Officer',
+                  'Inspection_Team'
+               ].includes(role))
+                  ? themeQuery.data.getCurrentAdmin?.themePreference
+                  : themeQuery.data.getCurrentUser?.themePreference;
+
+               if (themePreference) {
+                  localStorage.setItem('theme', themePreference);
+                  if (themePreference === 'dark') {
+                     document.documentElement.classList.add('dark');
+                  } else {
+                     document.documentElement.classList.remove('dark');
+                  }
+               }
+            } catch (themeError) {
+               console.error('Error setting theme:', themeError);
+            }
 
             // Force Apollo Client to reset its store
             await client.resetStore();

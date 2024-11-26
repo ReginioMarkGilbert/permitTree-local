@@ -108,6 +108,17 @@ export function ThemeToggle() {
       });
    }, [adminData, userData, adminLoading, userLoading, adminError, userError]);
 
+   // Add this new effect to initialize theme on login
+   useEffect(() => {
+      if (adminData?.getCurrentAdmin) {
+         console.log('Initializing admin theme:', adminData.getCurrentAdmin.themePreference);
+         setTheme(adminData.getCurrentAdmin.themePreference);
+      } else if (userData?.getCurrentUser) {
+         console.log('Initializing user theme:', userData.getCurrentUser.themePreference);
+         setTheme(userData.getCurrentUser.themePreference);
+      }
+   }, [adminData?.getCurrentAdmin, userData?.getCurrentUser]);
+
    const handleThemeChange = async (newTheme) => {
       console.log('Starting theme change:', {
          newTheme,
