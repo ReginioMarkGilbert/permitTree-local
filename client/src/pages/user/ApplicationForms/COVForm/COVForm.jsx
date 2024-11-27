@@ -17,6 +17,7 @@ import { formatLabel, formatReviewValue } from '@/pages/user/ApplicationForms/CS
 import '@/components/ui/styles/customScrollBar.css';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2 } from "lucide-react";
+import FormStepIndicator from '../FormStepIndicator';
 
 const CREATE_COV_PERMIT = gql`
   mutation CreateCOVPermit($input: COVPermitInput!) {
@@ -290,6 +291,9 @@ const COVForm = () => {
             <h1 className="text-3xl font-[700] text-green-800 dark:text-green-500 mb-6 text-center">
                Certificate of Verification Application
             </h1>
+            <div className="max-w-2xl mx-auto mb-6">
+               <FormStepIndicator currentStep={currentStep + 1} formType="COV" />
+            </div>
             <Card className="max-w-2xl mx-auto shadow-lg bg-background">
                <CardHeader>
                   <CardTitle className="text-foreground">{steps[currentStep].title}</CardTitle>
@@ -425,7 +429,7 @@ const COVForm = () => {
                         </div>
                      )}
 
-                     {(currentStep === 1 || currentStep === 2) && (
+                     {currentStep === 1 && (
                         <div className="space-y-4">
                            <UploadCard
                               label="Letter of Intent"
@@ -447,6 +451,32 @@ const COVForm = () => {
                               files={formData.files.forestCertification}
                               onFileChange={(e) => handleFileChange(e, 'forestCertification')}
                               onRemoveFile={(file) => removeFile('forestCertification', file)}
+                           />
+                        </div>
+                     )}
+
+                     {currentStep === 2 && (
+                        <div className="space-y-4">
+                           <UploadCard
+                              label="OR/CR"
+                              documentLabel="Upload OR/CR"
+                              files={formData.files.orCr}
+                              onFileChange={(e) => handleFileChange(e, 'orCr')}
+                              onRemoveFile={(file) => removeFile('orCr', file)}
+                           />
+                           <UploadCard
+                              label="Driver's License"
+                              documentLabel="Upload Driver's License"
+                              files={formData.files.driverLicense}
+                              onFileChange={(e) => handleFileChange(e, 'driverLicense')}
+                              onRemoveFile={(file) => removeFile('driverLicense', file)}
+                           />
+                           <UploadCard
+                              label="Special Power of Attorney"
+                              documentLabel={<>Upload Special Power of Attorney <strong>(If Applicable)</strong></>}
+                              files={formData.files.specialPowerOfAttorney}
+                              onFileChange={(e) => handleFileChange(e, 'specialPowerOfAttorney')}
+                              onRemoveFile={(file) => removeFile('specialPowerOfAttorney', file)}
                            />
                         </div>
                      )}

@@ -12,6 +12,7 @@ import '@/components/ui/styles/customScrollBar.css'
 import { CheckboxItem, UploadCard, CustomSelect, CustomDatePicker, formatLabel, formatReviewValue } from './CSAWFormUtils';
 import { gql, useMutation } from '@apollo/client';
 import { Loader2 } from "lucide-react";
+import FormStepIndicator from '../FormStepIndicator';
 
 const CREATE_CSAW_PERMIT = gql`
   mutation CreateCSAWPermit($input: CSAWPermitInput!) {
@@ -392,6 +393,11 @@ const ChainsawRegistrationForm = () => {
             <h1 className="text-2xl sm:text-3xl font-[700] text-green-800 dark:text-green-500 mb-4 text-center">
                Chainsaw Registration Application
             </h1>
+
+            <div className="max-w-2xl mx-auto mb-6">
+               <FormStepIndicator currentStep={currentStep + 1} steps={steps} />
+            </div>
+
             <Card className="max-w-2xl mx-auto shadow-lg bg-background">
                <CardHeader className="p-4 sm:p-6">
                   <CardTitle className="text-lg sm:text-xl text-foreground">{steps[currentStep].title}</CardTitle>

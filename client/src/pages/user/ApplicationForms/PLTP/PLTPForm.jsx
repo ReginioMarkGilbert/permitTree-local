@@ -17,7 +17,7 @@ import { gql, useMutation } from '@apollo/client';
 import { formatLabel, formatReviewValue } from '@/pages/user/ApplicationForms/CSAWForm/CSAWFormUtils';
 import '@/components/ui/styles/customScrollBar.css';
 import { Loader2 } from "lucide-react";
-
+import FormStepIndicator from '../FormStepIndicator';
 const CREATE_PLTP_PERMIT = gql`
   mutation CreatePLTPPermit($input: PLTPPermitInput!) {
     createPLTPPermit(input: $input) {
@@ -301,6 +301,9 @@ const PLTPForm = () => {
             <h1 className="text-3xl font-[700] text-green-800 dark:text-green-500 mb-6 text-center">
                Private Land Timber Permit Application
             </h1>
+            <div className="max-w-2xl mx-auto mb-6">
+               <FormStepIndicator currentStep={currentStep + 1} formType="PLTP" />
+            </div>
             <Card className="max-w-2xl mx-auto shadow-lg bg-background">
                <CardHeader>
                   <CardTitle className="text-foreground">{steps[currentStep].title}</CardTitle>

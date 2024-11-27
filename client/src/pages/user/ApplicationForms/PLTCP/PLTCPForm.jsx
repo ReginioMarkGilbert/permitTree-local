@@ -16,6 +16,7 @@ import { UploadCard } from '@/pages/user/ApplicationForms/CSAWForm/CSAWFormUtils
 import { gql, useMutation } from '@apollo/client';
 import { formatLabel, formatReviewValue } from '@/pages/user/ApplicationForms/CSAWForm/CSAWFormUtils';
 import '@/components/ui/styles/customScrollBar.css';
+import FormStepIndicator from '../FormStepIndicator';
 
 const CREATE_PLTCP_PERMIT = gql`
   mutation CreatePLTCPPermit($input: PLTCPPermitInput!) {
@@ -297,6 +298,9 @@ const PLTCPForm = () => {
             <h1 className="text-3xl font-[700] text-green-800 dark:text-green-500 mb-6 text-center">
                Public Land Tree Cutting Permit Application
             </h1>
+            <div className="max-w-2xl mx-auto mb-6">
+               <FormStepIndicator currentStep={currentStep + 1} formType="PLTCP" />
+            </div>
             <Card className="max-w-2xl mx-auto shadow-lg bg-background">
                <CardHeader>
                   <CardTitle className="text-foreground">{steps[currentStep].title}</CardTitle>
