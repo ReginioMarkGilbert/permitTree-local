@@ -1,28 +1,32 @@
 // Technical Staff Application Row
 
-import React, { useState } from 'react';
-import { Eye, ClipboardCheck, FileCheck, RotateCcw, FileCheck2, FileText } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { TableCell, TableRow } from "@/components/ui/table";
 import {
    Tooltip,
    TooltipContent,
    TooltipProvider,
    TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Card } from "@/components/ui/card";
 import { format } from 'date-fns';
-import TS_ViewModal from './TS_ViewModal';
-import TS_ReviewModal from './TS_ReviewModal';
+import { ClipboardCheck, Download, Eye, FileCheck, FileCheck2, RotateCcw } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import TS_AuthenticityReviewModal from './TS_AuthenticityReviewModal';
+import TS_ReviewModal from './TS_ReviewModal';
+import TS_ViewModal from './TS_ViewModal';
 // import GenerateCertificateModal from './GenerateCertificateModal';
-import CertificateActionHandler from './CertificateActionHandler';
 import { getUserRoles } from '@/utils/auth';
+import CertificateActionHandler from './CertificateActionHandler';
 // import { useUndoApplicationApproval } from '@/hooks/useApplications';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { gql, useMutation, useQuery } from '@apollo/client';
+import { Loader2 } from "lucide-react";
 import { toast } from 'sonner';
-import { gql, useMutation } from '@apollo/client';
-import CSAWCertificateViewModal from '../../CertificateComponents/CSAWCertificateViewModal';
+import CertificateViewModal from './CertificateViewModal';
 
 const GET_APPLICATION_DETAILS = gql`
   query GetApplication($id: ID!) {
@@ -104,12 +108,39 @@ const UNDO_ACCEPTANCE_TECHNICAL_STAFF = gql`
   }
 `;
 
+const GET_CERTIFICATE = gql`
+  query GetCertificatesByApplicationId($applicationId: ID!) {
+    getCertificatesByApplicationId(applicationId: $applicationId) {
+      id
+      certificateNumber
+      certificateStatus
+      dateCreated
+      dateIssued
+      expiryDate
+      uploadedCertificate {
+        filename
+        contentType
+        fileData
+        uploadDate
+        metadata {
+          certificateType
+          issueDate
+          expiryDate
+          remarks
+        }
+      }
+    }
+  }
+`;
+
 const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, isMobile }) => {
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
    const [isAuthenticityModalOpen, setIsAuthenticityModalOpen] = useState(false);
    const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(false);
    const [isViewCertModalOpen, setIsViewCertModalOpen] = useState(false);
+   const [selectedFile, setSelectedFile] = useState(null);
+   const [previewUrl, setPreviewUrl] = useState(null);
    // const { handleUndoApproval, handleUndoAcceptance } = useUndoApplicationApproval();
    const [updatePermitStage] = useMutation(UPDATE_PERMIT_STAGE);
    const [undoAcceptanceTechnicalStaff] = useMutation(UNDO_ACCEPTANCE_TECHNICAL_STAFF);
@@ -117,6 +148,11 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
    const handleViewCertClick = () => setIsViewCertModalOpen(true);
    const handleReviewClick = () => setIsReviewModalOpen(true);
    const handleAuthenticityClick = () => setIsAuthenticityModalOpen(true);
+
+   const { loading: certLoading, error: certError, data: certData } = useQuery(GET_CERTIFICATE, {
+      variables: { applicationId: app.id },
+      skip: !isViewCertModalOpen
+   });
 
    const handleReviewComplete = () => {
       setIsReviewModalOpen(false);
@@ -199,6 +235,45 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
       onReviewComplete();
    };
 
+   const handlePreview = (fileData, contentType) => {
+      try {
+         const byteCharacters = atob(fileData);
+         const byteNumbers = new Array(byteCharacters.length);
+         for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+         }
+         const byteArray = new Uint8Array(byteNumbers);
+         const file = new Blob([byteArray], { type: contentType });
+         const fileUrl = URL.createObjectURL(file);
+         setPreviewUrl(fileUrl);
+         setSelectedFile(file);
+      } catch (error) {
+         console.error('Error previewing file:', error);
+         toast.error('Error previewing file');
+      }
+   };
+
+   const handleDownload = (fileData, filename, contentType) => {
+      try {
+         const byteCharacters = atob(fileData);
+         const byteNumbers = new Array(byteCharacters.length);
+         for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+         }
+         const byteArray = new Uint8Array(byteNumbers);
+         const file = new Blob([byteArray], { type: contentType });
+         const link = document.createElement('a');
+         link.href = URL.createObjectURL(file);
+         link.download = filename;
+         document.body.appendChild(link);
+         link.click();
+         document.body.removeChild(link);
+      } catch (error) {
+         console.error('Error downloading file:', error);
+         toast.error('Error downloading file');
+      }
+   };
+
    const renderActionButtons = () => {
       const actions = [
          {
@@ -207,15 +282,6 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
             onClick: handleViewClick,
             variant: "outline"
          },
-
-         // Only show View Certificate button for Chainsaw Registration in Created Permits tab
-         currentTab === 'Created Permits' && app.applicationType === 'Chainsaw Registration' && {
-            icon: FileText,
-            label: "View Certificate",
-            onClick: () => setIsViewCertModalOpen(true),
-            variant: "outline",
-            className: "text-green-600 hover:text-green-800"
-      },
 
          app.status === 'Submitted' && {
             icon: ClipboardCheck,
@@ -233,6 +299,14 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
             className: "text-green-600 hover:text-green-800"
          },
 
+         currentTab === 'Created Permits' && {
+            icon: FileCheck2,
+            label: "View Certificate",
+            onClick: handleViewCertClick,
+            variant: "outline",
+            className: "text-blue-600 hover:text-blue-800"
+         },
+
          (currentTab === 'Approved Applications' ||
             currentTab === 'Accepted Applications' ||
             currentTab === 'Created Permits') && {
@@ -247,13 +321,12 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
 
          currentTab === 'Awaiting Permit Creation' && {
             icon: FileCheck2,
-            label: app.applicationType === 'Chainsaw Registration' ?
-               'Generate Certificate' : 'Upload Certificate',
+            label: 'Upload Certificate',
             onClick: () => setIsCertificateModalOpen(true),
             variant: "outline",
             className: "text-green-600 hover:text-green-800"
          }
-      ].filter(Boolean); // Remove falsy values
+      ].filter(Boolean);
 
       return actions.map((action, index) => (
          <TooltipProvider key={index}>
@@ -275,6 +348,21 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
          </TooltipProvider>
       ));
    };
+
+   useEffect(() => {
+      return () => {
+         if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+         }
+      };
+   }, [previewUrl]);
+
+   useEffect(() => {
+      if (certError) {
+         console.error('Error fetching certificate:', certError);
+         toast.error('Error loading certificate');
+      }
+   }, [certError]);
 
    if (isMobile) {
       return (
@@ -299,15 +387,6 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
                   {renderActionButtons()}
                </div>
             </Card>
-
-            {/* Add CSAWCertificateViewModal */}
-            {app.applicationType === 'Chainsaw Registration' && currentTab === 'Created Permits' && (
-               <CSAWCertificateViewModal
-                  isOpen={isViewCertModalOpen}
-                  onClose={() => setIsViewCertModalOpen(false)}
-                  applicationId={app.id}
-               />
-            )}
 
             {/* Add Modals */}
             <TS_ViewModal
@@ -358,15 +437,6 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
             </TableCell>
          </TableRow>
 
-         {/* Add CSAWCertificateViewModal */}
-         {app.applicationType === 'Chainsaw Registration' && currentTab === 'Created Permits' && (
-            <CSAWCertificateViewModal
-               isOpen={isViewCertModalOpen}
-               onClose={() => setIsViewCertModalOpen(false)}
-               applicationId={app.id}
-            />
-         )}
-
          {/* Add Modals */}
          <TS_ViewModal
             isOpen={isViewModalOpen}
@@ -391,6 +461,15 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
             application={app}
             onComplete={handleCertificateComplete}
          />
+         {currentTab === 'Created Permits' && (
+            <CertificateViewModal
+               isOpen={isViewCertModalOpen}
+               onClose={() => setIsViewCertModalOpen(false)}
+               certificate={certData?.getCertificatesByApplicationId[0]}
+               loading={certLoading}
+               error={certError}
+            />
+         )}
       </>
    );
 };

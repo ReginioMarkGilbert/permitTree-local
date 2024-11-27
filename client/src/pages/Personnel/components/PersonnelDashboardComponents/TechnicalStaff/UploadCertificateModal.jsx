@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useMutation, gql } from '@apollo/client';
 import { toast } from 'sonner';
-import FileUploader from '@/components/ui/file-uploader';
+import { X, Upload } from 'lucide-react';
 
 const UPLOAD_CERTIFICATE = gql`
   mutation UploadCertificate($input: UploadCertificateInput!) {
@@ -41,8 +41,16 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
 
    const [uploadCertificate] = useMutation(UPLOAD_CERTIFICATE);
 
-   const handleFileChange = (file) => {
-      setCertificateFile(file);
+   const handleFileChange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+         console.log('Selected file:', file);
+         setCertificateFile(file);
+      }
+   };
+
+   const handleRemoveFile = () => {
+      setCertificateFile(null);
    };
 
    const handleMetadataChange = (e) => {
@@ -53,13 +61,11 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
       }));
    };
 
-   // Function to convert file to base64
    const fileToBase64 = (file) => {
       return new Promise((resolve, reject) => {
          const reader = new FileReader();
          reader.readAsDataURL(file);
          reader.onload = () => {
-            // Extract the base64 string from the Data URL
             const base64String = reader.result.split(',')[1];
             resolve(base64String);
          };
@@ -75,7 +81,6 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
 
       setIsUploading(true);
       try {
-         // Convert file to base64
          const fileData = await fileToBase64(certificateFile);
 
          const { data } = await uploadCertificate({
@@ -129,11 +134,35 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
 
                <div className="grid gap-2">
                   <Label>Certificate File</Label>
-                  <FileUploader
-                     accept=".pdf,.doc,.docx"
-                     maxSize={5242880} // 5MB
-                     onFileSelect={handleFileChange}
-                  />
+                  {certificateFile && (
+                     <div className="flex items-center justify-between mb-2 bg-gray-100 p-2 rounded">
+                        <span className="text-sm text-gray-600 truncate">{certificateFile.name}</span>
+                        <Button
+                           type="button"
+                           variant="ghost"
+                           size="sm"
+                           onClick={handleRemoveFile}
+                        >
+                           <X className="h-4 w-4" />
+                        </Button>
+                     </div>
+                  )}
+                  <div className="flex items-center">
+                     <Input
+                        id="certificate-file"
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        onChange={handleFileChange}
+                        className="hidden"
+                     />
+                     <Label
+                        htmlFor="certificate-file"
+                        className="cursor-pointer flex items-center justify-center w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                     >
+                        <Upload className="mr-2 h-4 w-4" />
+                        {certificateFile ? 'Change Certificate' : 'Upload Certificate'}
+                     </Label>
+                  </div>
                   <p className="text-xs text-gray-500">Accepted formats: PDF, DOC, DOCX (max 5MB)</p>
                </div>
 

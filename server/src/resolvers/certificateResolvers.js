@@ -16,14 +16,31 @@ const certificateResolvers = {
       },
       getCertificateById: async (_, { id }) => {
          try {
-            return await Certificate.findById(id);
+            const certificate = await Certificate.findById(id);
+            if (!certificate) {
+               throw new UserInputError('Certificate not found');
+            }
+            const certObj = certificate.toObject();
+            // Convert Buffer to base64 string if it exists
+            if (certObj.uploadedCertificate && certObj.uploadedCertificate.fileData) {
+               certObj.uploadedCertificate.fileData = certObj.uploadedCertificate.fileData.toString('base64');
+            }
+            return certObj;
          } catch (error) {
             throw new Error(`Failed to fetch certificate: ${error.message}`);
          }
       },
       getCertificatesByApplicationId: async (_, { applicationId }) => {
          try {
-            return await Certificate.find({ applicationId });
+            const certificates = await Certificate.find({ applicationId });
+            return certificates.map(cert => {
+               const certObj = cert.toObject();
+               // Convert Buffer to base64 string if it exists
+               if (certObj.uploadedCertificate && certObj.uploadedCertificate.fileData) {
+                  certObj.uploadedCertificate.fileData = certObj.uploadedCertificate.fileData.toString('base64');
+               }
+               return certObj;
+            });
          } catch (error) {
             throw new Error(`Failed to fetch certificates: ${error.message}`);
          }

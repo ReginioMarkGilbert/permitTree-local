@@ -33,3 +33,4 @@ const COVPermitSchema = new mongoose.Schema({
 const COVPermit = Permit.discriminator('COVPermit', COVPermitSchema);
 
 module.exports = COVPermit;
+
