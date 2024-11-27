@@ -11,7 +11,8 @@ const CSAWCertificateTemplate = forwardRef(({ certificate, application }, ref) =
       ownerName: certificate.certificateData.ownerName,
       serialNumber: certificate.certificateData.chainsawDetails.serialNumber
    });
-
+   // correct way to format date in certificate template
+   // format date string
    const formatDateString = (dateString) => {
       try {
          const date = new Date(parseInt(dateString));

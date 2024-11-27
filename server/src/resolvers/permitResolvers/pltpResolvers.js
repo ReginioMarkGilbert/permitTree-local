@@ -7,10 +7,43 @@ const PersonnelNotificationService = require('../../services/personnelNotificati
 const pltpResolvers = {
    Query: {
       getAllPLTPPermits: async () => {
-         return await PLTPPermit.find();
+         const permits = await PLTPPermit.find().lean().exec();
+         return permits.map(permit => ({
+            ...permit,
+            id: permit._id.toString(),
+            dateOfSubmission: permit.dateOfSubmission.toISOString()
+         }));
       },
       getPLTPPermitById: async (_, { id }) => {
-         return await PLTPPermit.findById(id);
+         try {
+            const permit = await PLTPPermit.findById(id).lean().exec();
+            if (!permit) {
+               throw new Error('Permit not found');
+            }
+
+            // Convert Buffer data to base64 string for files
+            const processedFiles = {};
+            if (permit.files) {
+               for (const [key, files] of Object.entries(permit.files)) {
+                  if (Array.isArray(files)) {
+                     processedFiles[key] = files.map(file => ({
+                        ...file,
+                        data: file.data.toString('base64')
+                     }));
+                  }
+               }
+            }
+
+            return {
+               ...permit,
+               id: permit._id.toString(),
+               dateOfSubmission: permit.dateOfSubmission.toISOString(),
+               files: processedFiles
+            };
+         } catch (error) {
+            console.error('Error fetching PLTP permit:', error);
+            throw new Error(`Failed to fetch PLTP permit: ${error.message}`);
+         }
       },
    },
    Mutation: {
@@ -43,7 +76,7 @@ const pltpResolvers = {
                applicationType: 'Private Land Timber Permit',
                status: 'Submitted',
                currentStage: 'TechnicalStaffReview',
-               dateOfSubmission: new Date().toISOString(),
+               dateOfSubmission: new Date(),
                files: processedFiles,
             };
 
@@ -63,7 +96,8 @@ const pltpResolvers = {
 
             return {
                ...savedPermit.toObject(),
-               id: savedPermit._id.toString()
+               id: savedPermit._id.toString(),
+               dateOfSubmission: savedPermit.dateOfSubmission.toISOString()
             };
          } catch (error) {
             console.error('Error creating PLTP permit:', error);
@@ -75,17 +109,60 @@ const pltpResolvers = {
             throw new Error('You must be logged in to update a permit');
          }
 
-         const permit = await PLTPPermit.findById(id);
-         if (!permit) {
-            throw new Error('Permit not found');
-         }
+         try {
+            const permit = await PLTPPermit.findById(id);
+            if (!permit) {
+               throw new Error('Permit not found');
+            }
 
-         if (permit.applicantId.toString() !== user.id && user.role !== 'admin') {
-            throw new Error('You are not authorized to update this permit');
-         }
+            // Update non-file fields
+            Object.keys(input).forEach(key => {
+               if (key !== 'files' && input[key] !== undefined) {
+                  permit[key] = input[key];
+               }
+            });
 
-         Object.assign(permit, input);
-         return await permit.save();
+            // Handle file updates
+            if (input.files) {
+               const updatedFiles = { ...permit.files };
+
+               for (const [fileType, newFiles] of Object.entries(input.files)) {
+                  if (Array.isArray(newFiles)) {
+                     // If newFiles array is empty, it means all files of this type were removed
+                     if (newFiles.length === 0) {
+                        updatedFiles[fileType] = [];
+                        continue;
+                     }
+
+                     // Get existing files
+                     const existingFiles = permit.files[fileType] || [];
+
+                     // Process new files
+                     const processedNewFiles = newFiles
+                        .filter(file => file.data) // Only process files that have new data
+                        .map(file => ({
+                           filename: file.filename,
+                           contentType: file.contentType,
+                           data: Binary.createFromBase64(file.data)
+                        }));
+
+                     // If there are new files, replace all existing files of this type
+                     if (processedNewFiles.length > 0) {
+                        updatedFiles[fileType] = processedNewFiles;
+                     }
+                  }
+               }
+
+               permit.files = updatedFiles;
+               permit.markModified('files');
+            }
+
+            await permit.save();
+            return permit;
+         } catch (error) {
+            console.error('Error updating PLTP permit:', error);
+            throw new Error(`Failed to update PLTP permit: ${error.message}`);
+         }
       },
       savePLTPPermitDraft: async (_, { input }, { user }) => {
          if (!user) {
@@ -98,11 +175,11 @@ const pltpResolvers = {
             // Process file inputs
             const processedFiles = {};
             for (const [key, files] of Object.entries(input.files)) {
-               if (files && files.length > 0) {
+               if (files && Array.isArray(files) && files.length > 0) {
                   processedFiles[key] = files.map(file => ({
                      filename: file.filename,
-                     contentType: file.contentType || 'application/octet-stream',
-                     data: file.data ? Binary.createFromBase64(file.data) : undefined
+                     contentType: file.contentType,
+                     data: file.data ? Binary.createFromBase64(file.data) : null
                   }));
                } else {
                   processedFiles[key] = [];
@@ -116,13 +193,17 @@ const pltpResolvers = {
                applicationType: 'Private Land Timber Permit',
                status: 'Draft',
                currentStage: 'Draft',
-               dateOfSubmission: new Date().toISOString(),
+               dateOfSubmission: new Date(),
                files: processedFiles,
             };
 
             const newPermit = new PLTPPermit(permitData);
             const savedPermit = await newPermit.save();
-            return savedPermit;
+            return {
+               ...savedPermit.toObject(),
+               id: savedPermit._id.toString(),
+               dateOfSubmission: savedPermit.dateOfSubmission.toISOString()
+            };
          } catch (error) {
             console.error('Error saving PLTP permit draft:', error);
             throw new Error(`Failed to save PLTP permit draft: ${error.message}`);

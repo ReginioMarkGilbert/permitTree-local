@@ -75,7 +75,7 @@ const TS_AuthenticityReviewModal = ({ isOpen, onClose, application, onReviewComp
                </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-               <div className="text-sm text-gray-600">
+               <div className="text-sm text-gray-600 dark:text-gray-300">
                   <p className="mb-2">By approving authenticity, you confirm that:</p>
                   <ul className="list-disc pl-5">
                      <li>All original documents have been verified</li>
@@ -86,7 +86,7 @@ const TS_AuthenticityReviewModal = ({ isOpen, onClose, application, onReviewComp
                <div className="flex space-x-2">
                   <Button
                      onClick={handleApproveAuthenticity}
-                     className="flex-1 bg-green-600 hover:bg-green-700"
+                     className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                   >
                      Approve Authenticity
                   </Button>

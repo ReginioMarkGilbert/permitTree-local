@@ -90,51 +90,65 @@ const csawResolvers = {
             throw new Error('You must be logged in to update a permit');
          }
 
-         const permit = await CSAWPermit.findById(id);
-         if (!permit) {
-            throw new Error('Permit not found');
-         }
-
-         if (permit.applicantId.toString() !== user.id && user.role !== 'admin') {
-            throw new Error('You are not authorized to update this permit');
-         }
-
-         // Convert timestamp to ISO date string
-         if (input.dateOfAcquisition) {
-            input.dateOfAcquisition = format(new Date(parseInt(input.dateOfAcquisition)), 'yyyy-MM-dd');
-         }
-
-         // Update non-file fields
-         Object.keys(input).forEach(key => {
-            if (key !== 'files' && input[key] !== undefined) {
-               permit[key] = input[key];
+         try {
+            const permit = await CSAWPermit.findById(id);
+            if (!permit) {
+               throw new Error('Permit not found');
             }
-         });
 
-         // Update files
-         if (input.files) {
-            const updatedFiles = { ...permit.files };  // Start with existing files
-            Object.keys(input.files).forEach(fileType => {
-               if (Array.isArray(input.files[fileType])) {
-                  updatedFiles[fileType] = input.files[fileType].map(file => ({
-                     filename: file.filename,
-                     contentType: file.contentType,
-                     data: file.data ? Binary.createFromBase64(file.data) : undefined
-                  }));
-               } else {
-                  // If the array is not present, set it to an empty array
-                  updatedFiles[fileType] = [];
+            // Handle date conversion
+            if (input.dateOfAcquisition) {
+               input.dateOfAcquisition = format(new Date(parseInt(input.dateOfAcquisition)), 'yyyy-MM-dd');
+            }
+
+            // Update non-file fields
+            Object.keys(input).forEach(key => {
+               if (key !== 'files' && input[key] !== undefined) {
+                  permit[key] = input[key];
                }
             });
-            permit.files = updatedFiles;
+
+            // Handle file updates
+            if (input.files) {
+               const updatedFiles = { ...permit.files };
+
+               for (const [fileType, newFiles] of Object.entries(input.files)) {
+                  if (Array.isArray(newFiles)) {
+                     // If newFiles array is empty, it means all files of this type were removed
+                     if (newFiles.length === 0) {
+                        updatedFiles[fileType] = [];
+                        continue;
+                     }
+
+                     // Get existing files
+                     const existingFiles = permit.files[fileType] || [];
+
+                     // Process new files
+                     const processedNewFiles = newFiles
+                        .filter(file => file.data) // Only process files that have new data
+                        .map(file => ({
+                           filename: file.filename,
+                           contentType: file.contentType,
+                           data: Binary.createFromBase64(file.data)
+                        }));
+
+                     // If there are new files, replace all existing files of this type
+                     if (processedNewFiles.length > 0) {
+                        updatedFiles[fileType] = processedNewFiles;
+                     }
+                  }
+               }
+
+               permit.files = updatedFiles;
+               permit.markModified('files');
+            }
+
+            await permit.save();
+            return permit;
+         } catch (error) {
+            console.error('Error updating CSAW permit:', error);
+            throw new Error(`Failed to update CSAW permit: ${error.message}`);
          }
-
-         // Ensure the files field is marked as modified
-         permit.markModified('files');
-
-         await permit.save();
-
-         return permit;
       },
       saveCSAWPermitDraft: async (_, { input }, { user }) => {
          if (!user) {

@@ -201,10 +201,10 @@ const PersonnelHomePage = () => {
                               <div
                                  key={oop._id}
                                  className="group flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4 last:border-b-0
-                                    hover:bg-gray-50 rounded-lg transition-all duration-200 -mx-2 px-4"
+                                    hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-all duration-200 -mx-2 px-4"
                               >
                                  <div className="flex-grow">
-                                    <p className="font-semibold text-gray-900 dark:text-white group-hover:text-green-700
+                                    <p className="font-semibold text-gray-900 dark:text-white group-hover:text-green-700 dark:group-hover:text-green-500
                                        transition-colors duration-200">
                                        {oop.natureOfApplication}
                                     </p>
@@ -286,10 +286,10 @@ const PersonnelHomePage = () => {
                            <div
                               key={app.id}
                               className="group flex items-center border-b border-gray-100 dark:border-gray-800 pb-4 last:border-b-0
-                                 hover:bg-gray-50 rounded-lg transition-all duration-200 -mx-2 px-4"
+                                 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-all duration-200 -mx-2 px-4"
                            >
                               <div className="flex-grow">
-                                 <p className="font-semibold text-gray-900 dark:text-white group-hover:text-green-700
+                                 <p className="font-semibold text-gray-900 dark:text-white group-hover:text-green-700 dark:group-hover:text-green-500
                                     transition-colors duration-200">
                                     {app.applicationType}
                                  </p>

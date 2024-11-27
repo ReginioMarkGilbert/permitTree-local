@@ -7,10 +7,43 @@ const PersonnelNotificationService = require('../../services/personnelNotificati
 const pltcpResolvers = {
    Query: {
       getAllPLTCPPermits: async () => {
-         return await PLTCPPermit.find();
+         const permits = await PLTCPPermit.find().lean().exec();
+         return permits.map(permit => ({
+            ...permit,
+            id: permit._id.toString(),
+            dateOfSubmission: permit.dateOfSubmission.toISOString()
+         }));
       },
       getPLTCPPermitById: async (_, { id }) => {
-         return await PLTCPPermit.findById(id);
+         try {
+            const permit = await PLTCPPermit.findById(id).lean().exec();
+            if (!permit) {
+               throw new Error('Permit not found');
+            }
+
+            // Convert Buffer data to base64 string for files
+            const processedFiles = {};
+            if (permit.files) {
+               for (const [key, files] of Object.entries(permit.files)) {
+                  if (Array.isArray(files)) {
+                     processedFiles[key] = files.map(file => ({
+                        ...file,
+                        data: file.data.toString('base64')
+                     }));
+                  }
+               }
+            }
+
+            return {
+               ...permit,
+               id: permit._id.toString(),
+               dateOfSubmission: permit.dateOfSubmission.toISOString(),
+               files: processedFiles
+            };
+         } catch (error) {
+            console.error('Error fetching PLTCP permit:', error);
+            throw new Error(`Failed to fetch PLTCP permit: ${error.message}`);
+         }
       },
    },
    Mutation: {
@@ -43,7 +76,7 @@ const pltcpResolvers = {
                applicationType: 'Public Land Tree Cutting Permit',
                status: 'Submitted',
                currentStage: 'TechnicalStaffReview',
-               dateOfSubmission: new Date().toISOString(),
+               dateOfSubmission: new Date(),
                files: processedFiles,
             };
 
@@ -57,14 +90,14 @@ const pltcpResolvers = {
                   recipientId: technicalStaff._id,
                   type: 'PENDING_TECHNICAL_REVIEW',
                   stage: 'TechnicalStaffReview',
-                  // remarks: notes,
                   priority: 'high'
                });
             }
 
             return {
                ...savedPermit.toObject(),
-               id: savedPermit._id.toString()
+               id: savedPermit._id.toString(),
+               dateOfSubmission: savedPermit.dateOfSubmission.toISOString()
             };
          } catch (error) {
             console.error('Error creating PLTCP permit:', error);
@@ -72,40 +105,62 @@ const pltcpResolvers = {
          }
       },
       updatePLTCPPermit: async (_, { id, input }, { user }) => {
-         try {
-            if (!user) {
-               throw new Error('You must be logged in to update a permit');
-            }
+         if (!user) {
+            throw new Error('You must be logged in to update a permit');
+         }
 
+         try {
             const permit = await PLTCPPermit.findById(id);
             if (!permit) {
                throw new Error('Permit not found');
             }
 
-            if (permit.applicantId.toString() !== user.id && user.role !== 'admin') {
-               throw new Error('You are not authorized to update this permit');
-            }
-
-            console.log('Received input:', JSON.stringify(input, null, 2));
-
-            // Update the permit fields
-            Object.assign(permit, input);
+            // Update non-file fields
+            Object.keys(input).forEach(key => {
+               if (key !== 'files' && input[key] !== undefined) {
+                  permit[key] = input[key];
+               }
+            });
 
             // Handle file updates
             if (input.files) {
-               for (const [key, files] of Object.entries(input.files)) {
-                  permit.files[key] = files.map(file => ({
-                     filename: file.filename,
-                     contentType: file.contentType,
-                     data: file.data ? Buffer.from(file.data, 'base64') : undefined
-                  }));
+               const updatedFiles = { ...permit.files };
+
+               for (const [fileType, newFiles] of Object.entries(input.files)) {
+                  if (Array.isArray(newFiles)) {
+                     // If newFiles array is empty, it means all files of this type were removed
+                     if (newFiles.length === 0) {
+                        updatedFiles[fileType] = [];
+                        continue;
+                     }
+
+                     // Get existing files
+                     const existingFiles = permit.files[fileType] || [];
+
+                     // Process new files
+                     const processedNewFiles = newFiles
+                        .filter(file => file.data) // Only process files that have new data
+                        .map(file => ({
+                           filename: file.filename,
+                           contentType: file.contentType,
+                           data: Binary.createFromBase64(file.data)
+                        }));
+
+                     // If there are new files, replace all existing files of this type
+                     if (processedNewFiles.length > 0) {
+                        updatedFiles[fileType] = processedNewFiles;
+                     }
+                  }
                }
+
+               permit.files = updatedFiles;
+               permit.markModified('files');
             }
 
             await permit.save();
             return permit;
          } catch (error) {
-            console.error('Error in updatePLTCPPermit:', error);
+            console.error('Error updating PLTCP permit:', error);
             throw new Error(`Failed to update PLTCP permit: ${error.message}`);
          }
       },
@@ -120,11 +175,11 @@ const pltcpResolvers = {
             // Process file inputs
             const processedFiles = {};
             for (const [key, files] of Object.entries(input.files)) {
-               if (files && files.length > 0) {
+               if (files && Array.isArray(files) && files.length > 0) {
                   processedFiles[key] = files.map(file => ({
                      filename: file.filename,
-                     contentType: file.contentType || 'application/octet-stream',
-                     data: file.data ? Binary.createFromBase64(file.data) : undefined
+                     contentType: file.contentType,
+                     data: file.data ? Binary.createFromBase64(file.data) : null
                   }));
                } else {
                   processedFiles[key] = [];
@@ -138,13 +193,17 @@ const pltcpResolvers = {
                applicationType: 'Public Land Tree Cutting Permit',
                status: 'Draft',
                currentStage: 'Draft',
-               dateOfSubmission: new Date().toISOString(),
+               dateOfSubmission: new Date(),
                files: processedFiles,
             };
 
             const newPermit = new PLTCPPermit(permitData);
             const savedPermit = await newPermit.save();
-            return savedPermit;
+            return {
+               ...savedPermit.toObject(),
+               id: savedPermit._id.toString(),
+               dateOfSubmission: savedPermit.dateOfSubmission.toISOString()
+            };
          } catch (error) {
             console.error('Error saving PLTCP permit draft:', error);
             throw new Error(`Failed to save PLTCP permit draft: ${error.message}`);
