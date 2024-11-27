@@ -94,6 +94,15 @@ const UPDATE_PERMIT_STAGE = gql`
   }
 `;
 
+const UNDO_ACCEPTANCE_TECHNICAL_STAFF = gql`
+  mutation UndoAcceptanceTechnicalStaff($id: ID!, $acceptedByTechnicalStaff: Boolean) {
+    undoAcceptanceTechnicalStaff(id: $id, acceptedByTechnicalStaff: $acceptedByTechnicalStaff) {
+      id
+      acceptedByTechnicalStaff
+    }
+  }
+`;
+
 const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, isMobile }) => {
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -101,7 +110,7 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
    const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(false);
    // const { handleUndoApproval, handleUndoAcceptance } = useUndoApplicationApproval();
    const [updatePermitStage] = useMutation(UPDATE_PERMIT_STAGE);
-
+   const [undoAcceptanceTechnicalStaff] = useMutation(UNDO_ACCEPTANCE_TECHNICAL_STAFF);
    const handleViewClick = () => setIsViewModalOpen(true);
    const handleReviewClick = () => setIsReviewModalOpen(true);
    const handleAuthenticityClick = () => setIsAuthenticityModalOpen(true);
@@ -116,7 +125,7 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
       try {
          let variables;
 
-         if (currentTab === 'Approved Applications') { // after authenticity approval
+         if (currentTab === 'Approved Applications') {
             variables = {
                id: app.id,
                currentStage: 'ForInspectionByTechnicalStaff',
@@ -126,14 +135,27 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
                awaitingPermitCreation: false
             };
          } else if (currentTab === 'Accepted Applications') {
-            // Existing undo logic for approved applications
-            variables = {
-               id: app.id,
-               currentStage: 'TechnicalStaffReview',
-               status: 'Submitted',
-               notes: 'Acceptance undone by Technical Staff',
-               acceptedByTechnicalStaff: false
-            };
+            try {
+               const { data } = await undoAcceptanceTechnicalStaff({
+                  variables: {
+                     id: app.id,
+                     currentStage: 'TechnicalStaffReview',
+                     status: 'Submitted',
+                     acceptedByTechnicalStaff: false
+                  }
+               });
+
+               // Only show success if we get data back
+               if (data?.undoAcceptanceTechnicalStaff) {
+                  toast.success('Application status undone successfully');
+                  onReviewComplete();
+               } else {
+                  toast.error('Failed to undo application status, already recorded by Receiving Clerk');
+               }
+            } catch (error) {
+               console.error('Error undoing acceptance:', error);
+               toast.error(error.message || 'Failed to undo application status');
+            }
          } else if (currentTab === 'Created Permits') {
             variables = {
                id: app.id,
@@ -145,12 +167,14 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
             };
          }
 
-         await updatePermitStage({ variables });
-         toast.success('Application status undone successfully');
-         onReviewComplete();
+         const { data } = await updatePermitStage({ variables });
+         if (data?.updatePermitStage) {
+            toast.success('Application status undone successfully');
+            onReviewComplete();
+         }
       } catch (error) {
          console.error('Error undoing application status:', error);
-         toast.error('Failed to undo application status');
+         toast.error(error.message || 'Failed to undo application status');
       }
    };
 
@@ -198,12 +222,12 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
          },
 
          (currentTab === 'Approved Applications' ||
-          currentTab === 'Accepted Applications' ||
-          currentTab === 'Created Permits') && {
+            currentTab === 'Accepted Applications' ||
+            currentTab === 'Created Permits') && {
             icon: RotateCcw,
             label: `Undo ${currentTab === 'Accepted Applications' ? 'Acceptance' :
-                         currentTab === 'Created Permits' ? 'Permit Creation' :
-                         'Approval'}`,
+               currentTab === 'Created Permits' ? 'Permit Creation' :
+                  'Approval'}`,
             onClick: handleUndo,
             variant: "outline",
             className: "text-yellow-600 hover:text-yellow-800"
@@ -212,7 +236,7 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
          currentTab === 'Awaiting Permit Creation' && {
             icon: FileCheck2,
             label: app.applicationType === 'Chainsaw Registration' ?
-                  'Generate Certificate' : 'Upload Certificate',
+               'Generate Certificate' : 'Upload Certificate',
             onClick: () => setIsCertificateModalOpen(true),
             variant: "outline",
             className: "text-green-600 hover:text-green-800"

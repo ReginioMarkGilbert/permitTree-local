@@ -416,6 +416,7 @@ const permitTypes = gql`
     recordApplication(id: ID!, notes: String): Permit!
     undoRecordApplication(id: ID!, approvedByPENRCENROfficer: Boolean): Permit!
     undoAcceptanceCENRPENROfficer(id: ID!, reviewedByChief: Boolean): Permit!
+    undoAcceptanceTechnicalStaff(id: ID!, acceptedByTechnicalStaff: Boolean, recordedByReceivingClerk: Boolean): Permit!
 
     reviewApplication(id: ID!): Permit!
     submitPermit(id: ID!): Permit!

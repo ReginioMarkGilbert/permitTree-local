@@ -120,16 +120,25 @@ const PCOApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
 
    const handleUndo = async () => {
       try {
-         await undoAcceptanceCENRPENROfficer({
+         const { data } = await undoAcceptanceCENRPENROfficer({
             variables: {
-               id: app.id
+               id: app.id,
+               currentStage: 'CENRPENRReview',
+               status: 'In Progress',
+               reviewedByChief: false
             }
          });
-         toast.success('Application status undone successfully');
-         onReviewComplete();
+
+         // Only show success if we get data back
+         if (data?.undoAcceptanceCENRPENROfficer) {
+            toast.success('Application status undone successfully');
+            onReviewComplete();
+         } else {
+            toast.error('Failed to undo application status, already reviewed by Chief RPS');
+         }
       } catch (error) {
          console.error('Error undoing application status:', error);
-         toast.error(error.message);
+         toast.error(error.message || 'Failed to undo application status');
       }
    };
 

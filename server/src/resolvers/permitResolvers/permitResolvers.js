@@ -633,23 +633,68 @@ const permitResolvers = {
                throw new Error('Permit not found');
             }
 
-            if (reviewedByChief !== undefined) {
-               permit.reviewedByChief = reviewedByChief;
-            }
-
+            // Move validation checks to the top
             if (permit.reviewedByChief) {
                throw new Error('Application cannot be undone, already reviewed by Chief RPS');
             }
 
-            permit.currentStage = 'CENRPENRReview';
-            permit.status = 'In Progress';
+            if (reviewedByChief !== undefined) {
+               permit.reviewedByChief = reviewedByChief;
+            }
+
+            permit.currentStage = currentStage || 'CENRPENRReview';
+            permit.status = status || 'In Progress';
             permit.acceptedByPENRCENROfficer = false;
 
             permit.history.push({
-               stage: currentStage,
-               status: status,
+               stage: currentStage || 'CENRPENRReview',
+               status: status || 'In Progress',
                timestamp: new Date(),
-               notes: notes || ''
+               notes: notes || 'Acceptance undone by PENR/CENR Officer'
+            });
+
+            await permit.save();
+            return permit;
+
+         } catch (error) {
+            console.error('Error undoing record application:', error);
+            throw error;
+         }
+      },
+
+      undoAcceptanceTechnicalStaff: async (_, {
+         id,
+         currentStage,
+         status,
+         notes,
+         acceptedByTechnicalStaff,
+         recordedByReceivingClerk
+      }) => {
+         try {
+            const permit = await Permit.findById(id);
+            if (!permit) {
+               throw new Error('Permit not found');
+            }
+
+            // Move validation checks to the top
+            if (permit.recordedByReceivingClerk) {
+               throw new Error('Application cannot be undone, already recorded by Receiving Clerk');
+            }
+
+            if (acceptedByTechnicalStaff !== undefined) {
+               permit.acceptedByTechnicalStaff = acceptedByTechnicalStaff;
+            }
+
+            permit.currentStage = currentStage || 'TechnicalStaffReview';
+            permit.status = status || 'Submitted';
+            permit.acceptedByTechnicalStaff = false;
+            permit.recordedByReceivingClerk = false;
+
+            permit.history.push({
+               stage: currentStage || 'TechnicalStaffReview',
+               status: status || 'Submitted',
+               timestamp: new Date(),
+               notes: notes || 'Acceptance undone by Technical Staff'
             });
 
             await permit.save();
