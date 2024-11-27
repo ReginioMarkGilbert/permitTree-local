@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Eye, Edit, Trash2, RotateCcw, Send, MessageSquare } from 'lucide-react';
+import { Eye, Edit, Trash2, RotateCcw, Send, MessageSquare, FileCheck2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,33 @@ import ViewApplicationModal from './ViewApplicationModal';
 import ViewRemarksModal from './ViewRemarksModal';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { format } from 'date-fns';
+import { gql, useQuery } from '@apollo/client';
+import CertificateViewModal from '../../Personnel/components/PersonnelDashboardComponents/TechnicalStaff/CertificateViewModal';
+
+const GET_CERTIFICATE = gql`
+  query GetCertificatesByApplicationId($applicationId: ID!) {
+    getCertificatesByApplicationId(applicationId: $applicationId) {
+      id
+      certificateNumber
+      certificateStatus
+      dateCreated
+      dateIssued
+      expiryDate
+      uploadedCertificate {
+        filename
+        contentType
+        fileData
+        uploadDate
+        metadata {
+          certificateType
+          issueDate
+          expiryDate
+          remarks
+        }
+      }
+    }
+  }
+`;
 
 const UserApplicationRow = ({
    app,
@@ -36,11 +63,17 @@ const UserApplicationRow = ({
    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isRemarksModalOpen, setIsRemarksModalOpen] = useState(false);
+   const [isViewCertModalOpen, setIsViewCertModalOpen] = useState(false);
    const isMobile = useMediaQuery('(max-width: 640px)');
+   const { loading: certLoading, error: certError, data: certData } = useQuery(GET_CERTIFICATE, {
+      variables: { applicationId: app.id },
+      skip: !isViewCertModalOpen
+   });
 
    const handleEditClick = () => setIsEditModalOpen(true);
    const handleViewClick = () => setIsViewModalOpen(true);
    const handleViewRemarks = () => setIsRemarksModalOpen(true);
+   const handleViewCertClick = () => setIsViewCertModalOpen(true);
 
    const handleEditSave = (editedData) => {
       onEdit(app.id, editedData);
@@ -107,6 +140,14 @@ const UserApplicationRow = ({
             onClick: () => onUnsubmit(app),
             variant: "outline",
             className: "text-yellow-600 hover:text-yellow-800"
+         },
+
+         app.status === 'Released' && {
+            icon: FileCheck2,
+            label: "View Certificate",
+            onClick: handleViewCertClick,
+            variant: "outline",
+            className: "text-blue-600 hover:text-blue-800"
          }
       ].flat().filter(Boolean);
 
@@ -179,6 +220,15 @@ const UserApplicationRow = ({
                onClose={() => setIsRemarksModalOpen(false)}
                application={app}
             />
+            {app.status === 'Released' && (
+               <CertificateViewModal
+                  isOpen={isViewCertModalOpen}
+                  onClose={() => setIsViewCertModalOpen(false)}
+                  certificate={certData?.getCertificatesByApplicationId[0]}
+                  loading={certLoading}
+                  error={certError}
+               />
+            )}
          </>
       );
    }
@@ -227,6 +277,15 @@ const UserApplicationRow = ({
             onClose={() => setIsRemarksModalOpen(false)}
             application={app}
          />
+         {app.status === 'Released' && (
+            <CertificateViewModal
+               isOpen={isViewCertModalOpen}
+               onClose={() => setIsViewCertModalOpen(false)}
+               certificate={certData?.getCertificatesByApplicationId[0]}
+               loading={certLoading}
+               error={certError}
+            />
+         )}
       </>
    );
 };

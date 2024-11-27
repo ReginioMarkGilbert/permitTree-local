@@ -99,7 +99,7 @@ const UserApplicationsStatusPage = () => {
          'In Progress': { status: 'In Progress' },
          'Returned': { status: 'Returned', currentStage: 'ReturnedByTechnicalStaff' },
          'Accepted': { status: 'Accepted' },
-         'Released': { status: 'Released' },
+         'Released': { status: 'Released', currentStage: 'Released' },
          'Expired': { status: 'Expired' },
          'Rejected': { status: 'Rejected' },
       }[tab] || { status: 'Submitted' };

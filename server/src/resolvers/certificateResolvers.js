@@ -101,7 +101,7 @@ const certificateResolvers = {
                certificateNumber,
                applicationId: input.applicationId,
                applicationType: input.applicationType,
-               certificateStatus: 'Pending Signature',
+               certificateStatus: 'Released',
                uploadedCertificate: {
                   fileData: fileBuffer,
                   filename: input.uploadedCertificate.filename,
@@ -123,7 +123,8 @@ const certificateResolvers = {
                   certificateId: savedCertificate._id,
                   PermitCreated: true,
                   awaitingPermitCreation: false,
-                  currentStage: 'AuthenticityApprovedByTechnicalStaff'
+                  currentStage: 'Released',
+                  status: 'Released'
                }
             });
 

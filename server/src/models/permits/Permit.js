@@ -22,7 +22,7 @@ const PermitSchema = new mongoose.Schema({
    status: {
       type: String,
       required: true,
-      enum: ['Draft', 'Submitted', 'Returned', 'Accepted', 'Rejected', 'In Progress', 'Approved', 'Completed']
+      enum: ['Draft', 'Submitted', 'In Progress', 'Returned', 'Accepted', 'Released', 'Completed', 'Rejected']
    },
    currentStage: {
       type: String,
@@ -45,6 +45,9 @@ const PermitSchema = new mongoose.Schema({
 
          'InspectionReportForReviewByChief',
          'InspectionReportForReviewByPENRCENROfficer',
+
+         'PendingSignatureByChief',
+         'PendingSignatureByPENRCENROfficer',
 
          'PendingRelease',
          'Released',
@@ -73,6 +76,7 @@ const PermitSchema = new mongoose.Schema({
 
    awaitingPermitCreation: { type: Boolean, default: false },
    PermitCreated: { type: Boolean, default: false },
+
    history: [{
       stage: String,
       status: String,
