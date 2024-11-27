@@ -18,13 +18,6 @@ const CertificateSchema = new mongoose.Schema({
    dateIssued: Date,
    expiryDate: Date,
 
-   signedBy: {
-      PENRO: {
-         userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-         signature: String,
-         dateSigned: Date
-      }
-   },
    certificateData: {
       registrationType: String,
       ownerName: String,

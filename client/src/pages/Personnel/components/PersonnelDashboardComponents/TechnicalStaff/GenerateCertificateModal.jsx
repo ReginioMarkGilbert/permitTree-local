@@ -141,7 +141,7 @@ const GenerateCertificateModal = ({ isOpen, onClose, application, onComplete }) 
          <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-4xl">
                <DialogHeader>
-                  <DialogTitle>Certificate Preview</DialogTitle>
+                  <DialogTitle>Certificate Previeww</DialogTitle>
                   <DialogDescription>
                      Review the generated certificate before forwarding for signature.
                   </DialogDescription>

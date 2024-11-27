@@ -10,7 +10,6 @@ const certificateTypes = gql`
     dateCreated: String!
     dateIssued: String
     expiryDate: String
-    signedBy: CertificateSignatures
     certificateData: CertificateData
     uploadedCertificate: UploadedCertificate
   }

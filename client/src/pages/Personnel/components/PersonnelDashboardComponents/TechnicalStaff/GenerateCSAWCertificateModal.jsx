@@ -173,7 +173,7 @@ const GenerateCSAWCertificateModal = ({ isOpen, onClose, application, onComplete
          if (data.generateCertificate) {
             setCertificate(data.generateCertificate);
             setShowPreview(true);
-            toast.success('Certificate generated successfully');
+            toast.success('Certificate generated successfully, the application will be forwarded to Chief RPS for signature');
          }
       } catch (error) {
          console.error('Error generating certificate:', error);
@@ -199,6 +199,13 @@ const GenerateCSAWCertificateModal = ({ isOpen, onClose, application, onComplete
       }
    };
 
+   const handleOpenChange = (open) => {
+      if (!open && showPreview) {
+         return;
+      }
+      onClose();
+   };
+
    if (permitLoading) return (
       <tr>
          <td colSpan="5" className="text-center py-4">
@@ -217,10 +224,10 @@ const GenerateCSAWCertificateModal = ({ isOpen, onClose, application, onComplete
 
    if (showPreview) {
       return (
-         <Dialog open={isOpen} onOpenChange={onClose}>
+         <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             <DialogContent className="max-w-4xl">
                <DialogHeader>
-                  <DialogTitle>Certificate Preview</DialogTitle>
+                  <DialogTitle>Chainsaw Registration Certificate Preview</DialogTitle>
                   <DialogDescription>
                      Review the generated certificate before forwarding for signature.
                   </DialogDescription>
@@ -255,7 +262,7 @@ const GenerateCSAWCertificateModal = ({ isOpen, onClose, application, onComplete
    }
 
    return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
+      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
          <DialogContent>
             <DialogHeader>
                <DialogTitle>Generate Certificate</DialogTitle>

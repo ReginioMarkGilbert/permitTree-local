@@ -215,7 +215,7 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
             onClick: () => setIsViewCertModalOpen(true),
             variant: "outline",
             className: "text-green-600 hover:text-green-800"
-         },
+      },
 
          app.status === 'Submitted' && {
             icon: ClipboardCheck,
