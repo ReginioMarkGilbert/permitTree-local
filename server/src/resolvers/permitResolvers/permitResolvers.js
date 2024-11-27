@@ -586,13 +586,7 @@ const permitResolvers = {
                throw new Error('Permit not found');
             }
 
-            if (acceptedByPENRCENROfficer !== undefined) {
-               permit.acceptedByPENRCENROfficer = acceptedByPENRCENROfficer;
-            }
-            if (reviewedByChief !== undefined) {
-               permit.reviewedByChief = reviewedByChief;
-            }
-
+            // Move validation checks to the top
             if (permit.acceptedByPENRCENROfficer) {
                throw new Error('Cannot undo record: Application already accepted by PENR/CENR Officer');
             }
@@ -600,21 +594,29 @@ const permitResolvers = {
                throw new Error('Cannot undo record: Application already reviewed by Chief RPS/TSD');
             }
 
-            permit.currentStage = 'ForRecordByReceivingClerk';
-            permit.status = 'In Progress';
+            if (acceptedByPENRCENROfficer !== undefined) {
+               permit.acceptedByPENRCENROfficer = acceptedByPENRCENROfficer;
+            }
+            if (reviewedByChief !== undefined) {
+               permit.reviewedByChief = reviewedByChief;
+            }
+
+            permit.currentStage = currentStage || 'ForRecordByReceivingClerk';
+            permit.status = status || 'In Progress';
             permit.recordedByReceivingClerk = false;
 
             permit.history.push({
-               stage: currentStage,
-               status: status,
+               stage: currentStage || 'ForRecordByReceivingClerk',
+               status: status || 'In Progress',
                timestamp: new Date(),
-               notes: notes || ''
+               notes: notes || 'Record undone by Receiving Clerk'
             });
 
             await permit.save();
             return permit;
 
          } catch (error) {
+            console.error('Error undoing record:', error);
             throw error;
          }
       },

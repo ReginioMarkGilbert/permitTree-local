@@ -75,21 +75,30 @@ const RRC_ApplicationRow = ({ app, onRecordComplete, getStatusColor, currentTab,
 
    const handleUndo = async () => {
       try {
-         await undoRecordApplication({
+         const { data } = await undoRecordApplication({
             variables: {
-               id: app.id
+               id: app.id,
+               currentStage: 'ForRecordByReceivingClerk',
+               status: 'In Progress',
+               acceptedByPENRCENROfficer: false,
+               reviewedByChief: false
             }
          });
 
-         toast.success('Application status undone successfully');
-         onRecordComplete();
+         if (data?.undoRecordApplication) {
+            toast.success('Application status undone successfully');
+            onRecordComplete();
+         } else {
+            toast.error('Failed to undo record status, already accepted by PENR/CENR Officer or reviewed by Chief RPS/TSD');
+         }
       } catch (error) {
+         console.error('Error undoing record:', error);
          if (error.message.includes('already accepted by PENR/CENR Officer')) {
             toast.error('Cannot undo: Application already accepted by PENR/CENR Officer');
          } else if (error.message.includes('already reviewed by Chief RPS/TSD')) {
             toast.error('Cannot undo: Application already reviewed by Chief RPS/TSD');
          } else {
-            toast.error('Failed to undo application status. Please try again later.');
+            toast.error(error.message || 'Failed to undo record status');
          }
       }
    };
