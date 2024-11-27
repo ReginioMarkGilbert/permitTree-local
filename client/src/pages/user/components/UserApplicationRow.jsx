@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/tooltip";
 import EditDraftModal from './EditDraftModal';
 import ViewApplicationModal from './ViewApplicationModal';
+// import TS_ViewModal from '/TS_ViewModal';
 import ViewRemarksModal from './ViewRemarksModal';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { format } from 'date-fns';
@@ -168,7 +169,7 @@ const UserApplicationRow = ({
                fetchPLTPPermit={fetchPLTPPermit}
                fetchTCEBPPermit={fetchTCEBPPermit}
             />
-            <ViewApplicationModal
+            <TS_ViewModal
                isOpen={isViewModalOpen}
                onClose={() => setIsViewModalOpen(false)}
                application={app}

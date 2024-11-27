@@ -546,13 +546,19 @@ const TS_ViewModal = ({ isOpen, onClose, application }) => {
                         <h3 className="font-semibold text-sm text-gray-500">Application Type</h3>
                         <p>{application.applicationType}</p>
                      </div>
-                     <Badge variant="outline" className={
-                        application.status === 'Approved' ? 'bg-green-100 text-green-800' :
-                           application.status === 'Rejected' ? 'bg-red-100 text-red-800' :
-                              'bg-blue-100 text-blue-800'
-                     }>
-                        {application.status}
-                     </Badge>
+                     <div className="flex flex-col gap-2 items-end">
+                        <Badge variant="outline" className={
+                           application.status === 'Approved' ? 'bg-green-100 text-green-800' :
+                              application.status === 'Rejected' ? 'bg-red-100 text-red-800' :
+                                 'bg-blue-100 text-blue-800'
+                        }>
+                           {application.status}
+                        </Badge>
+                        {/* remove later, only for testing, look for commit "feat: add currentStage badge to TS_ViewModal" */}
+                        <Badge variant="secondary">
+                           {application.currentStage}
+                        </Badge>
+                     </div>
                   </div>
 
                   <Separator />
