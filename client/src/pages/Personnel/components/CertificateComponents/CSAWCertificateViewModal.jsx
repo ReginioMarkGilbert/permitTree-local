@@ -5,6 +5,7 @@ import { useQuery, gql } from '@apollo/client';
 import { Loader2 } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
 import CSAWCertificateTemplate from '../PersonnelDashboardComponents/TechnicalStaff/CSAWCertificateTemplate';
+import { useNavigate } from 'react-router-dom';
 
 const GET_CERTIFICATE = gql`
   query GetCertificatesByApplicationId($applicationId: ID!) {
@@ -58,9 +59,16 @@ const CSAWCertificateViewModal = ({ isOpen, onClose, applicationId }) => {
       skip: !applicationId
    });
 
-   const handlePrint = useReactToPrint({
-      content: () => certificateRef.current,
-   });
+   const navigate = useNavigate();
+
+   const handlePrint = () => {
+      navigate('/personnel/csaw-certificate-print', {
+         state: {
+            certificate: data?.getCertificatesByApplicationId[0],
+            application: applicationData?.getCSAWPermitById
+         }
+      });
+   };
 
    // Add this function to handle dialog close attempts
    const handleOpenChange = (open) => {

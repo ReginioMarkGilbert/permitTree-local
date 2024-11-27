@@ -4,7 +4,7 @@ import QRCode from 'react-qr-code';
 import DENRLogo from '@/assets/denr-logo.png';
 import BagongPilipinasLogo from '@/assets/BAGONG-PILIPINAS-LOGO.png';
 
-const CSAWCertificateTemplate = forwardRef(({ certificate, application }, ref) => {
+const CSAWCertificateTemplate = forwardRef(({ certificate, application, hiddenOnPrint = [] }, ref) => {
    const qrValue = JSON.stringify({
       certificateNumber: certificate.certificateNumber,
       applicationNumber: application.applicationNumber,
@@ -104,7 +104,7 @@ const CSAWCertificateTemplate = forwardRef(({ certificate, application }, ref) =
                <p>O.R. No.: _______________</p>
                <p>Date: _________________</p>
             </div>
-            <div className="text-center">
+            <div className={`qr-code ${hiddenOnPrint.includes('qr-code') ? 'no-print' : ''}`}>
                <QRCode
                   value={qrValue}
                   size={100}

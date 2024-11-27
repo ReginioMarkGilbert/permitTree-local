@@ -56,12 +56,15 @@ import InspectionSchedulingPage from './pages/Personnel/InspectionSchedulingPage
 
 import { cn } from './lib/utils';
 
+import CSAWCertificatePrintPage from './pages/Personnel/components/CertificateComponents/CSAWCertificatePrintPage';
+
 const App = () => {
    const { sidebarToggle, toggleSidebar } = useSidebarToggle();
    const navigate = useNavigate();
    const location = useLocation();
    const [userRoles, setUserRoles] = useState([]);
    const [showNavbar, setShowNavbar] = useState(false);
+   const [showSidebar, setShowSidebar] = useState(false);
 
    useEffect(() => {
       const authStatus = isAuthenticated();
@@ -70,7 +73,7 @@ const App = () => {
       } else if (location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/about' && location.pathname !== '/services' && location.pathname !== '/contact' && location.pathname !== '/learnMore') {
          navigate('/auth');
       }
-      setShowNavbar(authStatus && location.pathname !== '/' && location.pathname !== '/user/oop-print');
+      setShowNavbar(authStatus && location.pathname !== '/' && location.pathname !== '/user/oop-print' && location.pathname !== '/personnel/csaw-certificate-print');
    }, [navigate, location.pathname]);
 
    useEffect(() => {
@@ -109,12 +112,11 @@ const App = () => {
    return (
       <ApolloProvider client={client}>
          <div className="relative h-screen overflow-hidden">
-            {isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/user/oop-print' && location.pathname !== '/user/or-print' && (
+            {isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/user/oop-print' && location.pathname !== '/user/or-print' && location.pathname !== '/personnel/csaw-certificate-print' && (
                <div className="flex h-full">
                   {getSidebar()}
                   <div className={cn(
                      "flex-1 min-w-0 flex flex-col",
-                     // sidebarToggle ? 'lg:pl-[270px]' : 'lg:pl-[50px]',
                      'transition-[padding] duration-300'
                   )}>
                      {showNavbar && <Navbar sidebarToggle={sidebarToggle} setSidebarToggle={toggleSidebar} />}
@@ -190,19 +192,30 @@ const App = () => {
                                  </ProtectedRoute>
                               }
                            />
+                           <Route
+                              path="/personnel/csaw-certificate-print"
+                              element={
+                                 <ProtectedRoute roles={['Technical_Staff']}>
+                                    <CSAWCertificatePrintPage />
+                                 </ProtectedRoute>
+                              }
+                           />
                         </Routes>
                      </main>
                   </div>
                </div>
             )}
             {/* For non-authenticated routes */}
-            {(!isAuthenticated() || location.pathname === '/' || location.pathname === '/auth' || location.pathname === '/user/oop-print' || location.pathname === '/user/or-print') && (
+            {(!isAuthenticated() || location.pathname === '/' || location.pathname === '/auth' ||
+              location.pathname === '/user/oop-print' || location.pathname === '/user/or-print' ||
+              location.pathname === '/personnel/csaw-certificate-print') && (
                <main className="h-full overflow-y-auto bg-background">
                   <Routes>
                      <Route path="/" element={<LandingPage />} />
                      <Route path="/auth" element={<UserAuthPage />} />
                      <Route path="/user/oop-print" element={<OOPPrintPage />} />
                      <Route path="/user/or-print" element={<ORPrintPage />} />
+                     <Route path="/personnel/csaw-certificate-print" element={<CSAWCertificatePrintPage />} />
                   </Routes>
                </main>
             )}
