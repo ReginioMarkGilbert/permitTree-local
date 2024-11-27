@@ -1,7 +1,7 @@
 // Technical Staff Application Row
 
 import React, { useState } from 'react';
-import { Eye, ClipboardCheck, FileCheck, RotateCcw, FileCheck2 } from 'lucide-react';
+import { Eye, ClipboardCheck, FileCheck, RotateCcw, FileCheck2, FileText } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +22,7 @@ import { getUserRoles } from '@/utils/auth';
 // import { useUndoApplicationApproval } from '@/hooks/useApplications';
 import { toast } from 'sonner';
 import { gql, useMutation } from '@apollo/client';
+import CSAWCertificateViewModal from '../../CertificateComponents/CSAWCertificateViewModal';
 
 const GET_APPLICATION_DETAILS = gql`
   query GetApplication($id: ID!) {
@@ -108,10 +109,12 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
    const [isAuthenticityModalOpen, setIsAuthenticityModalOpen] = useState(false);
    const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(false);
+   const [isViewCertModalOpen, setIsViewCertModalOpen] = useState(false);
    // const { handleUndoApproval, handleUndoAcceptance } = useUndoApplicationApproval();
    const [updatePermitStage] = useMutation(UPDATE_PERMIT_STAGE);
    const [undoAcceptanceTechnicalStaff] = useMutation(UNDO_ACCEPTANCE_TECHNICAL_STAFF);
    const handleViewClick = () => setIsViewModalOpen(true);
+   const handleViewCertClick = () => setIsViewCertModalOpen(true);
    const handleReviewClick = () => setIsReviewModalOpen(true);
    const handleAuthenticityClick = () => setIsAuthenticityModalOpen(true);
 
@@ -205,6 +208,15 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
             variant: "outline"
          },
 
+         // Only show View Certificate button for Chainsaw Registration in Created Permits tab
+         currentTab === 'Created Permits' && app.applicationType === 'Chainsaw Registration' && {
+            icon: FileText,
+            label: "View Certificate",
+            onClick: () => setIsViewCertModalOpen(true),
+            variant: "outline",
+            className: "text-green-600 hover:text-green-800"
+         },
+
          app.status === 'Submitted' && {
             icon: ClipboardCheck,
             label: "Review Application",
@@ -288,6 +300,15 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
                </div>
             </Card>
 
+            {/* Add CSAWCertificateViewModal */}
+            {app.applicationType === 'Chainsaw Registration' && currentTab === 'Created Permits' && (
+               <CSAWCertificateViewModal
+                  isOpen={isViewCertModalOpen}
+                  onClose={() => setIsViewCertModalOpen(false)}
+                  applicationId={app.id}
+               />
+            )}
+
             {/* Add Modals */}
             <TS_ViewModal
                isOpen={isViewModalOpen}
@@ -336,6 +357,15 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
                </div>
             </TableCell>
          </TableRow>
+
+         {/* Add CSAWCertificateViewModal */}
+         {app.applicationType === 'Chainsaw Registration' && currentTab === 'Created Permits' && (
+            <CSAWCertificateViewModal
+               isOpen={isViewCertModalOpen}
+               onClose={() => setIsViewCertModalOpen(false)}
+               applicationId={app.id}
+            />
+         )}
 
          {/* Add Modals */}
          <TS_ViewModal

@@ -238,13 +238,13 @@ const GenerateCSAWCertificateModal = ({ isOpen, onClose, application, onComplete
                   </Button>
                   <Button
                      onClick={handlePrint}
-                     className="bg-blue-600 hover:bg-blue-700"
+                     className="bg-blue-600 hover:bg-blue-700 dark:bg-white dark:text-black dark:hover:bg-gray-200"
                   >
                      Print
                   </Button>
                   <Button
                      onClick={handleForward}
-                     className="bg-green-600 hover:bg-green-700"
+                     className="bg-green-600 hover:bg-green-700 dark:bg-white dark:text-black dark:hover:bg-gray-200"
                   >
                      Forward for Signature
                   </Button>
@@ -270,8 +270,6 @@ const GenerateCSAWCertificateModal = ({ isOpen, onClose, application, onComplete
                   <div className="text-sm">
                      <p><span className="font-medium">Application No:</span> {application.applicationNumber}</p>
                      <p><span className="font-medium">Application Type:</span> {application.applicationType}</p>
-                     {/* <p><span className="font-medium">Owner:</span> {application.ownerName}</p>
-                     <p><span className="font-medium">Chainsaw:</span> {application.chainsbrand} {application.model}</p> */}
                   </div>
                </div>
             </div>
@@ -282,7 +280,7 @@ const GenerateCSAWCertificateModal = ({ isOpen, onClose, application, onComplete
                </Button>
                <Button
                   onClick={handleGenerate}
-                  className="bg-green-600 hover:bg-green-700"
+                  className="bg-green-600 hover:bg-green-700 dark:bg-white dark:text-black dark:hover:bg-gray-200"
                   disabled={isGenerating}
                >
                   {isGenerating ? 'Generating...' : 'Generate Certificate'}
