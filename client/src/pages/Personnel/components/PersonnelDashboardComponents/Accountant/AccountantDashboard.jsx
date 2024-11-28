@@ -17,6 +17,7 @@ import {
    TableRow,
 } from "@/components/ui/table";
 import { useApplications } from '../../../hooks/useApplications';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 const AccountantDashboard = () => {
    const [filters, setFilters] = useState({
@@ -30,6 +31,8 @@ const AccountantDashboard = () => {
    });
    const [activeMainTab, setActiveMainTab] = useState('Order Of Payment');
    const [activeSubTab, setActiveSubTab] = useState('Pending Approval');
+
+   const isMobile = useMediaQuery('(max-width: 768px)');
 
    const mainTabs = ['Order Of Payment', 'Applications awaiting OOP'];
    const subTabs = {
@@ -192,12 +195,12 @@ const AccountantDashboard = () => {
          <Table>
             <TableHeader>
                <TableRow>
-                  <TableHead>Application Number</TableHead>
-                  <TableHead>Bill Number</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="w-[180px]">Application Number</TableHead>
+                  <TableHead className="w-[150px]">Bill Number</TableHead>
+                  <TableHead className="w-[120px]">Date</TableHead>
+                  <TableHead className="w-[120px]">Amount</TableHead>
+                  <TableHead className="w-[100px]">Status</TableHead>
+                  <TableHead className="w-[100px] text-end">Actions</TableHead>
                </TableRow>
             </TableHeader>
             <TableBody>
@@ -295,7 +298,7 @@ const AccountantDashboard = () => {
          title="Accountant Dashboard"
          description="Manage and process order of payments"
          onRefresh={handleRefetch}
-         isMobile={false}
+         isMobile={isMobile}
          mainTabs={mainTabs}
          subTabs={subTabs}
          activeMainTab={activeMainTab}

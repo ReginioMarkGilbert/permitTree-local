@@ -85,7 +85,7 @@
 }
 
 .step-3-container {
-    height: 600px; /* Match the height used in other steps */
+    height: 550px; /* Match the height used in other steps */
     display: flex;
     flex-direction: column;
 }

@@ -27,6 +27,8 @@ import { gql, useMutation, useQuery } from '@apollo/client';
 import { Loader2 } from "lucide-react";
 import { toast } from 'sonner';
 import CertificateViewModal from './CertificateViewModal';
+import TS_InspectionReportModal from '../../InspectionDashboardComponents/TS_InspectionReportModal';
+import TS_InspectionReportsViewModal from './TS_InspectionReportsViewModal';
 
 const GET_APPLICATION_DETAILS = gql`
   query GetApplication($id: ID!) {
@@ -148,6 +150,7 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
    const handleViewCertClick = () => setIsViewCertModalOpen(true);
    const handleReviewClick = () => setIsReviewModalOpen(true);
    const handleAuthenticityClick = () => setIsAuthenticityModalOpen(true);
+   const [isInspectionReportsModalOpen, setIsInspectionReportsModalOpen] = useState(false);
 
    const { loading: certLoading, error: certError, data: certData } = useQuery(GET_CERTIFICATE, {
       variables: { applicationId: app.id },
@@ -325,7 +328,15 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
             onClick: () => setIsCertificateModalOpen(true),
             variant: "outline",
             className: "text-green-600 hover:text-green-800"
-         }
+         },
+
+         currentTab === 'Approved Applications' && {
+            icon: FileCheck2,
+            label: "View Inspection Reports",
+            onClick: () => setIsInspectionReportsModalOpen(true),
+            variant: "outline",
+            className: "text-purple-600 hover:text-purple-800"
+         },
       ].filter(Boolean);
 
       return actions.map((action, index) => (
@@ -470,6 +481,11 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
                error={certError}
             />
          )}
+         <TS_InspectionReportsViewModal
+            isOpen={isInspectionReportsModalOpen}
+            onClose={() => setIsInspectionReportsModalOpen(false)}
+            applicationId={app.id}
+         />
       </>
    );
 };

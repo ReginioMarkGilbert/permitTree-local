@@ -7,7 +7,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import Modal from '@/components/ui/modal';
-// import '@/components/ui/styles/CSAWFormScrollbar.css';
+import '@/components/ui/styles/CSAWFormScrollbar.css';
 import '@/components/ui/styles/customScrollBar.css'
 import { CheckboxItem, UploadCard, CustomSelect, CustomDatePicker, formatLabel, formatReviewValue } from './CSAWFormUtils';
 import { gql, useMutation } from '@apollo/client';
@@ -187,7 +187,6 @@ const ChainsawRegistrationForm = () => {
    };
 
    const handleSaveAsDraft = async () => {
-      setIsSavingDraft(true);
       try {
          const input = {
             registrationType: formData.registrationType,
@@ -252,14 +251,11 @@ const ChainsawRegistrationForm = () => {
       } catch (error) {
          console.error('Error saving draft:', error);
          toast.error("Error saving draft: " + error.message);
-      } finally {
-         setIsSavingDraft(false);
       }
    };
 
    const handleSubmit = async (e) => {
       e.preventDefault();
-      setIsSubmitting(true);
       try {
          const input = {
             registrationType: formData.registrationType,
@@ -335,8 +331,6 @@ const ChainsawRegistrationForm = () => {
             }
          }
          toast.error("Error submitting application: " + error.message);
-      } finally {
-         setIsSubmitting(false);
       }
    };
 
@@ -393,35 +387,60 @@ const ChainsawRegistrationForm = () => {
             <h1 className="text-2xl sm:text-3xl font-[700] text-green-800 dark:text-green-500 mb-4 text-center">
                Chainsaw Registration Application
             </h1>
-
-            <div className="max-w-2xl mx-auto mb-6">
+            <div className="max-w-2xl mx-auto mb-4">
                <FormStepIndicator currentStep={currentStep + 1} steps={steps} />
             </div>
-
-            <Card className="max-w-2xl mx-auto shadow-lg bg-background">
+            <Card className="max-w-2xl mx-auto shadow-lg dark:black">
                <CardHeader className="p-4 sm:p-6">
-                  <CardTitle className="text-lg sm:text-xl text-foreground">{steps[currentStep].title}</CardTitle>
+                  <CardTitle className="dark:text-white">{steps[currentStep].title}</CardTitle>
                </CardHeader>
-               <CardContent className="p-4 sm:p-6">
+               <CardContent>
                   <form onSubmit={handleSubmit}>
                      {currentStep === 0 && (
-                        <div className="space-y-6 pb-4">
+                        <div className="space-y-4">
                            <RadioGroup
                               onValueChange={(value) => handleSelectChange('registrationType', value)}
                               value={formData.registrationType}
-                              className="space-y-4"
+                              className="space-y-3"
                            >
-                              <div className="flex items-center space-x-2 p-4 rounded-lg border border-input bg-background hover:bg-accent">
-                                 <RadioGroupItem value="New" id="new" />
-                                 <Label htmlFor="new" className="text-lg font-semibold text-foreground">
-                                    New Registration
-                                 </Label>
+                              <div
+                                 className={`w-full p-4 rounded-md transition-colors cursor-pointer
+                                    ${formData.registrationType === 'New'
+                                       ? 'bg-green-100 hover:bg-green-50 dark:bg-green-900 dark:hover:bg-green-800'
+                                       : 'bg-gray-100 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600'}`}
+                              >
+                                 <div className="flex items-center space-x-3">
+                                    <RadioGroupItem value="New" id="new" className="text-green-600 dark:text-green-400" />
+                                    <Label
+                                       htmlFor="new"
+                                       className={`text-base font-medium cursor-pointer
+                                          ${formData.registrationType === 'New'
+                                             ? 'text-green-700 dark:text-green-300'
+                                             : 'text-gray-700 dark:text-gray-300'}`}
+                                    >
+                                       New Registration
+                                    </Label>
+                                 </div>
                               </div>
-                              <div className="flex items-center space-x-2 p-4 rounded-lg border border-input bg-background hover:bg-accent">
-                                 <RadioGroupItem value="Renewal" id="renewal" />
-                                 <Label htmlFor="renewal" className="text-lg font-semibold text-foreground">
-                                    Renewal
-                                 </Label>
+
+                              <div
+                                 className={`w-full p-4 rounded-md transition-colors cursor-pointer
+                                    ${formData.registrationType === 'Renewal'
+                                       ? 'bg-green-100 hover:bg-green-50 dark:bg-green-900 dark:hover:bg-green-800'
+                                       : 'bg-gray-100 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600'}`}
+                              >
+                                 <div className="flex items-center space-x-3">
+                                    <RadioGroupItem value="Renewal" id="renewal" className="text-green-600 dark:text-green-400" />
+                                    <Label
+                                       htmlFor="renewal"
+                                       className={`text-base font-medium cursor-pointer
+                                          ${formData.registrationType === 'Renewal'
+                                             ? 'text-green-700 dark:text-green-300'
+                                             : 'text-gray-700 dark:text-gray-300'}`}
+                                    >
+                                       Renewal
+                                    </Label>
+                                 </div>
                               </div>
                            </RadioGroup>
                         </div>
@@ -429,7 +448,7 @@ const ChainsawRegistrationForm = () => {
 
                      {currentStep === 1 && (
                         <div className="space-y-4 pt-2">
-                           <p className="text-sm text-muted-foreground mb-3 font-semibold">
+                           <p className="text-sm text-gray-700 dark:text-gray-300 mb-3 font-semibold">
                               Please select the store where you purchased your chainsaw. If your store is not listed, please enter it manually.
                            </p>
                            <CustomSelect
@@ -439,7 +458,7 @@ const ChainsawRegistrationForm = () => {
                            />
                            {formData.chainsawStore === "other" && (
                               <div className="mt-4">
-                                 <Label htmlFor="customStore" className="text-foreground">Enter Chainsaw Store Name</Label>
+                                 <Label htmlFor="customStore" className="dark:text-white">Enter Chainsaw Store Name</Label>
                                  <Input
                                     id="customStore"
                                     name="customStore"
@@ -447,7 +466,7 @@ const ChainsawRegistrationForm = () => {
                                     onChange={(e) => setCustomStore(e.target.value)}
                                     placeholder="Enter the name of the store"
                                     required
-                                    className="bg-background"
+                                    className="dark:bg-gray-700 dark:text-white"
                                  />
                               </div>
                            )}
@@ -456,7 +475,7 @@ const ChainsawRegistrationForm = () => {
 
                      {currentStep === 2 && (
                         <div className="space-y-4">
-                           <p className="text-sm text-muted-foreground mb-4 font-semibold">
+                           <p className="text-sm text-gray-700 dark:text-gray-300 mb-4 font-semibold">
                               Please check the boxes that apply to you. In the next step, you will be required to upload the corresponding documents.
                            </p>
                            <div className="space-y-2">
@@ -491,10 +510,10 @@ const ChainsawRegistrationForm = () => {
 
                      {currentStep === 3 && (
                         <div className="step-3-container">
-                           <p className="text-sm text-muted-foreground mb-4 font-semibold dark:text-gray-300">
+                           <p className="text-sm text-gray-700 dark:text-gray-300 mb-4 font-semibold">
                               Please upload the required documents.
                            </p>
-                           <div className="upload-cards-container custom-scrollbar h-[600px] overflow-y-auto pr-2">
+                           <div className="upload-cards-container csaw-form-scrollbar">
                               <UploadCard
                                  label="Official Receipt of Chainsaw Purchase"
                                  documentLabel="Upload 1 certified copy and 1 original for verification (or Affidavit of Ownership if original is lost)"
@@ -560,12 +579,12 @@ const ChainsawRegistrationForm = () => {
 
                      {currentStep === 4 && (
                         <div className="space-y-4">
-                           <div className="space-y-5 custom-scrollbar h-[600px] overflow-y-auto px-2">
+                           <div className="space-y-5 h-[590px]">
                               <div>
-                                 <h3 className="text-lg font-semibold mb-1 text-green-700">Owner Details</h3>
+                                 <h3 className="text-lg font-semibold mb-1 text-green-700 dark:text-green-500">Owner Details</h3>
                                  <div className="space-y-2">
                                     <div className="space-y-2">
-                                       <Label htmlFor="ownerName">Name</Label>
+                                       <Label htmlFor="ownerName" className="dark:text-white">Name</Label>
                                        <Input
                                           id="ownerName"
                                           name="ownerName"
@@ -573,10 +592,11 @@ const ChainsawRegistrationForm = () => {
                                           onChange={handleInputChange}
                                           placeholder="Full Name"
                                           required
+                                          className="dark:bg-gray-700 dark:text-white"
                                        />
                                     </div>
                                     <div className="space-y-2">
-                                       <Label htmlFor="address">Address</Label>
+                                       <Label htmlFor="address" className="dark:text-white">Address</Label>
                                        <Input
                                           id="address"
                                           name="address"
@@ -585,10 +605,11 @@ const ChainsawRegistrationForm = () => {
                                           placeholder="Barangay, Bayan, Probinsya"
                                           required
                                           autoComplete="street-address"
+                                          className="dark:bg-gray-700 dark:text-white"
                                        />
                                     </div>
                                     <div className="space-y-2">
-                                       <Label htmlFor="phone">Phone Number</Label>
+                                       <Label htmlFor="phone" className="dark:text-white">Phone Number</Label>
                                        <Input
                                           id="phone"
                                           name="phone"
@@ -597,16 +618,17 @@ const ChainsawRegistrationForm = () => {
                                           placeholder="e.g. 09123456789"
                                           required
                                           autoComplete="tel"
+                                          className="dark:bg-gray-700 dark:text-white"
                                        />
                                     </div>
                                  </div>
                               </div>
                               <div>
-                                 <h3 className="text-lg font-semibold mb-2 text-green-700">Chainsaw Details</h3>
+                                 <h3 className="text-lg font-semibold mb-2 text-green-700 dark:text-green-500">Chainsaw Details</h3>
                                  <div className="space-y-4">
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-2 gap-4">
                                        <div>
-                                          <Label htmlFor="brand">Brand</Label>
+                                          <Label htmlFor="brand" className="dark:text-white">Brand</Label>
                                           <Input
                                              id="brand"
                                              name="brand"
@@ -614,10 +636,11 @@ const ChainsawRegistrationForm = () => {
                                              onChange={handleInputChange}
                                              placeholder="Enter Brand"
                                              required
+                                             className="dark:bg-gray-700 dark:text-white"
                                           />
                                        </div>
                                        <div>
-                                          <Label htmlFor="model">Model</Label>
+                                          <Label htmlFor="model" className="dark:text-white">Model</Label>
                                           <Input
                                              id="model"
                                              name="model"
@@ -625,12 +648,13 @@ const ChainsawRegistrationForm = () => {
                                              onChange={handleInputChange}
                                              placeholder="Enter Model"
                                              required
+                                             className="dark:bg-gray-700 dark:text-white"
                                           />
                                        </div>
                                     </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-2 gap-4">
                                        <div>
-                                          <Label htmlFor="serialNumber">Serial No.</Label>
+                                          <Label htmlFor="serialNumber" className="dark:text-white">Serial No.</Label>
                                           <Input
                                              id="serialNumber"
                                              name="serialNumber"
@@ -638,19 +662,20 @@ const ChainsawRegistrationForm = () => {
                                              onChange={handleInputChange}
                                              placeholder="Enter Serial Number"
                                              required
+                                             className="dark:bg-gray-700 dark:text-white"
                                           />
                                        </div>
                                        <div>
-                                          <Label htmlFor="dateOfAcquisition">Date of Acquisition</Label>
+                                          <Label htmlFor="dateOfAcquisition" className="dark:text-white">Date of Acquisition</Label>
                                           <CustomDatePicker
                                              selectedDate={formData.dateOfAcquisition}
                                              onChange={handleDateChange}
                                           />
                                        </div>
                                     </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-2 gap-4">
                                        <div>
-                                          <Label htmlFor="powerOutput">Power Output (kW/bhp)</Label>
+                                          <Label htmlFor="powerOutput" className="dark:text-white">Power Output (kW/bhp)</Label>
                                           <Input
                                              id="powerOutput"
                                              name="powerOutput"
@@ -658,10 +683,11 @@ const ChainsawRegistrationForm = () => {
                                              onChange={handleInputChange}
                                              placeholder="e.g. 5 kW or 6.7 bhp"
                                              required
+                                             className="dark:bg-gray-700 dark:text-white"
                                           />
                                        </div>
                                        <div>
-                                          <Label htmlFor="maxLengthGuidebar">Maximum Length of Guidebar (Inches)</Label>
+                                          <Label htmlFor="maxLengthGuidebar" className="dark:text-white">Maximum Length of Guidebar (Inches)</Label>
                                           <Input
                                              id="maxLengthGuidebar"
                                              name="maxLengthGuidebar"
@@ -669,10 +695,11 @@ const ChainsawRegistrationForm = () => {
                                              onChange={handleInputChange}
                                              placeholder="e.g. 20 inches"
                                              required
+                                             className="dark:bg-gray-700 dark:text-white"
                                           />
                                        </div>
                                     </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                                    <div className="grid grid-cols-2 gap-4">
                                        <div>
                                           <Label htmlFor="countryOfOrigin">Country of Origin</Label>
                                           <Input
@@ -703,9 +730,9 @@ const ChainsawRegistrationForm = () => {
                         </div>
                      )}
 
-                     {currentStep === 5 && (
-                        <div className="space-y-6 h-[600px] flex flex-col">
-                           <div className="review-step-container custom-scrollbar flex-grow overflow-auto px-2">
+                     {currentStep === 5 && ( // Review Your Application
+                        <div className="space-y-6 h-[590px] flex flex-col">
+                           <div className="review-step-container csaw-form-scrollbar flex-grow overflow-auto">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                                  {Object.entries(formData)
                                     .filter(([key]) => key !== 'status' && key !== 'dateOfSubmission' && key !== 'files')
@@ -728,9 +755,7 @@ const ChainsawRegistrationForm = () => {
                                           {files.length > 0 ? (
                                              <ul className="list-disc list-inside">
                                                 {files.map((file, index) => (
-                                                   <li key={index} className="text-xs text-muted-foreground truncate">
-                                                      {file.name}
-                                                   </li>
+                                                   <li key={index} className="text-xs text-muted-foreground truncate">{file.name}</li>
                                                 ))}
                                              </ul>
                                           ) : (
@@ -745,7 +770,7 @@ const ChainsawRegistrationForm = () => {
                      )}
                   </form>
                </CardContent>
-               <CardFooter className="flex flex-col sm:flex-row justify-between items-center gap-4 p-4">
+               <CardFooter className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8">
                   <div className="w-full sm:w-auto">
                      {currentStep > 0 && (
                         <Button
@@ -808,6 +833,17 @@ const ChainsawRegistrationForm = () => {
                </CardFooter>
             </Card>
          </div>
+         {/* <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+         /> */}
          <Modal
             isOpen={modalOpen}
             title={modalContent.title}

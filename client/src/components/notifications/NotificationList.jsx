@@ -5,7 +5,7 @@ import NotificationItem from './NotificationItem';
 
 const NotificationList = ({ notifications, loading, onMarkAsRead }) => {
    return (
-      <div className="space-y-4 h-[calc(7*7rem)] overflow-y-auto pr-2">
+      <div className="space-y-4 h-[calc(6*7rem)] overflow-y-auto pr-2">
          {loading ? (
             <div className="flex justify-center items-center h-48">
                <Loader2 className="h-8 w-8 animate-spin text-primary" />

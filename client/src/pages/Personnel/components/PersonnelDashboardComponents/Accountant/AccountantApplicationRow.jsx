@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/tooltip";
 import { Card } from "@/components/ui/card";
 import { format } from 'date-fns';
-import ViewApplicationModal from '@/components/ui/ApplicationDetailsModal';
-import OrderOfPaymentForm from '../../OrderOfPaymentForm';
+import TS_ViewModal from '@/pages/Personnel/components/PersonnelDashboardComponents/TechnicalStaff/TS_ViewModal';
+// import OrderOfPaymentForm from '../../OrderOfPaymentForm';
 import { toast } from 'sonner';
 
 const AccountantApplicationRow = ({ app, onReviewComplete, currentTab, isMobile }) => {
@@ -92,16 +92,10 @@ const AccountantApplicationRow = ({ app, onReviewComplete, currentTab, isMobile 
             </Card>
 
             {/* Modals */}
-            <ViewApplicationModal
+            <TS_ViewModal
                isOpen={isViewModalOpen}
                onClose={() => setIsViewModalOpen(false)}
                application={app}
-            />
-            <OrderOfPaymentForm
-               isOpen={isOOPFormOpen}
-               onClose={() => setIsOOPFormOpen(false)}
-               application={app}
-               onComplete={handleOOPComplete}
             />
          </>
       );
@@ -129,16 +123,10 @@ const AccountantApplicationRow = ({ app, onReviewComplete, currentTab, isMobile 
          </TableRow>
 
          {/* Modals */}
-         <ViewApplicationModal
+         <TS_ViewModal
             isOpen={isViewModalOpen}
             onClose={() => setIsViewModalOpen(false)}
             application={app}
-         />
-         <OrderOfPaymentForm
-            isOpen={isOOPFormOpen}
-            onClose={() => setIsOOPFormOpen(false)}
-            application={app}
-            onComplete={handleOOPComplete}
          />
       </>
    );

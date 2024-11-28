@@ -73,7 +73,7 @@ const UNDO_ACCOUNTANT_OOP_APPROVAL = gql`
 const AccountantOOPRow = ({ oop, onReviewComplete, currentTab }) => {
    const navigate = useNavigate();
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-   const [isViewOOPModalOpen, setIsViewOOPModalOpen] = useState(false);
+   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [undoAccountantOOPApproval] = useMutation(UNDO_ACCOUNTANT_OOP_APPROVAL);
 
    useEffect(() => {
@@ -86,7 +86,7 @@ const AccountantOOPRow = ({ oop, onReviewComplete, currentTab }) => {
    };
 
    const handleView = () => {
-      setIsViewOOPModalOpen(true);
+      setIsViewModalOpen(true);
    };
 
    const handlePrint = () => {
@@ -143,7 +143,7 @@ const AccountantOOPRow = ({ oop, onReviewComplete, currentTab }) => {
    return (
       <>
          <TableRow>
-            <TableCell>{oop.applicationId}</TableCell>
+            <TableCell>{oop.applicationNumber}</TableCell>
             <TableCell>{oop.billNo}</TableCell>
             <TableCell>{formatDate(oop.createdAt)}</TableCell>
             <TableCell>₱ {oop.totalAmount.toFixed(2)}</TableCell>
@@ -156,8 +156,8 @@ const AccountantOOPRow = ({ oop, onReviewComplete, currentTab }) => {
                   {oop.OOPstatus}
                </span>
             </TableCell>
-            <TableCell className="text-right">
-               <div className="flex items-center space-x-2">
+            <TableCell className="text-end pr-6">
+               <div className="flex justify-end gap-2">
                   <TooltipProvider>
                      <Tooltip delayDuration={250}>
                         <TooltipTrigger asChild>
@@ -238,8 +238,8 @@ const AccountantOOPRow = ({ oop, onReviewComplete, currentTab }) => {
          </TableRow>
 
          <ViewOOPModal
-            isOpen={isViewOOPModalOpen}
-            onClose={() => setIsViewOOPModalOpen(false)}
+            isOpen={isViewModalOpen}
+            onClose={() => setIsViewModalOpen(false)}
             oop={oop}
          />
 
