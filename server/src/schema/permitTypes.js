@@ -31,6 +31,8 @@ const permitTypes = gql`
     awaitingPermitCreation: Boolean!
     PermitCreated: Boolean!
     history: [HistoryEntry]
+    certificateId: ID
+    hasCertificate: Boolean!
   }
 
   type COVPermit implements Permit {
@@ -67,6 +69,8 @@ const permitTypes = gql`
     destinationAddress: String!
     files: COVFiles
     certificate: Certificate
+    certificateId: ID
+    hasCertificate: Boolean!
   }
 
   type CSAWPermit implements Permit {
@@ -112,6 +116,8 @@ const permitTypes = gql`
     isWPPHolder: Boolean!
     files: CSAWFiles
     certificate: Certificate
+    certificateId: ID
+    hasCertificate: Boolean!
   }
 
   type PLTCPPermit implements Permit {
@@ -148,6 +154,8 @@ const permitTypes = gql`
     purpose: String!
     files: PLTCPFiles
     certificate: Certificate
+    certificateId: ID
+    hasCertificate: Boolean!
   }
 
   type PTPRPermit implements Permit {
@@ -183,6 +191,8 @@ const permitTypes = gql`
     yearPlanted: Int!
     files: PTPRFiles
     certificate: Certificate
+    certificateId: ID
+    hasCertificate: Boolean!
   }
 
   type PLTPPermit implements Permit {
@@ -222,6 +232,8 @@ const permitTypes = gql`
     purpose: String!
     files: PLTPFiles
     certificate: Certificate
+    certificateId: ID
+    hasCertificate: Boolean!
   }
 
   type TCEBPPermit implements Permit {
@@ -254,6 +266,8 @@ const permitTypes = gql`
     requestType: String!
     files: TCEBPFiles
     certificate: Certificate
+    certificateId: ID
+    hasCertificate: Boolean!
   }
 
   type COVFiles {
@@ -390,10 +404,8 @@ const permitTypes = gql`
       currentStage: String!
       status: String!
       notes: String
-
       acceptedByTechnicalStaff: Boolean
       approvedByTechnicalStaff: Boolean
-
       acceptedByReceivingClerk: Boolean
       recordedByReceivingClerk: Boolean
 
@@ -404,14 +416,13 @@ const permitTypes = gql`
 
       awaitingOOP: Boolean
       OOPCreated: Boolean
-
       hasInspectionReport: Boolean
       InspectionReportsReviewedByChief: Boolean
       InspectionReportsReviewedByPENRCENROfficer: Boolean
-
       awaitingPermitCreation: Boolean
       PermitCreated: Boolean
-
+      hasCertificate: Boolean
+      certificateId: ID
     ): Permit!
     recordApplication(id: ID!, notes: String): Permit!
     undoRecordApplication(id: ID!, approvedByPENRCENROfficer: Boolean): Permit!

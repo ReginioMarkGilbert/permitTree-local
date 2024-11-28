@@ -82,6 +82,8 @@ const GET_APPLICATION_DETAILS = gql`
       maxLengthGuidebar
       countryOfOrigin
       purchasePrice
+      hasCertificate
+      certificateId
     }
   }
 `;
@@ -200,6 +202,11 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
          return;
       }
 
+      if (fullApplication.hasCertificate) {
+         toast.error('Certificate already exists for this application');
+         return;
+      }
+
       try {
          const certificateData = {
             registrationType: fullApplication.registrationType,
@@ -245,18 +252,38 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
    const renderCertificateTemplate = () => {
       if (!generatedCertificate) return null;
 
+      const certificateData = {
+         ...generatedCertificate,
+         certificateData: {
+            ...generatedCertificate.certificateData,
+            ownerName: application.ownerName,
+            address: application.address,
+            purpose: "For Cutting/Slicing of Planted trees with cutting permits and coconut within Private Land",
+            chainsawDetails: {
+               brand: application.brand,
+               model: application.model,
+               serialNumber: application.serialNumber,
+               dateOfAcquisition: application.dateOfAcquisition,
+               powerOutput: application.powerOutput,
+               maxLengthGuidebar: application.maxLengthGuidebar,
+               countryOfOrigin: application.countryOfOrigin,
+               purchasePrice: parseFloat(application.purchasePrice)
+            }
+         }
+      };
+
       switch (application.applicationType) {
          case 'Chainsaw Registration':
             return (
                <div style={{ display: 'none' }}>
                   <CSAWCertificateTemplate
                      ref={certificateRef}
-                     certificate={generatedCertificate}
-                     application={application}
+                     certificate={certificateData}
+                     application={certificateData.certificateData}
+                     hiddenOnPrint={[]}
                   />
                </div>
             );
-         // Add other cases for different permit types here
          default:
             return null;
       }
@@ -276,7 +303,8 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
                   <div className="overflow-auto max-h-[70vh]">
                      <CSAWCertificateTemplate
                         certificate={generatedCertificate}
-                        application={application}
+                        application={generatedCertificate.certificateData}
+                        hiddenOnPrint={[]}
                      />
                   </div>
                   <div className="flex justify-end gap-2 mt-4">

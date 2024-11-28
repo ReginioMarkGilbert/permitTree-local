@@ -10,6 +10,7 @@ const NotificationService = require('../../services/userNotificationService');
 const PersonnelNotificationService = require('../../services/personnelNotificationService');
 const User = require('../../models/User');
 const Admin = require('../../models/admin');
+const Certificate = require('../../models/Certificate');
 
 
 const permitResolvers = {
@@ -141,7 +142,9 @@ const permitResolvers = {
             return permits.map(permit => ({
                ...permit,
                id: permit._id.toString(),
-               dateOfSubmission: permit.dateOfSubmission.toISOString()
+               dateOfSubmission: permit.dateOfSubmission.toISOString(),
+               certificateId: permit.certificateId?.toString(),
+               hasCertificate: permit.hasCertificate || false
             }));
          } catch (error) {
             console.error('Error fetching recent permits:', error);
@@ -186,7 +189,9 @@ const permitResolvers = {
          InspectionReportsReviewedByPENRCENROfficer,
 
          awaitingPermitCreation,
-         PermitCreated
+         PermitCreated,
+         certificateId,
+         hasCertificate
       }) => {
          try {
             const query = Object.entries({
@@ -212,7 +217,9 @@ const permitResolvers = {
                InspectionReportsReviewedByPENRCENROfficer,
 
                awaitingPermitCreation,
-               PermitCreated
+               PermitCreated,
+               certificateId,
+               hasCertificate
             }).reduce((acc, [key, value]) => {
                if (value !== undefined) acc[key] = value;
                return acc;
@@ -237,7 +244,9 @@ const permitResolvers = {
             return permits.map(permit => ({
                ...permit,
                id: permit._id.toString(),
-               dateOfSubmission: permit.dateOfSubmission.toISOString()
+               dateOfSubmission: permit.dateOfSubmission.toISOString(),
+               certificateId: permit.certificateId?.toString(),
+               hasCertificate: permit.hasCertificate || false
             }));
          } catch (error) {
             console.error('Error fetching permits:', error);
@@ -385,7 +394,10 @@ const permitResolvers = {
          InspectionReportsReviewedByPENRCENROfficer,
 
          awaitingPermitCreation,
-         PermitCreated
+         PermitCreated,
+
+         hasCertificate,
+         certificateId
       }, { user }) => {
          try {
             const permit = await Permit.findById(id);
@@ -416,13 +428,21 @@ const permitResolvers = {
                InspectionReportsReviewedByPENRCENROfficer,
 
                awaitingPermitCreation,
-               PermitCreated
+               PermitCreated,
+
+               hasCertificate,
+               certificateId
             };
             Object.entries(fields).forEach(([key, value]) => {
                if (value !== undefined) {
                   permit[key] = value;
                }
             });
+
+            // If we're undoing permit creation, also delete the certificate
+            if (currentStage === 'AuthenticityApprovedByTechnicalStaff') {
+               await Certificate.findByIdAndDelete(permit.certificateId);
+            }
 
             // permit.history.push({
             //    stage: currentStage,
@@ -562,7 +582,6 @@ const permitResolvers = {
                notes: notes || ''
             });
 
-            // return updatedPermit;
             await permit.save();
             return permit;
 

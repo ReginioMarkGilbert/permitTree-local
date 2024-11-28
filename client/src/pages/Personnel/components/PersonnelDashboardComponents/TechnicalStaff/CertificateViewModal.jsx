@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -14,10 +14,55 @@ import {
    TooltipTrigger,
 } from "@/components/ui/tooltip";
 import CSAWCertificateTemplate from '../../CertificateComponents/certificateTemplates/CSAWCertificateTemplate';
+import { useQuery } from '@apollo/client';
+import { gql } from '@apollo/client';
+
+const GET_CERTIFICATE_DETAILS = gql`
+  query GetCertificateDetails($id: ID!) {
+    getCertificateById(id: $id) {
+      id
+      certificateNumber
+      certificateStatus
+      dateCreated
+      dateIssued
+      expiryDate
+      applicationId
+      applicationType
+      certificateData {
+        registrationType
+        ownerName
+        address
+        purpose
+        chainsawDetails {
+          brand
+          model
+          serialNumber
+          dateOfAcquisition
+          powerOutput
+          maxLengthGuidebar
+          countryOfOrigin
+          purchasePrice
+        }
+      }
+      orderOfPayment {
+        officialReceipt {
+          orNumber
+          dateIssued
+          amount
+        }
+      }
+    }
+  }
+`;
 
 const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) => {
    const [previewUrl, setPreviewUrl] = useState(null);
    const [showECertificate, setShowECertificate] = useState(false);
+   const certificateRef = useRef();
+   const { data: certDetails } = useQuery(GET_CERTIFICATE_DETAILS, {
+      variables: { id: certificate?.id },
+      skip: !certificate?.id
+   });
 
    const handleDownload = (fileData, filename, contentType) => {
       try {
@@ -121,6 +166,14 @@ const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) 
       };
    }, [previewUrl]);
 
+   console.log('Certificate data in view modal:', {
+      certificate,
+      certificateData: certificate?.certificateData,
+      chainsawDetails: certificate?.certificateData?.chainsawDetails
+   });
+
+   console.log('Certificate details:', certDetails);
+
    if (loading) {
       return (
          <Dialog open={isOpen} onOpenChange={onClose}>
@@ -158,12 +211,15 @@ const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) 
                         Certificate Number: {certificate.certificateNumber}
                      </DialogDescription>
                   </DialogHeader>
-                  <ScrollArea className="flex-grow">
+                  <div className="overflow-auto max-h-[70vh]">
                      <CSAWCertificateTemplate
-                        certificate={certificate}
-                        application={certificate} // Pass certificate as application since it contains the needed data
+                        ref={certificateRef}
+                        certificate={certDetails?.getCertificateById || certificate}
+                        application={certDetails?.getCertificateById?.certificateData}
+                        orderOfPayment={certDetails?.getCertificateById?.orderOfPayment}
+                        hiddenOnPrint={[]}
                      />
-                  </ScrollArea>
+                  </div>
                   <DialogFooter>
                      <Button variant="outline" onClick={() => setShowECertificate(false)}>
                         Back to Details
@@ -200,11 +256,19 @@ const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) 
                               </div>
                            </div>
 
-                           {certificate.uploadedCertificate && (
-                              <div>
-                                 <h3 className="font-semibold mb-2">Document</h3>
-                                 <div className="space-y-2">
-                                    <p className="text-sm">{certificate.uploadedCertificate.filename}</p>
+                           <div>
+                              <h3 className="font-semibold mb-2">Document Actions</h3>
+                              <div className="space-y-2">
+                                 <Button
+                                    variant="outline"
+                                    onClick={() => setShowECertificate(true)}
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                                 >
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    View E-Certificate
+                                 </Button>
+
+                                 {certificate.uploadedCertificate && (
                                     <div className="flex gap-2">
                                        <TooltipProvider>
                                           <Tooltip>
@@ -219,11 +283,11 @@ const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) 
                                                    )}
                                                 >
                                                    <Eye className="h-4 w-4 mr-2" />
-                                                   Preview
+                                                   Preview Upload
                                                 </Button>
                                              </TooltipTrigger>
                                              <TooltipContent>
-                                                <p>Preview certificate</p>
+                                                <p>Preview uploaded certificate</p>
                                              </TooltipContent>
                                           </Tooltip>
                                        </TooltipProvider>
@@ -250,9 +314,9 @@ const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) 
                                           </Tooltip>
                                        </TooltipProvider>
                                     </div>
-                                 </div>
+                                 )}
                               </div>
-                           )}
+                           </div>
                         </div>
 
                         <Separator />

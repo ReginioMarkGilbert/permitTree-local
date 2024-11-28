@@ -1,4 +1,5 @@
 const Certificate = require('../models/Certificate');
+const Counter = require('../models/Counter');
 
 const generateCertificateNumber = async (applicationType) => {
    const currentYear = new Date().getFullYear();
@@ -27,21 +28,19 @@ const generateCertificateNumber = async (applicationType) => {
          prefix = 'CERT';
    }
 
-   // Find the latest certificate number for this type and year
-   const latestCert = await Certificate.findOne({
-      certificateNumber: new RegExp(`^${prefix}-${currentYear}-`),
-      applicationType
-   }).sort({ certificateNumber: -1 });
+   try {
+      // Use Counter model to get next sequence
+      const counter = await Counter.findOneAndUpdate(
+         { _id: `${prefix}Certificate` },
+         { $inc: { seq: 1 } },
+         { new: true, upsert: true }
+      );
 
-   let sequence = 1;
-   if (latestCert) {
-      const match = latestCert.certificateNumber.match(/\d+$/);
-      if (match) {
-         sequence = parseInt(match[0]) + 1;
-      }
+      return `${prefix}-${currentYear}-${counter.seq.toString().padStart(4, '0')}`;
+   } catch (error) {
+      console.error('Error generating certificate number:', error);
+      throw error;
    }
-
-   return `${prefix}-${currentYear}-${sequence.toString().padStart(4, '0')}`;
 };
 
 module.exports = { generateCertificateNumber };

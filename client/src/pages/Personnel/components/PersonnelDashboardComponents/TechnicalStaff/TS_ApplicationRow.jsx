@@ -78,7 +78,9 @@ const UPDATE_PERMIT_STAGE = gql`
     $approvedByTechnicalStaff: Boolean,
     $awaitingPermitCreation: Boolean,
     $acceptedByTechnicalStaff: Boolean,
-    $PermitCreated: Boolean
+    $PermitCreated: Boolean,
+    $hasCertificate: Boolean,
+    $certificateId: ID
   ) {
     updatePermitStage(
       id: $id,
@@ -88,7 +90,9 @@ const UPDATE_PERMIT_STAGE = gql`
       approvedByTechnicalStaff: $approvedByTechnicalStaff,
       awaitingPermitCreation: $awaitingPermitCreation,
       acceptedByTechnicalStaff: $acceptedByTechnicalStaff,
-      PermitCreated: $PermitCreated
+      PermitCreated: $PermitCreated,
+      hasCertificate: $hasCertificate,
+      certificateId: $certificateId
     ) {
       id
       currentStage
@@ -97,6 +101,8 @@ const UPDATE_PERMIT_STAGE = gql`
       awaitingPermitCreation
       approvedByTechnicalStaff
       PermitCreated
+      hasCertificate
+      certificateId
     }
   }
 `;
@@ -187,7 +193,6 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
                   }
                });
 
-               // Only show success if we get data back
                if (data?.undoAcceptanceTechnicalStaff) {
                   toast.success('Application status undone successfully');
                   onReviewComplete();
@@ -205,14 +210,18 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
                status: 'In Progress',
                notes: 'Permit creation undone by Technical Staff',
                PermitCreated: false,
-               awaitingPermitCreation: true
+               awaitingPermitCreation: true,
+               hasCertificate: false,
+               certificateId: null
             };
          }
 
-         const { data } = await updatePermitStage({ variables });
-         if (data?.updatePermitStage) {
-            toast.success('Application status undone successfully');
-            onReviewComplete();
+         if (variables) {
+            const { data } = await updatePermitStage({ variables });
+            if (data?.updatePermitStage) {
+               toast.success('Application status undone successfully');
+               onReviewComplete();
+            }
          }
       } catch (error) {
          console.error('Error undoing application status:', error);

@@ -115,6 +115,7 @@ const certificateResolvers = {
             }
 
             const certificateNumber = await generateCertificateNumber(input.applicationType);
+            const currentDate = new Date();
 
             const certificateData = {
                certificateNumber,
@@ -122,12 +123,22 @@ const certificateResolvers = {
                applicationNumber: permit.applicationNumber,
                applicationType: input.applicationType,
                certificateStatus: 'Pending Signature',
-               dateCreated: new Date().toISOString(),
+               dateCreated: currentDate,
+               dateIssued: currentDate,
+               expiryDate: new Date(currentDate.setFullYear(currentDate.getFullYear() + 1)),
                certificateData: input.certificateData
             };
 
             const certificate = new Certificate(certificateData);
             const savedCertificate = await certificate.save();
+
+            // Update the permit with the certificate reference
+            await Permit.findByIdAndUpdate(input.applicationId, {
+               $set: {
+                  certificateId: savedCertificate._id,
+                  hasCertificate: true
+               }
+            });
 
             return savedCertificate;
          } catch (error) {
@@ -138,31 +149,49 @@ const certificateResolvers = {
 
       uploadCertificate: async (_, { input }) => {
          try {
-            const certificateNumber = await generateCertificateNumber(input.applicationType);
+            // Find existing certificate for this application
+            let certificate = await Certificate.findOne({
+               applicationId: input.applicationId,
+               certificateStatus: 'Pending Signature'
+            });
+
+            if (!certificate) {
+               throw new Error('No pending certificate found for this application. Please generate an e-certificate first.');
+            }
 
             // Convert base64 to Buffer
             const fileBuffer = Buffer.from(input.uploadedCertificate.fileData, 'base64');
 
-            const certificate = new Certificate({
-               certificateNumber,
-               applicationId: input.applicationId,
-               applicationType: input.applicationType,
-               certificateStatus: 'Released',
-               uploadedCertificate: {
-                  fileData: fileBuffer,
-                  filename: input.uploadedCertificate.filename,
-                  contentType: input.uploadedCertificate.contentType,
-                  metadata: {
-                     ...input.uploadedCertificate.metadata,
-                     issueDate: new Date(input.uploadedCertificate.metadata.issueDate),
-                     expiryDate: new Date(input.uploadedCertificate.metadata.expiryDate)
-                  }
+            // Keep the existing certificateData and update other fields
+            const updatedCertificate = {
+               $set: {
+                  certificateStatus: 'Released',
+                  uploadedCertificate: {
+                     fileData: fileBuffer,
+                     filename: input.uploadedCertificate.filename,
+                     contentType: input.uploadedCertificate.contentType,
+                     metadata: {
+                        ...input.uploadedCertificate.metadata,
+                        issueDate: new Date(input.uploadedCertificate.metadata.issueDate),
+                        expiryDate: new Date(input.uploadedCertificate.metadata.expiryDate)
+                     }
+                  },
+                  dateIssued: new Date(input.uploadedCertificate.metadata.issueDate),
+                  expiryDate: new Date(input.uploadedCertificate.metadata.expiryDate)
                }
-            });
+            };
 
-            const savedCertificate = await certificate.save();
+            // Use findOneAndUpdate with { new: true } to get the updated document
+            const savedCertificate = await Certificate.findOneAndUpdate(
+               { _id: certificate._id },
+               updatedCertificate,
+               {
+                  new: true,
+                  runValidators: true
+               }
+            ).lean();
 
-            // Update permit status only when uploading the certificate
+            // Update permit status
             await Permit.findByIdAndUpdate(input.applicationId, {
                $set: {
                   certificateGenerated: true,
@@ -176,7 +205,7 @@ const certificateResolvers = {
 
             // Convert Buffer back to base64 for response
             const responseData = {
-               ...savedCertificate.toObject(),
+               ...savedCertificate,
                id: savedCertificate._id.toString(),
                uploadedCertificate: {
                   ...savedCertificate.uploadedCertificate,

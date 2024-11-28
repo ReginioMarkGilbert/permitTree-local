@@ -77,6 +77,9 @@ const PermitSchema = new mongoose.Schema({
    awaitingPermitCreation: { type: Boolean, default: false },
    PermitCreated: { type: Boolean, default: false },
 
+   certificateId: { type: mongoose.Schema.Types.ObjectId, ref: 'Certificate' },
+   hasCertificate: { type: Boolean, default: false },
+
    history: [{
       stage: String,
       status: String,
@@ -89,6 +92,7 @@ const PermitSchema = new mongoose.Schema({
    }],
    dateOfSubmission: { type: Date, default: Date.now },
    lastUpdated: { type: Date, default: Date.now },
+
 }, { timestamps: true });
 
 // Initialize history as an array if missing before save
