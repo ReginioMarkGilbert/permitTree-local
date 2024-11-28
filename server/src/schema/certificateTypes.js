@@ -12,6 +12,7 @@ const certificateTypes = gql`
     expiryDate: String
     certificateData: CertificateData
     uploadedCertificate: UploadedCertificate
+    orderOfPayment: OOP
   }
 
   type CertificateSignatures {
@@ -116,6 +117,21 @@ const certificateTypes = gql`
     uploadCertificate(input: UploadCertificateInput!): Certificate!
     forwardCertificateForSignature(id: ID!): Certificate!
     signCertificate(id: ID!, signature: String!): Certificate!
+  }
+
+  type OOP {
+    id: ID
+    applicationId: ID
+    OOPstatus: String
+    officialReceipt: OfficialReceipt
+  }
+
+  type OfficialReceipt {
+    orNumber: String
+    dateIssued: String
+    amount: Float
+    paymentMethod: String
+    remarks: String
   }
 `;
 

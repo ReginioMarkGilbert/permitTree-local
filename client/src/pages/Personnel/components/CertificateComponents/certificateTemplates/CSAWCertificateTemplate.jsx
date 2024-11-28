@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import QRCode from 'react-qr-code';
 import DENRLogo from '@/assets/denr-logo.png';
 import BagongPilipinasLogo from '@/assets/BAGONG-PILIPINAS-LOGO.png';
+import { gql, useQuery } from '@apollo/client';
 
 const CSAWCertificateTemplate = forwardRef(({ certificate, application, hiddenOnPrint = [] }, ref) => {
    const qrValue = JSON.stringify({
@@ -13,19 +14,70 @@ const CSAWCertificateTemplate = forwardRef(({ certificate, application, hiddenOn
    });
    // correct way to format date in certificate template
    // format date string
-   const formatDateString = (dateString) => {
+   const formatDate = (timestamp) => {
       try {
-         const date = new Date(parseInt(dateString));
-         if (isNaN(date.getTime())) {
-            console.warn('Invalid date:', dateString);
-            return 'Date not available';
+         if (!timestamp) return null;
+
+         // Handle string timestamps
+         if (typeof timestamp === 'string') {
+            // Check if it's a numeric string (Unix timestamp)
+            if (!isNaN(timestamp)) {
+               return format(new Date(parseInt(timestamp)), 'MMMM d, yyyy');
+            }
+            // If it's an ISO string or other date string
+            return format(new Date(timestamp), 'MMMM d, yyyy');
          }
-         return format(date, 'MMMM d, yyyy');
+
+         // Handle numeric timestamps
+         if (typeof timestamp === 'number') {
+            return format(new Date(timestamp), 'MMMM d, yyyy');
+         }
+
+         // Handle Date objects
+         if (timestamp instanceof Date) {
+            return format(timestamp, 'MMMM d, yyyy');
+         }
+
+         return null;
       } catch (error) {
-         console.error('Error formatting date:', error);
-         return 'Date not available';
+         console.error('Error formatting date:', error, 'timestamp:', timestamp);
+         return null;
       }
    };
+
+   // Update the query to include OOP information
+   const GET_CERTIFICATE_DETAILS = gql`
+     query GetCertificateDetails($id: ID!) {
+       getCertificateById(id: $id) {
+         id
+         certificateNumber
+         certificateStatus
+         dateCreated
+         dateIssued
+         expiryDate
+         applicationId
+         orderOfPayment @include(if: true) {
+           id
+           OOPstatus
+           officialReceipt {
+             orNumber
+             dateIssued
+             amount
+             paymentMethod
+           }
+         }
+       }
+     }
+   `;
+
+   // Use the query if needed
+   const { data: certData, loading: certLoading } = useQuery(GET_CERTIFICATE_DETAILS, {
+      variables: { id: certificate.id },
+      skip: !certificate?.id,
+      onCompleted: (data) => {
+         console.log('Certificate with OOP data:', data);
+      }
+   });
 
    return (
       <div ref={ref} className="p-8 bg-white">
@@ -72,7 +124,7 @@ const CSAWCertificateTemplate = forwardRef(({ certificate, application, hiddenOn
                   <p><span className="font-bold">Serial No:</span> {certificate.certificateData.chainsawDetails.serialNumber}</p>
                   <p>
                      <span className="font-bold">Date of Acquisition:</span> {
-                        formatDateString(certificate.certificateData.chainsawDetails.dateOfAcquisition)
+                        formatDate(certificate.certificateData.chainsawDetails.dateOfAcquisition)
                      }
                   </p>
                </div>
@@ -86,8 +138,12 @@ const CSAWCertificateTemplate = forwardRef(({ certificate, application, hiddenOn
          </div>
 
          <div className="mb-6">
-            <p className="mb-2">Issued on: _____________________ at DENR-PENRO Marinduque</p>
-            <p>Expiry Date: _____________________</p>
+            <p className="mb-2">
+               Issued on: {formatDate(certificate.dateIssued) || '___________________'} at DENR-PENRO Marinduque
+            </p>
+            <p>
+               Expiry Date: {formatDate(certificate.expiryDate) || '_____________________'}
+            </p>
          </div>
 
          <div className="mb-6">
@@ -100,9 +156,11 @@ const CSAWCertificateTemplate = forwardRef(({ certificate, application, hiddenOn
 
          <div className="flex justify-between items-end">
             <div>
-               <p>Amount paid: Php 500.00</p>
-               <p>O.R. No.: _______________</p>
-               <p>Date: _________________</p>
+               <p>Amount paid: Php {certData?.getCertificateById?.orderOfPayment?.officialReceipt?.amount?.toFixed(2) || '500.00'}</p>
+               <p>O.R. No.: {certData?.getCertificateById?.orderOfPayment?.officialReceipt?.orNumber || '_______________'}</p>
+               <p>Date: {certData?.getCertificateById?.orderOfPayment?.officialReceipt?.dateIssued ?
+                  formatDate(certData.getCertificateById.orderOfPayment.officialReceipt.dateIssued) :
+                  '_________________'}</p>
             </div>
             <div className={`qr-code ${hiddenOnPrint.includes('qr-code') ? 'no-print' : ''}`}>
                <QRCode

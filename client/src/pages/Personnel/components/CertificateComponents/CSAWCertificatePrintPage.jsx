@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { toast } from 'sonner';
 import { getUserRoles } from '@/utils/auth';
-import CSAWCertificateTemplate from '../PersonnelDashboardComponents/TechnicalStaff/CSAWCertificateTemplate';
+import CSAWCertificateTemplate from './certificateTemplates/CSAWCertificateTemplate';
 
 const CSAWCertificatePrintPage = () => {
    const location = useLocation();

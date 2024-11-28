@@ -1,5 +1,6 @@
 const Certificate = require('../models/Certificate');
 const Permit = require('../models/permits/Permit');
+const { OOP } = require('../models/OOP');
 const { UserInputError } = require('apollo-server-express');
 const { generateCertificateNumber } = require('../utils/certificateNumberGenerator');
 const { Binary } = require('mongodb');
@@ -16,17 +17,40 @@ const certificateResolvers = {
       },
       getCertificateById: async (_, { id }) => {
          try {
-            const certificate = await Certificate.findById(id);
+            const certificate = await Certificate.findById(id)
+               .populate({
+                  path: 'orderOfPayment',
+                  match: {
+                     OOPstatus: 'Issued OR',
+                     'officialReceipt': { $exists: true }
+                  }
+               });
+
             if (!certificate) {
                throw new UserInputError('Certificate not found');
             }
+
+            // Log the populated data
+            console.log('Certificate with OOP:', {
+               id: certificate.id,
+               applicationId: certificate.applicationId,
+               orderOfPayment: certificate.orderOfPayment ? {
+                  id: certificate.orderOfPayment._id,
+                  status: certificate.orderOfPayment.OOPstatus,
+                  or: certificate.orderOfPayment.officialReceipt
+               } : null
+            });
+
             const certObj = certificate.toObject();
+
             // Convert Buffer to base64 string if it exists
             if (certObj.uploadedCertificate && certObj.uploadedCertificate.fileData) {
                certObj.uploadedCertificate.fileData = certObj.uploadedCertificate.fileData.toString('base64');
             }
+
             return certObj;
          } catch (error) {
+            console.error('Error fetching certificate:', error);
             throw new Error(`Failed to fetch certificate: ${error.message}`);
          }
       },
@@ -47,12 +71,44 @@ const certificateResolvers = {
       }
    },
 
+   Certificate: {
+      orderOfPayment: async (certificate) => {
+         try {
+            console.log('Fetching OOP for certificate:', certificate.id);
+            console.log('Application Number:', certificate.applicationNumber);
+
+            // Find OOP using application number
+            const oop = await OOP.findOne({
+               applicationNumber: certificate.applicationNumber,
+               OOPstatus: 'Issued OR',
+               'officialReceipt': { $exists: true }
+            }).lean();
+
+            if (oop) {
+               console.log('Found OOP:', {
+                  id: oop._id,
+                  applicationNumber: oop.applicationNumber,
+                  status: oop.OOPstatus,
+                  or: oop.officialReceipt
+               });
+            } else {
+               console.log('No OOP found for application number:', certificate.applicationNumber);
+            }
+
+            return oop;
+         } catch (error) {
+            console.error('Error fetching OOP:', error);
+            return null;
+         }
+      }
+   },
+
    Mutation: {
       generateCertificate: async (_, { input }) => {
          try {
             console.log('Generating certificate with input:', input);
 
-            // Verify the permit exists
+            // Verify the permit exists and get its application number
             const permit = await Permit.findById(input.applicationId);
             if (!permit) {
                throw new Error(`Permit not found with ID: ${input.applicationId}`);
@@ -63,6 +119,7 @@ const certificateResolvers = {
             const certificateData = {
                certificateNumber,
                applicationId: input.applicationId,
+               applicationNumber: permit.applicationNumber,
                applicationType: input.applicationType,
                certificateStatus: 'Pending Signature',
                dateCreated: new Date().toISOString(),
@@ -71,17 +128,6 @@ const certificateResolvers = {
 
             const certificate = new Certificate(certificateData);
             const savedCertificate = await certificate.save();
-
-            // Update permit status with correct flags
-            await Permit.findByIdAndUpdate(input.applicationId, {
-               $set: {
-                  certificateGenerated: true,
-                  certificateId: savedCertificate._id,
-                  PermitCreated: true,
-                  awaitingPermitCreation: false
-                  // currentStage: 'AuthenticityApprovedByTechnicalStaff'
-               }
-            });
 
             return savedCertificate;
          } catch (error) {
@@ -116,7 +162,7 @@ const certificateResolvers = {
 
             const savedCertificate = await certificate.save();
 
-            // Update permit status with correct flags
+            // Update permit status only when uploading the certificate
             await Permit.findByIdAndUpdate(input.applicationId, {
                $set: {
                   certificateGenerated: true,

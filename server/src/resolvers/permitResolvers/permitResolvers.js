@@ -136,7 +136,7 @@ const permitResolvers = {
                .lean()
                .exec();
 
-            console.log('Found permits:', permits.length);
+            // console.log('Found permits:', permits.length);
 
             return permits.map(permit => ({
                ...permit,
@@ -218,21 +218,21 @@ const permitResolvers = {
                return acc;
             }, {});
 
-            console.log('Query parameters:', query);
+            // console.log('Query parameters:', query);
 
             const permits = await Permit.find(query)
                .sort({ dateOfSubmission: -1 })
                .lean()
                .exec();
 
-            console.log('Found permits:', permits.length);
-            console.log('Permit details:', permits.map(p => ({
-               id: p._id,
-               applicationNumber: p.applicationNumber,
-               awaitingOOP: p.awaitingOOP,
-               OOPCreated: p.OOPCreated,
-               status: p.status
-            })));
+            // console.log('Found permits:', permits.length);
+            // console.log('Permit details:', permits.map(p => ({
+            //    id: p._id,
+            //    applicationNumber: p.applicationNumber,
+            //    awaitingOOP: p.awaitingOOP,
+            //    OOPCreated: p.OOPCreated,
+            //    status: p.status
+            // })));
 
             return permits.map(permit => ({
                ...permit,

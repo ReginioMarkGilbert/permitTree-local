@@ -103,7 +103,6 @@ const TechnicalStaffDashboard = () => {
             return { currentStage: 'ForInspectionByTechnicalStaff' };
          case 'Approved Applications':
             return {
-               currentStage: 'AuthenticityApprovedByTechnicalStaff',
                approvedByTechnicalStaff: true
             };
          case 'Awaiting Permit Creation':

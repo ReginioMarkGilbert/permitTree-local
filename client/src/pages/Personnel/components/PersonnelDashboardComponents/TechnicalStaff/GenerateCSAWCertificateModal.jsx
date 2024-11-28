@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { useMutation, useQuery, gql } from '@apollo/client';
 import { toast } from 'sonner';
 import { useReactToPrint } from 'react-to-print';
-import CSAWCertificateTemplate from './CSAWCertificateTemplate';
+import CSAWCertificateTemplate from '../../CertificateComponents/certificateTemplates/CSAWCertificateTemplate';
 import { format } from 'date-fns';
 
 const GET_CSAW_PERMIT = gql`

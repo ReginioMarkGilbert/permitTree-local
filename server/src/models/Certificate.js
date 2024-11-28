@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const CertificateSchema = new mongoose.Schema({
    certificateNumber: { type: String, required: true, unique: true },
    applicationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Permit', required: true },
+   applicationNumber: { type: String },
    applicationType: {
       type: String,
       required: true,
@@ -49,7 +50,8 @@ const CertificateSchema = new mongoose.Schema({
          expiryDate: Date,
          remarks: String
       }
-   }
+   },
+   oopId: { type: mongoose.Schema.Types.ObjectId, ref: 'OOP' }
 }, {
    timestamps: true,
    toObject: {
@@ -70,6 +72,13 @@ const CertificateSchema = new mongoose.Schema({
          return ret;
       }
    }
+});
+
+CertificateSchema.virtual('orderOfPayment', {
+   ref: 'OOP',
+   localField: 'applicationNumber',
+   foreignField: 'applicationNumber',
+   justOne: true
 });
 
 module.exports = mongoose.model('Certificate', CertificateSchema);
