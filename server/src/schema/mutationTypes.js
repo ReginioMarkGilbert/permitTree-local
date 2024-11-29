@@ -3,7 +3,15 @@ const { gql } = require('graphql-tag');
 const mutationTypes = gql`
   type Mutation {
     login(username: String!, password: String!): AuthPayload!
-    registerUser(firstName: String!, lastName: String!, username: String!, password: String!): AuthPayload!
+    registerUser(
+      firstName: String!
+      lastName: String!
+      username: String!
+      password: String!
+      email: String
+      role: String!
+      userType: String!
+    ): AuthPayload!
     createAdmin(input: CreateAdminInput!): Admin!
     updateUserProfile(input: UpdateUserProfileInput!): User
     logout: Boolean
@@ -74,6 +82,7 @@ const mutationTypes = gql`
 
     deactivateUser(id: ID!): User!
     activateUser(id: ID!): User!
+    deleteUser(id: ID!): User!
   }
 
   input NotificationPreferencesInput {
