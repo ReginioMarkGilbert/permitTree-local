@@ -162,7 +162,7 @@ const userResolvers = {
       },
    },
    Mutation: {
-      registerUser: async (_, { firstName, lastName, username, password }) => {
+      registerUser: async (_, { firstName, lastName, username, password, email, role, userType }) => {
          try {
             const existingUser = await User.findOne({ username });
             if (existingUser) {
@@ -174,7 +174,10 @@ const userResolvers = {
                lastName,
                username,
                password,
-               roles: ['user'] // Default role for new users
+               ...(email && { email }),
+               roles: [role],
+               userType,
+               isActive: true
             });
 
             await newUser.save();
@@ -188,7 +191,10 @@ const userResolvers = {
                   username: newUser.username,
                   firstName: newUser.firstName,
                   lastName: newUser.lastName,
-                  roles: newUser.roles
+                  email: newUser.email,
+                  roles: newUser.roles,
+                  userType: newUser.userType,
+                  isActive: newUser.isActive
                }
             };
          } catch (error) {
@@ -372,7 +378,36 @@ const userResolvers = {
          await user.save();
 
          return user;
-      }
+      },
+      deleteUser: async (_, { id }, context) => {
+         try {
+            // Check if user exists
+            const userToDelete = await User.findById(id);
+            if (!userToDelete) {
+               throw new Error('User not found');
+            }
+
+            // Delete the user
+            const deletedUser = await User.findByIdAndDelete(id);
+
+            if (!deletedUser) {
+               throw new Error('Failed to delete user');
+            }
+
+            return {
+               id: deletedUser._id,
+               username: deletedUser.username,
+               firstName: deletedUser.firstName,
+               lastName: deletedUser.lastName,
+               email: deletedUser.email,
+               roles: deletedUser.roles,
+               isActive: deletedUser.isActive,
+               userType: deletedUser.userType
+            };
+         } catch (error) {
+            throw new Error(`Failed to delete user: ${error.message}`);
+         }
+      },
    }
 };
 

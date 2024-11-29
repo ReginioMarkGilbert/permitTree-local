@@ -96,7 +96,8 @@ const App = () => {
       'Credit_Officer',
       'PENR_CENR_Officer',
       'Deputy_CENR_Officer',
-      'Inspection_Team'
+      'Inspection_Team',
+      'superadmin'
    ];
 
    const getSidebar = () => {

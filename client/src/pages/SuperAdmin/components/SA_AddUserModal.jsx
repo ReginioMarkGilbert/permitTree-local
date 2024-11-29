@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import CustomSelect from "@/components/ui/custom-select";
 import { Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -11,13 +12,14 @@ const SA_AddUserModal = ({ isOpen, onClose, onAddUser }) => {
    const [newUser, setNewUser] = useState({
       firstName: '',
       lastName: '',
-      email: '',
-      password: '',
-      role: '',
-      userType: '',
       username: '',
+      password: '',
+      email: '',
+      role: '',
+      userType: ''
    });
    const [showPassword, setShowPassword] = useState(false);
+   const [isChrome, setIsChrome] = useState(false);
 
    useEffect(() => {
       if (newUser.firstName && newUser.lastName) {
@@ -28,40 +30,67 @@ const SA_AddUserModal = ({ isOpen, onClose, onAddUser }) => {
       }
    }, [newUser.firstName, newUser.lastName]);
 
+   useEffect(() => {
+      // Check if browser is Chrome
+      const isChromeBrowser = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+      setIsChrome(isChromeBrowser);
+   }, []);
+
    const handleInputChange = (e) => {
       const { name, value } = e.target;
       setNewUser((prev) => ({ ...prev, [name]: value }));
    };
 
    const handleSelectChange = (name, value) => {
-      setNewUser((prev) => ({ ...prev, [name]: value }));
+      const userType = value === 'user' ? 'Client' : 'Personnel';
+      setNewUser((prev) => ({
+         ...prev,
+         [name]: value,
+         userType: userType // Automatically set userType based on role
+      }));
    };
 
    const togglePasswordVisibility = () => {
       setShowPassword(!showPassword);
    };
 
+   const handleClose = () => {
+      // Reset form data
+      setNewUser({
+         firstName: '',
+         lastName: '',
+         username: '',
+         password: '',
+         email: '',
+         role: '',
+         userType: ''
+      });
+      onClose();
+   };
+
    const handleSubmit = async (e) => {
       e.preventDefault();
-
-      if (!newUser.firstName || !newUser.lastName || !newUser.email || !newUser.password) {
-         toast.error('Please fill all required fields');
-         return;
-      }
-
       try {
-         await onAddUser({
-            firstName: newUser.firstName,
-            lastName: newUser.lastName,
-            username: newUser.username,
-            password: newUser.password,
-            email: newUser.email
-         });
-         onClose();
+         await onAddUser(newUser);
+         handleClose(); // Use handleClose instead of onClose
       } catch (error) {
          console.error('Error adding user:', error);
       }
    };
+
+   // Role options for CustomSelect
+   const roleOptions = [
+      { value: 'user', label: 'User (Client)' },
+      { value: 'Chief_RPS', label: 'Chief RPS (Personnel)' },
+      { value: 'superadmin', label: 'Super Admin (Personnel)' },
+      { value: 'Technical_Staff', label: 'Technical Staff (Personnel)' },
+      { value: 'Chief_TSD', label: 'Chief TSD (Personnel)' },
+      { value: 'Recieving_Clerk', label: 'Receiving Clerk (Personnel)' },
+      { value: 'Releasing_Clerk', label: 'Releasing Clerk (Personnel)' },
+      { value: 'Accountant', label: 'Accountant (Personnel)' },
+      { value: 'Bill_Collector', label: 'Bill Collector (Personnel)' },
+      { value: 'PENR_CENR_Officer', label: 'PENR/CENR Officer (Personnel)' }
+   ];
 
    return (
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -153,43 +182,32 @@ const SA_AddUserModal = ({ isOpen, onClose, onAddUser }) => {
                      <Label htmlFor="role" className="text-right">
                         Role
                      </Label>
-                     <Select
-                        onValueChange={(value) => handleSelectChange('role', value)}
-                        value={newUser.role}
-                     >
-                        <SelectTrigger className="col-span-3">
-                           <SelectValue placeholder="Select role" />
-                        </SelectTrigger>
-                        <SelectContent>
-                           <SelectItem value="user">User</SelectItem>
-                           <SelectItem value="Chief_RPS">Chief RPS</SelectItem>
-                           <SelectItem value="superadmin">Super Admin</SelectItem>
-                           <SelectItem value="Technical_Staff">Technical Staff</SelectItem>
-                           <SelectItem value="Chief_TSD">Chief TSD</SelectItem>
-                           <SelectItem value="Recieving_Clerk">Receiving Clerk</SelectItem>
-                           <SelectItem value="Releasing_Clerk">Releasing Clerk</SelectItem>
-                           <SelectItem value="Accountant">Accountant</SelectItem>
-                           <SelectItem value="Bill_Collector">Bill Collector</SelectItem>
-                           <SelectItem value="PENR_CENR_Officer">PENR/CENR Officer</SelectItem>
-                        </SelectContent>
-                     </Select>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                     <Label htmlFor="userType" className="text-right">
-                        User Type
-                     </Label>
-                     <Select
-                        onValueChange={(value) => handleSelectChange('userType', value)}
-                        defaultValue={newUser.userType}
-                     >
-                        <SelectTrigger className="col-span-3">
-                           <SelectValue placeholder="Select user type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                           <SelectItem value="Client">Client</SelectItem>
-                           <SelectItem value="Personnel">Personnel</SelectItem>
-                        </SelectContent>
-                     </Select>
+                     <div className="col-span-3">
+                        {isChrome ? (
+                           <CustomSelect
+                              options={roleOptions}
+                              value={newUser.role}
+                              onSelect={(value) => handleSelectChange('role', value)}
+                              placeholder="Select role"
+                           />
+                        ) : (
+                           <Select
+                              onValueChange={(value) => handleSelectChange('role', value)}
+                              value={newUser.role}
+                           >
+                              <SelectTrigger>
+                                 <SelectValue placeholder="Select role" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                 {roleOptions.map(option => (
+                                    <SelectItem key={option.value} value={option.value}>
+                                       {option.label}
+                                    </SelectItem>
+                                 ))}
+                              </SelectContent>
+                           </Select>
+                        )}
+                     </div>
                   </div>
                </div>
                <DialogFooter>

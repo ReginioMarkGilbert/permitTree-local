@@ -1,14 +1,19 @@
+import { useState, useCallback } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
-import { GET_ALL_USERS, ADD_USER, UPDATE_USER, DEACTIVATE_USER, ACTIVATE_USER } from './superAdmin';
+import { GET_ALL_USERS, ADD_USER, UPDATE_USER, DEACTIVATE_USER, ACTIVATE_USER, DELETE_USER } from './superAdmin';
 import { toast } from 'sonner';
 
 const useUsers = () => {
-   const { data, loading, error, refetch } = useQuery(GET_ALL_USERS);
+   const { data, loading, error, refetch } = useQuery(GET_ALL_USERS, {
+      fetchPolicy: 'network-only',
+      notifyOnNetworkStatusChange: true
+   });
 
    const [addUserMutation] = useMutation(ADD_USER);
    const [updateUserMutation] = useMutation(UPDATE_USER);
    const [deactivateUserMutation] = useMutation(DEACTIVATE_USER);
    const [activateUserMutation] = useMutation(ACTIVATE_USER);
+   const [deleteUserMutation] = useMutation(DELETE_USER);
 
    const addUser = async (newUser) => {
       try {
@@ -17,7 +22,10 @@ const useUsers = () => {
                firstName: newUser.firstName,
                lastName: newUser.lastName,
                username: newUser.username,
-               password: newUser.password
+               password: newUser.password,
+               email: newUser.email,
+               role: newUser.role,
+               userType: newUser.userType
             },
             refetchQueries: [{ query: GET_ALL_USERS }]
          });
@@ -93,6 +101,31 @@ const useUsers = () => {
       }
    };
 
+   const deleteUser = async (userId) => {
+      try {
+         await deleteUserMutation({
+            variables: { id: userId },
+            refetchQueries: [{ query: GET_ALL_USERS }]
+         });
+
+         toast.success('User deleted successfully');
+         return true;
+      } catch (err) {
+         toast.error('Failed to delete user', {
+            description: err.message
+         });
+         throw err;
+      }
+   };
+
+   const handleRefetch = useCallback(async () => {
+      try {
+         await refetch();
+      } catch (error) {
+         console.error('Error refetching users:', error);
+      }
+   }, [refetch]);
+
    return {
       users: data?.users || [],
       loading,
@@ -101,7 +134,8 @@ const useUsers = () => {
       addUser,
       deactivateUser,
       activateUser,
-      refetch
+      deleteUser,
+      refetch: handleRefetch
    };
 };
 

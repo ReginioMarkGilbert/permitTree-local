@@ -5,7 +5,7 @@ import SA_UserDetailsViewModal from './components/SA_userDetailsViewModal';
 import SA_UserEditDetailsModal from './components/SA_userEditDetailsModal';
 import SA_AddUserModal from './components/SA_AddUserModal';
 import { Button } from "@/components/ui/button";
-import { toast } from 'sonner';
+import DashboardLayout from '@/components/layouts/DashboardLayout';
 import {
    AlertDialog,
    AlertDialogAction,
@@ -18,13 +18,15 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const SuperAdminManageUsersPage = () => {
-   const { users, loading, error, updateUser, addUser, deactivateUser, activateUser } = useUsers();
+   const { users, loading, error, updateUser, addUser, deactivateUser, activateUser, deleteUser, refetch } = useUsers();
    const [selectedUser, setSelectedUser] = useState(null);
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
    const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
    const [userToDeactivate, setUserToDeactivate] = useState(null);
+   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+   const [userToDelete, setUserToDelete] = useState(null);
 
    const handleViewUser = useCallback((user) => {
       setSelectedUser(user);
@@ -80,24 +82,45 @@ const SuperAdminManageUsersPage = () => {
       }
    }, [addUser]);
 
+   const handleDeleteUser = useCallback((user) => {
+      setUserToDelete(user);
+      setIsDeleteModalOpen(true);
+   }, []);
+
+   const confirmDelete = useCallback(async () => {
+      if (userToDelete) {
+         try {
+            await deleteUser(userToDelete.id);
+            setIsDeleteModalOpen(false);
+            setUserToDelete(null);
+         } catch (err) {
+            console.error('Failed to delete user:', err);
+         }
+      }
+   }, [deleteUser, userToDelete]);
+
    if (loading) return <div>Loading...</div>;
    if (error) return <div>Error: {error}</div>;
 
+   const AddUserButton = (
+      <Button onClick={() => setIsAddModalOpen(true)}>Add New User</Button>
+   );
+
    return (
-      <div className="min-h-screen bg-green-50">
-         <div className="container mx-auto px-4 sm:px-6 py-24">
-            <div className="flex justify-between items-center mb-6">
-               <h1 className="text-3xl font-bold text-green-800">Manage Users</h1>
-               <Button onClick={() => setIsAddModalOpen(true)}>Add New User</Button>
-            </div>
-            <UserTable
-               users={users}
-               onViewUser={handleViewUser}
-               onEditUser={handleEditUser}
-               onDeactivateUser={handleDeactivateUser}
-               onActivateUser={handleActivateUser}
-            />
-         </div>
+      <DashboardLayout
+         title="Manage Users"
+         description="View and manage all user accounts in the system"
+         onRefresh={refetch}
+         filters={AddUserButton}
+      >
+         <UserTable
+            users={users}
+            onViewUser={handleViewUser}
+            onEditUser={handleEditUser}
+            onDeactivateUser={handleDeactivateUser}
+            onActivateUser={handleActivateUser}
+            onDeleteUser={handleDeleteUser}
+         />
          <SA_UserDetailsViewModal
             isOpen={isViewModalOpen}
             onClose={() => setIsViewModalOpen(false)}
@@ -133,7 +156,25 @@ const SuperAdminManageUsersPage = () => {
                </AlertDialogFooter>
             </AlertDialogContent>
          </AlertDialog>
-      </div>
+         <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+            <AlertDialogContent>
+               <AlertDialogHeader>
+                  <AlertDialogTitle>Delete User Account</AlertDialogTitle>
+                  <AlertDialogDescription>
+                     Are you sure you want to delete this user account? This action cannot be undone.
+                  </AlertDialogDescription>
+               </AlertDialogHeader>
+               <AlertDialogFooter>
+                  <AlertDialogCancel onClick={() => setIsDeleteModalOpen(false)}>
+                     Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+                     Delete
+                  </AlertDialogAction>
+               </AlertDialogFooter>
+            </AlertDialogContent>
+         </AlertDialog>
+      </DashboardLayout>
    );
 };
 

@@ -74,4 +74,4 @@ const CustomSelect = ({ options, onSelect, placeholder, value }) => {
    );
 };
 
-export default CustomSelect; 
+export default CustomSelect;

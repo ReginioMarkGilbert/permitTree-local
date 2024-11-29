@@ -34,6 +34,7 @@ const userTypes = gql`
     company: String
     address: String
     roles: [String!]!
+    userType: String!
     isActive: Boolean!
     lastPasswordChange: String
     lastLoginDate: String

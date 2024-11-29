@@ -22,13 +22,19 @@ export const ADD_USER = gql`
     $firstName: String!,
     $lastName: String!,
     $username: String!,
-    $password: String!
+    $password: String!,
+    $email: String!,
+    $role: String!,
+    $userType: String!
   ) {
     registerUser(
       firstName: $firstName,
       lastName: $lastName,
       username: $username,
-      password: $password
+      password: $password,
+      email: $email,
+      role: $role,
+      userType: $userType
     ) {
       token
       user {
@@ -39,6 +45,7 @@ export const ADD_USER = gql`
         email
         roles
         isActive
+        userType
       }
     }
   }
@@ -75,6 +82,15 @@ export const ACTIVATE_USER = gql`
     activateUser(id: $id) {
       id
       isActive
+    }
+  }
+`;
+
+export const DELETE_USER = gql`
+  mutation DeleteUser($id: ID!) {
+    deleteUser(id: $id) {
+      id
+      username
     }
   }
 `;

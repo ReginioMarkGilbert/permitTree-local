@@ -17,9 +17,16 @@ const UserSchema = new mongoose.Schema({
    roles: [{
       type: String,
       required: true,
-      enum: ['user'],
+      enum: ['user', 'Chief_RPS', 'superadmin', 'Technical_Staff', 'Chief_TSD',
+             'Recieving_Clerk', 'Releasing_Clerk', 'Accountant', 'Bill_Collector', 'PENR_CENR_Officer'],
       default: 'user'
    }],
+   userType: {
+      type: String,
+      required: true,
+      enum: ['Client', 'Personnel'],
+      default: 'Client'
+   },
    lastPasswordChange: { type: Date, default: Date.now },
    // for analytics
    isActive: { type: Boolean, default: true },
