@@ -18,13 +18,13 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const SuperAdminManageUsersPage = () => {
-   const { users, loading, error, updateUser, addUser, deleteUser } = useUsers();
+   const { users, loading, error, updateUser, addUser, deactivateUser, activateUser } = useUsers();
    const [selectedUser, setSelectedUser] = useState(null);
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-   const [userToDelete, setUserToDelete] = useState(null);
+   const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
+   const [userToDeactivate, setUserToDeactivate] = useState(null);
 
    const handleViewUser = useCallback((user) => {
       setSelectedUser(user);
@@ -36,31 +36,34 @@ const SuperAdminManageUsersPage = () => {
       setIsEditModalOpen(true);
    }, []);
 
-   const handleDeleteUser = useCallback((user) => {
-      setUserToDelete(user);
-      setIsDeleteModalOpen(true);
+   const handleDeactivateUser = useCallback((user) => {
+      setUserToDeactivate(user);
+      setIsDeactivateModalOpen(true);
    }, []);
 
-   const confirmDelete = useCallback(async () => {
-      if (userToDelete) {
+   const handleActivateUser = useCallback(async (user) => {
+      try {
+         await activateUser(user.id);
+      } catch (err) {
+         console.error('Failed to activate user:', err);
+      }
+   }, [activateUser]);
+
+   const confirmDeactivate = useCallback(async () => {
+      if (userToDeactivate) {
          try {
-            await deleteUser(userToDelete._id);
-            toast.success('User deleted successfully');
+            await deactivateUser(userToDeactivate.id);
+            setIsDeactivateModalOpen(false);
+            setUserToDeactivate(null);
          } catch (err) {
-            console.error('Failed to delete user:', err);
-            toast.error('Failed to delete user', {
-              description: err.message || 'An error occurred while deleting the user.'
-            });
-         } finally {
-            setIsDeleteModalOpen(false);
-            setUserToDelete(null);
+            console.error('Failed to deactivate user:', err);
          }
       }
-   }, [deleteUser, userToDelete]);
+   }, [deactivateUser, userToDeactivate]);
 
-   const handleSaveUser = useCallback(async (updatedUser) => {
+   const handleSaveUser = useCallback(async (updatedUserData) => {
       try {
-         await updateUser(selectedUser._id, updatedUser);
+         await updateUser(selectedUser.id, updatedUserData);
          setIsEditModalOpen(false);
          setSelectedUser(null);
       } catch (err) {
@@ -68,23 +71,17 @@ const SuperAdminManageUsersPage = () => {
       }
    }, [selectedUser, updateUser]);
 
-   const handleAddUser = useCallback(async (newUser) => {
+   const handleAddUser = useCallback(async (newUserData) => {
       try {
-         const addedUser = await addUser(newUser);
+         await addUser(newUserData);
          setIsAddModalOpen(false);
-         toast.success('User added successfully', {
-           description: `${addedUser.firstName} ${addedUser.lastName} has been added.`
-         });
       } catch (err) {
          console.error('Failed to add user:', err);
-         toast.error('Failed to add user', {
-           description: err.message || 'An error occurred while adding the user.'
-         });
       }
    }, [addUser]);
 
    if (loading) return <div>Loading...</div>;
-   if (error) return <div>{error}</div>;
+   if (error) return <div>Error: {error}</div>;
 
    return (
       <div className="min-h-screen bg-green-50">
@@ -97,7 +94,8 @@ const SuperAdminManageUsersPage = () => {
                users={users}
                onViewUser={handleViewUser}
                onEditUser={handleEditUser}
-               onDeleteUser={handleDeleteUser}
+               onDeactivateUser={handleDeactivateUser}
+               onActivateUser={handleActivateUser}
             />
          </div>
          <SA_UserDetailsViewModal
@@ -116,18 +114,22 @@ const SuperAdminManageUsersPage = () => {
             onClose={() => setIsAddModalOpen(false)}
             onAddUser={handleAddUser}
          />
-         <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+         <AlertDialog open={isDeactivateModalOpen} onOpenChange={setIsDeactivateModalOpen}>
             <AlertDialogContent>
                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                   <AlertDialogDescription>
-                     This action cannot be undone. This will permanently delete the user
-                     account and remove their data from our servers.
+                     This will deactivate the user account. The user will no longer be able to log in.
+                     This action can be reversed by reactivating the account later.
                   </AlertDialogDescription>
                </AlertDialogHeader>
                <AlertDialogFooter>
-                  <AlertDialogCancel onClick={() => setIsDeleteModalOpen(false)}>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+                  <AlertDialogCancel onClick={() => setIsDeactivateModalOpen(false)}>
+                     Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction onClick={confirmDeactivate}>
+                     Deactivate
+                  </AlertDialogAction>
                </AlertDialogFooter>
             </AlertDialogContent>
          </AlertDialog>

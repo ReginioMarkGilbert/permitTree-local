@@ -1,82 +1,108 @@
-import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import { useQuery, useMutation } from '@apollo/client';
+import { GET_ALL_USERS, ADD_USER, UPDATE_USER, DEACTIVATE_USER, ACTIVATE_USER } from './superAdmin';
+import { toast } from 'sonner';
 
 const useUsers = () => {
-   const [users, setUsers] = useState([]);
-   const [loading, setLoading] = useState(true);
-   const [error, setError] = useState(null);
+   const { data, loading, error, refetch } = useQuery(GET_ALL_USERS);
 
-   const getAuthToken = () => {
-      return localStorage.getItem('token');
+   const [addUserMutation] = useMutation(ADD_USER);
+   const [updateUserMutation] = useMutation(UPDATE_USER);
+   const [deactivateUserMutation] = useMutation(DEACTIVATE_USER);
+   const [activateUserMutation] = useMutation(ACTIVATE_USER);
+
+   const addUser = async (newUser) => {
+      try {
+         const { data } = await addUserMutation({
+            variables: {
+               firstName: newUser.firstName,
+               lastName: newUser.lastName,
+               username: newUser.username,
+               password: newUser.password
+            },
+            refetchQueries: [{ query: GET_ALL_USERS }]
+         });
+
+         toast.success('User added successfully');
+         return data.registerUser.user;
+      } catch (err) {
+         toast.error('Failed to add user', {
+            description: err.message
+         });
+         throw err;
+      }
    };
 
-   const fetchUsers = useCallback(async () => {
+   const updateUser = async (userId, updatedUser) => {
       try {
-         const token = getAuthToken();
-         const response = await axios.get('http://localhost:3000/api/admin/super/users', {
-            headers: { Authorization: token }
+         const { data } = await updateUserMutation({
+            variables: {
+               id: userId,
+               input: {
+                  firstName: updatedUser.firstName,
+                  lastName: updatedUser.lastName,
+                  email: updatedUser.email,
+                  phone: updatedUser.phone,
+                  company: updatedUser.company,
+                  address: updatedUser.address
+               }
+            },
+            refetchQueries: [{ query: GET_ALL_USERS }]
          });
-         setUsers(response.data);
-         setLoading(false);
+
+         toast.success('User updated successfully');
+         return data.updateUserProfile;
       } catch (err) {
-         console.error('Error fetching users:', err);
-         setError(err.response?.data?.message || 'Failed to fetch users');
-         setLoading(false);
-      }
-   }, []);
-
-   useEffect(() => {
-      fetchUsers();
-   }, [fetchUsers]);
-
-   const updateUser = useCallback(async (userId, updatedUser) => {
-      try {
-         const token = getAuthToken();
-         const response = await axios.put(`http://localhost:3000/api/admin/super/users/${userId}`, updatedUser, {
-            headers: { Authorization: token }
+         toast.error('Failed to update user', {
+            description: err.message
          });
-         setUsers(users.map(user => user._id === userId ? response.data : user));
-      } catch (err) {
-         throw new Error('Failed to update user');
+         throw err;
       }
-   }, [users]);
+   };
 
-   const deleteUser = useCallback(async (userId) => {
+   const deactivateUser = async (userId) => {
       try {
-         const token = getAuthToken();
-         await axios.delete(`http://localhost:3000/api/admin/super/users/${userId}`, {
-            headers: { Authorization: token }
+         await deactivateUserMutation({
+            variables: { id: userId },
+            refetchQueries: [{ query: GET_ALL_USERS }]
          });
-         setUsers(prevUsers => prevUsers.filter(user => user._id !== userId));
-         console.log('User deleted successfully');
+
+         toast.success('User deactivated successfully');
          return true;
       } catch (err) {
-         console.error('Error deleting user:', err);
-         throw new Error(err.response?.data?.message || 'Failed to delete user');
+         toast.error('Failed to deactivate user', {
+            description: err.message
+         });
+         throw err;
       }
-   }, []);
+   };
 
-   const addUser = useCallback(async (newUser) => {
+   const activateUser = async (userId) => {
       try {
-         const token = getAuthToken();
-         const response = await axios.post('http://localhost:3000/api/admin/super/users', newUser, {
-            headers: {
-               Authorization: token,
-               'Content-Type': 'application/json'
-            }
+         await activateUserMutation({
+            variables: { id: userId },
+            refetchQueries: [{ query: GET_ALL_USERS }]
          });
 
-         const addedUser = response.data;
-         setUsers(prevUsers => [...prevUsers, addedUser]);
-         return addedUser;
+         toast.success('User activated successfully');
+         return true;
       } catch (err) {
-         console.error('Error adding user:', err.response?.data || err.message);
-         throw new Error(err.response?.data?.message || 'Failed to add user');
+         toast.error('Failed to activate user', {
+            description: err.message
+         });
+         throw err;
       }
-   }, []);
+   };
 
-   return { users, loading, error, updateUser, addUser, deleteUser, setUsers };
+   return {
+      users: data?.users || [],
+      loading,
+      error: error?.message,
+      updateUser,
+      addUser,
+      deactivateUser,
+      activateUser,
+      refetch
+   };
 };
-
 
 export default useUsers;

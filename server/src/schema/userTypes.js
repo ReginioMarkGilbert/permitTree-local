@@ -29,16 +29,17 @@ const userTypes = gql`
     username: String!
     firstName: String
     lastName: String
-    roles: [String!]!
     email: String
     phone: String
     company: String
     address: String
-    profilePicture: ProfilePicture
-    themePreference: String!
+    roles: [String!]!
+    isActive: Boolean!
     lastPasswordChange: String
-    recentActivities: [UserActivity!]!
-    stats: UserStats!
+    lastLoginDate: String
+    createdAt: String
+    updatedAt: String
+    themePreference: String
   }
 
   input UpdateUserProfileInput {
@@ -49,8 +50,6 @@ const userTypes = gql`
     phone: String
     company: String
     address: String
-    removeProfilePicture: Boolean
-    profilePicture: ProfilePictureInput
     themePreference: String
   }
 

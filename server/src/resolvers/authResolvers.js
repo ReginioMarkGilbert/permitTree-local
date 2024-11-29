@@ -59,7 +59,6 @@ const authResolvers = {
             let user = await User.findOne({ username });
 
             if (!user) {
-               // console.log('User not found in User model, checking Admin model');
                user = await Admin.findOne({ username });
                if (user) {
                   console.log('AuthResolvers: User found in Admin model:', user.id, user.roles);
@@ -69,6 +68,11 @@ const authResolvers = {
             if (!user) {
                console.log('User not found in either model');
                throw new Error('Invalid credentials');
+            }
+
+            // Check if user is active (only for regular users, not admins)
+            if (!user.roles.includes('superadmin') && user.isActive === false) {
+               throw new Error('Account is deactivated. Please contact administrator.');
             }
 
             // Use bcrypt.compare to properly compare hashed passwords
@@ -103,17 +107,16 @@ const authResolvers = {
                   username: user.username,
                   firstName: user.firstName,
                   lastName: user.lastName,
-                  roles: user.roles
+                  roles: user.roles,
+                  isActive: user.isActive
                }
             };
          } catch (error) {
             console.error('Login error:', error);
-            throw new Error('Invalid credentials');
+            throw new Error(error.message || 'Invalid credentials');
          }
       },
       logout: async (_, __, context) => {
-         // Here you would typically invalidate the token on the server side
-         // For now, we'll just return true to indicate successful
          return true;
       }
    }

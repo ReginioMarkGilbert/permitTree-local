@@ -71,6 +71,9 @@ const mutationTypes = gql`
     rescheduleInspection(id: ID!, newDate: String!, newTime: String!): Inspection!
 
     updateNotificationSettings(preferences: NotificationPreferencesInput!, email: String): Admin!
+
+    deactivateUser(id: ID!): User!
+    activateUser(id: ID!): User!
   }
 
   input NotificationPreferencesInput {

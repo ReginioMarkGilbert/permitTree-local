@@ -6,6 +6,7 @@ const queryTypes = gql`
     getUser(id: ID!): User
     getAdmin(id: ID!): Admin
     getUserDetails: User
+    users: [User!]!
 
     getAllPermits: [Permit!]!
     getPermitById(id: ID!): Permit

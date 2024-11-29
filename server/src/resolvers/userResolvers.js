@@ -153,6 +153,13 @@ const userResolvers = {
             throw new Error('Failed to fetch user statistics');
          }
       },
+      users: async (_, __, { admin }) => {
+         // Check if requester is a superadmin
+         if (!admin || !admin.roles.includes('superadmin')) {
+            throw new Error('Not authorized to view all users');
+         }
+         return await User.find({ roles: ['user'] });
+      },
    },
    Mutation: {
       registerUser: async (_, { firstName, lastName, username, password }) => {
@@ -333,6 +340,38 @@ const userResolvers = {
             console.error('Error updating theme preference:', error);
             throw new Error(`Failed to update theme: ${error.message}`);
          }
+      },
+      deactivateUser: async (_, { id }, { admin }) => {
+         // Check if requester is a superadmin
+         if (!admin || !admin.roles.includes('superadmin')) {
+            throw new Error('Not authorized to deactivate users');
+         }
+
+         const user = await User.findById(id);
+         if (!user) {
+            throw new Error('User not found');
+         }
+
+         user.isActive = false;
+         await user.save();
+
+         return user;
+      },
+      activateUser: async (_, { id }, { admin }) => {
+         // Check if requester is a superadmin
+         if (!admin || !admin.roles.includes('superadmin')) {
+            throw new Error('Not authorized to activate users');
+         }
+
+         const user = await User.findById(id);
+         if (!user) {
+            throw new Error('User not found');
+         }
+
+         user.isActive = true;
+         await user.save();
+
+         return user;
       }
    }
 };
