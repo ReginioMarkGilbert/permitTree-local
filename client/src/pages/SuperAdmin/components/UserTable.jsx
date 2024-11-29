@@ -33,7 +33,7 @@ const UserTable = ({ users, onViewUser, onEditUser, onDeactivateUser, onActivate
                      </thead>
                      <tbody className="bg-white divide-y divide-gray-200">
                         {users.map((user) => (
-                           <tr key={user._id} className={!user.isActive ? 'bg-gray-50' : ''}>
+                           <tr key={user.id} className={!user.isActive ? 'bg-gray-50' : ''}>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.username}</td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
