@@ -19,8 +19,15 @@ const AdminSchema = new mongoose.Schema({
          'superadmin',
          'Technical_Staff',
          'Chief_TSD',
-         'Bill_Collector ',
+         'Receiving_Clerk',
+         'Releasing_Clerk',
+         'Accountant',
+         'OOP_Staff_Incharge',
+         'Bill_Collector',
+         'Credit_Officer',
          'PENR_CENR_Officer',
+         'Deputy_CENR_Officer',
+         'Inspection_Team'
       ]
    }],
    firstName: { type: String },

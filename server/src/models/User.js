@@ -17,8 +17,22 @@ const UserSchema = new mongoose.Schema({
    roles: [{
       type: String,
       required: true,
-      enum: ['user', 'Chief_RPS', 'superadmin', 'Technical_Staff', 'Chief_TSD',
-             'Recieving_Clerk', 'Releasing_Clerk', 'Accountant', 'Bill_Collector', 'PENR_CENR_Officer'],
+      enum: [
+         'user',
+         'Chief_RPS',
+         'superadmin',
+         'Technical_Staff',
+         'Chief_TSD',
+         'Receiving_Clerk',
+         'Releasing_Clerk',
+         'Accountant',
+         'OOP_Staff_Incharge',
+         'Bill_Collector',
+         'Credit_Officer',
+         'PENR_CENR_Officer',
+         'Deputy_CENR_Officer',
+         'Inspection_Team'
+      ],
       default: 'user'
    }],
    userType: {
@@ -31,8 +45,8 @@ const UserSchema = new mongoose.Schema({
    // for analytics
    isActive: { type: Boolean, default: true },
    lastLoginDate: { type: Date },
-   createdAt: { type: Date },
-   updatedAt: { type: Date },
+createdAt: { type: Date },
+updatedAt: { type: Date },
    themePreference: {
       type: String,
       enum: ['light', 'dark', 'system'],
