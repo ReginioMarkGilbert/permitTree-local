@@ -57,6 +57,8 @@ import InspectionSchedulingPage from './pages/Personnel/InspectionSchedulingPage
 import { cn } from './lib/utils';
 
 import CSAWCertificatePrintPage from './pages/Personnel/components/CertificateComponents/CSAWCertificatePrintPage';
+import FormMaintenancePage from './pages/SuperAdmin/FormMaintenancePage';
+import SuperAdminActivitiesPage from './pages/SuperAdmin/SuperAdminActivitiesPage';
 
 const App = () => {
    const { sidebarToggle, toggleSidebar } = useSidebarToggle();
@@ -162,11 +164,22 @@ const App = () => {
                               }
                            />
 
-                           <Route path="/superadmin/home" element={<ProtectedRoute roles={['superadmin']}><SuperAdminHomePage /></ProtectedRoute>} />
-                           <Route path="/superadmin/dashboard" element={<ProtectedRoute roles={['superadmin']}><SuperAdminDashboard /></ProtectedRoute>} />
-                           <Route path="/superadmin/manage-users" element={<ProtectedRoute roles={['superadmin']}><SuperAdminManageUsersPage /></ProtectedRoute>} />
-                           <Route path="/superadmin/reports" element={<ProtectedRoute roles={['superadmin']}><SuperAdminReportsPage /></ProtectedRoute>} />
-                           <Route path="/superadmin/settings" element={<ProtectedRoute roles={['superadmin']}><SuperAdminSettingsPage /></ProtectedRoute>} />
+                           <Route
+                              path="/superadmin/*"
+                              element={
+                                 <ProtectedRoute roles={['superadmin']}>
+                                    <Routes>
+                                       <Route index element={<Navigate to="dashboard" replace />} />
+                                       <Route path="dashboard" element={<SuperAdminDashboard />} />
+                                       <Route path="manage-users" element={<SuperAdminManageUsersPage />} />
+                                       <Route path="form-maintenance" element={<FormMaintenancePage />} />
+                                       <Route path="activities" element={<SuperAdminActivitiesPage />} />
+                                       <Route path="settings" element={<SuperAdminSettingsPage />} />
+                                    </Routes>
+                                 </ProtectedRoute>
+                              }
+                           />
+
                            <Route path="/user/oop-print" element={<OOPPrintPage />} />
                            <Route path="/user/or-print" element={<ORPrintPage />} />
                            <Route

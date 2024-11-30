@@ -4,6 +4,7 @@ const { OOP } = require('../models/OOP');
 const Permit = require('../models/permits/Permit');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const { logUserActivity } = require('../utils/activityLogger');
 
 const generateToken = (user) => {
    return jwt.sign(
@@ -250,10 +251,13 @@ const userResolvers = {
             }
 
             // Log the activity
-            await UserActivity.create({
+            await logUserActivity({
                userId: context.user.id,
                type: 'PROFILE_UPDATE',
-               details: 'Profile information updated'
+               details: 'User updated their profile information',
+               metadata: {
+                  updatedFields: Object.keys(input).join(', ')
+               }
             });
 
             return {
@@ -304,10 +308,10 @@ const userResolvers = {
             await user.save();
 
             // Log the activity
-            await UserActivity.create({
+            await logUserActivity({
                userId: context.user.id,
                type: 'PASSWORD_CHANGE',
-               details: 'Password was changed'
+               details: 'User changed their password'
             });
 
             return true;

@@ -221,7 +221,7 @@ const UserAuthPage = () => {
             toast.success('Login successful!');
 
             if (user.roles.includes('superadmin')) {
-               navigate('/superadmin/home', { replace: true });
+               navigate('/superadmin/dashboard', { replace: true });
             } else if (user.roles.some(role => [
                'Chief_RPS',
                'Chief_TSD',

@@ -12,6 +12,9 @@ const { personnelNotificationTypes } = require('./personnelNotificationTypes');
 const analyticsTypes = require('./analyticsTypes');
 const gisTypes = require('./gisTypes');
 const inspectionTypes = require('./inspectionTypes');
+const dashboardTypes = require('./dashboardTypes');
+const activityTypes = require('./activityTypes');
+
 const rootTypeDefs = gql`
   scalar Upload
   scalar JSON
@@ -43,5 +46,7 @@ module.exports = [
    personnelNotificationTypes,
    analyticsTypes,
    gisTypes,
-   inspectionTypes
+   inspectionTypes,
+   dashboardTypes,
+   activityTypes
 ];

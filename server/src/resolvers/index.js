@@ -20,7 +20,8 @@ const personnelNotificationResolvers = require('./personnelNotificationResolvers
 const analyticsResolvers = require('./analyticsResolvers');
 const gisResolvers = require('./gisResolvers');
 const inspectionResolvers = require('./inspectionResolvers');
-
+const dashboardResolvers = require('./dashboardResolvers');
+const activityResolvers = require('./activityResolvers');
 // Base resolvers with scalar types and type resolvers
 const baseResolvers = {
    Upload: GraphQLUpload,
@@ -38,7 +39,9 @@ const baseResolvers = {
       ...personnelNotificationResolvers.Query,
       ...analyticsResolvers.Query,
       ...gisResolvers.Query,
-      ...inspectionResolvers.Query
+      ...inspectionResolvers.Query,
+      ...dashboardResolvers.Query,
+      ...activityResolvers.Query
    },
    Mutation: {
       ...userResolvers.Mutation,
@@ -50,7 +53,8 @@ const baseResolvers = {
       ...personnelNotificationResolvers.Mutation,
       ...analyticsResolvers.Mutation,
       ...gisResolvers.Mutation,
-      ...inspectionResolvers.Mutation
+      ...inspectionResolvers.Mutation,
+      ...dashboardResolvers.Mutation
    },
    Subscription: {
       ...notificationResolvers.Subscription,
@@ -84,7 +88,9 @@ const resolvers = mergeResolvers([
    personnelNotificationResolvers,
    analyticsResolvers,
    gisResolvers,
-   inspectionResolvers
+   inspectionResolvers,
+   dashboardResolvers,
+   activityResolvers
 ]);
 
 module.exports = resolvers;

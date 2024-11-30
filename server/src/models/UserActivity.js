@@ -3,13 +3,30 @@ const mongoose = require('mongoose');
 const UserActivitySchema = new mongoose.Schema({
    userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
+      required: true,
+      refPath: 'userModel'
+   },
+   userModel: {
+      type: String,
+      required: true,
+      enum: ['User', 'Admin']
    },
    type: {
       type: String,
       required: true,
-      enum: ['LOGIN', 'PROFILE_UPDATE', 'PASSWORD_CHANGE']
+      enum: [
+         'LOGIN',
+         'LOGOUT',
+         'PROFILE_UPDATE',
+         'PASSWORD_CHANGE',
+         'APPLICATION_SUBMIT',
+         'PAYMENT_MADE',
+         'DOCUMENT_UPLOAD',
+         'ACCOUNT_CREATED',
+         'PERMIT_RECEIVED',
+         'EMAIL_VERIFIED',
+         'SETTINGS_UPDATED'
+      ]
    },
    timestamp: {
       type: Date,
@@ -17,11 +34,25 @@ const UserActivitySchema = new mongoose.Schema({
    },
    details: {
       type: String
+   },
+   metadata: {
+      ip: String,
+      userAgent: String,
+      location: String,
+      deviceType: String,
+      applicationId: {
+         type: mongoose.Schema.Types.ObjectId,
+         ref: 'Permit'
+      },
+      documentType: String,
+      amount: Number,
+      isAdmin: Boolean,
+      userType: String
    }
-}, { timestamps: true });
-
-// Index for faster queries
-UserActivitySchema.index({ userId: 1, timestamp: -1 });
+}, {
+   timestamps: true,
+   index: { userId: 1, timestamp: -1 }
+});
 
 const UserActivity = mongoose.model('UserActivity', UserActivitySchema);
 

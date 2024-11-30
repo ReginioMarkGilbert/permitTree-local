@@ -9,6 +9,7 @@ const PLTCPPermit = require('../models/permits/PLTCPPermit');
 const PLTPPermit = require('../models/permits/PLTPPermit');
 const TCEBPPermit = require('../models/permits/TCEBPPermit');
 const UserActivity = require('../models/UserActivity');
+const { logUserActivity } = require('../utils/activityLogger');
 
 const authResolvers = {
    Query: {
@@ -53,7 +54,7 @@ const authResolvers = {
    },
 
    Mutation: {
-      login: async (_, { username, password }) => {
+      login: async (_, { username, password }, context) => {
          try {
             console.log('Login attempt for username:', username);
             let user = await User.findOne({ username });
@@ -94,10 +95,14 @@ const authResolvers = {
             );
 
             // Log the login activity
-            await UserActivity.create({
+            await logUserActivity({
                userId: user.id,
                type: 'LOGIN',
-               details: 'User logged in'
+               details: 'User logged in successfully',
+               req: context.req,
+               metadata: {
+                  deviceType: context.req?.headers['user-agent']?.includes('Mobile') ? 'mobile' : 'desktop'
+               }
             });
 
             return {
@@ -117,7 +122,22 @@ const authResolvers = {
          }
       },
       logout: async (_, __, context) => {
-         return true;
+         try {
+            // Only log activity if there's a user in context
+            if (context.user || context.admin) {
+               await logUserActivity({
+                  userId: context.user?.id || context.admin?.id,
+                  type: 'LOGOUT',
+                  details: 'User logged out',
+                  req: context.req
+               });
+            }
+            return true;
+         } catch (error) {
+            console.error('Logout error:', error);
+            // Still return true even if logging activity fails
+            return true;
+         }
       }
    }
 };

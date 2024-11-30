@@ -7,10 +7,11 @@ import {
    Home,
    LayoutDashboard,
    Users,
-   BarChart,
    Settings,
    LogOut,
    ChevronLeft,
+   FormInput,
+   Activity
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -71,10 +72,10 @@ const SuperAdminSidebar = React.memo(({ isOpen, onToggle }) => {
    }, [navigate, isOpen, onToggle]);
 
    const mainNavItems = [
-      { to: "/superadmin/home", icon: Home, text: "Home" },
       { to: "/superadmin/dashboard", icon: LayoutDashboard, text: "Dashboard" },
       { to: "/superadmin/manage-users", icon: Users, text: "Manage Users" },
-      { to: "/personnel/reports", icon: BarChart, text: "Reports" },
+      { to: "/superadmin/form-maintenance", icon: FormInput, text: "Form Maintenance" },
+      { to: "/superadmin/activities", icon: Activity, text: "Activities" },
    ];
 
    const accountNavItems = [
