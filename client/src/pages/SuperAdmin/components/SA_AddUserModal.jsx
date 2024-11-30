@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import CustomSelect from "@/components/ui/custom-select";
-import { Eye, EyeOff } from 'lucide-react';
-import { toast } from 'sonner';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { cn } from "@/lib/utils";
 
 const SA_AddUserModal = ({ isOpen, onClose, onAddUser }) => {
+   const [isSubmitting, setIsSubmitting] = useState(false);
    const [newUser, setNewUser] = useState({
       firstName: '',
       lastName: '',
@@ -19,43 +19,29 @@ const SA_AddUserModal = ({ isOpen, onClose, onAddUser }) => {
       userType: ''
    });
    const [showPassword, setShowPassword] = useState(false);
-   const [isChrome, setIsChrome] = useState(false);
 
    useEffect(() => {
       if (newUser.firstName && newUser.lastName) {
-         const generatedUsername = `${newUser.firstName.toLowerCase()}_${newUser.lastName.toLowerCase()}`;
+         const generatedUsername = `${newUser.firstName.toLowerCase()}_${newUser.lastName.toLowerCase()}`.replace(/\s+/g, '');
          setNewUser(prev => ({ ...prev, username: generatedUsername }));
-      } else {
-         setNewUser(prev => ({ ...prev, username: '' }));
       }
    }, [newUser.firstName, newUser.lastName]);
-
-   useEffect(() => {
-      // Check if browser is Chrome
-      const isChromeBrowser = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
-      setIsChrome(isChromeBrowser);
-   }, []);
 
    const handleInputChange = (e) => {
       const { name, value } = e.target;
       setNewUser((prev) => ({ ...prev, [name]: value }));
    };
 
-   const handleSelectChange = (name, value) => {
+   const handleSelectChange = (value) => {
       const userType = value === 'user' ? 'Client' : 'Personnel';
       setNewUser((prev) => ({
          ...prev,
-         [name]: value,
-         userType: userType // Automatically set userType based on role
+         role: value,
+         userType: userType
       }));
    };
 
-   const togglePasswordVisibility = () => {
-      setShowPassword(!showPassword);
-   };
-
    const handleClose = () => {
-      // Reset form data
       setNewUser({
          firstName: '',
          lastName: '',
@@ -65,20 +51,23 @@ const SA_AddUserModal = ({ isOpen, onClose, onAddUser }) => {
          role: '',
          userType: ''
       });
+      setShowPassword(false);
       onClose();
    };
 
    const handleSubmit = async (e) => {
       e.preventDefault();
+      setIsSubmitting(true);
       try {
          await onAddUser(newUser);
-         handleClose(); // Use handleClose instead of onClose
+         handleClose();
       } catch (error) {
          console.error('Error adding user:', error);
+      } finally {
+         setIsSubmitting(false);
       }
    };
 
-   // Role options for CustomSelect
    const roleOptions = [
       { value: 'user', label: 'User (Client)' },
       { value: 'Chief_RPS', label: 'Chief RPS (Personnel)' },
@@ -92,126 +81,149 @@ const SA_AddUserModal = ({ isOpen, onClose, onAddUser }) => {
       { value: 'PENR_CENR_Officer', label: 'PENR/CENR Officer (Personnel)' }
    ];
 
+   // Add browser detection
+   const isChrome = React.useMemo(() => {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      const isBrave = navigator.brave !== undefined;
+      return userAgent.includes('chrome') && !userAgent.includes('edg') && !isBrave;
+   }, []);
+
+   const SelectComponent = () => (
+      <Select
+         id="role"
+         name="role"
+         value={newUser.role}
+         onValueChange={(value) => handleInputChange({ target: { name: 'role', value } })}
+      >
+         <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select a role" />
+         </SelectTrigger>
+         <SelectContent>
+            {roleOptions.map(option => (
+               <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+               </SelectItem>
+            ))}
+         </SelectContent>
+      </Select>
+   );
+
    return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
-         <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-               <DialogTitle>Add New User</DialogTitle>
+      <Dialog open={isOpen} onOpenChange={handleClose}>
+         <DialogContent className="max-w-[600px] p-0">
+            <DialogHeader className="px-6 pt-6 pb-4 border-b">
+               <DialogTitle className="text-xl font-semibold">Add New User</DialogTitle>
                <DialogDescription>
-                  Add a new user to the system.
+                  Fill in the information below to create a new user account
                </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleSubmit}>
-               <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                     <Label htmlFor="firstName" className="text-right">
-                        First Name
-                     </Label>
-                     <Input
-                        id="firstName"
-                        name="firstName"
-                        value={newUser.firstName}
-                        onChange={handleInputChange}
-                        className="col-span-3"
-                     />
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+               <div className="px-6 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                     <div className="space-y-2">
+                        <Label htmlFor="firstName">First Name</Label>
+                        <Input
+                           id="firstName"
+                           name="firstName"
+                           value={newUser.firstName}
+                           onChange={handleInputChange}
+                           required
+                        />
+                     </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="lastName">Last Name</Label>
+                        <Input
+                           id="lastName"
+                           name="lastName"
+                           value={newUser.lastName}
+                           onChange={handleInputChange}
+                           required
+                        />
+                     </div>
                   </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                     <Label htmlFor="lastName" className="text-right">
-                        Last Name
-                     </Label>
-                     <Input
-                        id="lastName"
-                        name="lastName"
-                        value={newUser.lastName}
-                        onChange={handleInputChange}
-                        className="col-span-3"
-                     />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                     <Label htmlFor="username" className="text-right">
-                        Username
-                     </Label>
+
+                  <div className="space-y-2">
+                     <Label htmlFor="username">Username</Label>
                      <Input
                         id="username"
                         name="username"
                         value={newUser.username}
-                        readOnly
-                        className="col-span-3"
+                        onChange={handleInputChange}
+                        required
                      />
                   </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                     <Label htmlFor="email" className="text-right">
-                        Email
-                     </Label>
+
+                  <div className="space-y-2">
+                     <Label htmlFor="email">Email</Label>
                      <Input
                         id="email"
                         name="email"
                         type="email"
                         value={newUser.email}
                         onChange={handleInputChange}
-                        className="col-span-3"
+                        required
                      />
                   </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                     <Label htmlFor="password" className="text-right">
-                        Password
-                     </Label>
-                     <div className="col-span-3 relative">
+
+                  <div className="space-y-2">
+                     <Label htmlFor="password">Password</Label>
+                     <div className="relative">
                         <Input
                            id="password"
                            name="password"
                            type={showPassword ? "text" : "password"}
                            value={newUser.password}
                            onChange={handleInputChange}
+                           required
                            className="pr-10"
                         />
                         <button
                            type="button"
-                           onClick={togglePasswordVisibility}
+                           onClick={() => setShowPassword(!showPassword)}
                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                         >
                            {showPassword ? (
-                              <EyeOff className="h-5 w-5" />
+                              <EyeOff className="h-4 w-4" />
                            ) : (
-                              <Eye className="h-5 w-5" />
+                              <Eye className="h-4 w-4" />
                            )}
                         </button>
                      </div>
                   </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                     <Label htmlFor="role" className="text-right">
-                        Role
-                     </Label>
-                     <div className="col-span-3">
-                        {isChrome ? (
-                           <CustomSelect
-                              options={roleOptions}
-                              value={newUser.role}
-                              onSelect={(value) => handleSelectChange('role', value)}
-                              placeholder="Select role"
-                           />
-                        ) : (
-                           <Select
-                              onValueChange={(value) => handleSelectChange('role', value)}
-                              value={newUser.role}
-                           >
-                              <SelectTrigger>
-                                 <SelectValue placeholder="Select role" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                 {roleOptions.map(option => (
-                                    <SelectItem key={option.value} value={option.value}>
-                                       {option.label}
-                                    </SelectItem>
-                                 ))}
-                              </SelectContent>
-                           </Select>
-                        )}
-                     </div>
+
+                  <div className="space-y-2">
+                     <Label htmlFor="role">Role</Label>
+                     <SelectComponent />
                   </div>
                </div>
-               <DialogFooter>
-                  <Button type="submit">Add User</Button>
+
+               <DialogFooter className="flex space-x-2 px-6 py-4 border-t">
+                  <Button
+                     type="button"
+                     variant="outline"
+                     onClick={handleClose}
+                     disabled={isSubmitting}
+                  >
+                     Cancel
+                  </Button>
+                  <Button
+                     type="submit"
+                     disabled={isSubmitting}
+                     className={cn(
+                        "bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white",
+                        isSubmitting && "opacity-50 cursor-not-allowed"
+                     )}
+                  >
+                     {isSubmitting ? (
+                        <>
+                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                           Adding...
+                        </>
+                     ) : (
+                        'Add User'
+                     )}
+                  </Button>
                </DialogFooter>
             </form>
          </DialogContent>

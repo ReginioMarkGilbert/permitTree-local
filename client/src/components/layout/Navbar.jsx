@@ -1,8 +1,8 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { FaBars, FaTimes, FaLeaf } from 'react-icons/fa';
+import { FaTimes, FaLeaf } from 'react-icons/fa';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Slider } from "@/components/ui/slider";
-import { Sun } from "lucide-react";
+import { Sun, Menu, X } from "lucide-react";
 import {
    Tooltip,
    TooltipContent,
@@ -51,12 +51,12 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
                   aria-label="Toggle Sidebar"
                >
                   <div className="relative w-5 h-5">
-                     <FaBars
+                     <Menu
                         size={20}
                         className={`absolute transition-all duration-200
                                     ${sidebarToggle ? 'opacity-0 rotate-90' : 'opacity-100 rotate-0'}`}
                      />
-                     <FaTimes
+                     <X
                         size={20}
                         className={`absolute transition-all duration-200
                                     ${sidebarToggle ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-90'}`}

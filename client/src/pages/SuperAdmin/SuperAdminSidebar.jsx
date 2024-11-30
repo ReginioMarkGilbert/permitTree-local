@@ -74,7 +74,7 @@ const SuperAdminSidebar = React.memo(({ isOpen, onToggle }) => {
    const mainNavItems = [
       { to: "/superadmin/dashboard", icon: LayoutDashboard, text: "Dashboard" },
       { to: "/superadmin/manage-users", icon: Users, text: "Manage Users" },
-      { to: "/superadmin/form-maintenance", icon: FormInput, text: "Form Maintenance" },
+      // { to: "/superadmin/form-maintenance", icon: FormInput, text: "Form Maintenance" },
       { to: "/superadmin/activities", icon: Activity, text: "Activities" },
    ];
 

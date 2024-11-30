@@ -16,6 +16,33 @@ import {
    AlertDialogHeader,
    AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { Input } from "@/components/ui/input";
+import {
+   Select,
+   SelectContent,
+   SelectItem,
+   SelectTrigger,
+   SelectValue,
+} from "@/components/ui/select";
+import { Search } from "lucide-react";
+
+const ROLES = {
+   ALL_ROLES: 'All Roles',
+   Chief_RPS: 'Chief RPS',
+   superadmin: 'Super Admin',
+   Technical_Staff: 'Technical Staff',
+   Chief_TSD: 'Chief TSD',
+   Receiving_Clerk: 'Receiving Clerk',
+   Releasing_Clerk: 'Releasing Clerk',
+   Accountant: 'Accountant',
+   OOP_Staff_Incharge: 'OOP Staff Incharge',
+   Bill_Collector: 'Bill Collector',
+   Credit_Officer: 'Credit Officer',
+   PENR_CENR_Officer: 'PENR/CENR Officer',
+   Deputy_CENR_Officer: 'Deputy CENR Officer',
+   Inspection_Team: 'Inspection Team'
+};
 
 const SuperAdminManageUsersPage = () => {
    const { users, loading, error, updateUser, addUser, deactivateUser, activateUser, deleteUser, refetch } = useUsers();
@@ -27,6 +54,9 @@ const SuperAdminManageUsersPage = () => {
    const [userToDeactivate, setUserToDeactivate] = useState(null);
    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
    const [userToDelete, setUserToDelete] = useState(null);
+   const [searchQuery, setSearchQuery] = useState('');
+   const [dateRange, setDateRange] = useState({ from: null, to: null });
+   const [selectedRole, setSelectedRole] = useState('ALL_ROLES');
 
    const handleViewUser = useCallback((user) => {
       setSelectedUser(user);
@@ -99,11 +129,68 @@ const SuperAdminManageUsersPage = () => {
       }
    }, [deleteUser, userToDelete]);
 
+   const handleClearFilters = () => {
+      setSearchQuery('');
+      setDateRange({ from: null, to: null });
+      setSelectedRole('ALL_ROLES');
+   };
+
+   const filteredUsers = users?.filter(user => {
+      const matchesSearch = user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+         user.email?.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesRole = selectedRole === 'ALL_ROLES' || user.role === selectedRole;
+
+      const matchesDate = (!dateRange.from || !dateRange.to) ? true :
+         new Date(user.createdAt) >= dateRange.from &&
+         new Date(user.createdAt) <= dateRange.to;
+
+      return matchesSearch && matchesRole && matchesDate;
+   });
+
    if (loading) return <div>Loading...</div>;
    if (error) return <div>Error: {error}</div>;
 
-   const AddUserButton = (
-      <Button onClick={() => setIsAddModalOpen(true)}>Add New User</Button>
+   const FiltersSection = (
+      <div className="flex flex-col gap-4 sm:flex-row items-end mb-6">
+         <div className="flex-1 min-w-[200px] relative">
+            <div className="relative">
+               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+               <Input
+                  placeholder="Search by name or email"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10"
+               />
+            </div>
+         </div>
+         <div className="min-w-[240px]">
+            <DateRangePicker
+               value={dateRange}
+               onChange={setDateRange}
+            />
+         </div>
+         <Select value={selectedRole} onValueChange={setSelectedRole}>
+            <SelectTrigger className="w-[220px]">
+               <SelectValue placeholder="Select Role" />
+            </SelectTrigger>
+            <SelectContent>
+               {Object.entries(ROLES).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                     {label}
+                  </SelectItem>
+               ))}
+            </SelectContent>
+         </Select>
+         <Button
+            variant="outline"
+            onClick={handleClearFilters}
+            className="whitespace-nowrap"
+         >
+            Clear Filters
+         </Button>
+         <Button onClick={() => setIsAddModalOpen(true)} className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white">Add New User</Button>
+      </div>
    );
 
    return (
@@ -111,10 +198,10 @@ const SuperAdminManageUsersPage = () => {
          title="Manage Users"
          description="View and manage all user accounts in the system"
          onRefresh={refetch}
-         filters={AddUserButton}
+         filters={FiltersSection}
       >
          <UserTable
-            users={users}
+            users={filteredUsers}
             onViewUser={handleViewUser}
             onEditUser={handleEditUser}
             onDeactivateUser={handleDeactivateUser}

@@ -163,7 +163,7 @@ const SuperAdminDashboard = () => {
 
    if (!useMockData && loading) {
       return (
-         <div className="flex items-center justify-center min-h-screen">
+         <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-green-50 to-white">
             <div className="flex flex-col items-center gap-4">
                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
                <p className="text-muted-foreground">Loading dashboard data...</p>
@@ -174,7 +174,7 @@ const SuperAdminDashboard = () => {
 
    if (!useMockData && error) {
       return (
-         <div className="flex items-center justify-center min-h-screen">
+         <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-green-50 to-white">
             <Card className="p-6 max-w-md">
                <h3 className="text-lg font-semibold text-red-600 mb-2">Error Loading Dashboard</h3>
                <p className="text-muted-foreground">{error.message}</p>
@@ -191,137 +191,139 @@ const SuperAdminDashboard = () => {
    }
 
    return (
-      <div className="p-8 max-w-7xl mx-auto pt-24 bg-gradient-to-b from-green-50 to-white">
-         <div className="mb-8">
-            <div className="flex justify-between items-center">
-               <div>
-                  <h1 className="text-3xl font-bold">Dashboard Overview</h1>
-                  <p className="text-muted-foreground mt-2">Welcome to the super admin dashboard</p>
-               </div>
-               <div className="flex items-center gap-2">
-                  <Database className="w-4 h-4 text-muted-foreground" />
-                  <Label htmlFor="data-toggle" className="text-sm text-muted-foreground">
-                     {useMockData ? 'Using Mock Data' : 'Using Real Data'}
-                  </Label>
-                  <Switch
-                     id="data-toggle"
-                     checked={!useMockData}
-                     onCheckedChange={(checked) => setUseMockData(!checked)}
-                  />
-               </div>
-            </div>
-         </div>
-
-         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <StatCard
-               title="Total Users"
-               value={dashboardData?.totalUsers || 0}
-               icon={Users}
-               trend="up"
-               trendValue={dashboardData?.usersTrend || '0% increase'}
-            />
-            <StatCard
-               title="Active Users"
-               value={dashboardData?.activeUsers || 0}
-               icon={Activity}
-               trend="up"
-               trendValue={dashboardData?.activeUsersTrend || '0% increase'}
-            />
-            <StatCard
-               title="Total Applications"
-               value={dashboardData?.totalApplications || 0}
-               icon={FileText}
-               trend="down"
-               trendValue={dashboardData?.applicationsTrend || '0% decrease'}
-            />
-            <StatCard
-               title="Pending Applications"
-               value={dashboardData?.pendingApplications || 0}
-               icon={AlertCircle}
-               trend="up"
-               trendValue={dashboardData?.pendingApplicationsTrend || '0% increase'}
-            />
-         </div>
-
-         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="p-6">
-               <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold">User Growth</h3>
-                  <Button
-                     variant="ghost"
-                     className="text-primary hover:text-primary/80"
-                     onClick={() => navigate('/superadmin/manage-users')}
-                  >
-                     Manage Users <ChevronRight className="ml-1 h-4 w-4" />
-                  </Button>
-               </div>
-               <div className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                     <LineChart data={dashboardData?.userActivity || []}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis
-                           dataKey="date"
-                           tickFormatter={(value) => format(new Date(value), 'MMM yyyy')}
-                        />
-                        <YAxis />
-                        <Tooltip
-                           labelFormatter={(value) => format(new Date(value), 'MMMM yyyy')}
-                        />
-                        <Line
-                           type="monotone"
-                           dataKey="users"
-                           stroke="#2563eb"
-                           strokeWidth={2}
-                           dot={{ r: 4 }}
-                           activeDot={{ r: 6 }}
-                        />
-                     </LineChart>
-                  </ResponsiveContainer>
-               </div>
-            </Card>
-
-            <Card className="p-6">
-               <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold">Recent Activities</h3>
+      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
+         <div className="p-8 max-w-7xl mx-auto pt-24">
+            <div className="mb-8">
+               <div className="flex justify-between items-center">
+                  <div>
+                     <h1 className="text-3xl font-bold">Dashboard Overview</h1>
+                     <p className="text-muted-foreground mt-2">Welcome to the super admin dashboard</p>
+                  </div>
                   <div className="flex items-center gap-2">
-                     <span className="text-sm text-muted-foreground">
-                        Last updated: {format(new Date(), 'MMM d, h:mm a')}
-                     </span>
-                     <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-primary hover:text-primary/80"
-                        onClick={handleRefresh}
-                        disabled={isRefreshing}
-                     >
-                        <Activity className={cn(
-                           "w-4 h-4 mr-1",
-                           isRefreshing && "animate-spin"
-                        )} />
-                        {isRefreshing ? 'Refreshing...' : 'Refresh'}
-                     </Button>
+                     <Database className="w-4 h-4 text-muted-foreground" />
+                     <Label htmlFor="data-toggle" className="text-sm text-muted-foreground">
+                        {useMockData ? 'Using Mock Data' : 'Using Real Data'}
+                     </Label>
+                     <Switch
+                        id="data-toggle"
+                        checked={!useMockData}
+                        onCheckedChange={(checked) => setUseMockData(!checked)}
+                     />
                   </div>
                </div>
-               <div className="space-y-3 max-h-[300px] overflow-y-auto custom-scrollbar">
-                  {(dashboardData?.recentActivities || []).length > 0 ? (
-                     dashboardData.recentActivities.map((activity) => (
-                        <ActivityItem key={activity.id} activity={activity} />
-                     ))
-                  ) : (
-                     <div className="text-center py-8 text-muted-foreground">
-                        <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                        <p>No recent activities</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+               <StatCard
+                  title="Total Users"
+                  value={dashboardData?.totalUsers || 0}
+                  icon={Users}
+                  trend="up"
+                  trendValue={dashboardData?.usersTrend || '0% increase'}
+               />
+               <StatCard
+                  title="Active Users"
+                  value={dashboardData?.activeUsers || 0}
+                  icon={Activity}
+                  trend="up"
+                  trendValue={dashboardData?.activeUsersTrend || '0% increase'}
+               />
+               <StatCard
+                  title="Total Applications"
+                  value={dashboardData?.totalApplications || 0}
+                  icon={FileText}
+                  trend="down"
+                  trendValue={dashboardData?.applicationsTrend || '0% decrease'}
+               />
+               <StatCard
+                  title="Pending Applications"
+                  value={dashboardData?.pendingApplications || 0}
+                  icon={AlertCircle}
+                  trend="up"
+                  trendValue={dashboardData?.pendingApplicationsTrend || '0% increase'}
+               />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+               <Card className="p-6">
+                  <div className="flex justify-between items-center mb-4">
+                     <h3 className="text-lg font-semibold">User Growth</h3>
+                     <Button
+                        variant="ghost"
+                        className="text-primary hover:text-primary/80"
+                        onClick={() => navigate('/superadmin/manage-users')}
+                     >
+                        Manage Users <ChevronRight className="ml-1 h-4 w-4" />
+                     </Button>
+                  </div>
+                  <div className="h-[300px]">
+                     <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={dashboardData?.userActivity || []}>
+                           <CartesianGrid strokeDasharray="3 3" />
+                           <XAxis
+                              dataKey="date"
+                              tickFormatter={(value) => format(new Date(value), 'MMM yyyy')}
+                           />
+                           <YAxis />
+                           <Tooltip
+                              labelFormatter={(value) => format(new Date(value), 'MMMM yyyy')}
+                           />
+                           <Line
+                              type="monotone"
+                              dataKey="users"
+                              stroke="#2563eb"
+                              strokeWidth={2}
+                              dot={{ r: 4 }}
+                              activeDot={{ r: 6 }}
+                           />
+                        </LineChart>
+                     </ResponsiveContainer>
+                  </div>
+               </Card>
+
+               <Card className="p-6">
+                  <div className="flex justify-between items-center mb-4">
+                     <h3 className="text-lg font-semibold">Recent Activities</h3>
+                     <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">
+                           Last updated: {format(new Date(), 'MMM d, h:mm a')}
+                        </span>
+                        <Button
+                           variant="ghost"
+                           size="sm"
+                           className="text-primary hover:text-primary/80"
+                           onClick={handleRefresh}
+                           disabled={isRefreshing}
+                        >
+                           <Activity className={cn(
+                              "w-4 h-4 mr-1",
+                              isRefreshing && "animate-spin"
+                           )} />
+                           {isRefreshing ? 'Refreshing...' : 'Refresh'}
+                        </Button>
                      </div>
-                  )}
-               </div>
-               <Button
-                  variant="ghost"
-                  className="w-full mt-4 text-primary hover:text-primary/80"
-                  onClick={() => navigate('/superadmin/activities')}
-               >
-                  View All Activities <ChevronRight className="ml-1 h-4 w-4" />
-               </Button>
-            </Card>
+                  </div>
+                  <div className="space-y-3 max-h-[300px] overflow-y-auto custom-scrollbar">
+                     {(dashboardData?.recentActivities || []).length > 0 ? (
+                        dashboardData.recentActivities.map((activity) => (
+                           <ActivityItem key={activity.id} activity={activity} />
+                        ))
+                     ) : (
+                        <div className="text-center py-8 text-muted-foreground">
+                           <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                           <p>No recent activities</p>
+                        </div>
+                     )}
+                  </div>
+                  <Button
+                     variant="ghost"
+                     className="w-full mt-4 text-primary hover:text-primary/80"
+                     onClick={() => navigate('/superadmin/activities')}
+                  >
+                     View All Activities <ChevronRight className="ml-1 h-4 w-4" />
+                  </Button>
+               </Card>
+            </div>
          </div>
       </div>
    );

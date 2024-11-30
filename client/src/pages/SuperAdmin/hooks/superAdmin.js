@@ -12,7 +12,11 @@ export const GET_ALL_USERS = gql`
       company
       address
       roles
+      userType
       isActive
+      lastLoginDate
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -91,6 +95,39 @@ export const DELETE_USER = gql`
     deleteUser(id: $id) {
       id
       username
+    }
+  }
+`;
+
+export const GET_USER_DETAILS = gql`
+  query GetUserDetails($id: ID!) {
+    getUserDetails(id: $id) {
+      id
+      username
+      firstName
+      lastName
+      email
+      phone
+      company
+      address
+      roles
+      userType
+      isActive
+      lastLoginDate
+      createdAt
+      updatedAt
+      lastPasswordChange
+      recentActivities {
+        id
+        type
+        timestamp
+        details
+      }
+      stats {
+        totalApplications
+        activePermits
+        pendingPayments
+      }
     }
   }
 `;

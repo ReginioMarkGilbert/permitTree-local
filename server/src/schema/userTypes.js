@@ -6,11 +6,6 @@ const userTypes = gql`
     contentType: String
   }
 
-  input ProfilePictureInput {
-    data: String!
-    contentType: String!
-  }
-
   type UserActivity {
     id: ID!
     type: String!
@@ -29,6 +24,7 @@ const userTypes = gql`
     username: String!
     firstName: String
     lastName: String
+    fullName: String
     email: String
     phone: String
     company: String
@@ -41,6 +37,9 @@ const userTypes = gql`
     createdAt: String
     updatedAt: String
     themePreference: String
+    profilePicture: ProfilePicture
+    recentActivities: [UserActivity!]
+    stats: UserStats
   }
 
   input UpdateUserProfileInput {
@@ -52,6 +51,13 @@ const userTypes = gql`
     company: String
     address: String
     themePreference: String
+    removeProfilePicture: Boolean
+    profilePicture: ProfilePictureInput
+  }
+
+  input ProfilePictureInput {
+    data: String!
+    contentType: String!
   }
 
   input UpdateThemeInput {
@@ -80,6 +86,9 @@ const userTypes = gql`
       lastName: String!
       username: String!
       password: String!
+      email: String
+      role: String!
+      userType: String!
     ): AuthPayload!
     updateUserProfile(input: UpdateUserProfileInput!): User!
     updateThemePreference(theme: String!): User!

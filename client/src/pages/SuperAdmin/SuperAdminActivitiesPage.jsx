@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useQuery, gql } from '@apollo/client';
-import { DatePickerWithRange } from '@/components/ui/date-range-picker';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
 import {
    Pagination,
    PaginationContent,
@@ -70,7 +70,7 @@ const GET_ALL_ACTIVITIES = gql`
 `;
 
 const activityTypes = [
-   { value: 'ALL', label: 'All Types' },
+   { value: 'ALL_TYPES', label: 'All Types' },
    { value: 'LOGIN', label: 'Login' },
    { value: 'LOGOUT', label: 'Logout' },
    { value: 'PROFILE_UPDATE', label: 'Profile Update' },
@@ -173,7 +173,7 @@ const ActivityItem = ({ activity }) => {
 
 const SuperAdminActivitiesPage = () => {
    const [searchTerm, setSearchTerm] = useState('');
-   const [selectedType, setSelectedType] = useState('ALL');
+   const [selectedType, setSelectedType] = useState('ALL_TYPES');
    const [dateRange, setDateRange] = useState({ from: null, to: null });
    const [currentPage, setCurrentPage] = useState(1);
    const itemsPerPage = 10;
@@ -189,7 +189,7 @@ const SuperAdminActivitiesPage = () => {
       variables: {
          filter: {
             searchTerm,
-            type: selectedType === 'ALL' ? null : selectedType,
+            type: selectedType === 'ALL_TYPES' ? null : selectedType,
             dateFrom: dateRange.from,
             dateTo: dateRange.to
          },
@@ -211,13 +211,13 @@ const SuperAdminActivitiesPage = () => {
 
    const handleReset = () => {
       setSearchTerm('');
-      setSelectedType('ALL');
+      setSelectedType('ALL_TYPES');
       setDateRange({ from: null, to: null });
       setCurrentPage(1);
       refetch({
          filter: {
             searchTerm: '',
-            type: '',
+            type: null,
             dateFrom: null,
             dateTo: null
          },
@@ -254,12 +254,12 @@ const SuperAdminActivitiesPage = () => {
                refetch();
             }}
          >
-            <SelectTrigger className="bg-background/50 dark:bg-gray-900/50">
-               <SelectValue placeholder="Activity Type" />
+            <SelectTrigger className="w-full bg-background/50 dark:bg-gray-900/50">
+               <SelectValue placeholder="Select Type" />
             </SelectTrigger>
-            <SelectContent className="bg-background dark:bg-gray-900">
-               {activityTypes.map(type => (
-                  <SelectItem key={type.value} value={type.value} className="dark:text-gray-200 dark:hover:bg-gray-800">
+            <SelectContent>
+               {activityTypes.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
                      {type.label}
                   </SelectItem>
                ))}
@@ -294,13 +294,13 @@ const SuperAdminActivitiesPage = () => {
                         <SelectComponent />
                      </div>
                      <div>
-                        <DatePickerWithRange
-                           date={dateRange}
-                           onDateChange={(range) => {
-                              setDateRange(range);
+                        <DateRangePicker
+                           value={dateRange}
+                           onChange={(range) => {
+                              setDateRange(range || { from: null, to: null });
+                              setCurrentPage(1);
                               refetch();
                            }}
-                           className="bg-background/50 dark:bg-gray-900/50"
                         />
                      </div>
                      <div className="flex justify-end">

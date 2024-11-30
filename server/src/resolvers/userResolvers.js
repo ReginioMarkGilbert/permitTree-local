@@ -23,7 +23,19 @@ const userResolvers = {
          return context.user;
       },
       getUser: async (_, { id }) => {
-         return await User.findById(id);
+         try {
+            const user = await User.findById(id);
+            if (!user) {
+               throw new Error('User not found');
+            }
+            return {
+               ...user.toObject(),
+               createdAt: user.createdAt.toISOString(),
+               lastLoginDate: user.lastLoginDate ? user.lastLoginDate.toISOString() : null
+            };
+         } catch (error) {
+            throw new Error(`Error fetching user: ${error.message}`);
+         }
       },
       getUserDetails: async (_, __, context) => {
          if (!context.user) {
@@ -155,11 +167,10 @@ const userResolvers = {
          }
       },
       users: async (_, __, { admin }) => {
-         // Check if requester is a superadmin
          if (!admin || !admin.roles.includes('superadmin')) {
             throw new Error('Not authorized to view all users');
          }
-         return await User.find({ roles: ['user'] });
+         return await User.find({ roles: ['user'] }).select('+createdAt +lastLoginDate');
       },
    },
    Mutation: {
@@ -178,10 +189,23 @@ const userResolvers = {
                ...(email && { email }),
                roles: [role],
                userType,
-               isActive: true
+               isActive: true,
+               createdAt: new Date(),
+               lastLoginDate: null
             });
 
             await newUser.save();
+
+            // Log the activity
+            await logUserActivity({
+               userId: newUser._id,
+               userModel: 'User',
+               type: 'ACCOUNT_CREATED',
+               details: 'New user account created',
+               metadata: {
+                  userType: userType
+               }
+            });
 
             const token = generateToken(newUser);
 
@@ -195,7 +219,8 @@ const userResolvers = {
                   email: newUser.email,
                   roles: newUser.roles,
                   userType: newUser.userType,
-                  isActive: newUser.isActive
+                  isActive: newUser.isActive,
+                  createdAt: newUser.createdAt
                }
             };
          } catch (error) {

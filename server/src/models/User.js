@@ -30,7 +30,7 @@ const UserSchema = new mongoose.Schema({
    lastPasswordChange: { type: Date, default: Date.now },
    // for analytics
    isActive: { type: Boolean, default: true },
-   lastLoginDate: { type: Date, default: Date.now },
+   lastLoginDate: { type: Date },
    createdAt: { type: Date },
    updatedAt: { type: Date },
    themePreference: {

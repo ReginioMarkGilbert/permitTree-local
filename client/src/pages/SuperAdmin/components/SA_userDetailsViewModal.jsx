@@ -1,71 +1,185 @@
 import React from 'react';
-import { X } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+   User,
+   Mail,
+   Phone,
+   Building2,
+   MapPin,
+   Shield,
+   Calendar,
+   CheckCircle2,
+   XCircle,
+   Clock,
+   UserCheck
+} from 'lucide-react';
+import { format, formatDistanceToNow, isValid } from 'date-fns';
 
 const SA_UserDetailsViewModal = ({ isOpen, onClose, user }) => {
-  if (!isOpen || !user) return null;
+   if (!user) return null;
 
-  const isPersonnel = user.userType === 'Personnel';
+   const isPersonnel = user.userType === 'Personnel';
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 pt-20 z-50">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col max-h-[90vh]">
-        <div className="flex justify-between items-center p-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-2xl">
-          <h2 className="text-xl font-semibold">User Details</h2>
-          <button onClick={onClose} className="hover:bg-white hover:bg-opacity-20 p-1 rounded-full transition-colors duration-200">
-            <X size={20} />
-          </button>
-        </div>
-        <div className="flex-grow overflow-y-auto p-6 space-y-6 custom-scrollbar">
-          <Section title={isPersonnel ? "Personnel Information" : "User Information"}>
-            {isPersonnel ? (
-              <>
-                <Field label="Username" value={user.username} />
-                <Field label="First Name" value={user.firstName} />
-                <Field label="Last Name" value={user.lastName} />
-                <Field label="Role" value={user.role} />
-              </>
-            ) : (
-              <>
-                <Field label="Full Name" value={`${user.firstName} ${user.lastName}`} />
-                <Field label="Email" value={user.email} />
-                <Field label="Phone" value={user.phone || 'N/A'} />
-                <Field label="Company" value={user.company || 'N/A'} />
-                <Field label="Address" value={user.address || 'N/A'} />
-              </>
-            )}
-          </Section>
-        </div>
-        <div className="p-5 bg-gray-50 flex justify-end rounded-b-2xl">
-          <button
-            onClick={onClose}
-            className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition duration-300 shadow-md hover:shadow-lg"
-          >
-            Close
-          </button>
-        </div>
+   const formatDateString = (dateString) => {
+      if (!dateString) return 'Not available';
+
+      try {
+         let date;
+         // Handle different date formats
+         if (typeof dateString === 'string') {
+            // Try parsing ISO string
+            date = new Date(dateString);
+         } else if (typeof dateString === 'number') {
+            // Handle timestamp
+            date = new Date(dateString);
+         } else {
+            return 'Invalid date';
+         }
+
+         if (!isValid(date)) {
+            return 'Invalid date';
+         }
+
+         return format(date, 'MMMM d, yyyy');
+      } catch (error) {
+         console.error('Error formatting date:', error);
+         return 'Date not available';
+      }
+   };
+
+   const getLastLoginText = () => {
+      if (!user.lastLoginDate) return 'Never logged in';
+
+      try {
+         let date;
+         if (typeof user.lastLoginDate === 'string') {
+            date = new Date(user.lastLoginDate);
+         } else if (typeof user.lastLoginDate === 'number') {
+            date = new Date(user.lastLoginDate);
+         } else {
+            return 'Invalid login date';
+         }
+
+         if (!isValid(date)) {
+            return 'Invalid login date';
+         }
+
+         return formatDistanceToNow(date, { addSuffix: true });
+      } catch (error) {
+         console.error('Error formatting last login:', error);
+         return 'Never logged in';
+      }
+   };
+
+   const formattedCreatedAt = formatDateString(user.createdAt);
+   const formattedLastLogin = getLastLoginText();
+
+   const InfoCard = ({ icon: Icon, title, value, className = "" }) => (
+      <div className="flex items-start gap-3 p-3 bg-secondary/10 rounded-lg hover:bg-secondary/20 transition-colors">
+         <div className="p-2 bg-background rounded-full shadow-sm">
+            <Icon className="w-4 h-4 text-primary" />
+         </div>
+         <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-muted-foreground">{title}</p>
+            <p className="text-sm font-semibold text-foreground mt-0.5">{value || 'N/A'}</p>
+         </div>
       </div>
-    </div>
-  );
+   );
+
+   return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+         <DialogContent className="max-w-[600px] p-0">
+            <DialogHeader className="px-6 pt-6 pb-4 border-b">
+               <div className="flex items-center justify-between">
+                  <DialogTitle className="text-xl font-semibold">
+                     {isPersonnel ? 'Personnel Details' : 'User Details'}
+                  </DialogTitle>
+                  <DialogDescription className="sr-only">
+                     View detailed information about the {isPersonnel ? 'personnel' : 'user'}
+                  </DialogDescription>
+               </div>
+            </DialogHeader>
+
+            <div className="px-6 py-6 space-y-6 max-h-[calc(100vh-12rem)] overflow-y-auto">
+               <Card className="p-5 shadow-sm">
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-4">
+                     {isPersonnel ? 'Personnel Information' : 'Basic Information'}
+                  </h3>
+                  <div className="grid gap-3">
+                     <InfoCard
+                        icon={User}
+                        title="Full Name"
+                        value={`${user.firstName} ${user.lastName}`}
+                     />
+                     <InfoCard
+                        icon={UserCheck}
+                        title="Username"
+                        value={user.username}
+                     />
+                     <InfoCard
+                        icon={Shield}
+                        title="Role"
+                        value={user.roles?.join(', ').replace(/_/g, ' ')}
+                     />
+                     <InfoCard
+                        icon={Mail}
+                        title="Email"
+                        value={user.email}
+                     />
+                     {!isPersonnel && (
+                        <>
+                           <InfoCard
+                              icon={Phone}
+                              title="Phone"
+                              value={user.phone}
+                           />
+                           <InfoCard
+                              icon={Building2}
+                              title="Company"
+                              value={user.company}
+                           />
+                           <InfoCard
+                              icon={MapPin}
+                              title="Address"
+                              value={user.address}
+                           />
+                        </>
+                     )}
+                  </div>
+               </Card>
+
+               <Card className="p-5 shadow-sm">
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-4">Account Activity</h3>
+                  <div className="grid gap-3">
+                     <InfoCard
+                        icon={Clock}
+                        title="Account Created"
+                        value={formattedCreatedAt}
+                     />
+                     <InfoCard
+                        icon={Calendar}
+                        title="Last Login"
+                        value={formattedLastLogin}
+                     />
+                  </div>
+               </Card>
+            </div>
+
+            <DialogFooter className="px-6 py-4 border-t">
+               <Button
+                  variant="outline"
+                  onClick={onClose}
+                  className="min-w-[100px]"
+               >
+                  Close
+               </Button>
+            </DialogFooter>
+         </DialogContent>
+      </Dialog>
+   );
 };
-
-function Section({ title, children }) {
-  return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden">
-      <h3 className="text-lg font-semibold text-gray-700 mb-2 px-4 pt-4">{title}</h3>
-      <div className="bg-gray-50 p-4 grid grid-cols-1 gap-4 rounded-b-xl">
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function Field({ label, value }) {
-  return (
-    <div className="bg-white p-3 rounded-lg shadow-sm">
-      <span className="text-sm text-gray-500">{label}</span>
-      <p className="font-medium text-gray-800">{value}</p>
-    </div>
-  );
-}
 
 export default SA_UserDetailsViewModal;

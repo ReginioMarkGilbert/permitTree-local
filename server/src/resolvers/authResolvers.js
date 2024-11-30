@@ -58,11 +58,13 @@ const authResolvers = {
          try {
             console.log('Login attempt for username:', username);
             let user = await User.findOne({ username });
+            let isAdmin = false;
 
             if (!user) {
                user = await Admin.findOne({ username });
                if (user) {
                   console.log('AuthResolvers: User found in Admin model:', user.id, user.roles);
+                  isAdmin = true;
                }
             }
 
@@ -76,13 +78,16 @@ const authResolvers = {
                throw new Error('Account is deactivated. Please contact administrator.');
             }
 
-            // Use bcrypt.compare to properly compare hashed passwords
             const isValid = await bcrypt.compare(password, user.password);
             console.log('Password valid:', isValid);
 
             if (!isValid) {
                throw new Error('Invalid credentials');
             }
+
+            // Update lastLoginDate
+            user.lastLoginDate = new Date();
+            await user.save();
 
             const token = jwt.sign(
                {
@@ -94,14 +99,17 @@ const authResolvers = {
                { expiresIn: '12h' }
             );
 
-            // Log the login activity
+            // Log the activity
             await logUserActivity({
                userId: user.id,
+               userModel: isAdmin ? 'Admin' : 'User',
                type: 'LOGIN',
                details: 'User logged in successfully',
                req: context.req,
                metadata: {
-                  deviceType: context.req?.headers['user-agent']?.includes('Mobile') ? 'mobile' : 'desktop'
+                  deviceType: context.req?.headers['user-agent']?.includes('Mobile') ? 'mobile' : 'desktop',
+                  isAdmin,
+                  userType: isAdmin ? 'Admin' : 'User'
                }
             });
 
@@ -113,7 +121,8 @@ const authResolvers = {
                   firstName: user.firstName,
                   lastName: user.lastName,
                   roles: user.roles,
-                  isActive: user.isActive
+                  isActive: user.isActive,
+                  lastLoginDate: user.lastLoginDate
                }
             };
          } catch (error) {

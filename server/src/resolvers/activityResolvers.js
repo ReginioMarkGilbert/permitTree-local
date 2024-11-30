@@ -2,6 +2,25 @@ const UserActivity = require('../models/UserActivity');
 const Admin = require('../models/admin');
 const User = require('../models/User');
 
+const formatRoleName = (role) => {
+   // Special cases
+   const specialCases = {
+      'Chief_RPS': 'Chief RPS',
+      'Chief_TSD': 'Chief TSD',
+      'PENR_CENR_Officer': 'PENR/CENR Officer'
+   };
+
+   if (specialCases[role]) {
+      return specialCases[role];
+   }
+
+   // For other roles, replace underscores with spaces and format properly
+   return role
+      .replace(/_/g, ' ')
+      .replace(/([A-Z])/g, ' $1')
+      .trim();
+};
+
 const activityResolvers = {
    Query: {
       allActivities: async (_, { filter, page = 1, limit = 10 }, { admin }) => {
@@ -73,10 +92,7 @@ const activityResolvers = {
                   user = await Admin.findById(activity.userId);
                   userType = 'Personnel';
                   specificRole = user?.roles?.[0] || '';
-                  specificRole = specificRole
-                     .replace(/_/g, ' ')
-                     .replace(/([A-Z])/g, ' $1')
-                     .trim();
+                  specificRole = formatRoleName(specificRole);
                } else {
                   user = await User.findById(activity.userId);
                   userType = user?.roles?.includes('user') ? 'User' : 'Personnel';
