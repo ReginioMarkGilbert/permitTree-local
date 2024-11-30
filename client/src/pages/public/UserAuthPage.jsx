@@ -11,8 +11,22 @@ import { gql, useMutation, useApolloClient } from '@apollo/client';
 import { initializeUserTheme } from '@/utils/auth';
 
 const REGISTER_USER = gql`
-  mutation RegisterUser($firstName: String!, $lastName: String!, $username: String!, $password: String!) {
-    registerUser(firstName: $firstName, lastName: $lastName, username: $username, password: $password) {
+  mutation RegisterUser(
+    $firstName: String!,
+    $lastName: String!,
+    $username: String!,
+    $password: String!,
+    $role: String!,
+    $userType: String!
+  ) {
+    registerUser(
+      firstName: $firstName,
+      lastName: $lastName,
+      username: $username,
+      password: $password,
+      role: $role,
+      userType: $userType
+    ) {
       token
       user {
         id
@@ -20,6 +34,7 @@ const REGISTER_USER = gql`
         firstName
         lastName
         roles
+        userType
       }
     }
   }
@@ -103,6 +118,8 @@ const UserAuthPage = () => {
                lastName,
                username,
                password,
+               role: 'user',
+               userType: 'Client'
             },
          });
          const { token, user } = data.registerUser;
