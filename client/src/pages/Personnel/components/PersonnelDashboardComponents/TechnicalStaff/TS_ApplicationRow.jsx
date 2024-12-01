@@ -157,6 +157,7 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
    const [isAuthenticityModalOpen, setIsAuthenticityModalOpen] = useState(false);
    const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(false);
+   const [isStampedCertificateModalOpen, setIsStampedCertificateModalOpen] = useState(false);
    const [isViewCertModalOpen, setIsViewCertModalOpen] = useState(false);
    const [selectedFile, setSelectedFile] = useState(null);
    const [previewUrl, setPreviewUrl] = useState(null);
@@ -364,7 +365,7 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
          currentTab === 'Pending Release' && {
             icon: FileCheck2,
             label: 'Upload Stamped Certificate',
-            onClick: () => setIsCertificateModalOpen(true),
+            onClick: () => setIsStampedCertificateModalOpen(true),
             variant: "outline",
             className: "text-green-600 hover:text-green-800"
          },
@@ -495,9 +496,15 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
                application={app}
                onReviewComplete={handleReviewComplete}
             />
-            <UploadStampedCertificateModal
+            <CertificateActionHandler
                isOpen={isCertificateModalOpen}
                onClose={() => setIsCertificateModalOpen(false)}
+               application={app}
+               onComplete={handleCertificateComplete}
+            />
+            <UploadStampedCertificateModal
+               isOpen={isStampedCertificateModalOpen}
+               onClose={() => setIsStampedCertificateModalOpen(false)}
                application={app}
                onComplete={handleCertificateComplete}
             />
@@ -546,9 +553,15 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
             application={app}
             onReviewComplete={handleReviewComplete}
          />
-         <UploadStampedCertificateModal
+         <CertificateActionHandler
             isOpen={isCertificateModalOpen}
             onClose={() => setIsCertificateModalOpen(false)}
+            application={app}
+            onComplete={handleCertificateComplete}
+         />
+         <UploadStampedCertificateModal
+            isOpen={isStampedCertificateModalOpen}
+            onClose={() => setIsStampedCertificateModalOpen(false)}
             application={app}
             onComplete={handleCertificateComplete}
          />
