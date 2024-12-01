@@ -19,8 +19,8 @@ import {
 } from "@/components/ui/table";
 
 const ChiefDashboard = () => {
-   const [activeMainTab, setActiveMainTab] = useState('Applications');
-   const [activeSubTab, setActiveSubTab] = useState('Applications for Review');
+   const [activeMainTab, setActiveMainTab] = useState('Applications Awaiting OOP');
+   const [activeSubTab, setActiveSubTab] = useState('Awaiting OOP');
    const [filters, setFilters] = useState({
       searchTerm: '',
       applicationType: '',
@@ -30,31 +30,32 @@ const ChiefDashboard = () => {
       }
    });
 
-   const mainTabs = ['Applications', 'Applications Awaiting OOP', 'Order Of Payment', 'Applications Inspection Reports', 'Certificates'];
+   // const mainTabs = ['Applications', 'Applications Awaiting OOP', 'Order Of Payment', 'Applications Inspection Reports', 'Certificates'];
+   const mainTabs = ['Applications Awaiting OOP', 'Order of Payment'];
    const subTabs = {
-      'Applications': ['Applications for Review', 'Completed Reviews'],
-      'Applications Inspection Reports': ['Reports for Review', 'Reviewed Reports'],
+      // 'Applications': ['Applications for Review', 'Completed Reviews'],
       'Applications Awaiting OOP': ['Awaiting OOP', 'Created OOP'],
-      'Order Of Payment': ['Pending Signature', 'Signed Order Of Payment'],
-      'Certificates': ['Permit Pending Signature', 'Signed Permits']
+      'Order of Payment': ['Pending Signature', 'Signed Order Of Payment'],
+      // 'Applications Inspection Reports': ['Reports for Review', 'Reviewed Reports'],
+      // 'Certificates': ['Permit Pending Signature', 'Signed Permits']
    };
 
    const getQueryParamsForTab = (tab) => {
       switch (tab) {
-         case 'Applications for Review':
-            return { currentStage: 'ChiefRPSReview', reviewedByChief: false };
-         case 'Completed Reviews':
-            return { reviewedByChief: true };
+         // case 'Applications for Review':
+         //    return { currentStage: 'ChiefRPSReview', reviewedByChief: false };
+         // case 'Completed Reviews':
+         //    return { reviewedByChief: true };
 
          case 'Awaiting OOP':
             return { awaitingOOP: true };
          case 'Created OOP':
             return { OOPCreated: true, awaitingOOP: false };
 
-         case 'Reports for Review':
-            return { currentStage: 'InspectionReportForReviewByChief', hasInspectionReport: true };
-         case 'Reviewed Reports':
-            return { InspectionReportsReviewedByChief: true };
+         // case 'Reports for Review':
+         //    return { currentStage: 'InspectionReportForReviewByChief', hasInspectionReport: true };
+         // case 'Reviewed Reports':
+         //    return { InspectionReportsReviewedByChief: true };
 
          case 'Pending Signature':
             return { OOPstatus: 'For Approval' };
@@ -70,7 +71,7 @@ const ChiefDashboard = () => {
    const { oops, loading: oopsLoading, error: oopsError, refetch: refetchOOPs } = useOrderOfPayments();
 
    const handleRefetch = () => {
-      if (activeMainTab === 'Order Of Payment') {
+      if (activeMainTab === 'Order of Payment') {
          refetchOOPs();
       } else {
          refetchApps();
@@ -224,10 +225,11 @@ const ChiefDashboard = () => {
       );
    };
 
-   const renderOOPTable = () => {
+   const renderOrderOfPaymentTable = () => {
       if (oopsLoading) return <div className="flex justify-center py-8">Loading order of payments...</div>;
       if (oopsError) return <div className="text-destructive text-center py-8">Error loading order of payments</div>;
-      if (filteredOOPs.length === 0) {
+
+      if (!filteredOOPs || filteredOOPs.length === 0) {
          return (
             <div className="text-center py-8">
                <FileX className="mx-auto h-12 w-12 text-muted-foreground" />
@@ -241,31 +243,16 @@ const ChiefDashboard = () => {
          );
       }
 
-      if (isMobile) {
-         return (
-            <div className="space-y-4">
-               {filteredOOPs.map((oop) => (
-                  <ChiefOOPRow
-                     key={oop._id}
-                     oop={oop}
-                     onRefetch={handleRefetch}
-                     isMobile={true}
-                  />
-               ))}
-            </div>
-         );
-      }
-
       return (
          <Table>
             <TableHeader>
                <TableRow>
-                  <TableHead>Application Number</TableHead>
-                  <TableHead>Bill Number</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="w-[25%]">Application Number</TableHead>
+                  <TableHead className="w-[15%] text-center">Bill Number</TableHead>
+                  <TableHead className="w-[15%] text-center">Date</TableHead>
+                  <TableHead className="w-[15%] text-center">Amount</TableHead>
+                  <TableHead className="w-[15%] text-center">Status</TableHead>
+                  <TableHead className="w-[15%] text-center">Actions</TableHead>
                </TableRow>
             </TableHeader>
             <TableBody>
@@ -274,7 +261,7 @@ const ChiefDashboard = () => {
                      key={oop._id}
                      oop={oop}
                      onRefetch={handleRefetch}
-                     isMobile={false}
+                     currentTab={activeSubTab}
                   />
                ))}
             </TableBody>
@@ -320,11 +307,11 @@ const ChiefDashboard = () => {
          <Table>
             <TableHeader>
                <TableRow>
-                  <TableHead>Application Number</TableHead>
-                  <TableHead>Application Type</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="w-[25%]">Application Number</TableHead>
+                  <TableHead className="w-[25%] text-center">Application Type</TableHead>
+                  <TableHead className="w-[20%] text-center">Date</TableHead>
+                  <TableHead className="w-[15%] text-center">Status</TableHead>
+                  <TableHead className="w-[15%] text-center">Actions</TableHead>
                </TableRow>
             </TableHeader>
             <TableBody>
@@ -356,12 +343,12 @@ const ChiefDashboard = () => {
          onMainTabChange={handleTabChange}
          onSubTabChange={handleSubTabChange}
          tabDescription={renderTabDescription()}
-         filters={activeMainTab === 'Order Of Payment' ?
-            <OOPFilters filters={filters} setFilters={setFilters} /> :
-            <ApplicationFilters filters={filters} setFilters={setFilters} />
-         }
+         filters={<ApplicationFilters filters={filters} setFilters={setFilters} />}
       >
-         {activeMainTab === 'Order Of Payment' ? renderOOPTable() : renderApplicationTable()}
+         {activeMainTab === 'Order of Payment' ?
+            renderOrderOfPaymentTable() :
+            renderApplicationTable()
+         }
       </DashboardLayout>
    );
 };

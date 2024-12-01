@@ -493,7 +493,7 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
          <TS_InspectionReportsViewModal
             isOpen={isInspectionReportsModalOpen}
             onClose={() => setIsInspectionReportsModalOpen(false)}
-            applicationId={app.id}
+            permitId={app.id}
          />
       </>
    );

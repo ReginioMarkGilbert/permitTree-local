@@ -13,7 +13,8 @@ const UPDATE_PERMIT_STAGE = gql`
     $status: String!,
     $notes: String,
     $acceptedByTechnicalStaff: Boolean,
-    $approvedByTechnicalStaff: Boolean
+    $approvedByTechnicalStaff: Boolean,
+    $awaitingOOP: Boolean
   ) {
     updatePermitStage(
       id: $id,
@@ -21,13 +22,15 @@ const UPDATE_PERMIT_STAGE = gql`
       status: $status,
       notes: $notes,
       acceptedByTechnicalStaff: $acceptedByTechnicalStaff,
-      approvedByTechnicalStaff: $approvedByTechnicalStaff
+      approvedByTechnicalStaff: $approvedByTechnicalStaff,
+      awaitingOOP: $awaitingOOP
     ) {
       id
       currentStage
       status
       acceptedByTechnicalStaff
       approvedByTechnicalStaff
+      awaitingOOP
       history {
         notes
         timestamp
@@ -48,10 +51,11 @@ const TS_ReviewModal = ({ isOpen, onClose, application, onReviewComplete }) => {
          await updatePermitStage({
             variables: {
                id: application.id,
-               currentStage: 'ForRecordByReceivingClerk',
+               currentStage: 'ForInspectionByTechnicalStaff',
                status: 'In Progress',
                notes: 'Application accepted by Technical Staff',
-               acceptedByTechnicalStaff: true
+               acceptedByTechnicalStaff: true,
+               awaitingOOP: true
                // approvedByTechnicalStaff will be undefined
             }
          });

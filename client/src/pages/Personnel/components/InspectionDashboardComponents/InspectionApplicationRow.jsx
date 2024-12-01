@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Calendar, FileCheck, Undo2 } from 'lucide-react';
+import { Calendar, FileCheck, Undo2, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { gql, useMutation } from '@apollo/client';
 import { toast } from 'sonner';
@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import TS_ScheduleInspectionModal from './TS_ScheduleInspectionModal';
 import TS_InspectionReportModal from './TS_InspectionReportModal';
+import TS_InspectionReportsViewModal from '../PersonnelDashboardComponents/TechnicalStaff/TS_InspectionReportsViewModal';
 
 const DELETE_INSPECTION = gql`
    mutation DeleteInspection($id: ID!, $reason: String) {
@@ -60,10 +61,15 @@ const InspectionApplicationRow = ({
    isMobile,
    onRefetch
 }) => {
+   console.log('Application object:', application);
+   console.log('Application ID:', application?.id);
+   console.log('Inspection object:', inspection);
+
    const [showScheduleModal, setShowScheduleModal] = useState(false);
    const [showReportModal, setShowReportModal] = useState(false);
    const [showUndoDialog, setShowUndoDialog] = useState(false);
    const [cancellationReason, setCancellationReason] = useState('');
+   const [showInspectionReports, setShowInspectionReports] = useState(false);
 
    const [deleteInspection] = useMutation(DELETE_INSPECTION, {
       onCompleted: () => {
@@ -229,6 +235,27 @@ const InspectionApplicationRow = ({
          );
       }
 
+      // Add view reports button for all applications
+      actions.push(
+         <TooltipProvider key="view-reports-action">
+            <Tooltip>
+               <TooltipTrigger asChild>
+                  <Button
+                     onClick={() => setShowInspectionReports(true)}
+                     variant="outline"
+                     size="icon"
+                     className="text-blue-600 hover:text-blue-800"
+                  >
+                     <Eye className="h-4 w-4" />
+                  </Button>
+               </TooltipTrigger>
+               <TooltipContent>
+                  <p>View Inspection Reports</p>
+               </TooltipContent>
+            </Tooltip>
+         </TooltipProvider>
+      );
+
       return actions;
    };
 
@@ -308,6 +335,14 @@ const InspectionApplicationRow = ({
                   </AlertDialogFooter>
                </AlertDialogContent>
             </AlertDialog>
+
+            {showInspectionReports && (
+               <TS_InspectionReportsViewModal
+                  isOpen={showInspectionReports}
+                  onClose={() => setShowInspectionReports(false)}
+                  permitId={application?.id}
+               />
+            )}
          </>
       );
    }
@@ -385,6 +420,14 @@ const InspectionApplicationRow = ({
                </AlertDialogFooter>
             </AlertDialogContent>
          </AlertDialog>
+
+         {showInspectionReports && (
+            <TS_InspectionReportsViewModal
+               isOpen={showInspectionReports}
+               onClose={() => setShowInspectionReports(false)}
+               permitId={application?.id}
+            />
+         )}
       </>
    );
 };

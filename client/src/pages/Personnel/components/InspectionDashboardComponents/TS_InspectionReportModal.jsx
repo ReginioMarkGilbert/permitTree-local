@@ -273,8 +273,9 @@ const TS_InspectionReportModal = ({ isOpen, onClose, inspection, application, on
                <Button
                   onClick={handleSubmit}
                   disabled={!findings.result}
+                  className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
                >
-                  Submit Report & Forward to Chief RPS
+                  Submit Report
                </Button>
             </div>
          </DialogContent>

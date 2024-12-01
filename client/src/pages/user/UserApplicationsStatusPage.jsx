@@ -426,75 +426,46 @@ const UserApplicationsStatusPage = () => {
    }, [oops, searchTerm, filters]);
 
    const renderOrderOfPaymentsTable = () => {
-      if (loading) return <p className="text-center text-gray-500">Loading...</p>;
-      if (error) return <p className="text-center text-red-500">Error: {error.message}</p>;
+      if (loading) return <div className="flex justify-center py-8">Loading order of payments...</div>;
+      if (error) return <div className="text-destructive text-center py-8">Error loading order of payments</div>;
 
-      const displayOOPs = filteredOOPs;
-
-      if (displayOOPs.length === 0) {
+      if (!filteredOOPs || filteredOOPs.length === 0) {
          return (
-            <div className="bg-white rounded-lg shadow-sm p-6 text-center">
-               <FileX className="mx-auto h-12 w-12 text-gray-400" />
-               <h3 className="mt-2 text-sm font-medium text-gray-900">No orders of payment found</h3>
-               <p className="mt-1 text-sm text-gray-500">
+            <div className="text-center py-8">
+               <FileX className="mx-auto h-12 w-12 text-muted-foreground" />
+               <h3 className="mt-2 text-lg font-semibold">No order of payments found</h3>
+               <p className="text-sm text-muted-foreground">
                   {filters.applicationType ?
-                     `No orders of payment found for ${filters.applicationType}` :
-                     'No orders of payment available for your applications'}
+                     `No order of payments found for ${filters.applicationType}` :
+                     'No order of payments available'}
                </p>
             </div>
          );
       }
 
-      if (isMobile) {
-         return (
-            <div className="space-y-4">
-               {displayOOPs.map((oop) => (
+      return (
+         <Table>
+            <TableHeader>
+               <TableRow>
+                  <TableHead className="w-[20%]">Application Number</TableHead>
+                  <TableHead className="w-[15%] text-center">Bill Number</TableHead>
+                  <TableHead className="w-[15%] text-center">Date</TableHead>
+                  <TableHead className="w-[15%] text-center">Amount</TableHead>
+                  <TableHead className="w-[20%] text-center">Status</TableHead>
+                  <TableHead className="w-[15%] text-center">Actions</TableHead>
+               </TableRow>
+            </TableHeader>
+            <TableBody>
+               {filteredOOPs.map((oop) => (
                   <UserOOPRow
                      key={oop._id}
                      oop={oop}
                      onRefetch={handleRefetch}
+                     currentTab={activeSubTab}
                   />
                ))}
-            </div>
-         );
-      }
-
-      return (
-         <div className="bg-white rounded-lg shadow overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-               <thead className="bg-gray-50">
-                  <tr>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Application Number
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Bill Number
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Date
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Total Amount
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                     </th>
-                  </tr>
-               </thead>
-               <tbody className="bg-white divide-y divide-gray-200">
-                  {displayOOPs.map((oop) => (
-                     <UserOOPRow
-                        key={oop._id}
-                        oop={oop}
-                        onRefetch={handleRefetch}
-                     />
-                  ))}
-               </tbody>
-            </table>
-         </div>
+            </TableBody>
+         </Table>
       );
    };
 

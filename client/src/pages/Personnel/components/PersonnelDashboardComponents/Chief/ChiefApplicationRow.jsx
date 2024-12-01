@@ -134,13 +134,13 @@ const ChiefApplicationRow = ({ app, onReviewComplete, currentTab, isMobile }) =>
             variant: "outline"
          },
 
-         app.currentStage === 'ChiefRPSReview' && !app.reviewedByChief && {
-            icon: ClipboardCheck,
-            label: "Review Application",
-            onClick: handleReviewClick,
-            variant: "outline",
-            className: "text-blue-600 hover:text-blue-800"
-         },
+         // app.currentStage === 'ChiefRPSReview' && !app.reviewedByChief && {
+         //    icon: ClipboardCheck,
+         //    label: "Review Application",
+         //    onClick: handleReviewClick,
+         //    variant: "outline",
+         //    className: "text-blue-600 hover:text-blue-800"
+         // },
 
          currentTab === 'Reports for Review' && {
             icon: ClipboardCheck,
@@ -236,19 +236,27 @@ const ChiefApplicationRow = ({ app, onReviewComplete, currentTab, isMobile }) =>
    return (
       <>
          <TableRow>
-            <TableCell>{app.applicationNumber}</TableCell>
-            <TableCell>{app.applicationType}</TableCell>
-            <TableCell>{format(new Date(app.dateOfSubmission), 'MMM d, yyyy')}</TableCell>
-            <TableCell>
-               <Badge
-                  variant={getStatusVariant(app.status).variant}
-                  className={getStatusVariant(app.status).className}
-               >
-                  {app.status}
-               </Badge>
+            <TableCell className="w-[25%]">
+               {app.applicationNumber}
             </TableCell>
-            <TableCell className="text-right">
-               <div className="flex justify-end gap-2">
+            <TableCell className="w-[25%] text-center">
+               {app.applicationType}
+            </TableCell>
+            <TableCell className="w-[20%] text-center">
+               {format(new Date(app.dateOfSubmission), 'MMM d, yyyy')}
+            </TableCell>
+            <TableCell className="w-[15%]">
+               <div className="flex justify-center">
+                  <Badge
+                     variant={getStatusVariant(app.status).variant}
+                     className={getStatusVariant(app.status).className}
+                  >
+                     {app.status}
+                  </Badge>
+               </div>
+            </TableCell>
+            <TableCell className="w-[15%]">
+               <div className="flex justify-center gap-2">
                   {renderActionButtons()}
                </div>
             </TableCell>

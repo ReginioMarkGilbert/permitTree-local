@@ -198,7 +198,7 @@ const oopResolvers = {
          }
       },
 
-      undoAccountantOOPApproval: async (_, { id }) => {
+      undoTechnicalStaffOOPApproval: async (_, { id }) => {
          try {
             const oop = await OOP.findById(id);
             if (!oop) throw new UserInputError('OOP not found');
@@ -216,12 +216,12 @@ const oopResolvers = {
 
             return updatedOOP;
          } catch (error) {
-            console.error('Error undoing accountant OOP approval:', error);
+            console.error('Error undoing technical staff OOP approval:', error);
             throw error;
          }
       },
 
-      forwardOOPToAccountant: async (_, { id }) => {
+      forwardOOPToTechnicalStaff: async (_, { id }) => {
          try {
             const oop = await OOP.findById(id);
             if (!oop) {
@@ -513,6 +513,7 @@ const oopResolvers = {
                         status: 'SUBMITTED'
                      },
                      OOPstatus: 'Payment Proof Submitted'
+                     // awaitingPaymentProofApproval: true
                   }
                },
                { new: true }

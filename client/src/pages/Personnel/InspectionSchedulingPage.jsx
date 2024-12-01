@@ -38,6 +38,11 @@ const GET_INSPECTIONS = gql`
         result
         observations
         recommendations
+        attachments {
+          filename
+          contentType
+          data
+        }
       }
       createdAt
       updatedAt
@@ -94,9 +99,10 @@ const InspectionSchedulingPage = () => {
    }, [getInspectionStatus]);
 
    const filteredApplications = useMemo(() => {
-      const inspections = inspectionData?.getInspections || [];
+      console.log('Raw applications:', applications);
 
       return applications.filter(app => {
+         console.log('Filtering application:', app);
          const inspection = getInspectionStatus(app.id);
 
          switch (activeMainTab) {

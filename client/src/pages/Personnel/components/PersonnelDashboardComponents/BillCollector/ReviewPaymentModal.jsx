@@ -172,15 +172,15 @@ const ReviewPaymentModal = ({ oop, isOpen, onClose, onReviewComplete }) => {
                   <Button variant="outline" onClick={onClose}>
                      Cancel
                   </Button>
-                  <Button
+                  {/* <Button
                      variant="destructive"
                      onClick={() => handleReview('REJECTED')}
                   >
                      Reject
-                  </Button>
+                  </Button> */}
                   <Button
                      onClick={() => handleReview('APPROVED')}
-                     className="bg-green-600 hover:bg-green-700"
+                     className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
                   >
                      Approve
                   </Button>

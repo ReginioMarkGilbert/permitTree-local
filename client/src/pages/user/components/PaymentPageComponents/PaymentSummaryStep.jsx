@@ -62,6 +62,7 @@ const PaymentSummaryStep = ({ oop, formData, onNext, onBack }) => {
                <Button
                   data-testid="proceed-payment-button"
                   onClick={onNext}
+                  className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
                >
                   Proceed to Payment
                </Button>

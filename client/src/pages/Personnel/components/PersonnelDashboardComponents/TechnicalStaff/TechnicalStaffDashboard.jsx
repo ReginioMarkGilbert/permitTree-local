@@ -25,6 +25,8 @@ import TS_CertificateRow from './TS_CertificateRow';
 //    DropdownMenuTrigger,
 // } from "@/components/ui/dropdown-menu";
 import DashboardLayout from '@/components/layouts/DashboardLayout';
+import TechnicalStaffOOPRow from './TechnicalStaffOOPRow';
+import { useOrderOfPayments } from '../../../hooks/useOrderOfPayments';
 
 const GET_CERTIFICATES = gql`
   query GetCertificates($status: String) {
@@ -78,9 +80,11 @@ const TechnicalStaffDashboard = () => {
       }
    });
 
-   const mainTabs = ['Applications', 'Awaiting Permit Creation', 'Certificates/Permits'];
+   // const mainTabs = ['Applications', 'Awaiting Permit Creation', 'Certificates/Permits'];
+   const mainTabs = ['Applications', 'Order of Payment', 'Awaiting Permit Creation', 'Certificates/Permits'];
    const subTabs = {
       'Applications': ['Pending Reviews', 'Returned Applications', 'Accepted Applications', 'For Inspection and Approval', 'Approved Applications'],
+      'Order of Payment': ['Pending Approval', 'Approved OOP'],
       'Awaiting Permit Creation': ['Awaiting Permit Creation', 'Created Permits'],
       'Certificates/Permits': ['Pending Signature', 'Signed Certificates']
    };
@@ -105,6 +109,17 @@ const TechnicalStaffDashboard = () => {
             return {
                approvedByTechnicalStaff: true
             };
+         case 'Awaiting OOP':
+            return {
+               currentStage: 'AuthenticityApprovedByTechnicalStaff',
+               awaitingOOP: true,
+               OOPCreated: false
+            };
+         case 'Created OOP':
+            return {
+               OOPCreated: true,
+               awaitingOOP: false
+            };
          case 'Awaiting Permit Creation':
             return {
                currentStage: 'AuthenticityApprovedByTechnicalStaff',
@@ -124,8 +139,12 @@ const TechnicalStaffDashboard = () => {
             return {
                certificateStatus: 'Complete Signatures'
             };
+         case 'Pending Approval':
+            return { OOPstatus: 'For Approval' };
+         case 'Approved OOP':
+            return { OOPstatus: 'Awaiting Payment' };
          default:
-            toast.error('Invalid subtab selected');
+            console.error('Invalid subtab selected:', tab);
             return {};
       }
    };
@@ -137,9 +156,13 @@ const TechnicalStaffDashboard = () => {
          skip: !activeMainTab.includes('Certificates'),
       });
 
+   const { oops, oopsLoading, oopsError, refetch: refetchOOPs } = useOrderOfPayments();
+
    const handleRefetch = () => {
-      if (activeMainTab.includes('Certificates')) {
-         refetchCertificates();
+      // if (activeMainTab.includes('Certificates')) {
+      //    refetchCertificates();
+      if (activeMainTab === 'Order of Payment') {
+         refetchOOPs();
       } else {
          refetchApps();
       }
@@ -206,6 +229,43 @@ const TechnicalStaffDashboard = () => {
          return matchesSearch && matchesType && matchesDateRange;
       });
    }, [applications, filters]);
+
+   const filteredOOPs = useMemo(() => {
+      if (!oops) return [];
+
+      return oops.filter(oop => {
+         // First filter by status based on activeSubTab
+         const matchesStatus = (() => {
+            if (activeSubTab === 'Pending Approval') {
+               return oop.OOPstatus === 'For Approval';
+            } else if (activeSubTab === 'Approved OOP') {
+               return oop.OOPstatus === 'Awaiting Payment';
+            }
+            return true;
+         })();
+
+         // Then apply search filter
+         const matchesSearch = !filters.searchTerm ||
+            oop.applicationId.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+            oop.billNo.toLowerCase().includes(filters.searchTerm.toLowerCase());
+
+         // Apply application type filter
+         const matchesType = !filters.applicationType ||
+            filters.applicationType === "all" ||
+            oop.applicationType === filters.applicationType;
+
+         // Apply date range filter
+         const matchesDateRange = (() => {
+            if (!filters.dateRange.from && !filters.dateRange.to) return true;
+            const oopDate = new Date(parseInt(oop.createdAt));
+            const fromDate = filters.dateRange.from ? new Date(filters.dateRange.from) : null;
+            const toDate = filters.dateRange.to ? new Date(filters.dateRange.to) : null;
+            return (!fromDate || oopDate >= fromDate) && (!toDate || oopDate <= toDate);
+         })();
+
+         return matchesStatus && matchesSearch && matchesType && matchesDateRange;
+      });
+   }, [oops, filters, activeSubTab]);
 
    const getStatusColor = (status) => {
       switch (status.toLowerCase()) {
@@ -360,6 +420,50 @@ const TechnicalStaffDashboard = () => {
       );
    };
 
+   const renderOrderOfPaymentTable = () => {
+      if (oopsLoading) return <div className="flex justify-center py-8">Loading order of payments...</div>;
+      if (oopsError) return <div className="text-destructive text-center py-8">Error loading order of payments</div>;
+
+      if (!filteredOOPs || filteredOOPs.length === 0) {
+         return (
+            <div className="text-center py-8">
+               <FileX className="mx-auto h-12 w-12 text-muted-foreground" />
+               <h3 className="mt-2 text-lg font-semibold">No order of payments found</h3>
+               <p className="text-sm text-muted-foreground">
+                  {filters.applicationType ?
+                     `No order of payments found for ${filters.applicationType}` :
+                     'No order of payments available'}
+               </p>
+            </div>
+         );
+      }
+
+      return (
+         <Table>
+            <TableHeader>
+               <TableRow>
+                  <TableHead className="w-[25%]">Application Number</TableHead>
+                  <TableHead className="w-[15%] text-center">Bill Number</TableHead>
+                  <TableHead className="w-[15%] text-center">Date</TableHead>
+                  <TableHead className="w-[15%] text-center">Amount</TableHead>
+                  <TableHead className="w-[15%] text-center">Status</TableHead>
+                  <TableHead className="w-[15%] text-center">Actions</TableHead>
+               </TableRow>
+            </TableHeader>
+            <TableBody>
+               {filteredOOPs.map((oop) => (
+                  <TechnicalStaffOOPRow
+                     key={oop._id}
+                     oop={oop}
+                     onReviewComplete={handleRefetch}
+                     currentTab={activeSubTab}
+                  />
+               ))}
+            </TableBody>
+         </Table>
+      );
+   };
+
    const renderTabDescription = () => {
       const descriptions = {
          // Applications
@@ -375,7 +479,11 @@ const TechnicalStaffDashboard = () => {
 
          // Certificates/Permits
          'Pending Signature': 'This is the list of permits/certificates pending for signature from authorized personnel.',
-         'Signed Certificates': 'This is the list of permits/certificates that have been completely signed.'
+         'Signed Certificates': 'This is the list of permits/certificates that have been completely signed.',
+
+         // Order of Payment
+         'Pending Approval': 'This is the list of Order of Payments pending for your approval.',
+         'Approved OOP': 'This is the list of Order of Payments that you have approved.'
       };
 
       const text = useTypewriter(descriptions[activeSubTab] || '');
@@ -402,11 +510,12 @@ const TechnicalStaffDashboard = () => {
          tabDescription={renderTabDescription()}
          filters={<ApplicationFilters filters={filters} setFilters={setFilters} />}
       >
-         {activeMainTab.includes('Certificates') ? (
-            renderCertificatesTable()
-         ) : (
-            renderApplicationTable()
-         )}
+         {activeMainTab === 'Order of Payment' ?
+            renderOrderOfPaymentTable() :
+            activeMainTab.includes('Certificates') ?
+               renderCertificatesTable() :
+               renderApplicationTable()
+         }
       </DashboardLayout>
    );
 };

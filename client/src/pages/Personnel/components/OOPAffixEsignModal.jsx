@@ -49,7 +49,7 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
    const rpsFileInputRef = useRef(null);
    const tsdFileInputRef = useRef(null);
 
-   const { updateSignature, forwardOOPToAccountant } = useOrderOfPayments();
+   const { updateSignature, forwardOOPToTechnicalStaff } = useOrderOfPayments();
 
    const [updateOOPTracking] = useMutation(UPDATE_OOP_TRACKING);
 
@@ -111,7 +111,7 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
          // Check if both signatures are present after saving
          const hasBothSignatures = signatures.rpsSignature && signatures.tsdSignature;
          if (hasBothSignatures) {
-            await forwardOOPToAccountant(oop._id);
+            await forwardOOPToTechnicalStaff(oop._id);
          }
 
          toast.success('Signatures saved successfully');
@@ -122,7 +122,7 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
       }
    };
 
-   const handleForwardToAccountant = async () => {
+   const handleForwardToTechnicalStaff = async () => {
       try {
          // Check if both signatures are present
          if (!signatures.rpsSignature || !signatures.tsdSignature) {
@@ -153,8 +153,8 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
          });
 
          // Then forward to accountant
-         await forwardOOPToAccountant(oop._id);
-         toast.success('OOP forwarded to accountant for approval');
+         await forwardOOPToTechnicalStaff(oop._id);
+         toast.success('OOP forwarded to Technical Staff for approval');
          onClose();
       } catch (error) {
          console.error('Error in forward process:', error);
@@ -363,11 +363,11 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
                      Save Changes
                   </Button> */}
                   <Button
-                     onClick={handleForwardToAccountant}
+                     onClick={handleForwardToTechnicalStaff}
                      disabled={!signatures.rpsSignature || !signatures.tsdSignature}
                      className="bg-green-600 hover:bg-green-700"
                   >
-                     Forward to Accountant
+                     Forward to Technical Staff
                   </Button>
                </div>
             </div>

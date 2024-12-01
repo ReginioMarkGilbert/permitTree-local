@@ -196,9 +196,9 @@ const UPDATE_OOP_SIGNATURE = gql`
   }
 `;
 
-const FORWARD_OOP_TO_ACCOUNTANT = gql`
-  mutation ForwardOOPToAccountant($id: ID!) {
-    forwardOOPToAccountant(id: $id) {
+const FORWARD_OOP_TO_TECHNICAL_STAFF = gql`
+  mutation ForwardOOPToTechnicalStaff($id: ID!) {
+    forwardOOPToTechnicalStaff(id: $id) {
       _id
       OOPstatus
       OOPSignedByTwoSignatories
@@ -233,7 +233,8 @@ export const GET_RECENT_OOPS = gql`
 export const useOrderOfPayments = (userId = null) => {
    const client = useApolloClient();
    const userRoles = getUserRoles();
-   const status = userRoles.includes('Accountant')
+   // const status = userRoles.includes('Accountant')
+   const status = userRoles.includes('Technical_Staff')
       ? "For Approval"
       : userRoles.includes('Bill_Collector')
          ? "Awaiting Payment"
@@ -291,7 +292,7 @@ export const useOrderOfPayments = (userId = null) => {
    // Mutations
    const [createOOP] = useMutation(CREATE_OOP);
    const [updateSignature] = useMutation(UPDATE_OOP_SIGNATURE);
-   const [forwardToAccountant] = useMutation(FORWARD_OOP_TO_ACCOUNTANT);
+   const [forwardToTechnicalStaff] = useMutation(FORWARD_OOP_TO_TECHNICAL_STAFF);
 
    const handleCreateOOP = async (oopData) => {
       try {
@@ -355,13 +356,13 @@ export const useOrderOfPayments = (userId = null) => {
       }
    };
 
-   const handleForwardToAccountant = async (oopId) => {
+   const handleForwardToTechnicalStaff = async (oopId) => {
       try {
-         const { data } = await forwardToAccountant({
+         const { data } = await forwardToTechnicalStaff({
             variables: { id: oopId },
             refetchQueries: [{ query: GET_ALL_OOPS }]
          });
-         return data.forwardOOPToAccountant;
+         return data.forwardOOPToTechnicalStaff;
       } catch (error) {
          console.error('Error forwarding OOP:', error);
          throw new Error(error.message);
@@ -387,7 +388,7 @@ export const useOrderOfPayments = (userId = null) => {
 
       createOOP: handleCreateOOP,
       updateSignature: handleUpdateSignature,
-      forwardOOPToAccountant: handleForwardToAccountant,
+      forwardOOPToTechnicalStaff: handleForwardToTechnicalStaff,
       refetch: refetchAll,
 
       getOOPWithPaymentProof: async (id) => {

@@ -13,6 +13,7 @@ import ViewOOPModal from '@/pages/user/components/ViewOOPModal';
 import { useMutation, gql, useQuery } from '@apollo/client';
 import { toast } from 'sonner';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { useNavigate } from 'react-router-dom';
 
 const GET_PERMIT_BY_APPLICATION_NUMBER = gql`
   query GetPermitByApplicationNumber($applicationNumber: String!) {
@@ -79,6 +80,7 @@ const GET_OOP = gql`
 `;
 
 const ChiefOOPRow = ({ oop, onRefetch }) => {
+   const navigate = useNavigate();
    const [isModalOpen, setIsModalOpen] = useState(false);
    const [deleteOOP] = useMutation(DELETE_OOP);
    const [undoOOPCreation] = useMutation(UNDO_OOP_CREATION);
@@ -86,8 +88,13 @@ const ChiefOOPRow = ({ oop, onRefetch }) => {
    const isMobile = useMediaQuery('(max-width: 640px)');
 
    const { data: permitData } = useQuery(GET_PERMIT_BY_APPLICATION_NUMBER, {
-      variables: { applicationNumber: oop.applicationId },
-      fetchPolicy: 'network-only'
+      // variables: { applicationNumber: oop.applicationId },
+      // fetchPolicy: 'network-only',
+      variables: { applicationNumber: oop.applicationNumber },
+      fetchPolicy: 'network-only',
+      onError: (error) => {
+         console.log('Error fetching permit:', error);
+      }
    });
    // the right way to format date
    const formatDate = (timestamp) => {
@@ -111,7 +118,7 @@ const ChiefOOPRow = ({ oop, onRefetch }) => {
    };
 
    const handlePrint = () => {
-      console.log('Print OOP:', oop._id);
+      navigate('/user/oop-print', { state: { oop } });
    };
 
    const handleAffixSign = () => {
@@ -121,7 +128,8 @@ const ChiefOOPRow = ({ oop, onRefetch }) => {
    const handleUndoOOP = async () => {
       try {
          if (!permitData?.getPermitByApplicationNumber?.id) {
-            throw new Error('Could not find permit ID');
+            toast.error('Unable to undo OOP: Permit not found');
+            return;
          }
 
          // First, delete the OOP document
@@ -139,7 +147,7 @@ const ChiefOOPRow = ({ oop, onRefetch }) => {
          });
 
          toast.success('OOP creation undone successfully');
-         if (onRefetch) onRefetch(); // Refresh the list
+         if (onRefetch) onRefetch();
       } catch (error) {
          console.error('Error undoing OOP creation:', error);
          toast.error('Failed to undo OOP creation');
@@ -292,26 +300,28 @@ const ChiefOOPRow = ({ oop, onRefetch }) => {
    // Desktop view remains the same
    return (
       <>
-         <tr key={oop._id}>
-            <td className="px-4 py-4 whitespace-nowrap">
+         <tr key={oop._id} className="border-b">
+            <td className="px-6 py-4 whitespace-nowrap w-[25%]">
                {oop.applicationNumber}
             </td>
-            <td className="px-4 py-4 whitespace-nowrap">
+            <td className="px-6 py-4 whitespace-nowrap w-[15%] text-center">
                {oop.billNo}
             </td>
-            <td className="px-4 py-4 whitespace-nowrap">
+            <td className="px-6 py-4 whitespace-nowrap w-[15%] text-center">
                {formatDate(oop.createdAt)}
             </td>
-            <td className="px-4 py-4 whitespace-nowrap">
+            <td className="px-6 py-4 whitespace-nowrap w-[15%] text-center">
                ₱{oop.totalAmount?.toFixed(2)}
             </td>
-            <td className="px-4 py-4 whitespace-nowrap">
-               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(oop.OOPstatus)}`}>
-                  {oop.OOPstatus}
-               </span>
+            <td className="px-6 py-4 whitespace-nowrap w-[15%] text-center">
+               <div className="flex justify-center">
+                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(oop.OOPstatus)}`}>
+                     {oop.OOPstatus}
+                  </span>
+               </div>
             </td>
-            <td className="px-4 py-4 whitespace-nowrap text-sm">
-               <div className="flex items-center space-x-2">
+            <td className="px-6 py-4 whitespace-nowrap w-[15%]">
+               <div className="flex justify-center space-x-2">
                   <TooltipProvider>
                      <Tooltip delayDuration={200}>
                         <TooltipTrigger asChild>

@@ -559,12 +559,20 @@ const OrderOfPaymentForm = ({ onClose }) => {
                {renderStep()}
                <div className="flex justify-between mt-6">
                   {step > 1 && (
-                     <Button type="button" onClick={handlePrevious}>
+                     <Button
+                        type="button"
+                        onClick={handlePrevious}
+                        variant="outline"
+                        >
                         Previous
                      </Button>
                   )}
                   {step < 2 ? (
-                     <Button type="button" onClick={handleNext}>
+                     <Button
+                        type="button"
+                        onClick={handleNext}
+                        className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
+                        >
                         Next
                      </Button>
                   ) : (

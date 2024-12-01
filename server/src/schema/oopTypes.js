@@ -125,8 +125,8 @@ const oopTypes = gql`
     createOOP(input: OOPInput!): OOP!
     updateOOPSignature(id: ID!, signatureType: String!, signatureImage: String!): OOP!
     approveOOP(id: ID!, notes: String, status: String!): OOP!
-    undoAccountantOOPApproval(id: ID!): OOP!
-    forwardOOPToAccountant(id: ID!): OOP!
+    undoTechnicalStaffOOPApproval(id: ID!): OOP!
+    forwardOOPToTechnicalStaff(id: ID!): OOP!
     undoApproval(paymentId: ID!): OOP!
     generateOR(Id: ID!, input: GenerateORInput!): OOP!
     sendORToApplicant(Id: ID!): OOP!

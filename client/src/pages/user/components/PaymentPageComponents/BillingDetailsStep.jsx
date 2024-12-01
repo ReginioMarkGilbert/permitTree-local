@@ -34,6 +34,7 @@ const BillingDetailsStep = ({ formData, setFormData, onNext, onBack }) => {
                         value={formData.fullName || ''}
                         onChange={handleInputChange}
                         placeholder="Enter your full name"
+                        autoComplete="name"
                         required
                      />
                   </div>
@@ -47,6 +48,7 @@ const BillingDetailsStep = ({ formData, setFormData, onNext, onBack }) => {
                         value={formData.email || ''}
                         onChange={handleInputChange}
                         placeholder="Enter your email"
+                        autoComplete="email"
                         required
                      />
                   </div>
@@ -59,6 +61,7 @@ const BillingDetailsStep = ({ formData, setFormData, onNext, onBack }) => {
                         value={formData.phoneNumber || ''}
                         onChange={handleInputChange}
                         placeholder="Enter your phone number"
+                        autoComplete="tel"
                         required
                      />
                   </div>
@@ -71,6 +74,7 @@ const BillingDetailsStep = ({ formData, setFormData, onNext, onBack }) => {
                         value={formData.address || ''}
                         onChange={handleInputChange}
                         placeholder="Enter your complete address"
+                        autoComplete="street-address"
                         required
                      />
                   </div>
@@ -87,6 +91,7 @@ const BillingDetailsStep = ({ formData, setFormData, onNext, onBack }) => {
                   <Button
                      data-testid="next-button"
                      onClick={onNext}
+                     className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
                   >
                      Next
                   </Button>

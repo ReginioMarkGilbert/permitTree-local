@@ -127,6 +127,10 @@ const oopSchema = new mongoose.Schema({
       ],
       default: 'Pending Signature'
    },
+   awaitingPaymentProofApproval: {
+      type: Boolean,
+      default: false
+   },
    OOPSignedByTwoSignatories: {
       type: Boolean,
       default: false

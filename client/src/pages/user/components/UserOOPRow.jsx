@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import { gql, useMutation } from '@apollo/client';
 import { toast } from 'sonner';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { TableCell, TableRow } from "@/components/ui/table";
 
 
 const UNDO_PAYMENT_PROOF = gql`
@@ -296,28 +297,162 @@ const UserOOPRow = ({ oop, onRefetch }) => {
 
    return (
       <>
-         <tr>
-            <td className="px-4 py-4 whitespace-nowrap">
+         <TableRow>
+            <TableCell className="w-[20%]">
                {oop.applicationNumber}
-            </td>
-            <td className="px-4 py-4 whitespace-nowrap">
+            </TableCell>
+            <TableCell className="w-[15%] text-center">
                {oop.billNo}
-            </td>
-            <td className="px-4 py-4 whitespace-nowrap">
+            </TableCell>
+            <TableCell className="w-[15%] text-center">
                {formatDate(oop.createdAt)}
-            </td>
-            <td className="px-4 py-4 whitespace-nowrap">
+            </TableCell>
+            <TableCell className="w-[15%] text-center">
                ₱{oop.totalAmount?.toFixed(2)}
-            </td>
-            <td className="px-4 py-4 whitespace-nowrap">
-               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(oop.OOPstatus)}`}>
-                  {oop.OOPstatus}
-               </span>
-            </td>
-            <td className="px-4 py-4 whitespace-nowrap text-sm">
-               {renderActions()}
-            </td>
-         </tr>
+            </TableCell>
+            <TableCell className="w-[20%]">
+               <div className="flex justify-center">
+                  <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(oop.OOPstatus)}`}>
+                     {oop.OOPstatus}
+                  </span>
+               </div>
+            </TableCell>
+            <TableCell className="w-[15%]">
+               <div className="flex justify-center gap-2">
+                  <TooltipProvider>
+                     <Tooltip delayDuration={200}>
+                        <TooltipTrigger asChild>
+                           <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => setIsViewOOPModalOpen(true)}
+                           >
+                              <Eye className="h-4 w-4" />
+                           </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>View OOP</TooltipContent>
+                     </Tooltip>
+                  </TooltipProvider>
+
+                  <TooltipProvider>
+                     <Tooltip>
+                        <TooltipTrigger asChild>
+                           <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={handlePrint}
+                           >
+                              <Printer className="h-4 w-4" />
+                           </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                           <p>Print OOP</p>
+                        </TooltipContent>
+                     </Tooltip>
+                  </TooltipProvider>
+
+                  {oop.OOPstatus === 'Awaiting Payment' && (
+                     <TooltipProvider>
+                        <Tooltip delayDuration={250}>
+                           <TooltipTrigger asChild>
+                              <Button
+                                 variant="outline"
+                                 size="icon"
+                                 className="h-8 w-8"
+                                 onClick={handlePayClick}
+                              >
+                                 <CreditCard className="h-4 w-4" />
+                              </Button>
+                           </TooltipTrigger>
+                           <TooltipContent>Pay</TooltipContent>
+                        </Tooltip>
+                     </TooltipProvider>
+                  )}
+
+                  {oop.OOPstatus === 'Issued OR' && (
+                     <>
+                        <TooltipProvider>
+                           <Tooltip>
+                              <TooltipTrigger asChild>
+                                 <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-8 w-8 text-purple-600"
+                                    onClick={handleViewOR}
+                                 >
+                                    <Receipt className="h-4 w-4" />
+                                 </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                 <p>View Official Receipt</p>
+                              </TooltipContent>
+                           </Tooltip>
+                        </TooltipProvider>
+
+                        <TooltipProvider>
+                           <Tooltip>
+                              <TooltipTrigger asChild>
+                                 <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    onClick={handlePrintOR}
+                                 >
+                                    <Printer className="h-4 w-4" />
+                                 </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                 <p>Print Official Receipt</p>
+                              </TooltipContent>
+                           </Tooltip>
+                        </TooltipProvider>
+                     </>
+                  )}
+
+                  {showPaymentProof && (
+                     <TooltipProvider>
+                        <Tooltip>
+                           <TooltipTrigger asChild>
+                              <Button
+                                 variant="outline"
+                                 size="icon"
+                                 className="h-8 w-8"
+                                 onClick={() => setIsViewPaymentProofModalOpen(true)}
+                              >
+                                 <Receipt className="h-4 w-4" />
+                              </Button>
+                           </TooltipTrigger>
+                           <TooltipContent>
+                              <p>View Payment Proof</p>
+                           </TooltipContent>
+                        </Tooltip>
+                     </TooltipProvider>
+                  )}
+
+                  {oop.OOPstatus === 'Payment Proof Submitted' && (
+                     <TooltipProvider>
+                        <Tooltip>
+                           <TooltipTrigger asChild>
+                              <Button
+                                 variant="outline"
+                                 size="icon"
+                                 className="h-8 w-8 text-yellow-600"
+                                 onClick={handleUndoPaymentProof}
+                              >
+                                 <RotateCcw className="h-4 w-4" />
+                              </Button>
+                           </TooltipTrigger>
+                           <TooltipContent>
+                              <p>Undo Payment Proof</p>
+                           </TooltipContent>
+                        </Tooltip>
+                     </TooltipProvider>
+                  )}
+               </div>
+            </TableCell>
+         </TableRow>
 
          {/* Modals */}
          <ViewORModal

@@ -269,7 +269,7 @@ const SuperAdminActivitiesPage = () => {
    };
 
    return (
-      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-gray-800 dark:to-gray-900 transition-colors duration-300 pt-16 pb-6 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-gray-800 dark:to-gray-900 transition-colors duration-300 pt-20 pb-6 px-4 sm:px-6 lg:px-8">
          <div className="max-w-7xl mx-auto space-y-4 pt-6">
             <Card className="border-none shadow-lg bg-white/50 dark:bg-black/50 backdrop-blur-sm">
                <CardHeader className="py-4">
