@@ -12,6 +12,7 @@ const Admin = require('./src/models/admin');
 const { permitTypes } = require('./src/schema/permitTypes');
 const typeDefs = require('./src/schema');
 const resolvers = require('./src/resolvers');
+const { scheduleCertificateExpirationCheck } = require('./src/utils/certificateExpirationChecker');
 
 const startServer = async () => {
    const app = express();
@@ -21,84 +22,87 @@ const startServer = async () => {
          useNewUrlParser: true,
          useUnifiedTopology: true,
       });
-      console.log('MongoDB Atlas connected successfully');
-   } catch (error) {
-      console.error('MongoDB connection error:', error);
-      process.exit(1); // Exit process with failure
-   }
+      console.log('Connected to MongoDB');
 
-   const server = new ApolloServer({
-      typeDefs,
-      resolvers,
-   });
+      // Schedule certificate expiration check
+      scheduleCertificateExpirationCheck();
 
-   await server.start();
+      await server.start();
+      // const server = new ApolloServer({
+      //    typeDefs,
+      //    resolvers,
+      // });
 
-   const corsOptions = {
-      origin: [
-         'http://localhost:5174',
-         'https://permittree-frontend-dev.vercel.app',
-         'https://permittree-backend-dev.vercel.app',
-         'https://permittree-staging.vercel.app',
-         'https://permittree-frontend.vercel.app',
-         'https://permittree-backend.vercel.app'
-      ],
-      credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'apollo-require-preflight'],
-      exposedHeaders: ['Access-Control-Allow-Origin']
-   };
+      await server.start();
 
-   app.use(cors(corsOptions));
-   app.options('*', cors(corsOptions));
-   app.use(express.json({ limit: '50mb' }));
-   app.use(express.urlencoded({ limit: '50mb', extended: true }));
-   app.use(graphqlUploadExpress());
+      const corsOptions = {
+         origin: [
+            'http://localhost:5174',
+            'https://permittree-frontend-dev.vercel.app',
+            'https://permittree-backend-dev.vercel.app',
+            'https://permittree-staging.vercel.app',
+            'https://permittree-frontend.vercel.app',
+            'https://permittree-backend.vercel.app'
+         ],
+         credentials: true,
+         methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+         allowedHeaders: ['Content-Type', 'Authorization', 'apollo-require-preflight'],
+         exposedHeaders: ['Access-Control-Allow-Origin']
+      };
 
-   app.get('/', (req, res) => {
-      res.send('PermiTree API is running!');
-   });
+      app.use(cors(corsOptions));
+      app.options('*', cors(corsOptions));
+      app.use(express.json({ limit: '50mb' }));
+      app.use(express.urlencoded({ limit: '50mb', extended: true }));
+      app.use(graphqlUploadExpress());
 
-   app.get('/favicon.ico', (req, res) => {
-      res.status(204).end(); // No content response
-   });
+      app.get('/', (req, res) => {
+         res.send('PermiTree API is running!');
+      });
 
-   app.use('/graphql', expressMiddleware(server, {
-      context: async ({ req }) => {
-         const token = req.headers.authorization || '';
-         if (token) {
-            try {
-               const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
+      app.get('/favicon.ico', (req, res) => {
+         res.status(204).end(); // No content response
+      });
 
-               // First check if it's an admin
-               let admin = await Admin.findById(decoded.id);
-               if (admin) {
-                  console.log('Admin found in context:', admin.id, admin.roles);
-                  return { admin }; // Return admin context
+      app.use('/graphql', expressMiddleware(server, {
+         context: async ({ req }) => {
+            const token = req.headers.authorization || '';
+            if (token) {
+               try {
+                  const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
+
+                  // First check if it's an admin
+                  let admin = await Admin.findById(decoded.id);
+                  if (admin) {
+                     console.log('Admin found in context:', admin.id, admin.roles);
+                     return { admin }; // Return admin context
+                  }
+
+                  // If not admin, check if it's a regular user
+                  let user = await User.findById(decoded.id);
+                  if (user) {
+                     console.log('User found in context:', user.id, user.roles);
+                     return { user }; // Return user context
+                  }
+               } catch (error) {
+                  console.error('Error verifying token:', error);
                }
-
-               // If not admin, check if it's a regular user
-               let user = await User.findById(decoded.id);
-               if (user) {
-                  console.log('User found in context:', user.id, user.roles);
-                  return { user }; // Return user context
-               }
-            } catch (error) {
-               console.error('Error verifying token:', error);
             }
-         }
-         console.log('No user/admin in context - server');
-         return {};
-      },
-   }));
-   // const PORT = process.env.PORT || 3001;
-   // const HOST = process.env.HOST || 'localhost';
-   // app.listen(PORT, HOST, () => {
-   //    console.log(`Server running on http://${HOST}:${PORT}/graphql`);
-   const PORT = process.env.PORT || 3001;
-   app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}/graphql`);
-   });
+            console.log('No user/admin in context - server');
+            return {};
+         },
+      }));
+      // const PORT = process.env.PORT || 3001;
+      // const HOST = process.env.HOST || 'localhost';
+      // app.listen(PORT, HOST, () => {
+      //    console.log(`Server running on http://${HOST}:${PORT}/graphql`);
+      const PORT = process.env.PORT || 3001;
+      app.listen(PORT, () => {
+         console.log(`Server running on http://localhost:${PORT}/graphql`);
+      });
+   } catch (error) {
+      console.error('Error starting server:', error);
+   }
 };
 
 startServer();
