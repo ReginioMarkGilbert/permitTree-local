@@ -148,8 +148,8 @@ const App = () => {
                            <Route path="/personnel/settings" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelSettingsPage /></ProtectedRoute>} />
                            <Route path="/personnel/reports" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelReportsPage /></ProtectedRoute>} />
                            <Route path="/personnel/notifications" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelNotificationPage /></ProtectedRoute>} />
-                           <Route path="/personnel/order-of-payment" element={<ProtectedRoute roles={['Chief_RPS', 'Accountant', 'PENR_CENR_Officer']}><OOPFormCreationPage /></ProtectedRoute>} />
-                           <Route path="/personnel/order-of-payment/:action" element={<ProtectedRoute roles={['Chief_RPS', 'Accountant', 'PENR_CENR_Officer']}><OOPFormCreationPage /></ProtectedRoute>} />
+                           <Route path="/personnel/order-of-payment" element={<ProtectedRoute roles={['Chief_RPS', 'Chief_TSD', 'Accountant', 'PENR_CENR_Officer']}><OOPFormCreationPage /></ProtectedRoute>} />
+                           <Route path="/personnel/order-of-payment/:action" element={<ProtectedRoute roles={['Chief_RPS', 'Chief_TSD', 'Accountant', 'PENR_CENR_Officer']}><OOPFormCreationPage /></ProtectedRoute>} />
 
                            {/* Dashboard Routes for Personnels */}
                            <Route path="/personnel/dashboard" element={<ProtectedRoute roles={PersonnelRoles}><PersonnelDashboard /></ProtectedRoute>} />

@@ -74,3 +74,10 @@ export const initializeUserTheme = async (userData) => {
       }
    }
 };
+
+export const hasRole = (role) => {
+   const user = JSON.parse(localStorage.getItem('user'));
+   const admin = JSON.parse(localStorage.getItem('admin'));
+   const roles = user?.roles || admin?.roles || [];
+   return roles.includes(role);
+};

@@ -252,7 +252,7 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
                            <>
                               <img
                                  src={signatures.rpsSignature}
-                                 alt="RPS Signature"
+                                 alt="Chief RPS Signature"
                                  className="max-w-full max-h-full object-contain"
                               />
                               <Button
@@ -265,7 +265,7 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
                               </Button>
                            </>
                         ) : (
-                           <p className="text-gray-400">RPS Signature</p>
+                           <p className="text-gray-400">Chief RPS Signature</p>
                         )}
                      </div>
                      <p className="font-semibold">SIMEON R. DIAZ</p>

@@ -16,6 +16,8 @@ import { useOrderOfPayments } from '../hooks/useOrderOfPayments';
 import { cn } from "@/lib/utils";
 import { ChevronDown } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { getUserRole } from '@/utils/auth';
+import { hasRole } from '@/utils/auth';
 
 const CustomSelect = ({ options, onSelect, placeholder }) => {
    const [isOpen, setIsOpen] = useState(false);
@@ -96,6 +98,9 @@ const OrderOfPaymentForm = ({ onClose }) => {
 
    const rpsFileInputRef = useRef(null);
    const tsdFileInputRef = useRef(null);
+
+   const isChiefTSD = hasRole('Chief_TSD');
+   const isChiefRPS = hasRole('Chief_RPS');
 
    const handleApplicationSelect = (applicationId) => {
       const selectedApp = applications.find(app => app.id === applicationId);
@@ -444,13 +449,13 @@ const OrderOfPaymentForm = ({ onClose }) => {
 
                         {/* Signature section */}
                         <div className="grid grid-cols-2 gap-8 mt-8">
-                           <div className="text-center">
+                           <div className={`text-center ${!isChiefRPS ? 'opacity-50' : ''}`}>
                               <div className="relative h-24 mb-4 border-2 border-dashed rounded-md flex items-center justify-center bg-accent/50">
                                  {formData.rpsSignature ? (
                                     <>
                                        <img
                                           src={formData.rpsSignature}
-                                          alt="RPS Signature"
+                                          alt="Chief RPS Signature"
                                           className="max-w-full max-h-full object-contain"
                                        />
                                        <Button
@@ -458,12 +463,13 @@ const OrderOfPaymentForm = ({ onClose }) => {
                                           size="icon"
                                           className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-red-100 hover:bg-red-200"
                                           onClick={() => handleRemoveSignature('rpsSignature', rpsFileInputRef)}
+                                          disabled={!isChiefRPS}
                                        >
                                           <X className="h-4 w-4 text-red-600" />
                                        </Button>
                                     </>
                                  ) : (
-                                    <p className="text-muted-foreground">RPS Signature</p>
+                                    <p className="text-muted-foreground">Chief RPS Signature</p>
                                  )}
                               </div>
                               <p className="font-semibold text-foreground">SIMEON R. DIAZ</p>
@@ -474,19 +480,21 @@ const OrderOfPaymentForm = ({ onClose }) => {
                                  className="hidden"
                                  accept="image/*"
                                  onChange={(e) => handleSignatureUpload(e, 'rpsSignature')}
+                                 disabled={!isChiefRPS}
                               />
                               <Button
                                  variant="outline"
                                  size="sm"
                                  className="mt-2"
                                  onClick={(e) => triggerFileInput(e, rpsFileInputRef)}
+                                 disabled={!isChiefRPS}
                               >
                                  <UploadIcon className="h-4 w-4 mr-2" />
                                  Upload Signature
                               </Button>
                            </div>
 
-                           <div className="text-center">
+                           <div className={`text-center ${!isChiefTSD ? 'opacity-50' : ''}`}>
                               <div className="relative h-24 mb-4 border-2 border-dashed rounded-md flex items-center justify-center bg-accent/50">
                                  {formData.tsdSignature ? (
                                     <>
@@ -500,12 +508,13 @@ const OrderOfPaymentForm = ({ onClose }) => {
                                           size="icon"
                                           className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-red-100 hover:bg-red-200"
                                           onClick={() => handleRemoveSignature('tsdSignature', tsdFileInputRef)}
+                                          disabled={!isChiefTSD}
                                        >
                                           <X className="h-4 w-4 text-red-600" />
                                        </Button>
                                     </>
                                  ) : (
-                                    <p className="text-muted-foreground">TSD Signature</p>
+                                    <p className="text-muted-foreground">Chief TSD Signature</p>
                                  )}
                               </div>
                               <p className="font-semibold text-foreground">Engr. CYNTHIA U. LOZANO</p>
@@ -516,12 +525,14 @@ const OrderOfPaymentForm = ({ onClose }) => {
                                  className="hidden"
                                  accept="image/*"
                                  onChange={(e) => handleSignatureUpload(e, 'tsdSignature')}
+                                 disabled={!isChiefTSD}
                               />
                               <Button
                                  variant="outline"
                                  size="sm"
                                  className="mt-2"
                                  onClick={(e) => triggerFileInput(e, tsdFileInputRef)}
+                                 disabled={!isChiefTSD}
                               >
                                  <UploadIcon className="h-4 w-4 mr-2" />
                                  Upload Signature
@@ -571,7 +582,7 @@ const OrderOfPaymentForm = ({ onClose }) => {
                      <Button
                         type="button"
                         onClick={handleNext}
-                        className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
+                        className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
                         >
                         Next
                      </Button>

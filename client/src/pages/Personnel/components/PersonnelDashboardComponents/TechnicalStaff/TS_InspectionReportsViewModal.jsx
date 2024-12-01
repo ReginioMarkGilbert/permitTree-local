@@ -36,14 +36,14 @@ const GET_INSPECTION_REPORTS = gql`
 `;
 
 const TS_InspectionReportsViewModal = ({ isOpen, onClose, permitId }) => {
-   console.log('PermitId in modal:', permitId);
+   // console.log('PermitId in modal:', permitId);
 
    const { loading, error, data } = useQuery(GET_INSPECTION_REPORTS, {
       variables: { permitId },
       skip: !permitId || !isOpen,
    });
 
-   console.log('Inspection reports data:', data);
+   // console.log('Inspection reports data:', data);
 
    const handleDownload = (file) => {
       try {
