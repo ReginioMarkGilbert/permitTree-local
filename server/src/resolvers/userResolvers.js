@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Admin = require('../models/admin');
 const UserActivity = require('../models/UserActivity');
 const { OOP } = require('../models/OOP');
 const Permit = require('../models/permits/Permit');
@@ -170,44 +171,138 @@ const userResolvers = {
          if (!admin || !admin.roles.includes('superadmin')) {
             throw new Error('Not authorized to view all users');
          }
-         return await User.find({ roles: ['user'] }).select('+createdAt +lastLoginDate');
+         try {
+            // Fetch regular users
+            const regularUsers = await User.find({}).select('+createdAt +lastLoginDate');
+
+            // Fetch admin/personnel users
+            const adminUsers = await Admin.find({}).select('+createdAt +lastLoginDate');
+
+            // Combine and format both sets of users
+            const allUsers = [
+               ...regularUsers.map(user => ({
+                  id: user._id.toString(),
+                  ...user.toObject(),
+                  _id: undefined,
+                  createdAt: user.createdAt?.toISOString(),
+                  lastLoginDate: user.lastLoginDate?.toISOString(),
+                  userType: 'Client'
+               })),
+               ...adminUsers.map(admin => ({
+                  id: admin._id.toString(),
+                  ...admin.toObject(),
+                  _id: undefined,
+                  createdAt: admin.createdAt?.toISOString(),
+                  lastLoginDate: admin.lastLoginDate?.toISOString(),
+                  userType: 'Personnel'
+               }))
+            ];
+
+            // Ensure all required fields are present
+            return allUsers.map(user => ({
+               id: user.id,
+               username: user.username || '',
+               firstName: user.firstName || '',
+               lastName: user.lastName || '',
+               email: user.email || '',
+               phone: user.phone || '',
+               company: user.company || '',
+               address: user.address || '',
+               roles: user.roles || [],
+               userType: user.userType || 'Client',
+               isActive: typeof user.isActive === 'boolean' ? user.isActive : true,
+               lastLoginDate: user.lastLoginDate || null,
+               createdAt: user.createdAt || null,
+               updatedAt: user.updatedAt || null
+            }));
+
+         } catch (error) {
+            console.error('Error fetching users:', error);
+            throw new Error('Failed to fetch users');
+         }
       },
    },
    Mutation: {
       registerUser: async (_, { firstName, lastName, username, password, email, role, userType }) => {
          try {
             const existingUser = await User.findOne({ username });
-            if (existingUser) {
+            const existingAdmin = await Admin.findOne({ username });
+
+            if (existingUser || existingAdmin) {
                throw new Error('Username already exists');
             }
 
-            const newUser = new User({
-               firstName,
-               lastName,
-               username,
-               password,
-               ...(email && { email }),
-               roles: [role],
-               userType,
-               isActive: true,
-               createdAt: new Date(),
-               lastLoginDate: null
-            });
+            // Determine if the role is a personnel role
+            const personnelRoles = [
+               'Chief_RPS',
+               'superadmin',
+               'Technical_Staff',
+               'Chief_TSD',
+               'Receiving_Clerk',
+               'Releasing_Clerk',
+               'Accountant',
+               'OOP_Staff_Incharge',
+               'Bill_Collector',
+               'Credit_Officer',
+               'PENR_CENR_Officer',
+               'Deputy_CENR_Officer',
+               'Inspection_Team'
+            ];
+
+            const isPersonnel = personnelRoles.includes(role);
+
+            let newUser;
+
+            if (isPersonnel) {
+               // Create admin account
+               newUser = new Admin({
+                  firstName,
+                  lastName,
+                  username,
+                  password,
+                  email,
+                  roles: [role],
+                  notificationPreferences: {
+                     email: false,
+                     inApp: true,
+                     sms: false
+                  }
+               });
+            } else {
+               // Create regular user account
+               newUser = new User({
+                  firstName,
+                  lastName,
+                  username,
+                  password,
+                  email,
+                  roles: [role],
+                  userType,
+                  isActive: true,
+                  createdAt: new Date(),
+                  lastLoginDate: null
+               });
+            }
 
             await newUser.save();
 
             // Log the activity
             await logUserActivity({
                userId: newUser._id,
-               userModel: 'User',
+               userModel: isPersonnel ? 'Admin' : 'User',
                type: 'ACCOUNT_CREATED',
                details: 'New user account created',
                metadata: {
-                  userType: userType
+                  userType: userType,
+                  isAdmin: isPersonnel
                }
             });
 
-            const token = generateToken(newUser);
+            const token = jwt.sign(
+               { id: newUser.id, username: newUser.username, roles: newUser.roles },
+               process.env.JWT_SECRET || 'default_secret',
+               { expiresIn: '12h' }
+            );
 
             return {
                token,
@@ -218,8 +313,8 @@ const userResolvers = {
                   lastName: newUser.lastName,
                   email: newUser.email,
                   roles: newUser.roles,
-                  userType: newUser.userType,
-                  isActive: newUser.isActive,
+                  userType: userType,
+                  isActive: true,
                   createdAt: newUser.createdAt
                }
             };

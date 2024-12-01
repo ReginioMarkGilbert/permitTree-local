@@ -54,7 +54,7 @@ const adminResolvers = {
             roles,
             firstName,
             lastName,
-            themePreference: 'dark'
+            themePreference: 'light'
          });
 
          await newAdmin.save();

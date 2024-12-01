@@ -106,11 +106,13 @@ const SuperAdminManageUsersPage = () => {
    const handleAddUser = useCallback(async (newUserData) => {
       try {
          await addUser(newUserData);
+         await refetch();
          setIsAddModalOpen(false);
       } catch (err) {
          console.error('Failed to add user:', err);
+         throw err;
       }
-   }, [addUser]);
+   }, [addUser, refetch]);
 
    const handleDeleteUser = useCallback((user) => {
       setUserToDelete(user);

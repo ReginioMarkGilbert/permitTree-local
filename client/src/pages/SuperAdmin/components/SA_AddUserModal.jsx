@@ -41,6 +41,15 @@ const SA_AddUserModal = ({ isOpen, onClose, onAddUser }) => {
       }));
    };
 
+   const handleRoleChange = (value) => {
+      const userType = value === 'user' ? 'Client' : 'Personnel';
+      setNewUser((prev) => ({
+         ...prev,
+         role: value,
+         userType: userType
+      }));
+   };
+
    const handleClose = () => {
       setNewUser({
          firstName: '',
@@ -93,7 +102,7 @@ const SA_AddUserModal = ({ isOpen, onClose, onAddUser }) => {
          id="role"
          name="role"
          value={newUser.role}
-         onValueChange={(value) => handleInputChange({ target: { name: 'role', value } })}
+         onValueChange={handleRoleChange}
       >
          <SelectTrigger className="w-full">
             <SelectValue placeholder="Select a role" />
@@ -162,7 +171,7 @@ const SA_AddUserModal = ({ isOpen, onClose, onAddUser }) => {
                         type="email"
                         value={newUser.email}
                         onChange={handleInputChange}
-                        required
+                     // required
                      />
                   </div>
 

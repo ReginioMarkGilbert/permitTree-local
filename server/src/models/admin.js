@@ -35,7 +35,7 @@ const AdminSchema = new mongoose.Schema({
    themePreference: {
       type: String,
       enum: ['light', 'dark', 'system'],
-      default: 'system'
+      default: 'light'
    }
 });
 

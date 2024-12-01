@@ -27,7 +27,33 @@ const useUsers = () => {
                role: newUser.role,
                userType: newUser.userType
             },
-            refetchQueries: [{ query: GET_ALL_USERS }]
+            update: (cache, { data: { registerUser } }) => {
+               // Read existing users from cache
+               const existingUsers = cache.readQuery({
+                  query: GET_ALL_USERS
+               });
+
+               // Prepare the new user object with all possible fields
+               const newUserForCache = {
+                  ...registerUser.user,
+                  phone: null,
+                  company: null,
+                  address: null,
+                  lastLoginDate: null,
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString()
+               };
+
+               // Write back to cache with new user added
+               if (existingUsers) {
+                  cache.writeQuery({
+                     query: GET_ALL_USERS,
+                     data: {
+                        users: [...existingUsers.users, newUserForCache]
+                     }
+                  });
+               }
+            }
          });
 
          toast.success('User added successfully');

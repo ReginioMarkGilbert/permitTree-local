@@ -45,12 +45,12 @@ const UserSchema = new mongoose.Schema({
    // for analytics
    isActive: { type: Boolean, default: true },
    lastLoginDate: { type: Date },
-createdAt: { type: Date },
-updatedAt: { type: Date },
+   createdAt: { type: Date },
+   updatedAt: { type: Date },
    themePreference: {
       type: String,
       enum: ['light', 'dark', 'system'],
-      default: 'system'
+      default: 'light'
    }
 }, {
    timestamps: true // This will automatically manage createdAt and updatedAt

@@ -42,8 +42,15 @@ const SA_UserEditDetailsModal = ({ isOpen, onClose, user, onSave }) => {
       e.preventDefault();
       setIsSubmitting(true);
       try {
+         const updatedData = Object.entries(formData).reduce((acc, [key, value]) => {
+            if (value.trim() !== '') {
+               acc[key] = value;
+            }
+            return acc;
+         }, {});
+
          await onSave({
-            ...formData,
+            ...updatedData,
             id: user.id
          });
          onClose();
@@ -60,7 +67,7 @@ const SA_UserEditDetailsModal = ({ isOpen, onClose, user, onSave }) => {
             <DialogHeader className="px-6 pt-6 pb-4 border-b">
                <DialogTitle className="text-xl font-semibold">Edit User Details</DialogTitle>
                <DialogDescription>
-                  Make changes to the user's information below
+                  Make changes to the user's information below. Phone, company, and address are optional.
                </DialogDescription>
             </DialogHeader>
 
