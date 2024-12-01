@@ -1,58 +1,49 @@
 import React from 'react';
-import { Eye, Edit, Ban, Power, Trash2 } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import {
-   Table,
-   TableBody,
-   TableCell,
-   TableHead,
-   TableHeader,
-   TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Eye, Pencil, Ban, CheckCircle, Trash2 } from 'lucide-react';
 import {
    Tooltip,
    TooltipContent,
    TooltipProvider,
    TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Card } from "@/components/ui/card";
 
-const UserTable = ({ users, onViewUser, onEditUser, onDeactivateUser, onActivateUser, onDeleteUser, isMobile }) => {
+const UserTable = ({ users, onViewUser, onEditUser, onDeactivateUser, onActivateUser, onDeleteUser }) => {
    const renderActionButtons = (user) => {
       const actions = [
          {
             icon: Eye,
-            label: "View User",
+            label: "View Details",
             onClick: () => onViewUser(user),
-            variant: "outline"
+            variant: "ghost"
          },
          {
-            icon: Edit,
+            icon: Pencil,
             label: "Edit User",
             onClick: () => onEditUser(user),
-            variant: "outline",
-            className: "text-yellow-600 hover:text-yellow-800"
+            variant: "ghost"
          },
          user.isActive ? {
             icon: Ban,
             label: "Deactivate User",
             onClick: () => onDeactivateUser(user),
-            variant: "outline",
-            className: "text-red-600 hover:text-red-800"
+            variant: "ghost",
+            className: "text-yellow-600 hover:text-yellow-700"
          } : {
-            icon: Power,
+            icon: CheckCircle,
             label: "Activate User",
             onClick: () => onActivateUser(user),
-            variant: "outline",
-            className: "text-green-600 hover:text-green-800"
+            variant: "ghost",
+            className: "text-green-600 hover:text-green-700"
          },
          {
             icon: Trash2,
             label: "Delete User",
             onClick: () => onDeleteUser(user),
-            variant: "outline",
-            className: "text-red-600 hover:text-red-800"
+            variant: "ghost",
+            className: "text-red-600 hover:text-red-700"
          }
       ];
 
@@ -64,7 +55,7 @@ const UserTable = ({ users, onViewUser, onEditUser, onDeactivateUser, onActivate
                      variant={action.variant}
                      size="icon"
                      onClick={action.onClick}
-                     className={action.className}
+                     className={`h-8 w-8 ${action.className || ''}`}
                   >
                      <action.icon className="h-4 w-4" />
                   </Button>
@@ -76,30 +67,6 @@ const UserTable = ({ users, onViewUser, onEditUser, onDeactivateUser, onActivate
          </TooltipProvider>
       ));
    };
-
-   if (isMobile) {
-      return (
-         <div className="space-y-4">
-            {users.map((user) => (
-               <Card key={user.id} className="p-4 space-y-3">
-                  <div className="flex justify-between items-start">
-                     <div>
-                        <p className="font-medium">{user.username}</p>
-                        <p className="text-sm text-muted-foreground">{`${user.firstName} ${user.lastName}`}</p>
-                     </div>
-                     <Badge variant={user.isActive ? 'success' : 'secondary'}>
-                        {user.isActive ? 'Active' : 'Inactive'}
-                     </Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{user.email}</p>
-                  <div className="flex gap-2">
-                     {renderActionButtons(user)}
-                  </div>
-               </Card>
-            ))}
-         </div>
-      );
-   }
 
    return (
       <Table>
@@ -114,18 +81,30 @@ const UserTable = ({ users, onViewUser, onEditUser, onDeactivateUser, onActivate
             </TableRow>
          </TableHeader>
          <TableBody>
-            {users.map((user) => (
+            {users?.map((user) => (
                <TableRow key={user.id}>
                   <TableCell>{user.username}</TableCell>
-                  <TableCell>{`${user.firstName} ${user.lastName}`}</TableCell>
+                  <TableCell>
+                     {user.firstName} {user.lastName}
+                  </TableCell>
                   <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.roles.join(', ')}</TableCell>
+                  <TableCell>
+                     {user.roles?.map((role) => (
+                        <Badge
+                           key={role}
+                           variant="secondary"
+                           className="bg-secondary/50 mr-1"
+                        >
+                           {role}
+                        </Badge>
+                     ))}
+                  </TableCell>
                   <TableCell>
                      <Badge
-                        variant={user.isActive ? 'success' : 'secondary'}
+                        variant={user.isActive ? "success" : "destructive"}
                         className={user.isActive ?
-                           'bg-green-100 text-green-800 hover:bg-green-100/80' :
-                           'bg-gray-100 text-gray-800 hover:bg-gray-100/80'
+                           "bg-green-100 text-green-800 hover:bg-green-100/80" :
+                           "bg-red-100 text-red-800 hover:bg-red-100/80"
                         }
                      >
                         {user.isActive ? 'Active' : 'Inactive'}

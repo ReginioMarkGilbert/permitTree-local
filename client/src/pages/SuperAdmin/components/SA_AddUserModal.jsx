@@ -97,25 +97,53 @@ const SA_AddUserModal = ({ isOpen, onClose, onAddUser }) => {
       return userAgent.includes('chrome') && !userAgent.includes('edg') && !isBrave;
    }, []);
 
-   const SelectComponent = () => (
-      <Select
-         id="role"
-         name="role"
-         value={newUser.role}
-         onValueChange={handleRoleChange}
-      >
-         <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select a role" />
-         </SelectTrigger>
-         <SelectContent>
-            {roleOptions.map(option => (
-               <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-               </SelectItem>
-            ))}
-         </SelectContent>
-      </Select>
-   );
+   const SelectComponent = () => {
+      if (isChrome) {
+         return (
+            <div className="space-y-2">
+               <Label htmlFor="role">Role</Label>
+               <select
+                  id="role"
+                  name="role"
+                  value={newUser.role}
+                  onChange={(e) => handleRoleChange(e.target.value)}
+                  className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
+                  required
+               >
+                  <option value="" disabled>Select a role</option>
+                  {roleOptions.map(option => (
+                     <option key={option.value} value={option.value}>
+                        {option.label}
+                     </option>
+                  ))}
+               </select>
+            </div>
+         );
+      }
+
+      return (
+         <div className="space-y-2">
+            <Label htmlFor="role">Role</Label>
+            <Select
+               id="role"
+               name="role"
+               value={newUser.role}
+               onValueChange={handleRoleChange}
+            >
+               <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a role" />
+               </SelectTrigger>
+               <SelectContent>
+                  {roleOptions.map(option => (
+                     <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                     </SelectItem>
+                  ))}
+               </SelectContent>
+            </Select>
+         </div>
+      );
+   };
 
    return (
       <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -201,10 +229,7 @@ const SA_AddUserModal = ({ isOpen, onClose, onAddUser }) => {
                      </div>
                   </div>
 
-                  <div className="space-y-2">
-                     <Label htmlFor="role">Role</Label>
-                     <SelectComponent />
-                  </div>
+                  <SelectComponent />
                </div>
 
                <DialogFooter className="flex space-x-2 px-6 py-4 border-t">

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import useUsers from './hooks/useUsers';
 import UserTable from './components/UserTable';
 import SA_UserDetailsViewModal from './components/SA_userDetailsViewModal';
@@ -26,6 +26,16 @@ import {
    SelectValue,
 } from "@/components/ui/select";
 import { Search } from "lucide-react";
+import { format } from "date-fns";
+import {
+   Pagination,
+   PaginationContent,
+   PaginationEllipsis,
+   PaginationItem,
+   PaginationLink,
+   PaginationNext,
+   PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const ROLES = {
    ALL_ROLES: 'All Roles',
@@ -57,6 +67,8 @@ const SuperAdminManageUsersPage = () => {
    const [searchQuery, setSearchQuery] = useState('');
    const [dateRange, setDateRange] = useState({ from: null, to: null });
    const [selectedRole, setSelectedRole] = useState('ALL_ROLES');
+   const [currentPage, setCurrentPage] = useState(1);
+   const itemsPerPage = 10;
 
    const handleViewUser = useCallback((user) => {
       setSelectedUser(user);
@@ -131,10 +143,45 @@ const SuperAdminManageUsersPage = () => {
       }
    }, [deleteUser, userToDelete]);
 
+   const handlePageChange = (newPage) => {
+      setCurrentPage(newPage);
+      window.scrollTo(0, 0);
+   };
+
+   const paginatedUsers = useMemo(() => {
+      const filtered = users?.filter(user => {
+         const matchesSearch = (
+            user.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.username?.toLowerCase().includes(searchQuery.toLowerCase())
+         );
+
+         const matchesRole = selectedRole === 'ALL_ROLES' || user.roles?.includes(selectedRole);
+
+         const matchesDate = (!dateRange.from || !dateRange.to) ? true :
+            new Date(user.createdAt) >= dateRange.from &&
+            new Date(user.createdAt) <= dateRange.to;
+
+         return matchesSearch && matchesRole && matchesDate;
+      }) || [];
+
+      const totalPages = Math.ceil(filtered.length / itemsPerPage);
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+
+      return {
+         users: filtered.slice(startIndex, endIndex),
+         totalPages,
+         total: filtered.length
+      };
+   }, [users, searchQuery, selectedRole, dateRange, currentPage]);
+
    const handleClearFilters = () => {
       setSearchQuery('');
       setDateRange({ from: null, to: null });
       setSelectedRole('ALL_ROLES');
+      setCurrentPage(1);
    };
 
    const filteredUsers = users?.filter(user => {
@@ -150,8 +197,85 @@ const SuperAdminManageUsersPage = () => {
       return matchesSearch && matchesRole && matchesDate;
    });
 
-   if (loading) return <div>Loading...</div>;
-   if (error) return <div>Error: {error}</div>;
+   const isChrome = useMemo(() => {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      const isBrave = navigator.brave !== undefined;
+      return userAgent.includes('chrome') && !userAgent.includes('edg') && !isBrave;
+   }, []);
+
+   const DateRangeComponent = () => {
+      if (isChrome) {
+         return (
+            <div className="flex items-center space-x-2">
+               <div className="flex items-center rounded-md border border-input">
+                  <input
+                     type="date"
+                     value={dateRange.from ? format(dateRange.from, "yyyy-MM-dd") : ""}
+                     onChange={(e) => {
+                        const from = e.target.value ? new Date(e.target.value) : null;
+                        setDateRange(prev => ({ ...prev, from }));
+                     }}
+                     className="h-10 px-3 py-2 rounded-md bg-background text-sm focus:outline-none"
+                  />
+               </div>
+               <span className="text-sm text-muted-foreground">to</span>
+               <div className="flex items-center rounded-md border border-input">
+                  <input
+                     type="date"
+                     value={dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : ""}
+                     onChange={(e) => {
+                        const to = e.target.value ? new Date(e.target.value) : null;
+                        setDateRange(prev => ({ ...prev, to }));
+                     }}
+                     className="h-10 px-3 py-2 rounded-md bg-background text-sm focus:outline-none"
+                  />
+               </div>
+            </div>
+         );
+      }
+
+      return (
+         <div className="min-w-[240px]">
+            <DateRangePicker
+               value={dateRange}
+               onChange={setDateRange}
+            />
+         </div>
+      );
+   };
+
+   const SelectComponent = () => {
+      if (isChrome) {
+         return (
+            <select
+               value={selectedRole}
+               onChange={(e) => setSelectedRole(e.target.value)}
+               className="w-[220px] h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
+            >
+               {Object.entries(ROLES).map(([value, label]) => (
+                  <option key={value} value={value}>
+                     {label}
+                  </option>
+               ))}
+            </select>
+         );
+      }
+
+      return (
+         <Select value={selectedRole} onValueChange={setSelectedRole}>
+            <SelectTrigger className="w-[220px]">
+               <SelectValue placeholder="Select Role" />
+            </SelectTrigger>
+            <SelectContent>
+               {Object.entries(ROLES).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                     {label}
+                  </SelectItem>
+               ))}
+            </SelectContent>
+         </Select>
+      );
+   };
 
    const FiltersSection = (
       <div className="flex flex-col gap-4 sm:flex-row items-end mb-6">
@@ -166,24 +290,8 @@ const SuperAdminManageUsersPage = () => {
                />
             </div>
          </div>
-         <div className="min-w-[240px]">
-            <DateRangePicker
-               value={dateRange}
-               onChange={setDateRange}
-            />
-         </div>
-         <Select value={selectedRole} onValueChange={setSelectedRole}>
-            <SelectTrigger className="w-[220px]">
-               <SelectValue placeholder="Select Role" />
-            </SelectTrigger>
-            <SelectContent>
-               {Object.entries(ROLES).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                     {label}
-                  </SelectItem>
-               ))}
-            </SelectContent>
-         </Select>
+         <DateRangeComponent />
+         <SelectComponent />
          <Button
             variant="outline"
             onClick={handleClearFilters}
@@ -195,6 +303,9 @@ const SuperAdminManageUsersPage = () => {
       </div>
    );
 
+   if (loading) return <div>Loading...</div>;
+   if (error) return <div>Error: {error}</div>;
+
    return (
       <DashboardLayout
          title="Manage Users"
@@ -202,14 +313,68 @@ const SuperAdminManageUsersPage = () => {
          onRefresh={refetch}
          filters={FiltersSection}
       >
-         <UserTable
-            users={filteredUsers}
-            onViewUser={handleViewUser}
-            onEditUser={handleEditUser}
-            onDeactivateUser={handleDeactivateUser}
-            onActivateUser={handleActivateUser}
-            onDeleteUser={handleDeleteUser}
-         />
+         <div className="space-y-4">
+            <UserTable
+               users={paginatedUsers.users}
+               onViewUser={handleViewUser}
+               onEditUser={handleEditUser}
+               onDeactivateUser={handleDeactivateUser}
+               onActivateUser={handleActivateUser}
+               onDeleteUser={handleDeleteUser}
+            />
+
+            {paginatedUsers.totalPages > 1 && (
+               <div className="flex justify-center py-4 border-t">
+                  <Pagination>
+                     <PaginationContent>
+                        <PaginationItem>
+                           <PaginationPrevious
+                              onClick={() => handlePageChange(currentPage - 1)}
+                              disabled={currentPage === 1}
+                           />
+                        </PaginationItem>
+
+                        {[...Array(paginatedUsers.totalPages)].map((_, i) => {
+                           const pageNumber = i + 1;
+                           if (
+                              pageNumber === 1 ||
+                              pageNumber === paginatedUsers.totalPages ||
+                              (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+                           ) {
+                              return (
+                                 <PaginationItem key={pageNumber}>
+                                    <PaginationLink
+                                       onClick={() => handlePageChange(pageNumber)}
+                                       isActive={currentPage === pageNumber}
+                                    >
+                                       {pageNumber}
+                                    </PaginationLink>
+                                 </PaginationItem>
+                              );
+                           } else if (
+                              pageNumber === currentPage - 2 ||
+                              pageNumber === currentPage + 2
+                           ) {
+                              return (
+                                 <PaginationItem key={pageNumber}>
+                                    <PaginationEllipsis />
+                                 </PaginationItem>
+                              );
+                           }
+                           return null;
+                        })}
+
+                        <PaginationItem>
+                           <PaginationNext
+                              onClick={() => handlePageChange(currentPage + 1)}
+                              disabled={currentPage === paginatedUsers.totalPages}
+                           />
+                        </PaginationItem>
+                     </PaginationContent>
+                  </Pagination>
+               </div>
+            )}
+         </div>
          <SA_UserDetailsViewModal
             isOpen={isViewModalOpen}
             onClose={() => setIsViewModalOpen(false)}
