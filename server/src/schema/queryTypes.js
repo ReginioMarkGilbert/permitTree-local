@@ -47,6 +47,7 @@ const queryTypes = gql`
     # Certificate queries
     getCertificates(certificateStatus: String): [Certificate!]!
     getCertificatesByApplicationId(applicationId: ID!): [Certificate!]!
+    getPreviousCertificate(certificateNumber: String!): Certificate
 
     # Notification Queries
     getNotifications: [Notification!]!

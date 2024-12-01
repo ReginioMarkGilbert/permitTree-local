@@ -140,8 +140,8 @@ const TechnicalStaffDashboard = () => {
             };
          case 'Released Certificates':
             return {
-               currentStage: 'Released',
-               status: 'Released',
+               // currentStage: 'Released',
+               // status: 'Released',
                certificateSignedByPENRCENROfficer: true,
                hasCertificate: true
             };

@@ -4,10 +4,12 @@ import { Button } from '@/components/ui/button';
 import { useMutation, gql } from '@apollo/client';
 import { toast } from 'sonner';
 import { Loader2, UploadIcon, X } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 const SIGN_CERTIFICATE = gql`
-  mutation SignCertificate($id: ID!, $signature: String!) {
-    signCertificate(id: $id, signature: $signature) {
+  mutation SignCertificate($id: ID!, $signature: String!, $expiryDate: String!) {
+    signCertificate(id: $id, signature: $signature, expiryDate: $expiryDate) {
       id
       certificateStatus
       dateIssued
@@ -47,6 +49,7 @@ const PCOSignatureModal = ({ isOpen, onClose, application, onSignComplete }) => 
    const [updatePermitStage] = useMutation(UPDATE_PERMIT_STAGE);
    const [signature, setSignature] = useState(null);
    const fileInputRef = useRef(null);
+   const [expiryDate, setExpiryDate] = useState('');
 
    useEffect(() => {
       console.log('Application prop in signature modal:', application);
@@ -82,79 +85,38 @@ const PCOSignatureModal = ({ isOpen, onClose, application, onSignComplete }) => 
          return;
       }
 
+      if (!expiryDate) {
+         toast.error('Please set the certificate expiry date');
+         return;
+      }
+
       try {
          setIsSubmitting(true);
 
-         // Log for debugging
-         console.log('Signing certificate with ID:', application.certificateId);
-         console.log('Signature data:', signature);
-
-         // Check if we have the certificate ID
-         if (!application.certificateId && application.id) {
-            // Try to get certificate ID from the application ID
-            const certResponse = await client.query({
-               query: GET_CERTIFICATE,
-               variables: { applicationId: application.id }
-            });
-
-            const certificateId = certResponse.data?.getCertificatesByApplicationId[0]?.id;
-            if (!certificateId) {
-               throw new Error('No certificate found for this application');
+         const { data: signData } = await signCertificate({
+            variables: {
+               id: application.certificateId,
+               signature: signature,
+               expiryDate: new Date(expiryDate).toISOString()
             }
+         });
 
-            // Sign the certificate with signature
-            const { data: signData } = await signCertificate({
+         console.log('Sign certificate response:', signData);
+
+         // Update permit stage only if signature was successful
+         if (signData?.signCertificate) {
+            await updatePermitStage({
                variables: {
-                  id: certificateId,
-                  signature: signature
+                  id: application.id,
+                  currentStage: 'PendingRelease',
+                  status: 'In Progress',
+                  certificateSignedByPENRCENROfficer: true
                }
             });
 
-            console.log('Sign certificate response:', signData);
-
-            // Update permit stage only if signature was successful
-            if (signData?.signCertificate) {
-               await updatePermitStage({
-                  variables: {
-                     id: application.id,
-                     currentStage: 'PendingRelease',
-                     status: 'In Progress',
-                     certificateSignedByPENRCENROfficer: true
-                  }
-               });
-
-               toast.success('Certificate signed successfully');
-               onSignComplete();
-               onClose();
-            }
-         } else if (application.certificateId) {
-            // Use the existing certificateId
-            const { data: signData } = await signCertificate({
-               variables: {
-                  id: application.certificateId,
-                  signature: signature
-               }
-            });
-
-            console.log('Sign certificate response:', signData);
-
-            // Update permit stage only if signature was successful
-            if (signData?.signCertificate) {
-               await updatePermitStage({
-                  variables: {
-                     id: application.id,
-                     currentStage: 'PendingRelease',
-                     status: 'In Progress',
-                     certificateSignedByPENRCENROfficer: true
-                  }
-               });
-
-               toast.success('Certificate signed successfully');
-               onSignComplete();
-               onClose();
-            }
-         } else {
-            throw new Error('No certificate ID found');
+            toast.success('Certificate signed successfully');
+            onSignComplete();
+            onClose();
          }
       } catch (error) {
          console.error('Error signing certificate:', error);
@@ -225,6 +187,17 @@ const PCOSignatureModal = ({ isOpen, onClose, application, onSignComplete }) => 
                      <UploadIcon className="h-4 w-4 mr-2" />
                      Upload Signature
                   </Button>
+               </div>
+
+               <div className="grid gap-2">
+                  <Label>Certificate Expiry Date</Label>
+                  <Input
+                     type="date"
+                     value={expiryDate}
+                     onChange={(e) => setExpiryDate(e.target.value)}
+                     min={new Date().toISOString().split('T')[0]}
+                     required
+                  />
                </div>
             </div>
 

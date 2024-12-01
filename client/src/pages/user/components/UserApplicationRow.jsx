@@ -142,7 +142,7 @@ const UserApplicationRow = ({
             className: "text-yellow-600 hover:text-yellow-800"
          },
 
-         app.status === 'Released' && {
+         (app.status === 'Released' || app.status === 'Expired') && {
             icon: FileCheck2,
             label: "View Certificate",
             onClick: handleViewCertClick,
@@ -220,7 +220,7 @@ const UserApplicationRow = ({
                onClose={() => setIsRemarksModalOpen(false)}
                application={app}
             />
-            {app.status === 'Released' && (
+            {(app.status === 'Released' || app.status === 'Expired') && (
                <CertificateViewModal
                   isOpen={isViewCertModalOpen}
                   onClose={() => setIsViewCertModalOpen(false)}
@@ -277,7 +277,7 @@ const UserApplicationRow = ({
             onClose={() => setIsRemarksModalOpen(false)}
             application={app}
          />
-         {app.status === 'Released' && (
+         {(app.status === 'Released' || app.status === 'Expired') && (
             <CertificateViewModal
                isOpen={isViewCertModalOpen}
                onClose={() => setIsViewCertModalOpen(false)}

@@ -5,8 +5,10 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useMutation, gql, useQuery } from '@apollo/client';
 import { toast } from 'sonner';
-import { X, Upload } from 'lucide-react';
+import { X, Upload, Eye, FileText } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 import CSAWCertificateTemplate from '../../CertificateComponents/certificateTemplates/CSAWCertificateTemplate';
 
 const UPLOAD_CERTIFICATE = gql`
@@ -88,6 +90,36 @@ const GET_APPLICATION_DETAILS = gql`
   }
 `;
 
+const UPDATE_PERMIT_STAGE = gql`
+  mutation UpdatePermitStage(
+    $id: ID!,
+    $currentStage: String!,
+    $status: String!,
+    $awaitingPermitCreation: Boolean,
+    $PermitCreated: Boolean,
+    $hasCertificate: Boolean,
+    $certificateId: ID
+  ) {
+    updatePermitStage(
+      id: $id,
+      currentStage: $currentStage,
+      status: $status,
+      awaitingPermitCreation: $awaitingPermitCreation,
+      PermitCreated: $PermitCreated,
+      hasCertificate: $hasCertificate,
+      certificateId: $certificateId
+    ) {
+      id
+      currentStage
+      status
+      awaitingPermitCreation
+      PermitCreated
+      hasCertificate
+      certificateId
+    }
+  }
+`;
+
 const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) => {
    const [isUploading, setIsUploading] = useState(false);
    const [certificateFile, setCertificateFile] = useState(null);
@@ -102,6 +134,7 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
 
    const [uploadCertificate] = useMutation(UPLOAD_CERTIFICATE);
    const [generateCertificateMutation] = useMutation(GENERATE_CERTIFICATE);
+   const [updatePermitStage] = useMutation(UPDATE_PERMIT_STAGE);
 
    const { data: applicationData, loading: applicationLoading, error: applicationError } = useQuery(GET_APPLICATION_DETAILS, {
       variables: { id: application.id },
@@ -157,9 +190,15 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
          return;
       }
 
+      if (!metadata.issueDate) {
+         toast.error('Please set the issue date');
+         return;
+      }
+
       setIsUploading(true);
       try {
          const fileData = await fileToBase64(certificateFile);
+         const issueDate = new Date(metadata.issueDate);
 
          const { data } = await uploadCertificate({
             variables: {
@@ -171,20 +210,38 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
                      filename: certificateFile.name,
                      contentType: certificateFile.type,
                      metadata: {
-                        ...metadata,
-                        certificateType: application.applicationType
+                        certificateType: application.applicationType,
+                        issueDate: issueDate.toISOString(),
+                        remarks: metadata.remarks || ''
                      }
                   }
                }
             }
          });
 
-         toast.success('Certificate uploaded successfully');
-         onComplete(data.uploadCertificate);
-         onClose();
+         if (data?.uploadCertificate) {
+            // Update permit stage after successful certificate upload
+            await updatePermitStage({
+               variables: {
+                  id: application.id,
+                  currentStage: 'PendingSignatureByPENRCENROfficer',
+                  status: 'In Progress',
+                  awaitingPermitCreation: false,
+                  PermitCreated: true,
+                  hasCertificate: true,
+                  certificateId: data.uploadCertificate.id
+               }
+            });
+
+            toast.success('Certificate uploaded successfully');
+            onComplete(data.uploadCertificate);
+            onClose();
+         } else {
+            throw new Error('Failed to upload certificate');
+         }
       } catch (error) {
          console.error('Error uploading certificate:', error);
-         toast.error('Failed to upload certificate');
+         toast.error(error.message || 'Failed to upload certificate');
       } finally {
          setIsUploading(false);
       }
@@ -291,15 +348,14 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
 
    return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-         <DialogContent className="max-w-3xl">
+         <DialogContent className={showECertificate ? "max-w-4xl" : "max-w-md"}>
             {showECertificate ? (
                <>
                   <DialogHeader>
                      <DialogTitle>E-Certificate Preview</DialogTitle>
-                     <DialogDescription>
-                        Review the generated certificate
-                     </DialogDescription>
                   </DialogHeader>
+
+                  {/* <ScrollArea className="h-[700px] rounded-md border"> */}
                   <div className="overflow-auto max-h-[70vh]">
                      <CSAWCertificateTemplate
                         certificate={generatedCertificate}
@@ -307,15 +363,15 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
                         hiddenOnPrint={[]}
                      />
                   </div>
-                  <div className="flex justify-end gap-2 mt-4">
+                  {/* </ScrollArea> */}
+
+                  <div className="flex justify-end gap-2">
                      <Button variant="outline" onClick={() => setShowECertificate(false)}>
-                        Back to Upload
+                        Back
                      </Button>
-                     <Button
-                        onClick={handlePrint}
-                        className="bg-blue-600 hover:bg-blue-700"
-                     >
-                        Print
+                     {/* remove this later if not implemented */}
+                     <Button onClick={handlePrint} className="bg-blue-600 hover:bg-blue-700">
+                        Print Certificate
                      </Button>
                   </div>
                </>
@@ -324,48 +380,46 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
                   <DialogHeader>
                      <DialogTitle>Upload Certificate</DialogTitle>
                      <DialogDescription>
-                        Upload the certificate document for {application.applicationType}
+                        {application.applicationNumber} - {application.applicationType}
                      </DialogDescription>
                   </DialogHeader>
 
-                  <div className="grid gap-4 py-4">
-                     <div className="grid gap-2">
-                        <Label>Application Details</Label>
-                        <div className="text-sm">
-                           <p><span className="font-medium">Application No:</span> {application.applicationNumber}</p>
-                           <p><span className="font-medium">Type:</span> {application.applicationType}</p>
-                           <p><span className="font-medium">Applicant:</span> {application.ownerName}</p>
-                        </div>
-                     </div>
-
-                     <div className="grid gap-2">
-                        <Label>E-Certificate Generation</Label>
+                  <div className="space-y-4 py-2">
+                     {/* E-Certificate Generation */}
+                     <div>
+                        <Label className="text-sm font-medium mb-2 block">E-Certificate</Label>
                         <div className="flex gap-2">
                            <Button
                               onClick={generateECertificate}
-                              className="bg-blue-600 hover:bg-blue-700"
+                              className="bg-blue-600 hover:bg-blue-700 flex-1"
                               disabled={generatedCertificate !== null}
                            >
-                              Generate E-Certificate
+                              <FileText className="h-4 w-4 mr-2" />
+                              Generate
                            </Button>
                            {generatedCertificate && (
                               <Button
                                  onClick={handleViewECertificate}
-                                 className="bg-purple-600 hover:bg-purple-700"
+                                 variant="outline"
                               >
-                                 View E-Certificate
+                                 <Eye className="h-4 w-4 mr-2" />
+                                 Preview
                               </Button>
                            )}
                         </div>
                      </div>
 
-                     <div className="grid gap-2">
-                        <Label>Upload Physical Certificate</Label>
-                        {certificateFile && (
-                           <div className="flex items-center justify-between mb-2 bg-gray-100 p-2 rounded">
-                              <span className="text-sm text-gray-600 truncate">{certificateFile.name}</span>
+                     <Separator />
+
+                     {/* Physical Certificate Upload */}
+                     <div>
+                        <Label className="text-sm font-medium mb-2 block">Physical Certificate</Label>
+                        {certificateFile ? (
+                           <div className="flex items-center justify-between bg-muted p-2 rounded-md">
+                              <span className="text-sm truncate max-w-[200px]">
+                                 {certificateFile.name}
+                              </span>
                               <Button
-                                 type="button"
                                  variant="ghost"
                                  size="sm"
                                  onClick={handleRemoveFile}
@@ -373,55 +427,47 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
                                  <X className="h-4 w-4" />
                               </Button>
                            </div>
+                        ) : (
+                           <div className="border-2 border-dashed rounded-md p-4 text-center">
+                              <Input
+                                 id="certificate-file"
+                                 type="file"
+                                 accept=".pdf,.doc,.docx"
+                                 onChange={handleFileChange}
+                                 className="hidden"
+                              />
+                              <Label
+                                 htmlFor="certificate-file"
+                                 className="cursor-pointer block"
+                              >
+                                 <Upload className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+                                 <span className="text-sm">Upload Certificate</span>
+                              </Label>
+                           </div>
                         )}
-                        <div className="flex items-center">
+                     </div>
+
+                     {/* Metadata Fields */}
+                     <div className="grid gap-3">
+                        <div>
+                           <Label>Issue Date</Label>
                            <Input
-                              id="certificate-file"
-                              type="file"
-                              accept=".pdf,.doc,.docx"
-                              onChange={handleFileChange}
-                              className="hidden"
+                              type="date"
+                              name="issueDate"
+                              value={metadata.issueDate}
+                              onChange={handleMetadataChange}
                            />
-                           <Label
-                              htmlFor="certificate-file"
-                              className="cursor-pointer flex items-center justify-center w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                           >
-                              <Upload className="mr-2 h-4 w-4" />
-                              {certificateFile ? 'Change Certificate' : 'Upload Certificate'}
-                           </Label>
                         </div>
-                        <p className="text-xs text-gray-500">Accepted formats: PDF, DOC, DOCX (max 5MB)</p>
-                     </div>
-
-                     <div className="grid gap-2">
-                        <Label>Issue Date</Label>
-                        <Input
-                           type="date"
-                           name="issueDate"
-                           value={metadata.issueDate}
-                           onChange={handleMetadataChange}
-                        />
-                     </div>
-
-                     <div className="grid gap-2">
-                        <Label>Expiry Date</Label>
-                        <Input
-                           type="date"
-                           name="expiryDate"
-                           value={metadata.expiryDate}
-                           onChange={handleMetadataChange}
-                        />
-                     </div>
-
-                     <div className="grid gap-2">
-                        <Label>Remarks (Optional)</Label>
-                        <Input
-                           type="text"
-                           name="remarks"
-                           value={metadata.remarks}
-                           onChange={handleMetadataChange}
-                           placeholder="Add any additional remarks..."
-                        />
+                        <div>
+                           <Label>Remarks</Label>
+                           <Input
+                              type="text"
+                              name="remarks"
+                              value={metadata.remarks}
+                              onChange={handleMetadataChange}
+                              placeholder="Optional remarks"
+                           />
+                        </div>
                      </div>
                   </div>
 
@@ -436,7 +482,7 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
                         className="bg-green-600 hover:bg-green-700"
                         disabled={isUploading || !certificateFile}
                      >
-                        {isUploading ? 'Uploading...' : 'Upload Certificate'}
+                        {isUploading ? 'Uploading...' : 'Upload'}
                      </Button>
                   </div>
                </>

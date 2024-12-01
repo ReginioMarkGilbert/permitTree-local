@@ -10,6 +10,7 @@ const certificateTypes = gql`
     dateCreated: String!
     dateIssued: String
     expiryDate: String
+    isExpired: Boolean
     certificateData: CertificateData
     uploadedCertificate: UploadedCertificate
     signature: SignatureData
@@ -103,6 +104,12 @@ const certificateTypes = gql`
   input CertificateMetadataInput {
     certificateType: String!
     issueDate: String!
+    remarks: String
+  }
+
+  input SignCertificateInput {
+    certificateType: String!
+    issueDate: String!
     expiryDate: String!
     remarks: String
   }
@@ -116,8 +123,9 @@ const certificateTypes = gql`
   extend type Mutation {
     generateCertificate(input: GenerateCertificateInput!): Certificate!
     uploadCertificate(input: UploadCertificateInput!): Certificate!
+    uploadStampedCertificate(input: UploadCertificateInput!): Certificate!
     forwardCertificateForSignature(id: ID!): Certificate!
-    signCertificate(id: ID!, signature: String!): Certificate!
+    signCertificate(id: ID!, signature: String!, expiryDate: String!): Certificate!
     updateCertificate(id: ID!, certificateStatus: String, signature: String): Certificate!
   }
 

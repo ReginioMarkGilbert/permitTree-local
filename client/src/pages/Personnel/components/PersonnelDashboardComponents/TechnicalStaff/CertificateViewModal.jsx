@@ -78,14 +78,8 @@ const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) 
       variables: { id: certificate?.id },
       skip: !certificate?.id,
       fetchPolicy: 'network-only',
-      // Add polling to keep data fresh
       pollInterval: 1000
    });
-
-   useEffect(() => {
-      console.log('Certificate prop:', certificate);
-      console.log('Certificate details:', certDetails);
-   }, [certificate, certDetails]);
 
    const handleDownload = (fileData, filename, contentType) => {
       try {
@@ -119,7 +113,6 @@ const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) 
          const file = new Blob([byteArray], { type: contentType });
          const fileUrl = URL.createObjectURL(file);
 
-         // For PDFs
          if (contentType === 'application/pdf') {
             const newWindow = window.open('', '_blank');
             if (newWindow) {
@@ -129,7 +122,6 @@ const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) 
                handleDownload(fileData, filename, contentType);
             }
          }
-         // For images
          else if (contentType.startsWith('image/')) {
             const newWindow = window.open('', '_blank');
             if (newWindow) {
@@ -163,7 +155,6 @@ const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) 
                handleDownload(fileData, filename, contentType);
             }
          }
-         // For other file types
          else {
             toast.error('Preview not supported for this file type. Downloading instead...');
             handleDownload(fileData, filename, contentType);
@@ -176,11 +167,6 @@ const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) 
       }
    };
 
-   const handleViewECertificate = () => {
-      setShowECertificate(true);
-   };
-
-   // Cleanup preview URL when component unmounts or modal closes
    useEffect(() => {
       return () => {
          if (previewUrl) {
@@ -189,25 +175,10 @@ const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) 
       };
    }, [previewUrl]);
 
-   console.log('Certificate data in view modal:', {
-      certificate,
-      certificateData: certificate?.certificateData,
-      chainsawDetails: certificate?.certificateData?.chainsawDetails
-   });
-
-   console.log('Certificate details:', certDetails);
-
-   // Add debug logging for signature
-   useEffect(() => {
-      if (certDetails?.getCertificateById?.signature) {
-         console.log('Signature data:', certDetails.getCertificateById.signature);
-      }
-   }, [certDetails]);
-
    if (loading) {
       return (
          <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent>
+            <DialogContent className="max-w-md">
                <div className="flex items-center justify-center p-6">
                   <Loader2 className="h-6 w-6 animate-spin" />
                </div>
@@ -219,10 +190,11 @@ const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) 
    if (error) {
       return (
          <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent>
-               <div className="text-red-500 p-6">
-                  Error loading certificate: {error.message}
-               </div>
+            <DialogContent className="max-w-md">
+               <DialogHeader>
+                  <DialogTitle className="text-red-500">Error</DialogTitle>
+                  <DialogDescription>{error.message}</DialogDescription>
+               </DialogHeader>
             </DialogContent>
          </Dialog>
       );
@@ -232,15 +204,13 @@ const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) 
 
    return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-         <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
+         <DialogContent className={showECertificate ? "max-w-4xl" : "max-w-md"}>
             {showECertificate ? (
                <>
                   <DialogHeader>
                      <DialogTitle>E-Certificate Preview</DialogTitle>
-                     <DialogDescription>
-                        Certificate Number: {certificate.certificateNumber}
-                     </DialogDescription>
                   </DialogHeader>
+
                   <div className="overflow-auto max-h-[70vh]">
                      <CSAWCertificateTemplate
                         ref={certificateRef}
@@ -250,9 +220,10 @@ const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) 
                         hiddenOnPrint={[]}
                      />
                   </div>
+
                   <DialogFooter>
                      <Button variant="outline" onClick={() => setShowECertificate(false)}>
-                        Back to Details
+                        Back
                      </Button>
                   </DialogFooter>
                </>
@@ -265,111 +236,92 @@ const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) 
                      </DialogDescription>
                   </DialogHeader>
 
-                  <ScrollArea className="flex-grow">
-                     <div className="space-y-6 p-4">
-                        <div className="grid grid-cols-2 gap-4">
-                           <div>
-                              <h3 className="font-semibold mb-2">Certificate Information</h3>
-                              <div className="space-y-2">
-                                 <p><span className="font-medium">Certificate Status:</span>
-                                    <Badge className="ml-2" variant={certificate.certificateStatus === 'Active' ? 'success' : 'secondary'}>
-                                       {certificate.certificateStatus}
-                                    </Badge>
-                                 </p>
-                                 {/* remove this later */}
-                                 {/* <p><span className="font-medium">Created:</span> {format(new Date(parseInt(certificate.dateCreated)), 'PPP')}</p> */}
-                                 {certificate.dateIssued && (
-                                    <p><span className="font-medium">Issued:</span> {format(new Date(parseInt(certificate.dateIssued)), 'PPP')}</p>
-                                 )}
-                                 {certificate.expiryDate && (
-                                    <p><span className="font-medium">Expires:</span> {format(new Date(parseInt(certificate.expiryDate)), 'PPP')}</p>
-                                 )}
+                  <div className="space-y-6">
+                     {/* Certificate Type Section */}
+                     {/* <div>
+                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Certificate Type</h3>
+                        <p>{certificate.applicationType}</p>
+                     </div> */}
+
+                     <Separator />
+
+                     {/* Issue Details Section */}
+                     <div>
+                        <h3 className="text-sm font-medium text-muted-foreground mb-2">Issue Details</h3>
+                        <div className="space-y-2">
+                           {certificate.dateIssued && (
+                              <div>
+                                 <span className="text-sm">Date Issued: </span>
+                                 <span className="text-sm">
+                                    {format(new Date(parseInt(certificate.dateIssued)), 'PPP')}
+                                 </span>
                               </div>
-                           </div>
-
-                           <div>
-                              <h3 className="font-semibold mb-2">Document Actions</h3>
-                              <div className="space-y-2">
-                                 <Button
-                                    variant="outline"
-                                    onClick={() => setShowECertificate(true)}
-                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                                 >
-                                    <Eye className="h-4 w-4 mr-2" />
-                                    View E-Certificate
-                                 </Button>
-
-                                 {certificate.uploadedCertificate && (
-                                    <div className="flex gap-2">
-                                       <TooltipProvider>
-                                          <Tooltip>
-                                             <TooltipTrigger asChild>
-                                                <Button
-                                                   variant="outline"
-                                                   size="sm"
-                                                   onClick={() => handlePreview(
-                                                      certificate.uploadedCertificate.fileData,
-                                                      certificate.uploadedCertificate.contentType,
-                                                      certificate.uploadedCertificate.filename
-                                                   )}
-                                                >
-                                                   <Eye className="h-4 w-4 mr-2" />
-                                                   Preview Upload
-                                                </Button>
-                                             </TooltipTrigger>
-                                             <TooltipContent>
-                                                <p>Preview uploaded certificate</p>
-                                             </TooltipContent>
-                                          </Tooltip>
-                                       </TooltipProvider>
-
-                                       <TooltipProvider>
-                                          <Tooltip>
-                                             <TooltipTrigger asChild>
-                                                <Button
-                                                   variant="outline"
-                                                   size="sm"
-                                                   onClick={() => handleDownload(
-                                                      certificate.uploadedCertificate.fileData,
-                                                      certificate.uploadedCertificate.filename,
-                                                      certificate.uploadedCertificate.contentType
-                                                   )}
-                                                >
-                                                   <Download className="h-4 w-4 mr-2" />
-                                                   Download
-                                                </Button>
-                                             </TooltipTrigger>
-                                             <TooltipContent>
-                                                <p>Download certificate</p>
-                                             </TooltipContent>
-                                          </Tooltip>
-                                       </TooltipProvider>
-                                    </div>
-                                 )}
+                           )}
+                           {certificate.expiryDate && (
+                              <div>
+                                 <span className="text-sm">Expiry Date: </span>
+                                 <span className="text-sm">
+                                    {format(new Date(parseInt(certificate.expiryDate)), 'PPP')}
+                                 </span>
                               </div>
-                           </div>
+                           )}
                         </div>
+                     </div>
 
-                        <Separator />
+                     <Separator />
 
-                        {certificate.uploadedCertificate?.metadata && (
-                           <div>
-                              <h3 className="font-semibold mb-2">Additional Information</h3>
-                              <div className="space-y-2">
-                                 <p><span className="font-medium">Certificate Type:</span> {certificate.uploadedCertificate.metadata.certificateType}</p>
-                                 {certificate.uploadedCertificate.metadata.remarks && (
-                                    <p><span className="font-medium">Remarks:</span> {certificate.uploadedCertificate.metadata.remarks}</p>
+                     {/* Status Section */}
+                     <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-muted-foreground">Status</span>
+                        <Badge variant={certificate.certificateStatus === 'Active' ? 'success' : 'secondary'}>
+                           {certificate.certificateStatus}
+                        </Badge>
+                     </div>
+
+                     <Separator />
+
+                     {/* Actions Section */}
+                     <div className="space-y-2">
+                        <Button
+                           className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
+                           onClick={() => setShowECertificate(true)}
+                        >
+                           <Eye className="h-4 w-4 mr-2" />
+                           View Certificate
+                        </Button>
+
+                        {certificate.uploadedCertificate && (
+                           <div className="grid grid-cols-2 gap-2">
+                              <Button
+                                 variant="outline"
+                                 onClick={() => handlePreview(
+                                    certificate.uploadedCertificate.fileData,
+                                    certificate.uploadedCertificate.contentType,
+                                    certificate.uploadedCertificate.filename
                                  )}
-                              </div>
+                              >
+                                 <Eye className="h-4 w-4 mr-2" />
+                                 Preview Upload
+                              </Button>
+
+                              <Button
+                                 variant="outline"
+                                 onClick={() => handleDownload(
+                                    certificate.uploadedCertificate.fileData,
+                                    certificate.uploadedCertificate.filename,
+                                    certificate.uploadedCertificate.contentType
+                                 )}
+                              >
+                                 <Download className="h-4 w-4 mr-2" />
+                                 Download
+                              </Button>
                            </div>
                         )}
                      </div>
-                  </ScrollArea>
+                  </div>
 
                   <DialogFooter>
-                     <Button variant="outline" onClick={onClose}>
-                        Close
-                     </Button>
+                     <Button variant="outline" onClick={onClose}>Close</Button>
                   </DialogFooter>
                </>
             )}

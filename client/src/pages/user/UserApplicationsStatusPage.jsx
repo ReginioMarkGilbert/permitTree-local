@@ -99,9 +99,23 @@ const UserApplicationsStatusPage = () => {
          'In Progress': { status: 'In Progress' },
          'Returned': { status: 'Returned', currentStage: 'ReturnedByTechnicalStaff' },
          'Accepted': { status: 'Accepted' },
-         'Released': { status: 'Released', currentStage: 'Released' },
-         'Expired': { status: 'Expired' },
+         'Released': {
+            status: 'Released',
+            currentStage: 'Released',
+            // Add condition to exclude expired certificates
+            certificateStatus: { $ne: 'Expired' }
+         },
+         'Expired': {
+            status: 'Expired',
+            currentStage: 'ForRenewal',
+            certificateStatus: 'Expired'
+         },
          'Rejected': { status: 'Rejected' },
+         'Chainsaw Registration': {
+            status: 'Renewed',
+            // currentStage: 'Renewed',
+            // certificateStatus: 'Renewed'
+         },
       }[tab] || { status: 'Submitted' };
 
       console.log('Query params for tab:', { tab, params });
@@ -139,7 +153,7 @@ const UserApplicationsStatusPage = () => {
    const subTabs = {
       'Applications': ['Draft', 'Submitted', 'In Progress', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected'],
       'Order Of Payments': ['Awaiting Payment', 'Payment Proof Submitted', 'Payment Proof Rejected', 'Payment Proof Approved', 'Completed', 'Issued OR'],
-      'Renewals': ['Draft', 'Submitted', 'Returned', 'Renewed', 'Rejected']
+      'Renewals': ['Chainsaw Registration', 'Certificate of Verification', 'Private Tree Plantation Registration', 'Public Land Tree Cutting Permit', 'Private Land Timber Permit', 'NGA Tree Cutting Permit']
    };
 
    const filteredApplications = useMemo(() => {
@@ -176,6 +190,7 @@ const UserApplicationsStatusPage = () => {
          case 'released': return 'bg-indigo-100 text-indigo-800';
          case 'expired': return 'bg-red-100 text-red-800';
          case 'rejected': return 'bg-red-100 text-red-800';
+         case 'renewal': return 'bg-purple-100 text-purple-800';
          default: return 'bg-gray-100 text-gray-800';
       }
    };

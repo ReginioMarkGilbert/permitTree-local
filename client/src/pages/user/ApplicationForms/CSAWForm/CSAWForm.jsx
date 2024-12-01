@@ -10,7 +10,7 @@ import Modal from '@/components/ui/modal';
 import '@/components/ui/styles/CSAWFormScrollbar.css';
 import '@/components/ui/styles/customScrollBar.css'
 import { CheckboxItem, UploadCard, CustomSelect, CustomDatePicker, formatLabel, formatReviewValue } from './CSAWFormUtils';
-import { gql, useMutation } from '@apollo/client';
+import { gql, useMutation, useLazyQuery } from '@apollo/client';
 import { Loader2 } from "lucide-react";
 import FormStepIndicator from '../FormStepIndicator';
 
@@ -48,6 +48,30 @@ const SAVE_CSAW_PERMIT_DRAFT = gql`
         businessPermit { filename contentType }
         certificateOfRegistration { filename contentType }
         woodProcessingPlantPermit { filename contentType }
+      }
+    }
+  }
+`;
+
+const GET_PREVIOUS_CERTIFICATE = gql`
+  query GetPreviousCertificate($certificateNumber: String!) {
+    getPreviousCertificate(certificateNumber: $certificateNumber) {
+      id
+      certificateNumber
+      certificateData {
+        registrationType
+        ownerName
+        address
+        chainsawDetails {
+          brand
+          model
+          serialNumber
+          dateOfAcquisition
+          powerOutput
+          maxLengthGuidebar
+          countryOfOrigin
+          purchasePrice
+        }
       }
     }
   }
@@ -101,6 +125,9 @@ const ChainsawRegistrationForm = () => {
    const [saveCSAWPermitDraft] = useMutation(SAVE_CSAW_PERMIT_DRAFT);
    const [isSubmitting, setIsSubmitting] = useState(false);
    const [isSavingDraft, setIsSavingDraft] = useState(false);
+   const [previousCertNumber, setPreviousCertNumber] = useState('');
+   const [isVerifyingCert, setIsVerifyingCert] = useState(false);
+   const [getPreviousCertificate] = useLazyQuery(GET_PREVIOUS_CERTIFICATE);
 
    const handleInputChange = (e) => {
       const { name, value } = e.target;
@@ -135,9 +162,15 @@ const ChainsawRegistrationForm = () => {
    };
 
    const handleNextStep = () => {
-      if (currentStep === 0 && !formData.registrationType) {
-         toast.error("Please select a registration type");
-         return;
+      if (currentStep === 0) {
+         if (!formData.registrationType) {
+            toast.error("Please select a registration type");
+            return;
+         }
+         if (formData.registrationType === 'Renewal' && !formData.previousCertificateNumber) {
+            toast.error("Please verify your previous certificate first");
+            return;
+         }
       }
       if (currentStep === 1) {
          if (!formData.chainsawStore) {
@@ -340,6 +373,68 @@ const ChainsawRegistrationForm = () => {
       setFormData(prev => ({ ...prev, dateOfAcquisition: date }));
    };
 
+   const verifyPreviousCertificate = async () => {
+      if (!previousCertNumber) {
+         toast.error('Please enter previous certificate number');
+         return;
+      }
+
+      setIsVerifyingCert(true);
+      try {
+         toast.info('Verifying certificate...', { duration: 1000 });
+
+         const { data } = await getPreviousCertificate({
+            variables: { certificateNumber: previousCertNumber }
+         });
+
+         if (data?.getPreviousCertificate) {
+            const prevCert = data.getPreviousCertificate;
+            // Pre-fill form with previous certificate data
+            setFormData(prev => ({
+               ...prev,
+               registrationType: 'Renewal',
+               previousCertificateNumber: previousCertNumber,
+               brand: prevCert.certificateData.chainsawDetails.brand,
+               model: prevCert.certificateData.chainsawDetails.model,
+               serialNumber: prevCert.certificateData.chainsawDetails.serialNumber,
+               powerOutput: prevCert.certificateData.chainsawDetails.powerOutput,
+               maxLengthGuidebar: prevCert.certificateData.chainsawDetails.maxLengthGuidebar,
+               countryOfOrigin: prevCert.certificateData.chainsawDetails.countryOfOrigin,
+               purchasePrice: prevCert.certificateData.chainsawDetails.purchasePrice,
+            }));
+            toast.success('Certificate verified successfully! Previous details loaded.', {
+               description: `Certificate Number: ${previousCertNumber}`,
+               duration: 3000
+            });
+         }
+      } catch (error) {
+         // Handle specific error messages
+         if (error.message.includes('Certificate not found')) {
+            toast.error('Certificate not found', {
+               description: 'Please check the certificate number and try again.',
+               duration: 3000
+            });
+         } else if (error.message.includes('does not belong to you')) {
+            toast.error('Certificate ownership verification failed', {
+               description: 'This certificate is not registered under your name.',
+               duration: 3000
+            });
+         } else if (error.message.includes('Only expired certificates')) {
+            toast.error('Certificate not eligible for renewal', {
+               description: 'Only expired certificates can be renewed.',
+               duration: 3000
+            });
+         } else {
+            toast.error('Verification failed', {
+               description: error.message || 'An unexpected error occurred.',
+               duration: 3000
+            });
+         }
+      } finally {
+         setIsVerifyingCert(false);
+      }
+   };
+
    const steps = [
       { title: "Registration Type", description: "Choose registration type" },
       { title: "Accredited Chainsaw Store", description: "Select chainsaw store" },
@@ -368,6 +463,90 @@ const ChainsawRegistrationForm = () => {
       };
    }, []);
 
+   const renderRegistrationTypeStep = () => (
+      <div className="space-y-4">
+         <div>
+            <RadioGroup
+               onValueChange={(value) => handleSelectChange('registrationType', value)}
+               value={formData.registrationType}
+               className="space-y-3"
+            >
+               <div
+                  className={`w-full p-4 rounded-md transition-colors cursor-pointer
+                     ${formData.registrationType === 'New'
+                        ? 'bg-green-100 hover:bg-green-50 dark:bg-green-900 dark:hover:bg-green-800'
+                        : 'bg-gray-100 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600'}`}
+               >
+                  <div className="flex items-center space-x-3">
+                     <RadioGroupItem value="New" id="new" className="text-green-600 dark:text-green-400" />
+                     <Label
+                        htmlFor="new"
+                        className={`text-base font-medium cursor-pointer
+                           ${formData.registrationType === 'New'
+                              ? 'text-green-700 dark:text-green-300'
+                              : 'text-gray-700 dark:text-gray-300'}`}
+                     >
+                        New Registration
+                     </Label>
+                  </div>
+               </div>
+
+               <div
+                  className={`w-full p-4 rounded-md transition-colors cursor-pointer
+                     ${formData.registrationType === 'Renewal'
+                        ? 'bg-green-100 hover:bg-green-50 dark:bg-green-900 dark:hover:bg-green-800'
+                        : 'bg-gray-100 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600'}`}
+               >
+                  <div className="flex items-center space-x-3">
+                     <RadioGroupItem value="Renewal" id="renewal" className="text-green-600 dark:text-green-400" />
+                     <Label
+                        htmlFor="renewal"
+                        className={`text-base font-medium cursor-pointer
+                           ${formData.registrationType === 'Renewal'
+                              ? 'text-green-700 dark:text-green-300'
+                              : 'text-gray-700 dark:text-gray-300'}`}
+                     >
+                        Renewal
+                     </Label>
+                  </div>
+               </div>
+            </RadioGroup>
+         </div>
+
+         {formData.registrationType === 'Renewal' && (
+            <div className="space-y-4 mt-4">
+               <div className="flex gap-2">
+                  <div className="flex-1">
+                     <Label>Previous Certificate Number</Label>
+                     <Input
+                        value={previousCertNumber}
+                        onChange={(e) => setPreviousCertNumber(e.target.value)}
+                        placeholder="Enter previous certificate number"
+                        className="dark:bg-gray-700 dark:text-white"
+                        required
+                     />
+                  </div>
+                  <Button
+                     type="button"
+                     onClick={verifyPreviousCertificate}
+                     disabled={isVerifyingCert || !previousCertNumber}
+                     className="mt-6 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
+                  >
+                     {isVerifyingCert ? (
+                        <>
+                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                           Verifying...
+                        </>
+                     ) : (
+                        'Verify'
+                     )}
+                  </Button>
+               </div>
+            </div>
+         )}
+      </div>
+   );
+
    return (
       <div className="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-300 flex flex-col justify-between pt-[83px]">
          <div className="container mx-auto">
@@ -383,55 +562,7 @@ const ChainsawRegistrationForm = () => {
                </CardHeader>
                <CardContent>
                   <form onSubmit={handleSubmit}>
-                     {currentStep === 0 && (
-                        <div className="space-y-4">
-                           <RadioGroup
-                              onValueChange={(value) => handleSelectChange('registrationType', value)}
-                              value={formData.registrationType}
-                              className="space-y-3"
-                           >
-                              <div
-                                 className={`w-full p-4 rounded-md transition-colors cursor-pointer
-                                    ${formData.registrationType === 'New'
-                                       ? 'bg-green-100 hover:bg-green-50 dark:bg-green-900 dark:hover:bg-green-800'
-                                       : 'bg-gray-100 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600'}`}
-                              >
-                                 <div className="flex items-center space-x-3">
-                                    <RadioGroupItem value="New" id="new" className="text-green-600 dark:text-green-400" />
-                                    <Label
-                                       htmlFor="new"
-                                       className={`text-base font-medium cursor-pointer
-                                          ${formData.registrationType === 'New'
-                                             ? 'text-green-700 dark:text-green-300'
-                                             : 'text-gray-700 dark:text-gray-300'}`}
-                                    >
-                                       New Registration
-                                    </Label>
-                                 </div>
-                              </div>
-
-                              <div
-                                 className={`w-full p-4 rounded-md transition-colors cursor-pointer
-                                    ${formData.registrationType === 'Renewal'
-                                       ? 'bg-green-100 hover:bg-green-50 dark:bg-green-900 dark:hover:bg-green-800'
-                                       : 'bg-gray-100 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600'}`}
-                              >
-                                 <div className="flex items-center space-x-3">
-                                    <RadioGroupItem value="Renewal" id="renewal" className="text-green-600 dark:text-green-400" />
-                                    <Label
-                                       htmlFor="renewal"
-                                       className={`text-base font-medium cursor-pointer
-                                          ${formData.registrationType === 'Renewal'
-                                             ? 'text-green-700 dark:text-green-300'
-                                             : 'text-gray-700 dark:text-gray-300'}`}
-                                    >
-                                       Renewal
-                                    </Label>
-                                 </div>
-                              </div>
-                           </RadioGroup>
-                        </div>
-                     )}
+                     {currentStep === 0 && renderRegistrationTypeStep()}
 
                      {currentStep === 1 && (
                         <div className="space-y-4 pt-2">
@@ -769,7 +900,7 @@ const ChainsawRegistrationForm = () => {
                         <Button
                            type="button"
                            onClick={handleNextStep}
-                           className="w-full sm:w-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white"
+                           className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
                            disabled={isSubmitting || isSavingDraft}
                         >
                            Next

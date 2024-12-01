@@ -22,7 +22,7 @@ const PermitSchema = new mongoose.Schema({
    status: {
       type: String,
       required: true,
-      enum: ['Draft', 'Submitted', 'In Progress', 'Returned', 'Accepted', 'Released', 'Completed', 'Rejected', 'Expired']
+      enum: ['Draft', 'Submitted', 'In Progress', 'Returned', 'Accepted', 'Released', 'Completed', 'Rejected', 'Expired', 'Renewed']
    },
    currentStage: {
       type: String,

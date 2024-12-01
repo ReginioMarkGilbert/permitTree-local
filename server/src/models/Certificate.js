@@ -12,7 +12,7 @@ const CertificateSchema = new mongoose.Schema({
    },
    certificateStatus: {
       type: String,
-      enum: ['Pending Signature', 'Complete Signatures', 'Stamped Certificate', 'Released'],
+      enum: ['Pending Signature', 'Complete Signatures', 'Stamped Certificate', 'Released', 'Expired', 'Renewed'],
       default: 'Pending Signature'
    },
    dateCreated: { type: Date, default: Date.now },
@@ -84,5 +84,42 @@ CertificateSchema.virtual('orderOfPayment', {
    foreignField: 'applicationNumber',
    justOne: true
 });
+
+// Add a method to check if certificate is expired
+CertificateSchema.methods.isExpired = function() {
+   return this.expiryDate && new Date() > this.expiryDate;
+};
+
+// Add pre-save middleware to check expiration
+CertificateSchema.pre('save', async function(next) {
+   // Check if expiry date has passed
+   if (this.expiryDate && new Date() > this.expiryDate) {
+      this.certificateStatus = 'Expired';
+
+      // Update associated permit
+      try {
+         await mongoose.model('Permit').findByIdAndUpdate(
+            this.applicationId,
+            {
+               $set: {
+                  status: 'Expired',
+                  currentStage: 'ForRenewal'
+               }
+            }
+         );
+      } catch (error) {
+         console.error('Error updating permit on certificate expiration:', error);
+      }
+   }
+   next();
+});
+
+// Add a new method to sync status with permit
+CertificateSchema.methods.syncWithPermit = async function(permit) {
+   if (permit.status === 'Expired' && permit.currentStage === 'ForRenewal') {
+      this.certificateStatus = 'Expired';
+      await this.save();
+   }
+};
 
 module.exports = mongoose.model('Certificate', CertificateSchema);

@@ -8,8 +8,8 @@ import { toast } from 'sonner';
 import { X, Upload } from 'lucide-react';
 
 const UPLOAD_STAMPED_CERTIFICATE = gql`
-  mutation UploadCertificate($input: UploadCertificateInput!) {
-    uploadCertificate(input: $input) {
+  mutation UploadStampedCertificate($input: UploadCertificateInput!) {
+    uploadStampedCertificate(input: $input) {
       id
       certificateNumber
       certificateStatus
@@ -39,7 +39,7 @@ const UploadStampedCertificateModal = ({ isOpen, onClose, application, onComplet
       remarks: ''
    });
 
-   const [uploadCertificate] = useMutation(UPLOAD_STAMPED_CERTIFICATE);
+   const [uploadStampedCertificate] = useMutation(UPLOAD_STAMPED_CERTIFICATE);
 
    const handleFileChange = (e) => {
       const file = e.target.files[0];
@@ -83,7 +83,7 @@ const UploadStampedCertificateModal = ({ isOpen, onClose, application, onComplet
       try {
          const fileData = await fileToBase64(certificateFile);
 
-         const { data } = await uploadCertificate({
+         const { data } = await uploadStampedCertificate({
             variables: {
                input: {
                   applicationId: application.id,
@@ -95,7 +95,6 @@ const UploadStampedCertificateModal = ({ isOpen, onClose, application, onComplet
                      metadata: {
                         certificateType: application.applicationType,
                         issueDate: new Date().toISOString(),
-                        expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
                         remarks: metadata.remarks || ''
                      }
                   }
@@ -103,9 +102,9 @@ const UploadStampedCertificateModal = ({ isOpen, onClose, application, onComplet
             }
          });
 
-         if (data?.uploadCertificate) {
+         if (data?.uploadStampedCertificate) {
             toast.success('Stamped certificate uploaded successfully');
-            onComplete(data.uploadCertificate);
+            onComplete(data.uploadStampedCertificate);
             onClose();
          } else {
             throw new Error('Failed to upload stamped certificate');

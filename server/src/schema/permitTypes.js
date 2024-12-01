@@ -100,6 +100,7 @@ const permitTypes = gql`
     applicantId: ID!
     history: [HistoryEntry!]!
     registrationType: String!
+    previousCertificateNumber: String
     chainsawStore: String!
     ownerName: String!
     address: String!
@@ -465,6 +466,7 @@ const permitTypes = gql`
 
   input CSAWPermitInput {
     registrationType: String!
+    previousCertificateNumber: String
     chainsawStore: String!
     ownerName: String!
     address: String!

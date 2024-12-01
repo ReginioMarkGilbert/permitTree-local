@@ -21,7 +21,7 @@ const permitResolvers = {
       getPermitById: async (_, { id }) => {
          return await Permit.findById(id).lean().exec();
       },
-      getUserApplications: async (_, { status, currentStage }, { user }) => {
+      getUserApplications: async (_, { status, currentStage, certificateStatus }, { user }) => {
          if (!user) {
             throw new Error('You must be logged in to view your applications');
          }
@@ -40,30 +40,41 @@ const permitResolvers = {
                .lean()
                .exec();
 
-            const formattedPermits = permits.map(permit => ({
+            // Check for expired certificates
+            for (const permit of permits) {
+               if (permit.certificateId) {
+                  const certificate = await Certificate.findById(permit.certificateId);
+                  if (certificate && certificate.isExpired()) {
+                     permit.status = 'Expired';
+                     permit.currentStage = 'ForRenewal';
+
+                     // Update the permit in database
+                     await Permit.findByIdAndUpdate(permit._id, {
+                        $set: {
+                           status: 'Expired',
+                           currentStage: 'ForRenewal'
+                        }
+                     });
+                  }
+               }
+            }
+
+            // Filter based on certificateStatus if provided
+            const filteredPermits = certificateStatus ?
+               permits.filter(permit => {
+                  if (certificateStatus === 'Expired') {
+                     return permit.status === 'Expired' && permit.currentStage === 'ForRenewal';
+                  }
+                  return true;
+               }) : permits;
+
+            return filteredPermits.map(permit => ({
                ...permit,
                id: permit._id.toString(),
                dateOfSubmission: permit.dateOfSubmission.toISOString(),
                currentStage: permit.currentStage || 'Submitted',
-               history: permit.history || [],
-               recordedByReceivingClerk: permit.recordedByReceivingClerk || false,
-               reviewedByChief: permit.reviewedByChief || false,
-               acceptedByTechnicalStaff: permit.acceptedByTechnicalStaff || false,
-               approvedByTechnicalStaff: permit.approvedByTechnicalStaff || false,
-               acceptedByPENRCENROfficer: permit.acceptedByPENRCENROfficer || false,
-               approvedByPENRCENROfficer: permit.approvedByPENRCENROfficer || false,
-               InspectionReportsReviewedByChief: permit.InspectionReportsReviewedByChief || false,
-               InspectionReportsReviewedByPENRCENROfficer: permit.InspectionReportsReviewedByPENRCENROfficer || false,
-               awaitingPermitCreation: permit.awaitingPermitCreation || false,
-               PermitCreated: permit.PermitCreated || false,
-               certificateSignedByPENRCENROfficer: permit.certificateSignedByPENRCENROfficer || false
+               history: permit.history || []
             }));
-
-            // console.log('Server: Fetched user applications:', query);
-            // console.log('Server: Number of applications:', formattedPermits.length);
-            // console.log('Server: First application:', formattedPermits[0]);
-
-            return formattedPermits;
          } catch (error) {
             console.error('Error fetching permits:', error);
             throw new Error(`Failed to fetch permits: ${error.message}`);
@@ -374,258 +385,38 @@ const permitResolvers = {
 
          return permit;
       },
-      updatePermitStage: async (_, {
-         id,
-         currentStage,
-         status,
-         notes,
-
-         acceptedByTechnicalStaff,
-         approvedByTechnicalStaff,
-
-         acceptedByReceivingClerk,
-         recordedByReceivingClerk,
-
-         acceptedByPENRCENROfficer,
-         approvedByPENRCENROfficer,
-
-         reviewedByChief,
-
-         awaitingOOP,
-         OOPCreated,
-
-         hasInspectionReport,
-         InspectionReportsReviewedByChief,
-         InspectionReportsReviewedByPENRCENROfficer,
-
-         awaitingPermitCreation,
-         PermitCreated,
-
-         certificateSignedByPENRCENROfficer,
-
-         hasCertificate,
-         certificateId
-      }, { user }) => {
+      updatePermitStage: async (_, { id, currentStage, status, ...rest }, { user }) => {
          try {
             const permit = await Permit.findById(id);
             if (!permit) {
                throw new Error('Permit not found');
             }
 
-            // If we're undoing permit creation, delete the certificate
-            if (currentStage === 'AuthenticityApprovedByTechnicalStaff' && permit.certificateId) {
-               console.log('Undoing permit creation. Deleting certificate:', permit.certificateId);
-               try {
-                  const deletedCertificate = await Certificate.findByIdAndDelete(permit.certificateId);
-                  console.log('Certificate deleted:', deletedCertificate ? 'success' : 'not found');
-
-                  // Reset certificate-related fields
-                  permit.certificateId = null;
-                  permit.hasCertificate = false;
-                  permit.certificateGenerated = false;
-                  permit.PermitCreated = false;
-                  permit.awaitingPermitCreation = true;
-                  permit.certificateSignedByPENRCENROfficer = false;
-
-                  console.log('Permit certificate fields reset:', {
-                     certificateId: permit.certificateId,
-                     hasCertificate: permit.hasCertificate,
-                     certificateGenerated: permit.certificateGenerated,
-                     PermitCreated: permit.PermitCreated,
-                     awaitingPermitCreation: permit.awaitingPermitCreation,
-                     certificateSignedByPENRCENROfficer: permit.certificateSignedByPENRCENROfficer
-                  });
-               } catch (error) {
-                  console.error('Error deleting certificate:', error);
-                  throw new Error(`Failed to delete associated certificate: ${error.message}`);
+            // If permit is being marked as expired
+            if (status === 'Expired' && currentStage === 'ForRenewal') {
+               // Update associated certificate
+               const certificate = await Certificate.findById(permit.certificateId);
+               if (certificate) {
+                  await certificate.syncWithPermit(permit);
                }
             }
 
-            // Update permit fields
-            permit.currentStage = currentStage;
-            permit.status = status;
-
-            const fields = {
-               acceptedByTechnicalStaff,
-               approvedByTechnicalStaff,
-
-               acceptedByReceivingClerk,
-               recordedByReceivingClerk,
-
-               acceptedByPENRCENROfficer,
-               approvedByPENRCENROfficer,
-
-               reviewedByChief,
-
-               awaitingOOP,
-               OOPCreated,
-
-               hasInspectionReport,
-               InspectionReportsReviewedByChief,
-               InspectionReportsReviewedByPENRCENROfficer,
-
-               awaitingPermitCreation,
-               PermitCreated,
-
-               certificateSignedByPENRCENROfficer,
-
-               hasCertificate,
-               certificateId
+            // Update permit
+            const updateData = {
+               currentStage,
+               status,
+               ...rest
             };
-            Object.entries(fields).forEach(([key, value]) => {
-               if (value !== undefined) {
-                  permit[key] = value;
-               }
-            });
 
-            // If we're undoing permit creation, also delete the certificate
-            if (currentStage === 'AuthenticityApprovedByTechnicalStaff') {
-               await Certificate.findByIdAndDelete(permit.certificateId);
-            }
+            const updatedPermit = await Permit.findByIdAndUpdate(
+               id,
+               { $set: updateData },
+               { new: true }
+            );
 
-            // permit.history.push({
-            //    stage: currentStage,
-            //    status: status,
-            //    timestamp: new Date(),
-            //    notes: notes || ''
-            // });
-
-            // const updatedPermit = await permit.save();
-
-            // #region - Technical Staff Review
-            //* ACCEPTANCE NOTIFICATIONS
-            if (currentStage === 'ForRecordByReceivingClerk' && acceptedByTechnicalStaff) {
-               // Notify applicant
-               await NotificationService.createApplicationNotification({
-                  application: permit,
-                  recipientId: permit.applicantId,
-                  type: 'APPLICATION_ACCEPTED_BY_TECHNICAL',
-                  stage: currentStage,
-                  remarks: notes
-               });
-
-               // Notify Receiving_Clerk
-               const receivingClerk = await Admin.findOne({ roles: 'Receiving_Clerk' });
-               if (receivingClerk) {
-                  await PersonnelNotificationService.createApplicationPersonnelNotification({
-                     application: permit,
-                     recipientId: receivingClerk._id,
-                     type: 'PENDING_RECEIVING_CLERK_RECORD',
-                     stage: 'ForRecordByReceivingClerk',
-                     remarks: notes,
-                     priority: 'high'
-                  });
-               }
-            }
-
-            // Handle Technical Staff Return notifications
-            if (currentStage === 'ReturnedByTechnicalStaff' && !acceptedByTechnicalStaff) {
-               await NotificationService.createApplicationNotification({
-                  application: permit,
-                  recipientId: permit.applicantId,
-                  type: 'APPLICATION_RETURNED_BY_TECHNICAL',
-                  stage: currentStage,
-                  remarks: notes
-               });
-            }
-            //* INSPECTION NOTIFICATIONS
-            if (currentStage === 'ForInspectionByTechnicalStaff' && reviewedByChief) {
-               // Notify applicant
-               await NotificationService.createApplicationNotification({
-                  application: permit,
-                  recipientId: permit.applicantId,
-                  type: 'APPLICATION_REVIEWED_BY_CHIEF',
-                  stage: currentStage,
-                  remarks: notes
-               });
-
-               // Notify Technical Staff for inspection
-               const technicalStaff = await Admin.findOne({ roles: 'Technical_Staff' });
-               if (technicalStaff) {
-                  await PersonnelNotificationService.createApplicationPersonnelNotification({
-                     application: permit,
-                     recipientId: technicalStaff._id,
-                     type: 'PENDING_INSPECTION',
-                     stage: currentStage,
-                     remarks: notes,
-                     priority: 'high'
-                  });
-               }
-            }
-            // #endregion - Technical Staff Review
-
-            // #region - Receiving Clerk Record notifications
-            if ((currentStage === 'ChiefRPSReview' || currentStage === 'CENRPENRReview') && recordedByReceivingClerk) {
-               // Notify applicant
-               await NotificationService.createApplicationNotification({
-                  application: permit,
-                  recipientId: permit.applicantId,
-                  type: 'APPLICATION_RECORDED',
-                  stage: currentStage,
-                  remarks: notes
-               });
-
-               // Notify next personnel based on stage
-               if (currentStage === 'ChiefRPSReview') {
-                  // Notify Chief RPS/TSD
-                  const chiefRPS = await Admin.findOne({ roles: 'Chief_RPS' });
-                  if (chiefRPS) {
-                     await PersonnelNotificationService.createApplicationPersonnelNotification({
-                        application: permit,
-                        recipientId: chiefRPS._id,
-                        type: 'PENDING_CHIEF_REVIEW',
-                        stage: currentStage,
-                        remarks: notes,
-                        priority: 'high'
-                     });
-                  } else {
-                     console.log('Chief RPS not found');
-                  }
-                  // send notification to Chief TSD
-                  const chiefTSD = await Admin.findOne({ roles: 'Chief_TSD' });
-                  if (chiefTSD) {
-                     await PersonnelNotificationService.createApplicationPersonnelNotification({
-                        application: permit,
-                        recipientId: chiefTSD._id,
-                        type: 'PENDING_CHIEF_REVIEW',
-                        stage: currentStage,
-                        remarks: notes,
-                        priority: 'high'
-                     });
-                  } else {
-                     console.log('Chief TSD not found');
-                  }
-               }
-               //* PENR/CENR Officer Approval Notifications
-               if (currentStage === 'CENRPENRReview') {
-                  // Notify PENR/CENR Officer
-                  const penrCenrOfficer = await Admin.findOne({ roles: 'PENR_CENR_Officer' });
-                  if (penrCenrOfficer) {
-                     await PersonnelNotificationService.createApplicationPersonnelNotification({
-                        application: permit,
-                        recipientId: penrCenrOfficer._id,
-                        type: 'PENDING_PENRCENR_APPROVAL',
-                        stage: currentStage,
-                        remarks: notes,
-                        priority: 'high'
-                     });
-                  }
-               }
-            }
-            // #endregion - Receiving Clerk Record notifications
-
-            permit.history.push({
-               stage: currentStage,
-               status: status,
-               timestamp: new Date(),
-               notes: notes || ''
-            });
-
-            await permit.save();
-            return permit;
-
+            return updatedPermit;
          } catch (error) {
-            console.error('Error updating permit:', error);
+            console.error('Error updating permit stage:', error);
             throw error;
          }
       },

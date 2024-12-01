@@ -4,6 +4,8 @@ const { Binary } = require('mongodb');
 const { format } = require('date-fns');
 const Admin = require('../../models/admin');
 const PersonnelNotificationService = require('../../services/personnelNotificationService');
+const Certificate = require('../../models/Certificate');
+const Permit = require('../../models/permits/Permit');
 
 const csawResolvers = {
    Query: {
@@ -25,6 +27,65 @@ const csawResolvers = {
             throw new Error(`Failed to fetch CSAW permit: ${error.message}`);
          }
       },
+      getPreviousCertificate: async (_, { certificateNumber }, { user }) => {
+         if (!user) {
+            throw new Error('You must be logged in to verify certificates');
+         }
+
+         console.log('Verifying certificate:', { certificateNumber, userId: user.id });
+
+         // First find the certificate
+         const certificate = await Certificate.findOne({ certificateNumber });
+
+         if (!certificate) {
+            throw new Error('Certificate not found');
+         }
+
+         // Then find the associated permit to verify ownership
+         const permit = await Permit.findOne({
+            _id: certificate.applicationId,
+            applicantId: user.id
+         });
+
+         if (!permit) {
+            throw new Error('Certificate does not belong to you');
+         }
+
+         if (certificate.certificateStatus !== 'Expired') {
+            console.log('Certificate status check failed:', {
+               certificateNumber,
+               currentStatus: certificate.certificateStatus,
+               expiryDate: certificate.expiryDate
+            });
+            throw new Error(`Certificate is not eligible for renewal. Current status: ${certificate.certificateStatus}`);
+         }
+
+         // Auto-renew the certificate
+         const twoYearsFromNow = new Date();
+         twoYearsFromNow.setFullYear(twoYearsFromNow.getFullYear() + 2);
+
+         // Update certificate with new expiry date
+         certificate.expiryDate = twoYearsFromNow;
+         certificate.certificateStatus = 'Renewed';
+         await certificate.save();
+
+         // Update permit status
+         await Permit.findByIdAndUpdate(permit._id, {
+            $set: {
+               status: 'Renewed',
+               currentStage: 'Renewed'
+            }
+         });
+
+         console.log('Certificate auto-renewed:', {
+            certificateNumber,
+            newExpiryDate: twoYearsFromNow,
+            newStatus: 'Renewed',
+            permitStatus: 'Renewed'
+         });
+
+         return certificate;
+      }
    },
    Mutation: {
       createCSAWPermit: async (_, { input }, { user }) => {

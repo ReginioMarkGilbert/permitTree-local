@@ -146,6 +146,58 @@ const certificateResolvers = {
 
       uploadCertificate: async (_, { input }) => {
          try {
+            let certificate = await Certificate.findOne({
+               applicationId: input.applicationId
+            });
+
+            if (!certificate) {
+               throw new Error('No certificate found for this application.');
+            }
+
+            const fileBuffer = Buffer.from(input.uploadedCertificate.fileData, 'base64');
+
+            const updateData = {
+               $set: {
+                  certificateStatus: 'Pending Signature',
+                  uploadedCertificate: {
+                     fileData: fileBuffer,
+                     filename: input.uploadedCertificate.filename,
+                     contentType: input.uploadedCertificate.contentType,
+                     metadata: {
+                        certificateType: input.uploadedCertificate.metadata.certificateType,
+                        issueDate: input.uploadedCertificate.metadata.issueDate,
+                        remarks: input.uploadedCertificate.metadata.remarks || ''
+                     }
+                  },
+                  dateIssued: new Date(input.uploadedCertificate.metadata.issueDate)
+               }
+            };
+
+            const savedCertificate = await Certificate.findOneAndUpdate(
+               { _id: certificate._id },
+               updateData,
+               { new: true, runValidators: true }
+            ).lean();
+
+            // Convert Buffer back to base64 for response
+            const responseData = {
+               ...savedCertificate,
+               id: savedCertificate._id.toString(),
+               uploadedCertificate: {
+                  ...savedCertificate.uploadedCertificate,
+                  fileData: savedCertificate.uploadedCertificate.fileData.toString('base64')
+               }
+            };
+
+            return responseData;
+         } catch (error) {
+            console.error('Error uploading certificate:', error);
+            throw new Error(`Failed to upload certificate: ${error.message}`);
+         }
+      },
+
+      uploadStampedCertificate: async (_, { input }) => {
+         try {
             // Find existing certificate
             let certificate = await Certificate.findOne({
                applicationId: input.applicationId
@@ -160,32 +212,22 @@ const certificateResolvers = {
             const fileBuffer = Buffer.from(input.uploadedCertificate.fileData, 'base64');
 
             // Update the certificate with new stamped certificate
-            const updatedCertificate = {
+            const updateData = {
                $set: {
                   certificateStatus: 'Stamped Certificate',
                   uploadedCertificate: {
                      fileData: fileBuffer,
                      filename: input.uploadedCertificate.filename,
                      contentType: input.uploadedCertificate.contentType,
-                     metadata: {
-                        ...input.uploadedCertificate.metadata,
-                        issueDate: new Date(input.uploadedCertificate.metadata.issueDate),
-                        expiryDate: new Date(input.uploadedCertificate.metadata.expiryDate)
-                     }
-                  },
-                  dateIssued: new Date(input.uploadedCertificate.metadata.issueDate),
-                  expiryDate: new Date(input.uploadedCertificate.metadata.expiryDate)
+                     metadata: input.uploadedCertificate.metadata
+                  }
                }
             };
 
-            // Use findOneAndUpdate with { new: true } to get the updated document
             const savedCertificate = await Certificate.findOneAndUpdate(
                { _id: certificate._id },
-               updatedCertificate,
-               {
-                  new: true,
-                  runValidators: true
-               }
+               updateData,
+               { new: true, runValidators: true }
             ).lean();
 
             // Update permit status
@@ -208,8 +250,8 @@ const certificateResolvers = {
 
             return responseData;
          } catch (error) {
-            console.error('Error uploading certificate:', error);
-            throw new Error(`Failed to upload certificate: ${error.message}`);
+            console.error('Error uploading stamped certificate:', error);
+            throw new Error(`Failed to upload stamped certificate: ${error.message}`);
          }
       },
 
@@ -233,27 +275,18 @@ const certificateResolvers = {
          }
       },
 
-      signCertificate: async (_, { id, signature }) => {
+      signCertificate: async (_, { id, signature, expiryDate }) => {
          try {
             const certificate = await Certificate.findById(id);
             if (!certificate) {
                throw new UserInputError('Certificate not found');
             }
 
-            // Log for debugging
-            console.log('Signing certificate:', id);
-            console.log('Signature data length:', signature?.length);
-
-            // Extract the base64 data from the data URL
+            // Extract and convert signature data
             const base64Data = signature.split(',')[1] || signature;
-
-            // Convert base64 signature to Buffer
             const signatureBuffer = Buffer.from(base64Data, 'base64');
 
-            // Log for debugging
-            console.log('Converted signature buffer length:', signatureBuffer.length);
-
-            // Update certificate with signature data
+            // Update certificate
             const updateData = {
                signature: {
                   data: signatureBuffer,
@@ -261,7 +294,7 @@ const certificateResolvers = {
                },
                certificateStatus: 'Signed',
                dateIssued: new Date(),
-               expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // 1 year from now
+               expiryDate: new Date(expiryDate)
             };
 
             const updatedCertificate = await Certificate.findByIdAndUpdate(
