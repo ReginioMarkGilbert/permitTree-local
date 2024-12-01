@@ -51,7 +51,11 @@ const CertificateSchema = new mongoose.Schema({
          remarks: String
       }
    },
-   oopId: { type: mongoose.Schema.Types.ObjectId, ref: 'OOP' }
+   oopId: { type: mongoose.Schema.Types.ObjectId, ref: 'OOP' },
+   signature: {
+      data: Buffer,
+      contentType: String
+   }
 }, {
    timestamps: true,
    toObject: {

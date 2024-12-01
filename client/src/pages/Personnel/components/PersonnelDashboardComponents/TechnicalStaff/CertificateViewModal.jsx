@@ -22,12 +22,12 @@ const GET_CERTIFICATE_DETAILS = gql`
     getCertificateById(id: $id) {
       id
       certificateNumber
+      applicationId
+      applicationType
       certificateStatus
       dateCreated
       dateIssued
       expiryDate
-      applicationId
-      applicationType
       certificateData {
         registrationType
         ownerName
@@ -42,6 +42,21 @@ const GET_CERTIFICATE_DETAILS = gql`
           maxLengthGuidebar
           countryOfOrigin
           purchasePrice
+        }
+      }
+      signature {
+        data
+        contentType
+      }
+      uploadedCertificate {
+        fileData
+        filename
+        contentType
+        metadata {
+          certificateType
+          issueDate
+          expiryDate
+          remarks
         }
       }
       orderOfPayment {
@@ -59,10 +74,18 @@ const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) 
    const [previewUrl, setPreviewUrl] = useState(null);
    const [showECertificate, setShowECertificate] = useState(false);
    const certificateRef = useRef();
-   const { data: certDetails } = useQuery(GET_CERTIFICATE_DETAILS, {
+   const { data: certDetails, loading: detailsLoading } = useQuery(GET_CERTIFICATE_DETAILS, {
       variables: { id: certificate?.id },
-      skip: !certificate?.id
+      skip: !certificate?.id,
+      fetchPolicy: 'network-only',
+      // Add polling to keep data fresh
+      pollInterval: 1000
    });
+
+   useEffect(() => {
+      console.log('Certificate prop:', certificate);
+      console.log('Certificate details:', certDetails);
+   }, [certificate, certDetails]);
 
    const handleDownload = (fileData, filename, contentType) => {
       try {
@@ -173,6 +196,13 @@ const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) 
    });
 
    console.log('Certificate details:', certDetails);
+
+   // Add debug logging for signature
+   useEffect(() => {
+      if (certDetails?.getCertificateById?.signature) {
+         console.log('Signature data:', certDetails.getCertificateById.signature);
+      }
+   }, [certDetails]);
 
    if (loading) {
       return (

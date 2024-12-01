@@ -113,8 +113,19 @@ const CSAWCertificateTemplate = forwardRef(({ certificate, application, orderOfP
          <div className="mb-6">
             <p className="font-bold mb-4">APPROVED BY:</p>
             <div className="mt-12">
-               <p className="font-bold text-center">IMELDA M. DIAZ</p>
-               <p className="text-center">OIC-PENR Officer</p>
+               <div className="signature-box text-center">
+                  {certificate?.signature?.data && (
+                     <div className="signature-line mb-2">
+                        <img
+                           src={`data:${certificate.signature.contentType};base64,${certificate.signature.data}`}
+                           alt="PENR Officer Signature"
+                           className="mx-auto h-16 object-contain"
+                        />
+                     </div>
+                  )}
+                  <p className="font-bold text-center">IMELDA M. DIAZ</p>
+                  <p className="text-center">OIC-PENR Officer</p>
+               </div>
             </div>
          </div>
 

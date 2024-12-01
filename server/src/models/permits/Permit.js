@@ -77,6 +77,8 @@ const PermitSchema = new mongoose.Schema({
    awaitingPermitCreation: { type: Boolean, default: false },
    PermitCreated: { type: Boolean, default: false },
 
+   certificateSignedByPENRCENROfficer: { type: Boolean, default: false },
+
    certificateId: { type: mongoose.Schema.Types.ObjectId, ref: 'Certificate' },
    hasCertificate: { type: Boolean, default: false },
 

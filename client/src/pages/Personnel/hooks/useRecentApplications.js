@@ -15,6 +15,7 @@ const GET_APPLICATIONS = gql`
     $awaitingOOP: Boolean
     $awaitingPermitCreation: Boolean
     $PermitCreated: Boolean
+    $certificateSignedByPENRCENROfficer: Boolean
   ) {
     getApplicationsByStatus(
       status: $status
@@ -29,6 +30,7 @@ const GET_APPLICATIONS = gql`
       awaitingOOP: $awaitingOOP
       awaitingPermitCreation: $awaitingPermitCreation
       PermitCreated: $PermitCreated
+      certificateSignedByPENRCENROfficer: $certificateSignedByPENRCENROfficer
     ) {
       ... on CSAWPermit {
         id

@@ -30,6 +30,7 @@ const permitTypes = gql`
     InspectionReportsReviewedByPENRCENROfficer: Boolean!
     awaitingPermitCreation: Boolean!
     PermitCreated: Boolean!
+    certificateSignedByPENRCENROfficer: Boolean!
     history: [HistoryEntry]
     certificateId: ID
     hasCertificate: Boolean!
@@ -55,6 +56,7 @@ const permitTypes = gql`
     InspectionReportsReviewedByPENRCENROfficer: Boolean!
     awaitingPermitCreation: Boolean!
     PermitCreated: Boolean!
+    certificateSignedByPENRCENROfficer: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -93,6 +95,7 @@ const permitTypes = gql`
     InspectionReportsReviewedByPENRCENROfficer: Boolean!
     awaitingPermitCreation: Boolean!
     PermitCreated: Boolean!
+    certificateSignedByPENRCENROfficer: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -140,6 +143,7 @@ const permitTypes = gql`
     InspectionReportsReviewedByPENRCENROfficer: Boolean!
     awaitingPermitCreation: Boolean!
     PermitCreated: Boolean!
+    certificateSignedByPENRCENROfficer: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -178,6 +182,7 @@ const permitTypes = gql`
     InspectionReportsReviewedByPENRCENROfficer: Boolean!
     awaitingPermitCreation: Boolean!
     PermitCreated: Boolean!
+    certificateSignedByPENRCENROfficer: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -215,6 +220,7 @@ const permitTypes = gql`
     InspectionReportsReviewedByPENRCENROfficer: Boolean!
     awaitingPermitCreation: Boolean!
     PermitCreated: Boolean!
+    certificateSignedByPENRCENROfficer: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -256,6 +262,7 @@ const permitTypes = gql`
     InspectionReportsReviewedByPENRCENROfficer: Boolean!
     awaitingPermitCreation: Boolean!
     PermitCreated: Boolean!
+    certificateSignedByPENRCENROfficer: Boolean!
     dateOfSubmission: String!
     applicantId: ID!
     history: [HistoryEntry!]!
@@ -367,7 +374,8 @@ const permitTypes = gql`
       InspectionReportsReviewedByPENRCENROfficer: Boolean,
 
       awaitingPermitCreation: Boolean,
-      PermitCreated: Boolean
+      PermitCreated: Boolean,
+      certificateSignedByPENRCENROfficer: Boolean
     ): [Permit!]!
    #  getApplicationsByCurrentStage(currentStage: String!): [Permit!]!
     getPermitByApplicationNumber(applicationNumber: String!): Permit
@@ -421,6 +429,7 @@ const permitTypes = gql`
       InspectionReportsReviewedByPENRCENROfficer: Boolean
       awaitingPermitCreation: Boolean
       PermitCreated: Boolean
+      certificateSignedByPENRCENROfficer: Boolean
       hasCertificate: Boolean
       certificateId: ID
     ): Permit!

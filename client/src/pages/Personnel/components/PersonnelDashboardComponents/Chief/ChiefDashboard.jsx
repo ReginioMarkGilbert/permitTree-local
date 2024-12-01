@@ -12,7 +12,6 @@ import DashboardLayout from '@/components/layouts/DashboardLayout';
 import {
    Table,
    TableBody,
-   TableCell,
    TableHead,
    TableHeader,
    TableRow,

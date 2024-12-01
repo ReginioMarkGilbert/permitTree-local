@@ -197,6 +197,7 @@ const SA_AddUserModal = ({ isOpen, onClose, onAddUser }) => {
                         id="email"
                         name="email"
                         type="email"
+                        placeholder="(Optional)"
                         value={newUser.email}
                         onChange={handleInputChange}
                      // required

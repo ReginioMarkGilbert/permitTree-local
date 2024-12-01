@@ -30,22 +30,19 @@ const certificateResolvers = {
                throw new UserInputError('Certificate not found');
             }
 
-            // Log the populated data
-            console.log('Certificate with OOP:', {
-               id: certificate.id,
-               applicationId: certificate.applicationId,
-               orderOfPayment: certificate.orderOfPayment ? {
-                  id: certificate.orderOfPayment._id,
-                  status: certificate.orderOfPayment.OOPstatus,
-                  or: certificate.orderOfPayment.officialReceipt
-               } : null
-            });
-
             const certObj = certificate.toObject();
 
             // Convert Buffer to base64 string if it exists
             if (certObj.uploadedCertificate && certObj.uploadedCertificate.fileData) {
                certObj.uploadedCertificate.fileData = certObj.uploadedCertificate.fileData.toString('base64');
+            }
+
+            // Convert signature Buffer to base64 if it exists
+            if (certObj.signature && certObj.signature.data) {
+               certObj.signature = {
+                  ...certObj.signature,
+                  data: certObj.signature.data.toString('base64')
+               };
             }
 
             return certObj;
@@ -149,7 +146,7 @@ const certificateResolvers = {
 
       uploadCertificate: async (_, { input }) => {
          try {
-            // Find existing certificate for this application
+            // Find existing certificate
             let certificate = await Certificate.findOne({
                applicationId: input.applicationId,
                certificateStatus: 'Pending Signature'
@@ -165,7 +162,7 @@ const certificateResolvers = {
             // Keep the existing certificateData and update other fields
             const updatedCertificate = {
                $set: {
-                  certificateStatus: 'Released',
+                  certificateStatus: 'Pending Signature',
                   uploadedCertificate: {
                      fileData: fileBuffer,
                      filename: input.uploadedCertificate.filename,
@@ -191,15 +188,15 @@ const certificateResolvers = {
                }
             ).lean();
 
-            // Update permit status
+            // Update permit status and forward to PENR/CENR Officer
             await Permit.findByIdAndUpdate(input.applicationId, {
                $set: {
                   certificateGenerated: true,
                   certificateId: savedCertificate._id,
                   PermitCreated: true,
                   awaitingPermitCreation: false,
-                  currentStage: 'Released',
-                  status: 'Released'
+                  currentStage: 'PendingSignatureByPENRCENROfficer',
+                  status: 'In Progress'
                }
             });
 
@@ -240,27 +237,105 @@ const certificateResolvers = {
          }
       },
 
-      signCertificate: async (_, { id }) => {
+      signCertificate: async (_, { id, signature }) => {
          try {
             const certificate = await Certificate.findById(id);
             if (!certificate) {
                throw new UserInputError('Certificate not found');
             }
 
-            certificate.certificateStatus = 'Signed';
-            certificate.dateIssued = new Date();
-            certificate.expiryDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year from now
+            // Log for debugging
+            console.log('Signing certificate:', id);
+            console.log('Signature data length:', signature?.length);
 
-            certificate.history.push({
-               action: 'SIGNED',
-               timestamp: new Date(),
-               userId: input.createdBy,
-               notes: 'Certificate signed by PENRO'
+            // Extract the base64 data from the data URL
+            const base64Data = signature.split(',')[1] || signature;
+
+            // Convert base64 signature to Buffer
+            const signatureBuffer = Buffer.from(base64Data, 'base64');
+
+            // Log for debugging
+            console.log('Converted signature buffer length:', signatureBuffer.length);
+
+            // Update certificate with signature data
+            const updateData = {
+               signature: {
+                  data: signatureBuffer,
+                  contentType: 'image/png'
+               },
+               certificateStatus: 'Signed',
+               dateIssued: new Date(),
+               expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // 1 year from now
+            };
+
+            const updatedCertificate = await Certificate.findByIdAndUpdate(
+               id,
+               { $set: updateData },
+               { new: true }
+            );
+
+            // Log the updated certificate
+            console.log('Updated certificate:', {
+               id: updatedCertificate.id,
+               hasSignature: !!updatedCertificate.signature?.data,
+               signatureSize: updatedCertificate.signature?.data?.length
             });
 
-            return await certificate.save();
+            // Convert signature buffer back to base64 for response
+            const certObj = updatedCertificate.toObject();
+            if (certObj.signature && certObj.signature.data) {
+               certObj.signature = {
+                  ...certObj.signature,
+                  data: certObj.signature.data.toString('base64')
+               };
+            }
+
+            return certObj;
          } catch (error) {
+            console.error('Error signing certificate:', error);
             throw new Error(`Failed to sign certificate: ${error.message}`);
+         }
+      },
+
+      updateCertificate: async (_, { id, certificateStatus, signature }) => {
+         try {
+            const certificate = await Certificate.findById(id);
+            if (!certificate) {
+               throw new UserInputError('Certificate not found');
+            }
+
+            const updateData = {};
+
+            if (certificateStatus) {
+               updateData.certificateStatus = certificateStatus;
+            }
+
+            if (signature === null) {
+               // Remove signature and reset dates
+               updateData.$unset = { signature: 1 }; // Properly remove the signature field
+               updateData.dateIssued = null;
+               updateData.expiryDate = null;
+            }
+
+            const updatedCertificate = await Certificate.findByIdAndUpdate(
+               id,
+               signature === null ? { $set: updateData, $unset: { signature: 1 } } : { $set: updateData },
+               { new: true }
+            );
+
+            // Convert signature buffer to base64 if it exists
+            const certObj = updatedCertificate.toObject();
+            if (certObj.signature && certObj.signature.data) {
+               certObj.signature = {
+                  ...certObj.signature,
+                  data: certObj.signature.data.toString('base64')
+               };
+            }
+
+            return certObj;
+         } catch (error) {
+            console.error('Error updating certificate:', error);
+            throw new Error(`Failed to update certificate: ${error.message}`);
          }
       }
    }

@@ -55,7 +55,8 @@ const permitResolvers = {
                InspectionReportsReviewedByChief: permit.InspectionReportsReviewedByChief || false,
                InspectionReportsReviewedByPENRCENROfficer: permit.InspectionReportsReviewedByPENRCENROfficer || false,
                awaitingPermitCreation: permit.awaitingPermitCreation || false,
-               PermitCreated: permit.PermitCreated || false
+               PermitCreated: permit.PermitCreated || false,
+               certificateSignedByPENRCENROfficer: permit.certificateSignedByPENRCENROfficer || false
             }));
 
             // console.log('Server: Fetched user applications:', query);
@@ -190,6 +191,8 @@ const permitResolvers = {
 
          awaitingPermitCreation,
          PermitCreated,
+
+         certificateSignedByPENRCENROfficer,
          certificateId,
          hasCertificate
       }) => {
@@ -218,6 +221,8 @@ const permitResolvers = {
 
                awaitingPermitCreation,
                PermitCreated,
+
+               certificateSignedByPENRCENROfficer,
                certificateId,
                hasCertificate
             }).reduce((acc, [key, value]) => {
@@ -396,6 +401,8 @@ const permitResolvers = {
          awaitingPermitCreation,
          PermitCreated,
 
+         certificateSignedByPENRCENROfficer,
+
          hasCertificate,
          certificateId
       }, { user }) => {
@@ -405,6 +412,34 @@ const permitResolvers = {
                throw new Error('Permit not found');
             }
 
+            // If we're undoing permit creation, delete the certificate
+            if (currentStage === 'AuthenticityApprovedByTechnicalStaff' && permit.certificateId) {
+               console.log('Undoing permit creation. Deleting certificate:', permit.certificateId);
+               try {
+                  const deletedCertificate = await Certificate.findByIdAndDelete(permit.certificateId);
+                  console.log('Certificate deleted:', deletedCertificate ? 'success' : 'not found');
+
+                  // Reset certificate-related fields
+                  permit.certificateId = null;
+                  permit.hasCertificate = false;
+                  permit.certificateGenerated = false;
+                  permit.PermitCreated = false;
+                  permit.awaitingPermitCreation = true;
+
+                  console.log('Permit certificate fields reset:', {
+                     certificateId: permit.certificateId,
+                     hasCertificate: permit.hasCertificate,
+                     certificateGenerated: permit.certificateGenerated,
+                     PermitCreated: permit.PermitCreated,
+                     awaitingPermitCreation: permit.awaitingPermitCreation
+                  });
+               } catch (error) {
+                  console.error('Error deleting certificate:', error);
+                  throw new Error(`Failed to delete associated certificate: ${error.message}`);
+               }
+            }
+
+            // Update permit fields
             permit.currentStage = currentStage;
             permit.status = status;
 
@@ -429,6 +464,8 @@ const permitResolvers = {
 
                awaitingPermitCreation,
                PermitCreated,
+
+               certificateSignedByPENRCENROfficer,
 
                hasCertificate,
                certificateId

@@ -13,10 +13,50 @@ import {
    TableHeader,
    TableRow,
 } from "@/components/ui/table";
+import { gql, useQuery } from '@apollo/client';
+
+const GET_CERTIFICATES = gql`
+  query GetCertificates($status: String) {
+    getCertificates(status: $status) {
+      id
+      certificateNumber
+      applicationId
+      applicationType
+      certificateStatus
+      dateCreated
+      certificateData {
+        registrationType
+        ownerName
+        address
+        chainsawDetails {
+          brand
+          model
+          serialNumber
+          dateOfAcquisition
+          powerOutput
+          maxLengthGuidebar
+          countryOfOrigin
+          purchasePrice
+        }
+      }
+      uploadedCertificate {
+        fileData
+        filename
+        contentType
+        uploadDate
+        metadata {
+          certificateType
+          issueDate
+          expiryDate
+          remarks
+        }
+      }
+    }
+  }
+`;
 
 const PENRCENROfficerDashboard = () => {
-   const [activeMainTab, setActiveMainTab] = useState('Applications');
-   const [activeSubTab, setActiveSubTab] = useState('Applications for Review');
+   const [activeMainTab, setActiveMainTab] = useState('Pending Signature');
    const [filters, setFilters] = useState({
       searchTerm: '',
       applicationType: '',
@@ -26,46 +66,49 @@ const PENRCENROfficerDashboard = () => {
       }
    });
 
-   const mainTabs = ['Applications', 'Applications Awaiting OOP', 'Applications Inspection Reports', 'Certificates/Permits'];
-   const subTabs = {
-      'Applications': ['Applications for Review', 'Accepted Applications'],
-      'Applications Inspection Reports': ['Reports for Review', 'Reviewed Reports'],
-      'Applications Awaiting OOP': ['Awaiting OOP', 'Created OOP'],
-      'Certificates/Permits': ['Pending Certification', 'Certified Certificates']
-   };
+   // Remove nested structure, use flat main tabs
+   const mainTabs = [
+      'Pending Signature',
+      'Signed Certificates'
+   ];
 
    const getQueryParamsForTab = (tab) => {
       switch (tab) {
-         case 'Reports for Review':
-            return { currentStage: 'InspectionReportForReviewByPENRCENROfficer', hasInspectionReport: true };
-         case 'Reviewed Reports':
-            return { InspectionReportsReviewedByPENRCENROfficer: true };
-         case 'Applications for Review':
-            return { currentStage: 'CENRPENRReview' };
-         case 'Accepted Applications':
-            return { acceptedByPENRCENROfficer: true };
-         case 'Awaiting OOP':
-            return { awaitingOOP: true };
-         case 'Created OOP':
-            return { awaitingOOP: false, OOPCreated: true, status: 'In Progress' };
-         case 'Pending Certification':
-            return { currentStage: 'PENRCENRCertification' };
-         case 'Certified Certificates':
-            return { currentStage: 'PENRCENRCertified' };
+         case 'Pending Signature':
+            return {
+               currentStage: 'PendingSignatureByPENRCENROfficer',
+               hasCertificate: true,
+               PermitCreated: true
+            };
+         case 'Signed Certificates':
+            return {
+               certificateSignedByPENRCENROfficer: true,
+               hasCertificate: true
+            };
          default:
             return {};
       }
    };
 
-   const { applications, loading: appLoading, error: appError, refetch: refetchApps } = useApplications(getQueryParamsForTab(activeSubTab));
+   const { applications, loading: appLoading, error: appError, refetch: refetchApps } = useApplications(getQueryParamsForTab(activeMainTab));
+
+   const { data: certificatesData, loading: certificatesLoading, error: certificatesError, refetch: refetchCertificates }
+      = useQuery(GET_CERTIFICATES, {
+         variables: { status: activeMainTab === 'Pending Signature' ? 'Pending Signature' : 'Complete Signatures' },
+         skip: !activeMainTab.includes('Certificates'),
+      });
 
    const handleRefetch = () => {
-      refetchApps();
+      if (activeMainTab.includes('Certificates')) {
+         refetchCertificates();
+      } else {
+         refetchApps();
+      }
    };
 
    useEffect(() => {
       refetchApps();
-   }, [refetchApps, activeSubTab]);
+   }, [refetchApps, activeMainTab]);
 
    useEffect(() => {
       const pollInterval = setInterval(handleRefetch, 5000);
@@ -73,25 +116,12 @@ const PENRCENROfficerDashboard = () => {
    }, [activeMainTab]);
 
    const handleTabChange = (tab) => {
-      const isCurrentlyCertificates = activeMainTab.includes('Certificates');
-      const isTargetCertificates = tab.includes('Certificates');
-
       setActiveMainTab(tab);
-      setActiveSubTab(subTabs[tab][0]);
-
-      if (isCurrentlyCertificates !== isTargetCertificates) {
-         setFilters({
-            searchTerm: '',
-            applicationType: '',
-            dateRange: { from: undefined, to: undefined }
-         });
-      }
-
-      handleRefetch();
-   };
-
-   const handleSubTabChange = (tab) => {
-      setActiveSubTab(tab);
+      setFilters({
+         searchTerm: '',
+         applicationType: '',
+         dateRange: { from: undefined, to: undefined }
+      });
       handleRefetch();
    };
 
@@ -135,17 +165,11 @@ const PENRCENROfficerDashboard = () => {
 
    const renderTabDescription = () => {
       const descriptions = {
-         'Applications for Review': 'This is the list of applications pending for your review.',
-         'Accepted Applications': 'This is the list of applications that you have accepted after review.',
-         'Reports for Review': 'This is the list of inspection reports that require your review and approval.',
-         'Reviewed Reports': 'This is the list of inspection reports that you have already reviewed.',
-         'Awaiting OOP': 'This is the list of applications waiting for Order of Payment creation.',
-         'Created OOP': 'This is the list of applications with created Order of Payments.',
          'Pending Certification': 'This is the list of permits/certificates pending for your certification.',
          'Certified Certificates': 'This is the list of permits/certificates that you have certified.'
       };
 
-      const text = useTypewriter(descriptions[activeSubTab] || '');
+      const text = useTypewriter(descriptions[activeMainTab] || '');
 
       return (
          <div className="mb-4 -mt-4">
@@ -186,7 +210,7 @@ const PENRCENROfficerDashboard = () => {
                      app={app}
                      onReviewComplete={handleRefetch}
                      getStatusColor={getStatusColor}
-                     currentTab={activeSubTab}
+                     currentTab={activeMainTab}
                      isMobile={true}
                   />
                ))}
@@ -212,7 +236,7 @@ const PENRCENROfficerDashboard = () => {
                      app={app}
                      onReviewComplete={handleRefetch}
                      getStatusColor={getStatusColor}
-                     currentTab={activeSubTab}
+                     currentTab={activeMainTab}
                      isMobile={false}
                   />
                ))}
@@ -228,11 +252,8 @@ const PENRCENROfficerDashboard = () => {
          onRefresh={handleRefetch}
          isMobile={isMobile}
          mainTabs={mainTabs}
-         subTabs={subTabs}
          activeMainTab={activeMainTab}
-         activeSubTab={activeSubTab}
          onMainTabChange={handleTabChange}
-         onSubTabChange={handleSubTabChange}
          tabDescription={renderTabDescription()}
          filters={<ApplicationFilters filters={filters} setFilters={setFilters} />}
       >
