@@ -102,15 +102,6 @@ const ChainsawRegistrationForm = () => {
    const [isSubmitting, setIsSubmitting] = useState(false);
    const [isSavingDraft, setIsSavingDraft] = useState(false);
 
-   const chainsawStores = [
-      { value: "Green Chainsaw Co.", label: "Green Chainsaw Co." },
-      { value: "Forest Tools Inc.", label: "Forest Tools Inc." },
-      { value: "EcoSaw Supplies", label: "EcoSaw Supplies" },
-      { value: "Timber Tech Equipment", label: "Timber Tech Equipment" },
-      { value: "Woodland Machinery", label: "Woodland Machinery" },
-      { value: "other", label: "Other (not listed)" }
-   ];
-
    const handleInputChange = (e) => {
       const { name, value } = e.target;
       setFormData(prev => ({ ...prev, [name]: value }));
@@ -149,13 +140,9 @@ const ChainsawRegistrationForm = () => {
          return;
       }
       if (currentStep === 1) {
-         if (formData.chainsawStore === "other" && !customStore) {
+         if (!formData.chainsawStore) {
             toast.error("Please enter the name of the chainsaw store.");
             return;
-         }
-         // Update formData with custom store if "other" is selected
-         if (formData.chainsawStore === "other") {
-            setFormData(prev => ({ ...prev, chainsawStore: customStore }));
          }
       }
       if (currentStep === 4) {
@@ -449,27 +436,20 @@ const ChainsawRegistrationForm = () => {
                      {currentStep === 1 && (
                         <div className="space-y-4 pt-2">
                            <p className="text-sm text-gray-700 dark:text-gray-300 mb-3 font-semibold">
-                              Please select the store where you purchased your chainsaw. If your store is not listed, please enter it manually.
+                              Please enter the name of the store where you purchased your chainsaw.
                            </p>
-                           <CustomSelect
-                              value={formData.chainsawStore}
-                              onChange={(value) => handleSelectChange('chainsawStore', value)}
-                              options={chainsawStores}
-                           />
-                           {formData.chainsawStore === "other" && (
-                              <div className="mt-4">
-                                 <Label htmlFor="customStore" className="dark:text-white">Enter Chainsaw Store Name</Label>
-                                 <Input
-                                    id="customStore"
-                                    name="customStore"
-                                    value={customStore}
-                                    onChange={(e) => setCustomStore(e.target.value)}
-                                    placeholder="Enter the name of the store"
-                                    required
-                                    className="dark:bg-gray-700 dark:text-white"
-                                 />
-                              </div>
-                           )}
+                           <div className="space-y-2">
+                              <Label htmlFor="chainsawStore" className="dark:text-white">Chainsaw Store Name</Label>
+                              <Input
+                                 id="chainsawStore"
+                                 name="chainsawStore"
+                                 value={formData.chainsawStore}
+                                 onChange={handleInputChange}
+                                 placeholder="Enter the name of the store"
+                                 required
+                                 className="dark:bg-gray-700 dark:text-white"
+                              />
+                           </div>
                         </div>
                      )}
 
