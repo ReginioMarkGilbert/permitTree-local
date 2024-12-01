@@ -2,7 +2,7 @@
 // Technical Staff Application Row
 
 import React, { useState, useEffect } from 'react';
-import { Eye, ClipboardCheck, RotateCcw, FileSignature } from 'lucide-react';
+import { Eye, ClipboardCheck, RotateCcw, FileSignature, FileText } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -308,7 +308,7 @@ const PCOApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
          },
 
          (currentTab === 'Pending Signature' || currentTab === 'Signed Certificates') && {
-            icon: Eye,
+            icon: FileText,
             label: "View Certificate",
             onClick: handleViewCertificate,
             variant: "outline",

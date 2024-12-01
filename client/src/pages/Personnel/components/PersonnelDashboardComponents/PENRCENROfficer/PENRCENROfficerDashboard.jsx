@@ -82,6 +82,7 @@ const PENRCENROfficerDashboard = () => {
             };
          case 'Signed Certificates':
             return {
+               // currentStage: 'PendingRelease',
                certificateSignedByPENRCENROfficer: true,
                hasCertificate: true
             };
@@ -165,8 +166,8 @@ const PENRCENROfficerDashboard = () => {
 
    const renderTabDescription = () => {
       const descriptions = {
-         'Pending Certification': 'This is the list of permits/certificates pending for your certification.',
-         'Certified Certificates': 'This is the list of permits/certificates that you have certified.'
+         'Pending Signature': 'This is the list of permits/certificates pending for your signature.',
+         'Signed Certificates': 'This is the list of permits/certificates that you have signed.'
       };
 
       const text = useTypewriter(descriptions[activeMainTab] || '');

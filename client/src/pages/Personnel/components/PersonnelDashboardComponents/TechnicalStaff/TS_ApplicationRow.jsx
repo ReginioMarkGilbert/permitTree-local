@@ -11,7 +11,7 @@ import {
    TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { format } from 'date-fns';
-import { ClipboardCheck, Download, Eye, FileCheck, FileCheck2, RotateCcw } from 'lucide-react';
+import { ClipboardCheck, Download, Eye, FileCheck, FileCheck2, RotateCcw, FileText } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import TS_AuthenticityReviewModal from './TS_AuthenticityReviewModal';
 import TS_ReviewModal from './TS_ReviewModal';
@@ -29,6 +29,8 @@ import { toast } from 'sonner';
 import CertificateViewModal from './CertificateViewModal';
 import TS_InspectionReportModal from '../../InspectionDashboardComponents/TS_InspectionReportModal';
 import TS_InspectionReportsViewModal from './TS_InspectionReportsViewModal';
+import UploadStampedCertificateModal from './UploadStampedCertificateModal';
+import ReleaseConfirmationModal from './ReleaseConfirmationModal';
 
 const GET_APPLICATION_DETAILS = gql`
   query GetApplication($id: ID!) {
@@ -141,6 +143,15 @@ const GET_CERTIFICATE = gql`
   }
 `;
 
+const UPDATE_CERTIFICATE = gql`
+  mutation UpdateCertificate($id: ID!, $certificateStatus: String) {
+    updateCertificate(id: $id, certificateStatus: $certificateStatus) {
+      id
+      certificateStatus
+    }
+  }
+`;
+
 const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, isMobile }) => {
    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -152,11 +163,13 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
    // const { handleUndoApproval, handleUndoAcceptance } = useUndoApplicationApproval();
    const [updatePermitStage] = useMutation(UPDATE_PERMIT_STAGE);
    const [undoAcceptanceTechnicalStaff] = useMutation(UNDO_ACCEPTANCE_TECHNICAL_STAFF);
+   const [updateCertificate] = useMutation(UPDATE_CERTIFICATE);
    const handleViewClick = () => setIsViewModalOpen(true);
    const handleViewCertClick = () => setIsViewCertModalOpen(true);
    const handleReviewClick = () => setIsReviewModalOpen(true);
    const handleAuthenticityClick = () => setIsAuthenticityModalOpen(true);
    const [isInspectionReportsModalOpen, setIsInspectionReportsModalOpen] = useState(false);
+   const [isReleaseModalOpen, setIsReleaseModalOpen] = useState(false);
 
    const { loading: certLoading, error: certError, data: certData } = useQuery(GET_CERTIFICATE, {
       variables: { applicationId: app.id },
@@ -212,7 +225,8 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
                PermitCreated: false,
                awaitingPermitCreation: true,
                hasCertificate: false,
-               certificateId: null
+               certificateId: null,
+               certificateSignedByPENRCENROfficer: false
             };
          }
 
@@ -311,12 +325,12 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
             className: "text-green-600 hover:text-green-800"
          },
 
-         currentTab === 'Created Permits' && {
-            icon: FileCheck2,
+         (currentTab === 'Created Permits' || currentTab === 'Pending Release' || currentTab === 'Released Certificates') && {
+            icon: FileText,
             label: "View Certificate",
             onClick: handleViewCertClick,
             variant: "outline",
-            className: "text-blue-600 hover:text-blue-800"
+            className: "text-purple-600 hover:text-purple-800"
          },
 
          (currentTab === 'Approved Applications' ||
@@ -345,6 +359,30 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
             onClick: () => setIsInspectionReportsModalOpen(true),
             variant: "outline",
             className: "text-purple-600 hover:text-purple-800"
+         },
+
+         currentTab === 'Pending Release' && {
+            icon: FileCheck2,
+            label: 'Upload Stamped Certificate',
+            onClick: () => setIsCertificateModalOpen(true),
+            variant: "outline",
+            className: "text-green-600 hover:text-green-800"
+         },
+
+         currentTab === 'Pending Release' && {
+            icon: FileCheck2,
+            label: 'Release Certificate',
+            onClick: () => setIsReleaseModalOpen(true),
+            variant: "outline",
+            className: "text-blue-600 hover:text-blue-800"
+         },
+
+         currentTab === 'Released Certificates' && {
+            icon: RotateCcw,
+            label: "Undo Release",
+            onClick: handleUndoRelease,
+            variant: "outline",
+            className: "text-yellow-600 hover:text-yellow-800"
          },
       ].filter(Boolean);
 
@@ -383,6 +421,37 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
          toast.error('Error loading certificate');
       }
    }, [certError]);
+
+   const handleUndoRelease = async () => {
+      try {
+         const result = await updatePermitStage({
+            variables: {
+               id: app.id,
+               currentStage: 'PendingRelease',
+               status: 'In Progress',
+               notes: 'Release undone by Technical Staff'
+            }
+         });
+
+         // Also update certificate status
+         if (certData?.getCertificatesByApplicationId[0]?.id) {
+            await updateCertificate({
+               variables: {
+                  id: certData.getCertificatesByApplicationId[0].id,
+                  certificateStatus: 'Stamped Certificate'
+               }
+            });
+         }
+
+         if (result?.data?.updatePermitStage) {
+            toast.success('Certificate release undone successfully');
+            onReviewComplete();
+         }
+      } catch (error) {
+         console.error('Error undoing release:', error);
+         toast.error(`Failed to undo release: ${error.message}`);
+      }
+   };
 
    if (isMobile) {
       return (
@@ -426,7 +495,7 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
                application={app}
                onReviewComplete={handleReviewComplete}
             />
-            <CertificateActionHandler
+            <UploadStampedCertificateModal
                isOpen={isCertificateModalOpen}
                onClose={() => setIsCertificateModalOpen(false)}
                application={app}
@@ -439,19 +508,21 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
    return (
       <>
          <TableRow>
-            <TableCell>{app.applicationNumber}</TableCell>
-            <TableCell>{app.applicationType}</TableCell>
-            <TableCell>{format(new Date(app.dateOfSubmission), 'MMM d, yyyy')}</TableCell>
-            <TableCell>
-               <Badge
-                  variant={getStatusVariant(app.status).variant}
-                  className={getStatusVariant(app.status).className}
-               >
-                  {app.status}
-               </Badge>
+            <TableCell className="w-[25%]">{app.applicationNumber}</TableCell>
+            <TableCell className="w-[25%] text-center">{app.applicationType}</TableCell>
+            <TableCell className="w-[20%] text-center">{format(new Date(app.dateOfSubmission), 'MMM d, yyyy')}</TableCell>
+            <TableCell className="w-[15%]">
+               <div className="flex justify-center">
+                  <Badge
+                     variant={getStatusVariant(app.status).variant}
+                     className={getStatusVariant(app.status).className}
+                  >
+                     {app.status}
+                  </Badge>
+               </div>
             </TableCell>
-            <TableCell className="text-right">
-               <div className="flex justify-end gap-2">
+            <TableCell className="w-[15%]">
+               <div className="flex justify-center space-x-2">
                   {renderActionButtons()}
                </div>
             </TableCell>
@@ -475,13 +546,13 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
             application={app}
             onReviewComplete={handleReviewComplete}
          />
-         <CertificateActionHandler
+         <UploadStampedCertificateModal
             isOpen={isCertificateModalOpen}
             onClose={() => setIsCertificateModalOpen(false)}
             application={app}
             onComplete={handleCertificateComplete}
          />
-         {currentTab === 'Created Permits' && (
+         {(currentTab === 'Created Permits' || currentTab === 'Pending Release' || currentTab === 'Released Certificates') && (
             <CertificateViewModal
                isOpen={isViewCertModalOpen}
                onClose={() => setIsViewCertModalOpen(false)}
@@ -494,6 +565,12 @@ const TS_ApplicationRow = ({ app, onReviewComplete, getStatusColor, currentTab, 
             isOpen={isInspectionReportsModalOpen}
             onClose={() => setIsInspectionReportsModalOpen(false)}
             permitId={app.id}
+         />
+         <ReleaseConfirmationModal
+            isOpen={isReleaseModalOpen}
+            onClose={() => setIsReleaseModalOpen(false)}
+            application={app}
+            onComplete={onReviewComplete}
          />
       </>
    );

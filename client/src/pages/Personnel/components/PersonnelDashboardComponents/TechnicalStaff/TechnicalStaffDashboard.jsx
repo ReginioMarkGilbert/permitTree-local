@@ -86,7 +86,7 @@ const TechnicalStaffDashboard = () => {
       'Applications': ['Pending Reviews', 'Returned Applications', 'Accepted Applications', 'For Inspection and Approval', 'Approved Applications'],
       'Order of Payment': ['Pending Approval', 'Approved OOP'],
       'Awaiting Permit Creation': ['Awaiting Permit Creation', 'Created Permits'],
-      'Certificates/Permits': ['Pending Signature', 'Signed Certificates']
+      'Certificates/Permits': ['Pending Release', 'Released Certificates']
    };
 
    const getQueryParamsForTab = (tab) => {
@@ -130,14 +130,20 @@ const TechnicalStaffDashboard = () => {
             return {
                PermitCreated: true
             };
-         case 'Pending Signature':
+         case 'Pending Release':
             return {
+               currentStage: 'PendingRelease',
                status: 'In Progress',
-               certificateStatus: 'Pending Signature'
+               certificateSignedByPENRCENROfficer: true,
+               hasCertificate: true,
+               PermitCreated: true
             };
-         case 'Signed Certificates':
+         case 'Released Certificates':
             return {
-               certificateStatus: 'Complete Signatures'
+               currentStage: 'Released',
+               status: 'Released',
+               certificateSignedByPENRCENROfficer: true,
+               hasCertificate: true
             };
          case 'Pending Approval':
             return { OOPstatus: 'For Approval' };
@@ -330,11 +336,11 @@ const TechnicalStaffDashboard = () => {
          <Table>
             <TableHeader>
                <TableRow>
-                  <TableHead>Application Number</TableHead>
-                  <TableHead>Application Type</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="w-[25%]">Application Number</TableHead>
+                  <TableHead className="w-[25%] text-center">Application Type</TableHead>
+                  <TableHead className="w-[20%] text-center">Date</TableHead>
+                  <TableHead className="w-[15%] text-center">Status</TableHead>
+                  <TableHead className="w-[15%] text-center">Actions</TableHead>
                </TableRow>
             </TableHeader>
             <TableBody>
@@ -350,73 +356,6 @@ const TechnicalStaffDashboard = () => {
                ))}
             </TableBody>
          </Table>
-      );
-   };
-
-   const renderCertificatesTable = () => {
-      if (certificatesLoading) return <p className="text-center text-gray-500">Loading certificates...</p>;
-      if (certificatesError) return <p className="text-center text-red-500">Error loading certificates</p>;
-      if (!certificatesData?.getCertificates?.length) {
-         return (
-            <div className="bg-white rounded-lg shadow-sm p-6 text-center">
-               <FileX className="mx-auto h-12 w-12 text-gray-400" />
-               <h3 className="mt-2 text-sm font-medium text-gray-900">No certificates found</h3>
-               <p className="mt-1 text-sm text-gray-500">No certificates available at this time</p>
-            </div>
-         );
-      }
-
-      // Mobile view
-      if (isMobile) {
-         return (
-            <div className="space-y-4">
-               {certificatesData.getCertificates.map((cert) => (
-                  <TS_CertificateRow
-                     key={cert.id}
-                     certificate={cert}
-                     onRefetch={handleRefetch}
-                     isMobile={true}
-                  />
-               ))}
-            </div>
-         );
-      }
-
-      // Desktop view
-      return (
-         <div className="bg-white rounded-lg shadow overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-               <thead className="bg-gray-50">
-                  <tr>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Certificate Number
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Application Number
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Date Created
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                     </th>
-                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                     </th>
-                  </tr>
-               </thead>
-               <tbody className="bg-white divide-y divide-gray-200">
-                  {certificatesData.getCertificates.map((cert) => (
-                     <TS_CertificateRow
-                        key={cert.id}
-                        certificate={cert}
-                        onRefetch={handleRefetch}
-                        isMobile={false}
-                     />
-                  ))}
-               </tbody>
-            </table>
-         </div>
       );
    };
 
@@ -478,8 +417,8 @@ const TechnicalStaffDashboard = () => {
          'Created Permits': 'This is the list of applications with created permits/certificates.',
 
          // Certificates/Permits
-         'Pending Signature': 'This is the list of permits/certificates pending for signature from authorized personnel.',
-         'Signed Certificates': 'This is the list of permits/certificates that have been completely signed.',
+         'Pending Release': 'This is the list of permits/certificates that are ready for release to the applicant.',
+         'Released Certificates': 'This is the list of permits/certificates that have been released to the applicant.',
 
          // Order of Payment
          'Pending Approval': 'This is the list of Order of Payments pending for your approval.',
@@ -512,9 +451,7 @@ const TechnicalStaffDashboard = () => {
       >
          {activeMainTab === 'Order of Payment' ?
             renderOrderOfPaymentTable() :
-            activeMainTab.includes('Certificates') ?
-               renderCertificatesTable() :
-               renderApplicationTable()
+            renderApplicationTable()
          }
       </DashboardLayout>
    );

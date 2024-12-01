@@ -425,13 +425,15 @@ const permitResolvers = {
                   permit.certificateGenerated = false;
                   permit.PermitCreated = false;
                   permit.awaitingPermitCreation = true;
+                  permit.certificateSignedByPENRCENROfficer = false;
 
                   console.log('Permit certificate fields reset:', {
                      certificateId: permit.certificateId,
                      hasCertificate: permit.hasCertificate,
                      certificateGenerated: permit.certificateGenerated,
                      PermitCreated: permit.PermitCreated,
-                     awaitingPermitCreation: permit.awaitingPermitCreation
+                     awaitingPermitCreation: permit.awaitingPermitCreation,
+                     certificateSignedByPENRCENROfficer: permit.certificateSignedByPENRCENROfficer
                   });
                } catch (error) {
                   console.error('Error deleting certificate:', error);

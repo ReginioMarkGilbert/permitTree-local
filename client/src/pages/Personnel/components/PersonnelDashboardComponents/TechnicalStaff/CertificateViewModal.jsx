@@ -271,12 +271,13 @@ const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) 
                            <div>
                               <h3 className="font-semibold mb-2">Certificate Information</h3>
                               <div className="space-y-2">
-                                 <p><span className="font-medium">Status:</span>
+                                 <p><span className="font-medium">Certificate Status:</span>
                                     <Badge className="ml-2" variant={certificate.certificateStatus === 'Active' ? 'success' : 'secondary'}>
                                        {certificate.certificateStatus}
                                     </Badge>
                                  </p>
-                                 <p><span className="font-medium">Created:</span> {format(new Date(parseInt(certificate.dateCreated)), 'PPP')}</p>
+                                 {/* remove this later */}
+                                 {/* <p><span className="font-medium">Created:</span> {format(new Date(parseInt(certificate.dateCreated)), 'PPP')}</p> */}
                                  {certificate.dateIssued && (
                                     <p><span className="font-medium">Issued:</span> {format(new Date(parseInt(certificate.dateIssued)), 'PPP')}</p>
                                  )}

@@ -148,21 +148,21 @@ const certificateResolvers = {
          try {
             // Find existing certificate
             let certificate = await Certificate.findOne({
-               applicationId: input.applicationId,
-               certificateStatus: 'Pending Signature'
+               applicationId: input.applicationId
             });
 
+            // If no certificate exists, throw error
             if (!certificate) {
-               throw new Error('No pending certificate found for this application. Please generate an e-certificate first.');
+               throw new Error('No certificate found for this application.');
             }
 
             // Convert base64 to Buffer
             const fileBuffer = Buffer.from(input.uploadedCertificate.fileData, 'base64');
 
-            // Keep the existing certificateData and update other fields
+            // Update the certificate with new stamped certificate
             const updatedCertificate = {
                $set: {
-                  certificateStatus: 'Pending Signature',
+                  certificateStatus: 'Stamped Certificate',
                   uploadedCertificate: {
                      fileData: fileBuffer,
                      filename: input.uploadedCertificate.filename,
@@ -188,14 +188,10 @@ const certificateResolvers = {
                }
             ).lean();
 
-            // Update permit status and forward to PENR/CENR Officer
+            // Update permit status
             await Permit.findByIdAndUpdate(input.applicationId, {
                $set: {
-                  certificateGenerated: true,
-                  certificateId: savedCertificate._id,
-                  PermitCreated: true,
-                  awaitingPermitCreation: false,
-                  currentStage: 'PendingSignatureByPENRCENROfficer',
+                  currentStage: 'PendingRelease',
                   status: 'In Progress'
                }
             });
@@ -274,6 +270,18 @@ const certificateResolvers = {
                { new: true }
             );
 
+            // Update the associated permit's stage
+            await Permit.findByIdAndUpdate(
+               updatedCertificate.applicationId,
+               {
+                  $set: {
+                     currentStage: 'PendingRelease',
+                     status: 'In Progress',
+                     certificateSignedByPENRCENROfficer: true
+                  }
+               }
+            );
+
             // Log the updated certificate
             console.log('Updated certificate:', {
                id: updatedCertificate.id,
@@ -322,6 +330,19 @@ const certificateResolvers = {
                signature === null ? { $set: updateData, $unset: { signature: 1 } } : { $set: updateData },
                { new: true }
             );
+
+            // Update permit stage if certificate status changes
+            if (certificateStatus === 'Stamped Certificate') {
+               await Permit.findByIdAndUpdate(
+                  updatedCertificate.applicationId,
+                  {
+                     $set: {
+                        currentStage: 'PendingRelease',
+                        status: 'In Progress'
+                     }
+                  }
+               );
+            }
 
             // Convert signature buffer to base64 if it exists
             const certObj = updatedCertificate.toObject();

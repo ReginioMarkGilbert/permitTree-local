@@ -12,7 +12,7 @@ const CertificateSchema = new mongoose.Schema({
    },
    certificateStatus: {
       type: String,
-      enum: ['Pending Signature', 'Complete Signatures', 'Released'],
+      enum: ['Pending Signature', 'Complete Signatures', 'Stamped Certificate', 'Released'],
       default: 'Pending Signature'
    },
    dateCreated: { type: Date, default: Date.now },
