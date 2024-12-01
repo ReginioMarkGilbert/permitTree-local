@@ -6,6 +6,7 @@ const Permit = require('../models/permits/Permit');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { logUserActivity } = require('../utils/activityLogger');
+const AdminIdCounter = require('../models/AdminIdCounter');
 
 const generateToken = (user) => {
    return jwt.sign(
@@ -254,8 +255,16 @@ const userResolvers = {
             let newUser;
 
             if (isPersonnel) {
-               // Create admin account
+               // Get next adminId counter
+               const adminIdCounter = await AdminIdCounter.findOneAndUpdate(
+                  { name: 'adminId' },
+                  { $inc: { value: 1 } },
+                  { new: true, upsert: true }
+               );
+
+               // Create admin account with adminId
                newUser = new Admin({
+                  adminId: adminIdCounter.value,
                   firstName,
                   lastName,
                   username,
