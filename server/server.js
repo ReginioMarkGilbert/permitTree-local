@@ -17,7 +17,7 @@ const startServer = async () => {
    const app = express();
    // await mongoose.connect(process.env.MONGO_URI_NEW);
    try {
-      await mongoose.connect(process.env.MONGO_URI_NEW, {
+      await mongoose.connect(process.env.MONGO_URI_ONLINE, {
          useNewUrlParser: true,
          useUnifiedTopology: true,
       });
