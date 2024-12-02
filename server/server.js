@@ -27,12 +27,13 @@ const startServer = async () => {
       // Schedule certificate expiration check
       scheduleCertificateExpirationCheck();
 
-      await server.start();
-      // const server = new ApolloServer({
-      //    typeDefs,
-      //    resolvers,
-      // });
+      // Create Apollo Server instance
+      const server = new ApolloServer({
+         typeDefs,
+         resolvers,
+      });
 
+      // Start the Apollo Server
       await server.start();
 
       const corsOptions = {
