@@ -72,7 +72,7 @@ const certificateTypes = gql`
     registrationType: String!
     ownerName: String!
     address: String!
-    chainsawDetails: ChainsawDetailsInput!
+    chainsawDetails: ChainsawDetailsInput
     purpose: String!
     otherDetails: JSON
   }

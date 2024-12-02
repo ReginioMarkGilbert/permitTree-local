@@ -14,6 +14,7 @@ import {
    TooltipTrigger,
 } from "@/components/ui/tooltip";
 import CSAWCertificateTemplate from '../../CertificateComponents/certificateTemplates/CSAWCertificateTemplate';
+import COVCertificateTemplate from '../../CertificateComponents/certificateTemplates/COVCertificateTemplate';
 import { useQuery } from '@apollo/client';
 import { gql } from '@apollo/client';
 
@@ -43,6 +44,7 @@ const GET_CERTIFICATE_DETAILS = gql`
           countryOfOrigin
           purchasePrice
         }
+        otherDetails
       }
       signature {
         data
@@ -175,6 +177,46 @@ const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) 
       };
    }, [previewUrl]);
 
+   const renderCertificateTemplate = () => {
+      const certData = certDetails?.getCertificateById || certificate;
+
+      switch (certData.applicationType) {
+         case 'Chainsaw Registration':
+            return (
+               <CSAWCertificateTemplate
+                  ref={certificateRef}
+                  certificate={certData}
+                  application={certData.certificateData}
+                  orderOfPayment={certData.orderOfPayment}
+                  hiddenOnPrint={[]}
+               />
+            );
+         case 'Certificate of Verification':
+            // Merge certificateData with otherDetails for COV
+            const covData = {
+               ...certData.certificateData,
+               name: certData.certificateData.ownerName,
+               driverName: certData.certificateData.otherDetails?.driverName,
+               driverLicenseNumber: certData.certificateData.otherDetails?.driverLicenseNumber,
+               vehiclePlateNumber: certData.certificateData.otherDetails?.vehiclePlateNumber,
+               originAddress: certData.certificateData.otherDetails?.originAddress,
+               destinationAddress: certData.certificateData.otherDetails?.destinationAddress
+            };
+
+            return (
+               <COVCertificateTemplate
+                  ref={certificateRef}
+                  certificate={certData}
+                  application={covData}
+                  orderOfPayment={certData.orderOfPayment}
+                  hiddenOnPrint={[]}
+               />
+            );
+         default:
+            return null;
+      }
+   };
+
    if (loading) {
       return (
          <Dialog open={isOpen} onOpenChange={onClose}>
@@ -212,13 +254,7 @@ const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) 
                   </DialogHeader>
 
                   <div className="overflow-auto max-h-[70vh]">
-                     <CSAWCertificateTemplate
-                        ref={certificateRef}
-                        certificate={certDetails?.getCertificateById || certificate}
-                        application={certDetails?.getCertificateById?.certificateData}
-                        orderOfPayment={certDetails?.getCertificateById?.orderOfPayment}
-                        hiddenOnPrint={[]}
-                     />
+                     {renderCertificateTemplate()}
                   </div>
 
                   <DialogFooter>

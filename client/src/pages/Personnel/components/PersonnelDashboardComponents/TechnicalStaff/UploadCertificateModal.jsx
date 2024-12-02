@@ -10,6 +10,7 @@ import { useReactToPrint } from 'react-to-print';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import CSAWCertificateTemplate from '../../CertificateComponents/certificateTemplates/CSAWCertificateTemplate';
+import COVCertificateTemplate from '../../CertificateComponents/certificateTemplates/COVCertificateTemplate';
 import { cn } from '@/lib/utils';
 
 const UPLOAD_CERTIFICATE = gql`
@@ -46,6 +47,7 @@ const GENERATE_CERTIFICATE = gql`
         registrationType
         ownerName
         address
+        purpose
         chainsawDetails {
           brand
           model
@@ -56,6 +58,7 @@ const GENERATE_CERTIFICATE = gql`
           countryOfOrigin
           purchasePrice
         }
+        otherDetails
       }
       orderOfPayment {
         officialReceipt {
@@ -67,7 +70,7 @@ const GENERATE_CERTIFICATE = gql`
   }
 `;
 
-const GET_APPLICATION_DETAILS = gql`
+const GET_CSAW_PERMIT = gql`
   query GetCSAWPermit($id: ID!) {
     getCSAWPermitById(id: $id) {
       id
@@ -85,6 +88,27 @@ const GET_APPLICATION_DETAILS = gql`
       maxLengthGuidebar
       countryOfOrigin
       purchasePrice
+      hasCertificate
+      certificateId
+    }
+  }
+`;
+
+const GET_COV_PERMIT = gql`
+  query GetCOVPermit($id: ID!) {
+    getCOVPermitById(id: $id) {
+      id
+      applicationNumber
+      applicationType
+      name
+      address
+      cellphone
+      purpose
+      driverName
+      driverLicenseNumber
+      vehiclePlateNumber
+      originAddress
+      destinationAddress
       hasCertificate
       certificateId
     }
@@ -126,7 +150,6 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
    const [certificateFile, setCertificateFile] = useState(null);
    const [metadata, setMetadata] = useState({
       issueDate: '',
-      expiryDate: '',
       remarks: ''
    });
    const [generatedCertificate, setGeneratedCertificate] = useState(null);
@@ -138,16 +161,18 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
    const [generateCertificateMutation] = useMutation(GENERATE_CERTIFICATE);
    const [updatePermitStage] = useMutation(UPDATE_PERMIT_STAGE);
 
-   const { data: applicationData, loading: applicationLoading, error: applicationError } = useQuery(GET_APPLICATION_DETAILS, {
+   const { data: csawData, loading: csawLoading } = useQuery(GET_CSAW_PERMIT, {
       variables: { id: application.id },
-      skip: !application.id,
-      onCompleted: (data) => {
-         console.log('Application data loaded:', data);
-      },
-      onError: (error) => {
-         console.error('Error loading application:', error);
-      }
+      skip: !application.id || application.applicationType !== 'Chainsaw Registration',
    });
+
+   const { data: covData, loading: covLoading } = useQuery(GET_COV_PERMIT, {
+      variables: { id: application.id },
+      skip: !application.id || application.applicationType !== 'Certificate of Verification',
+   });
+
+   const applicationData = application.applicationType === 'Chainsaw Registration' ? csawData?.getCSAWPermitById : covData?.getCOVPermitById;
+   const isLoading = application.applicationType === 'Chainsaw Registration' ? csawLoading : covLoading;
 
    const handleFileChange = (e) => {
       const file = e.target.files[0];
@@ -250,55 +275,71 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
    };
 
    const generateECertificate = async () => {
-      if (applicationLoading) {
+      if (isLoading) {
          toast.error('Loading application details...');
          return;
       }
 
       setIsGenerating(true);
       try {
-         const fullApplication = applicationData?.getCSAWPermitById;
-         if (!fullApplication) {
+         if (!applicationData) {
             toast.error('Application details not found');
             return;
          }
 
-         if (fullApplication.hasCertificate) {
+         if (applicationData.hasCertificate) {
             toast.error('Certificate already exists for this application');
             return;
          }
 
-         const certificateData = {
-            registrationType: fullApplication.registrationType,
-            ownerName: fullApplication.ownerName,
-            address: fullApplication.address,
-            purpose: "For Cutting/Slicing of Planted trees with cutting permits and coconut within Private Land",
-            chainsawDetails: {
-               brand: fullApplication.brand,
-               model: fullApplication.model,
-               serialNumber: fullApplication.serialNumber,
-               dateOfAcquisition: fullApplication.dateOfAcquisition,
-               powerOutput: fullApplication.powerOutput,
-               maxLengthGuidebar: fullApplication.maxLengthGuidebar,
-               countryOfOrigin: fullApplication.countryOfOrigin,
-               purchasePrice: parseFloat(fullApplication.purchasePrice)
-            }
-         };
-
-         console.log('Certificate Data:', certificateData);
+         let certificateData;
+         if (application.applicationType === 'Chainsaw Registration') {
+            certificateData = {
+               registrationType: applicationData.registrationType,
+               ownerName: applicationData.ownerName,
+               address: applicationData.address,
+               purpose: "For Cutting/Slicing of Planted trees with cutting permits and coconut within Private Land",
+               chainsawDetails: {
+                  brand: applicationData.brand,
+                  model: applicationData.model,
+                  serialNumber: applicationData.serialNumber,
+                  dateOfAcquisition: applicationData.dateOfAcquisition,
+                  powerOutput: applicationData.powerOutput,
+                  maxLengthGuidebar: applicationData.maxLengthGuidebar,
+                  countryOfOrigin: applicationData.countryOfOrigin,
+                  purchasePrice: parseFloat(applicationData.purchasePrice)
+               }
+            };
+         } else {
+            certificateData = {
+               registrationType: 'Certificate of Verification',
+               ownerName: applicationData.name,
+               address: applicationData.address,
+               purpose: applicationData.purpose,
+               otherDetails: {
+                  driverName: applicationData.driverName,
+                  driverLicenseNumber: applicationData.driverLicenseNumber,
+                  vehiclePlateNumber: applicationData.vehiclePlateNumber,
+                  originAddress: applicationData.originAddress,
+                  destinationAddress: applicationData.destinationAddress
+               }
+            };
+         }
 
          const { data } = await generateCertificateMutation({
             variables: {
                input: {
-                  applicationId: fullApplication.id,
-                  applicationType: fullApplication.applicationType,
+                  applicationId: applicationData.id,
+                  applicationType: application.applicationType,
                   certificateData
                }
             }
          });
 
-         setGeneratedCertificate(data.generateCertificate);
-         toast.success('E-Certificate generated successfully');
+         if (data?.generateCertificate) {
+            setGeneratedCertificate(data.generateCertificate);
+            toast.success('E-Certificate generated successfully');
+         }
       } catch (error) {
          console.error('Error generating certificate:', error);
          toast.error(`Failed to generate e-certificate: ${error.message}`);
@@ -307,32 +348,8 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
       }
    };
 
-   const handleViewECertificate = () => {
-      setShowECertificate(true);
-   };
-
    const renderCertificateTemplate = () => {
       if (!generatedCertificate) return null;
-
-      const certificateData = {
-         ...generatedCertificate,
-         certificateData: {
-            ...generatedCertificate.certificateData,
-            ownerName: application.ownerName,
-            address: application.address,
-            purpose: "For Cutting/Slicing of Planted trees with cutting permits and coconut within Private Land",
-            chainsawDetails: {
-               brand: application.brand,
-               model: application.model,
-               serialNumber: application.serialNumber,
-               dateOfAcquisition: application.dateOfAcquisition,
-               powerOutput: application.powerOutput,
-               maxLengthGuidebar: application.maxLengthGuidebar,
-               countryOfOrigin: application.countryOfOrigin,
-               purchasePrice: parseFloat(application.purchasePrice)
-            }
-         }
-      };
 
       switch (application.applicationType) {
          case 'Chainsaw Registration':
@@ -340,8 +357,19 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
                <div style={{ display: 'none' }}>
                   <CSAWCertificateTemplate
                      ref={certificateRef}
-                     certificate={certificateData}
-                     application={certificateData.certificateData}
+                     certificate={generatedCertificate}
+                     application={generatedCertificate.certificateData}
+                     hiddenOnPrint={[]}
+                  />
+               </div>
+            );
+         case 'Certificate of Verification':
+            return (
+               <div style={{ display: 'none' }}>
+                  <COVCertificateTemplate
+                     ref={certificateRef}
+                     certificate={generatedCertificate}
+                     application={generatedCertificate.certificateData}
                      hiddenOnPrint={[]}
                   />
                </div>
@@ -360,21 +388,26 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
                      <DialogTitle>E-Certificate Preview</DialogTitle>
                   </DialogHeader>
 
-                  {/* <ScrollArea className="h-[700px] rounded-md border"> */}
                   <div className="overflow-auto max-h-[70vh]">
-                     <CSAWCertificateTemplate
-                        certificate={generatedCertificate}
-                        application={generatedCertificate.certificateData}
-                        hiddenOnPrint={[]}
-                     />
+                     {application.applicationType === 'Chainsaw Registration' ? (
+                        <CSAWCertificateTemplate
+                           certificate={generatedCertificate}
+                           application={generatedCertificate.certificateData}
+                           hiddenOnPrint={[]}
+                        />
+                     ) : (
+                        <COVCertificateTemplate
+                           certificate={generatedCertificate}
+                           application={generatedCertificate.certificateData}
+                           hiddenOnPrint={[]}
+                        />
+                     )}
                   </div>
-                  {/* </ScrollArea> */}
 
                   <div className="flex justify-end gap-2">
                      <Button variant="outline" onClick={() => setShowECertificate(false)}>
                         Back
                      </Button>
-                     {/* remove this later if not implemented */}
                      <Button onClick={handlePrint} className="bg-blue-600 hover:bg-blue-700">
                         Print Certificate
                      </Button>
@@ -413,7 +446,7 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
                            </Button>
                            {generatedCertificate && (
                               <Button
-                                 onClick={handleViewECertificate}
+                                 onClick={() => setShowECertificate(true)}
                                  variant="outline"
                               >
                                  <Eye className="h-4 w-4 mr-2" />
