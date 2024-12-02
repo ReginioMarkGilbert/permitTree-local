@@ -8,7 +8,6 @@ require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const User = require('./src/models/User');
 const Admin = require('./src/models/admin');
-const timeout = require('connect-timeout');
 
 const { permitTypes } = require('./src/schema/permitTypes');
 const typeDefs = require('./src/schema');
@@ -63,49 +62,36 @@ const startServer = async () => {
       });
 
       app.get('/favicon.ico', (req, res) => {
-         res.status(204).end(); // No content response
+         res.status(204).end();
       });
-      // Add timeout middleware (2 minute timeout)
-      app.use(timeout('120s'));
-      app.use(haltOnTimedout);
 
-      app.use('/graphql',
-         cors(corsOptions),
-         timeout('120s'), // Specific timeout for GraphQL endpoint
-         haltOnTimedout,
-         expressMiddleware(server, {
-            context: async ({ req }) => {
-               const token = req.headers.authorization || '';
-               if (token) {
-                  try {
-                     const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
+      app.use('/graphql', expressMiddleware(server, {
+         context: async ({ req }) => {
+            const token = req.headers.authorization || '';
+            if (token) {
+               try {
+                  const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
 
-                     // First check if it's an admin
-                     let admin = await Admin.findById(decoded.id);
-                     if (admin) {
-                        console.log('Admin found in context:', admin.id, admin.roles);
-                        return { admin }; // Return admin context
-                     }
-
-                     // If not admin, check if it's a regular user
-                     let user = await User.findById(decoded.id);
-                     if (user) {
-                        console.log('User found in context:', user.id, user.roles);
-                        return { user }; // Return user context
-                     }
-                  } catch (error) {
-                     console.error('Error verifying token:', error);
+                  let admin = await Admin.findById(decoded.id);
+                  if (admin) {
+                     console.log('Admin found in context:', admin.id, admin.roles);
+                     return { admin };
                   }
+
+                  let user = await User.findById(decoded.id);
+                  if (user) {
+                     console.log('User found in context:', user.id, user.roles);
+                     return { user };
+                  }
+               } catch (error) {
+                  console.error('Error verifying token:', error);
                }
-               console.log('No user/admin in context - server');
-               return {};
-            },
-         })
-      );
-      // const PORT = process.env.PORT || 3001;
-      // const HOST = process.env.HOST || 'localhost';
-      // app.listen(PORT, HOST, () => {
-      //    console.log(`Server running on http://${HOST}:${PORT}/graphql`);
+            }
+            console.log('No user/admin in context - server');
+            return {};
+         },
+      }));
+
       const PORT = process.env.PORT || 3001;
       app.listen(PORT, () => {
          console.log(`Server running on http://localhost:${PORT}/graphql`);
@@ -114,10 +100,5 @@ const startServer = async () => {
       console.error('Error starting server:', error);
    }
 };
-
-// Timeout handler
-function haltOnTimedout(req, res, next) {
-   if (!req.timedout) next();
-}
 
 startServer();
