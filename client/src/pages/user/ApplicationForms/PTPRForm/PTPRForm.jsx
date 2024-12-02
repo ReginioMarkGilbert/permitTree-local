@@ -125,6 +125,7 @@ const PTPRForm = () => {
 
    const handleSaveAsDraft = async () => {
       try {
+         setIsSavingDraft(true);
          const input = {
             ownerName: formData.ownerName,
             address: formData.address,
@@ -174,12 +175,15 @@ const PTPRForm = () => {
       } catch (error) {
          console.error('Error saving draft:', error);
          toast.error("Error saving draft: " + error.message);
+      } finally {
+         setIsSavingDraft(false);
       }
    };
 
    const handleSubmit = async (e) => {
       e.preventDefault();
       try {
+         setIsSubmitting(true);
          const input = {
             ownerName: formData.ownerName,
             address: formData.address,
@@ -232,6 +236,8 @@ const PTPRForm = () => {
       } catch (error) {
          console.error('Error submitting application:', error);
          toast.error("Error submitting application: " + error.message);
+      } finally {
+         setIsSubmitting(false);
       }
    };
 
@@ -336,7 +342,8 @@ const PTPRForm = () => {
                               />
                            </div>
                            <div>
-                              <Label htmlFor="treeSpecies" className="text-foreground">Tree Species Planted (comma-separated)</Label>
+                              {/* <Label htmlFor="treeSpecies" className="text-foreground">Tree Species Planted (comma-separated)</Label> */}
+                              <Label htmlFor="treeSpecies" className="text-foreground">Tree Species Planted</Label>
                               <Input
                                  id="treeSpecies"
                                  name="treeSpecies"
