@@ -16,6 +16,7 @@ import {
 import CSAWCertificateTemplate from '../../CertificateComponents/certificateTemplates/CSAWCertificateTemplate';
 import COVCertificateTemplate from '../../CertificateComponents/certificateTemplates/COVCertificateTemplate';
 import PTPRCertificateTemplate from '../../CertificateComponents/certificateTemplates/PTPRCertificateTemplate';
+import PLTCPCertificateTemplate from '../../CertificateComponents/certificateTemplates/PLTCPCertificateTemplate';
 import { useQuery } from '@apollo/client';
 import { gql } from '@apollo/client';
 
@@ -235,6 +236,40 @@ const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) 
                   ref={certificateRef}
                   certificate={certData}
                   application={ptprData}
+                  orderOfPayment={certData.orderOfPayment}
+                  hiddenOnPrint={[]}
+               />
+            );
+         case 'Public Land Tree Cutting Permit':
+            console.log('Raw Certificate Data:', {
+               certificateData: certData.certificateData,
+               purpose: certData.certificateData.purpose,
+               otherDetails: certData.certificateData.otherDetails
+            });
+
+            const pltcpData = {
+               ...certData.certificateData,
+               ownerName: certData.certificateData.ownerName,
+               address: certData.certificateData.address,
+               purpose: certData.certificateData.purpose,
+               treeType: certData.certificateData.otherDetails?.treeType || [],
+               treeStatus: certData.certificateData.otherDetails?.treeStatus || [],
+               landType: certData.certificateData.otherDetails?.landType || [],
+               posingDanger: certData.certificateData.otherDetails?.posingDanger,
+               forPersonalUse: certData.certificateData.otherDetails?.forPersonalUse,
+               contactNumber: certData.certificateData.otherDetails?.contactNumber
+            };
+
+            console.log('Processed PLTCP Data:', {
+               pltcpData,
+               purpose: pltcpData.purpose
+            });
+
+            return (
+               <PLTCPCertificateTemplate
+                  ref={certificateRef}
+                  certificate={certData}
+                  application={pltcpData}
                   orderOfPayment={certData.orderOfPayment}
                   hiddenOnPrint={[]}
                />
