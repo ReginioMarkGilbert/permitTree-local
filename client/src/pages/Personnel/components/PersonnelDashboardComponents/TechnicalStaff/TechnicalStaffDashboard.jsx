@@ -140,10 +140,10 @@ const TechnicalStaffDashboard = () => {
             };
          case 'Released Certificates':
             return {
-               // currentStage: 'Released',
-               // status: 'Released',
-               certificateSignedByPENRCENROfficer: true,
-               hasCertificate: true
+               currentStage: 'Released',
+               status: 'Released',
+               // certificateSignedByPENRCENROfficer: true,
+               // hasCertificate: true
             };
          case 'Pending Approval':
             return { OOPstatus: 'For Approval' };

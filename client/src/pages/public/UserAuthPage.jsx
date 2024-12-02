@@ -278,6 +278,17 @@ const UserAuthPage = () => {
       }
    };
 
+   const handleKeyPress = (e, formType) => {
+      if (e.key === 'Enter') {
+         e.preventDefault();
+         if (formType === 'signin') {
+            handleLogin(e);
+         } else if (formType === 'signup') {
+            handleSignup(e);
+         }
+      }
+   };
+
    return (
       <div className="flex flex-col min-h-screen bg-gradient-to-br from-green-50 to-green-100">
          {/* {isLoading && (
@@ -355,6 +366,7 @@ const UserAuthPage = () => {
                               onChange={(e) => setLoginUsername(e.target.value)}
                               className="mt-1 w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                               placeholder="Enter your username"
+                              onKeyPress={(e) => handleKeyPress(e, 'signin')}
                            />
                         </div>
                         <div>
@@ -370,6 +382,7 @@ const UserAuthPage = () => {
                                  onChange={(e) => setLoginPassword(e.target.value)}
                                  className="mt-1 w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                                  placeholder="Enter your password"
+                                 onKeyPress={(e) => handleKeyPress(e, 'signin')}
                               />
                               <button
                                  type="button"
@@ -493,6 +506,7 @@ const UserAuthPage = () => {
                               onChange={(e) => setConfirmPassword(e.target.value)}
                               className="mt-1 w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                               placeholder="Confirm your password"
+                              onKeyPress={(e) => handleKeyPress(e, 'signup')}
                            />
                         </div>
                         <button

@@ -233,28 +233,28 @@ const InspectionApplicationRow = ({
                </Tooltip>
             </TooltipProvider>
          );
-      }
 
-      // Add view reports button for all applications
-      actions.push(
-         <TooltipProvider key="view-reports-action">
-            <Tooltip>
-               <TooltipTrigger asChild>
-                  <Button
-                     onClick={() => setShowInspectionReports(true)}
-                     variant="outline"
-                     size="icon"
-                     className="text-blue-600 hover:text-blue-800"
-                  >
-                     <Eye className="h-4 w-4" />
-                  </Button>
-               </TooltipTrigger>
-               <TooltipContent>
-                  <p>View Inspection Reports</p>
-               </TooltipContent>
-            </Tooltip>
-         </TooltipProvider>
-      );
+         // Add view reports button only for completed inspections
+         actions.push(
+            <TooltipProvider key="view-reports-action">
+               <Tooltip>
+                  <TooltipTrigger asChild>
+                     <Button
+                        onClick={() => setShowInspectionReports(true)}
+                        variant="outline"
+                        size="icon"
+                        className="text-blue-600 hover:text-blue-800"
+                     >
+                        <Eye className="h-4 w-4" />
+                     </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                     <p>View Inspection Reports</p>
+                  </TooltipContent>
+               </Tooltip>
+            </TooltipProvider>
+         );
+      }
 
       return actions;
    };

@@ -93,11 +93,13 @@ const ViewOOPModal = ({ isOpen, onClose, oop }) => {
                      <div className="grid grid-cols-2 gap-4 mb-6">
                         <div className="text-center">
                            <img src={oop.rpsSignatureImage} alt="RPS Signature" className="h-20 mx-auto" />
-                           <p className="mt-2 text-sm font-semibold">Chief, Regulatory & Permitting Section</p>
+                           <p className="mt-2 text-sm font-semibold">SIMEON R. DIAZ</p>
+                           <p className="text-sm text-gray-600">SVEMS/Chief, RPS</p>
                         </div>
                         <div className="text-center">
                            <img src={oop.tsdSignatureImage} alt="TSD Signature" className="h-20 mx-auto" />
-                           <p className="mt-2 text-sm font-semibold">Technical Services Division</p>
+                           <p className="mt-2 text-sm font-semibold">Engr. CYNTHIA U. LOZANO</p>
+                           <p className="text-sm text-gray-600">Chief, Technical Services Division</p>
                         </div>
                      </div>
                   )}

@@ -414,6 +414,17 @@ const permitResolvers = {
                { new: true }
             );
 
+            // Send notification when permit is released
+            if (currentStage === 'Released') {
+               await NotificationService.createApplicationNotification({
+                  application: updatedPermit,
+                  recipientId: updatedPermit.applicantId,
+                  type: 'PERMIT_RELEASED',
+                  stage: 'Released',
+                  remarks: 'Your permit has been released. You can view it in your Applications > Released tab.'
+               });
+            }
+
             return updatedPermit;
          } catch (error) {
             console.error('Error updating permit stage:', error);

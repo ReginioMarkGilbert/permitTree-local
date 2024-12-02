@@ -74,6 +74,10 @@ class NotificationService {
          'APPLICATION_INSPECTION_COMPLETE': {
             title: 'Inspection Completed',
             message: `Inspection for your application ${application.applicationNumber} has been completed. ${remarks}`
+         },
+         'PERMIT_RELEASED': {
+            title: 'Permit Released',
+            message: `Your permit for application ${application.applicationNumber} has been released. You can view it in your Applications > Released tab.`
          }
       };
 

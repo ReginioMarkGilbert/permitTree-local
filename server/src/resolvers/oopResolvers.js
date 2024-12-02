@@ -14,13 +14,19 @@ const oopResolvers = {
          try {
             const oops = await OOP.find().sort({ createdAt: -1 });
 
-            console.log('OOPs from database:', oops);
-
             return oops.map(oop => ({
                ...oop._doc,
+               _id: oop._id,
                totalAmount: oop.items.reduce((sum, item) => sum + item.amount, 0),
-               // Ensure applicationNumber is included
-               applicationNumber: oop.applicationNumber
+               applicationNumber: oop.applicationNumber,
+               date: oop.createdAt,
+               receivedDate: oop.receivedDate,
+               receivedTime: oop.receivedTime,
+               trackingNo: oop.trackingNo,
+               releasedDate: oop.releasedDate,
+               releasedTime: oop.releasedTime,
+               paymentProof: oop.paymentProof,
+               officialReceipt: oop.officialReceipt
             }));
          } catch (error) {
             console.error('Error fetching OOPs:', error);
@@ -29,7 +35,28 @@ const oopResolvers = {
       },
 
       getOOPById: async (_, { id }) => {
-         return await OOP.findById(id);
+         try {
+            const oop = await OOP.findById(id);
+            if (!oop) {
+               throw new Error('OOP not found');
+            }
+            return {
+               ...oop._doc,
+               _id: oop._id,
+               totalAmount: oop.items.reduce((sum, item) => sum + item.amount, 0),
+               date: oop.createdAt,
+               receivedDate: oop.receivedDate,
+               receivedTime: oop.receivedTime,
+               trackingNo: oop.trackingNo,
+               releasedDate: oop.releasedDate,
+               releasedTime: oop.releasedTime,
+               paymentProof: oop.paymentProof,
+               officialReceipt: oop.officialReceipt
+            };
+         } catch (error) {
+            console.error('Error fetching OOP by ID:', error);
+            throw new Error('Failed to fetch OOP');
+         }
       },
 
       getOOPsByApplicationId: async (_, { applicationId }) => {
@@ -374,8 +401,10 @@ const oopResolvers = {
                   type: 'OR_GENERATED_TECHNICAL_STAFF',
                   OOPStatus: 'Issued OR',
                   remarks: `Application ${updatedOOP.applicationNumber} has completed payment`,
-                  priority: 'medium'
+                  priority: 'high'
                });
+            } else {
+               throw new Error('Technical Staff not found');
             }
 
             return updatedOOP;
@@ -420,7 +449,7 @@ const oopResolvers = {
                   type: 'OR_GENERATED_TECHNICAL_STAFF',
                   OOPStatus: 'Issued OR',
                   remarks: `Application ${updatedOOP.applicationNumber} has completed payment`,
-                  priority: 'medium'
+                  priority: 'high'
                });
             }
 

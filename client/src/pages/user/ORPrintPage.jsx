@@ -41,7 +41,7 @@ const ORPrintPage = () => {
          if (check === 1) { // prevent multiple print window from opening
             setTimeout(() => {
                window.print();
-            }, 3500);
+            }, 4500);
          }
       } else {
          toast.error('Invalid URL');

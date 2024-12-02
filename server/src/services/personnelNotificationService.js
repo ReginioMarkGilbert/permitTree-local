@@ -185,8 +185,8 @@ class PersonnelNotificationService {
             },
             'OR_GENERATED_TECHNICAL_STAFF': {
                title: 'Payment Completed',
-               message: `Official Receipt has been generated for Order of Payment (${oop.billNo}). Application ${oop.applicationNumber} has completed payment.`,
-               priority: 'medium'
+               message: `Official Receipt has been generated for Order of Payment (${oop.billNo}). Application ${oop.applicationNumber} has completed payment. Please proceed to create inspection schedule.`,
+               priority: 'high'
             }
          };
 

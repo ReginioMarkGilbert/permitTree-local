@@ -178,24 +178,6 @@ const UserOOPRow = ({ oop, onRefetch }) => {
                      </TooltipContent>
                   </Tooltip>
                </TooltipProvider>
-
-               <TooltipProvider>
-                  <Tooltip>
-                     <TooltipTrigger asChild>
-                        <Button
-                           variant="outline"
-                           size="icon"
-                           className="h-8 w-8"
-                           onClick={handlePrintOR}
-                        >
-                           <Printer className="h-4 w-4" />
-                        </Button>
-                     </TooltipTrigger>
-                     <TooltipContent>
-                        <p>Print Official Receipt</p>
-                     </TooltipContent>
-                  </Tooltip>
-               </TooltipProvider>
             </>
          )}
 
@@ -387,24 +369,6 @@ const UserOOPRow = ({ oop, onRefetch }) => {
                               </TooltipTrigger>
                               <TooltipContent>
                                  <p>View Official Receipt</p>
-                              </TooltipContent>
-                           </Tooltip>
-                        </TooltipProvider>
-
-                        <TooltipProvider>
-                           <Tooltip>
-                              <TooltipTrigger asChild>
-                                 <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={handlePrintOR}
-                                 >
-                                    <Printer className="h-4 w-4" />
-                                 </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                 <p>Print Official Receipt</p>
                               </TooltipContent>
                            </Tooltip>
                         </TooltipProvider>

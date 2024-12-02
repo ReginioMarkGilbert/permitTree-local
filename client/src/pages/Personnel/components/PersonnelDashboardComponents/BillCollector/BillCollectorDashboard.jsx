@@ -32,6 +32,17 @@ const GET_OOPS = gql`
         description
         amount
       }
+      rpsSignatureImage
+      tsdSignatureImage
+      signatures {
+        chiefRPS
+        technicalServices
+      }
+      receivedDate
+      receivedTime
+      trackingNo
+      releasedDate
+      releasedTime
       paymentProof {
         transactionId
         paymentMethod

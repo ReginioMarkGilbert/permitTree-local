@@ -102,6 +102,26 @@ export const GET_ALL_OOPS = gql`
       trackingNo
       releasedDate
       releasedTime
+      paymentProof {
+        transactionId
+        paymentMethod
+        amount
+        timestamp
+        referenceNumber
+        payerDetails {
+          name
+          email
+          phoneNumber
+        }
+        status
+      }
+      officialReceipt {
+        orNumber
+        dateIssued
+        amount
+        paymentMethod
+        remarks
+      }
     }
   }
 `;
