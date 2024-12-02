@@ -59,9 +59,9 @@ const checkExpiredCertificates = async () => {
 // Run every 5 seconds
 const scheduleCertificateExpirationCheck = () => {
    // cron.schedule('0 0 * * *', checkExpiredCertificates); // 1 day
-   // cron.schedule('*/5 * * * * *', checkExpiredCertificates); // 5 seconds
+   cron.schedule('*/5 * * * * *', checkExpiredCertificates); // 5 seconds
    // 30 seconds
-   cron.schedule('*/30 * * * * *', checkExpiredCertificates); // 30 seconds
+   // cron.schedule('*/30 * * * * *', checkExpiredCertificates); // 30 seconds
    // 5 minutes
    // cron.schedule('*/30 * * * *', checkExpiredCertificates); // 30 minutes
    // 1 hour

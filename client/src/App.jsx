@@ -46,8 +46,6 @@ import { Toaster } from 'sonner';
 
 import PersonnelDashboard from './pages/Personnel/PersonnelDashboard';
 
-// import { AuthProvider } from '@/context/AuthContext';
-
 import OOPPrintPage from './pages/user/OOPPrintPage';
 import PaymentPage from './pages/user/PaymentPage';
 import ORPrintPage from './pages/user/ORPrintPage';
@@ -81,7 +79,6 @@ const App = () => {
       '/personnel/csaw-certificate-print'
    ];
 
-   // Add print paths separately to handle them differently
    const printPaths = [
       '/user/oop-print',
       '/user/or-print',
@@ -242,7 +239,6 @@ const App = () => {
             ) : (
                <main className={cn(
                   "h-full overflow-y-auto bg-background",
-                  // Remove padding for both print pages and public pages
                   'p-0'
                )}>
                   <Routes>

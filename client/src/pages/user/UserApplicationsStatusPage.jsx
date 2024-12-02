@@ -151,9 +151,10 @@ const UserApplicationsStatusPage = () => {
 
    const mainTabs = ['Applications', 'Order Of Payments', 'Renewals'];
    const subTabs = {
-      'Applications': ['Draft', 'Submitted', 'In Progress', 'Returned', 'Accepted', 'Released', 'Expired', 'Rejected'],
+      'Applications': ['Draft', 'Submitted', 'In Progress', 'Returned', 'Accepted', 'Released', 'Expired'],
       'Order Of Payments': ['Awaiting Payment', 'Payment Proof Submitted', 'Payment Proof Rejected', 'Payment Proof Approved', 'Completed', 'Issued OR'],
-      'Renewals': ['Chainsaw Registration', 'Certificate of Verification', 'Private Tree Plantation Registration', 'Public Land Tree Cutting Permit', 'Private Land Timber Permit', 'NGA Tree Cutting Permit']
+      // 'Renewals': ['Chainsaw Registration', 'Certificate of Verification', 'Private Tree Plantation Registration', 'Public Land Tree Cutting Permit', 'Private Land Timber Permit', 'NGA Tree Cutting Permit']
+      'Renewals': ['Chainsaw Registration']
    };
 
    const filteredApplications = useMemo(() => {
@@ -189,7 +190,7 @@ const UserApplicationsStatusPage = () => {
          case 'accepted': return 'bg-green-100 text-green-800';
          case 'released': return 'bg-indigo-100 text-indigo-800';
          case 'expired': return 'bg-red-100 text-red-800';
-         case 'rejected': return 'bg-red-100 text-red-800';
+         // case 'rejected': return 'bg-red-100 text-red-800';
          case 'renewal': return 'bg-purple-100 text-purple-800';
          default: return 'bg-gray-100 text-gray-800';
       }
