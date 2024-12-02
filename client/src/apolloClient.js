@@ -10,12 +10,8 @@ const API_URL = 'https://permittree-backend-dev.vercel.app/graphql'; // online
 const httpLink = createHttpLink({
    uri: API_URL,
    credentials: 'include',
-   fetchOptions: {
-      timeout: 30000,
-   },
    headers: {
       'Content-Type': 'application/json',
-      'apollo-require-preflight': 'true'
    }
 });
 
@@ -32,14 +28,15 @@ const authLink = setContext((_, { headers }) => {
 
 const retryLink = new RetryLink({
    delay: {
-      initial: 1000,
-      max: 10000,
+      initial: 300,
+      max: 3000,
       jitter: true
    },
    attempts: {
-      max: 3,
+      max: 5,
       retryIf: (error, _operation) => {
-         return !!error && (error.statusCode === 504 || error.message?.includes('timeout'));
+         return !(error.message?.includes('Failed to fetch') ||
+            error.message?.includes('CORS'));
       },
    },
 });
@@ -58,9 +55,6 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
       if (networkError.statusCode === 401) {
          localStorage.removeItem('token');
          window.location.href = '/auth';
-      }
-      if (networkError.statusCode === 504) {
-         console.error('Request timed out. Please try again.');
       }
    }
 
