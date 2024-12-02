@@ -3,11 +3,12 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { format } from "date-fns";
-import { UploadIcon, X } from "lucide-react";
+import { UploadIcon, X, Loader2 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useOrderOfPayments } from '../hooks/useOrderOfPayments';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { gql, useMutation } from '@apollo/client';
+import { cn } from '@/lib/utils';
 
 const UPDATE_OOP_SIGNATURE = gql`
   mutation UpdateOOPSignature($id: ID!, $signatureType: String!, $signatureImage: String!) {
@@ -53,19 +54,30 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
 
    const [updateOOPTracking] = useMutation(UPDATE_OOP_TRACKING);
 
+   const [isSubmitting, setIsSubmitting] = useState(false);
+   const [isUploading, setIsUploading] = useState({
+      rps: false,
+      tsd: false
+   });
+
    useEffect(() => {
       console.log('Full OOP data:', oop);
       console.log('Tracking data:', oop?.tracking);
    }, [oop]);
 
-   const handleSignatureUpload = (event, signatureType) => {
+   const handleSignatureUpload = async (event, signatureType) => {
       const file = event.target.files[0];
       if (file) {
-         const reader = new FileReader();
-         reader.onload = (e) => {
-            setSignatures(prev => ({ ...prev, [signatureType]: e.target.result }));
-         };
-         reader.readAsDataURL(file);
+         try {
+            setIsUploading(prev => ({ ...prev, [signatureType]: true }));
+            const reader = new FileReader();
+            reader.onload = (e) => {
+               setSignatures(prev => ({ ...prev, [signatureType]: e.target.result }));
+            };
+            reader.readAsDataURL(file);
+         } finally {
+            setIsUploading(prev => ({ ...prev, [signatureType]: false }));
+         }
       }
    };
 
@@ -124,13 +136,13 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
 
    const handleForwardToTechnicalStaff = async () => {
       try {
-         // Check if both signatures are present
+         setIsSubmitting(true);
+
          if (!signatures.rpsSignature || !signatures.tsdSignature) {
             toast.error('Both signatures are required before forwarding');
             return;
          }
 
-         // First, save any new signatures
          if (signatures.rpsSignature !== oop.rpsSignatureImage) {
             await updateSignature(oop._id, 'rps', signatures.rpsSignature);
          }
@@ -138,7 +150,6 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
             await updateSignature(oop._id, 'tsd', signatures.tsdSignature);
          }
 
-         // Generate tracking number and update tracking info
          const now = new Date();
          await updateOOPTracking({
             variables: {
@@ -152,13 +163,14 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
             }
          });
 
-         // Then forward to accountant
          await forwardOOPToTechnicalStaff(oop._id);
          toast.success('OOP forwarded to Technical Staff for approval');
          onClose();
       } catch (error) {
          console.error('Error in forward process:', error);
          toast.error(error.message || 'Failed to forward OOP');
+      } finally {
+         setIsSubmitting(false);
       }
    };
 
@@ -170,6 +182,16 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
    return (
       <Dialog open={isOpen} onOpenChange={onClose}>
          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            {isSubmitting && (
+               <div className="absolute inset-0 bg-black/10 backdrop-blur-sm flex items-center justify-center z-50 rounded-lg">
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-6 flex flex-col items-center space-y-4">
+                     <Loader2 className="h-8 w-8 animate-spin text-green-600 dark:text-green-400" />
+                     <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        Processing...
+                     </p>
+                  </div>
+               </div>
+            )}
             <DialogHeader>
                <DialogTitle>Order of Payment Details</DialogTitle>
                <DialogDescription>
@@ -282,9 +304,19 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
                         size="sm"
                         className="mt-2"
                         onClick={(e) => triggerFileInput(e, rpsFileInputRef)}
+                        disabled={isUploading.rps || isSubmitting}
                      >
-                        <UploadIcon className="h-4 w-4 mr-2" />
-                        Upload Signature
+                        {isUploading.rps ? (
+                           <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Uploading...
+                           </>
+                        ) : (
+                           <>
+                              <UploadIcon className="h-4 w-4 mr-2" />
+                              Upload Signature
+                           </>
+                        )}
                      </Button>
                   </div>
 
@@ -324,9 +356,19 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
                         size="sm"
                         className="mt-2"
                         onClick={(e) => triggerFileInput(e, tsdFileInputRef)}
+                        disabled={isUploading.tsd || isSubmitting}
                      >
-                        <UploadIcon className="h-4 w-4 mr-2" />
-                        Upload Signature
+                        {isUploading.tsd ? (
+                           <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Uploading...
+                           </>
+                        ) : (
+                           <>
+                              <UploadIcon className="h-4 w-4 mr-2" />
+                              Upload Signature
+                           </>
+                        )}
                      </Button>
                   </div>
                </div>
@@ -364,10 +406,20 @@ const OOPAffixEsignModal = ({ oop, isOpen, onClose }) => {
                   </Button> */}
                   <Button
                      onClick={handleForwardToTechnicalStaff}
-                     disabled={!signatures.rpsSignature || !signatures.tsdSignature}
-                     className="bg-green-600 hover:bg-green-700"
+                     disabled={!signatures.rpsSignature || !signatures.tsdSignature || isSubmitting}
+                     className={cn(
+                        "bg-green-600 hover:bg-green-700",
+                        isSubmitting && "cursor-not-allowed opacity-70"
+                     )}
                   >
-                     Forward to Technical Staff
+                     {isSubmitting ? (
+                        <>
+                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                           Forwarding...
+                        </>
+                     ) : (
+                        'Forward to Technical Staff'
+                     )}
                   </Button>
                </div>
             </div>

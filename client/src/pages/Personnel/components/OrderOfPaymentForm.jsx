@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon, PlusIcon, MinusIcon, UploadIcon, ArrowLeft, X } from "lucide-react";
+import { CalendarIcon, PlusIcon, MinusIcon, UploadIcon, ArrowLeft, X, Loader2 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import "@/components/ui/styles/customScrollBar.css";
 import { useOrderOfPayments } from '../hooks/useOrderOfPayments';
@@ -69,7 +69,7 @@ const CustomSelect = ({ options, onSelect, placeholder }) => {
    );
 };
 
-const OrderOfPaymentForm = ({ onClose }) => {
+const OrderOfPaymentForm = ({ onClose, onSubmitStart, onSubmitEnd }) => {
    const navigate = useNavigate();
    const isMobile = useMediaQuery('(max-width: 640px)');
 
@@ -101,6 +101,8 @@ const OrderOfPaymentForm = ({ onClose }) => {
 
    const isChiefTSD = hasRole('Chief_TSD');
    const isChiefRPS = hasRole('Chief_RPS');
+
+   const [isSubmitting, setIsSubmitting] = useState(false);
 
    const handleApplicationSelect = (applicationId) => {
       const selectedApp = applications.find(app => app.id === applicationId);
@@ -189,6 +191,9 @@ const OrderOfPaymentForm = ({ onClose }) => {
    const handleSubmit = async (e) => {
       e.preventDefault();
       try {
+         setIsSubmitting(true);
+         onSubmitStart?.();
+
          // Validate required fields
          if (!formData.applicationId || !formData.applicationNumber || !formData.namePayee || !formData.address || !formData.natureOfApplication) {
             toast.error('Please fill in all required fields');
@@ -238,6 +243,9 @@ const OrderOfPaymentForm = ({ onClose }) => {
       } catch (error) {
          console.error('Error creating Order of Payment:', error);
          toast.error(`Failed to create Order of Payment: ${error.message}`);
+      } finally {
+         setIsSubmitting(false);
+         onSubmitEnd?.();
       }
    };
 
@@ -574,7 +582,8 @@ const OrderOfPaymentForm = ({ onClose }) => {
                         type="button"
                         onClick={handlePrevious}
                         variant="outline"
-                        >
+                        disabled={isSubmitting}
+                     >
                         Previous
                      </Button>
                   )}
@@ -583,11 +592,25 @@ const OrderOfPaymentForm = ({ onClose }) => {
                         type="button"
                         onClick={handleNext}
                         className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
-                        >
+                        disabled={isSubmitting}
+                     >
                         Next
                      </Button>
                   ) : (
-                     <Button type="button" onClick={handleSubmit}>Create Order of Payment</Button>
+                     <Button
+                        type="button"
+                        onClick={handleSubmit}
+                        disabled={isSubmitting}
+                        className={cn(
+                           "relative",
+                           isSubmitting && "cursor-not-allowed opacity-70"
+                        )}
+                     >
+                        {isSubmitting && (
+                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
+                        {isSubmitting ? 'Creating...' : 'Create Order of Payment'}
+                     </Button>
                   )}
                </div>
             </form>
