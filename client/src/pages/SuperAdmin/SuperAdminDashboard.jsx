@@ -40,14 +40,14 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 const StatCard = ({ title, value, icon: Icon, trend, trendValue }) => (
-   <Card className="p-6">
+   <Card className="p-6 bg-white dark:bg-black">
       <div className="flex justify-between items-start">
          <div>
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <h3 className="text-2xl font-bold mt-2">{value}</h3>
+            <p className="text-sm font-medium text-muted-foreground dark:text-gray-400">{title}</p>
+            <h3 className="text-2xl font-bold mt-2 text-gray-900 dark:text-white">{value}</h3>
             {trend && (
                <p className={`text-sm mt-2 flex items-center ${
-                  trendValue.includes('increase') ? 'text-green-600' : 'text-red-600'
+                  trendValue.includes('increase') ? 'text-green-600 dark:text-green-500' : 'text-red-600 dark:text-red-500'
                }`}>
                   {trendValue.includes('increase') ?
                      <ArrowUpRight className="w-4 h-4 mr-1" /> :
@@ -57,7 +57,7 @@ const StatCard = ({ title, value, icon: Icon, trend, trendValue }) => (
                </p>
             )}
          </div>
-         <div className="p-3 bg-primary/10 rounded-full">
+         <div className="p-3 bg-primary/10 rounded-full dark:bg-primary/20">
             <Icon className="w-5 h-5 text-primary" />
          </div>
       </div>
@@ -107,31 +107,31 @@ const ActivityItem = ({ activity }) => {
 
    // Enhanced activity item with metadata display
    return (
-      <div className="flex items-center gap-4 p-3 bg-secondary/20 rounded-lg hover:bg-secondary/30 transition-colors">
-         <div className={`p-2 bg-background rounded-full ${colorClass}`}>
+      <div className="flex items-center gap-4 p-3 bg-secondary/20 dark:bg-black rounded-lg hover:bg-secondary/30 dark:hover:bg-gray-800/70 transition-colors">
+         <div className={`p-2 bg-background dark:bg-gray-900 rounded-full ${colorClass}`}>
             <Icon className="w-4 h-4" />
          </div>
          <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-               <p className="text-sm font-medium truncate">
+               <p className="text-sm font-medium truncate text-gray-900 dark:text-white">
                   <span className="font-semibold">{activity.username}</span>
                   {' '}{activity.description}
                </p>
                {activity.metadata?.applicationId && (
-                  <span className="text-xs bg-primary/10 px-2 py-1 rounded-full">
+                  <span className="text-xs bg-primary/10 dark:bg-primary/20 px-2 py-1 rounded-full">
                      {activity.metadata.applicationId.applicationNumber}
                   </span>
                )}
             </div>
             <div className="flex items-center gap-2 mt-1">
-               <p className="text-xs text-muted-foreground">{formattedDate}</p>
+               <p className="text-xs text-muted-foreground dark:text-gray-400">{formattedDate}</p>
                {activity.metadata?.deviceType && (
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground dark:text-gray-400">
                      • {activity.metadata.deviceType}
                   </span>
                )}
                {activity.metadata?.amount && (
-                  <span className="text-xs text-emerald-500 font-medium">
+                  <span className="text-xs text-emerald-500 dark:text-emerald-400 font-medium">
                      • ₱{activity.metadata.amount.toLocaleString()}
                   </span>
                )}
@@ -163,10 +163,10 @@ const SuperAdminDashboard = () => {
 
    if (!useMockData && loading) {
       return (
-         <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-green-50 to-white">
+         <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-gray-900 dark:to-gray-800">
             <div className="flex flex-col items-center gap-4">
                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-               <p className="text-muted-foreground">Loading dashboard data...</p>
+               <p className="text-muted-foreground dark:text-gray-400">Loading dashboard data...</p>
             </div>
          </div>
       );
@@ -174,13 +174,13 @@ const SuperAdminDashboard = () => {
 
    if (!useMockData && error) {
       return (
-         <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-green-50 to-white">
-            <Card className="p-6 max-w-md">
-               <h3 className="text-lg font-semibold text-red-600 mb-2">Error Loading Dashboard</h3>
-               <p className="text-muted-foreground">{error.message}</p>
+         <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-gray-900 dark:to-gray-800">
+            <Card className="p-6 max-w-md bg-white dark:bg-black">
+               <h3 className="text-lg font-semibold text-red-600 dark:text-red-500 mb-2">Error Loading Dashboard</h3>
+               <p className="text-muted-foreground dark:text-gray-400">{error.message}</p>
                <Button
                   variant="outline"
-                  className="mt-4"
+                  className="mt-4 dark:text-gray-300 dark:hover:text-white"
                   onClick={() => setUseMockData(true)}
                >
                   Switch to Mock Data
@@ -191,17 +191,17 @@ const SuperAdminDashboard = () => {
    }
 
    return (
-      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
+      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
          <div className="p-8 max-w-7xl mx-auto pt-24">
             <div className="mb-8">
                <div className="flex justify-between items-center">
                   <div>
-                     <h1 className="text-3xl font-bold">Dashboard Overview</h1>
-                     <p className="text-muted-foreground mt-2">Welcome to the super admin dashboard</p>
+                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard Overview</h1>
+                     <p className="text-muted-foreground dark:text-gray-400 mt-2">Welcome to the super admin dashboard</p>
                   </div>
                   <div className="flex items-center gap-2">
-                     <Database className="w-4 h-4 text-muted-foreground" />
-                     <Label htmlFor="data-toggle" className="text-sm text-muted-foreground">
+                     <Database className="w-4 h-4 text-muted-foreground dark:text-gray-400" />
+                     <Label htmlFor="data-toggle" className="text-sm text-muted-foreground dark:text-gray-400">
                         {useMockData ? 'Using Mock Data' : 'Using Real Data'}
                      </Label>
                      <Switch
@@ -245,12 +245,12 @@ const SuperAdminDashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-               <Card className="p-6">
+               <Card className="p-6 bg-white dark:bg-black">
                   <div className="flex justify-between items-center mb-4">
-                     <h3 className="text-lg font-semibold">User Growth</h3>
+                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">User Growth</h3>
                      <Button
                         variant="ghost"
-                        className="text-primary hover:text-primary/80"
+                        className="text-primary hover:text-primary/80 dark:text-gray-300 dark:hover:text-white"
                         onClick={() => navigate('/superadmin/manage-users')}
                      >
                         Manage Users <ChevronRight className="ml-1 h-4 w-4" />
@@ -259,14 +259,16 @@ const SuperAdminDashboard = () => {
                   <div className="h-[300px]">
                      <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={dashboardData?.userActivity || []}>
-                           <CartesianGrid strokeDasharray="3 3" />
+                           <CartesianGrid strokeDasharray="3 3" className="dark:opacity-50" />
                            <XAxis
                               dataKey="date"
                               tickFormatter={(value) => format(new Date(value), 'MMM yyyy')}
+                              className="dark:text-gray-400"
                            />
-                           <YAxis />
+                           <YAxis className="dark:text-gray-400" />
                            <Tooltip
                               labelFormatter={(value) => format(new Date(value), 'MMMM yyyy')}
+                              contentStyle={{ backgroundColor: 'rgb(31 41 55)', color: '#fff' }}
                            />
                            <Line
                               type="monotone"
