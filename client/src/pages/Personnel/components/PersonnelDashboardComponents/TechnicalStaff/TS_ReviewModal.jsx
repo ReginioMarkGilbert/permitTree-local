@@ -48,6 +48,8 @@ const TS_ReviewModal = ({ isOpen, onClose, application, onReviewComplete }) => {
       try {
          if (!application?.id) throw new Error('Invalid application data');
 
+         const isPrivateTreePlantation = application.applicationType === 'Private Tree Plantation Registration';
+
          await updatePermitStage({
             variables: {
                id: application.id,
@@ -55,12 +57,9 @@ const TS_ReviewModal = ({ isOpen, onClose, application, onReviewComplete }) => {
                status: 'In Progress',
                notes: 'Application accepted by Technical Staff',
                acceptedByTechnicalStaff: true,
-               awaitingOOP: true
-               // approvedByTechnicalStaff will be undefined
+               awaitingOOP: !isPrivateTreePlantation
             }
          });
-
-         console.log('data sent:', application)
 
          onReviewComplete();
          onClose();
