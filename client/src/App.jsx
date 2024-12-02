@@ -68,14 +68,17 @@ const App = () => {
    const [showNavbar, setShowNavbar] = useState(false);
    const [showSidebar, setShowSidebar] = useState(false);
 
+   // Add these routes to the list of public paths
+   const publicPaths = ['/', '/auth', '/about', '/services', '/contact', '/learnMore'];
+
    useEffect(() => {
       const authStatus = isAuthenticated();
       if (authStatus) {
          setUserRoles(getUserRoles());
-      } else if (location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/about' && location.pathname !== '/services' && location.pathname !== '/contact' && location.pathname !== '/learnMore') {
+      } else if (!publicPaths.includes(location.pathname)) {
          navigate('/auth');
       }
-      setShowNavbar(authStatus && location.pathname !== '/' && location.pathname !== '/user/oop-print' && location.pathname !== '/personnel/csaw-certificate-print');
+      setShowNavbar(authStatus && !publicPaths.includes(location.pathname));
    }, [navigate, location.pathname]);
 
    useEffect(() => {
@@ -115,7 +118,7 @@ const App = () => {
    return (
       <ApolloProvider client={client}>
          <div className="relative h-screen overflow-hidden">
-            {isAuthenticated() && location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/user/oop-print' && location.pathname !== '/user/or-print' && location.pathname !== '/personnel/csaw-certificate-print' && (
+            {(isAuthenticated() && !publicPaths.includes(location.pathname)) ? (
                <div className="flex h-full">
                   {getSidebar()}
                   <div className={cn(
@@ -218,15 +221,15 @@ const App = () => {
                      </main>
                   </div>
                </div>
-            )}
-            {/* For non-authenticated routes */}
-            {(!isAuthenticated() || location.pathname === '/' || location.pathname === '/auth' ||
-              location.pathname === '/user/oop-print' || location.pathname === '/user/or-print' ||
-              location.pathname === '/personnel/csaw-certificate-print') && (
+            ) : (
                <main className="h-full overflow-y-auto bg-background">
                   <Routes>
                      <Route path="/" element={<LandingPage />} />
                      <Route path="/auth" element={<UserAuthPage />} />
+                     <Route path="/about" element={<AboutPage />} />
+                     <Route path="/services" element={<ServicesPage />} />
+                     <Route path="/contact" element={<ContactPage />} />
+                     <Route path="/learnMore" element={<LearnMorePage />} />
                      <Route path="/user/oop-print" element={<OOPPrintPage />} />
                      <Route path="/user/or-print" element={<ORPrintPage />} />
                      <Route path="/personnel/csaw-certificate-print" element={<CSAWCertificatePrintPage />} />
