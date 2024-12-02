@@ -5,8 +5,10 @@ const { generateTrackingNumber } = require('../utils/trackingNumberGenerator');
 const officialReceiptSchema = new mongoose.Schema({
    orNumber: {
       type: String,
-      sparse: true,
-      unique: true
+      unique: function() {
+         return this.orNumber != null;
+      },
+      sparse: true
    },
    dateIssued: {
       type: Date,

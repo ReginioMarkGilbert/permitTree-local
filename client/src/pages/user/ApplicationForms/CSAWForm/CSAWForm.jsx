@@ -713,9 +713,9 @@ const ChainsawRegistrationForm = () => {
                                           name="address"
                                           value={formData.address}
                                           onChange={handleInputChange}
-                                          placeholder="Barangay, Bayan, Probinsya"
                                           required
                                           autoComplete="street-address"
+                                          placeholder="Brgy/Street, Municipality, Province"
                                           className="dark:bg-gray-700 dark:text-white"
                                        />
                                     </div>
@@ -786,13 +786,13 @@ const ChainsawRegistrationForm = () => {
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                        <div>
-                                          <Label htmlFor="powerOutput" className="dark:text-white">Power Output (kW/bhp)</Label>
+                                          <Label htmlFor="powerOutput" className="dark:text-white">Power Output (kW/horsepower)</Label>
                                           <Input
                                              id="powerOutput"
                                              name="powerOutput"
                                              value={formData.powerOutput}
                                              onChange={handleInputChange}
-                                             placeholder="e.g. 5 kW or 6.7 bhp"
+                                             placeholder="e.g. 5 kW or 2.0 horsepower"
                                              required
                                              className="dark:bg-gray-700 dark:text-white"
                                           />
