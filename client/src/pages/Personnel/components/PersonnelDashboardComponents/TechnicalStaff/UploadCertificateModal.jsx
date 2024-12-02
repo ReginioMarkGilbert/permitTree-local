@@ -13,6 +13,7 @@ import CSAWCertificateTemplate from '../../CertificateComponents/certificateTemp
 import COVCertificateTemplate from '../../CertificateComponents/certificateTemplates/COVCertificateTemplate';
 import PTPRCertificateTemplate from '../../CertificateComponents/certificateTemplates/PTPRCertificateTemplate';
 import PLTCPCertificateTemplate from '../../CertificateComponents/certificateTemplates/PLTCPCertificateTemplate';
+import PLTPCertificateTemplate from '../../CertificateComponents/certificateTemplates/PLTPCertificateTemplate';
 import { cn } from '@/lib/utils';
 
 const UPLOAD_CERTIFICATE = gql`
@@ -158,6 +159,30 @@ const GET_PLTCP_PERMIT = gql`
   }
 `;
 
+const GET_PLTP_PERMIT = gql`
+  query GetPLTPPermit($id: ID!) {
+    getPLTPPermitById(id: $id) {
+      id
+      applicationNumber
+      applicationType
+      name
+      address
+      contactNumber
+      plantedTrees
+      naturallyGrown
+      standing
+      blownDown
+      withinPrivateLand
+      withinTenuredForestLand
+      posingDanger
+      forPersonalUse
+      purpose
+      hasCertificate
+      certificateId
+    }
+  }
+`;
+
 const UPDATE_PERMIT_STAGE = gql`
   mutation UpdatePermitStage(
     $id: ID!,
@@ -224,6 +249,11 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
       skip: !application.id || application.applicationType !== 'Public Land Tree Cutting Permit',
    });
 
+   const { data: pltpData, loading: pltpLoading } = useQuery(GET_PLTP_PERMIT, {
+      variables: { id: application.id },
+      skip: !application.id || application.applicationType !== 'Private Land Timber Permit',
+   });
+
    const applicationData = (() => {
       switch (application.applicationType) {
          case 'Chainsaw Registration':
@@ -234,6 +264,8 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
             return ptprData?.getPTPRPermitById;
          case 'Public Land Tree Cutting Permit':
             return pltcpData?.getPLTCPPermitById;
+         case 'Private Land Timber Permit':
+            return pltpData?.getPLTPPermitById;
          default:
             return null;
       }
@@ -249,6 +281,8 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
             return ptprLoading;
          case 'Public Land Tree Cutting Permit':
             return pltcpLoading;
+         case 'Private Land Timber Permit':
+            return pltpLoading;
          default:
             return false;
       }
@@ -447,6 +481,29 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
 
                console.log('PLTCP Certificate Data:', certificateData); // Debug log
                break;
+            case 'Private Land Timber Permit':
+               console.log('PLTP Application Data:', applicationData); // Debug log
+
+               certificateData = {
+                  registrationType: 'Private Land Timber Permit',
+                  ownerName: applicationData.name,
+                  address: applicationData.address,
+                  purpose: applicationData.purpose,
+                  otherDetails: {
+                     plantedTrees: applicationData.plantedTrees,
+                     naturallyGrown: applicationData.naturallyGrown,
+                     standing: applicationData.standing,
+                     blownDown: applicationData.blownDown,
+                     withinPrivateLand: applicationData.withinPrivateLand,
+                     withinTenuredForestLand: applicationData.withinTenuredForestLand,
+                     posingDanger: applicationData.posingDanger,
+                     forPersonalUse: applicationData.forPersonalUse,
+                     contactNumber: applicationData.contactNumber
+                  }
+               };
+
+               console.log('PLTP Certificate Data:', certificateData); // Debug log
+               break;
             default:
                throw new Error('Unsupported application type');
          }
@@ -521,6 +578,17 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
                   />
                </div>
             );
+         case 'Private Land Timber Permit':
+            return (
+               <div style={{ display: 'none' }}>
+                  <PLTPCertificateTemplate
+                     ref={certificateRef}
+                     certificate={generatedCertificate}
+                     application={generatedCertificate.certificateData}
+                     hiddenOnPrint={[]}
+                  />
+               </div>
+            );
          default:
             return null;
       }
@@ -565,6 +633,14 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
                            case 'Public Land Tree Cutting Permit':
                               return (
                                  <PLTCPCertificateTemplate
+                                    certificate={generatedCertificate}
+                                    application={generatedCertificate.certificateData}
+                                    hiddenOnPrint={[]}
+                                 />
+                              );
+                           case 'Private Land Timber Permit':
+                              return (
+                                 <PLTPCertificateTemplate
                                     certificate={generatedCertificate}
                                     application={generatedCertificate.certificateData}
                                     hiddenOnPrint={[]}

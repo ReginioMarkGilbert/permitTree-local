@@ -17,6 +17,7 @@ import CSAWCertificateTemplate from '../../CertificateComponents/certificateTemp
 import COVCertificateTemplate from '../../CertificateComponents/certificateTemplates/COVCertificateTemplate';
 import PTPRCertificateTemplate from '../../CertificateComponents/certificateTemplates/PTPRCertificateTemplate';
 import PLTCPCertificateTemplate from '../../CertificateComponents/certificateTemplates/PLTCPCertificateTemplate';
+import PLTPCertificateTemplate from '../../CertificateComponents/certificateTemplates/PLTPCertificateTemplate';
 import { useQuery } from '@apollo/client';
 import { gql } from '@apollo/client';
 
@@ -270,6 +271,36 @@ const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) 
                   ref={certificateRef}
                   certificate={certData}
                   application={pltcpData}
+                  orderOfPayment={certData.orderOfPayment}
+                  hiddenOnPrint={[]}
+               />
+            );
+         case 'Private Land Timber Permit':
+            console.log('Raw Certificate Data:', certData.certificateData); // Debug log
+
+            const pltpData = {
+               ...certData.certificateData,
+               ownerName: certData.certificateData.ownerName,
+               address: certData.certificateData.address,
+               purpose: certData.certificateData.purpose,
+               plantedTrees: certData.certificateData.otherDetails?.plantedTrees,
+               naturallyGrown: certData.certificateData.otherDetails?.naturallyGrown,
+               standing: certData.certificateData.otherDetails?.standing,
+               blownDown: certData.certificateData.otherDetails?.blownDown,
+               withinPrivateLand: certData.certificateData.otherDetails?.withinPrivateLand,
+               withinTenuredForestLand: certData.certificateData.otherDetails?.withinTenuredForestLand,
+               posingDanger: certData.certificateData.otherDetails?.posingDanger,
+               forPersonalUse: certData.certificateData.otherDetails?.forPersonalUse,
+               contactNumber: certData.certificateData.otherDetails?.contactNumber
+            };
+
+            console.log('Processed PLTP Data:', pltpData); // Debug log
+
+            return (
+               <PLTPCertificateTemplate
+                  ref={certificateRef}
+                  certificate={certData}
+                  application={pltpData}
                   orderOfPayment={certData.orderOfPayment}
                   hiddenOnPrint={[]}
                />
