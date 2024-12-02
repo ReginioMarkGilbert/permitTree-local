@@ -65,7 +65,6 @@ const startServer = async () => {
       app.get('/favicon.ico', (req, res) => {
          res.status(204).end(); // No content response
       });
-
       // Add timeout middleware (2 minute timeout)
       app.use(timeout('120s'));
       app.use(haltOnTimedout);
