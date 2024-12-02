@@ -4,7 +4,33 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Users, FileCheck, RotateCcw, TrendingUp } from "lucide-react"
 import { ResponsiveLine } from '@nivo/line'
 import { ResponsiveBar } from '@nivo/bar'
+import { Skeleton } from "@/components/ui/skeleton"
 import axios from "axios"
+
+// Add Skeleton components for each card type
+const StatCardSkeleton = () => (
+   <Card className="bg-white shadow-lg">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+         <Skeleton className="h-4 w-[120px]" />
+      </CardHeader>
+      <CardContent>
+         <Skeleton className="h-7 w-[60px]" />
+      </CardContent>
+   </Card>
+);
+
+const ChartCardSkeleton = ({ height = "350px" }) => (
+   <Card className="bg-white shadow-lg">
+      <CardHeader>
+         <Skeleton className="h-6 w-[150px]" />
+      </CardHeader>
+      <CardContent className={`h-[${height}]`}>
+         <div className="w-full h-full flex items-center justify-center">
+            <Skeleton className="w-full h-[300px]" />
+         </div>
+      </CardContent>
+   </Card>
+);
 
 export default function ModernChartsPage() {
     const [reportData, setReportData] = useState({
@@ -87,6 +113,45 @@ export default function ModernChartsPage() {
 
     const handleUserGrowthFilterChange = (value) => {
         setUserGrowthFilter(value);
+    }
+
+    // Render loading state
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-green-50 p-8">
+                <Skeleton className="h-10 w-[200px] mb-10 mt-14 ml-4" /> {/* For the title */}
+
+                {/* Stat Cards Loading */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    {[...Array(4)].map((_, i) => (
+                        <StatCardSkeleton key={i} />
+                    ))}
+                </div>
+
+                {/* Charts Loading */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <ChartCardSkeleton />
+                    <ChartCardSkeleton />
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <ChartCardSkeleton />
+                    <ChartCardSkeleton />
+                </div>
+            </div>
+        );
+    }
+
+    // Render error state
+    if (error) {
+        return (
+            <div className="min-h-screen bg-green-50 p-8 pt-24">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <strong className="font-bold">Error: </strong>
+                    <span className="block sm:inline">{error}</span>
+                </div>
+            </div>
+        );
     }
 
     return (

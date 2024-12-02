@@ -8,7 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import './styles/UserAuthPage.css';
 import { gql, useMutation, useApolloClient } from '@apollo/client';
-import { initializeUserTheme } from '@/utils/auth';
+import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const REGISTER_USER = gql`
   mutation RegisterUser(
@@ -55,6 +56,17 @@ const LOGIN_USER = gql`
   }
 `;
 
+const LoadingOverlay = ({ message }) => (
+   <div className="fixed inset-0 bg-black/20 backdrop-blur-[2px] flex items-center justify-center z-50">
+      <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg">
+         <Loader2 className="h-5 w-5 animate-spin text-green-600" />
+         <p className="text-sm font-medium text-gray-800">
+            {message}
+         </p>
+      </div>
+   </div>
+);
+
 const UserAuthPage = () => {
    const [activeTab, setActiveTab] = useState('signin');
    const [firstName, setFirstName] = useState('');
@@ -70,6 +82,7 @@ const UserAuthPage = () => {
    const [registerUser] = useMutation(REGISTER_USER);
    const [loginUser] = useMutation(LOGIN_USER);
    const client = useApolloClient();
+   const [isLoading, setIsLoading] = useState(false);
 
    useEffect(() => {
       // Force light mode for auth page
@@ -112,6 +125,7 @@ const UserAuthPage = () => {
          return;
       }
       try {
+         setIsLoading(true);
          const { data } = await registerUser({
             variables: {
                firstName,
@@ -130,30 +144,24 @@ const UserAuthPage = () => {
       } catch (error) {
          console.error('Signup error:', error);
          toast.error(error.message || 'Signup failed. Please try again.');
+      } finally {
+         setIsLoading(false);
       }
    };
 
    const handleLogin = async (e) => {
       e.preventDefault();
 
-      // Clear any existing validation errors
       const errors = [];
-
-      // Validate required fields
-      if (!loginUsername) {
-         errors.push('Username is required');
-      }
-      if (!loginPassword) {
-         errors.push('Password is required');
-      }
-
-      // Show validation errors if any
+      if (!loginUsername) errors.push('Username is required');
+      if (!loginPassword) errors.push('Password is required');
       if (errors.length > 0) {
          toast.error('Please fill in all required fields');
          return;
       }
 
       try {
+         setIsLoading(true);
          const { data } = await loginUser({
             variables: {
                username: loginUsername,
@@ -265,11 +273,18 @@ const UserAuthPage = () => {
       } catch (error) {
          console.error('Login error:', error);
          toast.error('Login failed: Invalid credentials');
+      } finally {
+         setIsLoading(false);
       }
    };
 
    return (
       <div className="flex flex-col min-h-screen bg-gradient-to-br from-green-50 to-green-100">
+         {isLoading && (
+            <LoadingOverlay
+               message={activeTab === 'signin' ? 'Signing in...' : 'Creating account...'}
+            />
+         )}
          <header className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm shadow-sm z-10">
             <div className="container mx-auto px-4 sm:px-6">
                <div className="flex items-center justify-between h-16">
@@ -368,11 +383,23 @@ const UserAuthPage = () => {
                         <button
                            onClick={handleLogin}
                            data-testid="signin-submit"
-                           className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-2.5 px-4 rounded-lg font-medium
-                    hover:from-green-700 hover:to-green-600 focus:ring-2 focus:ring-green-500 focus:ring-offset-2
-                    transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+                           disabled={isLoading}
+                           className={cn(
+                              "w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-2.5 px-4 rounded-lg font-medium",
+                              "hover:from-green-700 hover:to-green-600 focus:ring-2 focus:ring-green-500 focus:ring-offset-2",
+                              "transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]",
+                              "flex items-center justify-center",
+                              isLoading && "opacity-70 cursor-not-allowed"
+                           )}
                         >
-                           Sign In
+                           {isLoading ? (
+                              <>
+                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                 Signing in...
+                              </>
+                           ) : (
+                              'Sign In'
+                           )}
                         </button>
                      </div>
                      <div
@@ -471,11 +498,23 @@ const UserAuthPage = () => {
                         <button
                            onClick={handleSignup}
                            data-testid="signup-submit"
-                           className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-2.5 px-4 rounded-lg font-medium
-                    hover:from-green-700 hover:to-green-600 focus:ring-2 focus:ring-green-500 focus:ring-offset-2
-                    transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+                           disabled={isLoading}
+                           className={cn(
+                              "w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-2.5 px-4 rounded-lg font-medium",
+                              "hover:from-green-700 hover:to-green-600 focus:ring-2 focus:ring-green-500 focus:ring-offset-2",
+                              "transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]",
+                              "flex items-center justify-center",
+                              isLoading && "opacity-70 cursor-not-allowed"
+                           )}
                         >
-                           Sign Up
+                           {isLoading ? (
+                              <>
+                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                 Creating Account...
+                              </>
+                           ) : (
+                              'Sign Up'
+                           )}
                         </button>
                      </div>
                   </div>

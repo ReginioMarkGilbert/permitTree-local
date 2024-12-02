@@ -68,8 +68,25 @@ const App = () => {
    const [showNavbar, setShowNavbar] = useState(false);
    const [showSidebar, setShowSidebar] = useState(false);
 
-   // Add these routes to the list of public paths
-   const publicPaths = ['/', '/auth', '/about', '/services', '/contact', '/learnMore'];
+   // Add print pages to public paths
+   const publicPaths = [
+      '/',
+      '/auth',
+      '/about',
+      '/services',
+      '/contact',
+      '/learnMore',
+      '/user/oop-print',
+      '/user/or-print',
+      '/personnel/csaw-certificate-print'
+   ];
+
+   // Add print paths separately to handle them differently
+   const printPaths = [
+      '/user/oop-print',
+      '/user/or-print',
+      '/personnel/csaw-certificate-print'
+   ];
 
    useEffect(() => {
       const authStatus = isAuthenticated();
@@ -78,6 +95,7 @@ const App = () => {
       } else if (!publicPaths.includes(location.pathname)) {
          navigate('/auth');
       }
+      // Don't show navbar for print pages
       setShowNavbar(authStatus && !publicPaths.includes(location.pathname));
    }, [navigate, location.pathname]);
 
@@ -222,7 +240,11 @@ const App = () => {
                   </div>
                </div>
             ) : (
-               <main className="h-full overflow-y-auto bg-background">
+               <main className={cn(
+                  "h-full overflow-y-auto bg-background",
+                  // Remove padding for both print pages and public pages
+                  'p-0'
+               )}>
                   <Routes>
                      <Route path="/" element={<LandingPage />} />
                      <Route path="/auth" element={<UserAuthPage />} />
