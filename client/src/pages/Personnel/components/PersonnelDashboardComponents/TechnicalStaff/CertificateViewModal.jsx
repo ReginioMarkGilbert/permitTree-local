@@ -18,6 +18,7 @@ import COVCertificateTemplate from '../../CertificateComponents/certificateTempl
 import PTPRCertificateTemplate from '../../CertificateComponents/certificateTemplates/PTPRCertificateTemplate';
 import PLTCPCertificateTemplate from '../../CertificateComponents/certificateTemplates/PLTCPCertificateTemplate';
 import PLTPCertificateTemplate from '../../CertificateComponents/certificateTemplates/PLTPCertificateTemplate';
+import TCEBPCertificateTemplate from '../../CertificateComponents/certificateTemplates/TCEBPCertificateTemplate';
 import { useQuery } from '@apollo/client';
 import { gql } from '@apollo/client';
 
@@ -301,6 +302,29 @@ const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) 
                   ref={certificateRef}
                   certificate={certData}
                   application={pltpData}
+                  orderOfPayment={certData.orderOfPayment}
+                  hiddenOnPrint={[]}
+               />
+            );
+         case 'Tree Cutting and/or Earth Balling Permit':
+            console.log('Raw Certificate Data:', certData.certificateData); // Debug log
+
+            const tcebpData = {
+               ...certData.certificateData,
+               ownerName: certData.certificateData.ownerName,
+               address: certData.certificateData.address,
+               purpose: certData.certificateData.purpose,
+               requestType: certData.certificateData.otherDetails?.requestType,
+               contactNumber: certData.certificateData.otherDetails?.contactNumber
+            };
+
+            console.log('Processed TCEBP Data:', tcebpData); // Debug log
+
+            return (
+               <TCEBPCertificateTemplate
+                  ref={certificateRef}
+                  certificate={certData}
+                  application={tcebpData}
                   orderOfPayment={certData.orderOfPayment}
                   hiddenOnPrint={[]}
                />

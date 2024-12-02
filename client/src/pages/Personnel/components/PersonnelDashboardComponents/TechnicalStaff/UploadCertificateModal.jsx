@@ -14,6 +14,7 @@ import COVCertificateTemplate from '../../CertificateComponents/certificateTempl
 import PTPRCertificateTemplate from '../../CertificateComponents/certificateTemplates/PTPRCertificateTemplate';
 import PLTCPCertificateTemplate from '../../CertificateComponents/certificateTemplates/PLTCPCertificateTemplate';
 import PLTPCertificateTemplate from '../../CertificateComponents/certificateTemplates/PLTPCertificateTemplate';
+import TCEBPCertificateTemplate from '../../CertificateComponents/certificateTemplates/TCEBPCertificateTemplate';
 import { cn } from '@/lib/utils';
 
 const UPLOAD_CERTIFICATE = gql`
@@ -183,6 +184,23 @@ const GET_PLTP_PERMIT = gql`
   }
 `;
 
+const GET_TCEBP_PERMIT = gql`
+  query GetTCEBPPermit($id: ID!) {
+    getTCEBPPermitById(id: $id) {
+      id
+      applicationNumber
+      applicationType
+      requestType
+      name
+      address
+      contactNumber
+      purpose
+      hasCertificate
+      certificateId
+    }
+  }
+`;
+
 const UPDATE_PERMIT_STAGE = gql`
   mutation UpdatePermitStage(
     $id: ID!,
@@ -254,6 +272,11 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
       skip: !application.id || application.applicationType !== 'Private Land Timber Permit',
    });
 
+   const { data: tcebpData, loading: tcebpLoading } = useQuery(GET_TCEBP_PERMIT, {
+      variables: { id: application.id },
+      skip: !application.id || application.applicationType !== 'Tree Cutting and/or Earth Balling Permit',
+   });
+
    const applicationData = (() => {
       switch (application.applicationType) {
          case 'Chainsaw Registration':
@@ -266,6 +289,8 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
             return pltcpData?.getPLTCPPermitById;
          case 'Private Land Timber Permit':
             return pltpData?.getPLTPPermitById;
+         case 'Tree Cutting and/or Earth Balling Permit':
+            return tcebpData?.getTCEBPPermitById;
          default:
             return null;
       }
@@ -283,6 +308,8 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
             return pltcpLoading;
          case 'Private Land Timber Permit':
             return pltpLoading;
+         case 'Tree Cutting and/or Earth Balling Permit':
+            return tcebpLoading;
          default:
             return false;
       }
@@ -504,6 +531,22 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
 
                console.log('PLTP Certificate Data:', certificateData); // Debug log
                break;
+            case 'Tree Cutting and/or Earth Balling Permit':
+               console.log('TCEBP Application Data:', applicationData); // Debug log
+
+               certificateData = {
+                  registrationType: 'Tree Cutting and/or Earth Balling Permit',
+                  ownerName: applicationData.name,
+                  address: applicationData.address,
+                  purpose: applicationData.purpose,
+                  otherDetails: {
+                     requestType: applicationData.requestType,
+                     contactNumber: applicationData.contactNumber
+                  }
+               };
+
+               console.log('TCEBP Certificate Data:', certificateData); // Debug log
+               break;
             default:
                throw new Error('Unsupported application type');
          }
@@ -589,6 +632,17 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
                   />
                </div>
             );
+         case 'Tree Cutting and/or Earth Balling Permit':
+            return (
+               <div style={{ display: 'none' }}>
+                  <TCEBPCertificateTemplate
+                     ref={certificateRef}
+                     certificate={generatedCertificate}
+                     application={generatedCertificate.certificateData}
+                     hiddenOnPrint={[]}
+                  />
+               </div>
+            );
          default:
             return null;
       }
@@ -641,6 +695,14 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
                            case 'Private Land Timber Permit':
                               return (
                                  <PLTPCertificateTemplate
+                                    certificate={generatedCertificate}
+                                    application={generatedCertificate.certificateData}
+                                    hiddenOnPrint={[]}
+                                 />
+                              );
+                           case 'Tree Cutting and/or Earth Balling Permit':
+                              return (
+                                 <TCEBPCertificateTemplate
                                     certificate={generatedCertificate}
                                     application={generatedCertificate.certificateData}
                                     hiddenOnPrint={[]}
