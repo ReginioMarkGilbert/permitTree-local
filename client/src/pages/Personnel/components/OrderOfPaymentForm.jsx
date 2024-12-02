@@ -502,7 +502,7 @@ const OrderOfPaymentForm = ({ onClose, onSubmitStart, onSubmitEnd }) => {
                               </Button>
                            </div>
 
-                           <div className={`text-center ${!isChiefTSD ? 'opacity-50' : ''}`}>
+                           <div className="text-center opacity-50">
                               <div className="relative h-24 mb-4 border-2 border-dashed rounded-md flex items-center justify-center bg-accent/50">
                                  {formData.tsdSignature ? (
                                     <>
@@ -516,7 +516,7 @@ const OrderOfPaymentForm = ({ onClose, onSubmitStart, onSubmitEnd }) => {
                                           size="icon"
                                           className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-red-100 hover:bg-red-200"
                                           onClick={() => handleRemoveSignature('tsdSignature', tsdFileInputRef)}
-                                          disabled={!isChiefTSD}
+                                          disabled
                                        >
                                           <X className="h-4 w-4 text-red-600" />
                                        </Button>
@@ -565,7 +565,7 @@ const OrderOfPaymentForm = ({ onClose, onSubmitStart, onSubmitEnd }) => {
    }
 
    return (
-      <div className="container mx-auto px-4 py-8 mt-16">
+      <div className="container mx-auto px-4 py-8 mt-14 max-w-4xl">
          <div className="bg-background border rounded-lg p-6 shadow-md">
             <div className="flex justify-between items-center mb-6">
                <Button variant="ghost" onClick={handleBack} className="flex items-center">
@@ -602,7 +602,7 @@ const OrderOfPaymentForm = ({ onClose, onSubmitStart, onSubmitEnd }) => {
                         onClick={handleSubmit}
                         disabled={isSubmitting}
                         className={cn(
-                           "relative",
+                           "relative bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white",
                            isSubmitting && "cursor-not-allowed opacity-70"
                         )}
                      >

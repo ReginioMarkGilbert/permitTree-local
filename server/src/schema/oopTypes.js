@@ -135,6 +135,7 @@ const oopTypes = gql`
     submitPaymentProof(oopId: ID!, paymentProof: PaymentProofInput!): OOP!
     reviewPaymentProof(oopId: ID!, status: String!, notes: String): OOP!
     undoPaymentProof(oopId: ID!): OOP!
+    undoOOPSignature(id: ID!): OOP!
   }
 `;
 

@@ -6,6 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useMutation, gql } from '@apollo/client';
 import { toast } from 'sonner';
 import { format } from "date-fns";
+import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const REVIEW_PAYMENT_PROOF = gql`
   mutation ReviewPaymentProof($oopId: ID!, $status: String!, $notes: String) {
@@ -37,6 +39,7 @@ const REVIEW_PAYMENT_PROOF = gql`
 
 const ReviewPaymentModal = ({ oop, isOpen, onClose, onReviewComplete }) => {
    const [notes, setNotes] = useState('');
+   const [isSubmitting, setIsSubmitting] = useState(false);
    const [reviewPaymentProof] = useMutation(REVIEW_PAYMENT_PROOF);
 
    useEffect(() => {
@@ -59,6 +62,7 @@ const ReviewPaymentModal = ({ oop, isOpen, onClose, onReviewComplete }) => {
    };
 
    const handleReview = async (status) => {
+      setIsSubmitting(true);
       try {
          const { data } = await reviewPaymentProof({
             variables: {
@@ -76,6 +80,8 @@ const ReviewPaymentModal = ({ oop, isOpen, onClose, onReviewComplete }) => {
       } catch (error) {
          console.error('Error reviewing payment proof:', error);
          toast.error('Failed to review payment proof');
+      } finally {
+         setIsSubmitting(false);
       }
    };
 
@@ -169,20 +175,29 @@ const ReviewPaymentModal = ({ oop, isOpen, onClose, onReviewComplete }) => {
 
                {/* Actions */}
                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={onClose}>
+                  <Button
+                     variant="outline"
+                     onClick={onClose}
+                     disabled={isSubmitting}
+                  >
                      Cancel
                   </Button>
-                  {/* <Button
-                     variant="destructive"
-                     onClick={() => handleReview('REJECTED')}
-                  >
-                     Reject
-                  </Button> */}
                   <Button
                      onClick={() => handleReview('APPROVED')}
-                     className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
+                     className={cn(
+                        "bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white",
+                        isSubmitting && "cursor-not-allowed opacity-70"
+                     )}
+                     disabled={isSubmitting}
                   >
-                     Approve
+                     {isSubmitting ? (
+                        <>
+                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                           Processing...
+                        </>
+                     ) : (
+                        'Approve'
+                     )}
                   </Button>
                </div>
             </div>

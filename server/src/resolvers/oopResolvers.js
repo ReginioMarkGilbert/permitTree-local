@@ -362,8 +362,21 @@ const oopResolvers = {
                oop: updatedOOP,
                recipientId: updatedOOP.userId,
                type: 'OR_ISSUED',
-               remarks: 'Official Receipt has been generated for your payment, '
+               remarks: 'Official Receipt has been generated for your payment'
             });
+
+            // Notify Technical Staff
+            const technicalStaff = await Admin.findOne({ roles: 'Technical_Staff' });
+            if (technicalStaff) {
+               await PersonnelNotificationService.createOOPPersonnelNotification({
+                  oop: updatedOOP,
+                  recipientId: technicalStaff._id,
+                  type: 'OR_GENERATED_TECHNICAL_STAFF',
+                  OOPStatus: 'Issued OR',
+                  remarks: `Application ${updatedOOP.applicationNumber} has completed payment`,
+                  priority: 'medium'
+               });
+            }
 
             return updatedOOP;
          } catch (error) {
@@ -372,9 +385,9 @@ const oopResolvers = {
          }
       },
 
-      sendORToApplicant: async (_, { oopId }) => {
+      sendORToApplicant: async (_, { Id }) => {
          try {
-            const oop = await OOP.findById(oopId);
+            const oop = await OOP.findById(Id);
             if (!oop) {
                throw new Error('OOP not found');
             }
@@ -385,10 +398,31 @@ const oopResolvers = {
 
             // Update OOP status to indicate OR has been sent
             const updatedOOP = await OOP.findByIdAndUpdate(
-               oopId,
+               Id,
                { OOPstatus: 'Issued OR' },
                { new: true }
             );
+
+            // Notify applicant
+            await UserNotificationService.createOOPUserNotification({
+               oop: updatedOOP,
+               recipientId: updatedOOP.userId,
+               type: 'OR_ISSUED',
+               remarks: 'Official Receipt has been generated for your payment'
+            });
+
+            // Notify Technical Staff
+            const technicalStaff = await Admin.findOne({ roles: 'Technical_Staff' });
+            if (technicalStaff) {
+               await PersonnelNotificationService.createOOPPersonnelNotification({
+                  oop: updatedOOP,
+                  recipientId: technicalStaff._id,
+                  type: 'OR_GENERATED_TECHNICAL_STAFF',
+                  OOPStatus: 'Issued OR',
+                  remarks: `Application ${updatedOOP.applicationNumber} has completed payment`,
+                  priority: 'medium'
+               });
+            }
 
             return updatedOOP;
          } catch (error) {
@@ -513,7 +547,6 @@ const oopResolvers = {
                         status: 'SUBMITTED'
                      },
                      OOPstatus: 'Payment Proof Submitted'
-                     // awaitingPaymentProofApproval: true
                   }
                },
                { new: true }
@@ -532,7 +565,20 @@ const oopResolvers = {
                });
             }
 
-            // Notify user that their payment proof was submitted
+            // Notify Technical Staff
+            const technicalStaff = await Admin.findOne({ roles: 'Technical_Staff' });
+            if (technicalStaff) {
+               await PersonnelNotificationService.createOOPPersonnelNotification({
+                  oop: updatedOOP,
+                  recipientId: technicalStaff._id,
+                  type: 'PAYMENT_PROOF_SUBMITTED_TECHNICAL_STAFF',
+                  OOPStatus: 'Payment Proof Submitted',
+                  remarks: 'New payment submitted and pending verification',
+                  priority: 'medium'
+               });
+            }
+
+            // Notify user
             await UserNotificationService.createOOPUserNotification({
                oop: updatedOOP,
                recipientId: updatedOOP.userId,
@@ -568,6 +614,34 @@ const oopResolvers = {
             return updatedOOP;
          } catch (error) {
             throw new Error(`Failed to undo payment proof: ${error.message}`);
+         }
+      },
+
+      undoOOPSignature: async (_, { id }) => {
+         try {
+            const oop = await OOP.findById(id);
+            if (!oop) {
+               throw new Error('OOP not found');
+            }
+
+            // Reset signatures and status
+            const updatedOOP = await OOP.findByIdAndUpdate(
+               id,
+               {
+                  $set: {
+                     OOPstatus: 'Pending Signature',
+                     OOPSignedByTwoSignatories: false,
+                     tsdSignatureImage: null,
+                     'signatures.technicalServices': null
+                  }
+               },
+               { new: true }
+            );
+
+            return updatedOOP;
+         } catch (error) {
+            console.error('Error undoing OOP signature:', error);
+            throw new Error(`Failed to undo OOP signature: ${error.message}`);
          }
       }
    }

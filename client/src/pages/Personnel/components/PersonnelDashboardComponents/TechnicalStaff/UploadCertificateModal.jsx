@@ -5,11 +5,12 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useMutation, gql, useQuery } from '@apollo/client';
 import { toast } from 'sonner';
-import { X, Upload, Eye, FileText } from 'lucide-react';
+import { X, Upload, Eye, FileText, Loader2 } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import CSAWCertificateTemplate from '../../CertificateComponents/certificateTemplates/CSAWCertificateTemplate';
+import { cn } from '@/lib/utils';
 
 const UPLOAD_CERTIFICATE = gql`
   mutation UploadCertificate($input: UploadCertificateInput!) {
@@ -131,6 +132,7 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
    const [generatedCertificate, setGeneratedCertificate] = useState(null);
    const certificateRef = useRef();
    const [showECertificate, setShowECertificate] = useState(false);
+   const [isGenerating, setIsGenerating] = useState(false);
 
    const [uploadCertificate] = useMutation(UPLOAD_CERTIFICATE);
    const [generateCertificateMutation] = useMutation(GENERATE_CERTIFICATE);
@@ -253,18 +255,19 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
          return;
       }
 
-      const fullApplication = applicationData?.getCSAWPermitById;
-      if (!fullApplication) {
-         toast.error('Application details not found');
-         return;
-      }
-
-      if (fullApplication.hasCertificate) {
-         toast.error('Certificate already exists for this application');
-         return;
-      }
-
+      setIsGenerating(true);
       try {
+         const fullApplication = applicationData?.getCSAWPermitById;
+         if (!fullApplication) {
+            toast.error('Application details not found');
+            return;
+         }
+
+         if (fullApplication.hasCertificate) {
+            toast.error('Certificate already exists for this application');
+            return;
+         }
+
          const certificateData = {
             registrationType: fullApplication.registrationType,
             ownerName: fullApplication.ownerName,
@@ -299,6 +302,8 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
       } catch (error) {
          console.error('Error generating certificate:', error);
          toast.error(`Failed to generate e-certificate: ${error.message}`);
+      } finally {
+         setIsGenerating(false);
       }
    };
 
@@ -392,10 +397,19 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
                            <Button
                               onClick={generateECertificate}
                               className="bg-blue-600 hover:bg-blue-700 flex-1"
-                              disabled={generatedCertificate !== null}
+                              disabled={generatedCertificate !== null || isGenerating}
                            >
-                              <FileText className="h-4 w-4 mr-2" />
-                              Generate
+                              {isGenerating ? (
+                                 <>
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    Generating...
+                                 </>
+                              ) : (
+                                 <>
+                                    <FileText className="h-4 w-4 mr-2" />
+                                    Generate
+                                 </>
+                              )}
                            </Button>
                            {generatedCertificate && (
                               <Button
@@ -423,6 +437,7 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
                                  variant="ghost"
                                  size="sm"
                                  onClick={handleRemoveFile}
+                                 disabled={isUploading}
                               >
                                  <X className="h-4 w-4" />
                               </Button>
@@ -435,13 +450,26 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
                                  accept=".pdf,.doc,.docx"
                                  onChange={handleFileChange}
                                  className="hidden"
+                                 disabled={isUploading}
                               />
                               <Label
                                  htmlFor="certificate-file"
-                                 className="cursor-pointer block"
+                                 className={cn(
+                                    "cursor-pointer block",
+                                    isUploading && "opacity-50 cursor-not-allowed"
+                                 )}
                               >
-                                 <Upload className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
-                                 <span className="text-sm">Upload Certificate</span>
+                                 {isUploading ? (
+                                    <>
+                                       <Loader2 className="h-6 w-6 mx-auto mb-2 animate-spin text-muted-foreground" />
+                                       <span className="text-sm">Uploading...</span>
+                                    </>
+                                 ) : (
+                                    <>
+                                       <Upload className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+                                       <span className="text-sm">Upload Certificate</span>
+                                    </>
+                                 )}
                               </Label>
                            </div>
                         )}

@@ -23,7 +23,9 @@ const PersonnelNotificationSchema = new mongoose.Schema({
          'PAYMENT_PENDING_VERIFICATION',
          'APPLICATION_RECORDED',
          'APPLICATION_READY_FOR_INSPECTION',
-         'PAYMENT_PROOF_SUBMITTED'
+         'PAYMENT_PROOF_SUBMITTED',
+         'PAYMENT_PROOF_SUBMITTED_TECHNICAL_STAFF',
+         'OR_GENERATED_TECHNICAL_STAFF'
       ]
    },
    title: {

@@ -173,10 +173,20 @@ class PersonnelNotificationService {
                message: `A payment proof for Order of Payment (${oop.billNo}) has been submitted and requires your verification.`,
                priority: 'high'
             },
+            'PAYMENT_PROOF_SUBMITTED_TECHNICAL_STAFF': {
+               title: 'New Payment Submitted',
+               message: `A payment has been submitted for Order of Payment (${oop.billNo}) and is pending verification.`,
+               priority: 'medium'
+            },
             'PAYMENT_PENDING_VERIFICATION': {
                title: 'Payment Pending Verification',
                message: `Payment for Order of Payment (${oop.billNo}) is pending verification.`,
                priority: 'high'
+            },
+            'OR_GENERATED_TECHNICAL_STAFF': {
+               title: 'Payment Completed',
+               message: `Official Receipt has been generated for Order of Payment (${oop.billNo}). Application ${oop.applicationNumber} has completed payment.`,
+               priority: 'medium'
             }
          };
 

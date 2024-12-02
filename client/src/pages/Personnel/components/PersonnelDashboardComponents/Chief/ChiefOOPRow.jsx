@@ -79,6 +79,22 @@ const GET_OOP = gql`
   }
 `;
 
+const UNDO_OOP_SIGNATURE = gql`
+  mutation UndoOOPSignature($id: ID!) {
+    undoOOPSignature(id: $id) {
+      _id
+      OOPstatus
+      OOPSignedByTwoSignatories
+      rpsSignatureImage
+      tsdSignatureImage
+      signatures {
+        chiefRPS
+        technicalServices
+      }
+    }
+  }
+`;
+
 const ChiefOOPRow = ({ oop, onRefetch }) => {
    const navigate = useNavigate();
    const [isModalOpen, setIsModalOpen] = useState(false);
@@ -86,6 +102,7 @@ const ChiefOOPRow = ({ oop, onRefetch }) => {
    const [undoOOPCreation] = useMutation(UNDO_OOP_CREATION);
    const [isViewOOPModalOpen, setIsViewOOPModalOpen] = useState(false);
    const isMobile = useMediaQuery('(max-width: 640px)');
+   const [undoOOPSignature] = useMutation(UNDO_OOP_SIGNATURE);
 
    const { data: permitData } = useQuery(GET_PERMIT_BY_APPLICATION_NUMBER, {
       // variables: { applicationNumber: oop.applicationId },
@@ -154,6 +171,20 @@ const ChiefOOPRow = ({ oop, onRefetch }) => {
       }
    };
 
+   const handleUndoSignature = async () => {
+      try {
+         await undoOOPSignature({
+            variables: { id: oop._id }
+         });
+
+         toast.success('Signatures undone successfully');
+         if (onRefetch) onRefetch();
+      } catch (error) {
+         console.error('Error undoing signatures:', error);
+         toast.error('Failed to undo signatures');
+      }
+   };
+
    const renderActionButtons = () => {
       if (isMobile) {
          return (
@@ -196,6 +227,17 @@ const ChiefOOPRow = ({ oop, onRefetch }) => {
                         <RotateCcw className="h-4 w-4" />
                      </Button>
                   </>
+               )}
+
+               {oop.OOPstatus === 'For Approval' && (
+                  <Button
+                     variant="outline"
+                     size="icon"
+                     onClick={handleUndoSignature}
+                     className="h-8 w-8 text-yellow-600"
+                  >
+                     <RotateCcw className="h-4 w-4" />
+                  </Button>
                )}
             </>
          );
@@ -244,6 +286,26 @@ const ChiefOOPRow = ({ oop, onRefetch }) => {
                      Undo
                   </Button>
                </>
+            )}
+
+            {oop.OOPstatus === 'For Approval' && (
+               <TooltipProvider>
+                  <Tooltip delayDuration={200}>
+                     <TooltipTrigger asChild>
+                        <Button
+                           onClick={handleUndoSignature}
+                           variant="outline"
+                           size="icon"
+                           className="h-8 w-8 text-yellow-600 hover:text-yellow-800"
+                        >
+                           <RotateCcw className="h-4 w-4" />
+                        </Button>
+                     </TooltipTrigger>
+                     <TooltipContent>
+                        <p>Undo E-Signatures</p>
+                     </TooltipContent>
+                  </Tooltip>
+               </TooltipProvider>
             )}
          </>
       );
@@ -396,6 +458,26 @@ const ChiefOOPRow = ({ oop, onRefetch }) => {
                            </Tooltip>
                         </TooltipProvider>
                      </>
+                  )}
+
+                  {oop.OOPstatus === 'For Approval' && (
+                     <TooltipProvider>
+                        <Tooltip delayDuration={200}>
+                           <TooltipTrigger asChild>
+                              <Button
+                                 onClick={handleUndoSignature}
+                                 variant="outline"
+                                 size="icon"
+                                 className="h-8 w-8 text-yellow-600 hover:text-yellow-800"
+                              >
+                                 <RotateCcw className="h-4 w-4" />
+                              </Button>
+                           </TooltipTrigger>
+                           <TooltipContent>
+                              <p>Undo E-Signatures</p>
+                           </TooltipContent>
+                        </Tooltip>
+                     </TooltipProvider>
                   )}
                </div>
             </td>
