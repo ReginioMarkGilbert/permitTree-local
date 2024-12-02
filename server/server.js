@@ -65,7 +65,7 @@ const startServer = async () => {
          res.status(204).end(); // No content response
       });
 
-      app.use('/graphql', expressMiddleware(server, {
+      app.use('/graphql', cors(corsOptions), expressMiddleware(server, {
          context: async ({ req }) => {
             const token = req.headers.authorization || '';
             if (token) {
