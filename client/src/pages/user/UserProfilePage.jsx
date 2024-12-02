@@ -373,7 +373,7 @@ export default function UserProfilePage() {
                         <Button
                            onClick={handleSubmit}
                            disabled={isLoading}
-                           className="bg-white text-black hover:bg-gray-100"
+                           className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
                         >
                            {isLoading ? (
                               <>

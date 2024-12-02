@@ -79,7 +79,7 @@ const SuperAdminSidebar = React.memo(({ isOpen, onToggle }) => {
    ];
 
    const accountNavItems = [
-      { to: "/superadmin/settings", icon: Settings, text: "Settings" },
+      // { to: "/superadmin/  settings", icon: Settings, text: "Settings" },
       { to: "/auth", icon: LogOut, text: "Logout", onClick: handleLogout }
    ];
 

@@ -187,7 +187,11 @@ const userResolvers = {
                   _id: undefined,
                   createdAt: user.createdAt?.toISOString(),
                   lastLoginDate: user.lastLoginDate?.toISOString(),
-                  userType: 'Client'
+                  userType: 'Client',
+                  profilePicture: user.profilePicture && user.profilePicture.data ? {
+                     data: user.profilePicture.data.toString('base64'),
+                     contentType: user.profilePicture.contentType
+                  } : null
                })),
                ...adminUsers.map(admin => ({
                   id: admin._id.toString(),
@@ -195,7 +199,11 @@ const userResolvers = {
                   _id: undefined,
                   createdAt: admin.createdAt?.toISOString(),
                   lastLoginDate: admin.lastLoginDate?.toISOString(),
-                  userType: 'Personnel'
+                  userType: 'Personnel',
+                  profilePicture: admin.profilePicture && admin.profilePicture.data ? {
+                     data: admin.profilePicture.data.toString('base64'),
+                     contentType: admin.profilePicture.contentType
+                  } : null
                }))
             ];
 
@@ -214,7 +222,8 @@ const userResolvers = {
                isActive: typeof user.isActive === 'boolean' ? user.isActive : true,
                lastLoginDate: user.lastLoginDate || null,
                createdAt: user.createdAt || null,
-               updatedAt: user.updatedAt || null
+               updatedAt: user.updatedAt || null,
+               profilePicture: user.profilePicture || null
             }));
 
          } catch (error) {

@@ -17,32 +17,32 @@ const UserTable = ({ users, onViewUser, onEditUser, onDeactivateUser, onActivate
             icon: Eye,
             label: "View Details",
             onClick: () => onViewUser(user),
-            variant: "ghost"
+            variant: "outline"
          },
          {
             icon: Pencil,
             label: "Edit User",
             onClick: () => onEditUser(user),
-            variant: "ghost"
+            variant: "outline"
          },
          user.isActive ? {
             icon: Ban,
             label: "Deactivate User",
             onClick: () => onDeactivateUser(user),
-            variant: "ghost",
+            variant: "outline",
             className: "text-yellow-600 hover:text-yellow-700"
          } : {
             icon: CheckCircle,
             label: "Activate User",
             onClick: () => onActivateUser(user),
-            variant: "ghost",
+            variant: "outline",
             className: "text-green-600 hover:text-green-700"
          },
          {
             icon: Trash2,
             label: "Delete User",
             onClick: () => onDeleteUser(user),
-            variant: "ghost",
+            variant: "outline",
             className: "text-red-600 hover:text-red-700"
          }
       ];

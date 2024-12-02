@@ -14,12 +14,21 @@ import {
    CheckCircle2,
    XCircle,
    Clock,
-   UserCheck
+   UserCheck,
+   Activity
 } from 'lucide-react';
 import { format, formatDistanceToNow, isValid } from 'date-fns';
 
 const SA_UserDetailsViewModal = ({ isOpen, onClose, user }) => {
    if (!user) return null;
+
+   // console.log('User data:', user);
+
+   const profilePictureSrc = user.profilePicture
+      ? `data:${user.profilePicture.contentType};base64,${user.profilePicture.data}`
+      : null;
+
+   // console.log('Profile Picture Source:', profilePictureSrc);
 
    const isPersonnel = user.userType === 'Personnel';
 
@@ -28,12 +37,9 @@ const SA_UserDetailsViewModal = ({ isOpen, onClose, user }) => {
 
       try {
          let date;
-         // Handle different date formats
          if (typeof dateString === 'string') {
-            // Try parsing ISO string
             date = new Date(dateString);
          } else if (typeof dateString === 'number') {
-            // Handle timestamp
             date = new Date(dateString);
          } else {
             return 'Invalid date';
@@ -78,101 +84,119 @@ const SA_UserDetailsViewModal = ({ isOpen, onClose, user }) => {
    const formattedLastLogin = getLastLoginText();
 
    const InfoCard = ({ icon: Icon, title, value, className = "" }) => (
-      <div className="flex items-start gap-3 p-3 bg-secondary/10 rounded-lg hover:bg-secondary/20 transition-colors">
-         <div className="p-2 bg-background rounded-full shadow-sm">
-            <Icon className="w-4 h-4 text-primary" />
+      <div className="flex items-start gap-4 p-4 bg-card hover:bg-accent/5 rounded-lg transition-all duration-200 border border-border/50">
+         <div className="p-2.5 bg-primary/10 rounded-full">
+            <Icon className="w-5 h-5 text-primary" />
          </div>
          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="text-sm font-semibold text-foreground mt-0.5">{value || 'N/A'}</p>
+            <p className="text-sm font-medium text-muted-foreground mb-1">{title}</p>
+            <p className="text-base font-medium text-foreground">{value || 'N/A'}</p>
          </div>
       </div>
    );
 
+   const roles = {
+      "Technical_Staff": "Technical Staff",
+      "Chief_RPS": "Chief RPS",
+      "Chief_TSD": "Chief TSD",
+      "Billing_Collector": "Billing Collector",
+      "PENR_CENR_Officer": "PENR CENR Officer"
+   }
+
    return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-         <DialogContent className="max-w-[600px] p-0">
-            <DialogHeader className="px-6 pt-6 pb-4 border-b">
-               <div className="flex items-center justify-between">
-                  <DialogTitle className="text-xl font-semibold">
-                     {isPersonnel ? 'Personnel Details' : 'User Details'}
-                  </DialogTitle>
-                  <DialogDescription className="sr-only">
-                     View detailed information about the {isPersonnel ? 'personnel' : 'user'}
-                  </DialogDescription>
+         <DialogContent className="max-w-2xl p-0">
+            <DialogHeader className="px-8 pt-8 pb-6 border-b bg-gradient-to-r from-primary/5 to-primary/10">
+               <div className="flex items-center gap-4">
+                  <div className="rounded-full">
+                     {profilePictureSrc ? (
+                        <img
+                           src={profilePictureSrc}
+                           alt="Profile"
+                           className="w-16 h-16 rounded-full"
+                        />
+                     ) : (
+                        <div className="p-3 bg-primary/20 rounded-full">
+                           <User className="w-8 h-8 text-primary" />
+                        </div>
+                     )}
+                  </div>
+                  <div>
+                     <DialogTitle className="text-2xl font-bold mb-1">
+                        {`${user.firstName} ${user.lastName}`}
+                     </DialogTitle>
+                     <DialogDescription className="text-base">
+                        {user.roles.includes("user") ? "Client" : roles[user.roles[0]]}
+                     </DialogDescription>
+                  </div>
                </div>
             </DialogHeader>
 
-            <div className="px-6 py-6 space-y-6 max-h-[calc(100vh-12rem)] overflow-y-auto">
-               <Card className="p-5 shadow-sm">
-                  <h3 className="text-sm font-semibold text-muted-foreground mb-4">
-                     {isPersonnel ? 'Personnel Information' : 'Basic Information'}
+            <div className="px-8 py-6 space-y-8 max-h-[calc(100vh-12rem)] overflow-y-auto">
+               <section>
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                     <UserCheck className="w-5 h-5 text-primary" />
+                     Account Information
                   </h3>
-                  <div className="grid gap-3">
+                  <div className="grid md:grid-cols-2 gap-4">
                      <InfoCard
-                        icon={User}
-                        title="Full Name"
-                        value={`${user.firstName} ${user.lastName}`}
-                     />
-                     <InfoCard
-                        icon={UserCheck}
-                        title="Username"
-                        value={user.username}
+                        icon={Mail}
+                        title="Email Address"
+                        value={user.email}
                      />
                      <InfoCard
                         icon={Shield}
-                        title="Role"
-                        value={user.roles?.join(', ').replace(/_/g, ' ')}
-                     />
-                     <InfoCard
-                        icon={Mail}
-                        title="Email"
-                        value={user.email}
+                        title="Username"
+                        value={user.username}
                      />
                      {!isPersonnel && (
                         <>
                            <InfoCard
                               icon={Phone}
-                              title="Phone"
+                              title="Phone Number"
                               value={user.phone}
                            />
                            <InfoCard
                               icon={Building2}
-                              title="Company"
+                              title="Company Name"
                               value={user.company}
                            />
                            <InfoCard
                               icon={MapPin}
                               title="Address"
                               value={user.address}
+                              className="md:col-span-2"
                            />
                         </>
                      )}
                   </div>
-               </Card>
+               </section>
 
-               <Card className="p-5 shadow-sm">
-                  <h3 className="text-sm font-semibold text-muted-foreground mb-4">Account Activity</h3>
-                  <div className="grid gap-3">
+               <section>
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                     <Activity className="w-5 h-5 text-primary" />
+                     Account Activity
+                  </h3>
+                  <div className="grid md:grid-cols-2 gap-4">
                      <InfoCard
-                        icon={Clock}
+                        icon={Calendar}
                         title="Account Created"
                         value={formattedCreatedAt}
                      />
                      <InfoCard
-                        icon={Calendar}
+                        icon={Clock}
                         title="Last Login"
                         value={formattedLastLogin}
                      />
                   </div>
-               </Card>
+               </section>
             </div>
 
-            <DialogFooter className="px-6 py-4 border-t">
+            <DialogFooter className="px-8 py-6 border-t bg-muted/30">
                <Button
                   variant="outline"
                   onClick={onClose}
-                  className="min-w-[100px]"
+                  className="min-w-[120px]"
                >
                   Close
                </Button>

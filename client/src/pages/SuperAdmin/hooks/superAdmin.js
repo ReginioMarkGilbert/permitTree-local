@@ -17,6 +17,10 @@ export const GET_ALL_USERS = gql`
       lastLoginDate
       createdAt
       updatedAt
+      profilePicture {
+        data
+        contentType
+      }
     }
   }
 `;
@@ -117,6 +121,10 @@ export const GET_USER_DETAILS = gql`
       createdAt
       updatedAt
       lastPasswordChange
+      profilePicture {
+        data
+        contentType
+      }
       recentActivities {
         id
         type
