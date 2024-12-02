@@ -5,7 +5,7 @@ const { generateTrackingNumber } = require('../utils/trackingNumberGenerator');
 const officialReceiptSchema = new mongoose.Schema({
    orNumber: {
       type: String,
-      required: true,
+      sparse: true,
       unique: true
    },
    dateIssued: {
@@ -18,12 +18,16 @@ const officialReceiptSchema = new mongoose.Schema({
    },
    amount: {
       type: Number,
-      required: true
+      required: function() {
+         return this.orNumber != null;
+      }
    },
    paymentMethod: {
       type: String,
-      required: true,
-      enum: ['GCASH', 'CASH', 'CHECK']
+      enum: ['GCASH', 'CASH', 'CHECK'],
+      required: function() {
+         return this.orNumber != null;
+      }
    },
    remarks: String
 });
@@ -33,17 +37,21 @@ const OR = mongoose.model('OfficialReceipt', officialReceiptSchema);
 const paymentProofSchema = new mongoose.Schema({
    transactionId: {
       type: String,
-      required: true,
-      unique: true
+      sparse: true,
+      unique: true,
+      required: function() {
+         return this.paymentMethod != null;
+      }
    },
    paymentMethod: {
       type: String,
-      enum: ['GCASH'],
-      required: true
+      enum: ['GCASH']
    },
    amount: {
       type: Number,
-      required: true
+      required: function() {
+         return this.paymentMethod != null;
+      }
    },
    timestamp: {
       type: Date,
@@ -51,7 +59,9 @@ const paymentProofSchema = new mongoose.Schema({
    },
    referenceNumber: {
       type: String,
-      required: true
+      required: function() {
+         return this.paymentMethod != null;
+      }
    },
    payerDetails: {
       name: {
@@ -150,7 +160,10 @@ const oopSchema = new mongoose.Schema({
       required: true,
       ref: 'User'
    },
-   officialReceipt: officialReceiptSchema,
+   officialReceipt: {
+      type: officialReceiptSchema,
+      required: false
+   },
    receivedDate: {
       type: Date,
       default: Date.now
@@ -162,7 +175,10 @@ const oopSchema = new mongoose.Schema({
    },
    releasedDate: Date,
    releasedTime: String,
-   paymentProof: paymentProofSchema
+   paymentProof: {
+      type: paymentProofSchema,
+      required: false
+   }
 }, {
    timestamps: true
 });
