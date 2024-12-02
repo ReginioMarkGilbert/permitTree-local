@@ -103,13 +103,15 @@ const certificateResolvers = {
    Mutation: {
       generateCertificate: async (_, { input }) => {
          try {
-            console.log('Generating certificate with input:', input);
+            console.log('Generating certificate with input:', JSON.stringify(input, null, 2));
 
             // Verify the permit exists and get its application number
             const permit = await Permit.findById(input.applicationId);
             if (!permit) {
                throw new Error(`Permit not found with ID: ${input.applicationId}`);
             }
+
+            console.log('Found permit:', JSON.stringify(permit, null, 2));
 
             const certificateNumber = await generateCertificateNumber(input.applicationType);
             const currentDate = new Date();
@@ -126,16 +128,10 @@ const certificateResolvers = {
                certificateData: input.certificateData
             };
 
+            console.log('Certificate data to save:', JSON.stringify(certificateData, null, 2));
+
             const certificate = new Certificate(certificateData);
             const savedCertificate = await certificate.save();
-
-            // Update the permit with the certificate reference
-            await Permit.findByIdAndUpdate(input.applicationId, {
-               $set: {
-                  certificateId: savedCertificate._id,
-                  hasCertificate: true
-               }
-            });
 
             return savedCertificate;
          } catch (error) {

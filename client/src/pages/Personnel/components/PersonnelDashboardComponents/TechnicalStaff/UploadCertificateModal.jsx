@@ -11,6 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import CSAWCertificateTemplate from '../../CertificateComponents/certificateTemplates/CSAWCertificateTemplate';
 import COVCertificateTemplate from '../../CertificateComponents/certificateTemplates/COVCertificateTemplate';
+import PTPRCertificateTemplate from '../../CertificateComponents/certificateTemplates/PTPRCertificateTemplate';
 import { cn } from '@/lib/utils';
 
 const UPLOAD_CERTIFICATE = gql`
@@ -115,6 +116,26 @@ const GET_COV_PERMIT = gql`
   }
 `;
 
+const GET_PTPR_PERMIT = gql`
+  query GetPTPRPermit($id: ID!) {
+    getPTPRPermitById(id: $id) {
+      id
+      applicationNumber
+      applicationType
+      ownerName
+      address
+      contactNumber
+      lotArea
+      treeSpecies
+      totalTrees
+      treeSpacing
+      yearPlanted
+      hasCertificate
+      certificateId
+    }
+  }
+`;
+
 const UPDATE_PERMIT_STAGE = gql`
   mutation UpdatePermitStage(
     $id: ID!,
@@ -171,8 +192,36 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
       skip: !application.id || application.applicationType !== 'Certificate of Verification',
    });
 
-   const applicationData = application.applicationType === 'Chainsaw Registration' ? csawData?.getCSAWPermitById : covData?.getCOVPermitById;
-   const isLoading = application.applicationType === 'Chainsaw Registration' ? csawLoading : covLoading;
+   const { data: ptprData, loading: ptprLoading } = useQuery(GET_PTPR_PERMIT, {
+      variables: { id: application.id },
+      skip: !application.id || application.applicationType !== 'Private Tree Plantation Registration',
+   });
+
+   const applicationData = (() => {
+      switch (application.applicationType) {
+         case 'Chainsaw Registration':
+            return csawData?.getCSAWPermitById;
+         case 'Certificate of Verification':
+            return covData?.getCOVPermitById;
+         case 'Private Tree Plantation Registration':
+            return ptprData?.getPTPRPermitById;
+         default:
+            return null;
+      }
+   })();
+
+   const isLoading = (() => {
+      switch (application.applicationType) {
+         case 'Chainsaw Registration':
+            return csawLoading;
+         case 'Certificate of Verification':
+            return covLoading;
+         case 'Private Tree Plantation Registration':
+            return ptprLoading;
+         default:
+            return false;
+      }
+   })();
 
    const handleFileChange = (e) => {
       const file = e.target.files[0];
@@ -293,37 +342,62 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
          }
 
          let certificateData;
-         if (application.applicationType === 'Chainsaw Registration') {
-            certificateData = {
-               registrationType: applicationData.registrationType,
-               ownerName: applicationData.ownerName,
-               address: applicationData.address,
-               purpose: "For Cutting/Slicing of Planted trees with cutting permits and coconut within Private Land",
-               chainsawDetails: {
-                  brand: applicationData.brand,
-                  model: applicationData.model,
-                  serialNumber: applicationData.serialNumber,
-                  dateOfAcquisition: applicationData.dateOfAcquisition,
-                  powerOutput: applicationData.powerOutput,
-                  maxLengthGuidebar: applicationData.maxLengthGuidebar,
-                  countryOfOrigin: applicationData.countryOfOrigin,
-                  purchasePrice: parseFloat(applicationData.purchasePrice)
-               }
-            };
-         } else {
-            certificateData = {
-               registrationType: 'Certificate of Verification',
-               ownerName: applicationData.name,
-               address: applicationData.address,
-               purpose: applicationData.purpose,
-               otherDetails: {
-                  driverName: applicationData.driverName,
-                  driverLicenseNumber: applicationData.driverLicenseNumber,
-                  vehiclePlateNumber: applicationData.vehiclePlateNumber,
-                  originAddress: applicationData.originAddress,
-                  destinationAddress: applicationData.destinationAddress
-               }
-            };
+         switch (application.applicationType) {
+            case 'Chainsaw Registration':
+               certificateData = {
+                  registrationType: applicationData.registrationType,
+                  ownerName: applicationData.ownerName,
+                  address: applicationData.address,
+                  purpose: "For Cutting/Slicing of Planted trees with cutting permits and coconut within Private Land",
+                  chainsawDetails: {
+                     brand: applicationData.brand,
+                     model: applicationData.model,
+                     serialNumber: applicationData.serialNumber,
+                     dateOfAcquisition: applicationData.dateOfAcquisition,
+                     powerOutput: applicationData.powerOutput,
+                     maxLengthGuidebar: applicationData.maxLengthGuidebar,
+                     countryOfOrigin: applicationData.countryOfOrigin,
+                     purchasePrice: parseFloat(applicationData.purchasePrice)
+                  }
+               };
+               break;
+            case 'Certificate of Verification':
+               certificateData = {
+                  registrationType: 'Certificate of Verification',
+                  ownerName: applicationData.name,
+                  address: applicationData.address,
+                  purpose: applicationData.purpose,
+                  otherDetails: {
+                     driverName: applicationData.driverName,
+                     driverLicenseNumber: applicationData.driverLicenseNumber,
+                     vehiclePlateNumber: applicationData.vehiclePlateNumber,
+                     originAddress: applicationData.originAddress,
+                     destinationAddress: applicationData.destinationAddress
+                  }
+               };
+               break;
+            case 'Private Tree Plantation Registration':
+               console.log('PTPR Application Data:', applicationData); // Debug log
+
+               certificateData = {
+                  registrationType: 'Private Tree Plantation Registration',
+                  ownerName: applicationData.ownerName,
+                  address: applicationData.address,
+                  purpose: "For registration of private tree plantation",
+                  otherDetails: {
+                     lotArea: Number(applicationData.lotArea),  // Ensure number conversion
+                     treeSpecies: applicationData.treeSpecies,  // Already an array
+                     totalTrees: Number(applicationData.totalTrees),  // Ensure number conversion
+                     treeSpacing: String(applicationData.treeSpacing),
+                     yearPlanted: Number(applicationData.yearPlanted),  // Ensure number conversion
+                     contactNumber: String(applicationData.contactNumber)
+                  }
+               };
+
+               console.log('PTPR Certificate Data:', certificateData); // Debug log
+               break;
+            default:
+               throw new Error('Unsupported application type');
          }
 
          const { data } = await generateCertificateMutation({
@@ -374,6 +448,17 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
                   />
                </div>
             );
+         case 'Private Tree Plantation Registration':
+            return (
+               <div style={{ display: 'none' }}>
+                  <PTPRCertificateTemplate
+                     ref={certificateRef}
+                     certificate={generatedCertificate}
+                     application={generatedCertificate.certificateData}
+                     hiddenOnPrint={[]}
+                  />
+               </div>
+            );
          default:
             return null;
       }
@@ -389,19 +474,36 @@ const UploadCertificateModal = ({ isOpen, onClose, application, onComplete }) =>
                   </DialogHeader>
 
                   <div className="overflow-auto max-h-[70vh]">
-                     {application.applicationType === 'Chainsaw Registration' ? (
-                        <CSAWCertificateTemplate
-                           certificate={generatedCertificate}
-                           application={generatedCertificate.certificateData}
-                           hiddenOnPrint={[]}
-                        />
-                     ) : (
-                        <COVCertificateTemplate
-                           certificate={generatedCertificate}
-                           application={generatedCertificate.certificateData}
-                           hiddenOnPrint={[]}
-                        />
-                     )}
+                     {(() => {
+                        switch (application.applicationType) {
+                           case 'Chainsaw Registration':
+                              return (
+                                 <CSAWCertificateTemplate
+                                    certificate={generatedCertificate}
+                                    application={generatedCertificate.certificateData}
+                                    hiddenOnPrint={[]}
+                                 />
+                              );
+                           case 'Certificate of Verification':
+                              return (
+                                 <COVCertificateTemplate
+                                    certificate={generatedCertificate}
+                                    application={generatedCertificate.certificateData}
+                                    hiddenOnPrint={[]}
+                                 />
+                              );
+                           case 'Private Tree Plantation Registration':
+                              return (
+                                 <PTPRCertificateTemplate
+                                    certificate={generatedCertificate}
+                                    application={generatedCertificate.certificateData}
+                                    hiddenOnPrint={[]}
+                                 />
+                              );
+                           default:
+                              return null;
+                        }
+                     })()}
                   </div>
 
                   <div className="flex justify-end gap-2">

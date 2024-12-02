@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/tooltip";
 import CSAWCertificateTemplate from '../../CertificateComponents/certificateTemplates/CSAWCertificateTemplate';
 import COVCertificateTemplate from '../../CertificateComponents/certificateTemplates/COVCertificateTemplate';
+import PTPRCertificateTemplate from '../../CertificateComponents/certificateTemplates/PTPRCertificateTemplate';
 import { useQuery } from '@apollo/client';
 import { gql } from '@apollo/client';
 
@@ -208,6 +209,32 @@ const CertificateViewModal = ({ isOpen, onClose, certificate, loading, error }) 
                   ref={certificateRef}
                   certificate={certData}
                   application={covData}
+                  orderOfPayment={certData.orderOfPayment}
+                  hiddenOnPrint={[]}
+               />
+            );
+         case 'Private Tree Plantation Registration':
+            console.log('Raw Certificate Data:', certData.certificateData); // Debug log
+
+            const ptprData = {
+               ...certData.certificateData,
+               ownerName: certData.certificateData.ownerName,
+               address: certData.certificateData.address,
+               lotArea: Number(certData.certificateData.otherDetails?.lotArea),
+               treeSpecies: certData.certificateData.otherDetails?.treeSpecies || [],
+               totalTrees: Number(certData.certificateData.otherDetails?.totalTrees),
+               treeSpacing: certData.certificateData.otherDetails?.treeSpacing,
+               yearPlanted: Number(certData.certificateData.otherDetails?.yearPlanted),
+               contactNumber: certData.certificateData.otherDetails?.contactNumber
+            };
+
+            console.log('Processed PTPR Data:', ptprData); // Debug log
+
+            return (
+               <PTPRCertificateTemplate
+                  ref={certificateRef}
+                  certificate={certData}
+                  application={ptprData}
                   orderOfPayment={certData.orderOfPayment}
                   hiddenOnPrint={[]}
                />

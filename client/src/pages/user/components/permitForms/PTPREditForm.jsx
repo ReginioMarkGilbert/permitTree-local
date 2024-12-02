@@ -130,7 +130,8 @@ const PTPREditForm = ({ formData, handleInputChange, handleFileChange, removeFil
             />
          </div>
          <div>
-            <Label htmlFor="treeSpecies" className="text-foreground">Tree Species Planted (comma-separated)</Label>
+            {/* <Label htmlFor="treeSpecies" className="text-foreground">Tree Species Planted (comma-separated)</Label> */}
+            <Label htmlFor="treeSpecies" className="text-foreground">Tree Species Planted</Label>
             <Input
                id="treeSpecies"
                name="treeSpecies"
