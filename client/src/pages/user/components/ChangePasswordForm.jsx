@@ -4,16 +4,52 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useChangePassword } from '@/pages/user/hooks/useChangePassword';
 import { toast } from 'sonner';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { gql, useMutation, useQuery } from '@apollo/client';
+
+const SEND_VERIFICATION_CODE = gql`
+  mutation SendVerificationCode($email: String!) {
+    sendVerificationCode(email: $email) {
+      success
+      message
+    }
+  }
+`;
+
+const VERIFY_CODE = gql`
+  mutation VerifyCode($email: String!, $code: String!) {
+    verifyCode(email: $email, code: $code) {
+      success
+      message
+    }
+  }
+`;
 
 const ChangePasswordForm = ({ onClose }) => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { changePassword, loading } = useChangePassword();
+  const [step, setStep] = useState('initial'); // initial, verification, changePassword
+  const [sendingCode, setSendingCode] = useState(false);
+  const [verifyingCode, setVerifyingCode] = useState(false);
+  const { changePassword, loading: changePasswordLoading } = useChangePassword();
+  const [sendCode] = useMutation(SEND_VERIFICATION_CODE);
+  const [verifyCode] = useMutation(VERIFY_CODE);
+
+  // Get current user's email from context
+  const { data: userData } = useQuery(gql`
+    query GetCurrentUser {
+      getCurrentUser {
+        email
+      }
+    }
+  `);
+
+  const userEmail = userData?.getCurrentUser?.email;
 
   const [isValid, setIsValid] = useState(false);
   const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
@@ -52,8 +88,65 @@ const ChangePasswordForm = ({ onClose }) => {
     setShowPasswordRequirements(false);
   };
 
+  const handleSendCode = async () => {
+    if (!userEmail) {
+      toast.error('Email address not found');
+      return;
+    }
+
+    try {
+      setSendingCode(true);
+      const { data } = await sendCode({
+        variables: { email: userEmail }
+      });
+
+      if (data?.sendVerificationCode?.success) {
+        toast.success('Verification code sent to your email');
+        setStep('verification');
+      }
+    } catch (error) {
+      toast.error(error.message || 'Failed to send verification code');
+    } finally {
+      setSendingCode(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    if (!userEmail) {
+      toast.error('Email address not found');
+      return;
+    }
+
+    try {
+      setVerifyingCode(true);
+      const { data } = await verifyCode({
+        variables: {
+          email: userEmail,
+          code: verificationCode
+        }
+      });
+
+      if (data?.verifyCode?.success) {
+        toast.success('Code verified successfully');
+        setStep('changePassword');
+      }
+    } catch (error) {
+      toast.error(error.message || 'Invalid verification code');
+    } finally {
+      setVerifyingCode(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (step === 'initial') {
+      handleSendCode();
+      return;
+    }
+    if (step === 'verification') {
+      handleVerifyCode();
+      return;
+    }
 
     // Check password length first
     if (newPassword.length < 8) {
@@ -73,7 +166,8 @@ const ChangePasswordForm = ({ onClose }) => {
           input: {
             currentPassword,
             newPassword,
-            confirmPassword
+            confirmPassword,
+            verificationCode
           }
         }
       });
@@ -86,128 +180,177 @@ const ChangePasswordForm = ({ onClose }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4" role="form" data-testid="password-form">
-      <div className="space-y-2">
-        <Label htmlFor="currentPassword">Current Password</Label>
-        <div className="relative">
-          <Input
-            id="currentPassword"
-            type={showCurrentPassword ? 'text' : 'password'}
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            required
-            className="pr-10"
-          />
+      {step === 'initial' && (
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            To change your password, we'll first send a verification code to your email ({userEmail})
+          </p>
           <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+            type="submit"
+            className="w-full"
+            disabled={sendingCode}
           >
-            {showCurrentPassword ? (
-              <EyeOff className="h-4 w-4 text-gray-500" />
+            {sendingCode ? (
+              <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending Code...</>
             ) : (
-              <Eye className="h-4 w-4 text-gray-500" />
+              'Send Verification Code'
             )}
           </Button>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="newPassword">New Password</Label>
-        <div className="relative">
-          <Input
-            id="newPassword"
-            type={showNewPassword ? 'text' : 'password'}
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            onFocus={handleNewPasswordFocus}
-            onBlur={handleNewPasswordBlur}
-            required
-            className="pr-10"
-            aria-label="New Password"
-          />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-            onClick={() => setShowNewPassword(!showNewPassword)}
-          >
-            {showNewPassword ? (
-              <EyeOff className="h-4 w-4 text-gray-500" />
-            ) : (
-              <Eye className="h-4 w-4 text-gray-500" />
-            )}
-          </Button>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="confirmPassword">Confirm New Password</Label>
-        <div className="relative">
-          <Input
-            id="confirmPassword"
-            type={showConfirmPassword ? 'text' : 'password'}
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            className="pr-10"
-          />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-          >
-            {showConfirmPassword ? (
-              <EyeOff className="h-4 w-4 text-gray-500" />
-            ) : (
-              <Eye className="h-4 w-4 text-gray-500" />
-            )}
-          </Button>
-        </div>
-      </div>
-
-      {showPasswordRequirements && (
-        <div className="text-sm text-muted-foreground space-y-1" data-testid="password-requirements">
-          <p>New password must:</p>
-          <ul className="space-y-1">
-            <li className="flex items-center gap-2">
-              <div className={`w-1.5 h-1.5 rounded-full ${validations.length ? 'bg-green-500' : 'bg-red-500'}`} />
-              <span className={validations.length ? 'text-green-600' : 'text-muted-foreground'}>
-                Be at least 8 characters long
-              </span>
-            </li>
-            <li className="flex items-center gap-2">
-              <div className={`w-1.5 h-1.5 rounded-full ${validations.uppercase ? 'bg-green-500' : 'bg-red-500'}`} />
-              <span className={validations.uppercase ? 'text-green-600' : 'text-muted-foreground'}>
-                Include at least one uppercase letter
-              </span>
-            </li>
-            <li className="flex items-center gap-2">
-              <div className={`w-1.5 h-1.5 rounded-full ${validations.number ? 'bg-green-500' : 'bg-red-500'}`} />
-              <span className={validations.number ? 'text-green-600' : 'text-muted-foreground'}>
-                Include at least one number
-              </span>
-            </li>
-          </ul>
         </div>
       )}
 
-      <div className="flex justify-end space-x-4">
-        <Button variant="outline" type="button" onClick={onClose}>
-          Cancel
-        </Button>
-        <Button
-          type="submit"
-          disabled={!isValid || loading}
-          data-testid="submit-button"
-        >
-          {loading ? 'Changing...' : 'Change Password'}
-        </Button>
-      </div>
+      {step === 'verification' && (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="verificationCode">Enter Verification Code</Label>
+            <Input
+              id="verificationCode"
+              value={verificationCode}
+              onChange={(e) => setVerificationCode(e.target.value)}
+              placeholder="Enter 6-digit code"
+              maxLength={6}
+            />
+          </div>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={verificationCode.length !== 6 || verifyingCode}
+          >
+            {verifyingCode ? (
+              <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Verifying...</>
+            ) : (
+              'Verify Code'
+            )}
+          </Button>
+        </div>
+      )}
+
+      {step === 'changePassword' && (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="currentPassword">Current Password</Label>
+            <div className="relative">
+              <Input
+                id="currentPassword"
+                type={showCurrentPassword ? 'text' : 'password'}
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                required
+                className="pr-10"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+              >
+                {showCurrentPassword ? (
+                  <EyeOff className="h-4 w-4 text-gray-500" />
+                ) : (
+                  <Eye className="h-4 w-4 text-gray-500" />
+                )}
+              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="newPassword">New Password</Label>
+            <div className="relative">
+              <Input
+                id="newPassword"
+                type={showNewPassword ? 'text' : 'password'}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                onFocus={handleNewPasswordFocus}
+                onBlur={handleNewPasswordBlur}
+                required
+                className="pr-10"
+                aria-label="New Password"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+              >
+                {showNewPassword ? (
+                  <EyeOff className="h-4 w-4 text-gray-500" />
+                ) : (
+                  <Eye className="h-4 w-4 text-gray-500" />
+                )}
+              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">Confirm New Password</Label>
+            <div className="relative">
+              <Input
+                id="confirmPassword"
+                type={showConfirmPassword ? 'text' : 'password'}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                className="pr-10"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="h-4 w-4 text-gray-500" />
+                ) : (
+                  <Eye className="h-4 w-4 text-gray-500" />
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {showPasswordRequirements && (
+            <div className="text-sm text-muted-foreground space-y-1" data-testid="password-requirements">
+              <p>New password must:</p>
+              <ul className="space-y-1">
+                <li className="flex items-center gap-2">
+                  <div className={`w-1.5 h-1.5 rounded-full ${validations.length ? 'bg-green-500' : 'bg-red-500'}`} />
+                  <span className={validations.length ? 'text-green-600' : 'text-muted-foreground'}>
+                    Be at least 8 characters long
+                  </span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className={`w-1.5 h-1.5 rounded-full ${validations.uppercase ? 'bg-green-500' : 'bg-red-500'}`} />
+                  <span className={validations.uppercase ? 'text-green-600' : 'text-muted-foreground'}>
+                    Include at least one uppercase letter
+                  </span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className={`w-1.5 h-1.5 rounded-full ${validations.number ? 'bg-green-500' : 'bg-red-500'}`} />
+                  <span className={validations.number ? 'text-green-600' : 'text-muted-foreground'}>
+                    Include at least one number
+                  </span>
+                </li>
+              </ul>
+            </div>
+          )}
+
+          <div className="flex justify-end space-x-4">
+            <Button variant="outline" type="button" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={!isValid || changePasswordLoading}
+              data-testid="submit-button"
+            >
+              {changePasswordLoading ? 'Changing...' : 'Change Password'}
+            </Button>
+          </div>
+        </div>
+      )}
     </form>
   );
 };

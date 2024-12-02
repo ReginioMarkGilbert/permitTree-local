@@ -51,6 +51,10 @@ const UserSchema = new mongoose.Schema({
       type: String,
       enum: ['light', 'dark', 'system'],
       default: 'light'
+   },
+   verificationCode: {
+      code: String,
+      expiresAt: Date
    }
 }, {
    timestamps: true // This will automatically manage createdAt and updatedAt

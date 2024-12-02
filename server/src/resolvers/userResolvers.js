@@ -7,6 +7,8 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { logUserActivity } = require('../utils/activityLogger');
 const AdminIdCounter = require('../models/AdminIdCounter');
+const emailService = require('../services/emailService');
+const crypto = require('crypto');
 
 const generateToken = (user) => {
    return jwt.sign(
@@ -236,108 +238,36 @@ const userResolvers = {
       registerUser: async (_, { firstName, lastName, username, password, email, role, userType }) => {
          try {
             const existingUser = await User.findOne({ username });
-            const existingAdmin = await Admin.findOne({ username });
-
-            if (existingUser || existingAdmin) {
+            if (existingUser) {
                throw new Error('Username already exists');
             }
 
-            // Determine if the role is a personnel role
-            const personnelRoles = [
-               'Chief_RPS',
-               'superadmin',
-               'Technical_Staff',
-               'Chief_TSD',
-               'Receiving_Clerk',
-               'Releasing_Clerk',
-               'Accountant',
-               'OOP_Staff_Incharge',
-               'Bill_Collector',
-               'Credit_Officer',
-               'PENR_CENR_Officer',
-               'Deputy_CENR_Officer',
-               'Inspection_Team'
-            ];
-
-            const isPersonnel = personnelRoles.includes(role);
-
-            let newUser;
-
-            if (isPersonnel) {
-               // Get next adminId counter
-               const adminIdCounter = await AdminIdCounter.findOneAndUpdate(
-                  { name: 'adminId' },
-                  { $inc: { value: 1 } },
-                  { new: true, upsert: true }
-               );
-
-               // Create admin account with adminId
-               newUser = new Admin({
-                  adminId: adminIdCounter.value,
-                  firstName,
-                  lastName,
-                  username,
-                  password,
-                  email,
-                  roles: [role],
-                  notificationPreferences: {
-                     email: false,
-                     inApp: true,
-                     sms: false
-                  }
-               });
-            } else {
-               // Create regular user account
-               newUser = new User({
-                  firstName,
-                  lastName,
-                  username,
-                  password,
-                  email,
-                  roles: [role],
-                  userType,
-                  isActive: true,
-                  createdAt: new Date(),
-                  lastLoginDate: null
-               });
-            }
-
-            await newUser.save();
-
-            // Log the activity
-            await logUserActivity({
-               userId: newUser._id,
-               userModel: isPersonnel ? 'Admin' : 'User',
-               type: 'ACCOUNT_CREATED',
-               details: 'New user account created',
-               metadata: {
-                  userType: userType,
-                  isAdmin: isPersonnel
-               }
+            const user = new User({
+               firstName,
+               lastName,
+               username,
+               password,
+               email,
+               roles: [role],
+               userType
             });
 
-            const token = jwt.sign(
-               { id: newUser.id, username: newUser.username, roles: newUser.roles },
-               process.env.JWT_SECRET || 'default_secret',
-               { expiresIn: '12h' }
-            );
+            await user.save();
+            const token = generateToken(user);
 
             return {
                token,
                user: {
-                  id: newUser.id,
-                  username: newUser.username,
-                  firstName: newUser.firstName,
-                  lastName: newUser.lastName,
-                  email: newUser.email,
-                  roles: newUser.roles,
-                  userType: userType,
-                  isActive: true,
-                  createdAt: newUser.createdAt
+                  id: user.id,
+                  username: user.username,
+                  firstName: user.firstName,
+                  lastName: user.lastName,
+                  roles: user.roles,
+                  userType: user.userType
                }
             };
          } catch (error) {
-            throw new Error(`Failed to register user: ${error.message}`);
+            throw new Error(`Registration failed: ${error.message}`);
          }
       },
       updateUserProfile: async (_, { input }, context) => {
@@ -419,43 +349,33 @@ const userResolvers = {
          }
       },
       changePassword: async (_, { input }, context) => {
-         if (!context.user) {
-            throw new Error('Not authenticated');
-         }
+         if (!context.user) throw new Error('Not authenticated');
 
-         const { currentPassword, newPassword, confirmPassword } = input;
-
-         if (newPassword !== confirmPassword) {
-            throw new Error('New password and confirm password do not match');
-         }
+         const { currentPassword, newPassword, confirmPassword, verificationCode } = input;
 
          try {
             const user = await User.findById(context.user.id);
-            if (!user) {
-               throw new Error('User not found');
-            }
+            if (!user) throw new Error('User not found');
 
-            // Use the comparePassword method
+            // Verify current password
             const isMatch = await user.comparePassword(currentPassword);
-            if (!isMatch) {
-               throw new Error('Current password is incorrect');
+            if (!isMatch) throw new Error('Current password is incorrect');
+
+            // Verify code
+            if (!user.verificationCode ||
+                verificationCode !== user.verificationCode.code ||
+                user.verificationCode.expiresAt < new Date()) {
+               throw new Error('Invalid or expired verification code');
             }
 
-            // Set the new password - the pre-save hook will hash it
+            // Update password
             user.password = newPassword;
+            user.verificationCode = undefined; // Clear verification code
             await user.save();
-
-            // Log the activity
-            await logUserActivity({
-               userId: context.user.id,
-               type: 'PASSWORD_CHANGE',
-               details: 'User changed their password'
-            });
 
             return true;
          } catch (error) {
-            console.error('Error changing password:', error);
-            throw new Error(error.message || 'Failed to change password');
+            throw new Error(`Failed to change password: ${error.message}`);
          }
       },
       updateThemePreference: async (_, { theme }, context) => {
@@ -550,6 +470,61 @@ const userResolvers = {
             throw new Error(`Failed to delete user: ${error.message}`);
          }
       },
+      sendVerificationCode: async (_, { email }, context) => {
+         if (!context.user) throw new Error('Not authenticated');
+
+         try {
+            const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+            // Update user with verification code
+            await User.findByIdAndUpdate(context.user.id, {
+               verificationCode: {
+                  code: verificationCode,
+                  expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+               }
+            });
+
+            const emailSent = await emailService.sendNotificationEmail(
+               email,
+               'Password Change Verification Code',
+               `Your verification code is: ${verificationCode}\n\nThis code will expire in 10 minutes.`
+            );
+
+            if (!emailSent) {
+               throw new Error('Failed to send verification email');
+            }
+
+            return { success: true, message: 'Verification code sent successfully' };
+         } catch (error) {
+            console.error('Error sending verification code:', error);
+            throw new Error('Failed to send verification code');
+         }
+      },
+      verifyCode: async (_, { email, code }, context) => {
+         if (!context.user) throw new Error('Not authenticated');
+
+         try {
+            const user = await User.findById(context.user.id);
+            if (!user) throw new Error('User not found');
+
+            if (!user.verificationCode || !user.verificationCode.code) {
+               throw new Error('No verification code found');
+            }
+
+            if (user.verificationCode.expiresAt < new Date()) {
+               throw new Error('Verification code has expired');
+            }
+
+            if (code !== user.verificationCode.code) {
+               throw new Error('Invalid verification code');
+            }
+
+            return { success: true, message: 'Code verified successfully' };
+         } catch (error) {
+            console.error('Error verifying code:', error);
+            throw new Error(error.message || 'Failed to verify code');
+         }
+      }
    }
 };
 

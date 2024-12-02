@@ -69,6 +69,11 @@ const userTypes = gql`
     user: User!
   }
 
+  type VerificationResponse {
+    success: Boolean!
+    message: String!
+  }
+
   extend type Query {
     getUser(id: ID!): User
     getAllUsers: [User!]!
@@ -95,12 +100,15 @@ const userTypes = gql`
     login(username: String!, password: String!): AuthPayload!
     logout: Boolean!
     changePassword(input: ChangePasswordInput!): Boolean!
+    sendVerificationCode(email: String!): VerificationResponse!
+    verifyCode(email: String!, code: String!): VerificationResponse!
   }
 
   input ChangePasswordInput {
     currentPassword: String!
     newPassword: String!
     confirmPassword: String!
+    verificationCode: String!
   }
 `;
 
