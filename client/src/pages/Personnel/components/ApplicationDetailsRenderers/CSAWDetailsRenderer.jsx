@@ -154,6 +154,7 @@ const CSAWDetailsRenderer = ({ data, handlePreview, handleDownload }) => {
             {data.files && (
                <ScrollArea className="h-[300px] custom-scrollbar">
                   <div className="space-y-4 pr-4">
+                     {renderFileSection(processFiles(data.files.permitToPurchase), "Permit to Purchase")}
                      {renderFileSection(processFiles(data.files.officialReceipt), "Official Receipt")}
                      {renderFileSection(processFiles(data.files.deedOfSale), "Deed of Sale")}
                      {renderFileSection(processFiles(data.files.specialPowerOfAttorney), "Special Power of Attorney")}

@@ -101,6 +101,7 @@ const ChainsawRegistrationForm = () => {
          countryOfOrigin: '',
          purchasePrice: '',
          files: {
+            permitToPurchase: [],
             officialReceipt: [],
             deedOfSale: [],
             specialPowerOfAttorney: [],
@@ -197,6 +198,12 @@ const ChainsawRegistrationForm = () => {
                toast.error("Please fill out all required fields to proceed.");
                return;
             }
+         }
+      }
+      if (currentStep === 3) {
+         if (!formData.files.permitToPurchase || formData.files.permitToPurchase.length === 0) {
+            toast.error("Please upload the Permit to Purchase document");
+            return;
          }
       }
       setCurrentStep(prev => prev + 1);
@@ -625,6 +632,14 @@ const ChainsawRegistrationForm = () => {
                               Please upload the required documents.
                            </p>
                            <div className="upload-cards-container csaw-form-scrollbar">
+                              <UploadCard
+                                 label="Permit to Purchase"
+                                 documentLabel="Upload Permit to Purchase (Required)"
+                                 files={formData.files.permitToPurchase}
+                                 onFileChange={(e) => handleFileChange(e, 'permitToPurchase')}
+                                 onRemoveFile={(file) => removeFile('permitToPurchase', file)}
+                                 required={true}
+                              />
                               <UploadCard
                                  label="Official Receipt of Chainsaw Purchase"
                                  documentLabel="Upload 1 certified copy and 1 original for verification (or Affidavit of Ownership if original is lost)"

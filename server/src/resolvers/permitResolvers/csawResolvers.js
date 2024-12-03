@@ -100,6 +100,11 @@ const csawResolvers = {
             const processedFiles = {};
             for (const [key, files] of Object.entries(input.files)) {
                if (files && files.length > 0) {
+                  // Validate permit to purchase is included
+                  if (key === 'permitToPurchase' && (!files || files.length === 0)) {
+                     throw new Error('Permit to Purchase document is required');
+                  }
+
                   processedFiles[key] = files.map(file => ({
                      filename: file.filename,
                      contentType: file.contentType,
@@ -108,6 +113,11 @@ const csawResolvers = {
                } else {
                   processedFiles[key] = [];
                }
+            }
+
+            // Validate permit to purchase is present
+            if (!processedFiles.permitToPurchase || processedFiles.permitToPurchase.length === 0) {
+               throw new Error('Permit to Purchase document is required');
             }
 
             const permitData = {

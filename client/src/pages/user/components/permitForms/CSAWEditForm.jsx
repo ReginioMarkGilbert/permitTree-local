@@ -38,6 +38,7 @@ const CSAWEditForm = ({ formData, handleInputChange, handleFileChange, removeFil
 
    const renderFileInputs = () => {
       const fileTypes = [
+         { type: 'permitToPurchase', label: 'Permit to Purchase', condition: true },
          { type: 'officialReceipt', label: 'Official Receipt', condition: true },
          { type: 'deedOfSale', label: 'Deed of Sale', condition: true },
          { type: 'specialPowerOfAttorney', label: 'Special Power of Attorney', condition: !formData.isOwner },

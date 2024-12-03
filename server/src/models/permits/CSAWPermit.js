@@ -29,6 +29,7 @@ const CSAWPermitSchema = new mongoose.Schema({
    isPTPRHolder: { type: Boolean, required: true },
    isWPPHolder: { type: Boolean, required: true },
    files: {
+      permitToPurchase: [FileSchema],
       officialReceipt: [FileSchema],
       deedOfSale: [FileSchema],
       specialPowerOfAttorney: [FileSchema],
